@@ -37,6 +37,7 @@
             <th>申请理由</th>
             <th>期望参加活动</th>
             <th>签订合同</th>
+            <th>申请时间</th>
             <th>状态</th>
 
 
@@ -59,6 +60,7 @@
                         <a href="{:cmf_get_image_preview_url($vo.pdf_file)}" target="_blank">查询</a>
                     </notempty>
                 </td>
+                <td>{$vo.create_time|date="Y-m-d H:i:s"}</td>
                 <td>{$vo.status_name}
 
                     <if condition="$vo.status == 3">
