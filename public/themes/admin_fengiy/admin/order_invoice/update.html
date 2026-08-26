@@ -1,0 +1,145 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+
+
+        <div class="form-group ">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>抬头类型:</label>
+            <div class="col-md-2 col-sm-10">
+                <select name="type" class="form-control" lay-filter="type" lay-search="">
+<!--                    <option value="">请选择</option>-->
+                    <foreach name="type_list" item="vo">
+                        <notempty name="$item.type">
+                            <option value="{$key}"
+                            <if condition="$item.type == $key">selected</if>
+                            >{$vo}</option>
+                            <else/>
+                            <option value="{$key}">{$vo}</option>
+                        </notempty>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>发票抬头:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="text" class="form-control" name="title" value="{$item.title|default=''}" required>
+            </div>
+        </div>
+        <div class="form-group type1">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>公司税号:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="text" class="form-control" name="tax_sn" value="{$item.tax_sn|default=''}" required>
+            </div>
+        </div>
+        <div class="form-group type1">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>开户银行:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="text" class="form-control" name="bank_name" value="{$item.bank_name|default=''}" >
+            </div>
+        </div>
+        <div class="form-group type1">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>开户银行卡号:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="text" class="form-control" name="bank_sn" value="{$item.bank_sn|default=''}" >
+            </div>
+        </div>
+<!--        <div class="form-group type1">-->
+<!--            <label class="col-sm-2 control-label"><span class="form-required">*</span>订单编号:</label>-->
+<!--            <div class="col-md-4 col-sm-10">-->
+<!--                <input type="text" class="form-control" name="order_num" value="{$item.order_num|default=''}" required>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="form-group type1">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>公司地址:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="text" class="form-control" name="address" value="{$item.address|default=''}" >
+            </div>
+        </div>
+        <div class="form-group type1">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>公司手机号:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="text" class="form-control" name="phone" value="{$item.phone|default=''}" >
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>邮箱:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="email" class="form-control" name="email" value="{$item.email|default=''}" >
+            </div>
+        </div>
+
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">发票:</label>
+            <div class="col-md-6 col-sm-10">
+                <php>  $thumb='invoice';</php>
+                <input type="hidden" name="{$thumb}" id="{$thumb}" value="{$item[$thumb]|default=''}">
+                <a href="javascript:uploadOneImage('图片上传','#{$thumb}');">
+                    <if condition="empty($item[$thumb])">
+                        <img src="__TMPL__/public/assets/images/default-thumbnail.png"
+                             id="{$thumb}-preview"
+                             width="135" style="cursor: pointer"/>
+                        <else/>
+                        <img src="{:cmf_get_image_preview_url($item[$thumb])}"
+                             id="{$thumb}-preview"
+                             width="135" style="cursor: pointer"/>
+                    </if>
+                </a>
+            </div>
+        </div>
+
+
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <!--            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>-->
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    layui.use(['form', 'laydate', 'util'], function () {
+        var form = layui.form;
+        var layer = layui.layer;
+
+        form.on('select(type)', function (data) {
+            console.log(data.value);
+            get_type(data.value);
+        });
+
+        value="{$item.type??1}";
+        get_type(value);
+
+        function get_type(value) {
+            if (value == 1) {
+                $('.type1').show();
+                $('.type2').hide();
+            } else {
+                $('.type2').show();
+                $('.type1').hide();
+            }
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update')}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>名称:</label>
+            <div class="col-md-4 col-sm-10">
+                <input  type="text" class="form-control" name="name" value="{$item.name|default=''}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">图片:</label>
+            <div class="col-md-6 col-sm-10">
+                <php>  $thumb='thumb';</php>
+                <input type="hidden" name="{$thumb}" id="{$thumb}" value="{$item[$thumb]|default=''}">
+                <a href="javascript:uploadOneImage('图片上传','#{$thumb}');">
+                    <if condition="empty($item[$thumb])">
+                        <img src="__TMPL__/public/assets/images/default-thumbnail.png"
+                             id="{$thumb}-preview"
+                             width="135" style="cursor: pointer"/>
+                        <else/>
+                        <img src="{:cmf_get_image_preview_url($item[$thumb])}"
+                             id="{$thumb}-preview"
+                             width="135" style="cursor: pointer"/>
+                    </if>
+                </a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>地址:</label>
+            <div class="col-md-4 col-sm-10">
+                <input  type="text" class="form-control" name="address" value="{$item.address|default=''}" required>
+            </div>
+        </div>
+
+<!--        <div class="form-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>地址</label>-->
+
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <div style="display: flex;">-->
+<!--                    <input type="text" class="form-control" name="address" id="address" placeholder="请输入详细地址"-->
+<!--                           required value="{$item.address??''}" onblur="searchAddress()">-->
+
+<!--                    <a class="btn btn-primary" href="javascript:;" style="margin-left: 10px;" onclick="searchAddress()">搜索</a>-->
+
+<!--                </div>-->
+<!--                <div id="container" style="margin-top:10px;width:600px;height:300px;"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label"><span class="form-required">*</span>经纬度</label>-->
+<!--            <input type="hidden" value="{$item.lng??''}" name="lng" id="lng">-->
+<!--            <input type="hidden" value="{$item.lat??''}" name="lat" id="lat">-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <input type="text" class="form-control" id="lnglat" placeholder="" readonly required-->
+<!--                       value="{$item.lng??''},{$item.lat??''}">-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="https://map.qq.com/api/gljs?v=1.exp&key=PT6BZ-I3WKG-P7VQN-QJZ2O-6FZPT-YCFZQ"></script>
+<script>
+    //定义地图中心点坐标
+
+    var already_lat = $("#lat").val();
+    var already_lon = $("#lng").val();
+
+    if (already_lat == '') {
+        already_lat = 39.916706;
+        already_lon = 116.403119;
+    }
+    var center = new TMap.LatLng(already_lat, already_lon);
+    //定义map变量，调用 TMap.Map() 构造函数创建地图
+    var map = new TMap.Map(document.getElementById('container'), {
+        center: center,//设置地图中心点坐标
+        zoom: 17, //设置地图缩放级别
+        viewMode: '3D'
+    });
+    let markerLayer = new TMap.MultiMarker({
+        id: 'marker-layer',
+        map: map
+    });
+    var clickHandler = function (evt) {
+        var lat = evt.latLng.getLat().toFixed(6);
+        var lng = evt.latLng.getLng().toFixed(6);
+        $("#lnglat").val(lng + "," + lat);
+        removeMarker("search_res");
+        addMarker(new TMap.LatLng(lat, lng), "search_res");
+
+        let url = "{:url('tool/reverse_address')}";
+        $.get(url, {lnglat: lat + "," + lng}, function (res) {
+            //debugger;
+            res = JSON.parse(res);
+            if (res.status == 0) {
+                $("#address").val(res.result.formatted_addresses.recommend);
+            }
+        });
+    };
+    map.on("click", clickHandler);
+
+    function addMarker(latLng, id) {
+        markerLayer.add({
+            id: id,
+            position: latLng
+        });
+        let lng = latLng.lng;
+        let lat = latLng.lat;
+
+
+        map.setCenter(new TMap.LatLng(lat, lng)); // 坐标为天安门
+    }
+
+    //移除marker事件
+    function removeMarker(id) {
+        markerLayer.remove(id)
+    }
+
+    function searchAddress() {
+        var province = $(".province option:selected").text();
+        var city = $(".city option:selected").text();
+        var district = $(".district option:selected").text();
+
+        if (province == '省份') {
+            layer.msg('请选择地区');
+            return;
+        }
+        if (city == '请选择' || district == '请选择') {
+            layer.msg('请选择地区');
+            return;
+        }
+
+        let address = $("#address").val();
+        var full_address = province + city + district + address;
+        let url = "{:url('tool/search_address')}";
+        $.get(url, {address: full_address}, function (res) {
+            res = JSON.parse(res);
+            if (res.status == 0) {
+                let location = res.result.location;
+                $("#lnglat").val(location.lng + "," + location.lat);
+                $("#lng").val(location.lng);
+                $("#lat").val(location.lat);
+                removeMarker("search_res");
+                addMarker(new TMap.LatLng(location.lat, location.lng), "search_res");
+
+            } else {
+                layer.msg(res.message);
+            }
+        });
+    }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+<script type="text/html" id="photos-item-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <input class="form-control" id="photo-{id}-name" type="text" name="photo_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="">推送用户</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('selectPush')}">
+
+        <input type="hidden" class="form-control" name="id" value="{$shop_id}" required>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>选择用户:</label>
+            <div class="col-md-6 col-sm-10">
+                <select  class="form-control" lay-filter="user" lay-search>
+                    <option value = "0">请选择</option>
+                    <foreach name="can_list" item="vo">
+                        <option value = "{$vo.id}" data-name="{$vo.nickname}">{$vo.nickname}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+        <label class="col-sm-2 control-label white-space: nowrap">已选用户:</label>
+        <div class="form-group craft-parent" style="display: flex" id="last">
+            <foreach name="select_list" item="vo">
+                <div class="craft-item delete_{$vo.id}" onclick="delete_item(this)">
+                    <div type="text" class="form-control"  readonly>{$vo.name}</div>
+                    <input type="hidden" class="form-control" value="{$vo.id}" name="user_id[]" readonly>
+                </div>
+            </foreach>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    layui.use(['element', 'jquery', 'layer', 'form', 'laydate'], function () {
+        var form = layui.form
+                , element = layui.element
+                , laydate = layui.laydate
+                , $ = layui.$;
+
+        //动态添加input输入框
+        var x = 0;
+
+        form.on('select(user)', function(data) {
+            console.log(data);
+            var this_id = data.value;
+            var this_name =$(data.elem).find("option:selected").attr("data-name");
+
+            if(this_id == 0){
+                return;
+            }
+
+            console.log(this_id);
+
+            if($(".delete_"+this_id).length == 0){
+                var str = '<div class="craft-item delete_'+this_id+'" onclick="delete_item(this)">'+
+                        '<div class="form-control"  readonly>'+this_name+'</div>'+
+                        '<input type="hidden" class="form-control" name="user_id[]" value="'+this_id+'" readonly>'+
+                        '</div>' ;
+
+                $("#last").append(str);
+                x++;
+                form.render('select');
+            }else{
+                $(".delete_"+this_id).remove();
+            }
+        });
+
+    })
+
+    function delete_item(item){
+        item.remove();
+    }
+
+</script>
+<style>
+    .layui-input-inline input {
+        width:190px;
+    }
+    .layui-input-inline .layui-unselect {
+        width:190px;
+    }
+    .craft-parent {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: 200px !important;
+        width: 930px;
+    }
+    .craft-item {
+        flex: 0 0 16%;
+        margin-bottom: 10px;
+        margin-left: 5px;
+    }
+    .craft-parent .form-control{
+        width:200px
+    }
+</style>
+</body>
+</html>

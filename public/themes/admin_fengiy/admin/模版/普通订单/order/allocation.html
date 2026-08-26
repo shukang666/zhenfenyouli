@@ -1,0 +1,36 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+<!--    <ul class="nav nav-tabs">-->
+<!--        &lt;!&ndash;    <li><a href="{:url('companion_goods_type/index')}">活动管理</a></li>&ndash;&gt;-->
+<!--&lt;!&ndash;        <li class="active"><a href="{:url('doctor')}">康复师</a></li>&ndash;&gt;-->
+<!--    </ul>-->
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('allocation_post')}">
+        <input type="hidden" class="form-control" name="id" value="{$params.id|default=''}">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">师傅名称<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <div class="form-group layui-form" style="width: 500px">
+                    <select name="work_id" class="form-control" name="doctor_id"lay-search >
+                        <option value='0'>请选择</option>
+                        <foreach name="name" item="co" key="k">
+                            <option value='{$k}' {$k==$work_id?"selected":''}> {$co}</option>
+                        </foreach>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary js-ajax-submit">保存</button>
+                <!--        <a class="btn btn-default" href="{:url('companion_goods_type/index')}">{:lang('BACK')}</a>-->
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js">
+
+</script>
+
+</body>

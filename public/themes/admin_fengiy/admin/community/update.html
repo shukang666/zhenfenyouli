@@ -1,0 +1,147 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update')}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+
+<!--        <div class="form-group">-->
+<!--            <div class="layui-form-item">-->
+<!--                <label class="col-sm-2 control-label"><span class="form-required">*</span>地区:</label>-->
+<!--                <div class="col-md-6 col-sm-10" style="z-index: 2000!important;">-->
+<!--                    <div class="layui-inline">-->
+<!--                        <select name="province" id="province" lay-verify="required" lay-search lay-filter="province">-->
+<!--                            <option value="">请选择</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="layui-inline">-->
+<!--                        <select name="city" id="city" lay-verify="required" lay-search lay-filter="city">-->
+<!--                            <option value="">请选择</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <div class="layui-inline">-->
+<!--                        <select name="county" id="county" lay-verify="required" lay-search>-->
+<!--                            <option value="">请选择</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">名称:</label>
+            <div class="col-md-4 col-sm-10">
+                <input  type="text" class="form-control" name="name" value="{$item.name|default=''}" >
+            </div>
+        </div>
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label">描述:</label>-->
+<!--            <div class="col-md-4 col-sm-10">-->
+<!--                <input  type="text" class="form-control" name="desc" value="{$item.desc|default=''}" >-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label">图片:</label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <php>  $thumb='thumb';</php>-->
+<!--                <input type="hidden" name="{$thumb}" id="{$thumb}" value="{$item[$thumb]|default=''}">-->
+<!--                <a href="javascript:uploadOneImage('图片上传','#{$thumb}');">-->
+<!--                    <if condition="empty($item[$thumb])">-->
+<!--                        <img src="__TMPL__/public/assets/images/default-thumbnail.png"-->
+<!--                             id="{$thumb}-preview"-->
+<!--                             width="135" style="cursor: pointer"/>-->
+<!--                        <else/>-->
+<!--                        <img src="{:cmf_get_image_preview_url($item[$thumb])}"-->
+<!--                             id="{$thumb}-preview"-->
+<!--                             width="135" style="cursor: pointer"/>-->
+<!--                    </if>-->
+<!--                </a>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['form', 'element'], function () {
+        var form = layui.form, element = layui.element;
+
+        var province = "{$item.province??''}"
+        var city = "{$item.city??''}"
+        var county = "{$item.county??''}"
+        getCateList(0, $("#province"), 'province');
+        getCateList(province, $("#city"), 'city');
+        getCateList(city, $("#county"), 'county');
+        getCateList(0, $("#province"), 'province');
+        form.on('select(province)', function (data) {
+            province = data.value;
+            getCateList(data.value, $("#city"), 'city');
+        })
+
+        form.on('select(city)', function (data) {
+            city = data.value;
+            getCateList(data.value, $("#county"), 'county');
+        })
+
+        function getCateList(pid, target, type) {
+            console.log(pid)
+            $.ajax({
+                type: 'POST',
+                url: "{:url('getJsonAreaList')}",
+                data: {
+                    pid: pid,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    var cate_list = data.data;
+                    // console.log(cate_list)
+                    var str = "<option value=''>" + "请选择" + "</option>";
+                    for (var i = 0; i < cate_list.length; i++) {
+
+                        if (type == 'province') {
+                            var where = province;
+                        } else if (type == 'city') {
+                            var where = city;
+                        } else {
+                            var where = county;
+                        }
+                        if (where == cate_list[i].code) {
+                            str += "<option value='" + cate_list[i].code + "' selected>" + cate_list[i].name + "</option>";
+                        } else {
+                            str += "<option value='" + cate_list[i].code + "'>" + cate_list[i].name + "</option>";
+                        }
+                    }
+                    target.html(str);
+                    form.render('select');
+                }
+            });
+        }
+    })
+</script>
+</body>
+</html>

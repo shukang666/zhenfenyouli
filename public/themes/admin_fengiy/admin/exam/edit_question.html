@@ -1,0 +1,270 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('exam/question_list',array('exam_id'=>$exam_id))}">题库管理</a></li>
+        <li class="active"><a href="{:url('exam/add_question',array('exam_id'=>$exam_id))}">添加题库</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20"
+          action="{:url('exam/edit_question',array('exam_id'=>$exam_id))}">
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">问题<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" id="input-name" name="question" value="{$item.question}"
+                       placeholder="请输入问题">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">类型</label>
+            <div class="col-md-6 col-sm-10">
+                <label class="radio-inline">
+                    <php>$active_true_checked=($item['type']==1)?"checked":"";</php>
+                    <input type="radio" name="type" value="1" {$active_true_checked}>单选
+                </label>
+                <label class="radio-inline">
+                    <php>$active_false_checked=($item['type']==2)?"checked":"";</php>
+                    <input type="radio" name="type" value="2" {$active_false_checked}>多选
+                </label>
+                <label class="radio-inline">
+                    <php>$active_false_checked=($item['type']==3)?"checked":"";</php>
+                    <input type="radio" name="type" value="3" {$active_false_checked}>填空
+                </label>
+            </div>
+        </div>
+        <div class="form-group select-option">
+            <label class="col-sm-2 control-label">选项:</label>
+            <div class="col-md-5 col-sm-10">
+                <div class="layui-form-item">
+                    <table class="layui-table">
+                        <thead>
+                        <tr>
+                            <th>选项内容</th>
+                            <th class="next-opt hide">下一步操作</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <foreach name="option" item="vo" key="key">
+                            <!--									{$vo['option_type'][$key]}-->
+                            <!--{$vo['option_type']}-->
+                            <!--									{$item.option[0]['option_type']}-->
+                            <tr>
+                                <td>
+                                    <input type="text" name="option[]" lay-verify="required" value="{$vo.option}"
+                                           class="form-control prop_name" placeholder="选项"/>
+                                </td>
+                                <td class="next-opt hide">
+                                    <div style="display: flex;">
+                                        <select name="option_type[]" class="form-control prop_name type-select"
+                                                style="width:135px">
+                                            <option value="0">默认下一题</option>
+                                            <option value="1"
+                                            <if condition="$vo['option_type'] eq 1">selected</if>
+                                            >跳转指定题</option>
+                                            <option value="2"
+                                            <if condition="$vo['option_type'] eq 2">selected</if>
+                                            >选择医疗机构</option>
+                                            <option value="3"
+                                            <if condition="$vo['option_type'] eq 3">selected</if>
+                                            >直接提交</option>
+                                        </select>
+                                        <input type="text" name="next[]" placeholder="下一题的序号" value="{$vo.next}"
+                                               autocomplete="off" class="form-control prop_name <if condition=" $vo['option_type']
+                                        neq 1">hide</if>" style="width: 120px; margin-left: 5px" />
+                                    </div>
+                                </td>
+                                <td>
+                                    <button type="button" class="layui-btn layui-btn-danger layui-btn-sm del">
+                                        <i class="layui-icon">&#xe67e;</i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </foreach>
+                        <tr id="last">
+                            <td colspan="3">
+                                <button id="add" type="button" class="layui-btn layui-btn-warm layui-btn-sm">
+                                    <i class="layui-icon">&#xe654;</i>
+                                    <span>添加选项</span>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+<!--        <div class="form-group is_mobile">-->
+
+<!--            <label class="col-sm-2 control-label">是否获取手机号</label>-->
+
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <label class="radio-inline">-->
+<!--                    <php>$active_true_mobile=($item['is_mobile']==1)?"checked":"";</php>-->
+<!--                    <input type="radio" name="is_mobile" value="1" {$active_true_mobile}>是-->
+<!--                </label>-->
+<!--                <label class="radio-inline">-->
+<!--                    <php>$active_false_mobile=($item['is_mobile']==2)?"checked":"";</php>-->
+<!--                    <input type="radio" name="is_mobile" value="2" {$active_false_mobile}>否-->
+<!--                </label>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="form-group is_thumb ">
+
+            <label class="col-sm-2 control-label">是否上传图片</label>
+
+            <div class="col-md-6 col-sm-10">
+                <label class="radio-inline">
+                    <php>$active_true_checked=($item['is_thumb']==0)?"checked":"";</php>
+                    <input type="radio" name="is_thumb" value="0" {$active_true_checked}>否
+                </label>
+                <label class="radio-inline">
+                    <php>$active_false_checked=($item['is_thumb']==1)?"checked":"";</php>
+                    <input type="radio" name="is_thumb" value="1" {$active_false_checked}>是
+                </label>
+            </div>
+        </div>
+
+
+
+        <div class="form-group select_option">
+
+            <label class="col-sm-2 control-label">是否需要补充</label>
+
+            <div class="col-md-6 col-sm-10">
+                <label class="radio-inline">
+                    <php>$active_true_checked=($item['is_other']==0)?"checked":"";</php>
+                    <input type="radio" name="is_other" value="0" {$active_true_checked}>否
+                </label>
+                <label class="radio-inline">
+                    <php>$active_false_checked=($item['is_other']==1)?"checked":"";</php>
+                    <input type="radio" name="is_other" value="1" {$active_false_checked}>是
+                </label>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="hidden" name="id" value="{$item.id}">
+                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+                <a class="btn btn-default" href="javascript:history.go(-1);">{:lang('BACK')}</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['element', 'jquery', 'layer', 'form', 'laydate'], function () {
+        var form = layui.form,
+            element = layui.element,
+            laydate = layui.laydate,
+            $ = layui.$;
+
+        $type = {$item.type};
+
+        if ($type == 3) {
+            $('.select-option').addClass('hide')
+            $('.is_mobile').show();
+        } else {
+            $('.is_thumb').hide();
+            $('.is_mobile').hide();
+            $('.select-option').removeClass('hide')
+            if ($type == 1) {
+                $('.next-opt').removeClass('hide')
+            } else {
+                $('.next-opt').addClass('hide')
+            }
+        }
+
+
+        //判断类型
+        $('input[type=radio][name=type]').change(function () {
+            if (this.value == 3) {
+                $('.is_mobile').show();
+                $('.select-option').addClass('hide')
+                $('.is_thumb').show();
+            } else {
+                $('.is_thumb').hide();
+                $('.is_mobile').hide();
+                $('.select-option').removeClass('hide')
+                if (this.value == 1) {
+                    $('.next-opt').removeClass('hide')
+                } else {
+                    $('.next-opt').addClass('hide')
+                }
+            }
+        })
+
+        //动态添加input输入框
+        $("#add").click(function () {
+            var str = '<tr>';
+            str = str + '<td>';
+            str = str + '	<input type="text" name="option[]" lay-verify="required" class="form-control prop_name" placeholder="选项" />';
+            str = str + '</td>';
+            str = str + '<td class="next-opt hide">';
+            str = str + '	<div style="display: flex;">';
+            str = str + '		<select name="option_type[]" class="form-control prop_name type-select" style="width:135px">';
+            str = str + '			<option value="0">默认下一题</option>';
+            str = str + '			<option value="1">跳转指定题</option>';
+            str = str + '			<option value="2">选择医疗机构</option>';
+            str = str + '			<option value="3">直接提交</option>';
+            str = str + '		</select>';
+            str = str + '		<input type="text" name="next[]" placeholder="下一题的序号" autocomplete="off" class="form-control prop_name hide" style="width: 120px; margin-left: 5px" />';
+            str = str + '	</div>';
+            str = str + '</td>';
+            str = str + '<td>';
+            str = str + '	<button type="button" class="layui-btn layui-btn-danger layui-btn-sm del">';
+            str = str + '		<i class="layui-icon">&#xe67e;</i>';
+            str = str + '	</button>';
+            str = str + '</td>';
+            str = str + '</tr>';
+            $("#last").before(str);
+            let type = $('input:radio:checked').val();
+            if (type == 1) {
+                $('.next-opt').removeClass('hide')
+            }
+            //删除动态添加的input输入框
+            $('.del').on('click', function () {
+                $(this).closest('tr').remove();
+            });
+
+            //监听当前选择
+            $('.type-select').each(function () {
+                $(this).change(function () {
+                    var index = $(this).val();
+                    if (index == 1) {
+                        $(this).next().removeClass('hide')
+                    } else {
+                        $(this).next().addClass('hide')
+                    }
+                })
+            })
+
+        });
+
+        //监听当前选择
+        $('.type-select').each(function () {
+            $(this).change(function () {
+                var index = $(this).val();
+                if (index == 1) {
+                    $(this).next().removeClass('hide')
+                } else {
+                    $(this).next().addClass('hide')
+                }
+            })
+        })
+
+        //删除动态添加的input输入框
+        $('.del').on('click', function () {
+            $(this).closest('tr').remove();
+        });
+    })
+
+
+</script>
+</body>
+</html>

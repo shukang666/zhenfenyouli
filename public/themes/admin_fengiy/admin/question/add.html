@@ -1,0 +1,265 @@
+<include file="public@header"/>
+<script type="text/html" id="image-item-tpl">
+    <li id="saved-image{id}">
+        <input id="image-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <!--        <input class="form-control" id="image-{id}-name" type="text" name="image_names[]" value="{name}"-->
+        <!--               style="width: 200px;" title="图片名称">-->
+        <img id="image-{id}-preview" src="{url}" style="height:34px;width: 44px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a class="btn btn-default" href="javascript:uploadOneImage('图片上传','#image-{id}');"><i class="fa fa-upload fa-fw"></i></a>
+        <a class="btn btn-danger" href="javascript:(function(){$('#saved-image{id}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+        <a class="btn btn-success" href="javascript:(function(){$('#saved-image{id}').before($('#saved-image{id}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index',['pid'=>$pid])}">列表</a></li>
+        <li class="active"><a href="{:url('add',['pid'=>$pid])}">添加</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('add')}">
+
+        <input type="hidden" name="pid" value="{$pid}">
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label"><span class="form-required">*</span>题目类型:</label>-->
+<!--            <div class="col-md-6 col-sm-10" style="z-index: 8888">-->
+<!--                <select name="type" class="form-control" lay-search lay-filter="type" id="type">-->
+<!--                    <foreach name="type_list" item="vo" key="key">-->
+<!--                        <option value = "{$key}">{$vo}</option>-->
+<!--                    </foreach>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>题目:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="title" value="" required>
+            </div>
+        </div>
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label"><span class="form-required">*</span>得分:</label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <input type="number" class="form-control" name="score" value="{$data.score??0}" required>-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label"><span class="form-required">*</span>题号:</label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <input type="number" class="form-control" name="sn" value="" required>-->
+<!--            </div>-->
+<!--        </div>-->
+
+     <!--   <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>题目:</label>
+            <div class="col-md-6 col-sm-10">
+                <script type="text/plain" id="title" name="title"></script>
+            </div>
+        </div>
+-->
+
+     <!--   <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">图片:</label>
+            <div class="col-md-6 col-sm-10">
+                <ul id="image" class="pic-list list-unstyled form-inline">
+                    <notempty name="$data.photos">
+                        <foreach name="$data.photos" item="vo">
+                            <li id="saved-image{$key}">
+                                <input id="image-{$key}" type="hidden" name="photos[]" value="{$vo}">
+                                <img id="image-{$key}-preview" src="{:cmf_get_image_preview_url($vo)}" style="height:34px;width: 44px;" onclick="parent.imagePreviewDialog(this.src);">
+                                <a class="btn btn-default"  href="javascript:uploadOneImage('图片上传','#image-{$key}');"><i class="fa fa-upload fa-fw"></i></a>
+                                <a class="btn btn-danger"  href="javascript:(function(){$('#saved-image{$key}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+                                <a class="btn btn-success"  href="javascript:(function(){$('#saved-image{$key}').before($('#saved-image{$key}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+                            </li>
+                        </foreach>
+                    </notempty>
+                </ul>
+                <a href="javascript:uploadMultiImage('图片上传','#image','image-item-tpl');" class="btn btn-default" style="margin-top: -10px">选择图片</a>
+            </div>
+        </div>
+-->
+       <!-- <div class="form-group show_type show_type_3">
+            <label class="col-sm-2 control-label">答案:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="true_answer" value="">
+            </div>
+        </div>-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>答案解析:</label>
+            <div class="col-md-6 col-sm-10">
+                <script type="text/plain" id="desc" name="desc"></script>
+            </div>
+        </div>
+
+    <!--    <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>选项:</label>
+            <div class="col-md-5 col-sm-10">
+                <div class="layui-form-item">
+                    &lt;!&ndash;   <label class="layui-form-label">选项</label>&ndash;&gt;
+                    <div class="layui-input-inline" id="last">
+
+                        <div class="layui-form-item" style="display: flex">
+
+                            <div class="layui-input-inline">
+                                <select name="true_answer[]" lay-verify="required">
+                                    <foreach name="letter_list" item="item">
+                                        <option value = "{$item}" class="form-control">{$item}</option>
+                                    </foreach>
+                                </select>
+                            </div>
+
+                            <div class="layui-input-inline">
+                                <input type="text" name="name[]" placeholder="请输入选项" autocomplete="off" class="form-control">
+                            </div>
+
+                            <div class="layui-input-inline">
+                                <select name="true_answer[]" lay-verify="required">
+                                    <option value = "0" class="form-control">否</option>
+                                    <option value = "1" class="form-control">是</option>
+                                </select>
+                            </div>
+
+                            <div class="layui-input-block">
+                                <button id="add" type="button" class="layui-btn layui-btn-warm layui-btn-sm">
+                                    <i class="layui-icon">&#xe654;</i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+-->
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("ADD")}</button>
+            <a class="btn btn-default" href="{:url('index',['pid'=>$pid])}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    layui.use(['element', 'jquery', 'layer', 'form', 'laydate'], function () {
+        var form = layui.form
+            , element = layui.element
+            , laydate = layui.laydate
+            , $ = layui.$;
+
+        //动态添加input输入框
+        var x = 0;
+        $("#add").click(function () {
+
+            var this_craft = this.value;
+
+            var str =  '<div class="layui-form-item" style="display: flex">' +
+
+                '<div class="layui-input-inline">' +
+                '<input type="text" name="name[]" placeholder="请输入内容" autocomplete="off" class="form-control">' +
+                '</div>' +
+
+                '<div class="layui-input-block" style="margin-left: 80px">' +
+                '<button type="button" class="layui-btn layui-btn-danger layui-btn-sm removeclass"> <i class="layui-icon">&#xe67e;</i> </button>' +
+                '</div>' +
+                '</div>' ;
+
+            $("#last").append(str);
+            x++;
+            form.render('select');
+        });
+
+        //删除动态添加的input输入框
+        $("body").on('click', ".removeclass", function () {
+            //元素移除前校验是否被引用
+            var approvalName = $(this).parent().prev('div.layui-input-inline').children().val();
+            var parentEle = $(this).parent().parent();
+            parentEle.remove();
+        });
+
+    })
+
+</script>
+<style>
+    .layui-input-inline input {
+        width:300px;
+    }
+    .layui-input-inline .layui-unselect {
+        width:80px;
+    }
+    .craft-parent {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: 200px !important;
+        width: 2000px;
+    }
+    .craft-item {
+        flex: 0 0 16%;
+        margin-bottom: 10px;
+    }
+</style>
+<script type="text/javascript">
+    //编辑器路径定义
+    var editorURL = GV.WEB_ROOT;
+</script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+
+        desc = new baidu.editor.ui.Editor();
+        desc.render('desc');
+        try {
+            desc.sync();
+        } catch (err) {
+        }
+
+        title = new baidu.editor.ui.Editor();
+        title.render('title');
+        try {
+            title.sync();
+        } catch (err) {
+        }
+
+    });
+
+</script>
+<style>
+    .layui-form-checkbox i{
+        height: 30px;
+    }
+    .layui-form-checkbox{
+        margin-bottom: 4px;
+    }
+</style>
+<script>
+    layui.use(['layer', 'form'], function(){
+        let layer = layui.layer,form = layui.form;
+        const type = $("#type").val();
+        setShow(type)
+        form.on('select(type)', function(data) {
+            setShow(data.value)
+        })
+        function setShow(type){
+            $('.show_type').css('display','none');
+            $('.show_type_'+type).css('display','block');
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+前端
+<div class="layui-tab layui-tab-brief">
+    <ul class="layui-tab-title order-tab">
+        <foreach name="status_menu" item="menu_item">
+            <li
+            <if condition="$menu_item.status == $status">class="layui-this"</if>
+            >
+            <a href="{:url('index',['status'=>$menu_item.status])}" style='text-decoration:none;color: inherit'>
+                {$menu_item.status_name}
+                <if condition="$menu_item.status != 0">({$menu_item.status_count})</if>
+            </a>
+            </li>
+        </foreach>
+    </ul>
+</div>
+
+
+//控制器 controller
+public function setWhere()
+{
+$name = $this->request->param('name', '', 'trim');
+$status = $this->request->param('status', '', 'trim');
+$start_time = $this->request->param('start_time', '', 'trim');
+$end_time = $this->request->param('end_time', '', 'trim');
+
+$where = [];
+if ($name) {
+$where[] = ['name|mobile', 'like', '%' . $name . '%'];
+}
+if ($start_time) $where[] = ['create_time', '>=', strtotime($start_time)];
+if ($end_time) $where[] = ['create_time', '<=', strtotime($end_time) + 86399];
+if (!empty($status)) {
+$where[] = ['status', '=', $status];
+}
+$this->assign('status', $status);
+
+$this->assign('status_menu', ReportModel::getStatusMenu());
+$this->assign('status_list', ReportModel::getStatusList());
+return $where;
+}
+//数据层 Model
+
+
+static public function statusArray()
+{
+return [
+'0' => '全部',
+'1' => '未支付',
+'2' => '已支付',
+'3' => '生成报告',
+];
+}
+
+
+public function getStatus($name)
+{
+$status = $this->statusArray();
+return $status[$name];
+}
+
+
+
+//状态列表展示的数量
+public static function getStatusMenu(): array
+{
+//每个订单状态的数量
+$array = [];
+foreach (self::statusArray() as $status => $status_name) {
+$array[$status]['status'] = $status;//状态数字
+$array[$status]['status_name'] = $status_name;//状态名称
+if (!empty($status)) {
+$map[] = ['status', '=', $status];//查询条件
+}
+$array[$status]['status_count'] =  ReportModel::where($map)->count();//这个状态的数量
+}
+return $array;
+
+}
+
+
+
+$this->assign('status_menu', ReportModel::getStatusMenu());
+//        $this->assign('status_list', ReportModel::getStatusList());
+
+</body>
+</html>

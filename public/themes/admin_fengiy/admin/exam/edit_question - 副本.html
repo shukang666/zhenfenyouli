@@ -1,0 +1,232 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:url('exam/question_list',array('exam_id'=>$exam_id))}">题库管理</a></li>
+			<li class="active"><a href="{:url('exam/add_question',array('exam_id'=>$exam_id))}">添加题库</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form margin-top-20"
+			action="{:url('exam/edit_question',array('exam_id'=>$exam_id))}">
+			<div class="form-group">
+				<label for="input-name" class="col-sm-2 control-label">问题<span class="form-required">*</span></label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-name" name="question" value="{$item.question}"
+						placeholder="请输入问题">
+				</div>
+			</div>
+			<div class="form-group">
+
+				<label class="col-sm-2 control-label">类型</label>
+
+				<div class="col-md-6 col-sm-10">
+					<label class="radio-inline">
+						<php>$active_true_checked=($item['type']==1)?"checked":"";</php>
+						<input type="radio" name="type" value="1" {$active_true_checked}>单选
+					</label>
+					<label class="radio-inline">
+						<php>$active_false_checked=($item['type']==2)?"checked":"";</php>
+						<input type="radio" name="type" value="2" {$active_false_checked}>多选
+					</label>
+					<label class="radio-inline">
+						<php>$active_false_checked=($item['type']==3)?"checked":"";</php>
+						<input type="radio" name="type" value="3" {$active_false_checked}>填空
+					</label>
+				</div>
+			</div>
+			<div class="form-group select_option">
+				<label class="col-sm-2 control-label">选项:</label>
+				<div class="col-md-5 col-sm-10">
+					<div class="layui-form-item">
+						<!--   <label class="layui-form-label">选项</label>-->
+						<div class="layui-input-inline" id="last">
+
+							<!-- 循环列出数据 -->
+							<foreach name="item.option" item="vo" key="key">
+
+								<div class="layui-form-item" style="display: flex">
+									<div class="layui-input-inline">
+										<input type="text" name="option[]" lay-verify="required" value="{$vo.option}"
+											class="form-control prop_name" placeholder="选项">
+										<p class="text text-danger">选项内容</p>
+									</div>
+
+									<div class="layui-input-inline next-sort">
+										<input type="text" name='next[]' placeholder="下一题的序号" value="{$vo.next}"
+											autocomplete="off" value=0 class="form-control prop_name">
+										<p class="text text-danger">下一题的序号</p>
+									</div>
+									<div class="layui-input-block" style="margin-left: 200px">
+										<button type="button"
+											class="layui-btn layui-btn-danger layui-btn-sm removeclass"><i
+												class="layui-icon">&#xe67e;</i></button>
+									</div>
+								</div>
+							</foreach>
+							<div class="layui-form-item" style="display: flex">
+								<div class="layui-input-inline">
+									<input type="text" name="option[]" placeholder="选项" autocomplete="off"
+										class="form-control prop_name">
+								</div>
+								<div class="layui-input-inline next-sort">
+									<input type="text" name="next[]" placeholder="下一题的序号" autocomplete="off"
+										class="form-control prop_name">
+								</div>
+								<div class="layui-input-block" style="margin-left: 200px">
+									<button id="add" type="button" class="layui-btn layui-btn-warm layui-btn-sm">
+										<i class="layui-icon">&#xe654;</i>
+									</button>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+
+			<div class="form-group tiankong">
+				<label for="input-name" class="col-sm-2 control-label">填空最小字数限制<span
+						class="form-required">*</span></label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" class="form-control" id="input-name" name="limit_words"
+						placeholder="请输入填空最小字数限制" value="{$item.limit_words}">
+				</div>
+			</div>
+			<!--			<div class="form-group select_option">-->
+
+			<!--				<label class="col-sm-2 control-label">是否需要补充</label>-->
+			<!--	-->
+			<!--				<div class="col-md-6 col-sm-10">-->
+			<!--					<label class="radio-inline">-->
+			<!--						<php>$active_true_checked=($item['is_other']==0)?"checked":"";</php>-->
+			<!--						<input type="radio" name="is_other" value="0" {$active_true_checked}>否-->
+			<!--					</label>-->
+			<!--					<label class="radio-inline">-->
+			<!--						<php>$active_false_checked=($item['is_other']==1)?"checked":"";</php>-->
+			<!--						<input type="radio" name="is_other" value="1" {$active_false_checked}>是-->
+			<!--					</label>-->
+			<!--				</div>-->
+			<!--			</div>-->
+			<!--			-->
+
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<input type="hidden" name="id" value="{$item.id}">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+					<a class="btn btn-default" href="javascript:history.go(-1);">{:lang('BACK')}</a>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+	<script>
+		layui.use(['element', 'jquery', 'layer', 'form', 'laydate'], function() {
+			var form = layui.form,
+				element = layui.element,
+				laydate = layui.laydate,
+				$ = layui.$;
+
+			//动态添加input输入框
+			var x = 0;
+			$("#add").click(function() {
+
+				var this_craft = this.value;
+
+				var str = '<div class="layui-form-item" style="display: flex">' +
+					'<div class="layui-input-inline">' +
+					'<input type="text" name="option[]" placeholder="选项" autocomplete="off" class="form-control prop_name">' +
+					'<p class="text text-danger">选项内容</p></div>' +
+					'<div class="layui-input-inline next-sort">' +
+					'<input type="text" name="next[]" placeholder="下一题的序号" value=0 autocomplete="off" class="form-control prop_name ">' +
+					'<p class="text text-danger">下一题的序号</p>' +
+					'</div>' +
+					'<div class="layui-input-block" style="margin-left: 200px">' +
+					'<button type="button" class="layui-btn layui-btn-danger layui-btn-sm removeclass"> <i class="layui-icon">&#xe67e;</i> </button>' +
+					'</div>' +
+					'</div>';
+				let type = $('input:radio:checked').val()
+				if (type == 2) {
+					var str = '<div class="layui-form-item" style="display: flex">' +
+						'<div class="layui-input-inline">' +
+						'<input type="text" name="option[]" placeholder="选项" autocomplete="off" class="form-control prop_name">' +
+						'<p class="text text-danger">选项内容</p></div>' +
+						'<div class="layui-input-block" style="margin-left: 200px">' +
+						'<button type="button" class="layui-btn layui-btn-danger layui-btn-sm removeclass"> <i class="layui-icon">&#xe67e;</i> </button>' +
+						'</div>' +
+						'</div>';
+				}
+				$("#last").append(str);
+				x++;
+				form.render('select');
+			});
+
+			//删除动态添加的input输入框
+			$("body").on('click', ".removeclass", function() {
+				//元素移除前校验是否被引用
+				var approvalName = $(this).parent().prev('div.layui-input-inline').children().val();
+				var parentEle = $(this).parent().parent();
+				parentEle.remove();
+			});
+
+			$('input[type=radio][name=type]').change(function() {
+				//$("#last").html('');
+				if (this.value == 3) {
+					$('.tiankong').show();
+					$('.select_option').hide();
+				} else {
+					if (this.value == 2) {
+						$('.next-sort').hide();
+					} else {
+						$('.next-sort').show();
+					}
+					$('.tiankong').hide();
+					$('.select_option').show();
+				}
+			});
+
+			let type = "{$item['type']}";
+
+			if (type == 3) {
+				$('.tiankong').show();
+				$('.select_option').hide();
+			} else {
+				if (type == 2) {
+					$('.next-select').hide();
+				} else {
+					$('.next-select').show();
+				}
+				$('.tiankong').hide();
+				$('.select_option').show();
+			}
+		})
+	</script>
+
+	<style>
+		.layui-input-inline input {
+			width: 190px;
+		}
+
+		.layui-input-inline .layui-unselect {
+			width: 190px;
+		}
+
+		.craft-parent {
+			display: flex;
+			flex-wrap: wrap;
+			margin-left: 200px !important;
+			width: 930px;
+		}
+
+		.craft-item {
+			flex: 0 0 16%;
+			margin-bottom: 10px;
+		}
+
+		.prop_value {
+			font-size: 12px;
+		}
+	</style>
+</body>
+</html>

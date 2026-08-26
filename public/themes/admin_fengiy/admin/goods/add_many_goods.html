@@ -1,0 +1,28 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('goods/goodsList')}">商品列表</a></li>
+        <li><a href="{:url('goods/addGoods')}">添加商品</a></li>
+        <li class="active"><a href="{:url('goods/addManyGoods')}">导入商品</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('addManyGoods')}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>上传表格:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="file" class="form-control" name="myfile" value="" required>
+            </div>
+            <label class="col-sm-0 control-label"><a href="https://dz220.aulod.com/upload/会员商城 商品.xlsx">下载模板</a></label>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">导入</button>
+
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demo</title>
+    <!-- 请勿在项目正式环境中引用该 layui.css 地址 -->
+    <link href="__STATIC__/layui/layui/css/layui.css" rel="stylesheet">
+    <!-- 请勿在项目正式环境中引用该 layui.js 地址 -->
+    <script src="__STATIC__/layui/layui/layui.js"></script>
+</head>
+<body>
+
+<div style="margin: 10px" id="ID-transfer-demo-inst"></div>
+
+<!-- 请勿在项目正式环境中引用该 layui.js 地址 -->
+<script>
+
+    layui.use(function () {
+        var transfer = layui.transfer;
+        var data = {$categories};
+        // 渲染
+        transfer.render({
+            elem: '#ID-transfer-demo-inst',
+            data: data,
+            id: 'demo-inst', // 定义唯一索引
+            showSearch: true,
+            title: ['列表', '选中列表'],
+            width: '45%',
+            value:{$ids},
+            // height: '30%',
+            parseData: function(res){ // 解析成规定的 data 格式
+                return {
+                    "value": res.id, // 数据值
+                    "title": '('+res.id+')'+res.name, // 数据标题
+                    // "disabled": res.disabled,  // 是否禁用
+                    // "checked": res.checked // 是否选中
+                };
+            }
+        });
+
+    });
+
+
+
+    function confirm() {
+        var transfer = layui.transfer;
+        getData = transfer.getData('demo-inst'); // 获取右侧数据
+        //取出来分开放进数组
+        var selected_id = [];
+        var selected_name = [];
+        for (var j = 0; j < getData.length; j++) {
+            selected_id.push(getData[j].value);
+            selected_name.push(getData[j].title);
+        }
+
+        return {
+            selected_name: selected_name,//名称
+            selected_id: selected_id,//id
+        };
+    }
+
+</script>
+
+</body>
+</html>

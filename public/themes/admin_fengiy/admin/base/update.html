@@ -1,0 +1,127 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update')}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>姓名:</label>
+            <div class="col-md-6 col-sm-10">
+                <input  style="width: 212px" type="text" class="form-control" name="true_name" value="{$item.true_name|default=''}" required>
+            </div>
+        </div>
+   <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>电话:</label>
+            <div class="col-md-6 col-sm-10">
+                <input  style="width: 212px" type="text" class="form-control" name="mobile" value="{$item.mobile|default=''}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>头像:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="hidden" name="avatar" id="avatar" value="{$item.avatar|default=''}">
+                <a href="javascript:uploadOneImage('图片上传','#avatar');">
+                    <notempty name="item.avatar">
+                        <img src="{:cmf_get_image_preview_url($item.avatar)}" id="avatar-preview" width="135" style="cursor: hand"/>
+                        <else />
+                        <img src="__TMPL__/public/assets/images/default-image.png" id="avatar-preview" width="135" style="cursor: hand"/>
+                    </notempty>
+                </a>
+                <input type="button" class="btn btn-sm" onclick="$('#avatar-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#avatar').val('');return false;" value="取消图片">
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">就医病历<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <ul id="image" class="pic-list list-unstyled form-inline">
+                    <notempty name="$item.image">
+                        <foreach name="$item.image" item="vo">
+
+                            <li id="image-saved-image{$key}">
+                                <input id="image-{$key}" type="hidden" name="image[]"
+                                       value="{$vo}">
+                                <php>$img_url=cmf_get_image_preview_url($vo);</php>
+                                <img id="image-{$key}-preview"
+                                     src="{:cmf_get_image_preview_url($vo)}"
+                                     style="height:34px;width: 44px;"
+                                     onclick="parent.imagePreviewDialog(this.src);">
+                                <a class="btn btn-default"  href="javascript:uploadOneImage('照片上传','#image-{$key}');"><i class="fa fa-upload fa-fw"></i></a>
+                                <a class="btn btn-danger"  href="javascript:(function(){$('#image-saved-image{$key}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+                                <a class="btn btn-success"  href="javascript:(function(){$('#image-saved-image{$key}').before($('#image-saved-image{$key}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+                            </li>
+                        </foreach>
+                    </notempty>
+                </ul>
+                <a href="javascript:uploadMultiImage('照片上传','#image','image-item-tpl');"
+                   class="btn btn-default">就医病历</a>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/html" id="image-item-tpl">
+    <li id="image-saved-image{id}">
+        <input id="image-{id}" type="hidden" name="image[]" value="{filepath}">
+        <img id="image-{id}-preview" src="{url}" style="height:34px;width: 44px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a class="btn btn-default" href="javascript:uploadOneImage('图片上传','#image-{id}');"><i class="fa fa-upload fa-fw"></i></a>
+        <a class="btn btn-danger" href="javascript:(function(){$('#image-saved-image{id}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+        <a class="btn btn-success" href="javascript:(function(){$('#image-saved-image{id}').before($('#image-saved-image{id}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+    </li>
+</script>
+<script>
+    layui.use(['layer', 'form'], function () {
+        let layer = layui.layer, form = layui.form;
+        form.on('switch(status)', function (data) {
+            setStatus(data.value, 'status', this.checked ? 1 : 2)
+        });
+        //发布不发布
+        form.on('switch(is_top)', function (data) {
+            setStatus(data.value, 'is_top', this.checked ? 1 : 0)
+        });
+
+        function setStatus(id, type, status) {
+            $.ajax({
+                url: '{:url(\'setStatus\')}',
+                type: "POST",
+                data: {id: id, type: type, status: status, cate: 0},
+                success: function (res) {
+                    if (res.code === 1) {
+                        layer.msg(res.msg, {icon: 1});
+                    } else {
+                        layer.msg(res.msg, {icon: 7});
+                    }
+                }
+            });
+        }
+    });
+
+</script>
+</body>
+</html>

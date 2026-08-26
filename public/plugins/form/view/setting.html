@@ -1,0 +1,112 @@
+<include file="public/head"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('/plugin/form/AdminIndex/index')}">列表</a></li>
+        <li class="active"><a href="{:url('/plugin/form/AdminIndex/setting')}">配置表单</a></li>
+        <!--<li><a  href="{:url('nav/edit')}" >{:lang('ADMIN_NAV_EDIT')}</a></li>-->
+    </ul>
+<!--    <div class="alert ">-->
+<!--        <pre>-->
+<!--模板生成插件-->
+
+<!--1. 创建一个表,注意表前缀无需写-->
+<!--    在创建表时候,添加上注释,可以在列表中展示时,自动填入注释,-->
+<!--    如果注释需要复杂,则第一个","前面的就是注释,后面是详细说明-->
+
+<!--2. model 名称为驼峰写法,不用带最后带Model-->
+
+<!--3. Controller 名称为驼峰写法,不用最后带Controller-->
+<!--        </pre>-->
+<!--    </div>-->
+
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('/plugin/form/AdminIndex/settingPost')}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>表单名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="table_name" value="" placeholder="表名不需要带前缀">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>model名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="model_name" value="">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>controller名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="controllers" value="">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"></label>
+            <div class="col-md-6 col-sm-10">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" id="check_root"> 是否是子菜单
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group show-parent" >
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>根菜单的名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="root_menu_name" value="">
+                <span class="help-block">一级标签显示的名称</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>子标签名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="menu" value="">
+                <span class="help-block">二级标签显示的名称</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>所属父标签名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" id="menu_parent" name="menu_parent" value="default">
+                <span class="help-block">本地父标签"default",如果是第三方的 Controller "Foo/default"</span>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">保存</button>
+            <a class="btn btn-default" href="{:url('/plugin/form/AdminIndex/admin_index.html')}">返回</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    $(function (){
+        tagger_parent()
+    })
+
+    function tagger_parent(){
+        $("#check_root").click(function (){
+            $(".show-parent").hide();
+
+            // 选中为子标签
+            if($(this).is(':checked')) {
+                $("#menu_parent").val(null);
+            }else{
+                // 父标签
+                $(".show-parent").show();
+                $("#menu_parent").val("default");
+            }
+        })
+    }
+</script>
+</body>
+</html>

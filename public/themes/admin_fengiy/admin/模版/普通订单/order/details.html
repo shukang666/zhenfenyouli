@@ -1,0 +1,92 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+        <table  class="table table-bordered layui-form">
+
+            <tr>  <td width="200">订单编号:</td>  <td>{$item.order_num}</td> </tr>
+            <tr>  <td>用户信息:</td>  <td>({$item.user_id}){$item.nickname}</td> </tr>
+            <tr>  <td>师傅信息:</td>  <td>{$item.work_info.name}({$item.work_info.mobile})</td> </tr>
+
+
+            <tr>  <td>车牌:</td>  <td>{$item.car_num}</td> </tr>
+            <tr>  <td>姓名:</td>  <td>{$item.name}</td> </tr>
+            <tr>  <td>手机号:</td>  <td>{$item.mobile}</td> </tr>
+            <tr>  <td>车辆类型:</td>  <td>{$item.cate_name}</td> </tr>
+            <tr>  <td>取车地址:</td>  <td>{$item.take_address}</td> </tr>
+            <tr>  <td>异地还车:</td>  <td>{$item.is_other?'否':'是'}</td> </tr>
+            <tr>  <td>还车地址:</td>  <td>{$item.send_address}</td> </tr>
+            <tr>  <td>基础金额:</td>  <td>{$item.wash_car_price}</td> </tr>
+            <tr>  <td>异地还车价格:</td>  <td>{$item.start_price}</td> </tr>
+            <tr>  <td>优惠金额:</td>  <td>{$item.coupon_price}</td> </tr>
+            <tr>  <td>状态:</td>  <td>{$item.status_name}</td> </tr>
+            <tr>  <td>创建时间:</td>  <td>{$item.create_time}</td> </tr>
+            <tr>  <td>支付时间:</td>  <td>{$item.pay_time}</td> </tr>
+            <tr>  <td>接单时间:</td>  <td>{$item.receive_time}</td> </tr>
+            <tr>  <td>取车时间:</td>  <td>{$item.take_time}</td> </tr>
+            <tr>  <td>取车照片:</td>  <td>
+                <if condition="!empty($item['take_car_image'])">
+                    <foreach name="item['take_car_image']" item="item1">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($item1)}');">
+                            <img src="{:cmf_get_image_preview_url($item1)}"
+                                 style="width:40px;height:40px;round-clip: 40px">
+                        </a>
+                    </foreach>
+                </if>
+            </td> </tr>
+            <tr>  <td>取车视频:</td>  <td>
+
+                <if condition="!empty($item['take_car_video'])">
+                    <a class="btn btn-info inline"
+                       href="{:cmf_get_file_download_url($item['take_car_video'])}"
+                       target="_blank"><i class="fa fa-play-circle fa-fw"></i></a>
+                </if>
+            </td> </tr>
+
+            <tr>  <td>洗车开始时间:</td>  <td>{$item.wash_start_time}</td> </tr>
+
+            <tr>  <td>洗车结束时间:</td>  <td>{$item.wash_end_time}</td> </tr>
+            <tr>  <td>洗车视频:</td>  <td>
+                <if condition="!empty($item['wash_video'])">
+                    <a class="btn btn-info inline" id="file-auido-preview"
+                       href="{:cmf_get_file_download_url($item['wash_video'])}"
+                       target="_blank"><i class="fa fa-play-circle fa-fw"></i></a>
+                </if>
+            </td> </tr>
+
+            <tr>  <td>还车时间:</td>  <td>{$item.return_time}</td> </tr>
+            <tr>  <td>还车图片:</td>  <td>
+                <if condition="!empty($item['return_car_image'])">
+                    <foreach name="item['return_car_image']" item="item2">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($item2)}');">
+                            <img src="{:cmf_get_image_preview_url($item2)}"
+                                 style="width:40px;height:40px;round-clip: 40px">
+                        </a>
+                    </foreach>
+                </if>
+            </td> </tr>
+            <tr>  <td>还车视频:</td>  <td>
+                <if condition="!empty($item['return_car_video'])">
+                <a class="btn btn-info inline"
+                   href="{:cmf_get_file_download_url($item['return_car_video'])}"
+                   target="_blank"><i class="fa fa-play-circle fa-fw"></i></a>
+            </if></td> </tr>
+            <tr>  <td>完成时间:</td>  <td>{$item.finish_time}</td> </tr>
+            <tr>  <td>取消时间:</td>  <td>{$item.cancel_time}</td> </tr>
+
+
+
+        </table>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

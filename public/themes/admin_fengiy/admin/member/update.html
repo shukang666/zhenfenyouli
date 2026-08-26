@@ -1,0 +1,115 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update')}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+
+
+
+        <php>
+            $list= cmf_table('member_community')->where('delete_time',0)->select();
+        </php>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>小区:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="community_id" class="form-control">
+                    <foreach name="list" item="vo">
+                        <notempty name="item.community_id">
+                            <option value="{$vo.id}"
+                            <if condition="$item.community_id == $vo.id">selected</if>
+                            >{$vo.name}</option>
+                            <else/>
+                            <option value="{$vo.id}">{$vo.name}</option>
+                        </notempty>
+
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>昵称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="nickname"
+                       value="{$item.nickname|default=''}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>电话:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="mobile"
+                       value="{$item.mobile|default=''}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>头像:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="hidden" name="avatar" id="avatar" value="{$item.avatar|default=''}">
+                <a href="javascript:uploadOneImage('图片上传','#avatar');">
+                    <notempty name="item.avatar">
+                        <img src="{:cmf_get_image_preview_url($item.avatar)}" id="avatar-preview" width="135"
+                             style="cursor: hand"/>
+                        <else/>
+                        <img src="__TMPL__/public/assets/images/default-image.png" id="avatar-preview" width="135"
+                             style="cursor: hand"/>
+                    </notempty>
+                </a>
+                <input type="button" class="btn btn-sm"
+                       onclick="$('#avatar-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#avatar').val('');return false;"
+                       value="取消图片">
+            </div>
+        </div>
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    layui.use(['form', 'laydate', 'util'], function () {
+        var form = layui.form;
+        var layer = layui.layer;
+
+    // form.on('select(vip_id)', function (data) {
+    //     console.log(data.value);
+    //     if (data.value ==0) {
+    //         $('#price-group').show();
+    //     } else {
+    //         $('#price-group').hide();
+    //     }
+    // });
+
+    // // 初始化时根据当前选择的vip_id隐藏或显示价格字段
+    // if ($('#vip_id').val() !== '') {
+    //     $('#price-group').hide();
+    // }
+    });
+</script>
+
+</body>
+</html>

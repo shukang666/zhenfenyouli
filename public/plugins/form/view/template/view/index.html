@@ -1,0 +1,69 @@
+{$head}
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{$url_list}">列表</a></li>
+        <li><a href="{$url_add}"  >添加</a></li>
+    </ul>
+
+    <form class="js-ajax-form" method="post">
+
+        <br>
+        <div class="table-actions">
+            <button class="btn btn-danger btn-sm js-ajax-submit" type="submit" data-action="{$url_delete_all}"
+                    data-subcheck="true" data-msg="{:lang('DELETE_CONFIRM_MESSAGE')}">{:lang('DELETE')}
+            </button>
+        </div>
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <th  style="width: 16px" >
+                    <label>
+                        <input type="checkbox" class="js-check-all" data-direction="x" data-checklist="js-check-x">
+                    </label>
+                </th>
+
+                <foreach name="fields" item="vo">
+                    <th style="width: 60px" >{$vo.COLUMN_COMMENT}</th>
+
+                </foreach>
+
+                <th  style="width: 160px">{:lang('ACTIONS')}</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {$foreach}
+
+                <tr>
+                    <td>
+                        <input type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+                               value="{$id}">
+                    </td>
+
+            <foreach name="fields" item="v">
+                <td>{$v.field}</td>
+            </foreach>
+
+                    <td>
+                        <a class="btn btn-xs btn-success"  href="{$url_edit}">{:lang('EDIT')}</a>
+                        <a class="btn btn-xs btn-danger js-ajax-delete" href="{$url_delete}">{:lang('DELETE')}</a>
+                    </td>
+                </tr>
+
+            {$foreachEnd}
+
+            </tbody>
+
+        </table>
+
+    </form>
+
+    {$page}
+
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

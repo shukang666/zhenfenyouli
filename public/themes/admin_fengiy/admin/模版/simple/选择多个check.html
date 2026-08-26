@@ -1,0 +1,59 @@
+<include file="public@header"/>
+<script type="text/html" id="photos-item-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <input class="form-control" id="photo-{id}-name" type="text" name="photo_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('setPrice')}">选择志愿者</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('setPrice')}">
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>选择志愿者:</label>
+            <div class="col-md-6 col-sm-10">
+                <foreach name="vol_list" item="vo">
+                    <label class="checkbox-inline">
+                        <input value="{$vo.id}" type="checkbox" name="user_id[]" >{$vo.true_name}（{$vo.c_name}）
+                    </label>
+                </foreach>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">标签:</label>
+            <div class="col-md-6 col-sm-10">
+                <foreach name="tags_list" item="vo">
+                    <input type="checkbox" name="tags[]" title="{$vo.name}" value="{$vo.name}" <if condition="$vo.checked == 1">checked</if>>
+                </foreach>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<style>
+    .layui-form-checkbox i{
+        height: 30px;
+    }
+    .layui-form-checkbox{
+        margin-bottom: 4px;
+    }
+</style>
+</body>
+</html>

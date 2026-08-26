@@ -1,0 +1,164 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index',['info_id'=>$info_id])}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update',['info_id'=>$info_id])}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id |default=''}" name="id">
+        <input type="hidden" value="{$info_id|default=''}" name="info_id">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>用户:</label>
+            <div class="col-md-6 col-sm-10">
+
+                <!-- 搜索输入框 -->
+                <input type="text" id="user_search" class="form-control"
+                       placeholder="输入用户名或手机号搜索"
+                       value="<notempty name="item.user_id">{$item.nickname}({$item.mobile})</notempty>">
+
+                <!-- 搜索结果展示区域 -->
+                <div id="search_results" style="display:none; max-height:200px; overflow-y:auto; border:1px solid #eee; margin-top:5px;"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>内容:</label>
+            <div class="col-md-6 col-sm-10">
+                <textarea name="content" class="layui-textarea">{$item.content |default=''}</textarea>
+            </div>
+        </div>
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label"><span class="form-required">*</span>回复ID:</label>-->
+<!--            <div class="col-md-4 col-sm-10">-->
+<!--                <input type="number" class="form-control" name="c_id" value="{$item.c_id|default=''}">-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>回复评论:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="c_id" class="form-control">
+                    <option value="">无</option>
+                    <foreach name="comment" item="vo">
+                        <notempty name="item.c_id">
+                            <option value="{$vo.id}"
+                            <if condition="$item.c_id == $vo.id">selected</if>
+                            >{$vo.content}</option>
+                            <else/>
+                            <option value="{$vo.id}">{$vo.content}</option>
+                        </notempty>
+
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index',['info_id'=>$info_id])}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['jquery'],  function(){
+        var $ = layui.jquery;
+
+        // 防抖函数，减少请求频率
+        var debounce = function(fn, delay) {
+            var timer = null;
+            return function() {
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function() {
+                    fn.apply(context,  args);
+                }, delay);
+            };
+        };
+
+        // 搜索用户函数
+        var searchUsers = debounce(function(keyword) {
+            if(keyword.length  < 1) {
+                $('#search_results').hide();
+                return;
+            }
+
+            $.ajax({
+                url: "{:url('users')}",
+                type: 'GET',
+                data: {keyword: keyword},
+                beforeSend: function() {
+                    $('#search_results').html('<div style="padding:10px;color:#999;">搜索中...</div>').show();
+                },
+                success: function(res) {
+                    if(res.code  === 1 && res.data.length  > 0) {
+                        var html = '<ul style="margin:0;padding:0;list-style:none;">';
+                        $.each(res.data,  function(i, item) {
+                            html += '<li style="padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;" ' +
+                                'data-id="'+item.id+'"  data-text="'+item.nickname+'('+item.mobile+')">'  +
+                                item.nickname  + '(' + item.mobile  + ')</li>';
+                        });
+                        html += '</ul>';
+                        $('#search_results').html(html).show();
+                    } else {
+                        $('#search_results').html('<div style="padding:10px;color:#999;">未找到匹配用户</div>').show();
+                    }
+                },
+                error: function() {
+                    $('#search_results').html('<div style="padding:10px;color:red;">搜索失败，请重试</div>').show();
+                }
+            });
+        }, 300); // 300毫秒防抖
+
+        // 监听搜索输入
+        $('#user_search').on('input', function() {
+            var keyword = $(this).val().trim();
+            searchUsers(keyword);
+        });
+
+// 点击搜索结果项
+        $(document).on('click', '#search_results li', function() {
+            var id = $(this).data('id');
+            var text = $(this).data('text');
+
+            // 更新显示框为只显示用户ID
+            $('#user_search').val(text);
+
+            // 添加隐藏字段来传递用户ID
+            if ($('#hidden_user_id').length === 0) {
+                $('#user_search').after('<input type="hidden" id="hidden_user_id" name="user_id" value="'+id+'">');
+            } else {
+                $('#hidden_user_id').val(id);
+            }
+
+            // 隐藏搜索结果
+            $('#search_results').hide();
+        });
+
+
+        // 点击页面其他区域隐藏搜索结果
+        $(document).on('click', function(e) {
+            if(!$(e.target).closest('#search_results,  #user_search').length) {
+                $('#search_results').hide();
+            }
+        });
+    });
+</script>
+</body>
+</html>

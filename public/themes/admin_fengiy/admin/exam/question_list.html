@@ -1,0 +1,71 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<!-- <li class="active"><a href="{:url('exam/question_list')}">题库管理</a></li>
+			<li><a href="{:url('exam/add_question')}">添加题目</a></li> -->
+
+			<li class="active"><a href="{:url('exam/question_list',array('exam_id'=>$exam_id))}">题库管理</a></li>
+			<li ><a href="{:url('exam/add_question',array('exam_id'=>$exam_id))}">添加题库</a></li>
+		</ul>
+		<form class="well form-inline margin-top-20" method="get" action="{:url('exam/question_list',array('exam_id'=>$exam_id))}">
+			
+            关键字:
+            <input type="text" class="form-control" name="keyword" style="width: 220px;" value="{:input('request.keyword/s','')}" placeholder="请输入问题名称">
+            
+            <input type="submit" class="btn btn-primary" value="搜索" />
+            <a class="btn btn-danger" href="{:url('exam/question_list',array('exam_id'=>$exam_id))}">清空</a>
+		</form>
+		<form method="post" class="js-ajax-form margin-top-20" action="{:url('exam/listOrder')}">
+			<div class="table-actions">
+				<button class="btn btn-primary btn-sm js-ajax-submit" type="submit">{:lang('SORT')}</button>
+			</div>
+				<table class="table table-hover table-bordered margin-top-20">
+					<thead>
+						<tr>
+							<th width="50">{:lang('SORT')}</th>
+							<th>ID</th>
+							<th>问题</th>
+							<!-- <th>选项1</th>
+							<th>选项2</th>
+							<th>选项3</th>
+							<th>选项4</th>
+							<th>选项5</th> -->
+
+							<!-- <th>答案</th>
+							<th>分值</th> -->
+							<th width="260">{:lang('ACTIONS')}</th>
+						</tr>
+					</thead>
+					<tbody>
+						
+						<foreach name="list" item="vo">
+						<tr>
+							<td>
+								<input name="list_orders[{$vo.id}]" class="input-order" type="text" value="{$vo.list_order}">
+							</td>
+							<td>{$vo.id}</td>
+							<td>{$vo.question}</td>
+							<!-- <td>{$vo.option1}</td>
+							<td>{$vo.option2}</td>
+							<td>{$vo.option3}</td>
+							<td>{$vo.option4}</td>
+							<td>{$vo.option5}</td> -->
+
+							<!-- <td>{$vo.answer}</td>
+							<td>{$vo.score}</td> -->
+							<td>
+								<a class="btn btn-xs btn-primary" href="{:url('exam/edit_question',array('id'=>$vo['id']))}">{:lang('EDIT')}</a>
+								<a class="btn btn-xs btn-danger js-ajax-delete" href="{:url('exam/delete_question',array('id'=>$vo['id'],'exam_id'=>$vo['exam_id']))}">{:lang('DELETE')}</a>
+							</td>
+						</tr>
+						</foreach>
+					</tbody>
+				</table>
+		</form>
+		<ul class="pagination">{$page|default=''}</ul>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

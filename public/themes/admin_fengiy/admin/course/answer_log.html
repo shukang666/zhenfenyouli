@@ -1,0 +1,47 @@
+<include file="public@header" />
+</head>
+<body>
+<div class="wrap js-check-wrap">
+<!--    <ul class="nav nav-tabs">-->
+<!--        <li class="active"><a href="{:url('answer',['answer_id'=>$answer_id])}">答题记录</a></li>-->
+<!--    </ul>-->
+
+
+    <table class="table table-hover table-bordered">
+        <thead>
+        <tr>
+            <th width="50">ID</th>
+            <th>题目</th>
+            <th>选项</th>
+            <th>正确答案</th>
+            <th>用户选项</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.q_title}</td>
+                <td>
+                    <notempty name="vo.option_list">
+                        <foreach name="vo.option_list" item="item">
+                            <span style="display: flex">{$item.letter} . {$item.option} </span>    <br>
+                        </foreach>
+                    </notempty>
+                </td>
+
+                <td>{$vo.true_answer??''}</td>
+                <td>{$vo.user_answer??''}</td>
+
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

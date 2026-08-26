@@ -1,0 +1,58 @@
+<include file="public@header" />
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="">列表</a></li>
+    </ul>
+
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th width="50">ID</th>
+            <th>国家名称</th>
+            <th>货币单位</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.name}</td>
+                <td><input style="width: 150px;border: 1px solid #A2A7AD" type="text"  class="form-control" name="title" value="{$vo.price_unit}" onblur="changeUnit(this,{$vo.id})"></td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['layer', 'form'], function(){
+        var layer = layui.layer,form = layui.form;
+
+    });
+
+    function changeUnit(that,id){
+        var unit = $(that).val();
+        console.log(unit)
+        console.log(id)
+        $.ajax({
+            url:'/admin/area/setUnit',
+            type:"POST",
+            data: {id:id,price_unit:unit},
+            success: function(res) {
+                //console.log(res);
+                if(res.code==1){
+                   // layer.msg(res.msg, {icon:1});
+                }else{
+                    layer.msg(res.msg, {icon: 7});
+                }
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

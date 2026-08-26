@@ -1,0 +1,38 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li ><a href="{:url('license/index')}">车牌列表</a></li>
+        <li class="active"><a href="javascript:;">导入车牌</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('license/import')}">
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">xls文件<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10" style="display: flex;">
+                <input id="file-xls" class="form-control" type="text" name="xls"
+                        value="{$post.more.video|default=''}" placeholder="请选择上传xls文件" style="width: 200px;">
+                <!-- <notempty name="post.more.video">
+                    <a id="file-video-preview" href="{:cmf_get_file_download_url($post.more.video)}"
+                        target="_blank">下载</a>
+                </notempty> -->
+                <a href="javascript:uploadOne('文件上传','#file-xls','file');" class="btn btn-success" style="margin-left:10px;">上传</a>
+            </div>
+            <div class="col-md-6 col-sm-10" style="display: flex;padding-left: 400px;margin-top:10px;margin-bottom: 10px;">
+                <a id="file-video-preview" href="{:cmf_get_file_download_url('default/20201230/df68969fa7b54460ba5982aa68d7c9c5.xls')}"
+                target="_blank">模版下载</a>
+            </div>
+        </div>
+       
+       
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary js-ajax-submit">确定导入</button>
+                <a class="btn btn-default" href="{:url('license/index')}">{:lang('BACK')}</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

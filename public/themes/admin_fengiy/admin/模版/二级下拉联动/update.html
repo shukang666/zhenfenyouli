@@ -1,0 +1,180 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update')}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">角色:</label>
+            <div class="col-md-6 col-sm-10">
+                <div class="layui-form-item" style="margin-bottom: 0 !important;">
+                    <div class="layui-inline">
+                        <select lay-verify="order_type" lay-search lay-filter="order_type"
+                                name="type">
+                            <option value="1" class="form-control"
+                            <if condition="($item.type??0) == 1">selected</if>
+                            >环保管家</option>
+                            <option value="2" class="form-control"
+                            <if condition="($item.type??0) == 2">selected</if>
+                            >公司人员</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="form-group " id="order_type_div">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>公司:</label>
+            <div class="col-md-2 col-sm-10">
+                <select name="company_id" class="form-control" id="first_cate" lay-filter="first_cate">
+                    <!--                    <option value="">请选择公司</option>-->
+                    <foreach name="company_list" item="vo">
+                        <notempty name="item.company_id">
+                            <option value="{$vo.id}"
+                            <if condition="$item.company_id == $vo.id">selected</if>
+                            >{$vo.cate_name}</option>
+                            <else/>
+                            <option value="{$vo.id}">{$vo.cate_name}</option>
+                        </notempty>
+
+                    </foreach>
+                </select>
+            </div>
+        </div>
+        <div class="form-group " id="order_type_division">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>部门:</label>
+            <div class="col-md-2 col-sm-10">
+                <select class="form-control" name="division_id" id="second_cate">
+                    <option value="">暂无部门</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>姓名:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="true_name"
+                       value="{$item.true_name|default=''}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>电话:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="mobile"
+                       value="{$item.mobile|default=''}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>密码:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="password"
+                       value="{$item.password|default=''}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>头像:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="hidden" name="avatar" id="avatar" value="{$item.avatar|default=''}">
+                <a href="javascript:uploadOneImage('图片上传','#avatar');">
+                    <notempty name="item.avatar">
+                        <img src="{:cmf_get_image_preview_url($item.avatar)}" id="avatar-preview" width="135"
+                             style="cursor: hand"/>
+                        <else/>
+                        <img src="__TMPL__/public/assets/images/default-image.png" id="avatar-preview" width="135"
+                             style="cursor: hand"/>
+                    </notempty>
+                </a>
+                <input type="button" class="btn btn-sm"
+                       onclick="$('#avatar-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#avatar').val('');return false;"
+                       value="取消图片">
+            </div>
+        </div>
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['form', 'element'], function () {
+        var form = layui.form, element = layui.element;
+        var first_cate = "{$item.company_id??1}"
+        var second_cate = "{$item.division_id??''}"
+        // getCateList(0,0,$("#first_cate"),'first_cate');
+        getCateList(first_cate, $("#second_cate"), 'second_cate');
+        form.on('select(first_cate)', function (data) {
+            first_cate = data.value;
+            getCateList(first_cate, $("#second_cate"), 'second_cate');
+        })
+
+        var type = "{$item.type??1}";
+        get_type(type)
+        form.on('select(order_type)', function (data) {
+            type = data.value;
+            get_type(type)
+        })
+
+        function get_type(type){
+            if (type == 2) {
+                $("#order_type_div,#order_type_division").show();
+
+            } else {
+                $("#order_type_div ,#order_type_division").hide();
+
+            }
+        }
+
+        function getCateList(pid, target, type) {
+            $.ajax({
+                type: 'POST',
+                url: "{:url('getJsonCateList')}",
+                data: {
+                    pid: pid,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    var cate_list = data.data;
+                    var str = "<option value=''>" + "选择分类" + "</option>";
+                    for (var i = 0; i < cate_list.length; i++) {
+
+                        if (type == 'first_cate') {
+                            var where = first_cate;
+                        } else {
+                            var where = second_cate;
+                        }
+                        if (where == cate_list[i].id) {
+                            str += "<option value='" + cate_list[i].id + "' selected>" + cate_list[i].cate_name + "</option>";
+                        } else {
+                            str += "<option value='" + cate_list[i].id + "'>" + cate_list[i].cate_name + "</option>";
+                        }
+                    }
+                    target.html(str);
+                    form.render('select');
+                }
+            });
+        }
+    })
+
+</script>
+</body>
+</html>

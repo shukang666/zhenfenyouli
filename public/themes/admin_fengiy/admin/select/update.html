@@ -1,0 +1,65 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index',['type'=>$params.type])}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update',['type'=>$params.type])}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+        <input type="hidden" value="{$params.type|default=''}" name="type">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="name"
+                       value="{$item.name|default=''}" required>
+            </div>
+        </div>
+
+        <if condition="$params.type == 2">
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">垃圾分类上报图例:</label>
+                <div class="col-md-6 col-sm-10">
+                    <php>  $thumb='waste_thumb';</php>
+                    <input type="hidden" name="{$thumb}" id="{$thumb}" value="{$item[$thumb]|default=''}">
+                    <a href="javascript:uploadOneImage('图片上传','#{$thumb}');">
+                        <if condition="empty($item[$thumb])">
+                            <img src="__TMPL__/public/assets/images/default-thumbnail.png"
+                                 id="{$thumb}-preview"
+                                 width="135" style="cursor: pointer"/>
+                            <else/>
+                            <img src="{:cmf_get_image_preview_url($item[$thumb])}"
+                                 id="{$thumb}-preview"
+                                 width="135" style="cursor: pointer"/>
+                        </if>
+                    </a>
+                </div>
+            </div>
+        </if>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index',['type'=>$params.type])}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+</html>

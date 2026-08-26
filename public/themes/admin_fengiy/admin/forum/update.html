@@ -1,0 +1,203 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+<script type="text/html" id="image-item-tpl">
+    <li id="image-saved-image{id}">
+        <input id="image-{id}" type="hidden" name="image[]" value="{filepath}">
+        <img id="image-{id}-preview" src="{url}" style="height:34px;width: 44px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a class="btn btn-default" href="javascript:uploadOneImage('图片上传','#image-{id}');"><i
+                class="fa fa-upload fa-fw"></i></a>
+        <a class="btn btn-danger" href="javascript:(function(){$('#image-saved-image{id}').remove();})();"><i
+                class="fa fa-trash fa-fw"></i></a>
+        <a class="btn btn-success"
+           href="javascript:(function(){$('#image-saved-image{id}').before($('#image-saved-image{id}').next());})();"><i
+                class="fa fa-arrow-down fa-fw"></i></a>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+
+        <if condition="$type==2">
+            <li><a href="{:url('service_list',['type'=>$type])}">列表</a></li>
+            <else/>
+            <li><a href="{:url('index',['type'=>$type])}">列表</a></li>
+
+        </if>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+
+            <li class="active"><a href="{:url('update',['type'=>$type])}">添加</a></li>
+        </notempty>
+
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+        <input type="hidden" value="{$type|default=''}" name="type">
+
+
+
+        <if condition="$type==2">
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>标题:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input style="width: 212px" type="text" name="title" class="form-control"
+                           value="{$item.title|default=''}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>到期时间:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input style="width: 212px" type="text" class="form-control js-bootstrap-datetime" name="end_time"
+                           value="{$item.end_time|default=''}">
+                </div>
+
+            </div>
+            <div class="form-group " id="input_cate">
+                <label class="col-sm-2 control-label"><span class="form-required"></span>学校:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input class="form-control" type="text" required name="cate_names" value="{$item.cate_names??''}"
+                           placeholder="请选择学校" onclick="selected();" id="cate_names"
+                           readonly/>
+                    <input class="form-control" type="hidden" value="{$item.cate_ids??''}" name="cate_ids"
+                           id="cate_ids"/>
+                </div>
+            </div>
+            <else/>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>	栏目:</label>
+                <div class="col-md-6 col-sm-10">
+                    <select name="cate_id" class="form-control">
+                        <foreach name="cate_list" item="vo">
+                            <notempty name="data.cate_id">
+                                <option value="{$vo.id}"
+                                <if condition="$data.cate_id == $vo.id">selected</if>
+                                >{$vo.cate_name}</option>
+                                <else/>
+                                <option value="{$vo.id}">{$vo.cate_name}</option>
+                            </notempty>
+
+                        </foreach>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>学校:</label>
+                <div class="col-md-6 col-sm-10">
+                    <select name="school_id" class="form-control">
+                        <foreach name="school_list" item="vo">
+                            <notempty name="data.school_id">
+                                <option value="{$vo.id}"
+                                <if condition="$data.school_id == $vo.id">selected</if>
+                                >{$vo.cate_name}</option>
+                                <else/>
+                                <option value="{$vo.id}">{$vo.cate_name}</option>
+                            </notempty>
+
+                        </foreach>
+                    </select>
+                </div>
+            </div>
+        </if>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>置顶结束时间:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control js-bootstrap-datetime" name="top_end_time"
+                       value="{$item.top_end_time|default=''}">
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">多图<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <ul id="image" class="pic-list list-unstyled form-inline">
+                    <notempty name="$item.image">
+                        <foreach name="item.image" item="vo">
+
+                            <li id="image-saved-image{$key}">
+                                <input id="image-{$key}" type="hidden" name="image[]"
+                                       value="{$vo}">
+                                <php>$img_url=cmf_get_image_preview_url($vo);</php>
+                                <img id="image-{$key}-preview"
+                                     src="{:cmf_get_image_preview_url($vo)}"
+                                     style="height:34px;width: 44px;"
+                                     onclick="parent.imagePreviewDialog(this.src);">
+                                <a class="btn btn-default"
+                                   href="javascript:uploadOneImage('照片上传','#image-{$key}');"><i
+                                        class="fa fa-upload fa-fw"></i></a>
+                                <a class="btn btn-danger"
+                                   href="javascript:(function(){$('#image-saved-image{$key}').remove();})();"><i
+                                        class="fa fa-trash fa-fw"></i></a>
+                                <a class="btn btn-success"
+                                   href="javascript:(function(){$('#image-saved-image{$key}').before($('#image-saved-image{$key}').next());})();"><i
+                                        class="fa fa-arrow-down fa-fw"></i></a>
+                            </li>
+                        </foreach>
+                    </notempty>
+                </ul>
+                <a href="javascript:uploadMultiImage('照片上传','#image','image-item-tpl');"
+                   class="btn btn-default">图片</a>
+            </div>
+            <!--            <p class="help-block text-danger">建议尺寸:750*1440px</p>-->
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>内容:</label>
+            <div class="col-md-6 col-sm-10">
+                <textarea style="height: 212px" type="text" class="form-control" name="content" required>{$item.content|default=''}</textarea>
+            </div>
+        </div>
+
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <!--            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>-->
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    function selected() {
+        var selectedCategoriesId = $('#cate_ids').val();
+
+        // var type_id = $('#type_id').val();
+        openIframeLayer("{:url('forum_school/selected')}?ids="
+            + selectedCategoriesId + '&type=' + 1 + '&id=' + {$item.id ?? 0 }, '请选择学校', {
+            area: ['900px', '400px'],
+            btn: ['确定', '取消'],
+            yes: function (index, layero) {
+
+                var iframeWin = window[layero.find('iframe')[0]['name']];
+                var select_data = iframeWin.confirm();
+
+                var len = select_data.selected_id.length
+                console.log(select_data)
+                if (len == 0) {
+                    layer.msg('请选择分类');
+                    return;
+                }
+
+                $('#cate_names').val(select_data.selected_name.join(' ,'));
+                $('#cate_ids').val(select_data.selected_id.join(','));
+                layer.close(index); //如果设定了yes回调，需进行手工关闭
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+<script type="text/html" id="photos-item-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+<script type="text/html" id="files-item-tpl">
+    <li id="saved-file{id}">
+        <input id="file-{id}" type="hidden" name="file_urls[]" value="{filepath}">
+        <input class="form-control" id="file-{id}-name" type="text" name="file_names[]" value="{name}"
+               style="width: 200px;" title="文件名称">
+        <a id="file-{id}-preview" href="{preview_url}" target="_blank">下载</a>
+        <a href="javascript:uploadOne('文件上传','#file-{id}','file');">替换</a>
+        <a href="javascript:(function(){$('#saved-file{id}').remove();})();">移除</a>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">数据列表</a></li>
+        <li class="active"><a href="">编辑数据</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('edit')}">
+        <input type="hidden" class="form-control" name="id" value="{$data.id}" required>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>数据类型:</label>
+            <div class="col-md-6 col-sm-10">
+                <!-- 1图片 2视频 3音频 4名片-->
+                <select name="type" class="form-control" lay-filter="type" id="type">
+                    <foreach name="type_list" item="vo">
+                        <option value = "{$vo.id}" <if condition="$vo.id == $data.type">selected</if>>{$vo.type_name}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index',array('type'=>$data.type))}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['layer', 'form'], function(){
+        let layer = layui.layer,form = layui.form;
+        const type = $("#type").val();
+        setShow(type)
+        form.on('select(type)', function(data) {
+            setShow(data.value)
+        })
+        function setShow(type){
+            $('.show_type').css('display','none');
+            $('.show_type_'+type).css('display','block');
+        }
+    });
+</script>
+<script>
+
+    layui.use(['element', 'jquery', 'layer', 'form', 'laydate'], function () {
+        var form = layui.form
+                , element = layui.element
+                , laydate = layui.laydate
+                , $ = layui.$;
+
+        //动态添加input输入框
+        var x = 0;
+        $("#add").click(function () {
+
+            var str = '<div class="layui-form-item" style="display: flex;width: 50%">'+
+                    '<div class="layui-input-inline">'+
+                    '<input type="text" name="field[]" lay-verify="required"   placeholder="字段名称" class="form-control" style="width: 100px;">'+
+                    '</div>'+
+                    '<div class="layui-form-mid" style="flex-shrink: 0">：</div>'+
+                    '<div class="layui-input-inline">'+
+                    '<input type="text" name="value[]" lay-verify="required" placeholder="字段值"  class="form-control" style="width: 200px;">'+
+                    '</div>'+
+                    '<div class="layui-input-block" style="margin-left: 80px">'+
+                    '<button type="button" class="layui-btn layui-btn-danger layui-btn-sm removeclass"><i class="layui-icon">&#xe67e;</i></button>'+
+                    '</div>'+
+                    '</div>';
+
+            $("#last").append(str);
+            x++;
+            form.render('select');
+        });
+
+        $("#add1").click(function () {
+
+            var str = '<div class="layui-form-item" style="display: flex;width: 50%">'+
+                    '<div class="layui-input-inline">'+
+                    '<input type="text" name="field1[]" lay-verify="required"   placeholder="字段名称" class="form-control" style="width: 100px;">'+
+                    '</div>'+
+                    '<div class="layui-form-mid" style="flex-shrink: 0">：</div>'+
+                    '<div class="layui-input-inline">'+
+                    '<input type="text" name="value1[]" lay-verify="required" placeholder="字段值"  class="form-control" style="width: 200px;">'+
+                    '</div>'+
+                    '<div class="layui-input-block" style="margin-left: 80px">'+
+                    '<button type="button" class="layui-btn layui-btn-danger layui-btn-sm removeclass"><i class="layui-icon">&#xe67e;</i></button>'+
+                    '</div>'+
+                    '</div>';
+
+            $("#last1").append(str);
+            x++;
+            form.render('select');
+        });
+
+        //删除动态添加的input输入框
+        $("body").on('click', ".removeclass", function () {
+            //元素移除前校验是否被引用
+            var approvalName = $(this).parent().prev('div.layui-input-inline').children().val();
+            var parentEle = $(this).parent().parent();
+            parentEle.remove();
+        });
+
+    })
+
+</script>
+<style>
+    .layui-input-inline input {
+        width:190px;
+    }
+    .layui-input-inline .layui-unselect {
+        width:190px;
+    }
+</style>
+<script src="https://map.qq.com/api/gljs?v=1.exp&key=XQABZ-Z6GWP-OWEDN-V3K2Y-W43D6-D4B5P"></script>
+<script>
+    //定义地图中心点坐标
+
+    var already_lat = $("#lat").val();
+    var already_lon = $("#lon").val();
+
+    if(already_lat == ''){
+        already_lat = 39.916706;
+        already_lon = 116.403119;
+    }
+    var center = new TMap.LatLng(already_lat, already_lon);
+    //定义map变量，调用 TMap.Map() 构造函数创建地图
+    var map = new TMap.Map(document.getElementById('container'), {
+        center: center,//设置地图中心点坐标
+        zoom: 17, //设置地图缩放级别
+        viewMode:'3D'
+    });
+    let markerLayer = new TMap.MultiMarker({
+        id: 'marker-layer',
+        map: map
+    });
+    var clickHandler=function(evt){
+        var lat = evt.latLng.getLat().toFixed(6);
+        var lng = evt.latLng.getLng().toFixed(6);
+
+        $("#lat").val(lat);
+        $("#lon").val(lng);
+        removeMarker("search_res");
+        addMarker(new TMap.LatLng(lat,lng),"search_res");
+
+        let url = "{:url('data/reverse_address')}";
+        $.get(url,{lnglat:lat+","+lng},function(res){
+            //debugger;
+            res = JSON.parse(res);
+            if(res.status==0){
+                $("#address").val(res.result.formatted_addresses.recommend);
+            }
+        });
+    };
+    map.on("click",clickHandler);
+
+    function addMarker(latLng, id) {
+        markerLayer.add({
+            id: id,
+            position: latLng
+        });
+        let lng = latLng.lng;
+        let lat = latLng.lat;
+
+
+        map.setCenter(new TMap.LatLng(lat,lng)); // 坐标为天安门
+    }
+    //移除marker事件
+    function removeMarker(id) {
+        markerLayer.remove(id)
+    }
+
+    function searchAddress(){
+
+        let address = $("#address").val();
+        var full_address =address;
+        let url = "{:url('data/search_address')}";
+        $.get(url,{address:full_address},function(res){
+            // debugger;
+            res = JSON.parse(res);
+            if(res.status==0){
+                let location = res.result.location;
+                $("#lat").val(location.lat);
+                $("#lon").val(location.lng);
+                removeMarker("search_res");
+                addMarker(new TMap.LatLng(location.lat,location.lng),"search_res");
+
+            }else{
+                layer.msg(res.message);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

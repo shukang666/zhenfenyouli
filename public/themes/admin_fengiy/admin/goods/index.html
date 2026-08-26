@@ -1,0 +1,181 @@
+<include file="public@header" />
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a>商品列表</a></li>
+     <li><a href="{:url('Goods/add')}">添加</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20 layui-form" method="get" action="{:url('index')}" style="display: flex;flex-wrap: wrap">
+
+        <div>
+            <span>关键字：</span>
+            <div class="layui-inline">
+                <input type="text" class="form-control" name="keyword"  value="{:input('request.keyword/s','')}" placeholder="关键字">
+            </div>
+        </div>
+        <div style="margin-left: 10px">
+            <span>分类：</span>
+            <div class="layui-inline">
+                <select name="first_cate" lay-search >
+                    <option value = "0" class="form-control">全部</option>
+                    <foreach name="cate_list" item="item">
+                        <option value = "{$item.id}" class="form-control" <if condition="$item.id == input('request.first_cate')">selected</if>>{$item.cate_name}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+
+        <div style="margin-left: 10px">
+            <input type="submit" class="btn btn-primary" value="搜索" />
+            <a class="btn btn-danger" href="{:url('index')}">清空</a>
+        </div>
+    </form>
+
+
+    <form class="js-ajax-form margin-top-20" action="{:url('Goods/listOrder')}" method="post">
+        <button class="btn btn-sm btn-primary js-ajax-submit" type="submit">{:lang('SORT')}</button>
+        <button class="btn btn-success btn-sm js-ajax-submit" type="submit"
+                data-action="{:url('Goods/upManyGoods',array('yes'=>1))}" data-subcheck="true">上架
+        </button>
+        <button class="btn btn-warning btn-sm js-ajax-submit" type="submit"
+                data-action="{:url('Goods/upManyGoods',array('yes'=>2))}" data-subcheck="true">下架
+        </button>
+        <button class="btn btn-danger btn-sm js-ajax-submit" type="submit"
+                data-action="{:url('Goods/deleteManyGoods')}" data-subcheck="true" data-msg="确定删除吗">删除
+        </button>
+        <table class="table table-hover table-bordered margin-top-20">
+            <thead>
+            <tr>
+                <th width="15">
+                    <input type="checkbox" class="js-check-all" data-direction="x" data-checklist="js-check-x">
+                </th>
+                <th width="50">{:lang('SORT')}</th>
+                <th width="50">ID</th>
+                <th>商家</th>
+                <th width="60">封面</th>
+
+                <th>商品名称</th>
+                <th>分类</th>
+                <th>价格</th>
+                <th>库存</th>
+                <th>销量</th>
+                <th width="80">上架</th>
+                <th width="80">推荐</th>
+                <th width="150">{:lang('ACTIONS')}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <foreach name="list" item="vo">
+                <tr>
+                    <td>
+                        <input type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x" name="ids[]" value="{$vo.id}" title="ID:{$vo.id}">
+                    </td>
+                    <td>
+                        <input name="list_orders[{$vo.id}]" class="input-order form-control" type="text" value="{$vo.list_order}">
+                    </td>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.shop_info.shop_name}</td>
+                    <td>
+                        <notempty name="vo.thumb">
+                            <img height="50" style="border-radius: 5%" src="{:cmf_get_asset_url($vo.thumb)}" onclick="parent.imagePreviewDialog(this.src);"/>
+                        </notempty>
+                    </td>
+
+                    <td>{$vo.goods_name}</td>
+                    <td>{$vo.cate_name}</td>
+                    <td>{$vo.price}</td>
+                    <td>{$vo.stock}</td>
+                    <td>{$vo.sell_count}</td>
+                    <td>
+                        <div class="layui-form" style="margin-bottom: 8px">
+                            <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="status" name="status" value="{$vo.id}" <if condition="$vo.status == 1">checked</if>>
+                        </div>
+                    </td>
+                    <td>
+                         <div class="layui-form" style="margin-bottom: 8px">
+                            <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="is_recommend" name="is_recommend" value="{$vo.id}" <if condition="$vo.is_recommend == 1">checked</if>>
+                         </div>
+                    </td>
+                    <td>
+                        <if condition="$vo.user_id && $vo.check_status == 1">
+                            <a class="layui-btn layui-btn-xs btn-success" onclick='check("{$vo.id}")'>审核</a>
+                        </if>
+
+                        <a class="btn btn-xs btn-primary" href="javascript:parent.openIframeLayer('{:url('add',array('goods_id'=>$vo['id']))}','{$vo.goods_name}',{area:['80%','80%']});">编辑</a>
+                        <a class="btn btn-xs btn-danger js-ajax-delete" href="{:url('delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
+                    </td>
+                </tr>
+            </foreach>
+
+            </tbody>
+        </table>
+    </form>
+    <div class="pagination">{$page}</div>
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['layer', 'form', 'slider'], function () {
+        var layer = layui.layer, form = layui.form;
+        form.on('switch(status)', function(data){
+            setStatus(data.value,'status',this.checked ? 1 : 2)
+        });
+
+
+        form.on('switch(is_recommend)', function(data){
+            setStatus(data.value,'is_recommend',this.checked ? 1 : 0)
+        });
+
+        function setStatus(id,field,status){
+            $.ajax({
+                url:'/admin/goods/setGoods',
+                type:"POST",
+                data: {id:id,field:field,status:status},
+                success: function(res) {
+                    if(res.code === 1){
+                        layer.msg(res.msg, {icon:1});
+                    }else{
+                        layer.msg(res.msg, {icon: 7});
+                    }
+                }
+            });
+        }
+    });
+</script>
+<script>
+    function check(id) {
+        layer.confirm('确认审核通过？', {
+            btn: ['通过', '拒绝'] //按钮
+        }, function () {
+            doCheck(id, 1)
+        }, function () {
+            layer.prompt({title: '请说明拒绝原因', formType: 2}, function (text, index) {
+                doCheck(id, 2, text);
+            });
+        });
+    }
+
+
+    function doCheck(id, status, text) {
+        $.ajax({
+            url: "{:url('fix_status')}",
+            type: "POST",
+            data: {id: id, status: status, text: text},
+            success: function (res) {
+                if (res.code == 1) {
+                    layer.msg(res.msg, {icon: 1});
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+
+                } else {
+                    layer.msg(res.msg, {icon: 7});
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+<script type="text/html" id="photos-item-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <input class="form-control" id="photo-{id}-name" type="text" name="photo_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('cityFee')}">同城配送费</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('cityFee')}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>同城配送费:</label>
+            <div class="col-md-5 col-sm-10">
+                <div class="layui-form-item">
+                    <!--   <label class="layui-form-label">选项</label>-->
+                    <div class="layui-input-inline" id="last">
+
+                        <!-- 循环列出数据 -->
+                        <foreach name="option_list" item="vo">
+                            <div class="layui-form-item" style="display: flex">
+                                <div class="layui-input-inline">
+                                    <input type="text" name="start[]" lay-verify="required" value="{$vo.start|default=''}" class="form-control">
+
+                                </div>
+
+                                <div class="layui-input-inline">
+                                    <input type="text" name="end[]" lay-verify="required" value="{$vo.end|default=''}" class="form-control">
+
+                                </div>
+
+                                <div class="layui-input-inline">
+                                    <input type="number" name="price[]" lay-verify="required" value="{$vo.price|default=''}" class="form-control">
+
+                                </div>
+
+                                <div class="layui-input-block" style="margin-left: 80px">
+                                    <button type="button" class="layui-btn layui-btn-danger layui-btn-sm removeclass"><i class="layui-icon">&#xe67e;</i></button>
+                                </div>
+                            </div>
+                        </foreach>
+                        <div class="layui-form-item" style="display: flex">
+                               <div class="layui-input-inline">
+                                   <input type="text" name="start[]" placeholder="请输入起点" autocomplete="off" class="form-control">
+                               </div>
+                               <div class="layui-input-inline">
+                                   <input type="text" name="end[]" placeholder="请输入终点" autocomplete="off" class="form-control">
+                               </div>
+                                <div class="layui-input-inline">
+                                    <input type="number" name="price[]" placeholder="请输入价格" class="form-control">
+                                </div>
+
+                              <div class="layui-input-block" style="margin-left: 80px">
+                                  <button id="add" type="button" class="layui-btn layui-btn-warm layui-btn-sm">
+                                      <i class="layui-icon">&#xe654;</i>
+                                  </button>
+                              </div>
+                          </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    layui.use(['element', 'jquery', 'layer', 'form', 'laydate'], function () {
+        var form = layui.form
+                , element = layui.element
+                , laydate = layui.laydate
+                , $ = layui.$;
+
+        //动态添加input输入框
+        var x = 0;
+        $("#add").click(function () {
+
+            var this_craft = this.value;
+
+            var str =  '<div class="layui-form-item" style="display: flex">' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="start[]" placeholder="请输入起点" autocomplete="off" class="form-control">' +
+                    '</div>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="end[]" placeholder="请输入终点" autocomplete="off" class="form-control">' +
+                    '</div>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="number" name="price[]" placeholder="请输入价格" autocomplete="off" class="form-control">' +
+                    '</div>' +
+
+                    '<div class="layui-input-block" style="margin-left: 80px">' +
+                    '<button type="button" class="layui-btn layui-btn-danger layui-btn-sm removeclass"> <i class="layui-icon">&#xe67e;</i> </button>' +
+                    '</div>' +
+                    '</div>' ;
+
+            $("#last").append(str);
+            x++;
+            form.render('select');
+        });
+
+        //删除动态添加的input输入框
+        $("body").on('click', ".removeclass", function () {
+            //元素移除前校验是否被引用
+            var approvalName = $(this).parent().prev('div.layui-input-inline').children().val();
+            var parentEle = $(this).parent().parent();
+            parentEle.remove();
+        });
+
+    })
+
+</script>
+<style>
+    .layui-input-inline input {
+        width:190px;
+    }
+    .layui-input-inline .layui-unselect {
+        width:190px;
+    }
+    .craft-parent {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: 200px !important;
+        width: 930px;
+    }
+    .craft-item {
+        flex: 0 0 16%;
+        margin-bottom: 10px;
+    }
+</style>
+</body>
+</html>
