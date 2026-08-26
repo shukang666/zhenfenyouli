@@ -111,7 +111,7 @@ class ForumController extends ToolController
 
             //小区名称
             $item['community_name'] = CommunityModel::where('id', $item['subject_community_id'])->value('name');
-            if ($item['type'] == 3 && empty($item['community_name'])) {
+            if (empty($item['community_name'])) {
                 $item['community_name'] = CommunityModel::where('id', $item['community_id'])->value('name');
             }
 
