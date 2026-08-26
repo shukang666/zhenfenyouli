@@ -37,7 +37,8 @@ class ForumController extends ToolController
             $where[] = ['b.id', '=', trim($param['id'])];
         }
         if (!empty($param['name'])) {
-            $where[] = ['b.nickname|b.mobile', 'like', '%' . trim($param['name']) . '%'];
+            // 列表“用户”列显示为 (ID)昵称，用户可能按 ID 或昵称搜索，故同时匹配 b.id
+            $where[] = ['b.nickname|b.mobile|b.id', 'like', '%' . trim($param['name']) . '%'];
         }
         if (!empty($param['type'])) {
             $where[] = ['a.type', '=', trim($param['type'])];
