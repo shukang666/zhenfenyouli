@@ -46,7 +46,13 @@ class MemberController extends ToolController
         if (!empty($param['type'])) {
             $map[] = ['a.type', '=', $param['type']];
         }
-
+        if (!empty($param['id'])) {
+            $map[] = ['a.id', '=', $param['id']];
+        }
+        $start_time = $this->request->param('start_time', '', 'trim');
+        $end_time = $this->request->param('end_time', '', 'trim');
+        if ($start_time) $map[] = ['a.create_time', '>=', strtotime($start_time)];
+        if ($end_time) $map[] = ['a.create_time', '<=', strtotime($end_time) + 86399];
 
         // 验证排序字段
         if (!in_array($sortField, ['id', 'point', 'create_time'])) {
@@ -123,6 +129,13 @@ class MemberController extends ToolController
         if(!empty($params['type'])){
             $map[] = ['a.type','=',$params['type']];
         }
+        if(!empty($params['id'])){
+            $map[] = ['a.id','=',$params['id']];
+        }
+        $start_time = $this->request->param('start_time','','trim');
+        $end_time = $this->request->param('end_time','','trim');
+        if($start_time) $map[] = ['a.create_time','>=',strtotime($start_time)];
+        if($end_time) $map[] = ['a.create_time','<=',strtotime($end_time)+86399];
 
         // 验证排序字段，与 index 保持一致
         if (!in_array($sortField, ['id', 'point', 'create_time'])) {
