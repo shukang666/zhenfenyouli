@@ -41,6 +41,26 @@
         </div>
         </if>
 
+        <if condition="$params.type == 11113">
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>分类:</label>
+                <div class="col-md-6 col-sm-10">
+                    <select name="community_cate_id" class="form-control">
+                        <foreach name="community_cate_list" item="vo">
+                            <notempty name="item.community_cate_id">
+                                <option value="{$vo.id}"
+                                <if condition="$item.community_cate_id == $vo.id">selected</if>
+                                >{$vo.name}</option>
+                                <else/>
+                                <option value="{$vo.id}">{$vo.name}</option>
+                            </notempty>
+
+                        </foreach>
+                    </select>
+                </div>
+            </div>
+        </if>
+
 
 
         <div class="form-group">
@@ -72,27 +92,170 @@
 
         </div>
 
-        <div class="form-group">
-            <label class="col-sm-2 control-label"><span class="form-required">*</span>日期:</label>
-            <div class="col-md-2 col-sm-10">
-                <input type="date" class="form-control" name="date"
-                       value="{$item.date|default=''}" required>
+        <if condition="$params.type == 1">
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>报名日期:</label>
+                <div class="col-md-2 col-sm-10">
+                    <input type="date" class="form-control" name="date"
+                           value="{$item.date|default=''}" required>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label"><span class="form-required">*</span>时间类型:</label>
-            <div class="col-md-6 col-sm-10">
-                <input type="text" class="form-control" name="day_type"
-                       value="{$item.day_type|default=''}" required>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>报名所需积分:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="point" value="{$item.point|default=''}" required>
+                </div>
             </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label"><span class="form-required">*</span>地区范围:</label>
-            <div class="col-md-6 col-sm-10">
-                <input type="text" class="form-control" name="area_range"
-                       value="{$item.area_range|default=''}" required>
+
+            <div class="form-group" hidden>
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>分享积分:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="share_point" value="{$item.share_point|default=''}" required>
+                    <span>分享给其他用户后返利的积分</span>
+                </div>
             </div>
-        </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>是否需要打卡:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="checkbox" lay-skin="switch" class="form-control" lay-filter="is_clock" name="is_clock" value="1" <if condition="!empty($item.is_clock) && $item.is_clock==1">checked</if> lay-text="是|否">
+                </div>
+            </div>
+
+            <div class="form-group clock show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>活动开始时间:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="date" class="form-control" name="clock_start_time" required <if condition="!empty($item.clock_start_time)"> value="{:date('Y-m-d',$item.clock_start_time)}" </if> >
+                </div>
+            </div>
+
+            <div class="form-group clock show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>活动结束时间:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="date" class="form-control" name="clock_end_time" required <if condition="!empty($item.clock_end_time)"> value="{:date('Y-m-d',$item.clock_end_time)}" </if> >
+                </div>
+            </div>
+
+            <div class="form-group clock show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>赠送积分:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="send_point" required <if condition="!empty($item.send_point)"> value="{$item.send_point}" </if> >
+                    <span>每次打卡成功会额外赠送积分</span>
+                </div>
+            </div>
+
+            <div class="form-group clock show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>可报名身份:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="checkbox" class="form-control" name="role[]" value="1" title="居民" <if condition="!empty($item.role) && in_array(1,$item.role)">checked</if> >
+                    <input type="checkbox" class="form-control" name="role[]" value="2" title="环保达人" <if condition="!empty($item.role) && in_array(2,$item.role)">checked</if> >
+                    <input type="checkbox" class="form-control" name="role[]" value="3" title="督导员" <if condition="!empty($item.role) && in_array(3,$item.role)">checked</if> >
+                    <input type="checkbox" class="form-control" name="role[]" value="4" title="商户" <if condition="!empty($item.role) && in_array(4,$item.role)">checked</if> >
+                </div>
+            </div>
+
+            <div class="form-group clock show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>签到天数:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="sign_day" value="{$item.sign_day|default=''}" required>
+                </div>
+            </div>
+
+            <div class="form-group clock show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>是否开启徽章:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="checkbox" lay-skin="switch" class="form-control" lay-filter="is_badge" name="is_badge" value="1" <if condition="!empty($item.is_badge) && $item.is_badge==1">checked</if> lay-text="是|否">
+                    <span>连续签到达到指定天数时赠送徽章</span>
+                </div>
+            </div>
+
+            <div class="form-group badge1 show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>徽章名称:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control" name="badge_name" value="{$item.badge_name|default=''}" required>
+                </div>
+            </div>
+
+            <div class="form-group badge1 show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>徽章图:</label>
+                <div class="col-md-6 col-sm-10">
+                    <php>  $badge_image='badge_image';</php>
+                    <input type="hidden" name="{$badge_image}" id="{$badge_image}" value="{$item[$badge_image]|default=''}">
+                    <a href="javascript:uploadOneImage('图片上传','#{$badge_image}');">
+                        <if condition="empty($item[$badge_image])">
+                            <img src="__TMPL__/public/assets/images/default-thumbnail.png"
+                                 id="{$badge_image}-preview"
+                                 width="135" style="cursor: pointer"/>
+                            <else/>
+                            <img src="{:cmf_get_image_preview_url($item[$badge_image])}"
+                                 id="{$badge_image}-preview"
+                                 width="135" style="cursor: pointer"/>
+                        </if>
+                    </a>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>联系方式:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="phone" value="{$item.phone|default=''}" required>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>地址</label>
+
+                <div class="col-md-6 col-sm-10">
+                    <div style="display: flex;">
+                        <input type="text" class="form-control" name="address" id="address" placeholder="请输入详细地址"
+                               required value="{$item.address??''}" onblur="searchAddress()">
+
+                        <a class="btn btn-primary" href="javascript:;" style="margin-left: 10px;" onclick="searchAddress()">搜索</a>
+
+                    </div>
+                    <div id="container" style="margin-top:10px;width:600px;height:300px;"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>经纬度</label>
+                <input type="hidden" value="{$item.lng??''}" name="lng" id="lng">
+                <input type="hidden" value="{$item.lat??''}" name="lat" id="lat">
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control" id="lnglat" placeholder="" readonly required
+                           value="{$item.lng??''},{$item.lat??''}">
+                </div>
+            </div>
+
+            <else>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="form-required">*</span>日期:</label>
+                    <div class="col-md-2 col-sm-10">
+                        <input type="date" class="form-control" name="date"
+                               value="{$item.date|default=''}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="form-required">*</span>时间类型:</label>
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" name="day_type"
+                               value="{$item.day_type|default=''}" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="form-required">*</span>地区范围:</label>
+                    <div class="col-md-6 col-sm-10">
+                        <input type="text" class="form-control" name="area_range"
+                               value="{$item.area_range|default=''}" required>
+                    </div>
+                </div>
+
+        </if>
 
         <div class="form-group">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>详情:</label>
@@ -109,6 +272,97 @@
 
 </div>
 <script src="__STATIC__/js/admin.js"></script>
+<script src="https://map.qq.com/api/gljs?v=1.exp&key=OAOBZ-6XBL7-3AYXG-PV54X-PUZI6-7KFTR"></script>
+<script>
+    //定义地图中心点坐标
+
+    var already_lat = $("#lat").val();
+    var already_lon = $("#lng").val();
+
+    if (already_lat == '') {
+        already_lat = 39.916706;
+        already_lon = 116.403119;
+    }
+    var center = new TMap.LatLng(already_lat, already_lon);
+    //定义map变量，调用 TMap.Map() 构造函数创建地图
+    var map = new TMap.Map(document.getElementById('container'), {
+        center: center,//设置地图中心点坐标
+        zoom: 17, //设置地图缩放级别
+        viewMode: '3D'
+    });
+    let markerLayer = new TMap.MultiMarker({
+        id: 'marker-layer',
+        map: map
+    });
+    var clickHandler = function (evt) {
+        var lat = evt.latLng.getLat().toFixed(6);
+        var lng = evt.latLng.getLng().toFixed(6);
+        $("#lnglat").val(lng + "," + lat);
+        removeMarker("search_res");
+        addMarker(new TMap.LatLng(lat, lng), "search_res");
+
+        let url = "{:url('tool/reverse_address')}";
+        $.get(url, {lnglat: lat + "," + lng}, function (res) {
+            //debugger;
+            res = JSON.parse(res);
+            if (res.status == 0) {
+                $("#address").val(res.result.formatted_addresses.recommend);
+            }
+        });
+    };
+    map.on("click", clickHandler);
+
+    function addMarker(latLng, id) {
+        markerLayer.add({
+            id: id,
+            position: latLng
+        });
+        let lng = latLng.lng;
+        let lat = latLng.lat;
+
+
+        map.setCenter(new TMap.LatLng(lat, lng)); // 坐标为天安门
+    }
+
+    //移除marker事件
+    function removeMarker(id) {
+        markerLayer.remove(id)
+    }
+
+    function searchAddress() {
+        var province = $(".province option:selected").text();
+        var city = $(".city option:selected").text();
+        var district = $(".district option:selected").text();
+
+        if (province == '省份') {
+            layer.msg('请选择地区');
+            return;
+        }
+        if (city == '请选择' || district == '请选择') {
+            layer.msg('请选择地区');
+            return;
+        }
+
+        let address = $("#address").val();
+        var full_address = province + city + district + address;
+        let url = "{:url('tool/search_address')}";
+        $.get(url, {address: full_address}, function (res) {
+            res = JSON.parse(res);
+            if (res.status == 0) {
+                let location = res.result.location;
+                $("#lnglat").val(location.lng + "," + location.lat);
+                $("#lng").val(location.lng);
+                $("#lat").val(location.lat);
+                removeMarker("search_res");
+                addMarker(new TMap.LatLng(location.lat, location.lng), "search_res");
+
+            } else {
+                layer.msg(res.message);
+            }
+        });
+    }
+
+</script>
 <script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
 <script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
 <script type="text/javascript">
@@ -121,6 +375,52 @@
         } catch (err) {
         }
 
+    });
+</script>
+<script>
+    var is_clock = '{$item.is_clock|default=0}';
+    var is_badge = '{$item.is_badge|default=0}';
+
+    $('.show_hidden').hide();
+    if(is_clock == 1){
+        $('.clock').show();
+    }
+    if(is_badge == 1){
+        $('.badge1').show();
+    }
+
+</script>
+<script>
+    layui.use(['form'], function(){
+        var form = layui.form;
+
+        // 监听switch开关
+        form.on('switch(is_clock)', function(data){
+            // data.elem 当前DOM元素
+            // data.elem.checked true=开启，false=关闭
+            var status = data.elem.checked ? 1 : 0;
+            // console.log('徽章开关状态：', status);
+
+            if(status == 1){
+                $('.clock').show();
+            }else{
+                $('.clock').hide();
+            }
+        });
+
+        // 监听switch开关
+        form.on('switch(is_badge)', function(data){
+            // data.elem 当前DOM元素
+            // data.elem.checked true=开启，false=关闭
+            var status = data.elem.checked ? 1 : 0;
+            // console.log('徽章开关状态：', status);
+
+            if(status == 1){
+                $('.badge1').show();
+            }else{
+                $('.badge1').hide();
+            }
+        });
     });
 </script>
 </body>

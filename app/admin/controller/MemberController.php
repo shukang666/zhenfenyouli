@@ -6,6 +6,7 @@ use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\course\CourseUserModel;
 use app\admin\model\member\CommunityModel;
+use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberModel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use think\App;
@@ -56,6 +57,7 @@ class MemberController extends ToolController
                 ->field('a.*')
                 ->where($map)->order($sortField, $sortOrder)->paginate(10);
         foreach ($list as $item) {
+            $item['community_parent_name']=CommunityParentModel::where('id',$item['community_parent_id'])->value('name','');
             $item['community_name']=CommunityModel::where('id',$item['community_id'])->value('name','');
         }
         $list->appends($params);
@@ -104,44 +106,26 @@ class MemberController extends ToolController
     }
 
     public function outData(){
-        $params = $this->request->param();
         $keyword = $this->request->param('keyword','','trim');
-        $sortField = $this->request->param('sort_field','id','trim');
-        $sortOrder = $this->request->param('sort_order','desc','trim');
-
         $map = [];
-        $map[] = ['a.status','>',0];
+        $map[] = ['a.status','<>',0];
         if(!empty($keyword)){
-            $map[] = ['a.nickname|a.mobile','like',"%".$keyword."%"];
+            $map[] = ['a.nickname|a.mobile|a.true_name|a.sn','like',"%".$keyword."%"];
         }
-        if(!empty($params['community_id'])){
-            $map[] = ['a.community_id','=',$params['community_id']];
-        }
-        if(!empty($params['type'])){
-            $map[] = ['a.type','=',$params['type']];
-        }
-
-        // 验证排序字段，与 index 保持一致
-        if (!in_array($sortField, ['id', 'point', 'create_time'])) {
-            $sortField = 'id';
-        }
-        $list_order = 'a.' . $sortField . ' ' . $sortOrder;
-
         $Model = new MemberModel();
-        $list = $Model->getInfo($map, -1, 0, 'a.*', $list_order);
+        $list = $Model->getInfo($map,-1);
 
         foreach($list as &$item){
             $item['create_time'] = date('Y-m-d H:i:s',$item['create_time']);
-            $item['community_name'] = CommunityModel::where('id',$item['community_id'])->value('name','');
         }
 
+        $CommonModel = new CommonModel();
+
         $filename = '用户列表'.date('Y-m-d');
-        $head = ['用户ID','昵称','小区','手机号','积分','注册日期'];//设置表头
-        $keys = ['id','nickname','community_name','mobile','point','create_time'];//设置表头
-        // 注意：CommonModel::outData 是静态方法，必须用 :: 调用。
-        // 不可使用 $obj->outData() 这种实例调用方式，否则 ThinkPHP Model 的 __call 魔术方法
-        // 会把 outData 转发到查询构造器 $this->db()->outData()，进而对 cmf_common_model 表发起查询导致报错。
-        CommonModel::outData($filename,$list,$head,$keys);
+        $head = ['用户ID','昵称','手机号','积分','注册日期'];//设置表头
+        $keys = ['id','nickname','mobile','point','create_time'];//设置表头
+        $CommonModel->outData($filename,$list,$head,$keys);
+        $CommonModel->outData();
     }
 
 
@@ -240,6 +224,11 @@ class MemberController extends ToolController
         }
 
 
+    }
+
+    public function pdf()
+    {
+        return $this->fetch();
     }
 
 }

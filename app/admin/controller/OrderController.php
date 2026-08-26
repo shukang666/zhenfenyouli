@@ -36,6 +36,7 @@ class OrderController extends AdminBaseController
      */
     public function index($pay_type = '',$delivery_type = '', $order_num = '', $goods_name = '', $username = '', $phone = '', $status = '', $start_time = '', $end_time = '')
     {
+        $params = $this->request->param();
         $Model = new ShopOrderModel();
         $map = [];
         $map[] = ['a.delete_time', '=', 0];
@@ -60,6 +61,11 @@ class OrderController extends AdminBaseController
 
         if ($start_time) $map[] = ['a.create_time', '>=', strtotime($start_time)];
         if ($end_time) $map[] = ['a.create_time', '<=', strtotime($end_time) + 86399];
+
+
+        if(!empty($params['is_export'])){
+            return $this->export($map);
+        }
 
         $list = $Model->getInfo($map);
 
@@ -220,6 +226,9 @@ class OrderController extends AdminBaseController
                     AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point_pay'], ['order_num' => $order_num]);
                 }
 
+                //退回已抵扣积分
+                if($order_info['point'] > 0) AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $order_num]);
+
                 $data_i['status'] = 16;
                 $res = $order_info->save($data_i);
                 ShopOrderModel::setSellCountOrStock('stock_inc', $order_num);
@@ -256,6 +265,10 @@ class OrderController extends AdminBaseController
                     $UserCouponModel->where(['id' => $order_info['coupon_id']])->save(['used' => 0]);
                 }
             }
+
+            //退回已抵扣积分
+            if($order_info['point'] > 0) AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $order_num]);
+
             ShopOrderModel::setSellCountOrStock('stock_inc', $order_num);
             ShopOrderModel::setSellCountOrStock('sell_count_dec', $order_num);
             $order_info->save(['status' => 24, 'return_price_time' => time()]);
@@ -493,5 +506,120 @@ class OrderController extends AdminBaseController
         $id = $this->request->param('id');
         ShopOrderModel::where('id', $id)->update(['delete_time' => time()]);
         $this->success('删除成功');
+    }
+
+    //导出
+    public function export($map){
+        //不限制时间
+        set_time_limit(0);
+        //设置文件大小
+        ini_set('memory_limit','18000M');
+
+        $Model = new ShopOrderModel();
+
+        $list = $Model->getInfo($map,'a.*','0');
+
+        $cellName = ['订单号', '下单用户', '商品信息', '优惠券', '实付款', '状态', '上传时间'];
+
+
+        #导出内容组合
+        foreach ($list as $kk => $v) {
+            $data[$kk + 1]['order_num'] = ' ' . $v['order_num'];
+            $data[$kk + 1]['user_info'] = $v['nickname'] . '，' . $v['mobile'];
+
+            $goods = [];
+            foreach ($v['goods_list'] as $item) {
+                $goods[] = $item['goods_name'] . '，单价：' . $item['one_price'] . '，数量:' . $item['count'];
+            }
+            $data[$kk + 1]['goods_price'] = $v['goods_price'];
+            $data[$kk + 1]['goods_price'] = $v['goods_count'];
+            $data[$kk + 1]['coupon_price'] = $v['coupon_price'];
+            $data[$kk + 1]['price'] = $v['price'];
+            $data[$kk + 1]['status_name'] = $v['status_name'];
+            $data[$kk + 1]['create_time'] = date('Y-m-d H:i:s', $v['create_time']);
+
+            $data[$kk + 1]['goods'] = $goods;
+            $data[$kk + 1]['address'] = $v['user_address'] ?? '' . '，' . $v['username'] ?? '' . '，' . $v['phone'] ?? '';
+            $data[$kk + 1]['remark'] = $v['remark'];
+
+        }
+
+
+        $title = '订单列表';
+        //引入核心文件
+        $objPHPExcel = new \PHPExcel();
+        //定义配置
+        $topNumber = 2;//表头有几行占用
+        $xlsTitle = iconv('utf-8', 'gb2312', $title);//文件名称
+        $fileName = $title . date('_YmdHis');//文件名称
+        $cellKey = array(
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM',
+            'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ'
+        );
+
+        $objPHPExcel->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);//所有单元格（列）默认宽度
+
+        //垂直居中
+        $objPHPExcel->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        //处理表头标题
+        $objPHPExcel->getActiveSheet()->mergeCells('A1:' . $cellKey[count($cellName) - 1] . '1');//合并单元格（如果要拆分单元格是需要先合并再拆分的，否则程序会报错）
+        $objPHPExcel->setActiveSheetIndex(0)->setCellValue('A1', $title);
+        $objPHPExcel->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A1')->getFont()->setSize(18);
+        $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);
+
+        //处理表头
+        foreach ($cellName as $k => $v) {
+            $objPHPExcel->setActiveSheetIndex(0)->setCellValue($cellKey[$k] . $topNumber, $v);//设置表头数据
+        }
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(80);
+
+        //处理数据
+        $start = $topNumber + 1;
+        $j = $topNumber + 1;
+        foreach ($data as $k => $v) {
+            //            $j = $start;
+            foreach ($v['goods'] as $k1 => $v1) {
+                if ($k1 == 0) {
+                    //计算初步当前单元格标识，以及 需要合并的单元格标识 A B C D E F G M
+                    $end = $start + count($v['goods']) - 1;
+                    $objPHPExcel->getActiveSheet()->mergeCells("A" . $start . ':' . "A" . $end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("B" . $start . ':' . "B" . $end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("C" . $start . ':' . "C" . $end);
+                    //                    $objPHPExcel->getActiveSheet()->mergeCells("D".$start.':'."D".$end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("E" . $start . ':' . "E" . $end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("F" . $start . ':' . "F" . $end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("G" . $start . ':' . "G" . $end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("H" . $start . ':' . "H" . $end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("I" . $start . ':' . "I" . $end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("J" . $start . ':' . "J" . $end);
+
+                    $objPHPExcel->getActiveSheet()->setCellValue("A" . $start, $v['order_num']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("B" . $start, $v['user_info']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("D" . $start, $v['coupon_price']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("E" . $start, $v['price']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("F" . $start, $v['status_name']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("G" . $start, $v['create_time']);
+                }
+                $objPHPExcel->getActiveSheet()->setCellValue("C" . $j, $v1);
+                $j++;
+            }
+
+            $start += count($v['goods']);
+        }
+
+        //导出execl
+        ob_end_clean();//防止乱码
+        header('pragma:public');
+        header('Content-type:application/vnd.ms-excel;charset=utf-8;name="' . $xlsTitle . '.xlsx"');
+        header("Content-Disposition:attachment;filename=$fileName.xlsx");//attachment新窗口打印inline本窗口打印
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        $objWriter->save('php://output');
+        exit;
     }
 }

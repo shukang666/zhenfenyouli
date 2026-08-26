@@ -114,7 +114,7 @@
 
         <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 25px"/>
         <a class="btn btn-danger" href="{:url('index',['type'=>$params.type])}">清空</a>
-        <if condition="$params.type==2">
+        <if condition="$params.type==2 || $params.type==3">
             <input type="hidden" class="export" name="export" value="0">
             <a class="btn btn-success ajax-export" href="javascript:;">导出</a>
         </if>
@@ -152,7 +152,18 @@
                     <th>垃圾分类</th>
                 </if>
 
-                <th>图片</th>
+
+                <if condition="$params.type==3">
+                    <th>点位照片</th>
+                    <th>投放指南</th>
+                    <th>垃圾桶照片</th>
+
+                    <else>
+
+                        <th>图片</th>
+                </if>
+
+
                 <!--                <th>支付凭证</th>-->
                 <if condition="$is_handle">
                     <th>状态</th>
@@ -201,16 +212,46 @@
                         <td>{$vo.cate_name}</td>
                     </if>
 
-                    <td>
-                        <if condition="!empty($vo['image'])">
-                            <foreach name="vo['image']" item="item">
-                                <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($item)}');">
-                                    <img src="{:cmf_get_image_preview_url($item)}"
+                    <if condition="$params.type==3">
+                        <td>
+                            <notempty name="$vo.image_one">
+                                <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image_one)}');">
+                                    <img src="{:cmf_get_image_preview_url($vo.image_one)}"
                                          style="width:40px;height:40px;round-clip: 40px">
                                 </a>
-                            </foreach>
-                        </if>
-                    </td>
+                            </notempty>
+                        </td>
+                        <td>
+                            <notempty name="$vo.image_two">
+                                <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image_two)}');">
+                                    <img src="{:cmf_get_image_preview_url($vo.image_two)}"
+                                         style="width:40px;height:40px;round-clip: 40px">
+                                </a>
+                            </notempty>
+                        </td>
+                        <td>
+                            <notempty name="$vo.image_three">
+                                <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image_three)}');">
+                                    <img src="{:cmf_get_image_preview_url($vo.image_three)}"
+                                         style="width:40px;height:40px;round-clip: 40px">
+                                </a>
+                            </notempty>
+                        </td>
+
+                        <else>
+
+
+                            <td>
+                                <if condition="!empty($vo['image'])">
+                                    <foreach name="vo['image']" item="item">
+                                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($item)}');">
+                                            <img src="{:cmf_get_image_preview_url($item)}"
+                                                 style="width:40px;height:40px;round-clip: 40px">
+                                        </a>
+                                    </foreach>
+                                </if>
+                            </td>
+                    </if>
 
 
                     <!--                    <td>-->

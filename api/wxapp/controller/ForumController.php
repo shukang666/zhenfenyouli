@@ -17,6 +17,7 @@ use app\admin\model\forum\ForumMsgLogModel;
 use app\admin\model\forum\ForumMsgUserModel;
 use app\admin\model\member\CommunityCateModel;
 use app\admin\model\member\CommunityModel;
+use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberLevelModel;
 use app\admin\model\member\MemberModel;
 use think\facade\Db;
@@ -55,6 +56,9 @@ class ForumController extends AuthController
      *@OA\Parameter(name="title",description="标题",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Parameter(name="content",description="内容",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Parameter(name="image",description="多图 传数组",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="image_one",description="点位照片",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="image_two",description="投放指南",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="image_three",description="垃圾桶照片",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Response(response="200", description="An example resource"),
      *@OA\Response(response="default", description="An example resource")
      * )
@@ -62,8 +66,10 @@ class ForumController extends AuthController
     public function add_forum(ForumModel $forumModel, ForumCateModel $forumCateModel)
     {
         $this->checkUser();
+        $setting = cmf_get_option('set_config');
         $params = $this->request->param();
         $type = $this->request->param('type', 1);
+        $cate_id = $this->request->param('cate_id');
 //        if (empty($params['content'])) $this->error('内容不能为空');
         if (empty($type)) $this->error('类型不能为空');
         if ($type == 2 && empty($this->user_info['community_id'])) $this->error('请完善小区');
@@ -73,11 +79,37 @@ class ForumController extends AuthController
 //            $this->error('含有违规内容，请重新发布');
 //        }
 
+        $params['community_id'] = $this->user_info['subject_community_id'];
+
         if (!empty($params['image'])) {
             $params['image'] = json_encode($params['image']);
         }
         if (empty($params['id'])) {
             $params['user_id'] = $this->user_id;
+
+            if($type == 3){
+
+                $cate_info = CommunityCateModel::where('id',$cate_id)->find();
+                if(empty($cate_info)) $this->error('点位不能为空');
+
+
+                $map = [];
+                $map[] = ['type', '=', $type];
+                $map[] = ['user_id', '=', $this->user_id];
+                $map[] = ['cate_id', '=', $cate_id];
+                $handle_info = $forumModel->where($map)->order('id desc')->find();
+                if(!empty($handle_info)){
+                    if($handle_info['create_time'] > strtotime('-'.$cate_info['inspection_hour'].'hour')){
+                        $remaining_seconds = $handle_info['create_time'] - strtotime('-'.$cate_info['inspection_hour'].'hour');
+                        $this->error('当前还不可打卡',['remaining_seconds' => $remaining_seconds]);
+                    }
+                }
+
+                $point = $cate_info['inspection_point'];
+                AccountLogModel::add_account_log($this->user_id, 2, 222, $point, []);
+            }elseif($type == 2){
+                if(empty($params['image'])) $this->error('图片不能为空');
+            }
 
             $forumModel->save($params);
             $id = $forumModel->id;
@@ -113,7 +145,19 @@ class ForumController extends AuthController
             $forumModel->update($params, ['id' => $params['id']]);
         }
 
-        $this->success('发布成功！');
+        //当前还不是环保达人
+        if($this->user_info['is_environmental'] == 0 && $type == 2){
+            //判断是否连续天数达标
+            $array = ForumModel::where(['type' => $type, 'user_id' => $this->user_id])->column('create_time');
+            $clock_count = $this->getMaxContinueSignDays($array);
+            if($clock_count >= $setting['continuous_check']){
+                MemberModel::where('id', $this->user_id)->update(['is_environmental' => 1]);
+            }
+        }
+
+        $data = [];
+        $data['point'] = $point ?? 0;
+        $this->success('发布成功！', $data);
     }
 
     /**
@@ -169,7 +213,7 @@ class ForumController extends AuthController
         $cate_child_id = $this->request->param('cate_child_id');
         $type = $this->request->param('type', 1);
         $is_my = $this->request->param('is_my', 0);
-        $status = $this->request->param('status', 1);
+        $status = $this->request->param('status');
         $keyword = $this->request->param('keyword');
         $where = [];
         if (empty($id)) {
@@ -179,7 +223,7 @@ class ForumController extends AuthController
 //            $where[] = ['delete_time', '=', 0];
 //            $where[] = ['a.status', '=', 2];
             if ($type == 3 || $type == 4) {
-                $where[] = ['user_id', '<>', $this->user_id];
+                if (empty($is_my)) $where[] = ['user_id', '<>', $this->user_id];
                 if ($this->user_info['type'] == 1) {
                     $where[] = ['b.community_id', '=', $this->user_info['community_id']];
                 }
@@ -191,13 +235,14 @@ class ForumController extends AuthController
             if (!empty($type)) $where[] = ['a.type', '=', $type];
             if (!empty($keyword)) $where[] = ['a.content|a.title', 'like', "%$keyword%"];
 
+//            $this->error('测试',$where);
             $list = $forumModel
                 ->alias('a')
                 ->join('member b', 'a.user_id=b.id')
                 ->where($where)
                 ->order('a.id desc')
                 ->field('a.id,title,a.type,image,a.status,a.create_time,user_id,nickname,
-                avatar,view_num,cate_id,content,like_total,a.point,b.community_id')
+                avatar,view_num,cate_id,content,like_total,a.point,b.community_id,a.image_one,a.image_two,a.image_three')
                 ->paginate($this->page_size)->each(function ($item) use ($memberModel, $forumCateModel, $forumModel, $handleModel, $communityModel, $communityCateModel) {
                     $item['is_like'] = ForumLikeModel::where('rid', $item['id'])
                         ->where('user_id', $this->user_id)->where('type', 1)->count();
@@ -224,7 +269,7 @@ class ForumController extends AuthController
                         }
 
                     }
-                    return CommonModel::getOne($item, ['thumb', 'avatar'], ['image']);
+                    return CommonModel::getOne($item, ['thumb', 'avatar', 'image_one', 'image_two', 'image_three'], ['image']);
                 });
 
             $this->success('请求成功', $list);
@@ -237,7 +282,7 @@ class ForumController extends AuthController
 //            $item['status_name'] = $forumModel->get_status()[$item['status']];
             $item['community_name'] = $communityModel->where('id', $item['community_id'])->value('name');
             $item['cate_name'] = $forumCateModel->where('id', $item['cate_id'])->value('name');
-            $item = CommonModel::getOne($item, ['thumb', 'avatar'], ['image']);
+            $item = CommonModel::getOne($item, ['thumb', 'avatar', 'image_one', 'image_two', 'image_three'], ['image']);
             $item['is_like'] = ForumLikeModel::where('rid', $item['id'])
                 ->where('user_id', $this->user_id)->where('type', 1)->count();
             $item['comment_total'] = ForumCommentModel::where('info_id', $item['id'])->count();
@@ -506,18 +551,39 @@ class ForumController extends AuthController
 
 
     /**
+     *社区列表
+     * @OA\Post(
+     *tags={"小区"},
+     *path="/wxapp/forum/get_community_parent_list",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_community_parent_list(CommunityParentModel $communityModel)
+    {
+        $list = $communityModel->field('id,name')->order('id desc')->select();
+        $this->success('成功', $list);
+    }
+
+
+    /**
      *小区列表
      * @OA\Post(
      *tags={"小区"},
      *path="/wxapp/forum/get_community_list",
      *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="pid",description="父级id",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Response(response="200", description="An example resource"),
      *@OA\Response(response="default", description="An example resource")
      * )
      */
     public function get_community_list(CommunityModel $communityModel)
     {
-        $list = $communityModel->field('id,name')->order('list_order asc')->select();
+        $pid = $this->request->param('pid');
+        $where = [];
+        if(!empty($pid)) $where[] = ['pid', '=', $pid];
+        $list = $communityModel->field('id,name')->where($where)->order('list_order asc')->select();
 //        foreach ($list as &$item) {
 //            $item['county_name'] = CommonModel::getAreaName($item['county']);
 //            $item = CommonModel::getOne($item, ['thumb']);
@@ -560,6 +626,9 @@ class ForumController extends AuthController
      *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Parameter(name="forum_id",description="帖子ID",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Parameter(name="image",description="多图传数组",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="image_one",description="点位照片",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="image_two",description="投放指南",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="image_three",description="垃圾桶照片",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Parameter(name="content",description="内容",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Response(response="200", description="An example resource"),
      *@OA\Response(response="default", description="An example resource")
@@ -569,12 +638,30 @@ class ForumController extends AuthController
     {
 
         $this->checkUser();
+        $setting = cmf_get_option('set_config');
         $params = $this->request->param();
+        $forum_id = $params['forum_id'];
+        $map = [];
+        $map[] = ['forum_id', '=', $forum_id];
+        $map[] = ['user_id', '=', $this->user_id];
+        $handle_info = $handleModel->where($map)->order('id desc')->find();
+        if(!empty($handle_info)){
+            if($handle_info['create_time'] > strtotime('-'.$setting['inspection_hour'].'hour')){
+                $remaining_seconds = $handle_info['create_time'] - strtotime('-'.$setting['inspection_hour'].'hour');
+                $this->error('当前还不可打卡',['remaining_seconds' => $remaining_seconds]);
+            }
+        }
+
+
         $forum = $forumModel->find($params['forum_id']);
         if (!$forum) $this->error('帖子不存在');
         $params['user_id'] = $this->user_id;
         if (!empty($params['image'])) $params['image'] = json_encode($params['image']);
-        $handleModel->save($params);
+        $result = $handleModel->save($params);
+        if($result){
+            $point = $setting['inspection_point'];
+            AccountLogModel::add_account_log($this->user_id, 2, 222, $point, ['forum_id' => $forum_id]);
+        }
         $forum->save(['status' => 2]);
         $this->success('提交成功');
     }
@@ -631,4 +718,51 @@ class ForumController extends AuthController
     }
 
 
+
+    /**
+     * 获取一组打卡时间戳中 最长连续打卡天数
+     * @param array $timeStampArr 打卡时间戳数组
+     * @return int 最长连续天数
+     */
+    function getMaxContinueSignDays(array $timeStampArr): int
+    {
+        // 无打卡数据直接返回0
+        if (empty($timeStampArr)) {
+            return 0;
+        }
+
+        // 1、全部转为当天0点时间戳
+        $dayTsArr = array_map(function ($ts) {
+            return strtotime(date('Y-m-d', $ts));
+        }, $timeStampArr);
+
+        // 2、去重：同一天多次打卡只保留1条
+        $uniqueDayTs = array_unique($dayTsArr);
+        // 3、升序排序
+        sort($uniqueDayTs);
+
+        $oneDaySecond = 86400; // 一天总秒数
+        $maxDays = 1;    // 最大连续天数，最少1天
+        $currentDays = 1;// 当前连续计数
+        $prevTs = $uniqueDayTs[0];
+
+        foreach ($uniqueDayTs as $ts) {
+            // 跳过第一条自身
+            if ($ts === $prevTs) {
+                continue;
+            }
+            // 和前一天刚好差一整天 = 连续
+            if (($ts - $prevTs) === $oneDaySecond) {
+                $currentDays++;
+                // 更新最大值
+                $maxDays = max($maxDays, $currentDays);
+            } else {
+                // 断签，重置当前连续计数
+                $currentDays = 1;
+            }
+            $prevTs = $ts;
+        }
+
+        return $maxDays;
+    }
 }

@@ -26,9 +26,14 @@
                 <!--            <th>ID</th>-->
                 <th width="50">排序</th>
                 <th>名称</th>
+                <if condition="$params.type == 1">   <th>赠送积分</th> </if>
                 <th>启用</th>
+                <if condition="$params.type == 3 || $params.type == 1">
+                    <th>推荐</th>
+                </if>
                 <if condition="$params.type == 1">   <th>首页展示</th> </if>
                 <th>添加时间</th>
+                <th>小程序码</th>
 
                 <th width="200">{:lang('ACTIONS')}</th>
             </tr>
@@ -41,6 +46,13 @@
                     </td>
                     <!--                <td>{$vo.id}</td>-->
                     <td>{$vo.name}</td>
+                    <if condition="$params.type == 1">
+                        <td>
+                            <if condition="$vo.is_clock == 1">
+                                {$vo.send_point}
+                            </if>
+                        </td>
+                    </if>
 
                     <td>
                         <div class="layui-form">
@@ -50,6 +62,13 @@
                             >
                         </div>
                     </td>
+                    <if condition="$params.type == 3 || $params.type == 1">
+                        <td>
+                            <div class="layui-form">
+                                <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="is_recommendation" name="is_recommendation" value="{$vo.id}" <if condition="$vo.is_recommendation == 1">checked</if> >
+                            </div>
+                        </td>
+                    </if>
                     <if condition="$params.type == 1">
                         <td>
                             <div class="layui-form">
@@ -62,6 +81,13 @@
                         </td>
                     </if>
                     <td>{$vo.create_time |date="Y-m-d H:i:s"}</td>
+                    <td>
+                        <if condition="!empty($vo['qr_code'])">
+                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.qr_code)}');">
+                                <img src="{:cmf_get_image_preview_url($vo.qr_code)}" style="height:40px;">
+                            </a>
+                        </if>
+                    </td>
                     <td>
 
                         <a class="btn btn-xs btn-primary"
@@ -89,6 +115,14 @@
         //发布不发布
         form.on('switch(is_top)', function (data) {
             setStatus(data.value, 'is_top', this.checked ? 1 : 0)
+        });
+        //推荐不推荐
+        form.on('switch(is_recommendation)', function (data) {
+            setStatus(data.value, 'is_recommendation', this.checked ? 1 : 0)
+        });
+        //展示不展示
+        form.on('switch(is_put)', function (data) {
+            setStatus(data.value, 'is_put', this.checked ? 1 : 0)
         });
 
         function setStatus(id, type, status) {

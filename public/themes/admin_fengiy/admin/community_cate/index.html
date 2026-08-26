@@ -34,6 +34,8 @@
             <!--                                                 data-checklist="js-check-x"></label></th>-->
             <th>ID</th>
             <th>名称</th>
+            <th>打卡奖励（积分）</th>
+            <th>打卡间隔</th>
 
             <th width="200">{:lang('ACTIONS')}</th>
         </tr>
@@ -43,6 +45,8 @@
             <tr>
                 <td>{$vo.id}</td>
                 <td>{$vo.name}</td>
+                <td>{$vo.inspection_point}</td>
+                <td>{$vo.inspection_hour}小时</td>
 
                 <td>
                     <a class="btn btn-xs btn-primary"

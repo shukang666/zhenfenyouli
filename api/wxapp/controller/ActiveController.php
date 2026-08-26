@@ -2,10 +2,15 @@
 
 namespace api\wxapp\controller;
 
+use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\active\ActiveCateModel;
+use app\admin\model\active\ActiveClockModel;
+use app\admin\model\active\ActiveCommunityCateModel;
 use app\admin\model\active\ActiveModel;
+use app\admin\model\active\ActiveSIgnModel;
 use app\admin\model\active\ActiveUserModel;
+use app\admin\model\active\MemberBadgeModel;
 use app\admin\model\active\WasteCateModel;
 use app\admin\model\active\WasteModel;
 use app\admin\model\active\WasteUserModel;
@@ -54,6 +59,7 @@ class ActiveController extends AuthController
         } else {
             $where = [];
 //            if ($type) $where[] = ['type', '=', $type];
+            $where[] = ['status', '=', 1];
             $list = $activeCateModel->where($where)
                 ->order('list_order asc')
                 ->paginate($this->page_size);
@@ -91,6 +97,7 @@ class ActiveController extends AuthController
             $this->success('请求成功', $item);
         }
         $where = [];
+        $where[] = ['type', '<>', 1];
         if ($type) $where[] = ['type', '=', $type];
         if ($cate_id) $where[] = ['cate_id', '=', $cate_id];
         if ($is_put) $where[] = ['is_put', '=', 1];
@@ -286,6 +293,445 @@ class ActiveController extends AuthController
         }
     }
 
+    /**
+     * 活动分类列表
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_new_cate_active_list",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_new_cate_active_list(){
+        $where = [];
+        $where[] = ['status', '=', 1];
+        $list = ActiveCateModel::where($where)->order('list_order asc,id desc')->select()->each(function ($item){
+            $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
+            $item['image'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
+            return $item;
+        });
+        $this->success('请求成功', $list);
+    }
 
+    /**
+     * 活动列表
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_new_active_list",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="community_cate_id",description="社区活动分类id",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="is_recommendation",description="是否推荐，1；是",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="is_put",description="1:首页推荐",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="keyword",description="关键词",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_new_active_list(){
+        $page_size = $this->request->param('page_size', 10);
+        $community_cate_id = $this->request->param('community_cate_id');
+        $is_recommendation = $this->request->param('is_recommendation');
+        $keyword = $this->request->param('keyword');
+        $is_put = $this->request->param('is_put');
+        $where = [];
+        $where[] = ['type', '=', 1];
+        if(!empty($community_cate_id)) $where[] = ['cate_id', '=', $community_cate_id];
+        if(!empty($is_recommendation)) $where[] = ['is_recommendation', '=', 1];
+        if(!empty($is_put)) $where[] = ['is_put', '=', 1];
+        if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
+        $list = ActiveModel::where($where)->order('list_order asc,id desc')->paginate($page_size)->each(function ($item){
+            $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
+            $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
+            $item['content'] = htmlspecialchars_decode($item['content']);
+
+            //参与人数
+            $active_count = ActiveSIgnModel::where('active_id', $item['id'])->count();
+            $item['active_count'] = $active_count;
+            $avatar_array = ActiveSIgnModel::alias('a')
+                ->join('member b','a.user_id=b.id')
+                ->where('a.active_id', $item['id'])->limit(5)->column('b.avatar');
+            foreach($avatar_array as &$value){
+                $value = empty($value)?'':cmf_get_asset_url($value);
+            }
+            $item['avatar_array'] = $avatar_array;
+
+            //是否报名
+            $sign_info = ActiveSIgnModel::where('active_id', $item['id'])->where('user_id', $this->user_id)->find();
+            $item['sign_id'] = empty($sign_info)?0:$sign_info['id'];
+            $item['is_sign'] = empty($sign_info)?0:1;
+
+
+            $date_time = strtotime(date('Y-m-d 00:00:00'));
+            //是否打卡
+            $where = [];
+            $where[] = ['active_id', '=', $item['id']];
+            $where[] = ['user_id', '=', $this->user_id];
+            $where[] = ['sign_id', '=', $item['sign_id'] ];
+            $where[] = ['date_time', '=', $date_time];
+            $clock_info = ActiveClockModel::where($where)->find();
+            $item['is_sign_clock'] = empty($clock_info)?0:1;
+
+//            $item['sign_id'] = empty($sign_info)?'':$sign_info['id'];
+
+            //是否已结束
+            $item['is_end'] = 0;
+            if($item['date'] < time()){
+                $item['is_end'] = 1;
+            }
+            return $item;
+        });
+        $this->success('请求成功', $list);
+    }
+
+    /**
+     * 活动详情
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_new_active_detail",
+     *@OA\Parameter(name="active_id",description="活动id",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_new_active_detail(){
+        $active_id = $this->request->param('active_id');
+        $item = ActiveModel::where('id',$active_id)->find();
+        if(empty($item)) $this->error('活动不存在');
+        $item['role'] = explode(',',$item['role']);
+        $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
+        $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
+        $item['content'] = htmlspecialchars_decode($item['content']);
+
+        //是否报名
+        $where = [];
+        $where[] = ['active_id', '=', $item['id']];
+        $where[] = ['user_id', '=', $this->user_id];
+        $sign_info = ActiveSIgnModel::where($where)->find();
+        $item['sign_id'] = empty($sign_info)?0:$sign_info['id'];
+        $item['is_sign'] = empty($sign_info)?0:1;
+
+        $date_time = strtotime(date('Y-m-d 00:00:00'));
+        //是否打卡
+        $where = [];
+        $where[] = ['active_id', '=', $item['id']];
+        $where[] = ['user_id', '=', $this->user_id];
+        $where[] = ['sign_id', '=', $item['sign_id'] ];
+        $where[] = ['date_time', '=', $date_time];
+        $clock_info = ActiveClockModel::where($where)->find();
+        $item['is_sign_clock'] = empty($clock_info)?0:1;
+
+//        $item['sign_id'] = $sign_info['id'];
+
+        //是否已结束
+        $item['is_end'] = 0;
+        if($item['date'] < time()){
+            $item['is_end'] = 1;
+        }
+        $this->success('请求成功', $item);
+    }
+
+    /**
+     * 活动签到排行榜
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_new_active_ranking",
+     *@OA\Parameter(name="active_id",description="活动id",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_new_active_ranking(){
+        $active_id = $this->request->param('active_id');
+        $item = ActiveModel::where('id',$active_id)->find();
+        if(empty($item)) $this->error('活动不存在');
+        $where = [];
+        $where[] = ['active_id', '=', $active_id];
+        $list = ActiveSIgnModel::where($where)->select()->each(function ($item){
+            $item['qr_code'] = empty($item['qr_code'])?'':cmf_get_asset_url($item['qr_code']);
+            //签到数量
+            $map = [];
+            $map[] = ['user_id', '=', $item['user_id']];
+            $map[] = ['active_id', '=', $item['active_id']];
+            $map[] = ['sign_id', '=', $item['id']];
+            $clock_count = ActiveClockModel::where($map)->count();
+            $item['clock_count'] = $clock_count;
+            //用户信息
+            $member_info = MemberModel::where('id',$item['user_id'])->find();
+            $item['member_info'] = $member_info;
+            return $item;
+        })->toArray();
+        $count = ActiveSIgnModel::where($where)->count();
+
+        for($i = 0; $i < $count; $i++){
+            for($j = $i + 1; $j < $count - 1; $j++){
+                if($list[$i]['clock_count'] < $list[$j]['clock_count']){
+                    $array = $list[$i];
+                    $list[$i] = $list[$j];
+                    $list[$j] = $array;
+                }
+            }
+        }
+
+        $this->success('请求成功', $list);
+    }
+
+    /**
+     * 活动报名
+     * @OA\Post (
+     *tags={"新版活动"},
+     *path="/wxapp/active/post_new_active_sign",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="active_id",description="活动id",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function post_new_active_sign(){
+        $this->checkUser();
+        $active_id = $this->request->param('active_id');
+        $item = ActiveModel::where('id',$active_id)->find();
+        if(empty($item)) $this->error('活动不存在');
+        if($item['date'] < time()) $this->error('活动已结束');
+        $role = explode(',',$item['role']);
+        //是否具备报名条件
+        if($item['is_clock'] == 1){
+            $is_sign = 0;
+            foreach($role as $k=>$v){
+                if($v == 1) $is_sign = 1;
+                elseif($v == 2){
+                    if($this->user_info['is_environmental'] == 1) $is_sign = 1;
+                }elseif($v == 3){
+                    if($this->user_info['is_supervisor'] == 1) $is_sign = 1;
+                }elseif($v == 4){
+                    if($this->user_info['is_merchant'] == 1) $is_sign = 1;
+                }
+            }
+            if($is_sign == 0) $this->error('您不具备报名条件');
+        }
+
+        $data = [];
+        $data['user_id'] = $this->user_id;
+        $data['active_id'] = $active_id;
+        $sign_info = ActiveSIgnModel::where($data)->find();
+        if(!empty($sign_info)) $this->error('已报名');
+
+        $point = $item['point'];
+        if($point > 0){
+            if($this->user_info['point'] < $point) $this->error('积分不足');
+
+            AccountLogModel::add_account_log($this->user_id, 2, 221, -$point, ['active_id' => $active_id]);
+        }
+        $type = 1;
+        if($item['is_clock'] == 1) $type = 2;
+
+        $start_time = $item['clock_start_time'];
+        $end_time = $item['clock_end_time'];
+
+        $data['type'] = $type;
+        $data['start_time'] = $start_time;
+        $data['end_time'] = $end_time;
+        $result = ActiveSIgnModel::create($data);
+        if(!empty($result)){
+            //增加二维码
+            $text = (string)$result['id'];
+            $qrcode = CommonModel::createQrcode($text, $text.'.png');
+            ActiveSIgnModel::where('id',$result['id'])->update(['qr_code' => $qrcode]);
+        }
+
+        $this->success('报名成功');
+    }
+
+    /**
+     * 报名列表
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_new_sign_list",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_new_sign_list(){
+        $this->checkUser();
+        $page_size = $this->request->param('page_size', 10);
+        $where = [];
+        $where[] = ['user_id', '=', $this->user_id];
+        $list = ActiveSIgnModel::where($where)->order('id desc')->paginate($page_size)->each(function ($item){
+            $item['qr_code'] = empty($item['qr_code'])?'':cmf_get_asset_url($item['qr_code']);
+
+            $active_info = ActiveModel::where('id',$item['active_id'])->find();
+            if(!empty($active_info)){
+                $active_info['thumb'] = empty($active_info['thumb'])?'':cmf_get_asset_url($active_info['thumb']);
+                $active_info['badge_image'] = empty($active_info['badge_image'])?'':cmf_get_asset_url($active_info['badge_image']);
+                $active_info['content'] = htmlspecialchars_decode($active_info['content']);
+            }
+            $item['active_info'] = $active_info;
+            return $item;
+        });
+        $this->success('请求成功', $list);
+    }
+
+    /**
+     * 报名详情
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_new_sign_detail",
+     *@OA\Parameter(name="sign_id",description="报名记录id",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_new_sign_detail(){
+        $sign_id = $this->request->param('sign_id');
+        $item = ActiveSIgnModel::where('id',$sign_id)->find();
+        if(empty($item)) $this->error('报名记录不存在');
+        $item['qr_code'] = empty($item['qr_code'])?'':cmf_get_asset_url($item['qr_code']);
+
+        $active_info = ActiveModel::where('id',$item['active_id'])->find();
+        if(!empty($active_info)){
+            $active_info['thumb'] = empty($active_info['thumb'])?'':cmf_get_asset_url($active_info['thumb']);
+            $active_info['badge_image'] = empty($active_info['badge_image'])?'':cmf_get_asset_url($active_info['badge_image']);
+            $active_info['content'] = htmlspecialchars_decode($active_info['content']);
+        }
+        $item['active_info'] = $active_info;
+        $this->success('请求成功', $item);
+    }
+
+    /**
+     * 报名打卡
+     * @OA\Post (
+     *tags={"新版活动"},
+     *path="/wxapp/active/post_new_sign_clock",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="sign_id",description="报名记录id",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="image_url",description="上传图",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function post_new_sign_clock(){
+        $sign_id = $this->request->param('sign_id');
+        $image_url = $this->request->param('image_url');
+        $item = ActiveSIgnModel::where('id',$sign_id)->find();
+        if(empty($item)) $this->error('报名记录不存在');
+        if(empty($image_url)) $this->error('照片不能为空');
+        if($item['start_time'] > time()) $this->error('打卡时间未到');
+        if($item['end_time'] < time()) $this->error('打卡时间已过');
+        $active_id = $item['active_id'];
+        $active_info = ActiveModel::where('id',$active_id)->find();
+        if(empty($active_info)) $this->error('活动不存在');
+        $date_time = strtotime(date('Y-m-d 00:00:00'));
+        $send_point = $active_info['send_point'];
+
+        $data = [];
+        $data['user_id'] = $this->user_id;
+        $data['active_id'] = $active_id;
+        $data['sign_id'] = $sign_id;
+        $data['date_time'] = $date_time;
+        $clock_info = ActiveClockModel::where($data)->find();
+        $data['image_url'] = $image_url;
+        $data['send_point'] = $send_point;
+        if(empty($clock_info)){
+            ActiveClockModel::create($data);
+        }else{
+            $this->error('已打卡');
+        }
+        if($active_info['is_badge'] == 1){
+            //计算连续打卡次数
+            $where = [];
+            $where['user_id'] = $this->user_id;
+            $where['active_id'] = $active_id;
+            $where['sign_id'] = $sign_id;
+            $timeStampArr = ActiveClockModel::where($where)->column('date_time');
+            $clock_count = $this->getMaxContinueSignDays($timeStampArr);
+            //当前徽章是否存在，已存在就跳过
+            $map = [];
+            $map['user_id'] = $this->user_id;
+            $map['badge_id'] = $active_id;
+            $badge_info = MemberBadgeModel::where($map)->find();
+            if($clock_count >= $active_info['sign_day'] && empty($badge_info)){
+                $map['name'] = $active_info['badge_name'];
+                $map['image'] = $active_info['badge_image'];
+                MemberBadgeModel::create($map);
+            }
+        }
+
+        if($active_info['is_clock'] == 1){
+            //赠送积分
+            AccountLogModel::add_account_log($this->user_id, 2, 225, $send_point, ['remark' => '垃圾打卡扣除']);
+        }
+
+
+
+        $this->success('请求成功');
+    }
+
+    /**
+     * 我的徽章列表
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_new_badge_list",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_new_badge_list(){
+        $this->checkUser();
+        $list = MemberBadgeModel::where('user_id',$this->user_id)->order('id desc')->select()->each(function ($item){
+            $item['image'] = empty($item['image'])?'':cmf_get_asset_url($item['image']);
+            return $item;
+        });
+        $this->success('请求成功', $list);
+    }
+
+
+    /**
+     * 获取一组打卡时间戳中 最长连续打卡天数
+     * @param array $timeStampArr 打卡时间戳数组
+     * @return int 最长连续天数
+     */
+    function getMaxContinueSignDays(array $timeStampArr): int
+    {
+        // 无打卡数据直接返回0
+        if (empty($timeStampArr)) {
+            return 0;
+        }
+
+        // 1、全部转为当天0点时间戳
+        $dayTsArr = array_map(function ($ts) {
+            return strtotime(date('Y-m-d', $ts));
+        }, $timeStampArr);
+
+        // 2、去重：同一天多次打卡只保留1条
+        $uniqueDayTs = array_unique($dayTsArr);
+        // 3、升序排序
+        sort($uniqueDayTs);
+
+        $oneDaySecond = 86400; // 一天总秒数
+        $maxDays = 1;    // 最大连续天数，最少1天
+        $currentDays = 1;// 当前连续计数
+        $prevTs = $uniqueDayTs[0];
+
+        foreach ($uniqueDayTs as $ts) {
+            // 跳过第一条自身
+            if ($ts === $prevTs) {
+                continue;
+            }
+            // 和前一天刚好差一整天 = 连续
+            if (($ts - $prevTs) === $oneDaySecond) {
+                $currentDays++;
+                // 更新最大值
+                $maxDays = max($maxDays, $currentDays);
+            } else {
+                // 断签，重置当前连续计数
+                $currentDays = 1;
+            }
+            $prevTs = $ts;
+        }
+
+        return $maxDays;
+    }
 
 }
