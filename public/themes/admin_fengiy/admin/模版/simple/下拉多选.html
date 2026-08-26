@@ -1,0 +1,243 @@
+<include file="public@header"/>
+<!-- 多图上传引入开始-->
+<script type="text/html" id="photos-item-tpl">
+    <li  id="saved-image{id}" style="cursor:pointer;margin-bottom: 5px;margin-right: 10px;">
+        <input id="photo-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <input class="form-control" id="photo-{id}-name" type="hidden" name="photo_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">
+        <img id="photo-{id}-preview" src="{url}" style="height:80px;width: 80px;" >
+        <div>
+            <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+            <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+        </div>
+    </li>
+</script>
+<script type="text/javascript" src="__TMPL__/public/assets/js/xm-select/dist/xm-select.js"></script>
+<!-- 多图上传引入结束-->
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">列表</a></li>
+        <li class="active"><a href="{:url('add')}">添加</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('add')}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>分类:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="type" class="form-control" lay-search>
+                    <foreach name="type_list" item="vo" key="key">
+                        <option value = "{$key}">{$vo}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>项目名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="project_name" value="" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>编号:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="sn" value="" required>
+            </div>
+        </div>
+
+
+
+    <!--    <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>部门:</label>
+            <div class="col-md-6 col-sm-10" style="z-index: 7777;">
+                <select name="depart_id" class="form-control" lay-search>
+                    <foreach name="depart_list" item="vo">
+                        <option value = "{$vo.id}">{$vo.cate_name}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>-->
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>部门:</label>
+            <div class="col-md-6 col-sm-10">
+                <foreach name="depart_list" item="vo">
+                    <input type="checkbox" name="depart_id[]" title="{$vo.cate_name}" value="{$vo.id}" lay-filter="depart_id">
+                </foreach>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>时间:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="date" class="form-control" name="project_time" value="" required>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>项目负责人:</label>
+            <div class="col-md-6 col-sm-10" style="z-index: 9999 !important;">
+                <div id="charge_uid"></div>
+                <input type="hidden" name="charge_uid" value="" id="select_charge_uid">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>团队负责人:</label>
+            <div class="col-md-6 col-sm-10" style="z-index: 8888 !important;">
+                <div id="team_uid"></div>
+                <input type="hidden" name="team_uid" value="" id="select_team_uid">
+            </div>
+        </div>
+
+
+      <!--  <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>项目负责人:</label>
+            <div class="col-md-6 col-sm-10">
+                <foreach name="staff_list" item="vo">
+                    <input type="checkbox" name="charge_uid[]" title="{$vo.true_name}" value="{$vo.id}">
+                </foreach>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>团队负责人:</label>
+            <div class="col-md-6 col-sm-10">
+                <foreach name="staff_list" item="vo">
+                    <input type="checkbox" name="team_uid[]" title="{$vo.true_name}" value="{$vo.id}">
+                </foreach>
+            </div>
+        </div>-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>方案定制人:</label>
+            <div class="col-md-6 col-sm-10" style="z-index: 6666">
+                <select name="create_uid" class="form-control" lay-search>
+                    <foreach name="staff_list" item="vo">
+                        <option value = "{$vo.id}">{$vo.true_name}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>项目详情:</label>
+            <div class="col-md-6 col-sm-10">
+                <script type="text/plain" id="content" name="content"></script>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("ADD")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript">
+    //编辑器路径定义
+    var editorURL = GV.WEB_ROOT;
+</script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+    });
+
+    getSelectData('')
+
+    var charge_uid = xmSelect.render({
+        el: '#charge_uid',
+        language: 'zn',
+        data: [],
+        on: function(data){
+            //arr:  当前多选已选中的数据
+            var arr = data.arr;
+            var select_charge_uid = [];
+            if(arr){
+                arr.forEach(function(item,index){
+                    select_charge_uid.push(item.value)
+                });
+            }
+            if(select_charge_uid){
+                $('#select_charge_uid').val( select_charge_uid.join(','))
+            }
+        },
+    })
+
+    var team_uid = xmSelect.render({
+        el: '#team_uid',
+        language: 'zn',
+        data: [],
+        on: function(data){
+            //arr:  当前多选已选中的数据
+            var arr = data.arr;
+            var select_team_uid = [];
+            if(arr){
+                arr.forEach(function(item,index){
+                    select_team_uid.push(item.value)
+                });
+            }
+            if(select_team_uid){
+                $('#select_team_uid').val( select_team_uid.join(','))
+            }
+        },
+    })
+
+    layui.use(['layer', 'form'], function(){
+        var layer = layui.layer,form = layui.form;
+        form.on('checkbox(depart_id)', function(data){
+            console.log(22222)
+            var chk_value =[];//定义一个数组
+            $('input[name="depart_id[]"]:checked').each(function(){
+                chk_value.push($(this).val());
+            });
+            var selectId = chk_value.join(",");
+            getSelectData(selectId)
+        });
+    });
+
+    function getSelectData(depart_id){
+        var domain = "{$domain}"
+        $.ajax({
+            url:domain+'/api/wxapp/basic/getStaffByDepart',
+            type:"POST",
+            data: {depart_id:depart_id},
+            success: function(res) {
+                charge_uid.update({
+                    data: res.data,
+                    autoRow: true,
+                })
+                team_uid.update({
+                    data: res.data,
+                    autoRow: true,
+                })
+            }
+        });
+    }
+
+</script>
+
+<style>
+    .layui-form-checkbox i{
+        height: 30px;
+    }
+    .layui-form-checkbox{
+        margin-bottom: 4px;
+    }
+</style>
+</body>
+</html>

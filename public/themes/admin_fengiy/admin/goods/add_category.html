@@ -1,0 +1,47 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('categoryList',array('parent_id'=>$parent_id))}">分类列表</a></li>
+        <li class="active"><a href="{:url('addCategory',array('parent_id'=>$parent_id))}">添加分类</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('addCategory')}">
+
+        <input type="hidden" class="form-control" name="parent_id" value="{$parent_id}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>分类名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="cate_name" value="">
+            </div>
+        </div>
+
+<!--        <if condition="$parent_id == 0">-->
+<!--            <div class="form-group">-->
+<!--                <label class="col-sm-2 control-label"><span class="form-required">*</span>图标:</label>-->
+<!--                <div class="col-md-6 col-sm-10">-->
+<!--                    <input type="hidden" name="thumb" id="thumb" value="{$data.thumb|default=''}">-->
+<!--                    <a href="javascript:uploadOneImage('图片上传','#thumb');">-->
+<!--                        <notempty name="data.thumb">-->
+<!--                            <img src="{:cmf_get_image_preview_url($data.thumb)}" id="thumb-preview" width="135" style="cursor: hand"/>-->
+<!--                            <else />-->
+<!--                            <img src="__TMPL__/public/assets/images/default-image.png" id="thumb-preview" width="135" style="cursor: hand"/>-->
+<!--                        </notempty>-->
+<!--                    </a>-->
+<!--                    <input type="button" class="btn btn-sm" onclick="$('#thumb-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#thumb').val('');return false;" value="取消图片">-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </if>-->
+
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("ADD")}</button>
+            <a class="btn btn-default" href="{:url('categoryList',array('parent_id'=>$parent_id))}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

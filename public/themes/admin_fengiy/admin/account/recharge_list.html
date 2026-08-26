@@ -1,0 +1,42 @@
+<include file="public@header" />
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="">用户充值记录</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('balance/rechargeList')}">
+        关键字：
+        <input type="text" class="form-control" name="keyword" style="width: 140px;" value="{:input('request.keyword/s','')}" placeholder="请输入用户昵称或ID">
+        <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 25px"/>
+        <a class="btn btn-danger" href="{:url('balance/rechargeList')}">清空</a>
+    </form>
+
+        <table class="table table-hover table-bordered margin-top-20">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>用户信息</th>
+                <th>充值金额</th>
+                <th>充值时间</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <foreach name="list" item="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.user_nickname}(用户ID：{$vo.user_id})</td>
+                    <td>{$vo.price}</td>
+                    <td>{$vo.create_time|date="Y-m-d H:i:s"}</td>
+                </tr>
+            </foreach>
+            </tbody>
+        </table>
+
+    <div class="pagination">{$page}</div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

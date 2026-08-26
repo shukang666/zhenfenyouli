@@ -1,0 +1,56 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<form method="post" class="form-horizontal js-ajax-form" action="{:url('send')}">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">收货人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$data.username}" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">联系电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$data.phone}" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">收货地址</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$data.user_address}" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">
+					<span class="form-required">*</span>快递公司
+				</label>
+				<div class="col-md-6 col-sm-10">
+					<select class="form-control" name="express_name">
+						<option value="0">请选择</option>
+						<foreach name="express_list" item="vo">
+							<option value = "{$vo.name}" <if condition="$vo.name == $data.express_name">selected="selected"</if>>{$vo.name}</option>
+						</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">
+					<span class="form-required">*</span>快递单号
+				</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="express_sn" placeholder="请输入快递/物流单号" value="{$data.express_sn|default=''}">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<input type="hidden" class="form-control" value="{$data.id}" name="id">
+					<button type="submit" class="btn btn-primary js-ajax-submit">确认</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:url('exam/index')}">答题结果</a></li>
+		</ul>
+		<form class="well form-inline margin-top-20" method="get" action="{:url('exam/index')}">
+			
+            关键字:
+            <input type="text" class="form-control" name="keyword" style="width: 220px;" value="{:input('request.keyword/s','')}" placeholder="请输入考试名称">
+            
+            <input type="submit" class="btn btn-primary" value="搜索" />
+            <a class="btn btn-danger" href="{:url('exam/index')}">清空</a>
+        </form>
+		<table class="table table-hover table-bordered margin-top-20">
+			<thead>
+				<tr>
+					<th width="50">ID</th>
+					<th>名称</th>
+					<th>开始时间</th>
+					<th>结束时间</th>
+					<th>备注</th>
+					<th width="260">{:lang('ACTIONS')}</th>
+				</tr>
+			</thead>
+			<tbody>
+				<php>
+
+				</php>
+				<foreach name="list" item="vo">
+				<tr>
+					<td>{$vo.id}</td>
+					<td>{$vo.name}</td>
+					<td>{:date("Y-m-d H:i:s",$vo['begintime'])}</td>
+					<td>{:date("Y-m-d H:i:s",$vo['endtime'])}</td>
+					<td>{$vo.remark}</td>
+					<td>
+						<a class="btn btn-xs btn-primary" href="{:url('exam/exam_result',array('id'=>$vo['id']))}">考试结果</a>
+						<a class="btn btn-xs btn-primary" href="{:url('exam/question_list',array('id'=>$vo['id']))}">题库管理</a>
+                        <a class="btn btn-xs btn-primary" href="{:url('exam/edit',array('id'=>$vo['id']))}">{:lang('EDIT')}</a>
+                        <a class="btn btn-xs btn-danger js-ajax-delete" href="{:url('exam/delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
+                    </td>
+				</tr>
+				</foreach>
+			</tbody>
+		</table>
+		<ul class="pagination">{$page|default=''}</ul>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

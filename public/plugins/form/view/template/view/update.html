@@ -1,0 +1,39 @@
+{$head}
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{$url_list}">列表</a></li>
+        <li><a href="{$url_add}">添加</a></li>
+        <li class="active" ><a>编辑</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="updatePost">
+
+        <include file="{$controllers_name}/form" />
+
+        <foreach name="fields" item="v">
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>{$v.COLUMN_COMMENT}:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="{$v.type}" class="form-control" name="{$v.COLUMN_NAME}" value="{$v.value}">
+                </div>
+            </div>
+
+        </foreach>
+
+
+
+        <!-- 主键id -->
+        <input type="hidden" name="id" value="{$id}">
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary   js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{$url_list}">返回</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

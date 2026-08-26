@@ -1,0 +1,195 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update')}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>标题:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="title"
+                       value="{$item.title|default=''}" required>
+            </div>
+        </div>
+
+
+        <!--        <div class="form-group">-->
+        <!--            <label class="col-sm-2 control-label"><span class="form-required">*</span>科目分类:</label>-->
+        <!--            <div class="col-md-6 col-sm-10">-->
+        <!--                <select name="cate_id" class="form-control">-->
+        <!--                    <foreach name="cate_list" item="vo">-->
+        <!--                        <notempty name="item.cate_id">-->
+        <!--                            <option value="{$vo.id}"-->
+        <!--                            <if condition="$item.cate_id == $vo.id">selected</if>-->
+        <!--                            >{$vo.cate_name}</option>-->
+        <!--                            <else/>-->
+        <!--                            <option value="{$vo.id}">{$vo.cate_name}</option>-->
+        <!--                        </notempty>-->
+
+        <!--                    </foreach>-->
+        <!--                </select>-->
+        <!--            </div>-->
+        <!--        </div>-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>一级分类:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="teacher_id_1" class="form-control" lay-search id="e_id" lay-filter="e_id">
+                    <foreach name="teacher_cate" item="vo">
+                        <notempty name="item.teacher_id_1">
+                            <option value="{$vo.id}"
+                            <if condition="$item.teacher_id_1 == $vo.id">selected</if>
+                            >{$vo.name}</option>
+                            <else/>
+                            <option value="{$vo.id}">{$vo.name}</option>
+                        </notempty>
+
+                    </foreach>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>二级分类:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="teacher_id_2" class="form-control" id="class" lay-search lay-filter="class">
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">图片:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="hidden" name="thumb" id="thumbnail" value="{$item.thumb|default=''}">
+                <a href="javascript:uploadOneImage('图片上传','#thumbnail');">
+                    <if condition="empty($item.thumb)">
+                        <img src="__TMPL__/public/assets/images/default-thumbnail.png"
+                             id="thumbnail-preview"
+                             width="135" style="cursor: pointer"/>
+                        <else/>
+                        <img src="{:cmf_get_image_preview_url($item.thumb)}"
+                             id="thumbnail-preview"
+                             width="135" style="cursor: pointer"/>
+                    </if>
+                </a>
+            </div>
+        </div>
+
+        <!--        <div class="form-group">-->
+        <!--            <label class="col-sm-2 control-label"><span class="form-required">*</span>价格:</label>-->
+        <!--            <div class="col-md-6 col-sm-10">-->
+        <!--                <input style="width: 212px" type="number" class="form-control" name="price"-->
+        <!--                       value="{$item.price|default=''}" required>-->
+        <!--            </div>-->
+        <!--        </div>-->
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>一级分佣比例(%)</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="number" class="form-control" name="rebate1" value="{$item.rebate1|default=''}"
+                       required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>二级分佣比例(%)</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="number" class="form-control" name="rebate2" value="{$item.rebate2|default=''}"
+                       required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"></label>
+            <div class="col-md-6 col-sm-10">
+                <span style="color: red">分佣一二级加起来不可以超过50%（不然属于传销）</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>详情:</label>
+            <div class="col-md-6 col-sm-10">
+                <script type="text/plain" id="content" name="content">{$item.content|default=''}</script>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript">
+    //编辑器路径定义
+    var editorURL = GV.WEB_ROOT;
+</script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+
+    });
+</script>
+<script>
+    layui.use(['form', 'laydate', 'util'], function () {
+        var form = layui.form;
+        var layer = layui.layer;
+
+
+        form.on('select(e_id)', function (data) {
+            getCateList(data.value);
+        })
+        getCateList($("#e_id").val());
+
+        function getCateList(pid) {
+            console.log(pid)
+            $.ajax({
+                type: 'POST',
+                url: "{:url('getCate')}",
+                data: {
+                    pid: pid,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data)
+                    var cate_list = data;
+                    var str = "<option value=''>" + "请选择" + "</option>";
+                    for (var i = 0; i < cate_list.length; i++) {
+                        if ({$item.teacher_id_2 ?? 0} == cate_list[i].id) {
+                            str += "<option value='" + cate_list[i].id + "' selected>" + cate_list[i].name + "</option>";
+                        } else {
+                            str += "<option value='" + cate_list[i].id + "'>" + cate_list[i].name + "</option>";
+                        }
+                    }
+                    $('#class').html(str);//class 渲染到班级上
+                    form.render('select');//刷新
+                }
+            });
+        }
+
+    })
+</script>
+</body>
+</html>

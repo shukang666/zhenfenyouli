@@ -1,0 +1,180 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+<script type="text/html" id="photos-item-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <!--<input class="form-control" id="photo-{id}-name" type="text" name="photo_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">-->
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="">编辑商品</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('edit')}">
+
+        <input type="hidden" class="form-control" name="id" value="{$data.id}" required>
+        <div class="form-group">
+            <div class="layui-form-item">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>分类:</label>
+                <div class="col-md-10 col-sm-10">
+                    <div class="col-md-3 col-sm-10" style="margin-left: -15px">
+                        <select class="form-control" name="first_cate" id="first_cate" lay-filter="first_cate">
+                            <option value="">暂无分类</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 col-sm-10">
+                        <select class="form-control" name="second_cate" id="second_cate">
+                            <option value="">暂无分类</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="goods_name" value="{$data.goods_name}" required>
+            </div>
+        </div>
+
+        <if condition="$data.have_sku == 0">
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>价格:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="price" value="{$data.price}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>库存:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="stock" value="{$data.stock}" required>
+                </div>
+            </div>
+        </if>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">虚拟销量:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="number" class="form-control" name="show_sell_count" value="{$data.show_sell_count}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>相册:</label>
+            <ul id="photos" class="pic-list list-unstyled form-inline" style="margin-left: 18%">
+                <notempty name="data.photos">
+                    <foreach name="data.photos" item="vo">
+                        <php>$img_url=cmf_get_image_preview_url($vo);</php>
+                        <li id="saved-image{$key}">
+                            <input id="photo-{$key}" type="hidden" name="photos[]"
+                                   value="{$vo}">
+                            <img id="photo-{$key}-preview"
+                                 src="{:cmf_get_image_preview_url($vo)}"
+                                 style="height:36px;width: 36px;"
+                                 onclick="parent.imagePreviewDialog(this.src);">
+                            <a href="javascript:uploadOneImage('图片上传','#photo-{$key}');">替换</a>
+                            <a href="javascript:(function(){$('#saved-image{$key}').remove();})();">移除</a>
+                        </li>
+                    </foreach>
+                </notempty>
+            </ul>
+            <a href="javascript:uploadMultiImage('图片上传','#photos','photos-item-tpl');"
+               class="btn btn-default btn-sm" style="margin-left: 18%">选择图片</a>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>详情:</label>
+            <div class="col-md-6 col-sm-10">
+                <script type="text/plain" id="content" name="content">{$data.content}</script>
+            </div>
+        </div>
+
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript">
+    //编辑器路径定义
+    var editorURL = GV.WEB_ROOT;
+</script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+
+    });
+</script>
+<script>
+    layui.use([ 'form', 'element' ], function() {
+        var form = layui.form, element = layui.element;
+
+
+        var first_cate = "{$data.first_cate}"
+        var second_cate = "{$data.second_cate}"
+        getCateList(0,0,$("#first_cate"),'first_cate');
+        getCateList(first_cate,0,$("#second_cate"),'second_cate');
+        form.on('select(first_cate)', function(data) {
+            first_cate = data.value;
+            getCateList(data.value,0,$("#second_cate"),'second_cate');
+        })
+
+        function getCateList(pid,shop_id,target,type){
+            $.ajax({
+                type: 'POST',
+                url: "{:url('goods/getJsonCateList')}",
+                data: {
+                    pid: pid,
+                    shop_id:shop_id
+                },
+                dataType: 'json',
+                success: function (data) {
+                    var cate_list = data.data;
+                    var str = "<option value=''>" + "选择分类" + "</option>";
+                    for (var i = 0; i < cate_list.length; i++) {
+
+                        if(type == 'first_cate'){
+                            var where = first_cate;
+                        }else{
+                            var where = second_cate;
+                        }
+                        if (where == cate_list[i].id) {
+                            str += "<option value='" + cate_list[i].id + "' selected>" + cate_list[i].cate_name + "</option>";
+                        }else{
+                            str += "<option value='" + cate_list[i].id + "'>" + cate_list[i].cate_name + "</option>";
+                        }
+                    }
+                    target.html(str);
+                    form.render('select');
+                }
+            });
+        }
+    })
+
+</script>
+</body>
+</html>

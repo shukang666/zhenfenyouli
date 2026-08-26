@@ -1,0 +1,385 @@
+<include file="public@header"/>
+<style>
+    .prop_name{
+        width:200px;
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li ><a href="{:url('exam/index',['health_id'=>$health_id])}">所有问卷</a></li>
+        <li class="active"><a href="{:url('exam/add',['health_id'=>$health_id])}">添加问卷</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('exam/addPost')}">
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">排序<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" id="input-name" name="list_order" value="{$item.list_order}" placeholder="请输入排序">
+            </div>
+        </div>
+
+        <input type="hidden" name="health_id" value="{$health_id??0}">
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">名称<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" id="input-name" name="name" value="{$item.name}" placeholder="请输入名称">
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">描述:</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="text" class="form-control" name="desc" value="{$item.desc|default=''}" >
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">多图<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <php>$field='id_card_image';</php>
+                <ul id="{$field}" class="pic-list list-unstyled form-inline">
+                    <notempty name="$item[$field]">
+                        <foreach name="$item[$field]" item="vo">
+                            <li id="{$field}-saved-image{$key}">
+                                <input id="{$field}-{$key}" type="hidden" name="{$field}[]"
+                                       value="{$vo}">
+                                <php>$img_url=cmf_get_image_preview_url($vo);</php>
+                                <img id="{$field}-{$key}-preview"
+                                     src="{:cmf_get_image_preview_url($vo)}"
+                                     style="height:34px;width: 44px;"
+                                     onclick="parent.imagePreviewDialog(this.src);">
+                                <a class="btn btn-default"  href="javascript:uploadOneImage('照片上传','#{$field}-{$key}');"><i class="fa fa-upload fa-fw"></i></a>
+                                <a class="btn btn-danger"  href="javascript:(function(){$('#{$field}-saved-image{$key}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+                                <a class="btn btn-success"  href="javascript:(function(){$('#{$field}-saved-image{$key}').before($('#{$field}-saved-image{$key}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+                            </li>
+                        </foreach>
+                    </notempty>
+                </ul>
+                <a href="javascript:uploadMultiImage('照片上传','#{$field}','{$field}-item-tpl');"
+                   class="btn btn-default">图片</a>
+            </div>
+        </div>
+        <script type="text/html" id="{$field}-item-tpl">
+            <li id="{$field}-saved-image{id}">
+                <input id="{$field}-{id}" type="hidden" name="{$field}[]" value="{filepath}">
+                <img id="{$field}-{id}-preview" src="{url}" style="height:34px;width: 44px;"
+                     onclick="imagePreviewDialog(this.src);">
+                <a class="btn btn-default" href="javascript:uploadOneImage('图片上传','#{$field}-{id}');"><i class="fa fa-upload fa-fw"></i></a>
+                <a class="btn btn-danger" href="javascript:(function(){$('#{$field}-saved-image{id}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+                <a class="btn btn-success" href="javascript:(function(){$('#{$field}-saved-image{id}').before($('#{$field}-saved-image{id}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+            </li>
+        </script>
+
+
+        <php>$item['is_exam']=$item['is_exam']??1;  </php>
+            <div class="form-group ">
+                <label class="col-sm-2 control-label">类型</label>
+                <div class="col-md-6 col-sm-10">
+                    <php>$item['is_exam']=$item['is_exam']??1;</php>
+                    <php>$active_true_checked=($item['is_exam']==1)?"checked":"";</php>
+                    <input type="radio" class="form-control" name="is_exam" value="1"  title="答题" {$active_true_checked}>
+                    <php>$active_false_checked=($item['is_exam']==2)?"checked":"";</php>
+                    <input type="radio" class="form-control" name="is_exam" value="2"  title="预约" {$active_false_checked}>
+                </div>
+            </div>
+
+            <div class="form-group ">
+                <label class="col-sm-2 control-label">是否填写具体诊疗需求</label>
+                <div class="col-md-6 col-sm-10">
+                    <php>$item['is_demand']=$item['is_demand']??1;</php>
+                    <php>$active_true_checked1=($item['is_demand']==1)?"checked":"";</php>
+                    <input type="radio" class="form-control" name="is_demand" value="1" title="是" {$active_true_checked1}>
+                    <php>$active_false_checked2=($item['is_demand']==2)?"checked":"";</php>
+                    <input type="radio" class="form-control" name="is_demand" value="2" title="否" {$active_false_checked2}>
+                </div>
+            </div>
+
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>详情:</label>
+            <div class="col-md-6 col-sm-10">
+                <script type="text/plain" id="content" name="content">{$item.content|default=''}</script>
+            </div>
+        </div>
+
+
+
+
+
+        <!--        <div class="form-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">是否开启抽奖<span class="form-required">*</span></label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <label class="radio-inline">-->
+<!--                    <input type="radio" name="is_gift" value="1" checked> 开启-->
+<!--                </label>-->
+
+<!--                <label class="radio-inline">-->
+<!--                    <input type="radio" name="is_gift" value="0" > 关闭-->
+<!--                </label>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">是否需要兑换码<span class="form-required">*</span></label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <label class="radio-inline">-->
+<!--                    <input type="radio" name="is_giftcode" value="1" > 开启-->
+<!--                </label>-->
+
+<!--                <label class="radio-inline">-->
+<!--                    <input type="radio" name="is_giftcode" value="0" checked> 关闭-->
+<!--                </label>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="form-group gift-group ">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">奖品名称<span class="form-required">*</span></label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <input type="text" class="form-control" id="input-name" name="gift_name" value="{$item.gift_name}" placeholder="请输入奖品名称">-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="form-group gift-group">-->
+<!--            <label class="col-sm-2 control-label">中奖配置:</label>-->
+<!--            <div class="col-md-5 col-sm-10">-->
+<!--                <div class="layui-form-item">-->
+<!--                    &lt;!&ndash;   <label class="layui-form-label">选项</label>&ndash;&gt;-->
+<!--                    <div class="layui-input-inline" id="last">-->
+
+<!--                        &lt;!&ndash; 循环列出数据 &ndash;&gt;-->
+
+<!--                        <div class="layui-form-item" style="display: flex">-->
+<!--                            <div class="layui-input-inline">-->
+<!--                                <input type="text" name='option[]' placeholder="题目ID" autocomplete="off" class="form-control prop_name">-->
+<!--                                <p class="text text-danger">题目ID:1</p>-->
+<!--                            </div>-->
+<!--                           <div class="layui-input-inline">-->
+<!--                                -->
+<!--                                <input type="text" name='next[]' placeholder="中奖选项序号" autocomplete="off" value=0 class="form-control prop_name">-->
+<!--                                <p class="text text-danger">中奖选项序号如:1,2</p>-->
+<!--                            </div>-->
+
+<!--                            <div class="layui-input-block" style="margin-left: 200px">-->
+<!--                                <button id="add" type="button" class="layui-btn layui-btn-warm layui-btn-sm">-->
+<!--                                    <i class="layui-icon">&#xe654;</i>-->
+<!--                                </button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">背景<span class="form-required">*</span></label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <div >-->
+<!--                    <input type="hidden" name="bg_thumb" id="bg_thumb" value="{$item.bg_thumb}">-->
+<!--                    <a href="javascript:uploadOneImage('图片上传','#bg_thumb');">-->
+<!--                        <if condition="empty($item.bg_thumb)">-->
+<!--                            <img src="__TMPL__/public/assets/images/default-thumbnail.png"-->
+<!--                                 id="bg_thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            <else/>-->
+<!--                            <img src="{:cmf_get_image_preview_url($item.bg_thumb)}"-->
+<!--                                 id="bg_thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            </if>-->
+<!--                    </a>-->
+<!--                    <input type="button" class="btn btn-sm"-->
+<!--                           onclick="$('#bg_thumb-preview').attr('src','__TMPL__/public/assets/images/default-thumbnail.png');$('#bg_thumb').val('');return false;"-->
+<!--                           value="取消图片">-->
+<!--                    <p style="color:red;">建议尺寸:750px*1624px</p>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        -->
+
+<!--        <div class="form-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">封面<span class="form-required">*</span></label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <div >-->
+<!--                    <input type="hidden" name="thumb" id="thumb" value="{$item.thumb}">-->
+<!--                    <a href="javascript:uploadOneImage('图片上传','#thumb');">-->
+<!--                        <if condition="empty($item.thumb)">-->
+<!--                            <img src="__TMPL__/public/assets/images/default-thumbnail.png"-->
+<!--                                 id="thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            <else/>-->
+<!--                            <img src="{:cmf_get_image_preview_url($item.thumb)}"-->
+<!--                                 id="thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            </if>-->
+<!--                    </a>-->
+<!--                    <input type="button" class="btn btn-sm"-->
+<!--                           onclick="$('#thumb-preview').attr('src','__TMPL__/public/assets/images/default-thumbnail.png');$('#thumb').val('');return false;"-->
+<!--                           value="取消图片">-->
+<!--                    <p style="color:red;">建议尺寸:750px*1010 必须为png格式</p>-->
+
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="form-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">抽奖<span class="form-required">*</span></label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <div >-->
+<!--                    <input type="hidden" name="chou_thumb" id="chou_thumb" value="{$item.chou_thumb}">-->
+<!--                    <a href="javascript:uploadOneImage('图片上传','#chou_thumb');">-->
+<!--                        <if condition="empty($item.chou_thumb)">-->
+<!--                            <img src="__TMPL__/public/assets/images/default-thumbnail.png"-->
+<!--                                 id="chou_thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            <else/>-->
+<!--                            <img src="{:cmf_get_image_preview_url($item.chou_thumb)}"-->
+<!--                                 id="chou_thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            </if>-->
+<!--                    </a>-->
+<!--                    <input type="button" class="btn btn-sm"-->
+<!--                           onclick="$('#chou_thumb-preview').attr('src','__TMPL__/public/assets/images/default-thumbnail.png');$('#chou_thumb').val('');return false;"-->
+<!--                           value="取消图片">-->
+<!--                    <p style="color:red;">建议尺寸:660px*890px</p>-->
+
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        -->
+<!--        <div class="form-group gift-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">中奖结果<span class="form-required">*</span></label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <div >-->
+<!--                    <input type="hidden" name="result_success_thumb" id="result_success_thumb" value="{$item.result_success_thumb}">-->
+<!--                    <a href="javascript:uploadOneImage('图片上传','#result_success_thumb');">-->
+<!--                        <if condition="empty($item.result_success_thumb)">-->
+<!--                            <img src="__TMPL__/public/assets/images/default-thumbnail.png"-->
+<!--                                 id="result_success_thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            <else/>-->
+<!--                            <img src="{:cmf_get_image_preview_url($item.result_success_thumb)}"-->
+<!--                                 id="result_success_thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            </if>-->
+<!--                    </a>-->
+<!--                    <input type="button" class="btn btn-sm"-->
+<!--                           onclick="$('#result_success_thumb-preview').attr('src','__TMPL__/public/assets/images/default-thumbnail.png');$('#result_success_thumb').val('');return false;"-->
+<!--                           value="取消图片">-->
+<!--                    <p style="color:red;">建议尺寸:554px*816px</p>-->
+
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="form-group gift-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">未中奖结果<span class="form-required">*</span></label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <div >-->
+<!--                    <input type="hidden" name="result_fail_thumb" id="result_fail_thumb" value="{$item.result_fail_thumb}">-->
+<!--                    <a href="javascript:uploadOneImage('图片上传','#result_fail_thumb');">-->
+<!--                        <if condition="empty($item.result_fail_thumb)">-->
+<!--                            <img src="__TMPL__/public/assets/images/default-thumbnail.png"-->
+<!--                                 id="result_fail_thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            <else/>-->
+<!--                            <img src="{:cmf_get_image_preview_url($item.result_fail_thumb)}"-->
+<!--                                 id="result_fail_thumb-preview"-->
+<!--                                 width="135" style="cursor: pointer"/>-->
+<!--                            </if>-->
+<!--                    </a>-->
+<!--                    <input type="button" class="btn btn-sm"-->
+<!--                           onclick="$('#result_fail_thumb-preview').attr('src','__TMPL__/public/assets/images/default-thumbnail.png');$('#result_fail_thumb').val('');return false;"-->
+<!--                           value="取消图片">-->
+<!--                    <p style="color:red;">建议尺寸:554px*816px</p>-->
+
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label for="input-name" class="col-sm-2 control-label">说明</label>-->
+<!--            <div class="col-md-6 col-sm-10">-->
+<!--                <script type="text/plain" id="content" name="remark">{$item.remark}</script>-->
+
+<!--                &lt;!&ndash; <textarea name="remark" class="form-control">{$item.remark}</textarea> &ndash;&gt;-->
+<!--            </div>-->
+<!--        </div>-->
+<!--      -->
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('ADD')}</button>
+<!--                <a class="btn btn-default" href="{:url('exam/index')}">{:lang('BACK')}</a>-->
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript" src="__STATIC__/js/admin.js"></script>
+
+<script type="text/javascript">
+    //编辑器路径定义
+    var editorURL = GV.WEB_ROOT;
+</script>
+
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+	
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+        $('input[type=radio][name=is_gift]').change(function() {
+            if (this.value == 1) {
+                $('.gift-group').show();
+            }else {
+                $('.gift-group').hide();
+            }
+        });
+
+    });
+    layui.use(['element', 'jquery', 'layer', 'form', 'laydate'], function () {
+        var form = layui.form
+                , element = layui.element
+                , laydate = layui.laydate
+                , $ = layui.$;
+
+        //动态添加input输入框
+        var x = 0;
+        $("#add").click(function () {
+
+            var this_craft = this.value;
+
+            var str =  '<div class="layui-form-item" style="display: flex">' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="option[]" placeholder="题目ID" autocomplete="off" class="form-control prop_name">' +
+                    '<p class="text text-danger">题目ID:1</p></div>' +
+                    '<div class="layui-input-inline">' +
+                    '<input type="text" name="next[]" placeholder="中奖选项序号" value=0 autocomplete="off" class="form-control prop_name">' +
+                    '<p class="text text-danger">中奖选项序号如:1,2</p>' +
+                    '</div>' +
+                    '<div class="layui-input-block" style="margin-left: 200px">' +
+                    '<button type="button" class="layui-btn layui-btn-danger layui-btn-sm removeclass"> <i class="layui-icon">&#xe67e;</i> </button>' +
+                    '</div>' +
+                    '</div>' ;
+
+            $("#last").append(str);
+            x++;
+            form.render('select');
+        });
+
+        //删除动态添加的input输入框
+        $("body").on('click', ".removeclass", function () {
+            //元素移除前校验是否被引用
+            var approvalName = $(this).parent().prev('div.layui-input-inline').children().val();
+            var parentEle = $(this).parent().parent();
+            parentEle.remove();
+        });
+
+    })
+
+</script>
+
+</body>
+</html>

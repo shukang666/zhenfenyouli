@@ -1,0 +1,41 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+
+        <foreach name="field_list" item="vo">
+            <li <if condition="$vo.field == $field_data.field">class="active"</if>><a href="{:url('fieldDataOption',array('field'=>$vo.field))}">{$vo.field_name}</a></li>
+        </foreach>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('fieldDataOption')}">
+
+        <input type="hidden" name="field" value="{$field}">
+        <if condition="$field == 'set_money'">
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>提现手续费(%):</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="withdraw_fee" value="{$data.withdraw_fee|default=''}">
+                </div>
+            </div>
+        </if>
+
+        <if condition="$field == 'set_order'">
+            <div class="form-group">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>服务佣金(%):</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="service_fee" value="{$data.service_fee|default=''}">
+                </div>
+            </div>
+        </if>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

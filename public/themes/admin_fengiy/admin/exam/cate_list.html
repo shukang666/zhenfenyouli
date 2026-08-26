@@ -1,0 +1,38 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:url('exam/cate_list')}">所有分类</a></li>
+			<li><a href="{:url('exam/add_cate')}">添加分类</a></li>
+		</ul>
+		<table class="table table-hover table-bordered margin-top-20">
+			<thead>
+				<tr>
+					<th width="50">ID</th>
+					<th>名称</th>
+					<th width="160">{:lang('ACTIONS')}</th>
+				</tr>
+			</thead>
+			<tbody>
+				<php>
+
+				</php>
+				<foreach name="list" item="vo">
+				<tr>
+					<td>{$vo.id}</td>
+					<td>{$vo.name}</td>
+				
+					<td>
+                        <a class="btn btn-xs btn-primary" href="{:url('exam/edit_cate',array('id'=>$vo['id']))}">{:lang('EDIT')}</a>
+                        <!-- <a class="btn btn-xs btn-danger js-ajax-delete" href="{:url('exam/delete_cate',array('id'=>$vo['id']))}">{:lang('DELETE')}</a> -->
+                    </td>
+				</tr>
+				</foreach>
+			</tbody>
+		</table>
+
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

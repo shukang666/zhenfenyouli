@@ -1,0 +1,366 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+<script type="text/html" id="photos-item-tpl">
+    <li id="saved-image{id}">
+        <input id="photo-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <!--<input class="form-control" id="photo-{id}-name" type="text" name="photo_names[]" value="{name}"
+               style="width: 200px;" title="图片名称">-->
+        <img id="photo-{id}-preview" src="{url}" style="height:36px;width: 36px;"
+             onclick="imagePreviewDialog(this.src);">
+        <a href="javascript:uploadOneImage('图片上传','#photo-{id}');">替换</a>
+        <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="">编辑</a></li>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('edit')}">
+
+        <input type="hidden" class="form-control"  name="id" required value="{$data.id}">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>商家名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="shop_name" value="{$data.shop_name}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>手机号（登陆号）:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="mobile" value="{$data.mobile}" required>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">密码(留空不修改):</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="password" value="" placeholder="******">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">支付宝账号:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="ali_account" value="{$data.ali_account}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">支付宝姓名:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="ali_name" value="{$data.ali_name}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>银行名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="bank_name" value="{$data.bank_name}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>银行账号:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="bank_account" value="{$data.bank_account}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>户名:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="text" class="form-control" name="bank_true_name" value="{$data.bank_true_name}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="layui-form-item">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>地区:</label>
+                <div class="col-md-6 col-sm-10" style="z-index: 2000!important;">
+                    <div class="layui-inline">
+                        <select name="province" id="province" lay-verify="required" lay-search lay-filter="province">
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select name="city" id="city" lay-verify="required" lay-search lay-filter="city">
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <select name="county" id="county" lay-verify="required" lay-search>
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>地址</label>
+
+            <div class="col-md-6 col-sm-10">
+                <div style="display: flex;">
+                    <input type="text" class="form-control" name="address" id="address" placeholder="请输入详细地址" required value="{$data.address}" onblur="searchAddress()">
+
+                    <a class="btn btn-primary" href="javascript:;" style="margin-left: 10px;" onclick="searchAddress()">搜索</a>
+
+                </div>
+                <div id="container" style="margin-top:10px;width:600px;height:300px;"></div>
+            </div>
+        </div>
+        <div class="form-group">
+             <label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>经纬度</label>
+             <input type="hidden" value="{$data.lon}" id="lon">
+             <input type="hidden" value="{$data.lat}" id="lat">
+             <div class="col-md-6 col-sm-10">
+                 <input type="text" class="form-control" id="lnglat" name="lnglat" placeholder="" readonly required value="{$data.lon},{$data.lat}">
+             </div>
+         </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">头像:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="hidden" name="avatar" id="thumbnail" value="{$data.avatar}">
+                <a href="javascript:uploadOneImage('图片上传','#thumbnail');">
+                    <if condition="empty($data.avatar)">
+                        <img src="__TMPL__/public/assets/images/default-thumbnail.png"
+                             id="thumbnail-preview"
+                             width="80" style="cursor: pointer"/>
+                        <else/>
+                        <img src="{:cmf_get_image_preview_url($data.avatar)}"
+                             id="thumbnail-preview"
+                             width="80" style="cursor: pointer"/>
+                    </if>
+                </a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">相册:</label>
+            <ul id="photos" class="pic-list list-unstyled form-inline" style="margin-left: 18%">
+                <notempty name="data.photos">
+                    <foreach name="data.photos" item="vo">
+                        <php>$img_url=cmf_get_image_preview_url($vo);</php>
+                        <li id="saved-image{$key}">
+                            <input id="photo-{$key}" type="hidden" name="photos[]"
+                                   value="{$vo}">
+                            <img id="photo-{$key}-preview"
+                                 src="{:cmf_get_image_preview_url($vo)}"
+                                 style="height:36px;width: 36px;"
+                                 onclick="parent.imagePreviewDialog(this.src);">
+                            <a href="javascript:uploadOneImage('图片上传','#photo-{$key}');">替换</a>
+                            <a href="javascript:(function(){$('#saved-image{$key}').remove();})();">移除</a>
+                        </li>
+                    </foreach>
+                </notempty>
+            </ul>
+            <a href="javascript:uploadMultiImage('图片上传','#photos','photos-item-tpl');"
+               class="btn btn-default btn-sm" style="margin-left: 18%">选择图片</a>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">视频宣传:</label>
+            <div class="col-md-6 col-sm-10" style="display: flex">
+                <input id="file-video" class="form-control" type="text" name="video"
+                       value="{$data.video|default=''}" placeholder="请上传视频文件" style="width: 200px;">
+                <notempty name="data.video">
+                    <a id="file-video-preview" href="{:cmf_get_file_download_url($data.video)}"
+                       target="_blank" style="margin-left: 10px;margin-top: 5px">预览</a>
+                </notempty>
+                <a href="javascript:uploadOne('文件上传','#file-video','video');" style="margin-left: 10px;margin-top: 5px">上传</a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>企业介绍:</label>
+            <div class="col-md-6 col-sm-10">
+                <script type="text/plain" id="content" name="content">{$data.content}</script>
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit" onclick="closeSelfAndReloadParent()">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('shop/shopList')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="https://map.qq.com/api/gljs?v=1.exp&key=XQABZ-Z6GWP-OWEDN-V3K2Y-W43D6-D4B5P"></script>
+<script type="text/javascript">
+    //编辑器路径定义
+    var editorURL = GV.WEB_ROOT;
+</script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+
+    });
+
+</script>
+<script>
+    //定义地图中心点坐标
+
+    var already_lat = $("#lat").val();
+    var already_lon = $("#lon").val();
+
+    if(already_lat == ''){
+        already_lat = 39.916706;
+        already_lon = 116.403119;
+    }
+    var center = new TMap.LatLng(already_lat, already_lon);
+    //定义map变量，调用 TMap.Map() 构造函数创建地图
+    var map = new TMap.Map(document.getElementById('container'), {
+        center: center,//设置地图中心点坐标
+        zoom: 17, //设置地图缩放级别
+        viewMode:'3D'
+    });
+    let markerLayer = new TMap.MultiMarker({
+        id: 'marker-layer',
+        map: map
+    });
+    var clickHandler=function(evt){
+        var lat = evt.latLng.getLat().toFixed(6);
+        var lng = evt.latLng.getLng().toFixed(6);
+        $("#lnglat").val(lng+","+lat);
+        removeMarker("search_res");
+        addMarker(new TMap.LatLng(lat,lng),"search_res");
+
+        let url = "{:url('shop/reverse_address')}";
+        $.get(url,{lnglat:lat+","+lng},function(res){
+            //debugger;
+            res = JSON.parse(res);
+            if(res.status==0){
+                $("#address").val(res.result.formatted_addresses.recommend);
+            }
+        });
+    };
+    map.on("click",clickHandler);
+
+    function addMarker(latLng, id) {
+        markerLayer.add({
+            id: id,
+            position: latLng
+        });
+        let lng = latLng.lng;
+        let lat = latLng.lat;
+
+
+        map.setCenter(new TMap.LatLng(lat,lng)); // 坐标为天安门
+    }
+    //移除marker事件
+    function removeMarker(id) {
+        markerLayer.remove(id)
+    }
+
+    function searchAddress(){
+        var province = $(".province option:selected").text();
+        var city = $(".city option:selected").text();
+        var district = $(".district option:selected").text();
+
+        if(province == '省份'){
+            layer.msg('请选择地区');
+            return;
+        }
+        if(city == '请选择' || district == '请选择'){
+            layer.msg('请选择地区');
+            return;
+        }
+
+        let address = $("#address").val();
+        var full_address = province+city+district+address;
+        let url = "{:url('shop/search_address')}";
+        $.get(url,{address:full_address},function(res){
+            // debugger;
+            res = JSON.parse(res);
+            if(res.status==0){
+                let location = res.result.location;
+                $("#lnglat").val(location.lng+","+location.lat);
+                removeMarker("search_res");
+                addMarker(new TMap.LatLng(location.lat,location.lng),"search_res");
+
+            }else{
+                layer.msg(res.message);
+            }
+        });
+    }
+
+</script>
+<script>
+    layui.use([ 'form', 'element' ], function() {
+        var form = layui.form, element = layui.element;
+
+        var province = "{$data.province}"
+        var city = "{$data.city}"
+        var county = "{$data.county}"
+        getCateList(0,$("#province"),'province');
+        getCateList(province,$("#city"),'city');
+        getCateList(city,$("#county"),'county');
+        form.on('select(province)', function(data) {
+            province = data.value;
+            getCateList(data.value,$("#city"),'city');
+        })
+
+        form.on('select(city)', function(data) {
+            city = data.value;
+            getCateList(data.value,$("#county"),'county');
+        })
+
+        function getCateList(pid,target,type){
+            console.log(pid)
+            $.ajax({
+                type: 'POST',
+                url: "{:url('shop/getJsonAreaList')}",
+                data: {
+                    pid: pid,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    var cate_list = data.data;
+                    var str = "<option value=''>" + "请选择" + "</option>";
+                    for (var i = 0; i < cate_list.length; i++) {
+
+                        if(type == 'province'){
+                            var where = province;
+                        }else if(type == 'city'){
+                            var where = city;
+                        }else{
+                            var where = county;
+                        }
+                        if (where == cate_list[i].code) {
+                            str += "<option value='" + cate_list[i].code + "' selected>" + cate_list[i].name + "</option>";
+                        }else{
+                            str += "<option value='" + cate_list[i].code + "'>" + cate_list[i].name + "</option>";
+                        }
+                    }
+                    target.html(str);
+                    form.render('select');
+                }
+            });
+        }
+    })
+</script>
+
+</body>
+</html>

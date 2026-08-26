@@ -1,0 +1,48 @@
+
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('cate_index',['pid'=>$pid])}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="{:url('cate_update',['pid'=>$pid])}">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('cate_update',['pid'=>$pid])}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('cate_update_post')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+        <input type="hidden" value="{$pid|default=''}" name="parent_id">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>名称:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="cate_name"
+                       value="{$item.cate_name|default=''}" required>
+            </div>
+        </div>
+
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('cate_index',['pid'=>$pid])}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,233 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">列表</a></li>
+        <notempty name="item.id">
+            <li class="active"><a href="">编辑</a></li>
+            <else/>
+            <li class="active"><a href="{:url('update')}">添加</a></li>
+        </notempty>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('updatePost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>标题:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="text" class="form-control" name="name" value="{$item.name|default=''}"
+                       required>
+            </div>
+        </div>
+
+        <php>
+            $level_list= cmf_table('basic_select')->where('type','=',1)->select();
+        </php>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>等级:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="level" class="form-control">
+                    <foreach name="level_list" item="vo">
+                        <notempty name="item.level">
+                            <option value="{$vo.id}"
+                            <if condition="$item.level == $vo.id">selected</if>
+                            >{$vo.name}</option>
+                            <else/>
+                            <option value="{$vo.id}">{$vo.name}</option>
+                        </notempty>
+
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">图片:</label>
+            <div class="col-md-6 col-sm-10">
+                <php>  $thumb='thumb';</php>
+                <input type="hidden" name="{$thumb}" id="{$thumb}" value="{$item[$thumb]|default=''}">
+                <a href="javascript:uploadOneImage('图片上传','#{$thumb}');">
+                    <if condition="empty($item[$thumb])">
+                        <img src="__TMPL__/public/assets/images/default-thumbnail.png"
+                             id="{$thumb}-preview"
+                             width="135" style="cursor: pointer"/>
+                        <else/>
+                        <img src="{:cmf_get_image_preview_url($item[$thumb])}"
+                             id="{$thumb}-preview"
+                             width="135" style="cursor: pointer"/>
+                    </if>
+                </a>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">多图<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <php>$field='id_card_image';</php>
+                <ul id="{$field}" class="pic-list list-unstyled form-inline">
+                    <notempty name="$item[$field]">
+                        <foreach name="$item[$field]" item="vo">
+                            <li id="{$field}-saved-image{$key}">
+                                <input id="{$field}-{$key}" type="hidden" name="{$field}[]"
+                                       value="{$vo}">
+                                <php>$img_url=cmf_get_image_preview_url($vo);</php>
+                                <img id="{$field}-{$key}-preview"
+                                     src="{:cmf_get_image_preview_url($vo)}"
+                                     style="height:34px;width: 44px;"
+                                     onclick="parent.imagePreviewDialog(this.src);">
+                                <a class="btn btn-default"  href="javascript:uploadOneImage('照片上传','#{$field}-{$key}');"><i class="fa fa-upload fa-fw"></i></a>
+                                <a class="btn btn-danger"  href="javascript:(function(){$('#{$field}-saved-image{$key}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+                                <a class="btn btn-success"  href="javascript:(function(){$('#{$field}-saved-image{$key}').before($('#{$field}-saved-image{$key}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+                            </li>
+                        </foreach>
+                    </notempty>
+                </ul>
+                <a href="javascript:uploadMultiImage('照片上传','#{$field}','{$field}-item-tpl');"
+                   class="btn btn-default">图片</a>
+            </div>
+        </div>
+        <script type="text/html" id="{$field}-item-tpl">
+            <li id="{$field}-saved-image{id}">
+                <input id="{$field}-{id}" type="hidden" name="{$field}[]" value="{filepath}">
+                <img id="{$field}-{id}-preview" src="{url}" style="height:34px;width: 44px;"
+                     onclick="imagePreviewDialog(this.src);">
+                <a class="btn btn-default" href="javascript:uploadOneImage('图片上传','#{$field}-{id}');"><i class="fa fa-upload fa-fw"></i></a>
+                <a class="btn btn-danger" href="javascript:(function(){$('#{$field}-saved-image{id}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+                <a class="btn btn-success" href="javascript:(function(){$('#{$field}-saved-image{id}').before($('#{$field}-saved-image{id}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+            </li>
+        </script>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>视频:</label>
+            <div class="col-md-6 col-sm-10">
+                <input id="file-video" width="400px" class="form-control inline" type="text" name="video"
+                       value="{$item.video|default=''}" placeholder="请上传视频文件" style="width: 200px;">
+                <notempty name="item.video">
+                    <a class="btn btn-info inline" id="file-video-preview"
+                       href="{:cmf_get_file_download_url($item.video)}"
+                       target="_blank"><i class="fa fa-play-circle fa-fw"></i></a>
+                </notempty>
+                <a class="btn btn-default inline"
+                   href="javascript:uploadOne('文件上传','#file-video','video');"><i
+                        class="fa fa-upload fa-fw"></i></a>
+                <a class="btn btn-danger inline"
+                   href="javascript:(function(){$('#file-video').val('');})();"><i
+                        class="fa fa-trash fa-fw"></i></a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>音频:</label>
+            <div class="col-md-6 col-sm-10">
+                <input id="file-audio" class="form-control"  type="text" name="audio"
+                       value="{$item.audio|default=''}" placeholder="请上传音频文件" style="width: 200px;">
+                <notempty name="item.audio">
+                    <a class="btn btn-info" id="file-audio-preview"
+                       href="{:cmf_get_file_download_url($item.audio)}"
+                       target="_blank"><i class="fa fa-play-circle fa-fw"></i></a>
+                </notempty>
+                <a class="btn btn-default" href="javascript:uploadOne('文件上传','#file-audio','file');"><i
+                        class="fa fa-upload fa-fw"></i></a>
+                <a class="btn btn-danger" href="javascript:(function(){$('#file-file').val('');})();"><i
+                        class="fa fa-trash fa-fw"></i></a>
+
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>附件:</label>
+            <div class="col-md-6 col-sm-10">
+                <input class="form-control" id="file-file" type="text" name="file"
+                       value="{$item.file|default=''}" placeholder="请上文件" >
+                <notempty name="$item.file">
+                    <a class="btn btn-info" id="file1-preview" href="{:cmf_get_asset_url($item.file)}" target="_blank"><i class="fa fa-download fa-fw"></i></a>
+                </notempty>
+                <a class="btn btn-default" href="javascript:uploadOne('文件上传','#file-file','file');"><i
+                        class="fa fa-upload fa-fw"></i></a>
+
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label">多图片<span class="form-required">*</span></label>
+            <div class="col-md-6 col-sm-10">
+                <ul id="image" class="pic-list list-unstyled form-inline">
+                    <notempty name="$item.image">
+                        <foreach name="$item.image" item="vo">
+
+                            <li id="image-saved-image{$key}">
+                                <input id="image-{$key}" type="hidden" name="image[]"
+                                       value="{$vo}">
+                                <php>$img_url=cmf_get_image_preview_url($vo);</php>
+                                <img id="image-{$key}-preview"
+                                     src="{:cmf_get_image_preview_url($vo)}"
+                                     style="height:34px;width: 44px;"
+                                     onclick="parent.imagePreviewDialog(this.src);">
+                                <a class="btn btn-default"  href="javascript:uploadOneImage('照片上传','#image-{$key}');"><i class="fa fa-upload fa-fw"></i></a>
+                                <a class="btn btn-danger"  href="javascript:(function(){$('#image-saved-image{$key}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+                                <a class="btn btn-success"  href="javascript:(function(){$('#image-saved-image{$key}').before($('#image-saved-image{$key}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+                            </li>
+                        </foreach>
+                    </notempty>
+                </ul>
+                <a href="javascript:uploadMultiImage('照片上传','#image','image-item-tpl');"
+                   class="btn btn-default">图片</a>
+            </div>
+        </div>
+        <script type="text/html" id="image-item-tpl">
+            <li id="image-saved-image{id}">
+                <input id="image-{id}" type="hidden" name="image[]" value="{filepath}">
+                <img id="image-{id}-preview" src="{url}" style="height:34px;width: 44px;"
+                     onclick="imagePreviewDialog(this.src);">
+                <a class="btn btn-default" href="javascript:uploadOneImage('图片上传','#image-{id}');"><i class="fa fa-upload fa-fw"></i></a>
+                <a class="btn btn-danger" href="javascript:(function(){$('#image-saved-image{id}').remove();})();"><i class="fa fa-trash fa-fw"></i></a>
+                <a class="btn btn-success" href="javascript:(function(){$('#image-saved-image{id}').before($('#image-saved-image{id}').next());})();"><i class="fa fa-arrow-down fa-fw"></i></a>
+            </li>
+        </script>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>详情:</label>
+            <div class="col-md-6 col-sm-10">
+                <script type="text/plain" id="content" name="content">{$item.content|default=''}</script>
+            </div>
+        </div>
+
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    var editorURL = GV.WEB_ROOT;
+    $(function () {
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+    });
+</script>
+</body>
+</html>

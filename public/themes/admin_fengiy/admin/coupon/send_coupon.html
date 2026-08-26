@@ -1,0 +1,67 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="">赠送优惠券</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('coupon/sendCoupon')}">
+
+			<div class="form-group">
+				<label  class="col-sm-2 control-label"><span class="form-required">*</span>赠送数量</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" class="form-control" name="limit" placeholder="" value="{$data.limit}">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-2 control-label"><span class="form-required">*</span>金额：</label>
+				<div class="col-md-6 col-sm-10">
+					<div class="layui-form-item">
+
+						<div class="layui-inline">
+							<div class="layui-form-mid"><b></b>满</div>
+							<div class="layui-input-inline" style="width: 80px;">
+								<input type="text" name="full_amount"  autocomplete="off" class="layui-input" required value="{$data.full_amount}">
+							</div>
+							<div class="layui-form-mid"><b></b>元减</div>
+							<div class="layui-input-inline" style="width: 100px;">
+								<input type="text" name="amount" autocomplete="off" class="layui-input" required value="{$data.amount}">
+							</div>
+							<div class="layui-form-mid"><b></b>元</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label  class="col-sm-2 control-label"><span class="form-required">*</span>活动开始时间</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="date" class="form-control" name="start_time" placeholder="" value="{$data.start_time}">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label  class="col-sm-2 control-label"><span class="form-required">*</span>活动结束时间</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="date" class="form-control" name="end_time" placeholder="" value="{$data.end_time}">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label  class="col-sm-2 control-label"><span class="form-required">*</span>有效期（天）</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" class="form-control" name="indate" placeholder="" value="{$data.indate}">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

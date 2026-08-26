@@ -1,0 +1,107 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="">提现列表</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('withdraw')}">
+        关键字：
+        <input type="text" class="form-control" name="keyword" style="width: 200px;"
+               value="{:input('request.keyword/s','')}" placeholder="姓名、昵称、手机号">
+        <input type="submit" class="btn btn-primary" value="搜索"/>
+        <a class="btn btn-danger" href="{:url('withdraw')}">清空</a>
+    </form>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th width="50">ID</th>
+            <th>用户信息</th>
+            <th>提现金额</th>
+            <th>手续费</th>
+            <th>到账金额</th>
+            <th>提现时间</th>
+            <!--            <th>类型</th>-->
+            <th>提现资料</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>
+                    <notempty name="vo.true_name">
+                        {$vo.true_name} ({$vo.mobile})
+                        <else/>
+                        被删除
+                    </notempty>
+                </td>
+                <td>{$vo.num}</td>
+                <td>{$vo.fee}</td>
+                <td>{$vo.money}</td>
+                <td>{$vo.create_time|date="Y-m-d H:i:s"}</td>
+                <!--                <td>{$vo.type_name}</td>-->
+                <td>
+                    {$vo.param.ali_name??''}
+                </td>
+                <td>{$vo.status_name}</td>
+
+                <td>
+
+                    <if condition="$vo.status == 0"><span><button class="btn btn-xs btn-primary" id="btn1" href=""
+                                                                  onclick="check({$vo.id})">处理</button></span>
+                    </if>
+
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    function check(id) {
+        layer.confirm('是否已处理此申请？', {
+            btn: ['通过', '拒绝提现'] //按钮
+        }, function () {
+            setStatus(id, 1, '')
+            layer.closeAll();
+        }, function () {
+            layer.prompt({title: '请说明退回原因', formType: 2}, function (text, index) {
+                setStatus(id, 2, text);
+            });
+        });
+    }
+
+    function show(text) {
+        layer.tips('原因：' + text, '#reason');
+    }
+
+    function setStatus(id, status, text) {
+        $.ajax({
+            url: '/admin/account/doWithdraw',
+            type: "POST",
+            data: {id: id, status: status, text: text},
+            success: function (res) {
+                //console.log(res);
+                if (res.code == 1) {
+                    layer.msg(res.msg, {icon: 1});
+                    setTimeout(function () {
+                        location.reload()
+                    }, 1500);
+
+                } else {
+                    layer.msg(res.msg, {icon: 7});
+                }
+
+            }
+        });
+    }
+</script>
+</body>
+</html>

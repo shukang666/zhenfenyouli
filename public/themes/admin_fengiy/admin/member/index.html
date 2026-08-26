@@ -1,0 +1,153 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('index')}">用户列表</a></li>
+    </ul>
+
+    <!-- 搜索和排序表单 -->
+    <form class="well form-inline margin-top-20 layui-form" method="get" action="{:url('index')}">
+        <div class="layui-inline">
+            关键字：
+            <input type="text" class="form-control" name="keyword" style="width: 140px;"
+                   value="{:input('request.keyword/s','')}"  placeholder="请输入名称">
+        </div>
+
+        <php>
+            $community_list= cmf_table('member_community')->where('delete_time',0)->select();
+        </php>
+        小区：
+        <div class="form-group layui-form">
+            <select name="community_id" lay-search id="user_list" lay-filter="user_list">
+                <option value="">全部</option>
+                <foreach name="community_list" item="vo">
+                    <notempty name="$params.community_id">
+                        <option value="{$vo.id}"
+                        <if condition="$params.community_id == $vo.id">selected</if>
+                        >{$vo.name}</option>
+                        <else/>
+                        <option value="{$vo.id}">{$vo.name}</option>
+                    </notempty>
+                </foreach>
+            </select>
+        </div>
+
+
+
+        <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 25px"/>
+        <a class="btn btn-danger" href="{:url('index')}">重置</a>
+        <a class="btn btn-success" href="{:url('outData',input('get.'))}">导出</a>
+    </form>
+
+    <!-- 用户列表表格 -->
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th width="50">ID</th>
+            <th>昵称</th>
+            <th>小区</th>
+            <th width="80">头像</th>
+            <th width="120">手机号</th>
+            <th width="100">
+                <a href="{:url('index', array_merge(input('get.'), ['sort_field'=>'point', 'sort_order'=>input('sort_order/s')=='asc'?'desc':'asc']))}">
+                    积分
+                    <if condition="input('sort_field/s') eq 'point'">
+                        <php>echo input('sort_order/s') == 'asc' ? '↑' : '↓';</php>
+                    </if>
+                </a>
+            </th>
+            <th width="160">
+                <a href="{:url('index', array_merge(input('get.'), ['sort_field'=>'create_time', 'sort_order'=>input('sort_order/s')=='asc'?'desc':'asc']))}">
+                    创建时间
+                    <if condition="input('sort_field/s') eq 'create_time'">
+                        <php>echo input('sort_order/s') == 'asc' ? '↑' : '↓';</php>
+                    </if>
+                </a>
+            </th>
+            <th width="200">{:lang('ACTIONS')}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.nickname}</td>
+                <td>{$vo.community_name}</td>
+                <td>
+                    <if condition="!empty($vo['avatar'])">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.avatar)}');">
+                            <img src="{:cmf_get_image_preview_url($vo.avatar)}"
+                                 style="width:40px;height:40px;border-radius: 40px;">
+                        </a>
+                    </if>
+                </td>
+                <td>{$vo.mobile}</td>
+                <td>{$vo.point}</td>
+                <td>{$vo.create_time |date="Y-m-d H:i:s"}</td>
+                <td>
+                    <a class="btn btn-xs btn-primary" href="{:url('update',array('id'=>$vo['id']))}">{:lang('EDIT')}</a>
+                    <a class="btn btn-xs btn-warning" href="javascript:parent.openIframeLayer('{:url('addBalance',array('id'=>$vo['id']))}',' 账户调整',{area:['70%','70%']});">账户设置</a>
+                    <a class="btn btn-xs btn-danger js-ajax-delete" href="{:url('delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div class="pagination">
+        {$page}
+        <div class="page-jump" style="display:inline-block; margin-left:15px; vertical-align:middle;">
+            <span>第</span>
+            <input type="text" id="jump_page_input" class="form-control" style="width:50px; display:inline-block; height:32px; text-align:center;" value="{:input('page/d',1)}">
+            <span>页</span>
+            <button type="button" class="btn btn-primary btn-sm" id="jump_page_btn" style="height:32px;">跳转</button>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    // 页码跳转
+    function jumpToPage(page){
+        var url = window.location.href;
+        // 解析当前 URL 的 query 参数
+        var hashIndex = url.indexOf('#');
+        if (hashIndex > -1) url = url.substring(0, hashIndex);
+        var queryIndex = url.indexOf('?');
+        var base = url;
+        var params = {};
+        if (queryIndex > -1) {
+            base = url.substring(0, queryIndex);
+            var queryString = url.substring(queryIndex + 1);
+            var pairs = queryString.split('&');
+            for (var i = 0; i < pairs.length; i++) {
+                var pair = pairs[i].split('=');
+                if (pair[0]) {
+                    params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+                }
+            }
+        }
+        params['page'] = page;
+        var query = $.param(params);
+        window.location.href = base + '?' + query;
+    }
+
+    $(function () {
+        $('#jump_page_btn').click(function () {
+            var page = parseInt($('#jump_page_input').val(), 10);
+            if (isNaN(page) || page < 1) {
+                layer.msg('请输入有效的页码', {icon: 2});
+                return;
+            }
+            jumpToPage(page);
+        });
+        $('#jump_page_input').on('keypress', function (e) {
+            if (e.which === 13) {
+                $('#jump_page_btn').click();
+            }
+        });
+    });
+</script>
+</body>
+</html>

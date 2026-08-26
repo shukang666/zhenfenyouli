@@ -1,0 +1,209 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <!--    <ul class="nav nav-tabs">-->
+    <!--        <li class="active"><a href="{:url('index')}">列表</a></li>-->
+    <!--                <li><a href="{:url('update')}">添加</a></li>-->
+    <!--    </ul>-->
+    <!--    <form class="well form-inline margin-top-20" method="get" action="{:url('index')}">-->
+    <!--        关键字：-->
+    <!--        <input type="text" class="form-control" name="name" style="width: 140px;"-->
+    <!--               value="{:input('request.name/s','')}" placeholder="请输入名称">-->
+    <!--        <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 25px"/>-->
+    <!--        <a class="btn btn-danger" href="{:url('index')}">清空</a>-->
+
+    <!--    </form>-->
+
+
+    <!--    <form method="post" class="js-ajax-form margin-top-20" action="{:url('listOrder')}">-->
+    <!--        <form class="js-ajax-form" action="" method="post">-->
+    <!--            <div>-->
+    <!--                <button class="btn btn-primary btn-sm js-ajax-submit" type="submit"-->
+    <!--                        data-action="{:url('toggle',array('yes'=>1))}" data-subcheck="true">审核通过-->
+    <!--                </button>-->
+    <!--                <button class="btn btn-primary btn-sm js-ajax-submit" type="submit"-->
+    <!--                        data-action="{:url('toggle',array('no'=>1))}" data-subcheck="true">审核不通过-->
+    <!--                </button>-->
+    <!--            </div>-->
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <!--                    <th width="16"><label><input type="checkbox" class="js-check-all" data-direction="x"-->
+            <!--                                                 data-checklist="js-check-x"></label></th>-->
+            <th>ID</th>
+            <th>售后类型</th>
+            <th>名称</th>
+            <th>图片</th>
+            <th>规格</th>
+            <th>数量</th>
+
+            <th>退货快递信息</th>
+            <th>状态</th>
+
+
+            <th width="200">{:lang('ACTIONS')}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <!--                        <td><input type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x"-->
+                <!--                                   name="ids[]" value="{$vo.id}"></td>-->
+                <td>{$vo.id}</td>
+                <td>{$vo.type_name}</td>
+                <td>{$vo.goods_name}</td>
+
+                <td>
+                    <if condition="!empty($vo['thumb'])">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.thumb)}');">
+                            <img src="{:cmf_get_image_preview_url($vo.thumb)}"
+                                 style="width:40px;height:40px;">
+                        </a>
+                    </if>
+                </td>
+                <td>{$vo.sku_name}</td>
+                <td>{$vo.count}</td>
+                <td>{$vo.return_express_name}{$vo.return_express_sn}</td>
+                <td>{$vo.status_name}</td>
+                <td>
+                    <if condition="$vo.aftersale_status == 0">
+                        <a class=" btn  layui-btn" lay-on="order-refund" data-toggle="tooltip"
+                           data-id="{$vo.id}">
+                            审核
+                        </a>
+                    </if>
+                    <if condition="$vo.aftersale_status == 6">
+                    <a class="btn btn-xs btn-primary"
+                       href="javascript:parent.openIframeLayer('{:url('refund_price',array('id'=>$vo['id']))}','退款',{area:['30%','30%']});">退款</a>
+                    </if>
+
+                    <if condition="$vo.aftersale_status == 4">
+                        <a class="layui-bg-red-light layui-circle op-btn" lay-on="order-exchange" data-toggle="tooltip"
+                           data-id="{$vo.id}">
+                            换货完成
+                        </a>
+                    </if>
+
+                    <!--                    <a class="btn btn-xs btn-primary" href="{:url('update',array('id'=>$vo['id']))}">{:lang('EDIT')}</a>-->
+
+                    <!--&lt;!&ndash;                    <a class="btn btn-xs btn-primary"&ndash;&gt;-->
+                    <!--&lt;!&ndash;                       href="javascript:parent.openIframeLayer('{:url('edit',array('id'=>$vo['id']))}','',{area:['80%','80%']});">{:lang('EDIT')}</a>&ndash;&gt;-->
+                    <!--                    <a class="btn btn-xs btn-danger js-ajax-delete"-->
+                    <!--                       href="{:url('delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>-->
+                    <!--                    &lt;!&ndash;                                        <a class="btn btn-xs btn-warning" href="javascript:parent.openIframeLayer('{:url('cate_data/index',array('data_id'=>$vo['id']))}','',{area:['70%','70%']});">内容</a>&ndash;&gt;-->
+                </td>
+
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    </form>
+
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(function () {
+        var laydate = layui.laydate,
+            layer = layui.layer,
+            util = layui.util;
+
+        // 日期时间范围
+        laydate.render({
+            elem: '#create-time',
+            range: ['#create-startDate', '#create-endDate']
+        });
+
+        //操作订单
+        util.on('lay-on', {
+            //管理员添加备注信息
+            'order-tips': function () {
+                var orderid = $(this).attr("data-id"); //当前订单ID
+                var value = $(this).attr("data-notes"); //当前订单备注信息
+                layer.prompt({title: '请输入备注信息', value, formType: 2}, function (value, index, elem) {
+                    if (value === '') return elem.focus();
+                    $.ajax({
+                        url: '/admin/order/addAdminRemark',
+                        type: "POST",
+                        data: {id: orderid, admin_remark: util.escape(value)},
+                        success: function (res) {
+                            if (res.code === 1) {
+                                location.reload();
+                            } else {
+                                layer.msg(res.msg, {icon: 7});
+                            }
+                        }
+                    });
+                    //layer.msg('获得：'+ util.escape(value)); // 显示 value
+                    layer.close(index); // 关闭 prompt
+
+                });
+            },
+            //处理退款
+            'order-refund': function () {
+                var orderid = $(this).attr("data-id"); //当前订单ID
+                layer.confirm('确认要通过审核？', {
+                    btn: ['确定', '拒绝'] //按钮
+                }, function () {
+                    doRefund(orderid, 1)
+                }, function () {
+                    doRefund(orderid, 2)
+                    // layer.prompt({title: '请输入拒绝原因', formType: 2}, function (value, index, elem) {
+                    //     if (value === '') return elem.focus();
+                    //     doRefund(orderid, 2, util.escape(value))
+                    //     layer.close(index); // 关闭 prompt
+                    // });
+                });
+            }, 'order-exchange': function () {
+                var orderid = $(this).attr("data-id"); //当前订单ID
+                layer.confirm('确认要通过审核？', {
+                    btn: ['确定', '取消'] //按钮
+                }, function () {
+                    doRefund(orderid, 8)
+                }, function () {
+                    // doRefund(orderid, 2)
+                    // layer.prompt({title: '请输入拒绝原因', formType: 2}, function (value, index, elem) {
+                    //     if (value === '') return elem.focus();
+                    //     doRefund(orderid, 2, util.escape(value))
+                    //     layer.close(index); // 关闭 prompt
+                    // });
+                });
+            },
+        })
+
+
+        function doRefund(id, status, text) {
+            $.ajax({
+                url: '/admin/order/refund_goods',
+                type: "POST",
+                data: {id: id, status: status, text: text},
+                success: function (res) {
+                    //console.log(res);
+                    if (res.code == 1) {
+                        layer.msg(res.msg, {icon: 1});
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg(res.msg, {icon: 7});
+                    }
+                }
+            });
+        }
+
+    })
+
+    //展示退款图片
+    function showPhotos(images, index) {
+        layer.photos({
+            photos: {
+                "title": "Photos Demo",
+                "start": index,
+                "data": images
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<include file="public@header"/>
+<link href="__TMPL__/public/assets/css/common.css" rel="stylesheet">
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <table class="table table-hover table-bordered">
+        <tbody>
+
+        <tr>  <th>订单编号</th> <td>{$data.fpqqlsh}</td> </tr>
+        <tr>  <th>发票号码</th> <td>{$data.fphm}</td> </tr>
+        <tr>  <th>开票时间</th> <td>{$data.kprq}</td> </tr>
+        <tr>  <th>发票地址</th> <td>{$data.pdfUrl}
+        <a class="btn btn-xs btn-primary " target="_blank" href="{$data.pdfUrl}">打开</a>
+        </td> </tr>
+
+        </tbody>
+    </table>
+    <!-- PDF查看区域 -->
+<!--    <div id="pdfViewArea" style=" margin-top:20px;">-->
+<!--        <h4>发票预览</h4>-->
+<!--        <iframe id="pdfViewer" src="{$data.pdfUrl}" style="width:100%; height:500px; border:1px solid #ddd;" frameborder="0"></iframe>-->
+<!--    </div>-->
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    function togglePdfView(url) {
+        var viewer = document.getElementById('pdfViewArea');
+        if(viewer.style.display  === 'none') {
+            document.getElementById('pdfViewer').src  = url;
+            viewer.style.display  = 'block';
+        } else {
+            viewer.style.display  = 'none';
+        }
+        }
+</script>
+</body>
+</html>

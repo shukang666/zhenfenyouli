@@ -1,0 +1,111 @@
+<include file="public@header"/>
+<style type="text/css">
+    .pic-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+</head>
+<body>
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+<!--        <li><a href="{:url('index')}">列表</a></li>-->
+<!--        <notempty name="item.id">-->
+            <li class="active"><a href="">绑定</a></li>
+<!--            <else/>-->
+<!--            <li class="active"><a href="{:url('update')}">添加</a></li>-->
+<!--        </notempty>-->
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20 layui-form" action="{:url('editPost')}">
+
+        <input type="hidden" value="{$item.id|default=''}" name="id">
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required"></span>学生:</label>
+            <div class="col-md-6 col-sm-10">
+                <input class="form-control" type="text" required name="user_names" value="{$item.cate_names??''}"
+                       placeholder="请选分类"onclick="selected();" id="cate_names"
+                       readonly/>
+                <input class="form-control" type="hidden" value="{$item.cate_ids??''}" name="user_ids"
+                       id="cate_ids"/>
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>价格:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="number" class="form-control" name="price"
+                       value="{$item.price|default=''}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>课程有效期:</label>
+            <div class="col-md-6 col-sm-10">
+                <input style="width: 212px" type="number" class="form-control" name="date"
+                       value="{$item.date|default=''}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>参与分佣:</label>
+            <div class="col-md-6 col-sm-10">
+                <input type="radio" name="rebate" value="1" title="否" checked>
+                <input type="radio" name="rebate" value="2" title="是">
+
+            </div>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
+            <a class="btn btn-default" href="{:url('index')}">{:lang('BACK')}</a>
+        </div>
+    </form>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript">
+    //编辑器路径定义
+    var editorURL = GV.WEB_ROOT;
+</script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+
+    });
+</script>
+<script>
+    function selected() {
+        var selectedCategoriesId = $('#select_charge_id').val();
+        var user_id = $('#user_id').val();
+
+        // console.log(selectedCategoriesId);
+        openIframeLayer("{:url('selected')}?ids=" + selectedCategoriesId+'&user_id'+user_id, '请选择', {
+            area: ['60%', '60%'],
+            btn: ['确定', '取消'],
+            yes: function (index, layero) {
+                var iframeWin = window[layero.find('iframe')[0]['name']];
+                var select_data = iframeWin.confirm();
+                var len= select_data.selected_id.length
+                if (len == 0) {
+                    layer.msg('请选择分类');
+                    return;
+                }
+
+                $('#cate_names').val(select_data.selected_name.join(' ,'));
+                $('#cate_ids').val(select_data.selected_id.join(','));
+
+                layer.close(index); //如果设定了yes回调，需进行手工关闭
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('index')}">列表</a></li>
+<!--                <li><a href="{:url('update')}">添加</a></li>-->
+    </ul>
+    <form class="well form-inline margin-top-20 layui-form" method="get" action="{:url('index')}">
+        关键字：
+        <input type="text" class="form-control" name="name" style="width: 140px;"
+               value="{:input('request.name/s','')}" placeholder="请输入名称">
+
+        <span style="margin-top: 8px">类型：</span>
+        <div class="layui-inline">
+            <select name="enter_type" id="first_cate" lay-search lay-filter="first_cate">
+                <option value="">请选择</option>
+            </select>
+        </div>
+        <span style="margin-top: 8px">分类：</span>
+        <div class="layui-inline" style="margin-left: 5px">
+            <select name="material_type" id="second_cate" lay-search lay-filter="second_cate">
+                <option value="">请选择</option>
+            </select>
+        </div>
+
+
+<!--        &nbsp;&nbsp;&nbsp;分类：-->
+<!--        <div class="form-group layui-form">-->
+
+<!--            <div class="layui-form-item" style="margin-bottom: 0 !important;">-->
+<!--                <div class="col-md-14" style="z-index: 2000 !important;">-->
+<!--                    <div class="layui-inline" style="width: 300px;">-->
+<!--                        <select name="type" lay-verify="cate_id" lay-search lay-filter="type" >-->
+<!--                            <option value = "0" class="form-control">全部</option>-->
+<!--                            <foreach name="cate_list" item="item">-->
+<!--                                <option value = "{$item.id}" class="form-control" <if condition="$item.id == $type">selected</if>>{$item.cate_name}</option>-->
+<!--                            </foreach>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        &nbsp;&nbsp;&nbsp;状态：
+        <div class="form-group layui-form">
+
+            <div class="layui-form-item" style="margin-bottom: 0 !important;">
+                <div class="col-md-12" style="z-index: 2000 !important;">
+                    <div class="layui-inline" style="width: 150px;">
+                        <select name="status" lay-verify="cate_id" lay-search lay-filter="cate_id" >
+                            <option value = "0" class="form-control">全部</option>
+                            <foreach name="status_list" item="item">
+                                <option value = "{$key}" class="form-control" <if condition="$key == $status">selected</if>>{$item}</option>
+                            </foreach>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 25px"/>
+        <a class="btn btn-danger" href="{:url('index')}">清空</a>
+        <a class="btn btn-success" href="{:url('out_data')}">导出</a>
+
+
+    </form>
+
+
+    <!--    <form method="post" class="js-ajax-form margin-top-20" action="{:url('listOrder')}">-->
+    <!--        <form class="js-ajax-form" action="" method="post">-->
+    <!--            <div>-->
+    <!--                <button class="btn btn-primary btn-sm js-ajax-submit" type="submit"-->
+    <!--                        data-action="{:url('toggle',array('yes'=>1))}" data-subcheck="true">审核通过-->
+    <!--                </button>-->
+    <!--                <button class="btn btn-primary btn-sm js-ajax-submit" type="submit"-->
+    <!--                        data-action="{:url('toggle',array('no'=>1))}" data-subcheck="true">审核不通过-->
+    <!--                </button>-->
+    <!--            </div>-->
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <!--                    <th width="16"><label><input type="checkbox" class="js-check-all" data-direction="x"-->
+            <!--                                                 data-checklist="js-check-x"></label></th>-->
+<!--            <th>ID</th>-->
+            <th>序号</th>
+            <th>申请人</th>
+            <th>名称</th>
+            <th>数量</th>
+            <th>归还时间</th>
+            <th>状态</th>
+
+            <th>创建时间</th>
+
+
+            <th width="200">{:lang('ACTIONS')}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <!--                        <td><input type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x"-->
+                <!--                                   name="ids[]" value="{$vo.id}"></td>-->
+<!--                <td>{$vo.id}</td>-->
+                <td>{$vo.sn}</td>
+                <td>{$vo.true_name}</td>
+                <td>{$vo.type_name}</td>
+                <td>{$vo.num}</td>
+                <td>{$vo.return_date}</td>
+                <td>{$vo.status_name}</td>
+                <td>{$vo.create_time|date='Y-m-d H:i:s'}</td>
+                <td>
+                    <a class="btn btn-xs btn-primary" href="{:url('update',array('id'=>$vo['id']))}">{:lang('EDIT')}</a>
+
+<!--                    <a class="btn btn-xs btn-primary"-->
+<!--                       href="javascript:parent.openIframeLayer('{:url('edit',array('id'=>$vo['id']))}','',{area:['80%','80%']});">{:lang('EDIT')}</a>-->
+                    <a class="btn btn-xs btn-danger js-ajax-delete"
+                       href="{:url('delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
+                    <!--                                        <a class="btn btn-xs btn-warning" href="javascript:parent.openIframeLayer('{:url('cate_data/index',array('data_id'=>$vo['id']))}','',{area:['70%','70%']});">内容</a>-->
+                </td>
+
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    </form>
+
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['form', 'element'], function () {
+        var form = layui.form, element = layui.element;
+
+        var first_cate = "{$params.enter_type??0}"
+        var second_cate = "{$params.type??0}"
+        getCateList(0, $("#first_cate"), 'first_cate');
+
+        if (first_cate) {
+            getCateList(first_cate, $("#second_cate"), 'second_cate');
+        }
+
+        form.on('select(first_cate)', function (data) {
+            first_cate = data.value;
+            getCateList(data.value, $("#second_cate"), 'second_cate');
+        })
+
+        function getCateList(pid, target, type) {
+            $.ajax({
+                type: 'POST',
+                url: "{:url('getCateList')}",
+                data: {
+                    pid: pid, type: type,
+                },
+                dataType: 'json',
+                success: function (data) {
+                    var cate_list = data.data;
+                    console.log(cate_list)
+                    var str = "<option value=''>" + "请选择" + "</option>";
+                    for (var i = 0; i < cate_list.length; i++) {
+
+                        if (type == 'first_cate') {
+                            var where = first_cate;
+                        } else if (type == 'second_cate') {
+                            var where = second_cate;
+                        }
+                        if (where == cate_list[i].id) {
+                            str += "<option value='" + cate_list[i].id + "' selected>" + cate_list[i].cate_name + "</option>";
+                        } else {
+                            str += "<option value='" + cate_list[i].id + "'>" + cate_list[i].cate_name + "</option>";
+                        }
+                    }
+                    target.html(str);
+                    form.render('select');
+                }
+            });
+        }
+    })
+</script>
+</body>
+</html>

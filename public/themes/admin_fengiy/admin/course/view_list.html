@@ -1,0 +1,84 @@
+<include file="public@header" />
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('course/viewList')}">播放记录</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('course/viewList')}">
+        课程名称：
+        <input type="text" class="form-control" name="title"  value="{:input('request.title/s','')}" placeholder="请输入课程名称">
+
+        用户昵称/姓名：
+        <input type="text" class="form-control" name="keyword"  value="{:input('request.keyword/s','')}" placeholder="请输入用户昵称/姓名">
+
+        用户ID：
+        <input type="text" class="form-control" name="user_id"  value="{:input('request.user_id/s','')}" placeholder="请输入用户ID">
+
+        <input type="submit" class="btn btn-primary" value="搜索" />
+        <a class="btn btn-danger" href="{:url('course/viewList')}">清空</a>
+    </form>
+
+        <table class="table table-hover table-bordered margin-top-20">
+            <thead>
+            <tr>
+                <th width="50">ID</th>
+                <th>用户信息</th>
+                <th>类别</th>
+                <th>课程名称</th>
+                <th>章节</th>
+                <th>时间</th>
+            </tr>
+            </thead>
+            <tbody>
+            <foreach name="list" item="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.nickname}，(ID：{$vo.user_id})</td>
+                    <td>{$vo.type_name}</td>
+                    <td>{$vo.title}  <a class="" href="javascript:parent.openIframeLayer('{:url('course/viewDetail',array('id'=>$vo['id']))}','',{area:['70%','70%']});">播放详情</a>
+
+                    </td>
+                    <td>{$vo.name}</td>
+                    <td>{$vo.last_time|date="Y-m-d H:i:s"}</td>
+                </tr>
+            </foreach>
+            </tbody>
+        </table>
+
+    <div class="pagination">{$page}</div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['layer', 'form'], function(){
+        var layer = layui.layer,form = layui.form;
+
+        //首页显示
+        form.on('switch(status)', function(data){
+            var status = 2;
+            var id = data.value;
+            if(this.checked){
+                status = 1;
+            }
+            $.ajax({
+                url:'/admin/course/setCourseStatus',
+                type:"POST",
+                data: {id:id,type:1,status:status},
+                success: function(res) {
+                    //console.log(res);
+                    if(res.code==1){
+                        layer.msg(res.msg, {icon:1});
+                    }else{
+                        layer.msg(res.msg, {icon: 7});
+                    }
+                }
+            });
+        });
+    });
+
+
+
+</script>
+</body>
+</html>

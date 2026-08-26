@@ -1,0 +1,114 @@
+<include file="public@header" />
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('course/playLog')}">播放记录</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20 layui-form" method="get" action="{:url('playLog')}" style="display: flex;flex-wrap: wrap">
+
+        <div>
+            <span>关键字：</span>
+            <div class="layui-inline">
+                <input type="text" class="form-control" name="keyword"  value="{:input('request.keyword/s','')}" placeholder="关键字">
+            </div>
+        </div>
+
+
+        <div style="margin-left: 10px">
+            <span>视频：</span>
+            <div class="layui-inline" style="width: 250px">
+                <select name="course_id" lay-search >
+                    <option value = "0" class="form-control">全部</option>
+                    <foreach name="course_list" item="item">
+                        <option value = "{$item.id}" class="form-control" <if condition="$item.id == input('request.course_id')">selected</if>>{$item.title}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-left: 10px">
+            <span>门店：</span>
+            <div class="layui-inline">
+                <select name="shop_id" lay-search >
+                    <option value = "0" class="form-control">全部</option>
+                    <foreach name="shop_list" item="item">
+                        <option value = "{$item.id}" class="form-control" <if condition="$item.id == input('request.shop_id')">selected</if>>{$item.cate_name}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-left: 10px">
+            <span>最后播放时间：</span>
+            <div class="layui-inline" id="create-time">
+                <div class="layui-input-inline" style="width: 140px;">
+                    <input type="text" autocomplete="off" id="create-startDate" class="layui-input" name="start_time" value="{:input('request.start_time')}" placeholder="开始日期">
+                </div>
+                -
+                <div class="layui-input-inline" style="width: 140px;">
+                    <input type="text" autocomplete="off" id="create-endDate" class="layui-input" name="end_time" value="{:input('request.end_time')}" placeholder="结束日期">
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-left: 10px">
+            <input type="submit" class="btn btn-primary" value="搜索" />
+            <a class="btn btn-danger" href="{:url('playLog')}">清空</a>
+              <a class="btn btn-success" href="{:url('outData',['keyword'=>$keyword,'shop_id'=>$shop_id,
+              'course_id'=>$course_id,'start_time'=>$start_time,'end_time'=>$end_time])}">导出</a>
+        </div>
+    </form>
+
+        <table class="table table-hover table-bordered margin-top-20">
+            <thead>
+            <tr>
+                <th width="50">ID</th>
+                <th>用户信息</th>
+                <th>用户备注</th>
+                <th>门店</th>
+                <th>视频名称</th>
+                <th>总时长</th>
+                <th>当前播放时长</th>
+                <th>上次播放时间</th>
+                <th>是否已看完</th>
+            </tr>
+            </thead>
+            <tbody>
+            <foreach name="list" item="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.nickname}({$vo.mobile})</td>
+                    <td>{$vo.remark}</td>
+                    <td>{$vo.shop_name}</td>
+                    <td>{$vo.title}</td>
+                    <td>{$vo.show_duration}</td>
+                    <td>{$vo.show_play_time}</td>
+                    <td>{$vo.last_time|date="Y-m-d H:i:s"}</td>
+                    <td>
+                        <if condition="$vo.played == 1">是<else />否</if>
+                    </td>
+                </tr>
+            </foreach>
+            </tbody>
+        </table>
+
+    <div class="pagination">{$page}</div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['layer', 'form'], function(){
+        var layer = layui.layer,form = layui.form;laydate = layui.laydate;
+        laydate.render({
+            elem: '#create-time',
+            range: ['#create-startDate', '#create-endDate'],
+            rangeLinked: true
+        });
+    });
+
+
+
+</script>
+</body>
+</html>

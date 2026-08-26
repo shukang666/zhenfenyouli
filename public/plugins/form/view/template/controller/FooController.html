@@ -1,0 +1,18 @@
+<?php
+namespace app\admin\controller;
+
+%root_menu_name%
+class %controller_name%Controller extends ToolController{
+	
+	
+	
+	public function initialize(){
+		parent::initialize();
+		
+		$this->model=new \app\admin\model\%model_name%Model();
+		
+	}
+	
+
+
+}
