@@ -669,6 +669,13 @@ class CommonModel extends Model
      */
    static public function outData($name = '测试表', $data = [], $head = [], $keys = [], $types = [], $image_array = [])
     {
+        // PhpSpreadsheet 在大数据量导出时会消耗大量内存（每个单元格都会缓存对象），
+        // 默认 256M 经常不够用导致 "Allowed memory size of ... bytes exhausted"。
+        // 这里临时取消内存限制，导出结束后进程会自动退出释放内存。
+        // 之前曾因 `new CommonModel()->outData()` 触发 ThinkPHP Model __call
+        // 转发到 db()，进而查询不存在的 cmf_common_model 表，故此处必须静态调用。
+        @ini_set('memory_limit', '-1');
+        @set_time_limit(0);
 
         /* $filename = '签到列表'.date('Y-m-d');
          $head = ['用户ID','昵称','姓名','手机号','单位','项目名称'];//设置表头

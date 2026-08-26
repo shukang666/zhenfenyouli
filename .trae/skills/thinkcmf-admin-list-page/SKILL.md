@@ -12,18 +12,26 @@ description: "在 ThinkCMF6/ThinkPHP6 后台列表页（如 member/index、forum
 - 顶部搜索表单 + URL 参数透传
 - 「导出」按钮 → 调用 `outData` 输出 Excel
 
-## 1. 分页跳转输入框
+## 1. 分页跳转输入框（与 Bootstrap pagination 对齐）
 
-在分页区 `{*$list->render()*}` 旁加：
+项目分页渲染输出 `<ul class="pagination"><li>...</li></ul>`（Bootstrap 3 风格，外层模板通常包一层 `<div class="pagination">{$page}</div>`）。
+每个 `<li><a>` 默认 padding 6px 12px、line-height 1.42857、border 1px solid #ddd，总高约 36px。
+
+**对齐做法**：把跳转组件放在 `.pagination` 容器**内部**紧邻 `<ul>` 之后，用 Bootstrap 标准 `.form-control` + `.btn .btn-default` 类，height 设为 34px（+2px border = 36px，与 pagination li a 等高），视觉上与分页条融为一体。
 
 ```html
-<div class="page-jump" style="display:inline-block; margin-left:15px; vertical-align:middle;">
-    <span>第</span>
-    <input type="text" id="jump_page_input" class="form-control"
-           style="width:50px; display:inline-block; height:32px; text-align:center;"
-           value="{:input('page/d',1)}">
-    <span>页</span>
-    <button type="button" class="btn btn-primary btn-sm" id="jump_page_btn" style="height:32px;">跳转</button>
+<!-- 分页 -->
+<div class="pagination">
+    {$page}
+    <div class="pagination-jump" style="display:inline-block; vertical-align:middle; margin-left:10px;">
+        <span style="vertical-align:middle;">第</span>
+        <input type="text" id="jump_page_input" class="form-control"
+               style="width:50px; display:inline-block; height:34px; text-align:center; padding:6px;"
+               value="{:input('page/d',1)}">
+        <span style="vertical-align:middle;">页</span>
+        <button type="button" class="btn btn-default" id="jump_page_btn"
+                style="height:34px; padding:6px 12px;">跳转</button>
+    </div>
 </div>
 <script>
 (function(){
@@ -33,20 +41,24 @@ description: "在 ThinkCMF6/ThinkPHP6 后台列表页（如 member/index、forum
     function jump(){
         var p = parseInt(input.value, 10);
         if (isNaN(p) || p < 1) p = 1;
+        // 解析当前 query string，剔除旧 page，保留所有其它筛选/排序参数
         var qs = location.search ? location.search.substring(1) : '';
         var params = qs.split('&').filter(function(x){ return x && x.indexOf('page=') !== 0; });
         params.push('page=' + p);
         location.href = location.pathname + '?' + params.join('&') + location.hash;
     }
     btn.addEventListener('click', jump);
-    input.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); jump(); } });
+    input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); jump(); }
+    });
 })();
 </script>
 ```
 
 要点：
-- 用 `location.search` 解析原 query string，剔除旧 `page=`，追加新的，**保留所有其它筛选参数**；
-- 顺带保留 `location.hash`（业务页在 iframe 中常以 hash 形式被路由）。
+- 用 `location.search` 解析原 query string，剔除旧 `page=`，追加新的，**保留所有其它筛选/排序参数**；
+- 顺带保留 `location.hash`（业务页在 iframe 中常以 hash 形式被路由）；
+- **不要**用 `.btn-sm` / `.input-sm`（高度 30px），与 pagination 不一致；用默认 `.form-control` + `.btn`（34px）才对齐。
 
 ## 2. 搜索表单与导出按钮
 
@@ -68,41 +80,66 @@ description: "在 ThinkCMF6/ThinkPHP6 后台列表页（如 member/index、forum
 
 注意：`url('outData', input('get.'))` 中 `url()` 会自动把驼峰 action 名转下划线路由（`out_data`）。
 
-## 3. 控制器端实现
+## 3. 控制器端实现（关键：与 index 完全对齐）
+
+**核心原则**：`outData` 的筛选条件、排序、字段映射必须与 `index` 完全一致，否则导出的数据与列表看到的不一致。
 
 ```php
-public function outData()
-{
-    $params = input('get.');
-    $keyword   = trim($params['keyword'] ?? '');
-    $cid       = intval($params['community_id'] ?? 0);
-    $listOrder = $params['listOrder'] ?? 'a.id desc';
+public function outData(){
+    // 1. 复用 index 的所有筛选参数
+    $params = $this->request->param();
+    $keyword = $this->request->param('keyword','','trim');
+    $sortField = $this->request->param('sort_field','id','trim');
+    $sortOrder = $this->request->param('sort_order','desc','trim');
 
+    // 2. 与 index 完全一致的 where 条件
     $map = [];
-    if ($keyword !== '') {
-        $map[] = ['a.nickname|a.mobile', 'like', "%$keyword%"];
+    $map[] = ['a.status','>',0];  // 与 index 一致
+    if(!empty($keyword)){
+        $map[] = ['a.nickname|a.mobile|a.true_name|a.sn','like',"%".$keyword."%"];
     }
-    if ($cid > 0) {
-        $map[] = ['a.community_id', '=', $cid];
+    if(!empty($params['community_id'])){
+        $map[] = ['community_id','=',$params['community_id']];
     }
-
-    // -1 表示不限制条数（全部导出）
-    $list = MemberModel::where($map)->alias('a')
-        ->field('a.*')
-        ->order($listOrder)
-        ->select();
-
-    foreach ($list as &$item) {
-        $item['create_time'] = date('Y-m-d H:i:s', $item['create_time']);
-        $item['community_name'] = CommunityModel::where('id', $item['community_id'])->value('name','');
+    if(!empty($params['type'])){
+        $map[] = ['a.type','=',$params['type']];
     }
 
+    // 3. 与 index 一致的排序字段白名单
+    if (!in_array($sortField, ['id', 'point', 'create_time'])) {
+        $sortField = 'id';
+    }
+    $list_order = 'a.' . $sortField . ' ' . $sortOrder;
+
+    // 4. 用 MemberModel::getInfo($map, -1, 0, $field, $list_order) 取全量数据
+    //    注意：MemberModel::getInfo 签名为 (map, page_size, id=0, field='a.*', list_order='a.id desc')
+    //    page_size=-1 表示不分页（全部导出）
+    $Model = new MemberModel();
+    $list = $Model->getInfo($map, -1, 0, 'a.*', $list_order);
+
+    // 5. 补齐 index 模板里展示的关联字段（如 community_name）
+    foreach($list as &$item){
+        $item['create_time'] = date('Y-m-d H:i:s',$item['create_time']);
+        $item['community_parent_name'] = CommunityParentModel::where('id',$item['community_parent_id'])->value('name','');
+        $item['community_name'] = CommunityModel::where('id',$item['community_id'])->value('name','');
+    }
+
+    // 6. 表头与 keys 必须一一对应
     $filename = '用户列表' . date('Y-m-d');
-    $head = ['用户ID','昵称','小区','手机号','积分','注册日期'];
-    $keys = ['id','nickname','community_name','mobile','point','create_time'];
-    CommonModel::outData($filename, $list, $head, $keys);  // ⚠️ 必须静态调用
+    $head = ['用户ID','昵称','社区','小区','手机号','积分','注册日期'];
+    $keys = ['id','nickname','community_parent_name','community_name','mobile','point','create_time'];
+    // ⚠️ 必须静态调用，详见 thinkphp-static-vs-instance-call skill
+    CommonModel::outData($filename, $list, $head, $keys);
 }
 ```
+
+**CommonModel::outData 当前签名**（`api/wxapp/model/CommonModel.php`）：
+```php
+static public function outData($name, $data, $head, $keys, $types = [], $image_array = [])
+```
+- `$types`：可选，元素值为 `2` 时该列作为图片列处理（Drawing 插入）；
+- `$image_array`：可选，临时图片路径数组，脚本结束时通过 `register_shutdown_function` 自动 `unlink`；
+- 内部已有 PhpSpreadsheet 内存优化（`setPreCalculateFormulas(false)` / `setIncludeCharts(false)` / `disconnectWorksheets` / `gc_collect_cycles`），但**默认仍可能突破 256M**，所以函数起始处必须加 `@ini_set('memory_limit', '-1'); @set_time_limit(0);`。
 
 ## 4. 重要约束
 
