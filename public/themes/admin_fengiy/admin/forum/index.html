@@ -53,7 +53,7 @@
                placeholder="请输入用户id">
 
 
-        <if condition="$params.type==2">
+        <if condition="$params.type==2 || $params.type==3">
 
             <php>
                 $community_list= cmf_table('member_community')->where('delete_time',0)->select();
@@ -138,6 +138,9 @@
                                   data-checklist="js-check-x"></label></th>
                 <th>ID</th>
 
+                <if condition="$params.type==3">
+                    <th>小区</th>
+                </if>
                 <th>用户</th>
                 <if condition="$is_title">
                     <th>标题</th>
@@ -188,6 +191,9 @@
                     <td>{$vo.id}</td>
 
 
+                    <if condition="$params.type==3">
+                        <td>{$vo.community_name}</td>
+                    </if>
                     <td>{$vo.user_info}</td>
                     <if condition="$is_title">
                         <td>{$vo.title}</td>

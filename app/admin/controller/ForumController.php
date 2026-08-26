@@ -44,7 +44,12 @@ class ForumController extends ToolController
         }
 
         if (!empty($param['community_id'])) {
-            $where[] = ['b.community_id', '=', trim($param['community_id'])];
+            if (!empty($param['type']) && $param['type'] == 3) {
+                // 点位巡检按巡检目标小区筛选（与列表展示的 community_name 一致）
+                $where[] = ['a.subject_community_id', '=', trim($param['community_id'])];
+            } else {
+                $where[] = ['b.community_id', '=', trim($param['community_id'])];
+            }
         }
 
 //        $where[] = ['a.type', 'in', [1, 3]];
