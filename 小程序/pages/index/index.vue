@@ -116,14 +116,15 @@
 		},
 		onShow() {
 			// 已登录但未设置小区信息，强制跳转完善信息页（设置完社区小区和昵称后才可使用）
-			if (this.isLogin && !this.userInfo.community_id) {
-				uni.navigateTo({
-					url: '/pages/user/info',
-					fail: () => {
-						// 避免重复跳转或已在信息页时静默失败
-					}
-				})
-			}
+			// 用 nextTick 延迟跳转，避免在首页渲染过程中跳转导致白屏
+			this.$nextTick(() => {
+				if (this.isLogin && !this.userInfo.community_id) {
+					uni.navigateTo({
+						url: '/pages/user/info',
+						fail: () => {}
+					})
+				}
+			})
 		},
 		methods: {
 			// 获活动列表
