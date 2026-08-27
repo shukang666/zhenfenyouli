@@ -178,6 +178,10 @@
                     community_id:this.form.community_id
                 }).then(res => {
                     this.$u.toast(res.msg, 'success');
+                    // 关闭所有弹窗（头像/昵称/小区选择器）
+                    this.showAvatarPop = false
+                    this.showNicknamePop = false
+                    this.showCommunity = false
                     this.getUserInfo()
                 }).catch(err => {
                     this.$u.toast(err.msg);
