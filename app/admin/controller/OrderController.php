@@ -342,6 +342,11 @@ class OrderController extends AdminBaseController
         set_time_limit(0);
         //设置文件大小
         ini_set('memory_limit','18000M');
+        // PHPExcel 内部使用了花括号字符串偏移等旧语法，PHP 7.4+ 会抛 Deprecated；
+        // 服务器 display_errors 开启时这些提示会混进 xlsx 二进制流导致文件损坏，
+        // 导出期间必须屏蔽弃用类错误的输出
+        error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+        @ini_set('display_errors', '0');
 
         $Model = new ShopOrderModel();
 
@@ -442,7 +447,10 @@ class OrderController extends AdminBaseController
         }
 
         //导出execl
-        ob_end_clean();//防止乱码
+        //关闭所有层级输出缓冲，丢弃前面任何已产生的输出（防止残留文本混入 xlsx）
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         header('pragma:public');
         header('Content-type:application/vnd.ms-excel;charset=utf-8;name="' . $xlsTitle . '.xlsx"');
         header("Content-Disposition:attachment;filename=$fileName.xlsx");//attachment新窗口打印inline本窗口打印
