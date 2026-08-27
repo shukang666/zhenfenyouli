@@ -593,6 +593,35 @@ class ForumController extends AuthController
 
 
     /**
+     * 搜索小区(带社区名)
+     * @OA\Post(
+     *tags={"小区"},
+     *path="/wxapp/forum/search_community",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="keyword",description="小区名关键字",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function search_community(CommunityModel $communityModel)
+    {
+        $keyword = $this->request->param('keyword', '', 'trim');
+        $where = [];
+        if (!empty($keyword)) {
+            $where[] = ['c.name', 'like', '%' . $keyword . '%'];
+        }
+        $list = $communityModel->alias('c')
+            ->leftJoin('member_community_parent p', 'p.id = c.pid')
+            ->field('c.id, c.name, c.pid, p.name as parent_name')
+            ->where($where)
+            ->order('c.list_order asc')
+            ->limit(20)
+            ->select();
+        $this->success('成功', $list);
+    }
+
+
+    /**
      * 小区点位
      * @OA\Post(
      *tags={"小区"},

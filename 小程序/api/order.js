@@ -58,6 +58,8 @@ const order = {
     get_community_parent_list: (params = {}) => uni.$u.post('/wxapp/forum/get_community_parent_list', params),
     // 小区列表
     get_community_list: (params = {}) => uni.$u.post('/wxapp/forum/get_community_list', params),
+    // 搜索小区(带社区名)
+    search_community: (params = {}) => uni.$u.post('/wxapp/forum/search_community', params),
     // 点位列表
     get_community_cate_list: (params = {}) => uni.$u.post('/wxapp/forum/get_community_cate_list', params),
 	

@@ -55,9 +55,21 @@
 		        <view class="u-radius-5 u-p-lr-20 u-m-t-10" style="background-color: #f7f7f7;">
 		            <u-input v-model="form.district_name" type="select" placeholder="请选择" @click="district_show = true" />
 		        </view>
-				<view class="u-m-t-30" v-if="form.district_name">所在小区</view>
+				<view class="u-m-t-30">所在小区</view>
 		        <view class="u-radius-5 u-p-lr-20 u-m-t-10" style="background-color: #f7f7f7;">
-		            <u-input v-model="form.community_name" type="select" placeholder="请选择" @click="community_show = true" />
+		            <u-input v-model="communityKeyword" type="text" placeholder="输入小区名称搜索" :clearable="true" @input="onCommunitySearch" />
+		        </view>
+		        <view v-if="form.community_name && !communityKeyword" class="u-m-t-10 u-p-lr-10 u-font-24" style="color: #18AF38;">
+		            已选：{{form.district_name ? form.district_name + '-' : ''}}{{form.community_name}}
+		        </view>
+		        <view v-if="communityResults.length" class="u-m-t-10" style="max-height: 500rpx; overflow-y: auto; background-color: #fff; border: 1px solid #f0f0f0; border-radius: 10rpx;">
+		            <view v-for="item in communityResults" :key="item.id"
+		                @click="selectCommunity(item)"
+		                class="u-p-lr-20 u-p-tb-15"
+		                style="border-bottom: 1px solid #f7f7f7;">
+		                <view>{{item.name}}</view>
+		                <view class="u-font-24" style="color: #999;">{{item.parent_name}}</view>
+		            </view>
 		        </view>
 		        <view class="u-m-t-30">
 		            <u-button @click="submitBtn" type="primary" shape="circle" hover-class="none"
@@ -65,11 +77,9 @@
 		        </view>
 		    </view>
 		</u-popup>
-		
+
 		<!-- 选择所属社区 -->
 		<u-select v-model="district_show" label-name="name" value-name="id" :list="districtList" @confirm="districtConfirm"></u-select>
-		<!-- 选择所在小区 -->
-		<u-select v-model="community_show" label-name="name" value-name="id" :list="communityList" @confirm="communityConfirm"></u-select>
     </view>
 </template>
 
@@ -95,8 +105,9 @@
                 showCommunity: false, //修改小区弹窗
 				district_show: false,
 				districtList: [], //社区列表
-                community_show: false,
-                communityList: [], //小区列表
+                communityKeyword: '', //小区搜索关键字
+                communityResults: [], //小区搜索结果
+                searchTimer: null, //搜索防抖
             };
         },
         onShow() {
@@ -110,11 +121,14 @@
             this.get_community_parent_list()
         },
         methods: {
-			// 选择所属社区
+			// 选择所属社区(手动选择时清空已选小区，需重新搜索)
 			districtConfirm(e) {
 				this.form.district_id = e[0].value
 				this.form.district_name = e[0].label
-				this.get_community_list(e[0].value)
+				this.form.community_id = 0
+				this.form.community_name = ''
+				this.communityKeyword = ''
+				this.communityResults = []
 			},
 			// 获取社区列表
 			get_community_parent_list() {
@@ -122,16 +136,27 @@
 					this.districtList = res.data
 				})
 			},
-            // 选择小区
-            communityConfirm(e) {
-                this.form.community_id = e[0].value
-                this.form.community_name = e[0].label
+            // 搜索小区(防抖)
+            onCommunitySearch(value) {
+                if (this.searchTimer) clearTimeout(this.searchTimer)
+                if (!value || !value.trim()) {
+                    this.communityResults = []
+                    return
+                }
+                this.searchTimer = setTimeout(() => {
+                    this.$u.api.search_community({keyword: value.trim()}).then(res => {
+                        this.communityResults = res.data || []
+                    })
+                }, 300)
             },
-            // 获取小区列表
-            get_community_list(pid) {
-                this.$u.api.get_community_list({pid}).then(res => {
-                    this.communityList = res.data
-                })
+            // 选择小区(自动带出社区)
+            selectCommunity(item) {
+                this.form.community_id = item.id
+                this.form.community_name = item.name
+                this.form.district_id = item.pid
+                this.form.district_name = item.parent_name || ''
+                this.communityKeyword = ''
+                this.communityResults = []
             },
             // 更新会员信息
             submitBtn() {
