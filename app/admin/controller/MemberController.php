@@ -121,7 +121,7 @@ class MemberController extends ToolController
         $map = [];
         $map[] = ['a.status','>',0]; // 与 index 一致
         if(!empty($keyword)){
-            $map[] = ['a.nickname|a.mobile|a.true_name|a.sn','like',"%".$keyword."%"];
+            $map[] = ['a.nickname|a.mobile','like',"%".$keyword."%"];
         }
         if(!empty($params['community_id'])){
             $map[] = ['community_id','=',$params['community_id']];
