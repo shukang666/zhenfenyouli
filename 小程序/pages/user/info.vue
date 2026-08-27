@@ -170,6 +170,7 @@
             // 更新会员信息
             submitBtn() {
                 if (!this.form.nickname) return this.$u.toast('请填写昵称')
+                if (!this.form.community_id) return this.$u.toast('请选择所在小区')
                 this.$u.api.updateMember({
                     nickname: this.form.nickname,
                     avatar: this.filepath,
