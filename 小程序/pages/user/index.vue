@@ -124,7 +124,7 @@
 				<view class="u-font-24 u-m-t-10">我的徽章</view>
 			</u-grid-item>
 			<u-grid-item @click="navigator('/pages/answer/examine?id=1')">
-				<u-icon name="/static/user-9.png" :size="50"></u-icon>
+				<u-icon name="/static/user-6.png" :size="50"></u-icon>
 				<view class="u-font-24 u-m-t-10">答题考试</view>
 			</u-grid-item>
 			</u-grid>
