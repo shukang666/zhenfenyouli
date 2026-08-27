@@ -606,6 +606,8 @@ class ForumController extends AuthController
     public function search_community(CommunityModel $communityModel)
     {
         $keyword = $this->request->param('keyword', '', 'trim');
+        $page = $this->request->param('page', 1);
+        $page_size = $this->request->param('page_size', 20);
         $where = [];
         if (!empty($keyword)) {
             $where[] = ['c.name', 'like', '%' . $keyword . '%'];
@@ -615,9 +617,11 @@ class ForumController extends AuthController
             ->field('c.id, c.name, c.pid, p.name as parent_name')
             ->where($where)
             ->order('c.list_order asc')
-            ->limit(20)
-            ->select();
-        $this->success('成功', $list);
+            ->paginate([
+                'page' => $page,
+                'list_rows' => $page_size,
+            ]);
+        $this->success('成功', getFullData($list));
     }
 
 
