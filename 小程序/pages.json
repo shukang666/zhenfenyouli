@@ -749,27 +749,22 @@
 		}
 	],
 	"preloadRule": {
+		// 仅预载高频分包，避免多包并发下载抢占带宽内存、加剧页面跳转卡顿
 		"pages/index/index": {
-			"network": "all",
-			"packages": ["pages/zzhd", "pages/flhd"]
-		},
-		"pages/low_carbon/low_carbon": {
-			"network": "all",
-			"packages": ["pages/zzhd", "pages/flhd", "pages/dtsh"]
+			"network": "wifi",
+			"packages": ["pages/flhd"]
 		},
 		"pages/health/health": {
-			"network": "all",
-			"packages": ["pages/answer", "pages/sxjk", "pages/sxjcgj", "pages/community", "pages/sjhd"]
+			"network": "wifi",
+			"packages": ["pages/answer"]
 		},
 		"pages/mall/mall": {
-			"network": "all",
-			"packages": ["pages/address", "pages/coupon", "pages/order_list", "pages/settled", "pages/store"]
+			"network": "wifi",
+			"packages": ["pages/order_list"]
 		},
 		"pages/user/index": {
-			"network": "all",
-			"packages": ["pages/order_list", "pages/msg_list", "pages/address", "pages/coupon", "pages/balance", "pages/points", "pages/my_comment", "pages/my_evaluation", "pages/my_questionnaire",
-				"pages/my_reservation", "pages/settled", "pages/store"
-			]
+			"network": "wifi",
+			"packages": ["pages/msg_list"]
 		}
 	},
 	"globalStyle": {
