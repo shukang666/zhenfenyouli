@@ -30,14 +30,6 @@
 						垃圾分类指导
 					</view>
 				</view>
-				<view class="u-w-218 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30">
-					<view class="u-flex u-row-center" @click="navigator('/pages/answer/examine?id=1',3)">
-						<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png?watermark"></u-image>
-					</view>
-					<view class="u-m-t-30 u-font-bold">
-						答题考试
-					</view>
-				</view>
 			</view>
 		</view>
 	</view>
