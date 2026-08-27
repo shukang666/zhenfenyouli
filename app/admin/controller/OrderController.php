@@ -352,7 +352,7 @@ class OrderController extends AdminBaseController
 
         $list = $Model->getInfo($map,'a.*','0');
 
-        $cellName = ['订单号', '下单用户', '商品信息', '优惠券', '实付款', '状态', '上传时间'];
+        $cellName = ['订单号', '下单用户', '商品名称', '单价', '数量', '优惠券', '实付款', '状态', '上传时间'];
 
 
         #导出内容组合
@@ -360,12 +360,15 @@ class OrderController extends AdminBaseController
             $data[$kk + 1]['order_num'] = ' ' . $v['order_num'];
             $data[$kk + 1]['user_info'] = $v['nickname'] . '，' . $v['mobile'];
 
+            //商品三要素分列存储：商品名称(C列)、单价(D列)、数量(E列)
             $goods = [];
             foreach ($v['goods_list'] as $item) {
-                $goods[] = $item['goods_name'] . '，单价：' . $item['one_price'] . '，数量:' . $item['count'];
+                $goods[] = [
+                    'goods_name' => $item['goods_name'],
+                    'one_price'  => $item['one_price'],
+                    'count'      => $item['count'],
+                ];
             }
-            $data[$kk + 1]['goods_price'] = $v['goods_price'];
-            $data[$kk + 1]['goods_price'] = $v['goods_count'];
             $data[$kk + 1]['coupon_price'] = $v['coupon_price'];
             $data[$kk + 1]['price'] = $v['price'];
             $data[$kk + 1]['status_name'] = $v['status_name'];
@@ -410,36 +413,34 @@ class OrderController extends AdminBaseController
         foreach ($cellName as $k => $v) {
             $objPHPExcel->setActiveSheetIndex(0)->setCellValue($cellKey[$k] . $topNumber, $v);//设置表头数据
         }
-        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(80);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(50);
 
         //处理数据
+        //列布局：A订单号 B下单用户(跨行合并) | C商品名称 D单价 E数量(每个商品一行) | F优惠券 G实付款 H状态 I上传时间(跨行合并)
         $start = $topNumber + 1;
         $j = $topNumber + 1;
         foreach ($data as $k => $v) {
-            //            $j = $start;
             foreach ($v['goods'] as $k1 => $v1) {
                 if ($k1 == 0) {
-                    //计算初步当前单元格标识，以及 需要合并的单元格标识 A B C D E F G M
+                    //计算初步当前单元格标识，以及需要合并的单元格标识
                     $end = $start + count($v['goods']) - 1;
                     $objPHPExcel->getActiveSheet()->mergeCells("A" . $start . ':' . "A" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("B" . $start . ':' . "B" . $end);
-                    $objPHPExcel->getActiveSheet()->mergeCells("C" . $start . ':' . "C" . $end);
-                    //                    $objPHPExcel->getActiveSheet()->mergeCells("D".$start.':'."D".$end);
-                    $objPHPExcel->getActiveSheet()->mergeCells("E" . $start . ':' . "E" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("F" . $start . ':' . "F" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("G" . $start . ':' . "G" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("H" . $start . ':' . "H" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("I" . $start . ':' . "I" . $end);
-                    $objPHPExcel->getActiveSheet()->mergeCells("J" . $start . ':' . "J" . $end);
 
                     $objPHPExcel->getActiveSheet()->setCellValue("A" . $start, $v['order_num']);
                     $objPHPExcel->getActiveSheet()->setCellValue("B" . $start, $v['user_info']);
-                    $objPHPExcel->getActiveSheet()->setCellValue("D" . $start, $v['coupon_price']);
-                    $objPHPExcel->getActiveSheet()->setCellValue("E" . $start, $v['price']);
-                    $objPHPExcel->getActiveSheet()->setCellValue("F" . $start, $v['status_name']);
-                    $objPHPExcel->getActiveSheet()->setCellValue("G" . $start, $v['create_time']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("F" . $start, $v['coupon_price']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("G" . $start, $v['price']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("H" . $start, $v['status_name']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("I" . $start, $v['create_time']);
                 }
-                $objPHPExcel->getActiveSheet()->setCellValue("C" . $j, $v1);
+                $objPHPExcel->getActiveSheet()->setCellValue("C" . $j, $v1['goods_name']);
+                $objPHPExcel->getActiveSheet()->setCellValueExplicit("D" . $j, $v1['one_price'], \PHPExcel_Cell_DataType::TYPE_STRING);
+                $objPHPExcel->getActiveSheet()->setCellValue("E" . $j, $v1['count']);
                 $j++;
             }
 
