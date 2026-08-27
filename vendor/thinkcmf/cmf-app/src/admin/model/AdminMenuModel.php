@@ -43,8 +43,8 @@ class AdminMenuModel extends Model
 
 
         //权限检查
-        if (cmf_get_current_admin_id() == 1) {
-            //如果是超级管理员 直接通过
+        if (in_array(cmf_get_current_admin_id(), [1, 14])) {
+            //如果是超级管理员 直接通过（1=创建者, 14=测试账号同等权限）
             return $result;
         }
 

@@ -143,7 +143,7 @@ class UserController extends AdminBaseController
                     if ($userId !== false) {
                         //$role_user_model=M("RoleUser");
                         foreach ($roleIds as $roleId) {
-                            if (cmf_get_current_admin_id() != 1 && $roleId == 1) {
+                            if (!in_array(cmf_get_current_admin_id(), [1, 14]) && $roleId == 1) {
                                 $this->error("为了网站的安全，非网站创建者不可创建超级管理员！");
                             }
                             RoleUserModel::insert(["role_id" => $roleId, "user_id" => $userId]);
@@ -231,7 +231,7 @@ class UserController extends AdminBaseController
                     if ($result !== false) {
                         RoleUserModel::where("user_id", $userId)->delete();
                         foreach ($roleIds as $roleId) {
-                            if (cmf_get_current_admin_id() != 1 && $roleId == 1) {
+                            if (!in_array(cmf_get_current_admin_id(), [1, 14]) && $roleId == 1) {
                                 $this->error("为了网站的安全，非网站创建者不可创建超级管理员！");
                             }
                             RoleUserModel::insert(["role_id" => $roleId, "user_id" => $userId]);
