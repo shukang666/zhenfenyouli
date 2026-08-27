@@ -47,14 +47,16 @@
 		
 		<!-- 选择所属社区 -->
 		<u-popup mode="bottom" border-radius="20" closeable v-model="showCommunity">
-		    <view class="u-p-30">
+		    <view class="u-p-30" :style="{ paddingBottom: keyboardHeight ? keyboardHeight + 'px' : '30rpx' }">
 				<view class="u-font-32 u-text-center">
 				    修改社区信息
 				</view>
+		        <!-- 所属社区(暂隐藏，小区搜索选中后会自动带出)
 		        <view class="u-m-t-30">所属社区</view>
 		        <view class="u-radius-5 u-p-lr-20 u-m-t-10" style="background-color: #f7f7f7;">
 		            <u-input v-model="form.district_name" type="select" placeholder="请选择" @click="district_show = true" />
 		        </view>
+		        -->
 				<view class="u-m-t-30">所在小区</view>
 		        <view class="u-radius-5 u-p-lr-20 u-m-t-10" style="background-color: #f7f7f7;">
 		            <u-input v-model="communityKeyword" type="text" placeholder="输入小区名称搜索" :clearable="true" @input="onCommunitySearch" />
@@ -108,6 +110,7 @@
                 communityKeyword: '', //小区搜索关键字
                 communityResults: [], //小区搜索结果
                 searchTimer: null, //搜索防抖
+                keyboardHeight: 0, //键盘高度(弹起时顶起弹窗内容)
             };
         },
         onShow() {
@@ -119,6 +122,12 @@
             this.form.community_id = this.userInfo.community_id || 0;
             if (this.form.avatar) this.filepath = this.$u.func.cutImgUrl(this.form.avatar);
             this.get_community_parent_list()
+        },
+        mounted() {
+            // 监听键盘高度，弹起时顶起社区弹窗内容避免遮挡搜索结果
+            uni.onKeyboardHeightChange(res => {
+                this.keyboardHeight = res.height || 0
+            })
         },
         methods: {
 			// 选择所属社区(手动选择时清空已选小区，需重新搜索)
