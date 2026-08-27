@@ -1,0 +1,15 @@
+{
+  "name": "uniapp-template",
+  "version": "1.0.0",
+  "description": "uniapp + uview-ui空白项目模版",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vaevie520",
+  "license": "ISC",
+  "dependencies": {
+    "jweixin-module": "^1.6.0",
+    "uview-ui": "^1.8.1"
+  }
+}

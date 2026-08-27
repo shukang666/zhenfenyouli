@@ -1,0 +1,299 @@
+.card-all{
+	background: #ffffff;
+	border-radius: 30rpx;
+	padding: 25rpx;
+	width: 690rpx;
+	margin: 30rpx;
+}
+.card-lr{
+	background: #ffffff;
+	border-radius: 30rpx;
+	padding: 25rpx;
+	width: 690rpx;
+	margin:0 30rpx;
+}
+.card-p-lr{
+	background: #ffffff;
+	border-radius: 30rpx;
+	padding:0 25rpx;
+	width: 690rpx;
+	margin:30rpx;
+}
+.u-main-c{
+	color: #18AF38;
+}
+.u-hui-bg{
+	background-color: #F5F5F5;
+}
+.u-main-bg{
+	background-color:#18AF38;
+}
+.u-radius-o{
+	border-radius: 50%;
+}
+.u-flex-c-c{
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+.u-abso-center{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+.u-hui{
+	color: #777777;
+}
+.u-price-c{
+	color: #FF0054;
+}
+// 文字加中划线
+.old-price{
+	text-decoration:line-through;
+}
+
+.u-shadow{
+  box-shadow: 0rpx 4rpx 4rpx 0rpx rgba(0,0,0,0.13);
+}
+.u-abso-bottom{
+	position: absolute;
+	left: 50%;
+	bottom: 2%;
+	transform: translate(-50%, -50%);
+}
+
+
+	.kefuBtn {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		top: 0;
+		left: 0;
+		border-color: rgba(0, 0, 0, 0) !important;
+	}
+.u-hui-bg{
+	background: #F6F6F6;
+}
+
+	
+.u-p-b{
+	padding: 30rpx 60rpx;
+}
+
+// 定义内外边距，历遍1-200
+@for $i from 0 through 200 {
+	// 只要双数和能被5除尽的数
+	@if $i % 2 == 0 or $i % 5 == 0 {
+		// 定义外边距
+		.u-m-#{$i} {
+			margin: $i + rpx!important;
+		}
+		// 定义上下外边距
+		.u-m-tb-#{$i} {
+			margin: $i + rpx 0 !important;
+		}
+		// 定义左右外边距
+		.u-m-lr-#{$i} {
+			margin: 0 $i + rpx !important;
+		}
+		// 定义内边距
+		.u-p-#{$i} {
+			padding: $i + rpx!important;
+		}
+		// 定义上下内边距
+		.u-p-tb-#{$i} {
+			padding: $i + rpx 0 !important;
+		}
+		// 定义左右内边距
+		.u-p-lr-#{$i} {
+			padding: 0 $i + rpx !important;
+		}
+	}
+}
+
+// 圆角，历遍1-50
+@for $i from 0 through 50 {
+	.u-radius-#{$i} {
+		border-radius: $i + px !important;
+		overflow: hidden;
+	}
+	.u-radius-t-l-#{$i} {
+		border-top-left-radius: $i + px !important;
+		overflow: hidden;
+	}
+	.u-radius-t-r-#{$i} {
+		border-top-right-radius: $i + px !important;
+		overflow: hidden;
+	}
+	.u-radius-b-r-#{$i} {
+		border-bottom-right-radius: $i + px !important;
+		overflow: hidden;
+	}
+	.u-radius-b-l-#{$i} {
+		border-bottom-left-radius: $i + px !important;
+		overflow: hidden;
+	}
+}
+
+// 浮动边距，历遍1-750
+@for $i from 0 through 750 {
+	.u-abso-t-#{$i} {
+		top: $i + rpx !important;
+		bottom: auto;
+	}
+	.u-abso-r-#{$i} {
+		right: $i + rpx !important;
+		left: auto;
+	}
+	.u-abso-b-#{$i} {
+		bottom: $i + rpx !important;
+		top: auto;
+	}
+	.u-abso-l-#{$i} {
+		left: $i + rpx !important;
+		right: auto;
+	}
+}
+
+// 层级，历遍1-9999
+@for $i from 0 through 99 {
+	.u-zindex-#{$i} {
+		z-index: $i;
+	}
+}
+
+// 宽度 高度，历遍1-750
+@for $i from 0 through 750 {
+	.u-w-#{$i} {
+		width: $i + rpx !important;
+	}
+	.u-h-#{$i} {
+		height: $i + rpx !important;
+	}
+}
+
+// 100%宽度 多余隐藏
+.u-width-100{
+	width: 100%;
+	overflow: hidden;
+}
+
+// 定义字体(rpx)单位，大于或等于20的都为rpx单位字体
+@for $i from 20 through 100 {
+	.u-font-#{$i} {
+		font-size: $i + rpx;
+	}
+}
+
+.u-font-bold {
+	font-weight: bold;
+}
+.u-font-normal {
+	font-weight: normal;
+}
+.orange {
+	color: $orange;
+}
+.yellow {
+	color: $yellow;
+}
+.green {
+	color: $green;
+}
+.grey {
+	color: $grey;
+}
+.white {
+	color: $white;
+}
+.brown {
+	color: #7A4D24
+}
+.purple {
+	color: #9926FE
+}
+
+//白色背景
+.u-type-white-bg{
+	background: #FFFFFF;
+}
+
+//不自动缩放
+.u-shrink-no{
+	flex-shrink: 0;
+}
+/*删除线*/
+.u-line-through {
+	text-decoration: line-through;
+}
+/*文本域自动换行*/
+.u-white-space {
+	white-space: pre-line;
+}
+
+/*checkbox圆角*/
+/* #ifdef H5 */
+.u-checkbox-radius{
+	uni-checkbox .uni-checkbox-input {
+		width: 35rpx;
+		height: 35rpx;
+		border-radius: 50%;
+	}
+	uni-checkbox .uni-checkbox-input.uni-checkbox-input-checked {
+		width: 35rpx;
+		height: 35rpx;
+		border: 1rpx solid #FF2E2E;
+		background-color: #FF2E2E;
+	}
+
+	uni-checkbox .uni-checkbox-wrapper {
+		width: 100%;
+	}
+	
+	uni-checkbox .uni-checkbox-input.uni-checkbox-input-checked:before{
+		color: #FFFFFF;
+	}
+	
+	uni-checkbox:not([disabled]) .uni-checkbox-input:hover{
+		border-color: transparent;
+	}
+}
+/* #endif */
+/* #ifndef H5 */
+.u-checkbox-radius {
+	checkbox .wx-checkbox-input {
+		width: 30rpx;
+		height: 30rpx;
+		border-radius: 50%;
+	}
+	// 复选框选中样式
+	checkbox .wx-checkbox-input.wx-checkbox-input-checked {
+		border-color: #FF974B;
+		background-color: #FF974B;
+	}
+	// 复选框选中之后对号的样式
+	checkbox .wx-checkbox-input.wx-checkbox-input-checked::before {
+		font-size: 30rpx;
+		color:#FFF;
+	}
+}
+/* #endif */
+	
+/*底部浮动按钮*/
+.submit-btn{
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	z-index: 99;
+	background: linear-gradient(rgba(255,255,255,0), rgba(247,247,247,1), rgba(247,247,247,1));
+}
+
+/*列表/数据为空垂直居中*/
+.empty-tip{
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
