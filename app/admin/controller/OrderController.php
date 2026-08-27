@@ -350,7 +350,8 @@ class OrderController extends AdminBaseController
 
         $Model = new ShopOrderModel();
 
-        $list = $Model->getInfo($map,'a.*','0');
+        // ShopOrderModel::getInfo 签名为 ($map, $field, $page_size)，page_size 必须传 -1 才会全量查询
+        $list = $Model->getInfo($map,'a.*',-1);
 
         $cellName = ['订单号', '下单用户', '商品名称', '单价', '数量', '优惠券', '实付款', '状态', '上传时间'];
 
