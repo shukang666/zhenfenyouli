@@ -1,11 +1,49 @@
 <template>
 	<view class="container">
-		<!-- 顶部标签栏：后台"社区活动-活动标签"可配置1-4个，按排序显示；下方内容暂写死为现有内容，待后续模板化 -->
+		<!-- 顶部标签栏：后台"社区活动-活动标签"可配置1-4个；第一个为固定标签（显示垃圾分类打卡内容），其他标签暂显示现有内容，待按绑定分类模板化 -->
 		<view class="card-all tab-bar u-flex" style="margin: 20rpx 30rpx 0;padding: 8rpx;" v-if="tab_list.length">
 			<view class="tab-item u-text-center" :class="{active: current_tab == index}" v-for="(tab,index) in tab_list"
 				:key="tab.id" @click="switch_tab(index)">{{tab.name}}</view>
 		</view>
 
+		<!-- 第一个标签：固定内容，与"分类活动"（pages/flhd/flhd）页一致 -->
+		<view v-if="current_tab == 0" class="u-p-30">
+			<view class="u-type-white-bg u-radius-10" @click="navigator('/pages/flhd/ljfldk',1)">
+				<u-image width="100%" height="326" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
+				<view class="u-p-20 u-flex u-row-between">
+					<view class="">
+						<view class="u-font-bold u-font-32">
+							垃圾分类打卡
+						</view>
+						<view class="u-m-t-10 u-font-24 u-type-info">
+							参与垃圾分类学习通过考核后即可解锁
+						</view>
+					</view>
+					<view class="">
+						<u-button type="primary" size="mini" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
+							@click.stop="navigator('/pages/flhd/ljfldk',1)">立即参与</u-button>
+					</view>
+				</view>
+			</view>
+			<view class="u-m-t-50">
+				<view class="u-flex u-row-center">
+					<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/8912eace6b085bd4b6225c5c8ae185ff.png?watermark"></u-image>
+				</view>
+				<view class="u-m-t-30 u-flex">
+					<view class="u-w-218 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="navigator('/pages/flhd/list',2)">
+						<view class="u-flex u-row-center">
+							<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png?watermark"></u-image>
+						</view>
+						<view class="u-m-t-30 u-font-bold">
+							垃圾分类指导
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 其他标签：暂显示现有内容，待后续按绑定的活动分类模板化 -->
+		<view v-else>
 		<view class="u-m-30">
 			<u-swiper :list="swiper_list" height="340" mode="none" @click="adLink($event,swiper_list)"></u-swiper>
 		</view>
@@ -51,6 +89,7 @@
 				<image :src="item.image" class="u-w-80 u-h-80" mode="aspectFill"></image>
 				<view class="u-font-28 u-font-bold u-m-t-15">{{item.name}}</view>
 			</view>
+		</view>
 		</view>
 	</view>
 </template>
@@ -114,9 +153,25 @@
 				if (this.current_tab == index) return
 				this.current_tab = index
 			},
-			// 跳转页面
-			navigator(url) {
+			// 跳转页面（type==1 为垃圾分类打卡入口，需先通过答题考试）
+			navigator(url, type) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				if (!this.userInfo.is_answer && type == 1) {
+					var that = this
+					uni.showModal({
+						title: '提示',
+						content: '请先学习垃圾分类指导，通过答题考试后可参与活动',
+						showCancel: false,
+						confirmText: '立即学习',
+						confirmColor: '#39BF3E',
+						success: function(res) {
+							if (res.confirm) {
+								that.$u.route('/pages/flhd/list')
+							} else if (res.cancel) {}
+						}
+					});
+					return
+				}
 				this.$u.route(url)
 			},
 			// 轮播图跳转
