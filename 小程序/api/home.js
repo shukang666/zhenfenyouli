@@ -1,8 +1,10 @@
 const home = {
 	// 获取我的徽章列表 
 	get_new_badge_list: (params = {}) => uni.$u.post('/wxapp/active/get_new_badge_list', params),
-	// 活动分类 
+	// 活动分类
 	get_new_cate_active_list: (params = {}) => uni.$u.post('/wxapp/active/get_new_cate_active_list', params),
+	// 活动页标签列表
+	get_active_tab_list: (params = {}) => uni.$u.post('/wxapp/active/get_active_tab_list', params),
 	// 活动列表
 	get_new_active_list: (params = {}) => uni.$u.post('/wxapp/active/get_new_active_list', params),
 	// 获取活动详情 

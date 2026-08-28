@@ -9,6 +9,7 @@ use app\admin\model\active\ActiveClockModel;
 use app\admin\model\active\ActiveCommunityCateModel;
 use app\admin\model\active\ActiveModel;
 use app\admin\model\active\ActiveSIgnModel;
+use app\admin\model\active\ActiveTabModel;
 use app\admin\model\active\ActiveUserModel;
 use app\admin\model\active\MemberBadgeModel;
 use app\admin\model\active\WasteCateModel;
@@ -311,6 +312,23 @@ class ActiveController extends AuthController
             $item['image'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
             return $item;
         });
+        $this->success('请求成功', $list);
+    }
+
+    /**
+     * 活动页标签列表
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_active_tab_list",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_active_tab_list(){
+        $where = [];
+        $where[] = ['status', '=', 1];
+        $list = ActiveTabModel::where($where)->order('list_order asc,id asc')->limit(4)->select();
         $this->success('请求成功', $list);
     }
 

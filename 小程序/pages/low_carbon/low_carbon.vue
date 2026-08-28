@@ -1,5 +1,11 @@
 <template>
 	<view class="container">
+		<!-- 顶部标签栏：后台"社区活动-活动标签"可配置1-4个，按排序显示；下方内容暂写死为现有内容，待后续模板化 -->
+		<view class="card-all tab-bar u-flex" style="margin: 20rpx 30rpx 0;padding: 8rpx;" v-if="tab_list.length">
+			<view class="tab-item u-text-center" :class="{active: current_tab == index}" v-for="(tab,index) in tab_list"
+				:key="tab.id" @click="switch_tab(index)">{{tab.name}}</view>
+		</view>
+
 		<view class="u-m-30">
 			<u-swiper :list="swiper_list" height="340" mode="none" @click="adLink($event,swiper_list)"></u-swiper>
 		</view>
@@ -56,6 +62,8 @@
 			return {
 				swiper_list: [],
 				cate_list: [],
+				tab_list: [],
+				current_tab: 0,
 				page: 1,
 				total: 0
 			};
@@ -63,6 +71,7 @@
 		onLoad() {
 			this.find_slide()
 			this.get_new_cate_active_list()
+			this.get_active_tab_list()
 		},
 		onShow() {
 			if (checkCommunity(this)) return
@@ -91,6 +100,19 @@
 				}).catch(err => {
 					this.$u.toast(err.msg)
 				})
+			},
+			// 活动页标签
+			get_active_tab_list() {
+				this.$u.api.get_active_tab_list().then(res => {
+					this.tab_list = res.data
+				}).catch(err => {
+					this.$u.toast(err.msg)
+				})
+			},
+			// 切换标签（标签内容暂未模板化，下方统一显示现有内容）
+			switch_tab(index) {
+				if (this.current_tab == index) return
+				this.current_tab = index
 			},
 			// 跳转页面
 			navigator(url) {
@@ -128,5 +150,24 @@
 	.container {
 		min-height: 100vh;
 		background: #F5F5F5;
+	}
+
+	.tab-bar {
+		justify-content: space-around;
+
+		.tab-item {
+			flex: 1;
+			font-size: 28rpx;
+			color: #666;
+			padding: 16rpx 0;
+			border-radius: 10rpx;
+			transition: all .2s;
+
+			&.active {
+				color: #18AF38;
+				font-weight: bold;
+				background: rgba(24, 175, 56, 0.10);
+			}
+		}
 	}
 </style>
