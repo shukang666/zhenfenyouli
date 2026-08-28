@@ -134,12 +134,14 @@ class MobileController extends AdminBaseController
         $this->assign('status', $status);
         $this->assign('keyword', $params['keyword'] ?? '');
         $this->assign('list', $list);
-        //分页状态预计算（模板condition中不能出现 -> ，需在此算好）
-        $this->assign('show_page', $list->hasPages());
-        $this->assign('is_first', $list->onFirstPage());
-        $this->assign('is_last', !$list->hasMorePages());
-        $this->assign('cur_page', $list->currentPage());
-        $this->assign('last_page', $list->lastPage());
+        //分页状态预计算（该版本 Paginator 无 onFirstPage/hasMorePages，用 currentPage/lastPage 算术判断）
+        $curPage  = $list->currentPage();
+        $lastPage = $list->lastPage();
+        $this->assign('show_page', $lastPage > 1);
+        $this->assign('is_first', $curPage <= 1);
+        $this->assign('is_last', $curPage >= $lastPage);
+        $this->assign('cur_page', $curPage);
+        $this->assign('last_page', $lastPage);
         $this->assign('is_empty', count($list) == 0);
         return $this->fetch('mobile/check_index');
     }
