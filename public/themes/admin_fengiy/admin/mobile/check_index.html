@@ -250,14 +250,10 @@
 </div>
 
 <div class="tabs">
-    <a href="{:url('check_index', ['status' => 1, 'keyword' => $keyword])}"
-       class="{if $status == 1}active{/if}">待审核</a>
-    <a href="{:url('check_index', ['status' => 2, 'keyword' => $keyword])}"
-       class="{if $status == 2}active{/if}">已通过</a>
-    <a href="{:url('check_index', ['status' => 3, 'keyword' => $keyword])}"
-       class="{if $status == 3}active{/if}">已驳回</a>
-    <a href="{:url('check_index', ['status' => 0, 'keyword' => $keyword])}"
-       class="{if $status == 0}active{/if}">全部</a>
+    <a data-status="1" href="{:url('check_index', ['status' => 1, 'keyword' => $keyword])}">待审核</a>
+    <a data-status="2" href="{:url('check_index', ['status' => 2, 'keyword' => $keyword])}">已通过</a>
+    <a data-status="3" href="{:url('check_index', ['status' => 3, 'keyword' => $keyword])}">已驳回</a>
+    <a data-status="0" href="{:url('check_index', ['status' => 0, 'keyword' => $keyword])}">全部</a>
 </div>
 
 <form class="search-bar" method="get" action="{:url('check_index')}">
@@ -267,7 +263,7 @@
 </form>
 
 <div class="list">
-    {volist name="list" id="vo"}
+    <volist name="list" id="vo">
     <div class="card">
         <div class="card-head">
             <span class="name">{$vo.name}</span>
@@ -281,10 +277,10 @@
             <span class="time">{$vo.create_name}</span>
             <span class="btns">
                 <button class="btn btn-detail" onclick="showDetail(this)">详情</button>
-                {if $vo.status == 1}
+                <if condition="$vo.status == 1">
                 <button class="btn btn-pass" onclick="showPass({$vo.id})">通过</button>
                 <button class="btn btn-reject" onclick="showReject({$vo.id})">驳回</button>
-                {/if}
+                </if>
             </span>
         </div>
         <div class="detail-html">
@@ -294,33 +290,35 @@
             <div class="row"><span class="label">申请理由</span><span class="val">{$vo.reason}</span></div>
             <div class="row"><span class="label">申请时间</span><span class="val">{$vo.create_name}</span></div>
             <div class="row"><span class="label">当前状态</span><span class="val">{$vo.status_name}</span></div>
-            {if $vo.status == 3}<div class="row"><span class="label">驳回原因</span><span class="val">{$vo.msg}</span></div>{/if}
+            <if condition="$vo.status == 3">
+            <div class="row"><span class="label">驳回原因</span><span class="val">{$vo.msg}</span></div>
+            </if>
             <div class="row"><span class="label">手写签名</span></div>
-            {if $vo.sign_image}
+            <if condition="$vo.sign_image">
             <img class="sign-img" src="{$vo.sign_image}">
-            {else /}
+            <else />
             <div class="row"><span class="val" style="color:#bbb">暂无签名图</span></div>
-            {/if}
-            {if $vo.pdf_url}
+            </if>
+            <if condition="$vo.pdf_url">
             <a class="pdf-link" href="{$vo.pdf_url}" target="_blank">查看签约PDF ></a>
-            {/if}
+            </if>
         </div>
     </div>
-    {/volist}
-    {if count($list) == 0}
+    </volist>
+    <if condition="$is_empty">
     <div class="empty">暂无数据</div>
-    {/if}
+    </if>
 </div>
 
-{if $list->hasPages()}
+<if condition="$show_page">
 <div class="pager">
     <a href="{:$list->url(max(1, $list->currentPage() - 1))}"
-       class="{if $list->onFirstPage()}disabled{/if}">上一页</a>
-    <span>第 {$list->currentPage()} / {$list->lastPage()} 页</span>
+       class="<if condition="$is_first">disabled</if>">上一页</a>
+    <span>第 {$cur_page} / {$last_page} 页</span>
     <a href="{:$list->url(min($list->lastPage(), $list->currentPage() + 1))}"
-       class="{if !$list->hasMorePages()}disabled{/if}">下一页</a>
+       class="<if condition="$is_last">disabled</if>">下一页</a>
 </div>
-{/if}
+</if>
 
 <!-- 详情弹层 -->
 <div class="mask" id="detailMask">
@@ -361,6 +359,16 @@
 
 <script>
     var auditId = 0;
+
+    // 当前状态页签高亮
+    (function () {
+        var links = document.querySelectorAll('.tabs a');
+        for (var i = 0; i < links.length; i++) {
+            if (links[i].getAttribute('data-status') == '{$status}') {
+                links[i].classList.add('active');
+            }
+        }
+    })();
 
     function showDetail(btn) {
         document.getElementById('detailBody').innerHTML =
