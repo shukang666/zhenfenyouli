@@ -73,12 +73,16 @@
 					this.$u.vuex('userInfo', res.data);
 					this.$u.vuex('isLogin', true);
 					uni.removeStorageSync('vcode'); //从缓存移除vcode
-					uni.hideLoading();
-					this.$u.func.showToast({
-						title: '登录成功',
-						icon: 'success',
-						back: true
-					})
+				uni.hideLoading();
+				// 注册成功后跳转首页（switchTab 清空非tabbar页面栈），
+				// 由首页 onShow 中的 community_id 检查统一引导未绑定小区用户去 info 页完善信息，
+				// 避免用户从非tabbar活动页直接登录后绕过小区绑定检查
+				this.$u.func.showToast({
+					title: '登录成功',
+					icon: 'success',
+					url: '/pages/index/index',
+					type: 'switchTab'
+				})
 				}).catch(res => {
 					uni.hideLoading();
 					this.$u.toast(res.msg);
