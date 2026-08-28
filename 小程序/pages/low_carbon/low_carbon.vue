@@ -50,6 +50,7 @@
 </template>
 
 <script>
+	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	export default {
 		data() {
 			return {
@@ -64,6 +65,7 @@
 			this.get_new_cate_active_list()
 		},
 		onShow() {
+			if (checkCommunity(this)) return
 			if (this.isLogin) {
 				this.getUserInfo()
 			}

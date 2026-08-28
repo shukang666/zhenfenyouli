@@ -201,6 +201,7 @@
 </template>
 
 <script>
+	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	export default {
 		data() {
 			return {
@@ -211,6 +212,7 @@
 		},
 		onLoad() {},
 		onShow() {
+			if (checkCommunity(this)) return
 			if (this.isLogin) {
 				this.getUserInfo()
 				this.get_new_badge_list()

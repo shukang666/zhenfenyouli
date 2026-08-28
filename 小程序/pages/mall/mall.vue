@@ -86,6 +86,7 @@
 </template>
 
 <script>
+	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	export default {
 		data() {
 			return {
@@ -102,6 +103,9 @@
 			this.find_slide()
 			this.get_shop_coupon_list()
 			this.get_category()
+		},
+		onShow() {
+			if (checkCommunity(this)) return
 		},
 		methods: {
 			// 分类

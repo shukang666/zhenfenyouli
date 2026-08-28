@@ -92,6 +92,7 @@
 </template>
 
 <script>
+	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	export default {
 		data() {
 			return {
@@ -103,6 +104,9 @@
 		},
 		onLoad() {
 			this.get_forum_list()
+		},
+		onShow() {
+			if (checkCommunity(this)) return
 		},
 		methods: {
 			// 分享
