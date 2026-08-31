@@ -6,7 +6,7 @@
 				:key="tab.id" @click="switch_tab(index)">{{tab.name}}</view>
 		</view>
 
-		<!-- 第一个标签：固定内容，与"分类活动"（pages/flhd/flhd）页一致 -->
+		<!-- 第一个标签：固定打卡标签，绑定活动分类，顶部写死"垃圾分类打卡"入口卡片，下方动态加载该分类活动列表 -->
 		<view v-if="current_tab == 0" class="u-p-30">
 			<view class="u-type-white-bg u-radius-10" @click="navigator('/pages/flhd/ljfldk',1)">
 				<u-image width="100%" height="326" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
@@ -25,29 +25,38 @@
 					</view>
 				</view>
 			</view>
-			<view class="u-m-t-50">
-				<view class="u-flex u-row-center">
-					<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/8912eace6b085bd4b6225c5c8ae185ff.png?watermark"></u-image>
-				</view>
-				<view class="u-m-t-30 u-flex">
-					<view class="u-w-218 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="navigator('/pages/flhd/list',2)">
-						<view class="u-flex u-row-center">
-							<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png?watermark"></u-image>
-						</view>
-						<view class="u-m-t-30 u-font-bold">
-							垃圾分类指导
-						</view>
+			<view class="u-m-t-30">
+			<!-- 打卡标签绑定分类下的活动列表（与中间分类标签共用 active_list） -->
+			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
+				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+				<u-image width="100%" height="285" :src="item.thumb"></u-image>
+				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
+					<view class="u-flex">
+						<image :src="img" class="u-w-30 u-h-30 u-radius-o" mode="aspectFill" style="margin-left: -10rpx;" v-for="(img,i) in item.avatar_array" :key="i"></image>
 					</view>
-					<view class="u-w-218 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30">
-						<view class="u-flex u-row-center" @click="navigator('/pages/answer/examine?id=1')">
-							<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png?watermark"></u-image>
+					<view class="u-font-24 white u-m-l-10">{{item.active_count}}人参与</view>
+				</view>
+				<view class="u-p-30">
+					<view class="u-font-32 u-font-bold u-line-1">{{item.name}}</view>
+					<view class="u-flex u-row-between u-m-t-15">
+						<view class="u-flex  u-font-24 u-hui u-w-400">
+							<view class="u-flex">
+								<u-icon name="clock"></u-icon>
+								<text>{{item.date | date('yy-mm-dd')}}</text>
+							</view>
+							<view class="u-flex u-m-l-30">
+								<u-icon name="map"></u-icon>
+								<text>{{item.address}}</text>
+							</view>
 						</view>
-						<view class="u-m-t-30 u-font-bold">
-							答题考试
-						</view>
+						<u-button :custom-style="{width:'165rpx',height:'60rpx'}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button>
 					</view>
 				</view>
 			</view>
+			<view v-if="active_list.length === 0 && !active_loading" class="u-text-center u-p-60 u-type-info">暂无活动</view>
+			<view v-if="active_loading" class="u-text-center u-p-30 u-type-info">加载中...</view>
+			<view v-if="active_list.length > 0 && active_list.length >= active_total" class="u-text-center u-p-30 u-type-info">没有更多了</view>
+		</view>
 		</view>
 
 		<!-- 自治活动标签（备份前第一个写死标签，复刻 zzhd.vue 主体内容，不引入页面级背景） -->
@@ -411,14 +420,25 @@
 		},
 		onShow() {
 			if (checkCommunity(this)) return
-			if (this.isLogin) {
-				this.getUserInfo()
-			}
+			if (!this.isLogin) return
+			if (this._isChecking) return
+			this._isChecking = true
+			this.getUserInfo().then(() => {
+				this._isChecking = false
+				// API 失败时 isLogin 被置为 false，直接返回
+				if (!this.isLogin) return
+				// 强制学习/考试检查：未学完跳垃圾分类指导，未通过考试跳答题考试
+				if (!this.userInfo.is_learn) {
+					this.$u.route('/pages/flhd/list')
+				} else if (!this.userInfo.is_answer) {
+					this.$u.route('/pages/answer/examine?id=1')
+				}
+			})
 		},
 		methods: {
 			// 获取用户信息
 			getUserInfo() {
-				this.$u.api.getUserInfo().then(res => {
+				return this.$u.api.getUserInfo().then(res => {
 					this.$u.vuex('userInfo', res.data)
 				}).catch(err => {
 					this.$u.vuex('userInfo', {})
@@ -447,20 +467,30 @@
 					list.push({ id: -3, name: '社交活动', cate_id: 0, is_fixed: 2, _is_custom: 'sjhd' })
 					// list.push({ id: -1, name: '备份', cate_id: 0, is_fixed: 2, _is_backup: 1 })
 					this.tab_list = list
+					// 默认加载第一个标签（打卡）的活动列表
+					let firstTab = list[0]
+					if (firstTab && firstTab.cate_id) {
+						this.current_cate_id = firstTab.cate_id
+						this.active_list = []
+						this.active_page = 1
+						this.active_total = 0
+						this.load_active_list()
+					}
 				}).catch(err => {
 					this.$u.toast(err.msg)
 				})
 			},
-			// 切换标签：第1个固定打卡标签保持不变；最后一个"备份"标签显示现有内容；
-			// 自治活动标签加载商家信息（复刻 zzhd.vue onShow）；社交活动标签加载问卷调查列表（复刻 research.vue onLoad）；
+			// 切换标签：第1个固定打卡标签也加载分类活动列表（顶部仍保留"垃圾分类打卡"入口卡片）；
+			// 最后一个"备份"标签显示现有内容；
+			// 自治活动标签加载商家信息（复刻 zzhd.vue onShow）；社交活动标签无需预加载列表；
 			// 中间分类标签加载该标签绑定分类下的活动列表
 			switch_tab(index) {
 				if (this.current_tab == index) return
 				this.current_tab = index
 				let tab = this.tab_list[index]
 				if (!tab) return
-				// 备份标签和固定打卡标签不需要加载分类列表
-				if (tab._is_backup === 1 || index == 0) return
+				// 备份标签不加载分类列表
+				if (tab._is_backup === 1) return
 				// 自治活动标签：加载用户信息和商家信息
 				if (tab._is_custom === 'zzhd') {
 					if (this.isLogin) {
@@ -606,8 +636,8 @@
 			},
 		},
 		onReachBottom() {
-			// 仅在中间分类标签下加载更多活动列表；打卡/备份/自治/社交标签不分页
-			if (this.current_tab == 0 || this.is_backup_tab || this.is_zzhd_tab || this.is_sjhd_tab) return
+			// 打卡标签和中间分类标签都支持分页；备份/自治/社交标签不分页
+			if (this.is_backup_tab || this.is_zzhd_tab || this.is_sjhd_tab) return
 			if (this.active_list.length >= this.active_total) return
 			if (this.active_loading) return
 			this.active_page++

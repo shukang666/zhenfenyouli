@@ -116,10 +116,18 @@
 					<view class="u-font-24 u-m-t-10">健康生活社区</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('/pages/flhd/record')">
-					<u-icon name="/static/user-10.png" :size="50"></u-icon>
-					<view class="u-font-24 u-m-t-10">垃圾分类打卡</view>
-				</u-grid-item>
-				<u-grid-item @click="navigator('/pages/user/badge')">
+				<u-icon name="/static/user-10.png" :size="50"></u-icon>
+				<view class="u-font-24 u-m-t-10">垃圾分类打卡</view>
+			</u-grid-item>
+			<u-grid-item @click="navigator('/pages/flhd/list')">
+				<u-icon name="https://oss.ausite.cn/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png?watermark" :size="50"></u-icon>
+				<view class="u-font-24 u-m-t-10">垃圾分类指导</view>
+			</u-grid-item>
+			<u-grid-item @click="navigator('/pages/answer/examine?id=1')">
+				<u-icon name="https://oss.ausite.cn/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png?watermark" :size="50"></u-icon>
+				<view class="u-font-24 u-m-t-10">答题考试</view>
+			</u-grid-item>
+			<u-grid-item @click="navigator('/pages/user/badge')">
 				<u-icon name="/static/user-9.png" :size="50"></u-icon>
 				<view class="u-font-24 u-m-t-10">我的徽章</view>
 			</u-grid-item>

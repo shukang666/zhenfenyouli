@@ -51,7 +51,7 @@ class ActiveTabController extends ToolController
         return $item;
     }
 
-    //提交校验：普通标签必须绑定活动分类（固定标签表单不带cate_id）
+    //提交校验：所有标签（含固定打卡标签）必须绑定活动分类
     public function setParamData($params)
     {
         if (isset($params['cate_id']) && empty($params['cate_id'])) {

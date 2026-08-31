@@ -23,6 +23,8 @@ use app\admin\model\member\MemberModel;
 use app\admin\model\order\OrderQrcodeModel;
 use app\admin\model\order\ScanLogModel;
 use app\admin\model\shop\ShopModel;
+use app\admin\model\active\WasteModel;
+use app\admin\model\active\WasteUserModel;
 use cmf\lib\Storage;
 use think\facade\Db;
 use think\Model;
@@ -58,6 +60,10 @@ class UserController extends AuthController
             ->where('type', 1)
             ->where(['user_id' => $user['id']])
             ->count() ? 1 : 0;
+        //是否学完所有垃圾分类指导内容（user_count >= waste_count 且 waste_count > 0）
+        $waste_count = WasteModel::count();
+        $user_count = WasteUserModel::where('user_id', $user['id'])->count();
+        $user['is_learn'] = ($waste_count > 0 && $user_count >= $waste_count) ? 1 : 0;
         $user['check_status'] = $CheckModel->where('user_id', $user['id'])->value('status') ?? 0;
         $user['min_app_id'] = $this->get_config['min_app_id'];
         $shop_info = ShopModel::where('user_id', $user['id'])->field('status,msg')->find();

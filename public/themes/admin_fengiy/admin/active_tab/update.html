@@ -28,36 +28,27 @@
             </div>
         </div>
 
-        <if condition="!empty($item['id']) && $item['is_fixed'] == 1">
-            <div class="form-group">
-                <label class="col-sm-2 control-label">说明:</label>
-                <div class="col-md-6 col-sm-10">
-                    <p class="text-muted" style="padding-top: 7px;">固定标签：小程序活动页第一个标签，内容固定，不参与排序，不绑定活动分类。</p>
-                </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>绑定分类:</label>
+            <div class="col-md-4 col-sm-10">
+                <select name="cate_id" lay-verify="required" required>
+                    <option value="">请选择活动分类</option>
+                    <foreach name="cate_list" item="cate">
+                        <notempty name="item.id">
+                            <option value="{$cate.id}" <eq name="item.cate_id" value="$cate.id">selected</eq>>{$cate.name}</option>
+                            <else/>
+                            <option value="{$cate.id}">{$cate.name}</option>
+                        </notempty>
+                    </foreach>
+                </select>
             </div>
-        <else/>
-            <div class="form-group">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>绑定分类:</label>
-                <div class="col-md-4 col-sm-10">
-                    <select name="cate_id" lay-verify="required" required>
-                        <option value="">请选择活动分类</option>
-                        <foreach name="cate_list" item="cate">
-                            <notempty name="item.id">
-                                <option value="{$cate.id}" <eq name="item.cate_id" value="$cate.id">selected</eq>>{$cate.name}</option>
-                                <else/>
-                                <option value="{$cate.id}">{$cate.name}</option>
-                            </notempty>
-                        </foreach>
-                    </select>
-                </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">说明:</label>
+            <div class="col-md-6 col-sm-10">
+                <p class="text-muted" style="padding-top: 7px;">所有标签（含固定打卡标签）均需绑定活动分类；固定打卡标签排序列显示"固定"且不参与排序。</p>
             </div>
-            <div class="form-group">
-                <label class="col-sm-2 control-label">说明:</label>
-                <div class="col-md-6 col-sm-10">
-                    <p class="text-muted" style="padding-top: 7px;">普通标签按排序数字从小到大排列，需绑定活动分类。</p>
-                </div>
-            </div>
-        </if>
+        </div>
 
         <div class="col-sm-offset-2 col-sm-10">
             <button type="submit" class="btn btn-primary js-ajax-submit">{:lang("SAVE")}</button>
