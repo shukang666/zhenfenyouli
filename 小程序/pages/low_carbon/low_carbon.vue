@@ -50,7 +50,40 @@
 			</view>
 		</view>
 
-		<!-- 其他标签：暂显示现有内容，待后续按绑定的活动分类模板化 -->
+		<!-- 中间标签（第二个起，非打卡非备份）：显示该标签绑定分类下的活动列表 -->
+		<view v-else-if="!is_backup_tab" class="u-p-30">
+			<view class="u-w-690 u-m-30 u-radius-10 u-type-white-bg u-rela u-shadow" v-for="item in active_list" :key="item.id"
+				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+				<u-image width="690" height="285" :src="item.thumb"></u-image>
+				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
+					<view class="u-flex">
+						<image :src="img" class="u-w-30 u-h-30 u-radius-o" mode="aspectFill" style="margin-left: -10rpx;" v-for="(img,i) in item.avatar_array" :key="i"></image>
+					</view>
+					<view class="u-font-24 white u-m-l-10">{{item.active_count}}人参与</view>
+				</view>
+				<view class="u-p-30">
+					<view class="u-font-32 u-font-bold u-line-1">{{item.name}}</view>
+					<view class="u-flex u-row-between u-m-t-15">
+						<view class="u-flex  u-font-24 u-hui u-w-400">
+							<view class="u-flex">
+								<u-icon name="clock"></u-icon>
+								<text>{{item.date | date('yy-mm-dd')}}</text>
+							</view>
+							<view class="u-flex u-m-l-30">
+								<u-icon name="map"></u-icon>
+								<text>{{item.address}}</text>
+							</view>
+						</view>
+						<u-button :custom-style="{width:'165rpx',height:'60rpx'}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button>
+					</view>
+				</view>
+			</view>
+			<view v-if="active_list.length === 0 && !active_loading" class="u-text-center u-p-60 u-type-info">暂无活动</view>
+			<view v-if="active_loading" class="u-text-center u-p-30 u-type-info">加载中...</view>
+			<view v-if="active_list.length > 0 && active_list.length >= active_total" class="u-text-center u-p-30 u-type-info">没有更多了</view>
+		</view>
+
+		<!-- 最后一个"备份"标签：保留页面现有内容（轮播+通知+banner+活动分类卡片），前端写死，后台 active_tab 表不可见 -->
 		<view v-else>
 		<view class="u-m-30">
 			<u-swiper :list="swiper_list" height="340" mode="none" @click="adLink($event,swiper_list)"></u-swiper>
@@ -112,8 +145,23 @@
 				tab_list: [],
 				current_tab: 0,
 				page: 1,
-				total: 0
+				total: 0,
+				// 当前分类标签下的活动列表
+				active_list: [],
+				active_page: 1,
+				active_total: 0,
+				active_loading: false,
+				current_cate_id: 0,
 			};
+		},
+		computed: {
+			// 当前是否在最后一个"备份"标签（前端写死，后台 active_tab 表不可见）
+			is_backup_tab() {
+				return this.tab_list.length > 0
+					&& this.current_tab == this.tab_list.length - 1
+					&& this.tab_list[this.current_tab]
+					&& this.tab_list[this.current_tab]._is_backup === 1
+			}
 		},
 		onLoad() {
 			this.find_slide()
@@ -148,18 +196,58 @@
 					this.$u.toast(err.msg)
 				})
 			},
-			// 活动页标签
+			// 活动页标签：后台 active_tab 表返回（最多4个，第一个为固定打卡标签），
+			// 末尾追加一个前端写死的"备份"标签，仅前端可见，后台不可见
 			get_active_tab_list() {
 				this.$u.api.get_active_tab_list().then(res => {
-					this.tab_list = res.data
+					let list = res.data || []
+					list.push({ id: -1, name: '备份', cate_id: 0, is_fixed: 2, _is_backup: 1 })
+					this.tab_list = list
 				}).catch(err => {
 					this.$u.toast(err.msg)
 				})
 			},
-			// 切换标签（标签内容暂未模板化，下方统一显示现有内容）
+			// 切换标签：第1个固定打卡标签保持不变；最后一个"备份"标签显示现有内容；
+			// 中间标签加载该标签绑定分类下的活动列表
 			switch_tab(index) {
 				if (this.current_tab == index) return
 				this.current_tab = index
+				let tab = this.tab_list[index]
+				if (!tab) return
+				// 备份标签和固定打卡标签不需要加载分类列表
+				if (tab._is_backup === 1 || index == 0) return
+				this.current_cate_id = tab.cate_id || 0
+				this.active_list = []
+				this.active_page = 1
+				this.active_total = 0
+				this.load_active_list()
+			},
+			// 加载当前分类标签绑定的活动列表
+			load_active_list() {
+				if (this.active_loading) return
+				if (!this.current_cate_id) {
+					this.active_list = []
+					this.active_total = 0
+					return
+				}
+				this.active_loading = true
+				this.$u.api.get_new_active_list({
+					page: this.active_page,
+					community_cate_id: this.current_cate_id,
+				}).then(res => {
+					let data = res.data || {}
+					let list = data.data || []
+					if (this.active_page == 1) {
+						this.active_list = list
+					} else {
+						this.active_list.push(...list)
+					}
+					this.active_total = data.total || list.length
+				}).catch(err => {
+					this.$u.toast(err.msg)
+				}).finally(() => {
+					this.active_loading = false
+				})
 			},
 			// 跳转页面（type==1 为垃圾分类打卡入口，需先通过答题考试）
 			navigator(url, type) {
@@ -202,9 +290,12 @@
 			},
 		},
 		onReachBottom() {
-			if (this.cate_list.length >= this.total) return
-			this.page++
-			this.get_active_cate_list()
+			// 仅在中间分类标签下加载更多活动列表
+			if (this.current_tab == 0 || this.is_backup_tab) return
+			if (this.active_list.length >= this.active_total) return
+			if (this.active_loading) return
+			this.active_page++
+			this.load_active_list()
 		}
 	}
 </script>
