@@ -21,7 +21,7 @@
 					</view>
 					<view class="">
 						<u-button type="primary" size="mini" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
-							@click.stop="navigator('/pages/flhd/ljfldk',1)">立即参与</u-button>
+							@click="navigator('/pages/flhd/ljfldk',1)">立即参与</u-button>
 					</view>
 				</view>
 			</view>
