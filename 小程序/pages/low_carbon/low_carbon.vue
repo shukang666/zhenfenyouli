@@ -252,26 +252,23 @@
 						</u-row>
 					</view>
 				</view>
-				<!-- 问卷调查（融入 research.vue 逻辑） -->
+				<!-- 问卷调查入口（点击跳转独立问卷列表页 pages/low_carbon/research） -->
 				<view class="u-m-t-30">
 					<view class="u-flex u-row-center">
 						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">问卷调查</u-divider>
 					</view>
-					<view class="u-type-white-bg u-radius-10 u-m-b-20 u-p-20 u-m-t-30" v-for="(item,index) in health_list" :key="index"
-						@click="wj_btn(item)">
-						<u-image width="100%" height="166" :src="item.thumb" border-radius="10"></u-image>
-						<view class="u-m-t-20">
-							<view class="">
-								<view class="u-font-bold u-font-32">
-									{{item.name}}
-								</view>
-								<view class="u-type-info u-m-t-10" v-html="$u.func.formatTextArea(item.desc)"></view>
+					<view class="u-type-white-bg u-radius-10 u-p-30 u-m-t-30 u-flex u-row-between" @click="sjhd_navigator('/pages/low_carbon/research')">
+						<view class="">
+							<view class="u-font-bold u-font-32">
+								问卷调查
+							</view>
+							<view class="u-m-t-10 u-font-24 u-type-info">
+								点击查看所有问卷，参与即可获得积分
 							</view>
 						</view>
-						<view class="u-text-right u-m-t-20">
+						<view class="">
 							<u-button type="primary" size="mini" hover-class="none"
-								:customStyle="{background: 'linear-gradient( 145deg, #F0DF73 0%, #FFA320 100%)'}"
-								@click="wj_btn(item)">立即参与</u-button>
+								:customStyle="{background: 'linear-gradient( 145deg, #F0DF73 0%, #FFA320 100%)'}">立即参与</u-button>
 						</view>
 					</view>
 				</view>
@@ -472,11 +469,8 @@
 					}
 					return
 				}
-				// 社交活动标签：加载问卷调查列表
-				if (tab._is_custom === 'sjhd') {
-					this.get_health_home_list(2)
-					return
-				}
+				// 社交活动标签：问卷调查改为入口按钮，点击跳独立页，无需预加载列表
+				if (tab._is_custom === 'sjhd') return
 				this.current_cate_id = tab.cate_id || 0
 				this.active_list = []
 				this.active_page = 1
