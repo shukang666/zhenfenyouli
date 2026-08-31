@@ -138,6 +138,9 @@
                                   data-checklist="js-check-x"></label></th>
                 <th>ID</th>
 
+                <if condition="$params.type==2">
+                    <th>用户ID</th>
+                </if>
                 <if condition="$params.type==3">
                     <th>小区</th>
                 </if>
@@ -191,6 +194,9 @@
                     <td>{$vo.id}</td>
 
 
+                    <if condition="$params.type==2">
+                        <td>{$vo.uid}</td>
+                    </if>
                     <if condition="$params.type==3">
                         <td>{$vo.community_name}</td>
                     </if>

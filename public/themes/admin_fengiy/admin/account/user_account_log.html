@@ -66,6 +66,7 @@
                                          data-checklist="js-check-x"></label></th>
 
             <th>ID</th>
+            <th width="80">用户ID</th>
             <th>用户信息</th>
             <th>账户类别</th>
             <th>交易类型</th>
@@ -82,6 +83,7 @@
 
 
                 <td>{$vo.id}</td>
+                <td>{$vo.user_id}</td>
                 <td>
                     <notempty name="vo.true_name">
                         ({$vo.user_id})  {$vo.nickname}

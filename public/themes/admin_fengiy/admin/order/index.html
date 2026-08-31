@@ -137,7 +137,8 @@
                         <table class="th-table">
                             <tr>
                                 <th width="5%">商品ID</th>
-                                <th width="65%">商品信息</th>
+                                <th width="55%">商品信息</th>
+                                <th width="10%">用户ID</th>
                                 <th width="15%">单价</th>
                                 <th width="15%">数量</th>
                             </tr>
@@ -180,7 +181,7 @@
                                 <foreach name="item.goods_list" item="goods_item">
                                     <tr>
                                         <td width="5%" class="text-center">{$goods_item.goods_id}</td>
-                                        <td width="65%">
+                                        <td width="55%">
                                             <div class="img">
                                                 <img class="img-rounded" src="{$goods_item.thumb}" alt="" width="70"
                                                      height="70">
@@ -190,6 +191,7 @@
                                                 <span class="tags">{$goods_item.sku_name}</span>
                                             </notempty>
                                         </td>
+                                        <td width="10%" class="text-center">{$item.user_id}</td>
                                         <td width="15%" class="text-center">&yen; {$goods_item.one_price}</td>
                                         <td width="15%" class="text-center">{$goods_item.count}</td>
                                     </tr>

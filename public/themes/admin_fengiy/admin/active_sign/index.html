@@ -30,6 +30,7 @@
             <thead>
             <tr>
                 <th width="50">ID</th>
+                <th width="80">用户ID</th>
                 <th>报名用户</th>
                 <th>手机号</th>
                 <th>报名活动</th>
@@ -41,6 +42,7 @@
             <foreach name="list" item="vo">
                 <tr>
                     <td>{$vo.id}</td>
+                    <td>{$vo.user_id}</td>
                     <td>
                         <if condition="!empty($vo['avatar'])">
                             <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.avatar)}');">
