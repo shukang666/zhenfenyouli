@@ -50,11 +50,239 @@
 			</view>
 		</view>
 
-		<!-- 中间标签（第二个起，非打卡非备份）：显示该标签绑定分类下的活动列表 -->
+		<!-- 自治活动标签（备份前第一个写死标签，复刻 zzhd.vue 主体内容，不引入页面级背景） -->
+		<view v-else-if="is_zzhd_tab">
+			<view class="u-rela">
+				<u-image width="100%" height="340" src="https://oss.ausite.cn/xcxkf052/admin/20260617/08e04d3c0f112405a9b9c2d40c82862a.png?watermark"></u-image>
+				<view class="u-p-20 white u-radius-10 u-abso u-abso-b-30 u-abso-l-30 u-abso-r-30" style="background: rgba(255,255,255,0.38);">
+					{{setting.civilization_notice}}
+				</view>
+			</view>
+			<view class="u-p-30">
+				<!-- 督导员 -->
+				<view class="">
+					<view class="u-flex u-row-center">
+						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">督导员</u-divider>
+					</view>
+					<view class="u-m-t-30 u-flex">
+						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="zzhd_navigator('/pages/zzhd/wmbb',1)">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/e48645c17b800739e2f492b8f95c4ba6.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-30 u-font-bold">
+								督导员申请
+							</view>
+						</view>
+						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="zzhd_navigator('/pages/zzhd/ranking')">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/6f8d9cc52ce9afca23824a19564aed64.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-30 u-font-bold">
+								督导员排行
+							</view>
+						</view>
+					</view>
+				</view>
+				<!-- 点位管理 -->
+				<view class="u-m-t-30" v-if="!setting.app_test">
+					<view class="u-flex u-row-center">
+						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">点位管理</u-divider>
+					</view>
+					<view class="u-m-t-30 u-flex">
+						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=3')">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/51956890c56bc0241bad6c6eacf709dc.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-30 u-font-bold">
+								督导巡查
+							</view>
+						</view>
+						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="zzhd_navigator('/pages/zzhd/yxsj/yxsj?type=6')" v-if="setting.is_deed">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/18e7281ba65d9a3afb6bc9902b0e9139.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-30 u-font-bold">
+								优秀事迹
+							</view>
+						</view>
+						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=4')">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/ae1cb9fd359b5fe3d106e4293a174f57.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-30 u-font-bold">
+								其他督导
+							</view>
+						</view>
+					</view>
+				</view>
+				<!-- 商家自治 -->
+				<view class="u-m-t-30" v-if="!setting.app_test">
+					<view class="u-flex u-row-center">
+						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">商家自治</u-divider>
+					</view>
+					<view class="u-m-t-30 u-flex">
+						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="goApplyShop">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20260611/8c95821e23155697d1e0a2fd8e8439c8.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-30 u-font-bold">
+								商家申请
+							</view>
+						</view>
+						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="goShopSign">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20260611/1b473a1a2a5fde71f6d0aa98459bab92.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-30 u-font-bold">
+								商家打卡
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 社交活动标签（备份前第二个写死标签，复刻 sjhd.vue 主体内容 + research.vue 问卷调查区块） -->
+		<view v-else-if="is_sjhd_tab">
+			<view class="">
+				<u-image width="100%" height="340" src="https://oss.ausite.cn/xcxkf052/admin/20250512/5d288456e544b333329d345733847049.png?watermark"></u-image>
+			</view>
+			<view class="u-p-30">
+				<!-- 文明标兵 -->
+				<view class="">
+					<view class="u-flex u-row-center">
+						<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/ef3263d29adf8ccfcce54e46827409ea.png?watermark"></u-image>
+					</view>
+					<view class="u-m-t-30">
+						<u-row gutter="30">
+							<u-col span="4">
+								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="sjhd_navigator('/pages/sjhd/list?type=2')" v-if="setting.is_course">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/6dd071cac6cdfc81e7297998c0a011ee.png?watermark"></u-image>
+									</view>
+									<view class="u-m-t-30 u-font-bold">
+										课程培训
+									</view>
+								</view>
+							</u-col>
+							<u-col span="4">
+								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="sjhd_navigator('/pages/low_carbon/lsxf/lsxf?name=社区活动&type=3')" v-if="setting.is_active">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/8f9e9a13bb18f32ed74e6e7a43f4b081.png?watermark"></u-image>
+									</view>
+									<view class="u-m-t-30 u-font-bold">
+										社区活动
+									</view>
+								</view>
+							</u-col>
+							<u-col span="4">
+								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="sjhd_navigator('/pages/sjhd/list?type=3')" v-if="setting.is_match">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/956ddc6fd692c9cf48c6b2dd2ef6f5d2.png?watermark"></u-image>
+									</view>
+									<view class="u-m-t-30 u-font-bold">
+										社区知识竞赛
+									</view>
+								</view>
+							</u-col>
+						</u-row>
+					</view>
+				</view>
+				<!-- 宣传教育 -->
+				<view class="u-m-t-30">
+					<view class="u-flex u-row-center">
+						<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/cd4026f1bc19470be6bbf9efb0a9b38a.png?watermark"></u-image>
+					</view>
+					<view class="u-m-t-30">
+						<u-row gutter="30">
+							<u-col span="4">
+								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="sjhd_navigator('/pages/article/article?type=1')">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/6dd071cac6cdfc81e7297998c0a011ee.png?watermark"></u-image>
+									</view>
+									<view class="u-m-t-30 u-font-bold">
+										宣传手册
+									</view>
+								</view>
+							</u-col>
+							<u-col span="4">
+								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="sjhd_navigator('/pages/article/article?type=2')">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/8f9e9a13bb18f32ed74e6e7a43f4b081.png?watermark"></u-image>
+									</view>
+									<view class="u-m-t-30 u-font-bold">
+										入户宣传
+									</view>
+								</view>
+							</u-col>
+							<u-col span="4">
+								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="sjhd_navigator('/pages/zzhd/yxsj/yxsj?type=7')" v-if="!setting.is_environmental">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/f02ace719b53730c610058eda02a8006.png?watermark"></u-image>
+									</view>
+									<view class="u-m-t-30 u-font-bold">
+										环保论坛
+									</view>
+								</view>
+							</u-col>
+						</u-row>
+
+						<u-row gutter="30">
+							<u-col span="4">
+								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-t-30" @click="sjhd_navigator('/pages/low_carbon/lsxf/lsxf?name=环保活动&type=2')"
+									v-if="!setting.app_test">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/b2bc3031e9b1fcb65fb59b52c2be27f5.png?watermark"></u-image>
+									</view>
+									<view class="u-m-t-30 u-font-bold">
+										环保活动
+									</view>
+								</view>
+							</u-col>
+							<u-col span="4" v-if="!setting.is_mutual">
+								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-t-30" @click="sjhd_navigator('/pages/zzhd/yxsj/yxsj?type=5')">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/6e77a6e3afc5faefab1d80db1fb13e4c.png?watermark"></u-image>
+									</view>
+									<view class="u-m-t-30 u-font-bold">
+										互助平台
+									</view>
+								</view>
+							</u-col>
+						</u-row>
+					</view>
+				</view>
+				<!-- 问卷调查（融入 research.vue 逻辑） -->
+				<view class="u-m-t-30">
+					<view class="u-flex u-row-center">
+						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">问卷调查</u-divider>
+					</view>
+					<view class="u-type-white-bg u-radius-10 u-m-b-20 u-p-20 u-m-t-30" v-for="(item,index) in health_list" :key="index"
+						@click="wj_btn(item)">
+						<u-image width="100%" height="166" :src="item.thumb" border-radius="10"></u-image>
+						<view class="u-m-t-20">
+							<view class="">
+								<view class="u-font-bold u-font-32">
+									{{item.name}}
+								</view>
+								<view class="u-type-info u-m-t-10" v-html="$u.func.formatTextArea(item.desc)"></view>
+							</view>
+						</view>
+						<view class="u-text-right u-m-t-20">
+							<u-button type="primary" size="mini" hover-class="none"
+								:customStyle="{background: 'linear-gradient( 145deg, #F0DF73 0%, #FFA320 100%)'}"
+								@click="wj_btn(item)">立即参与</u-button>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 中间标签（第二个起，非打卡非备份非自定义）：显示该标签绑定分类下的活动列表 -->
 		<view v-else-if="!is_backup_tab" class="u-p-30">
-			<view class="u-w-690 u-m-30 u-radius-10 u-type-white-bg u-rela u-shadow" v-for="item in active_list" :key="item.id"
+			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
-				<u-image width="690" height="285" :src="item.thumb"></u-image>
+				<u-image width="100%" height="285" :src="item.thumb"></u-image>
 				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
 					<view class="u-flex">
 						<image :src="img" class="u-w-30 u-h-30 u-radius-o" mode="aspectFill" style="margin-left: -10rpx;" v-for="(img,i) in item.avatar_array" :key="i"></image>
@@ -152,6 +380,10 @@
 				active_total: 0,
 				active_loading: false,
 				current_cate_id: 0,
+				// 自治活动标签：商家信息（复刻 zzhd.vue）
+				shopInfo: {},
+				// 社交活动标签：问卷调查列表（复刻 research.vue）
+				health_list: [],
 			};
 		},
 		computed: {
@@ -161,6 +393,18 @@
 					&& this.current_tab == this.tab_list.length - 1
 					&& this.tab_list[this.current_tab]
 					&& this.tab_list[this.current_tab]._is_backup === 1
+			},
+			// 自治活动标签（备份前第一个写死标签，复刻 zzhd.vue）
+			is_zzhd_tab() {
+				return this.tab_list.length > 0
+					&& this.tab_list[this.current_tab]
+					&& this.tab_list[this.current_tab]._is_custom === 'zzhd'
+			},
+			// 社交活动标签（备份前第二个写死标签，复刻 sjhd.vue + research.vue）
+			is_sjhd_tab() {
+				return this.tab_list.length > 0
+					&& this.tab_list[this.current_tab]
+					&& this.tab_list[this.current_tab]._is_custom === 'sjhd'
 			}
 		},
 		onLoad() {
@@ -197,18 +441,22 @@
 				})
 			},
 			// 活动页标签：后台 active_tab 表返回（最多4个，第一个为固定打卡标签），
-			// 末尾追加一个前端写死的"备份"标签，仅前端可见，后台不可见
+			// 备份标签前追加两个前端写死的标签：自治活动（复刻 zzhd.vue）、社交活动（复刻 sjhd.vue + research.vue 问卷调查）
+			// 末尾再追加一个前端写死的"备份"标签，仅前端可见，后台不可见
 			get_active_tab_list() {
 				this.$u.api.get_active_tab_list().then(res => {
 					let list = res.data || []
-					list.push({ id: -1, name: '备份', cate_id: 0, is_fixed: 2, _is_backup: 1 })
+					list.push({ id: -2, name: '自治活动', cate_id: 0, is_fixed: 2, _is_custom: 'zzhd' })
+					list.push({ id: -3, name: '社交活动', cate_id: 0, is_fixed: 2, _is_custom: 'sjhd' })
+					// list.push({ id: -1, name: '备份', cate_id: 0, is_fixed: 2, _is_backup: 1 })
 					this.tab_list = list
 				}).catch(err => {
 					this.$u.toast(err.msg)
 				})
 			},
 			// 切换标签：第1个固定打卡标签保持不变；最后一个"备份"标签显示现有内容；
-			// 中间标签加载该标签绑定分类下的活动列表
+			// 自治活动标签加载商家信息（复刻 zzhd.vue onShow）；社交活动标签加载问卷调查列表（复刻 research.vue onLoad）；
+			// 中间分类标签加载该标签绑定分类下的活动列表
 			switch_tab(index) {
 				if (this.current_tab == index) return
 				this.current_tab = index
@@ -216,6 +464,19 @@
 				if (!tab) return
 				// 备份标签和固定打卡标签不需要加载分类列表
 				if (tab._is_backup === 1 || index == 0) return
+				// 自治活动标签：加载用户信息和商家信息
+				if (tab._is_custom === 'zzhd') {
+					if (this.isLogin) {
+						this.getUserInfo()
+						this.get_shop_new()
+					}
+					return
+				}
+				// 社交活动标签：加载问卷调查列表
+				if (tab._is_custom === 'sjhd') {
+					this.get_health_home_list(2)
+					return
+				}
 				this.current_cate_id = tab.cate_id || 0
 				this.active_list = []
 				this.active_page = 1
@@ -288,10 +549,71 @@
 					this.swiper_list = res.data
 				})
 			},
+			// ===== 自治活动标签方法（复刻 zzhd.vue，与首页 navigator 区分以保留督导员权限校验） =====
+			// 跳转页面（type 真值=跳过督导员权限校验，例如督导员申请本身就不需要先有督导员身份）
+			zzhd_navigator(url, type) {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				if (this.userInfo.check_status != 2 && !type) return this.$u.toast('无权限，请先申请督导员')
+				this.$u.route(url)
+			},
+			// 商家打卡
+			goShopSign() {
+				if (this.shopInfo.status != 2) return this.$u.toast("请先申请商家")
+				uni.navigateTo({
+					url: '/pages/zzhd/shop-sign'
+				})
+			},
+			// 商家申请（根据当前审核状态跳不同页）
+			goApplyShop() {
+				if (!this.$u.func.checkLogin()) return
+				if (this.shopInfo.status == 1 || this.shopInfo.status == 3) {
+					uni.navigateTo({
+						url: '/pages/zzhd/apply-status'
+					})
+					return
+				}
+				uni.navigateTo({
+					url: '/pages/zzhd/apply-shop'
+				})
+			},
+			// 跳转其他小程序
+			navigateToMiniProgram(appId) {
+				uni.navigateToMiniProgram({
+					appId,
+				})
+			},
+			// 获取商家信息
+			async get_shop_new() {
+				try {
+					let res = await this.$u.api.get_shop_new({})
+					this.shopInfo = res.data
+				} catch (e) {
+					console.log(e)
+				}
+			},
+			// ===== 社交活动标签方法（复刻 sjhd.vue + research.vue 问卷调查） =====
+			// 社交活动入口直接跳转（不做登录/权限校验，与 sjhd.vue 一致）
+			sjhd_navigator(url) {
+				this.$u.route(url)
+			},
+			// 问卷调研按钮（复刻 research.vue wj_btn）
+			wj_btn(item) {
+				this.$u.route('/pages/health/participate?id=' + item.id)
+			},
+			// 获取问卷调查列表（复刻 research.vue get_health_home_list）
+			get_health_home_list(type) {
+				this.$u.api.get_health_home_list({
+					type: type,
+				}).then(res => {
+					this.health_list = res.data
+				}).catch(err => {
+					this.$u.toast(err.msg)
+				})
+			},
 		},
 		onReachBottom() {
-			// 仅在中间分类标签下加载更多活动列表
-			if (this.current_tab == 0 || this.is_backup_tab) return
+			// 仅在中间分类标签下加载更多活动列表；打卡/备份/自治/社交标签不分页
+			if (this.current_tab == 0 || this.is_backup_tab || this.is_zzhd_tab || this.is_sjhd_tab) return
 			if (this.active_list.length >= this.active_total) return
 			if (this.active_loading) return
 			this.active_page++
