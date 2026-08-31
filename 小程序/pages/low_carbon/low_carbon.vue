@@ -53,9 +53,9 @@
 					</view>
 				</view>
 			</view>
-			<view v-if="active_list.length === 0 && !active_loading" class="u-text-center u-p-60 u-type-info">暂无活动</view>
+			<view v-if="active_list.length === 0 && !active_loading && current_tab != 0" class="u-text-center u-p-60 u-type-info">暂无活动</view>
 			<view v-if="active_loading" class="u-text-center u-p-30 u-type-info">加载中...</view>
-			<view v-if="active_list.length > 0 && active_list.length >= active_total" class="u-text-center u-p-30 u-type-info">没有更多了</view>
+			<view v-if="!active_loading && (current_tab == 0 || (active_list.length > 0 && active_list.length >= active_total))" class="u-text-center u-p-30 u-type-info">没有更多了</view>
 		</view>
 		</view>
 
