@@ -19,9 +19,8 @@
 							参与垃圾分类学习通过考核后即可解锁
 						</view>
 					</view>
-					<view class="" @click="navigator('/pages/flhd/ljfldk',1)">
-						<u-button type="primary" size="mini" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
-							@click="navigator('/pages/flhd/ljfldk',1)">立即参与</u-button>
+					<view class="" @click.stop="navigator('/pages/flhd/ljfldk',1)">
+						<view style="display: inline-flex; align-items: center; justify-content: center; background: linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%); color: #ffffff; font-size: 22rpx; height: 50rpx; line-height: 50rpx; padding: 0 20rpx; border-radius: 100rpx;">立即参与</view>
 					</view>
 				</view>
 			</view>
