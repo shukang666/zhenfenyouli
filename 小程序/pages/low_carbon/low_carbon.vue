@@ -274,10 +274,6 @@
 								点击查看所有问卷，参与即可获得积分
 							</view>
 						</view>
-						<view class="">
-							<u-button type="primary" size="mini" hover-class="none"
-								:customStyle="{background: 'linear-gradient( 145deg, #F0DF73 0%, #FFA320 100%)'}">立即参与</u-button>
-						</view>
 					</view>
 				</view>
 			</view>
