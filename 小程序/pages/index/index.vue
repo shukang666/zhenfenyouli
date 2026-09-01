@@ -77,19 +77,21 @@
 				</view>
 			</view>
 
-			<!-- 兑换商品列表 -->
-			<view class="goods-card" v-for="item in dataList" :key="item.id" @click="$u.route('/pages/mall/details?id='+item.id)">
-				<u-image border-radius="16rpx" width="180" height="180" :src="item.thumb" :lazy-load="true"></u-image>
-				<view class="goods-card-body">
-					<view class="goods-card-title">{{item.goods_name}}</view>
-					<view class="goods-card-sold">已兑换{{item.sell_count}}次</view>
-					<view class="u-flex u-row-between u-flex-1">
-						<view class="goods-card-price">
-							<text class="price-main" v-if="Number(item.price)">{{item.price}}元</text>
-							<text class="price-plus" v-if="Number(item.price) && item.point">+</text>
-							<text class="price-point" v-if="item.point">{{item.point}}积分</text>
+			<!-- 兑换商品列表：双列卡片网格，宽度与四宫格卡片对齐 -->
+			<view class="goods-grid">
+				<view class="goods-card" v-for="item in dataList" :key="item.id" @click="$u.route('/pages/mall/details?id='+item.id)">
+					<u-image width="100%" height="250" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
+					<view class="goods-card-body">
+						<view class="goods-card-title">{{item.goods_name}}</view>
+						<view class="goods-card-sold">已兑换{{item.sell_count}}次</view>
+						<view class="goods-card-footer">
+							<view class="goods-card-price">
+								<text class="price-point" v-if="item.point">{{item.point}}积分</text>
+								<text class="price-plus" v-if="Number(item.price) && item.point">+</text>
+								<text class="price-main" v-if="Number(item.price)">{{item.price}}元</text>
+							</view>
+							<view class="goods-card-btn">去兑换</view>
 						</view>
-						<image src="/static/images/car.png" class="u-w-48 u-h-48" mode="aspectFill"></image>
 					</view>
 				</view>
 			</view>
@@ -344,26 +346,29 @@
 		font-weight: bold;
 	}
 
-	/* 兑换商品卡片：白底圆角带阴影 */
-	.goods-card {
+	/* 兑换商品列表：双列卡片网格 */
+	.goods-grid {
 		display: flex;
-		margin: 0 30rpx 24rpx;
-		padding: 24rpx;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		padding: 0 30rpx;
+	}
+	.goods-card {
+		width: 334rpx;
+		margin-bottom: 24rpx;
 		background: #fff;
 		border-radius: 20rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+		overflow: hidden;
 	}
 	.goods-card-body {
-		margin-left: 20rpx;
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		height: 180rpx;
+		padding: 20rpx 20rpx 24rpx;
 	}
-	/* 商品标题：最多两行省略 */
+	/* 商品标题：固定两行高度，保证卡片底部对齐 */
 	.goods-card-title {
-		font-size: 30rpx;
-		font-weight: bold;
+		height: 76rpx;
+		font-size: 28rpx;
+		font-weight: 600;
+		line-height: 38rpx;
 		color: #1a1a1a;
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
@@ -371,29 +376,52 @@
 		overflow: hidden;
 	}
 	.goods-card-sold {
-		margin-top: 8rpx;
+		margin-top: 10rpx;
 		font-size: 22rpx;
-		color: #bbb;
+		color: #b3b9c2;
 	}
-	/* 商品价格：绿色突出，积分+元组合展示 */
+	.goods-card-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: 16rpx;
+	}
+	/* 商品价格：积分为主、金额为辅，绿色突出 */
 	.goods-card-price {
 		display: flex;
 		align-items: baseline;
-	}
-	.price-main {
-		font-size: 34rpx;
-		font-weight: bold;
-		color: #18AF38;
-	}
-	.price-plus {
-		margin: 0 6rpx;
-		font-size: 28rpx;
-		color: #18AF38;
-		font-weight: bold;
+		min-width: 0;
+		white-space: nowrap;
+		overflow: hidden;
 	}
 	.price-point {
 		font-size: 30rpx;
 		font-weight: bold;
 		color: #18AF38;
+	}
+	.price-plus {
+		margin: 0 4rpx;
+		font-size: 24rpx;
+		font-weight: bold;
+		color: #18AF38;
+	}
+	.price-main {
+		font-size: 24rpx;
+		font-weight: bold;
+		color: #18AF38;
+	}
+	/* 去兑换按钮：渐变绿胶囊，呼应活动报名按钮 */
+	.goods-card-btn {
+		flex-shrink: 0;
+		height: 52rpx;
+		line-height: 52rpx;
+		padding: 0 22rpx;
+		margin-left: 12rpx;
+		background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
+		color: #fff;
+		font-size: 24rpx;
+		font-weight: 600;
+		text-align: center;
+		border-radius: 26rpx;
 	}
 </style>
