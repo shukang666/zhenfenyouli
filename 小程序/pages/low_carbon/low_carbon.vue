@@ -475,13 +475,11 @@
 			// 检查 banner 跳转标记：从首页 banner 跳过来需要切到"本月推荐"标签
 			let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
 			if (jumpMonthlyRec) {
-				uni.removeStorageSync('jump_monthly_rec')
-				// 等 tab_list 准备好后切换
+				// tab_list 已加载：立即消费标记并切换；未加载：保留标记，等 get_active_tab_list 回调消费
 				if (this.tab_list.length > 0) {
+					uni.removeStorageSync('jump_monthly_rec')
 					this.current_tab = 0
 					this.load_monthly_rec_list()
-				} else {
-					// tab_list 还没加载完，在 get_active_tab_list 回调里也会检查
 				}
 				return
 			}
