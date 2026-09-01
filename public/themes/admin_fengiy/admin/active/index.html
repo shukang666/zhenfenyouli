@@ -31,7 +31,10 @@
                 <if condition="$params.type == 3 || $params.type == 1">
                     <th>推荐</th>
                 </if>
-                <if condition="$params.type == 1">   <th>首页展示</th> </if>
+                <if condition="$params.type == 1">
+                    <th>本月推荐</th>
+                    <th>首页展示</th>
+                </if>
                 <th>添加时间</th>
                 <th>小程序码</th>
 
@@ -70,6 +73,11 @@
                         </td>
                     </if>
                     <if condition="$params.type == 1">
+                        <td>
+                            <div class="layui-form">
+                                <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="is_month_recommend" name="is_month_recommend" value="{$vo.id}" <if condition="$vo.is_month_recommend == 1">checked</if> >
+                            </div>
+                        </td>
                         <td>
                             <div class="layui-form">
                                 <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="is_put"
@@ -123,6 +131,10 @@
         //展示不展示
         form.on('switch(is_put)', function (data) {
             setStatus(data.value, 'is_put', this.checked ? 1 : 0)
+        });
+        //本月推荐
+        form.on('switch(is_month_recommend)', function (data) {
+            setStatus(data.value, 'is_month_recommend', this.checked ? 1 : 0)
         });
 
         function setStatus(id, type, status) {

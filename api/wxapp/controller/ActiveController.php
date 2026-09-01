@@ -352,11 +352,13 @@ class ActiveController extends AuthController
         $is_recommendation = $this->request->param('is_recommendation');
         $keyword = $this->request->param('keyword');
         $is_put = $this->request->param('is_put');
+        $is_month_recommend = $this->request->param('is_month_recommend');
         $where = [];
         $where[] = ['type', '=', 1];
         if(!empty($community_cate_id)) $where[] = ['cate_id', '=', $community_cate_id];
         if(!empty($is_recommendation)) $where[] = ['is_recommendation', '=', 1];
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
+        if(!empty($is_month_recommend)) $where[] = ['is_month_recommend', '=', 1];
         if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
         $list = ActiveModel::where($where)->order('list_order asc,id desc')->paginate($page_size)->each(function ($item){
             $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);

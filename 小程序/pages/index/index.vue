@@ -198,11 +198,20 @@
 			adLink(e) {
 				let data = this.bannerList[e];
 				if (!data.url) return
+				let url = data.url
+				// 只要是跳转到活动页（low_carbon），就设置标记，让活动页切到"本月推荐"标签
+				// switchTab 不支持 query 参数，所以用 storage 传标记
+				if (url.indexOf('low_carbon') !== -1) {
+					let tabUrl = url.split('?')[0]
+					uni.setStorageSync('jump_monthly_rec', 1)
+					uni.switchTab({ url: tabUrl })
+					return
+				}
 				uni.navigateTo({
-					url: data.url,
+					url: url,
 					fail() {
 						uni.switchTab({
-							url: data.url
+							url: url
 						})
 					}
 				})
