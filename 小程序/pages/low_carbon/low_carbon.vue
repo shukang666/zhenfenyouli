@@ -12,9 +12,13 @@
 			<view class="content-area">
 
 		<!-- 本月推荐标签（前端写死第一个标签，unshift 到 tab_list 头部） -->
-		<view v-if="is_monthly_rec_tab" class="u-p-30">
-			<!-- 置顶：垃圾分类打卡固定入口卡片，复用打卡标签里的同款卡片 + top-pinned-card 样式 -->
-			<view class="u-type-white-bg u-radius-10 u-rela top-pinned-card u-m-b-30" @click="navigator('/pages/flhd/ljfldk',1)">
+	<view v-if="is_monthly_rec_tab" class="u-p-30">
+		<!-- 顶部 banner 图（后台轮播图管理 id=8 组配置，高度半屏，不点击） -->
+		<view v-if="monthly_rec_banner" class="u-m-b-30 u-radius-10" style="overflow:hidden;">
+			<u-image width="100%" height="50vh" :src="monthly_rec_banner" mode="aspectFill"></u-image>
+		</view>
+		<!-- 置顶：垃圾分类打卡固定入口卡片，复用打卡标签里的同款卡片 + top-pinned-card 样式 -->
+		<view class="u-type-white-bg u-radius-10 u-rela top-pinned-card u-m-b-30" @click="navigator('/pages/flhd/ljfldk',1)">
 				<u-image width="100%" height="326" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
 				<view class="u-p-20 u-flex" style="align-items:center;">
 					<view class="" style="flex:1;min-width:0;">
@@ -439,6 +443,8 @@
 		data() {
 			return {
 				swiper_list: [],
+			// 本月推荐标签顶部 banner 图（后台轮播图管理 id=8 组配置，单张图，不点击）
+			monthly_rec_banner: '',
 				cate_list: [],
 				tab_list: [],
 				current_tab: 0,
@@ -494,6 +500,7 @@
 		},
 		onLoad() {
 			this.find_slide()
+			this.get_monthly_rec_banner()
 			this.get_new_cate_active_list()
 			this.get_active_tab_list()
 		},
@@ -696,12 +703,22 @@
 			},
 			// 轮播图
 			find_slide() {
-				this.$u.api.find_slide({
-					id: 5
-				}).then(res => {
-					this.swiper_list = res.data
-				})
-			},
+			this.$u.api.find_slide({
+				id: 5
+			}).then(res => {
+				this.swiper_list = res.data
+			})
+		},
+		// 本月推荐标签顶部 banner 图（后台轮播图管理 id=8 组，单张图，不点击）
+		get_monthly_rec_banner() {
+			this.$u.api.find_slide({
+				id: 8
+			}).then(res => {
+				if (res.data && res.data.length > 0) {
+					this.monthly_rec_banner = res.data[0].image
+				}
+			})
+		},
 			// ===== 自治活动标签方法（复刻 zzhd.vue，与首页 navigator 区分以保留督导员权限校验） =====
 			// 跳转页面（type 真值=跳过督导员权限校验，例如督导员申请本身就不需要先有督导员身份）
 			zzhd_navigator(url, type) {
