@@ -191,5 +191,6 @@
 </script>
 
 <style lang="scss">
-
+	/* 占位：uni-app 空 style 块不生成 wxss，需至少一条规则 */
+	.mall-page {}
 </style>

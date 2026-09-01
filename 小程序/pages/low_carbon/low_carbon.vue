@@ -1,27 +1,32 @@
 <template>
 	<view class="container">
-		<!-- 顶部标签栏：后台"社区活动-活动标签"可配置1-4个；第一个为固定标签（显示垃圾分类打卡内容），其他标签暂显示现有内容，待按绑定分类模板化 -->
-		<view class="card-all tab-bar u-flex" style="margin: 20rpx 30rpx 0;padding: 8rpx;" v-if="tab_list.length">
-			<view class="tab-item u-text-center" :class="{active: current_tab == index}" v-for="(tab,index) in tab_list"
-				:key="tab.id" @click="switch_tab(index)">{{tab.name}}</view>
-		</view>
+		<!-- 侧边标签栏：后台"社区活动-活动标签"可配置1-4个；第一个为固定标签（显示垃圾分类打卡内容），其他标签暂显示现有内容，待按绑定分类模板化。改为侧边垂直布局，与右侧内容区联动 -->
+		<view class="layout-wrapper" v-if="tab_list.length">
+			<scroll-view class="side-bar" scroll-y>
+				<view class="tab-item" :class="{active: current_tab == index}" v-for="(tab,index) in tab_list"
+					:key="tab.id" @click="switch_tab(index)">
+					<view class="tab-name">{{tab.name}}</view>
+				</view>
+			</scroll-view>
+			<!-- 右侧内容区：根据 current_tab 联动显示对应标签内容 -->
+			<view class="content-area">
 
 		<!-- 第一个标签：固定打卡标签，绑定活动分类，顶部写死"垃圾分类打卡"入口卡片，下方动态加载该分类活动列表 -->
 		<view v-if="current_tab == 0" class="u-p-30">
 			<view class="u-type-white-bg u-radius-10" @click="navigator('/pages/flhd/ljfldk',1)">
 				<u-image width="100%" height="326" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
-				<view class="u-p-20 u-flex u-row-between">
-					<view class="">
-						<view class="u-font-bold u-font-32">
+				<view class="u-p-20 u-flex" style="align-items:center;">
+					<view class="" style="flex:1;min-width:0;">
+						<view class="u-font-bold u-font-32 u-line-1">
 							垃圾分类打卡
 						</view>
-						<view class="u-m-t-10 u-font-24 u-type-info">
+						<view class="u-m-t-10 u-font-22 u-type-info u-line-1">
 							参与垃圾分类学习通过考核后即可解锁
 						</view>
 					</view>
-					<view class="" @click.stop="navigator('/pages/flhd/ljfldk',1)">
-						<view style="display: inline-flex; align-items: center; justify-content: center; background: linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%); color: #ffffff; font-size: 22rpx; height: 50rpx; line-height: 50rpx; padding: 0 20rpx; border-radius: 100rpx;">立即参与</view>
-					</view>
+					<!-- <view class="" style="flex-shrink:0;margin-left:20rpx;" @click.stop="navigator('/pages/flhd/ljfldk',1)">
+						<view style="display: inline-flex; align-items: center; justify-content: center; background: linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%); color: #ffffff; font-size: 22rpx; height: 50rpx; line-height: 50rpx; padding: 0 20rpx; border-radius: 100rpx; white-space: nowrap;">立即参与</view>
+					</view> -->
 				</view>
 			</view>
 			<view class="u-m-t-30">
@@ -37,18 +42,18 @@
 				</view>
 				<view class="u-p-30">
 					<view class="u-font-32 u-font-bold u-line-1">{{item.name}}</view>
-					<view class="u-flex u-row-between u-m-t-15">
-						<view class="u-flex  u-font-24 u-hui u-w-400">
-							<view class="u-flex">
+					<view class="u-flex u-row-between u-m-t-15" style="align-items:center;">
+						<view class="u-flex u-font-24 u-hui u-flex-1 u-m-r-15" style="min-width:0;">
+							<view class="u-flex" style="flex-shrink:0;white-space:nowrap;">
 								<u-icon name="clock"></u-icon>
-								<text>{{item.date | date('yy-mm-dd')}}</text>
+								<text style="font-size:22rpx;">{{item.date | date('yy-mm-dd')}}</text>
 							</view>
-							<view class="u-flex u-m-l-30">
+							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;">
 								<u-icon name="map"></u-icon>
-								<text>{{item.address}}</text>
+								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
 							</view>
 						</view>
-						<u-button :custom-style="{width:'165rpx',height:'60rpx'}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button>
+						<!-- <u-button :custom-style="{width:'165rpx',height:'60rpx',flexShrink:0}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button> -->
 					</view>
 				</view>
 			</view>
@@ -61,7 +66,7 @@
 		<!-- 自治活动标签（备份前第一个写死标签，复刻 zzhd.vue 主体内容，不引入页面级背景） -->
 		<view v-else-if="is_zzhd_tab">
 			<view class="u-rela">
-				<u-image width="100%" height="340" src="https://oss.ausite.cn/xcxkf052/admin/20260617/08e04d3c0f112405a9b9c2d40c82862a.png?watermark"></u-image>
+				<u-image width="100%" height="260" src="https://oss.ausite.cn/xcxkf052/admin/20260617/08e04d3c0f112405a9b9c2d40c82862a.png?watermark"></u-image>
 				<view class="u-p-20 white u-radius-10 u-abso u-abso-b-30 u-abso-l-30 u-abso-r-30" style="background: rgba(255,255,255,0.38);">
 					{{setting.civilization_notice}}
 				</view>
@@ -72,8 +77,8 @@
 					<view class="u-flex u-row-center">
 						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">督导员</u-divider>
 					</view>
-					<view class="u-m-t-30 u-flex">
-						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="zzhd_navigator('/pages/zzhd/wmbb',1)">
+					<view class="u-m-t-30 u-flex" style="gap:15rpx;">
+						<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;" @click="zzhd_navigator('/pages/zzhd/wmbb',1)">
 							<view class="u-flex u-row-center">
 								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/e48645c17b800739e2f492b8f95c4ba6.png?watermark"></u-image>
 							</view>
@@ -81,7 +86,7 @@
 								督导员申请
 							</view>
 						</view>
-						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="zzhd_navigator('/pages/zzhd/ranking')">
+						<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;" @click="zzhd_navigator('/pages/zzhd/ranking')">
 							<view class="u-flex u-row-center">
 								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/6f8d9cc52ce9afca23824a19564aed64.png?watermark"></u-image>
 							</view>
@@ -96,8 +101,8 @@
 					<view class="u-flex u-row-center">
 						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">点位管理</u-divider>
 					</view>
-					<view class="u-m-t-30 u-flex">
-						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=3')">
+					<view class="u-m-t-30 u-flex" style="gap:15rpx;">
+						<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;" @click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=3')">
 							<view class="u-flex u-row-center">
 								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/51956890c56bc0241bad6c6eacf709dc.png?watermark"></u-image>
 							</view>
@@ -105,7 +110,7 @@
 								督导巡查
 							</view>
 						</view>
-						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="zzhd_navigator('/pages/zzhd/yxsj/yxsj?type=6')" v-if="setting.is_deed">
+						<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;" @click="zzhd_navigator('/pages/zzhd/yxsj/yxsj?type=6')" v-if="setting.is_deed">
 							<view class="u-flex u-row-center">
 								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/18e7281ba65d9a3afb6bc9902b0e9139.png?watermark"></u-image>
 							</view>
@@ -113,7 +118,7 @@
 								优秀事迹
 							</view>
 						</view>
-						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=4')">
+						<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;" @click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=4')">
 							<view class="u-flex u-row-center">
 								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/ae1cb9fd359b5fe3d106e4293a174f57.png?watermark"></u-image>
 							</view>
@@ -128,8 +133,8 @@
 					<view class="u-flex u-row-center">
 						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">商家自治</u-divider>
 					</view>
-					<view class="u-m-t-30 u-flex">
-						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="goApplyShop">
+					<view class="u-m-t-30 u-flex" style="gap:15rpx;">
+						<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;" @click="goApplyShop">
 							<view class="u-flex u-row-center">
 								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20260611/8c95821e23155697d1e0a2fd8e8439c8.png?watermark"></u-image>
 							</view>
@@ -137,7 +142,7 @@
 								商家申请
 							</view>
 						</view>
-						<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="goShopSign">
+						<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;" @click="goShopSign">
 							<view class="u-flex u-row-center">
 								<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20260611/1b473a1a2a5fde71f6d0aa98459bab92.png?watermark"></u-image>
 							</view>
@@ -149,20 +154,19 @@
 				</view>
 			</view>
 		</view>
-
 		<!-- 社交活动标签（备份前第二个写死标签，复刻 sjhd.vue 主体内容 + research.vue 问卷调查区块） -->
 		<view v-else-if="is_sjhd_tab">
 			<view class="">
-				<u-image width="100%" height="340" src="https://oss.ausite.cn/xcxkf052/admin/20250512/5d288456e544b333329d345733847049.png?watermark"></u-image>
+				<u-image width="100%" height="260" src="https://oss.ausite.cn/xcxkf052/admin/20250512/5d288456e544b333329d345733847049.png?watermark"></u-image>
 			</view>
 			<view class="u-p-30">
 				<!-- 文明标兵 -->
 				<view class="">
 					<view class="u-flex u-row-center">
-						<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/ef3263d29adf8ccfcce54e46827409ea.png?watermark"></u-image>
+						<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/ef3263d29adf8ccfcce54e46827409ea.png?watermark" style="max-width:100%;width:auto;"></u-image>
 					</view>
 					<view class="u-m-t-30">
-						<u-row gutter="30">
+						<u-row gutter="15">
 							<u-col span="4">
 								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="sjhd_navigator('/pages/sjhd/list?type=2')" v-if="setting.is_course">
 									<view class="u-flex u-row-center">
@@ -199,10 +203,10 @@
 				<!-- 宣传教育 -->
 				<view class="u-m-t-30">
 					<view class="u-flex u-row-center">
-						<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/cd4026f1bc19470be6bbf9efb0a9b38a.png?watermark"></u-image>
+						<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/cd4026f1bc19470be6bbf9efb0a9b38a.png?watermark" style="max-width:100%;width:auto;"></u-image>
 					</view>
 					<view class="u-m-t-30">
-						<u-row gutter="30">
+						<u-row gutter="15">
 							<u-col span="4">
 								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="sjhd_navigator('/pages/article/article?type=1')">
 									<view class="u-flex u-row-center">
@@ -235,7 +239,7 @@
 							</u-col>
 						</u-row>
 
-						<u-row gutter="30">
+						<u-row gutter="15">
 							<u-col span="4">
 								<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-t-30" @click="sjhd_navigator('/pages/low_carbon/lsxf/lsxf?name=环保活动&type=2')"
 									v-if="!setting.app_test">
@@ -265,15 +269,16 @@
 					<view class="u-flex u-row-center">
 						<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">问卷调查</u-divider>
 					</view>
-					<view class="u-type-white-bg u-radius-10 u-p-30 u-m-t-30 u-flex u-row-between" @click="sjhd_navigator('/pages/low_carbon/research')">
+					<view class="u-type-white-bg u-radius-10 u-p-30 u-m-t-30 u-flex u-row-between" style="align-items:center;" @click="sjhd_navigator('/pages/low_carbon/research')">
 						<view class="">
-							<view class="u-font-bold u-font-32">
+							<view class="u-font-bold u-font-30">
 								问卷调查
 							</view>
-							<view class="u-m-t-10 u-font-24 u-type-info">
+							<view class="u-m-t-10 u-font-22 u-type-info">
 								点击查看所有问卷，参与即可获得积分
 							</view>
 						</view>
+						<u-icon name="arrow-right" color="#999" size="28"></u-icon>
 					</view>
 				</view>
 			</view>
@@ -292,18 +297,18 @@
 				</view>
 				<view class="u-p-30">
 					<view class="u-font-32 u-font-bold u-line-1">{{item.name}}</view>
-					<view class="u-flex u-row-between u-m-t-15">
-						<view class="u-flex  u-font-24 u-hui u-w-400">
-							<view class="u-flex">
+					<view class="u-flex u-row-between u-m-t-15" style="align-items:center;">
+						<view class="u-flex u-font-24 u-hui u-flex-1 u-m-r-15" style="min-width:0;">
+							<view class="u-flex" style="flex-shrink:0;white-space:nowrap;">
 								<u-icon name="clock"></u-icon>
-								<text>{{item.date | date('yy-mm-dd')}}</text>
+								<text style="font-size:22rpx;">{{item.date | date('yy-mm-dd')}}</text>
 							</view>
-							<view class="u-flex u-m-l-30">
+							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;">
 								<u-icon name="map"></u-icon>
-								<text>{{item.address}}</text>
+								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
 							</view>
 						</view>
-						<u-button :custom-style="{width:'165rpx',height:'60rpx'}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button>
+						<u-button :custom-style="{width:'165rpx',height:'60rpx',flexShrink:0}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button>
 					</view>
 				</view>
 			</view>
@@ -320,7 +325,7 @@
 
 		<view class="card-all u-flex" style="margin-top: 0;padding: 10rpx 30rpx;">
 			<image src="/static/images/guanbbo.png" class="u-w-40 u-h-40 u-m-r-30" mode="aspectFill"></image>
-			<view class="u-w-560">
+			<view class="u-flex-1">
 				<u-notice-bar :volume-icon="false" mode="horizontal" :list="setting.carbon_notice" color="#333333" bg-color="#fff" border-radius="6"></u-notice-bar>
 			</view>
 
@@ -328,9 +333,9 @@
 		<!-- <view class="u-m-t-30" @click="$u.route('/pages/dtsh/dtsh')" v-if="setting.is_waste">
 			<u-image width="100%" height="240" src="https://oss.ausite.cn/xcxkf052/admin/20250606/68d14d845f207d15e52bdc15d735c387.png?watermark"></u-image>
 		</view> -->
-		<view class="u-flex u-row-between u-m-lr-30">
-			<image src="/static/images/lianjifenlei.png" class="u-w-334 u-h-146" mode="aspectFill" @click="$u.route('/pages/dtsh/dtsh')"></image>
-			<image src="/static/images/jiankangceshi2.png" class="u-w-334 u-h-146" mode="aspectFill" @click="$u.route('/pages/low_carbon/research')"></image>
+		<view class="u-flex u-m-lr-30">
+			<image src="/static/images/lianjifenlei.png" style="flex:1;height:146rpx;margin-right:20rpx;" mode="aspectFill" @click="$u.route('/pages/dtsh/dtsh')"></image>
+			<image src="/static/images/jiankangceshi2.png" style="flex:1;height:146rpx;" mode="aspectFill" @click="$u.route('/pages/low_carbon/research')"></image>
 		</view>
 
 		<view class="u-flex u-m-l-30 u-p-t-30">
@@ -354,13 +359,15 @@
 			</view>
 		</view> -->
 		<view class="card-all u-flex u-flex-wrap u-p-0" style="overflow: hidden;">
-			<view class="u-text-center u-p-tb-30 u-border-bottom u-border-right u-shrink-no" style="width:230rpx;" v-for="item in cate_list" :key="item.id"
+			<view class="u-text-center u-p-tb-30 u-border-bottom u-shrink-no" style="flex:1 1 33.33%;max-width:33.33%;box-sizing:border-box;" v-for="(item,idx) in cate_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/active-list?cate_id=${item.id}`)">
 				<image :src="item.image" class="u-w-80 u-h-80" mode="aspectFill"></image>
 				<view class="u-font-28 u-font-bold u-m-t-15">{{item.name}}</view>
 			</view>
 		</view>
 		</view>
+		</view>
+	</view>
 	</view>
 </template>
 
@@ -647,22 +654,62 @@
 		background: #F5F5F5;
 	}
 
-	.tab-bar {
-		justify-content: space-around;
+	/* 左右联动布局：左侧固定宽度侧边栏 + 右侧自适应内容区 */
+	.layout-wrapper {
+		display: flex;
+		height: 100vh;
+		overflow: hidden;
+	}
+
+	.side-bar {
+		width: 180rpx;
+		flex-shrink: 0;
+		height: 100vh;
+		background: #ffffff;
+		border-right: 1rpx solid #f0f0f0;
+		box-sizing: border-box;
 
 		.tab-item {
-			flex: 1;
-			font-size: 28rpx;
+			position: relative;
+			padding: 32rpx 0;
+			text-align: center;
+			font-size: 26rpx;
 			color: #666;
-			padding: 16rpx 0;
-			border-radius: 10rpx;
 			transition: all .2s;
+
+			.tab-name {
+				word-break: break-all;
+				line-height: 1.3;
+			}
 
 			&.active {
 				color: #18AF38;
 				font-weight: bold;
 				background: rgba(24, 175, 56, 0.10);
+
+				/* 左侧绿色色条标识当前选中 */
+				&::before {
+					content: '';
+					position: absolute;
+					left: 0;
+					top: 50%;
+					transform: translateY(-50%);
+					width: 6rpx;
+					height: 36rpx;
+					background: #18AF38;
+					border-radius: 0 6rpx 6rpx 0;
+				}
 			}
 		}
+	}
+
+	/* 右侧内容区：flex:1 自适应宽度 + 独立滚动 + 防横向溢出 */
+	.content-area {
+		flex: 1;
+		min-width: 0;
+		height: 100vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+		box-sizing: border-box;
 	}
 </style>
