@@ -355,6 +355,8 @@ class ActiveController extends AuthController
         $is_month_recommend = $this->request->param('is_month_recommend');
         $where = [];
         $where[] = ['type', '=', 1];
+        $where[] = ['status', '=', 1];
+        $where[] = ['delete_time', '=', 0];
         if(!empty($community_cate_id)) $where[] = ['cate_id', '=', $community_cate_id];
         if(!empty($is_recommendation)) $where[] = ['is_recommendation', '=', 1];
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
