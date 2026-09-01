@@ -37,7 +37,7 @@
 								<u-icon name="clock"></u-icon>
 								<text style="font-size:22rpx;">{{item.date | date('yy-mm-dd')}}</text>
 							</view>
-							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;">
+							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;" v-if="item.address && item.address.trim()">
 								<u-icon name="map"></u-icon>
 								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
 							</view>
@@ -84,7 +84,7 @@
 								<u-icon name="clock"></u-icon>
 								<text style="font-size:22rpx;">{{item.date | date('yy-mm-dd')}}</text>
 							</view>
-							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;">
+							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;" v-if="item.address && item.address.trim()">
 								<u-icon name="map"></u-icon>
 								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
 							</view>
@@ -338,7 +338,7 @@
 								<u-icon name="clock"></u-icon>
 								<text style="font-size:22rpx;">{{item.date | date('yy-mm-dd')}}</text>
 							</view>
-							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;">
+							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;" v-if="item.address && item.address.trim()">
 								<u-icon name="map"></u-icon>
 								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
 							</view>
