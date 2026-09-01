@@ -34,7 +34,7 @@
 					<view class="u-font-24 u-m-t-10">精选优质活动，值得参与</view>
 				</view>
 			</view>
-			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" :class="{'top-pinned-card': item.is_top == 1}" v-for="item in monthly_rec_list" :key="item.id"
+			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in monthly_rec_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<u-image width="100%" height="285" :src="item.thumb"></u-image>
 				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
@@ -81,7 +81,7 @@
 			</view>
 			<view class="u-m-t-30">
 			<!-- 打卡标签绑定分类下的活动列表（与中间分类标签共用 active_list） -->
-			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" :class="{'top-pinned-card': item.is_top == 1}" v-for="item in active_list" :key="item.id"
+			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<u-image width="100%" height="285" :src="item.thumb"></u-image>
 				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
@@ -335,7 +335,7 @@
 
 		<!-- 中间标签（第二个起，非打卡非备份非自定义）：显示该标签绑定分类下的活动列表 -->
 		<view v-else-if="!is_backup_tab" class="u-p-30">
-			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" :class="{'top-pinned-card': item.is_top == 1}" v-for="item in active_list" :key="item.id"
+			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<u-image width="100%" height="285" :src="item.thumb"></u-image>
 				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">

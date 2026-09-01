@@ -136,7 +136,6 @@ class ActiveController extends ToolController
             $params['is_clock'] = empty($params['is_clock']) ? 0 : 1;
             $params['is_badge'] = empty($params['is_badge']) ? 0 : 1;
             $params['is_month_recommend'] = empty($params['is_month_recommend']) ? 0 : 1;
-            $params['is_top'] = empty($params['is_top']) ? 0 : 1;
 
 
             $params = $this->setParamData($params);
