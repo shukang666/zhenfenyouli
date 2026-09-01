@@ -31,13 +31,6 @@
 					</view>
 				</view>
 			</view>
-			<view class="u-rela u-m-b-30">
-				<!-- <u-image width="100%" height="180" src="https://oss.ausite.cn/xcxkf052/admin/20250512/cd4026f1bc19470be6bbf9efb0a9b38a.png?watermark"></u-image> -->
-				<view class="u-abso u-abso-l-30 u-abso-b-30 white" style="text-shadow:0 2rpx 8rpx rgba(0,0,0,0.5);">
-					<view class="u-font-bold u-font-40">本月推荐</view>
-					<view class="u-font-24 u-m-t-10">精选优质活动，值得参与</view>
-				</view>
-			</view>
 			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in monthly_rec_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<u-image width="100%" height="285" :src="item.thumb"></u-image>
