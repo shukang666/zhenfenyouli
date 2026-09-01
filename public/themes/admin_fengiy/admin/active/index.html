@@ -33,6 +33,7 @@
                 </if>
                 <if condition="$params.type == 1">
                     <th>本月推荐</th>
+                    <th>置顶</th>
                     <th>首页展示</th>
                 </if>
                 <th>添加时间</th>
@@ -76,6 +77,11 @@
                         <td>
                             <div class="layui-form">
                                 <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="is_month_recommend" name="is_month_recommend" value="{$vo.id}" <if condition="$vo.is_month_recommend == 1">checked</if> >
+                            </div>
+                        </td>
+                        <td>
+                            <div class="layui-form">
+                                <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="is_top" name="is_top" value="{$vo.id}" <if condition="$vo.is_top == 1">checked</if> >
                             </div>
                         </td>
                         <td>
@@ -135,6 +141,10 @@
         //本月推荐
         form.on('switch(is_month_recommend)', function (data) {
             setStatus(data.value, 'is_month_recommend', this.checked ? 1 : 0)
+        });
+        //置顶
+        form.on('switch(is_top)', function (data) {
+            setStatus(data.value, 'is_top', this.checked ? 1 : 0)
         });
 
         function setStatus(id, type, status) {

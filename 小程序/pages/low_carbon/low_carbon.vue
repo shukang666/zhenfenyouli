@@ -13,6 +13,20 @@
 
 		<!-- 本月推荐标签（前端写死第一个标签，unshift 到 tab_list 头部） -->
 		<view v-if="is_monthly_rec_tab" class="u-p-30">
+			<!-- 置顶：垃圾分类打卡固定入口卡片，复用打卡标签里的同款卡片 + top-pinned-card 样式 -->
+			<view class="u-type-white-bg u-radius-10 u-rela top-pinned-card u-m-b-30" @click="navigator('/pages/flhd/ljfldk',1)">
+				<u-image width="100%" height="326" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
+				<view class="u-p-20 u-flex" style="align-items:center;">
+					<view class="" style="flex:1;min-width:0;">
+						<view class="u-font-bold u-font-32 u-line-1">
+							垃圾分类打卡
+						</view>
+						<view class="u-m-t-10 u-font-22 u-type-info u-line-1">
+							参与垃圾分类学习通过考核后即可解锁
+						</view>
+					</view>
+				</view>
+			</view>
 			<view class="u-rela u-m-b-30">
 				<!-- <u-image width="100%" height="180" src="https://oss.ausite.cn/xcxkf052/admin/20250512/cd4026f1bc19470be6bbf9efb0a9b38a.png?watermark"></u-image> -->
 				<view class="u-abso u-abso-l-30 u-abso-b-30 white" style="text-shadow:0 2rpx 8rpx rgba(0,0,0,0.5);">
@@ -20,7 +34,7 @@
 					<view class="u-font-24 u-m-t-10">精选优质活动，值得参与</view>
 				</view>
 			</view>
-			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in monthly_rec_list" :key="item.id"
+			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" :class="{'top-pinned-card': item.is_top == 1}" v-for="item in monthly_rec_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<u-image width="100%" height="285" :src="item.thumb"></u-image>
 				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
@@ -52,7 +66,7 @@
 
 		<!-- 打卡标签（后台第一个固定标签，index===1）：绑定活动分类，顶部写死"垃圾分类打卡"入口卡片，下方动态加载该分类活动列表 -->
 		<view v-else-if="is_daka_tab" class="u-p-30">
-			<view class="u-type-white-bg u-radius-10" @click="navigator('/pages/flhd/ljfldk',1)">
+			<view class="u-type-white-bg u-radius-10 u-rela top-pinned-card" @click="navigator('/pages/flhd/ljfldk',1)">
 				<u-image width="100%" height="326" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
 				<view class="u-p-20 u-flex" style="align-items:center;">
 					<view class="" style="flex:1;min-width:0;">
@@ -67,7 +81,7 @@
 			</view>
 			<view class="u-m-t-30">
 			<!-- 打卡标签绑定分类下的活动列表（与中间分类标签共用 active_list） -->
-			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
+			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" :class="{'top-pinned-card': item.is_top == 1}" v-for="item in active_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<u-image width="100%" height="285" :src="item.thumb"></u-image>
 				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
@@ -321,7 +335,7 @@
 
 		<!-- 中间标签（第二个起，非打卡非备份非自定义）：显示该标签绑定分类下的活动列表 -->
 		<view v-else-if="!is_backup_tab" class="u-p-30">
-			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
+			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" :class="{'top-pinned-card': item.is_top == 1}" v-for="item in active_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<u-image width="100%" height="285" :src="item.thumb"></u-image>
 				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
@@ -765,6 +779,27 @@
 		display: flex;
 		height: 100vh;
 		overflow: hidden;
+	}
+
+	/* 置顶卡片：右上角"置顶"标签 */
+	.top-pinned-card {
+		overflow: hidden;
+		position: relative;
+	}
+	.top-pinned-card::before {
+		content: '置顶';
+		position: absolute;
+		top: 0;
+		right: 0;
+		z-index: 10;
+		padding: 6rpx 18rpx;
+		font-size: 22rpx;
+		line-height: 1.4;
+		color: #fff;
+		background: linear-gradient(135deg, #ff6b35 0%, #ff3d00 100%);
+		border-bottom-left-radius: 14rpx;
+		border-top-right-radius: 10rpx;
+		box-shadow: 0 2rpx 6rpx rgba(255, 61, 0, .35);
 	}
 
 	.side-bar {

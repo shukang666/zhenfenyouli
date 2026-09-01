@@ -362,7 +362,7 @@ class ActiveController extends AuthController
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
         if(!empty($is_month_recommend)) $where[] = ['is_month_recommend', '=', 1];
         if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
-        $list = ActiveModel::where($where)->order('list_order asc,id desc')->paginate($page_size)->each(function ($item){
+        $list = ActiveModel::where($where)->order('is_top desc, list_order asc, id desc')->paginate($page_size)->each(function ($item){
             $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
             $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
             $item['content'] = htmlspecialchars_decode($item['content']);
