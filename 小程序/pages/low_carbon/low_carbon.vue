@@ -42,7 +42,6 @@
 								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
 							</view>
 						</view>
-						<u-button :custom-style="{width:'165rpx',height:'60rpx',flexShrink:0}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button>
 					</view>
 				</view>
 			</view>
@@ -344,7 +343,6 @@
 								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
 							</view>
 						</view>
-						<u-button :custom-style="{width:'165rpx',height:'60rpx',flexShrink:0}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button>
 					</view>
 				</view>
 			</view>
