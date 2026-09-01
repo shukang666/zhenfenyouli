@@ -13,19 +13,17 @@
 				<u-swiper :list="bannerList" height="340" border-radius="24" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
 			</view>
 
-			<!-- 核心功能入口：四宫格大图，两行两列，加圆角和阴影提升卡片质感 -->
+			<!-- 核心功能入口：四宫格卡片，统一白底、浅色图标容器，内容前置无多余装饰 -->
 			<view class="entry-grid">
-				<view class="entry-item" @click="$u.route({type:'switchTab',url:'/pages/low_carbon/low_carbon'})">
-					<image src="/static/images/ditanshenghuo.png" mode="aspectFill" class="entry-img" lazy-load></image>
-				</view>
-				<view class="entry-item" @click="$u.route({type:'switchTab',url:'/pages/health/health'})">
-					<image src="/static/images/jiankangceshi.png" mode="aspectFill" class="entry-img" lazy-load></image>
-				</view>
-				<view class="entry-item" @click="$u.route({type:'switchTab',url:'/pages/mall/mall'})">
-					<image src="/static/images/jifenshangcheng.png" mode="aspectFill" class="entry-img" lazy-load></image>
-				</view>
-				<view class="entry-item" @click="$u.route({url:'/pages/sjhd/sjhd'})">
-					<image src="/static/images/shequhudong.png" mode="aspectFill" class="entry-img" lazy-load></image>
+				<view class="entry-card" v-for="(item, index) in entry_list" :key="index"
+					hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(item)">
+					<view class="entry-icon" :style="{ background: item.bg }">
+						<u-icon :name="item.icon" size="40" :color="item.color"></u-icon>
+					</view>
+					<view class="entry-body">
+						<view class="entry-name">{{ item.name }}</view>
+						<view class="entry-desc">{{ item.desc }}</view>
+					</view>
 				</view>
 			</view>
 
@@ -106,6 +104,13 @@
 				bannerList: [],
 				dataList: [],
 				active_list: [],
+				// 首页四宫格入口：跳转路径保持原逻辑，switchTab 用于 tabbar 页面
+				entry_list: [
+					{ icon: 'calendar', name: '社区活动', desc: '参加低碳环保活动', color: '#18AF38', bg: 'rgba(24,175,56,0.10)', url: '/pages/low_carbon/low_carbon', type: 'switchTab' },
+					{ icon: 'heart', name: '健康测试', desc: '关注身体健康', color: '#2E7CF6', bg: 'rgba(46,124,246,0.10)', url: '/pages/health/health', type: 'switchTab' },
+					{ icon: 'integral', name: '积分商城', desc: '环保好礼兑换', color: '#F0546C', bg: 'rgba(240,84,108,0.10)', url: '/pages/mall/mall', type: 'switchTab' },
+					{ icon: 'chat', name: '社区互动', desc: '分享绿色生活', color: '#FF9040', bg: 'rgba(255,144,64,0.12)', url: '/pages/sjhd/sjhd', type: 'navigateTo' }
+				],
 			}
 		},
 		onShareAppMessage() {
@@ -138,6 +143,10 @@
 			})
 		},
 		methods: {
+			// 四宫格入口跳转
+			goEntry(item) {
+				this.$u.route({ type: item.type, url: item.url })
+			},
 			// 获取活动列表
 			async get_new_active_list() {
 				try {
@@ -211,22 +220,53 @@
 		padding: 30rpx 30rpx 0;
 	}
 
-	/* 核心功能入口：四宫格大图，两行两列布局 */
+	/* 核心功能入口：四宫格统一卡片，扁平无叠加装饰 */
 	.entry-grid {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
-		padding: 30rpx;
+		padding: 24rpx 30rpx 0;
 	}
-	.entry-item {
+	.entry-card {
+		display: flex;
+		align-items: center;
 		width: 334rpx;
+		height: 152rpx;
 		margin-bottom: 24rpx;
-	}
-	.entry-img {
-		width: 334rpx;
-		height: 245rpx;
+		padding: 0 24rpx;
+		background: #fff;
 		border-radius: 20rpx;
-		box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.08);
+		box-sizing: border-box;
+	}
+	.entry-card--hover {
+		background: #f7f9fa;
+	}
+	.entry-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 76rpx;
+		height: 76rpx;
+		border-radius: 24rpx;
+		flex-shrink: 0;
+	}
+	.entry-body {
+		flex: 1;
+		min-width: 0;
+		margin-left: 18rpx;
+	}
+	.entry-name {
+		font-size: 29rpx;
+		font-weight: 600;
+		color: #1a1a1a;
+	}
+	.entry-desc {
+		margin-top: 6rpx;
+		font-size: 22rpx;
+		color: #9aa0a8;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	/* 模块标题：图标 + 标题 + 分隔线 + 副标题 + 更多 */
