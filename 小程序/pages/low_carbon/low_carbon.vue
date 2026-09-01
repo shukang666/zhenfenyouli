@@ -333,10 +333,24 @@
 			</view>
 		</view>
 
-		<!-- 中间标签（第二个起，非打卡非备份非自定义）：显示该标签绑定分类下的活动列表 -->
-		<view v-else-if="!is_backup_tab" class="u-p-30">
-			<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
-				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+		<!-- 中间标签（第二个起，非打卡非备份非自定义）：顶部写死"垃圾分类打卡"置顶入口卡片 + 该标签绑定分类下的活动列表 -->
+	<view v-else-if="!is_backup_tab" class="u-p-30">
+		<!-- 置顶：垃圾分类打卡固定入口卡片，所有分类标签都写死显示，不可配置 -->
+		<view class="u-type-white-bg u-radius-10 u-rela top-pinned-card u-m-b-30" @click="navigator('/pages/flhd/ljfldk',1)">
+			<u-image width="100%" height="326" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
+			<view class="u-p-20 u-flex" style="align-items:center;">
+				<view class="" style="flex:1;min-width:0;">
+					<view class="u-font-bold u-font-32 u-line-1">
+						垃圾分类打卡
+					</view>
+					<view class="u-m-t-10 u-font-22 u-type-info u-line-1">
+						参与垃圾分类学习通过考核后即可解锁
+					</view>
+				</view>
+			</view>
+		</view>
+		<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
+			@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<u-image width="100%" height="285" :src="item.thumb"></u-image>
 				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
 					<view class="u-flex">
