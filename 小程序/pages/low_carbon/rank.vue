@@ -5,7 +5,7 @@
 			<view class="u-flex u-row-between u-font-28 u-hui" style="padding: 0 30rpx 0;">
 				<view class="u-w-100">排名</view>
 				<view class="u-w-320">用户</view>
-				<view class="u-w-150">签到次数</view>
+				<view class="u-w-150">打卡次数</view>
 			</view>
 			<view class="u-flex u-row-between u-font-28 u-hui u-m-t-30 u-radius-10" v-for="item,i in dataList" :key="i" style="padding: 30rpx;" :style="{background:returnColor(i)}">
 				<view class="u-w-100 u-text-center">

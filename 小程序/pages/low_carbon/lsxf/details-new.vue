@@ -30,23 +30,12 @@
 		<u-gap height="150"></u-gap>
 
 		<u-mask :show="tipShow">
-			<view class="u-w-560 u-radius-10 u-type-white-bg u-abso-center u-p-30" v-if="showType == 1">
-				<view class="u-text-center">
-					<image src="/static/images/wenxintishi.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
-					<view class="u-font-32">报名需要抵扣 <text class="u-font-40 u-main-c u-font-bold">{{info.point}}</text> 积分</view>
-					<view class="u-font-32">是否报名该活动</view>
-				</view>
-				<view class="u-m-t-30 u-flex u-row-around">
-					<u-button :custom-style="{width:'220rpx'}" type="warning" @click="tipShow = false">我再想想</u-button>
-					<u-button :custom-style="{width:'220rpx'}" @click="post_new_active_sign">确认报名</u-button>
-				</view>
-			</view>
 			<view class="u-w-560 u-radius-10 u-type-white-bg u-abso-center u-p-30" v-if="showType == 2">
 				<view class="u-text-center">
 					<image src="/static/images/qiandaochenggong.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
 
-					<view class="u-font-32">签到赠送 <text class="u-font-40 u-main-c u-font-bold">{{info.send_point}}</text> 积分</view>
-					<view class="u-font-32">恭喜您签到成功~</view>
+					<view class="u-font-32">打卡赠送 <text class="u-font-40 u-main-c u-font-bold">{{info.send_point}}</text> 积分</view>
+					<view class="u-font-32">恭喜您打卡成功~</view>
 				</view>
 				<view class="u-m-t-30 u-flex u-row-center">
 					<u-button :custom-style="{width:'400rpx'}" @click="tipShow = false">我知道了</u-button>
@@ -56,14 +45,14 @@
 
 		<u-popup v-model="sign_clock_show" mode="bottom" border-radius="20" closeable>
 			<view class="u-p-30">
-				<view class="u-font-bold">上传签到图片</view>
+				<view class="u-font-bold">上传打卡图片</view>
 				<view class="u-m-t-30 u-hui-bg u-radius-10 u-p-30">
 					<u-upload upload-text="上传图片" width="180" height="180" :action="uploadUrl" @on-success="uploadImages($event,'image_url',true)" :fileList="image_url"
 						@on-remove="removeImages($event,'image_url',true)" max-count="1">
 					</u-upload>
 				</view>
 				<view class="u-p-30">
-					<u-button @click="post_new_sign_clock">确认签到</u-button>
+					<u-button @click="post_new_sign_clock">确认打卡</u-button>
 				</view>
 			</view>
 		</u-popup>
@@ -74,18 +63,13 @@
 				<view class="u-font-26">邀请邻居</view>
 				<button open-type="share" plain class="kefuBtn"></button>
 			</view>
-			<!-- 	<view v-if="info.is_clock == 0">
-				<u-button :custom-style="{width:'480rpx'}" v-if="info.is_sign == 0" @click="showType = 1,tipShow = true" :disabled="info.is_end == 1">立即参与</u-button>
-			</view> -->
-			<u-button :custom-style="{width:'480rpx'}" v-if="info.is_clock == 0" @click="showType = 1,tipShow = true"
-				:disabled="(info.is_end == 1 || info.is_sign == 1) && isLogin">{{info.is_sign == 1 ? '已参与' :'立即参与'}}</u-button>
+			<u-button :custom-style="{width:'480rpx'}" v-if="info.is_clock == 0" :disabled="(info.is_end == 1 || info.is_sign == 1) && isLogin">{{info.is_sign == 1 ? '已参与' :'立即参与'}}</u-button>
 			<view class="u-flex u-row-between u-w-490" v-if="info.is_clock == 1">
 				<u-button :custom-style="{width:'230rpx'}" type="warning" plain @click="$u.route(`/pages/low_carbon/rank?id=${info.id}`)">
 					<image src="/static/images/rank.png" class="u-w-40 u-h-40 u-m-r-15" mode="aspectFill"></image>
 					<text>排行榜</text>
 				</u-button>
-				<u-button :custom-style="{width:'230rpx'}" @click="showType = 1,tipShow = true" v-if="info.is_sign == 0 ||  !isLogin" :disabled="info.is_end == 1 && isLogin">立即参与</u-button>
-				<u-button :custom-style="{width:'230rpx'}" v-if="info.is_sign == 1 && isLogin" @click="sign_clock_show = true" :disabled="info.is_end == 1 || info.is_sign_clock == 1">立即签到</u-button>
+				<u-button :custom-style="{width:'230rpx'}" v-if="info.is_sign == 1 && isLogin" @click="sign_clock_show = true" :disabled="info.is_end == 1 || info.is_sign_clock == 1">{{info.is_sign_clock == 1 ? '已打卡' : '立即打卡'}}</u-button>
 			</view>
 		</view>
 

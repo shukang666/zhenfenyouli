@@ -29,7 +29,7 @@
 								<text>{{item.address}}</text>
 							</view>
 						</view>
-						<u-button :custom-style="{width:'165rpx',height:'60rpx'}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即报名</u-button>
+						<u-button :custom-style="{width:'165rpx',height:'60rpx'}" size="mini" @click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">立即参与</u-button>
 					</view>
 				</view>
 			</view>

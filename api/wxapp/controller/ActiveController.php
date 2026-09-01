@@ -425,11 +425,22 @@ class ActiveController extends AuthController
         $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
         $item['content'] = htmlspecialchars_decode($item['content']);
 
-        //是否报名
+        //是否报名（未报名则自动报名，去除手动报名环节）
         $where = [];
         $where[] = ['active_id', '=', $item['id']];
         $where[] = ['user_id', '=', $this->user_id];
         $sign_info = ActiveSIgnModel::where($where)->find();
+        if(empty($sign_info) && $this->user_id){
+            // 自动创建报名记录，跳过角色条件校验和积分扣除
+            $sign_data = [];
+            $sign_data['user_id'] = $this->user_id;
+            $sign_data['active_id'] = $item['id'];
+            $sign_data['type'] = $item['is_clock'] == 1 ? 2 : 1;
+            $sign_data['start_time'] = $item['clock_start_time'];
+            $sign_data['end_time'] = $item['clock_end_time'];
+            ActiveSIgnModel::create($sign_data);
+            $sign_info = ActiveSIgnModel::where($where)->find();
+        }
         $item['sign_id'] = empty($sign_info)?0:$sign_info['id'];
         $item['is_sign'] = empty($sign_info)?0:1;
 
