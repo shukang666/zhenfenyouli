@@ -1,4 +1,4 @@
-('D:\\phpstudy_pro\\WWW\\xiayuxuan.com\\py\\积分使用记录\\build\\积分报表工具\\PYZ-00.pyz',
+('D:\\phpstudy_pro\\WWW\\xiayuxuan.com\\py\\dist\\build\\积分报表工具\\PYZ-00.pyz',
  [('PIL', 'D:\\Python312\\Lib\\site-packages\\PIL\\__init__.py', 'PYMODULE'),
   ('PIL.AvifImagePlugin',
    'D:\\Python312\\Lib\\site-packages\\PIL\\AvifImagePlugin.py',
