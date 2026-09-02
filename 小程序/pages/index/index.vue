@@ -199,9 +199,14 @@
 			},
 			// 核心入口跳转
 			goEntry(item) {
-				// 社区活动入口：跳转到活动页并切到"社交活动"标签
+				// 社区互动：功能开发中
+				if (item.key === 'community') {
+					this.$u.toast('该功能开发中')
+					return
+				}
+				// 社区活动：跳转活动页"本月推荐"标签（同 banner 跳转逻辑）
 				if (item.key === 'active' && item.url.indexOf('low_carbon') !== -1) {
-					uni.setStorageSync('jump_sjhd', 1)
+					uni.setStorageSync('jump_monthly_rec', 1)
 					uni.switchTab({ url: item.url.split('?')[0] })
 					return
 				}
