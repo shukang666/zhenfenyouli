@@ -17,31 +17,46 @@
 			<view class="entry-grid">
 				<!-- 左侧大卡 -->
 				<view class="entry-main" hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(entry_list[0])">
-					<view class="entry-icon entry-icon--lg" :style="{ background: entry_list[0].bg }">
-						<u-icon :name="entry_list[0].icon" size="48" :color="entry_list[0].color"></u-icon>
-					</view>
-					<view class="entry-name entry-name--lg">{{ entry_list[0].name }}</view>
-					<view class="entry-desc">{{ entry_list[0].desc }}</view>
+					<template v-if="entry_list[0].image">
+						<image :src="entry_list[0].image" class="entry-img entry-img--lg" mode="aspectFill"></image>
+					</template>
+					<template v-else>
+						<view class="entry-icon entry-icon--lg" :style="{ background: entry_list[0].bg }">
+							<u-icon :name="entry_list[0].icon" size="48" :color="entry_list[0].color"></u-icon>
+						</view>
+						<view class="entry-name entry-name--lg">{{ entry_list[0].name }}</view>
+						<view class="entry-desc">{{ entry_list[0].desc }}</view>
+					</template>
 				</view>
 				<!-- 右侧列：上两小块 + 下横条 -->
 				<view class="entry-side">
 					<view class="entry-side-top">
-						<view class="entry-mini" v-for="item in entry_list.slice(1, 3)" :key="item.icon"
+						<view class="entry-mini" v-for="item in entry_list.slice(1, 3)" :key="item.key"
 							hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(item)">
-							<view class="entry-icon" :style="{ background: item.bg }">
-								<u-icon :name="item.icon" size="36" :color="item.color"></u-icon>
-							</view>
-							<view class="entry-name entry-name--sm">{{ item.name }}</view>
+							<template v-if="item.image">
+								<image :src="item.image" class="entry-img entry-img--mini" mode="aspectFill"></image>
+							</template>
+							<template v-else>
+								<view class="entry-icon" :style="{ background: item.bg }">
+									<u-icon :name="item.icon" size="36" :color="item.color"></u-icon>
+								</view>
+								<view class="entry-name entry-name--sm">{{ item.name }}</view>
+							</template>
 						</view>
 					</view>
 					<view class="entry-wide" hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(entry_list[3])">
-						<view class="entry-icon" :style="{ background: entry_list[3].bg }">
-							<u-icon :name="entry_list[3].icon" size="36" :color="entry_list[3].color"></u-icon>
-						</view>
-						<view class="entry-body">
-							<view class="entry-name">{{ entry_list[3].name }}</view>
-							<view class="entry-desc">{{ entry_list[3].desc }}</view>
-						</view>
+						<template v-if="entry_list[3].image">
+							<image :src="entry_list[3].image" class="entry-img entry-img--wide" mode="aspectFill"></image>
+						</template>
+						<template v-else>
+							<view class="entry-icon" :style="{ background: entry_list[3].bg }">
+								<u-icon :name="entry_list[3].icon" size="36" :color="entry_list[3].color"></u-icon>
+							</view>
+							<view class="entry-body">
+								<view class="entry-name">{{ entry_list[3].name }}</view>
+								<view class="entry-desc">{{ entry_list[3].desc }}</view>
+							</view>
+						</template>
 					</view>
 				</view>
 			</view>
@@ -125,12 +140,12 @@
 				bannerList: [],
 				dataList: [],
 				active_list: [],
-				// 首页核心入口：第一项为左侧大卡，二三项为右侧小块，第四项为右下横条，跳转路径保持原逻辑，switchTab 用于 tabbar 页面
+				// 首页核心入口：默认 fallback 数据（后台 home_entries 没配图片时用），接口拉到后会覆盖
 				entry_list: [
-					{ icon: 'calendar', name: '社区活动', desc: '参加低碳环保活动', color: '#18AF38', bg: 'rgba(24,175,56,0.10)', url: '/pages/low_carbon/low_carbon', type: 'switchTab' },
-					{ icon: 'heart', name: '健康测试', desc: '关注身体健康', color: '#2E7CF6', bg: 'rgba(46,124,246,0.10)', url: '/pages/health/health', type: 'switchTab' },
-					{ icon: 'integral', name: '积分商城', desc: '环保好礼兑换', color: '#F0546C', bg: 'rgba(240,84,108,0.10)', url: '/pages/mall/mall', type: 'switchTab' },
-					{ icon: 'chat', name: '社区互动', desc: '分享绿色生活', color: '#FF9040', bg: 'rgba(255,144,64,0.12)', url: '/pages/sjhd/sjhd', type: 'navigateTo' }
+					{ key: 'active', icon: 'calendar', name: '社区活动', desc: '参加低碳环保活动', color: '#18AF38', bg: 'rgba(24,175,56,0.10)', url: '/pages/low_carbon/low_carbon', type: 'switchTab' },
+					{ key: 'health', icon: 'heart', name: '健康测试', desc: '关注身体健康', color: '#2E7CF6', bg: 'rgba(46,124,246,0.10)', url: '/pages/health/health', type: 'switchTab' },
+					{ key: 'mall', icon: 'integral', name: '积分商城', desc: '环保好礼兑换', color: '#F0546C', bg: 'rgba(240,84,108,0.10)', url: '/pages/mall/mall', type: 'switchTab' },
+					{ key: 'community', icon: 'chat', name: '社区互动', desc: '分享绿色生活', color: '#FF9040', bg: 'rgba(255,144,64,0.12)', url: '/pages/sjhd/sjhd', type: 'navigateTo' }
 				],
 			}
 		},
@@ -150,6 +165,7 @@
 			}
 			this.getBannerList()
 			this.get_new_active_list()
+			this.getHomeEntries()
 		},
 		onShow() {
 			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
@@ -163,6 +179,24 @@
 			})
 		},
 		methods: {
+			// 拉首页入口配置（后台 home_entries），有 image 则用图片，没图片保持 fallback icon 样式
+			async getHomeEntries() {
+				try {
+					let res = await this.$u.api.findSetting({ name: 'home_entries' })
+					let list = res.data || []
+					if (list.length === 0) return
+					// 按 key 匹配合并，保留 fallback 的 url/type 等字段
+					let merged = this.entry_list.map(fb => {
+						let cfg = list.find(c => c.key === fb.key)
+						return cfg ? Object.assign({}, fb, cfg) : fb
+					})
+					// 如果后台配的数量不对（比如没配全4个），还是用接口返回的
+					if (list.length === 4) merged = list
+					this.entry_list = merged
+				} catch (e) {
+					// 接口失败不影响，保留 fallback
+				}
+			},
 			// 核心入口跳转
 			goEntry(item) {
 				this.$u.route({ type: item.type, url: item.url })
@@ -254,6 +288,15 @@
 		display: flex;
 		align-items: stretch;
 		padding: 24rpx 30rpx 0;
+	}
+	/* 卡片内图片：铺满整张卡，圆角跟随卡片 */
+	.entry-img {
+		width: 100%;
+		height: 100%;
+		border-radius: inherit;
+	}
+	.entry-img--lg, .entry-img--mini, .entry-img--wide {
+		border-radius: 20rpx;
 	}
 	.entry-main {
 		display: flex;

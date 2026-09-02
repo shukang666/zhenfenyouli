@@ -170,6 +170,14 @@ class BasicController extends AuthController
                         $value[$k] = cmf_get_asset_url($v);
                     }
                 }
+                // home_entries：二维数组，每个子项里的 image 字段也要补全 URL
+                if ($option_name === 'home_entries') {
+                    foreach ($value as $idx => $item) {
+                        if (!empty($item['image'])) {
+                            $value[$idx]['image'] = cmf_get_asset_url($item['image']);
+                        }
+                    }
+                }
             }
         }else{
             $value = $value == 0 ? 0 : '';
