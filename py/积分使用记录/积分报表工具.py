@@ -261,58 +261,93 @@ class PointReportTool:
         return pd.DataFrame(list(user_map.values()))
 
     def _query_exchange_agg(self, conn, start_ts, end_ts):
-        """查询兑换明细并按用户聚合"""
+        """查询兑换明细并按用户聚合
+        
+        数据源：cmf_user_account_log type=203（积分抵扣/兑换扣积分）
+        通过 user_id + 时间差 < 120秒 近似关联 cmf_shop_order + cmf_shop_order_detail 获取商品信息
+        （type=203 的 order_num 全是 NULL，必须靠时间近似匹配）
+        """
         cursor = conn.cursor()
 
+        # 1. 查出时间段内所有 type=203 的扣积分日志
         sql = f"""
-            SELECT a.user_id,
-                   FROM_UNIXTIME(a.pay_time, '%m-%d') AS date_short,
-                   d.goods_name,
-                   COALESCE(NULLIF(d.sku_name, ''), '默认规格') AS sku_name,
-                   d.count,
-                   a.point_pay
-            FROM cmf_shop_order a
-            LEFT JOIN cmf_shop_order_detail d ON a.order_num = d.order_num
-            WHERE a.point_pay > 0
-              AND a.delete_time = 0
-              AND a.pay_time BETWEEN {start_ts} AND {end_ts}
-            ORDER BY a.pay_time
+            SELECT id, user_id, change_amount, create_time
+            FROM cmf_user_account_log 
+            WHERE account_type = 2 AND type = 203 AND change_amount < 0
+              AND create_time BETWEEN {start_ts} AND {end_ts}
+              AND delete_time = 0
+            ORDER BY user_id, create_time
         """
         cursor.execute(sql)
-        rows = cursor.fetchall()
+        log_rows = cursor.fetchall()
 
-        if not rows:
+        if not log_rows:
             return pd.DataFrame(columns=['user_id', '兑换物品明细', '_exchange_items', '兑换次数', '兑换消耗积分'])
 
-        # 按用户聚合
-        exchange_map = {}
-        for r in rows:
-            uid = r[0]
-            date_short = r[1] or ''
-            goods = r[2] or ''
-            sku = r[3] or '默认规格'
-            count = int(r[4]) if r[4] else 1
-            point_pay = int(float(r[5])) if r[5] else 0
+        # 2. 批量预加载这个时间段内的 shop_order + detail 到内存
+        cursor.execute(f"""
+            SELECT o.user_id, o.create_time, o.order_num, o.point_pay,
+                   d.goods_name, COALESCE(NULLIF(d.sku_name, ''), '默认规格'), d.count
+            FROM cmf_shop_order o
+            LEFT JOIN cmf_shop_order_detail d ON o.order_num = d.order_num
+            WHERE o.delete_time = 0
+              AND o.create_time BETWEEN {start_ts - 120} AND {end_ts + 120}
+            ORDER BY o.user_id, o.create_time
+        """)
+        order_rows = cursor.fetchall()
 
-            # 显示文本：日期 + 商品名(规格)x数量
-            label = goods[:25]
-            if sku and sku != '默认规格':
-                label += f"({sku})"
-            if count > 1:
-                label += f"×{count}"
+        # 按 user_id 分组索引订单，加速匹配
+        from collections import defaultdict
+        user_orders = defaultdict(list)
+        for r in order_rows:
+            user_orders[r[0]].append(r)
+
+        # 3. 逐条日志匹配订单
+        exchange_map = {}  # user_id -> {'items': [...], '消耗合计': 0}
+        unmatched_count = 0
+
+        for log_id, uid, change_amt, log_ct in log_rows:
+            point_pay = int(abs(float(change_amt)))
+
+            # 在同 user_id 的订单中找时间最接近的（差 < 120s）
+            best_order = None
+            best_diff = 120  # 秒
+            for order in user_orders.get(uid, []):
+                diff = abs(order[1] - log_ct)
+                if diff < best_diff:
+                    best_diff = diff
+                    best_order = order
+
+            if best_order and best_order[4]:  # goods_name 非空
+                date_short = datetime.fromtimestamp(log_ct).strftime('%m-%d')
+                goods = best_order[4][:30]
+                sku = best_order[5] or '默认规格'
+                count = int(best_order[6]) if best_order[6] else 1
+
+                label = goods
+                if sku and sku != '默认规格':
+                    label += f"({sku})"
+                if count > 1:
+                    label += f"×{count}"
+                display = f"{date_short} {label}"
+            else:
+                unmatched_count += 1
+                date_short = datetime.fromtimestamp(log_ct).strftime('%m-%d')
+                display = f"{date_short} 积分兑换 -{point_pay}"
 
             if uid not in exchange_map:
                 exchange_map[uid] = {'items': [], '消耗合计': 0}
-            exchange_map[uid]['items'].append(f"{date_short} {label}")
+            exchange_map[uid]['items'].append(display)
             exchange_map[uid]['消耗合计'] += point_pay
+
+        if unmatched_count > 0:
+            print(f"  [注意] {unmatched_count} 条兑换记录未匹配到订单，显示为'积分兑换 -XXX分'")
 
         result = []
         for uid, data in exchange_map.items():
             result.append({
                 'user_id': uid,
-                # 用 \n 分隔多条，方便 Excel wrap_text 和 Treeview 多行显示
                 '兑换物品明细': '\n'.join(data['items']),
-                # 每条独立的兑换记录列表，Excel 导出时展开用
                 '_exchange_items': data['items'],
                 '兑换次数': len(data['items']),
                 '兑换消耗积分': data['消耗合计'],
