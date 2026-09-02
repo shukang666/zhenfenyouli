@@ -34,7 +34,7 @@ class HomeEntriesController extends AdminBaseController
                     'type' => trim($item['type'] ?? 'navigateTo'),
                 ];
             }
-            $res = cmf_set_option($option_name, $clean);
+            $res = cmf_set_option($option_name, $clean, true);
             if ($res !== false) {
                 $this->success('保存成功');
             } else {
