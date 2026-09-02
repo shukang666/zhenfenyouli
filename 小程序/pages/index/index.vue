@@ -9,11 +9,16 @@
 			</template>
 
 			<!-- Banner 轮播图 -->
-			<view class="banner-wrap">
-				<u-swiper :list="bannerList" height="340" border-radius="24" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
-			</view>
+		<view class="banner-wrap">
+			<u-swiper :list="bannerList" height="340" border-radius="24" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
+		</view>
 
-			<!-- 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 -->
+		<!-- 走马灯通知栏（后台 home_notice 配置，留空则不显示） -->
+		<view class="notice-bar-wrap" v-if="homeNotice">
+			<u-notice-bar :text="homeNotice" left-icon="volume" scrollable :speed="60" :duration="2000"></u-notice-bar>
+		</view>
+
+		<!-- 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 -->
 			<view class="entry-grid">
 				<!-- 左侧大卡 -->
 				<view class="entry-main" hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(entry_list[0])">
@@ -140,6 +145,7 @@
 				bannerList: [],
 				dataList: [],
 				active_list: [],
+				homeNotice: '',
 				// 首页核心入口：默认 fallback 数据（后台 home_entries 没配图片时用），接口拉到后会覆盖
 				entry_list: [
 					{ key: 'active', icon: 'calendar', name: '社区活动', desc: '参加低碳环保活动', color: '#18AF38', bg: 'rgba(24,175,56,0.10)', url: '/pages/low_carbon/low_carbon', type: 'switchTab' },
@@ -166,6 +172,7 @@
 			this.getBannerList()
 			this.get_new_active_list()
 			this.getHomeEntries()
+			this.getHomeNotice()
 		},
 		onShow() {
 			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
@@ -195,6 +202,15 @@
 					this.entry_list = merged
 				} catch (e) {
 					// 接口失败不影响，保留 fallback
+				}
+			},
+			// 拉首页走马灯通知（后台 home_notice 配置，留空则不显示）
+			async getHomeNotice() {
+				try {
+					let res = await this.$u.api.findSetting({ name: 'home_notice' })
+					this.homeNotice = (res.data || '').toString()
+				} catch (e) {
+					// 接口失败不显示通知栏
 				}
 			},
 			// 核心入口跳转
@@ -292,6 +308,11 @@
 	/* Banner 轮播图容器：左右留白，顶部间距 */
 	.banner-wrap {
 		padding: 30rpx 30rpx 0;
+	}
+
+	/* 走马灯通知栏：左右留白与上下区块对齐 */
+	.notice-bar-wrap {
+		padding: 20rpx 30rpx 0;
 	}
 
 	/* 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 */
