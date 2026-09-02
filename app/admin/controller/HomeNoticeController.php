@@ -20,16 +20,18 @@ class HomeNoticeController extends AdminBaseController
         if ($this->request->isPost()) {
             $notice = $this->request->param('notice', '');
             $notice = trim($notice);
-            $res = cmf_set_option($option_name, $notice, true);
+            // cmf_set_option 要求 data 为数组，存为 ['text' => $notice]
+            $res = cmf_set_option($option_name, ['text' => $notice], true);
             if ($res !== false) {
                 $this->success('保存成功');
             } else {
                 $this->error('保存失败');
             }
         } else {
-            $notice = cmf_get_option($option_name);
-            if (empty($notice) || !is_string($notice)) {
-                $notice = '';
+            $option = cmf_get_option($option_name);
+            $notice = '';
+            if (is_array($option) && !empty($option['text'])) {
+                $notice = $option['text'];
             }
             $this->assign('notice', $notice);
             return $this->fetch();

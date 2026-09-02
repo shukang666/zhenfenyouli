@@ -208,7 +208,8 @@
 			async getHomeNotice() {
 				try {
 					let res = await this.$u.api.findSetting({ name: 'home_notice' })
-					this.homeNotice = (res.data || '').toString()
+					let data = res.data || {}
+					this.homeNotice = (data.text || '').toString()
 				} catch (e) {
 					// 接口失败不显示通知栏
 				}
