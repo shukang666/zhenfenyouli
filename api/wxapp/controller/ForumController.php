@@ -608,14 +608,27 @@ class ForumController extends AuthController
         $keyword = $this->request->param('keyword', '', 'trim');
         $page = $this->request->param('page', 1);
         $page_size = $this->request->param('page_size', 20);
-        $where = [];
-        if (!empty($keyword)) {
-            $where[] = ['c.name', 'like', '%' . $keyword . '%'];
+        // 关键字去除特殊符号，仅保留中文、字母、数字（如"中海华庭"可搜到"中海 · 华庭"）
+        $pureKeyword = preg_replace('/[^\p{Han}a-zA-Z0-9]/u', '', $keyword);
+        // 名称匹配时同样需要忽略的特殊符号（空格、间隔号、连接符、常见标点等）
+        $ignoreSymbols = [
+            ' ', '　', // 空格(半角/全角)
+            '·', '•', '‧', '・', '∙', '･', // 间隔号/圆点
+            '.', '．', '。', '、', ',', '，', // 点号/逗号
+            '-', '–', '—', '－', '_', '~', '～', // 连接符
+            '(', ')', '（', '）', '[', ']', '【', '】', // 括号
+            '“', '”', '‘', '’', // 引号
+        ];
+        $nameExpr = 'c.name';
+        foreach ($ignoreSymbols as $symbol) {
+            $nameExpr = "REPLACE({$nameExpr}, '{$symbol}', '')";
         }
         $list = $communityModel->alias('c')
             ->leftJoin('member_community_parent p', 'p.id = c.pid')
             ->field('c.id, c.name, c.pid, p.name as parent_name')
-            ->where($where)
+            ->when($pureKeyword !== '', function ($query) use ($nameExpr, $pureKeyword) {
+                $query->whereRaw("{$nameExpr} LIKE :keyword", ['keyword' => '%' . $pureKeyword . '%']);
+            })
             ->order('c.list_order asc')
             ->paginate([
                 'page' => $page,
