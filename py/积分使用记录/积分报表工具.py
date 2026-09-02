@@ -282,7 +282,7 @@ class PointReportTool:
         rows = cursor.fetchall()
 
         if not rows:
-            return pd.DataFrame(columns=['user_id', '兑换物品明细', '兑换次数', '兑换消耗积分'])
+            return pd.DataFrame(columns=['user_id', '兑换物品明细', '_exchange_items', '兑换次数', '兑换消耗积分'])
 
         # 按用户聚合
         exchange_map = {}
