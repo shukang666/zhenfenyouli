@@ -446,6 +446,21 @@
 				monthly_rec_loading: false,
 			};
 		},
+		watch: {
+			// tab_list 加载完成后，检查是否有跳转标记（解决首次加载时 onShow 太早 tab_list 还没数据的问题）
+			tab_list(newVal) {
+				if (newVal.length > 0) {
+					let jumpSjhd = uni.getStorageSync('jump_sjhd')
+					if (jumpSjhd) {
+						uni.removeStorageSync('jump_sjhd')
+						let sjhdIdx = newVal.findIndex(t => t._is_custom === 'sjhd')
+						if (sjhdIdx !== -1 && this.current_tab !== sjhdIdx) {
+							this.switch_tab(sjhdIdx)
+						}
+					}
+				}
+			}
+		},
 		computed: {
 			// 当前是否在最后一个"备份"标签（前端写死，后台 active_tab 表不可见）
 			is_backup_tab() {
@@ -484,6 +499,19 @@
 			this.get_active_tab_list()
 		},
 		onShow() {
+			// 检查首页"社区活动"入口跳转标记：切到"社交活动"标签
+			let jumpSjhd = uni.getStorageSync('jump_sjhd')
+			if (jumpSjhd) {
+				if (this.tab_list.length > 0) {
+					uni.removeStorageSync('jump_sjhd')
+					let sjhdIdx = this.tab_list.findIndex(t => t._is_custom === 'sjhd')
+					if (sjhdIdx !== -1 && this.current_tab !== sjhdIdx) {
+						this.switch_tab(sjhdIdx)
+					}
+				}
+				// tab_list 为空时保留标记，watch 会在 tab_list 加载完后消费
+				return
+			}
 			// 检查 banner 跳转标记：从首页 banner 跳过来需要切到"本月推荐"标签
 			let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
 			if (jumpMonthlyRec) {
@@ -544,8 +572,18 @@
 					list.push({ id: -3, name: '社交活动', cate_id: 0, is_fixed: 2, _is_custom: 'sjhd' })
 					// list.push({ id: -1, name: '备份', cate_id: 0, is_fixed: 2, _is_backup: 1 })
 					this.tab_list = list
-					// 默认加载：检查是否有 banner 跳转标记
-					let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
+				// 默认加载：检查是否有首页"社区活动"入口跳转标记
+				let jumpSjhd = uni.getStorageSync('jump_sjhd')
+				if (jumpSjhd) {
+					uni.removeStorageSync('jump_sjhd')
+					let sjhdIdx = list.findIndex(t => t._is_custom === 'sjhd')
+					if (sjhdIdx !== -1) {
+						this.current_tab = sjhdIdx
+					}
+					return
+				}
+				// 检查是否有 banner 跳转标记
+				let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
 					if (jumpMonthlyRec) {
 						uni.removeStorageSync('jump_monthly_rec')
 						this.current_tab = 0

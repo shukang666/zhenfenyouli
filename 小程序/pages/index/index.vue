@@ -199,6 +199,12 @@
 			},
 			// 核心入口跳转
 			goEntry(item) {
+				// 社区活动入口：跳转到活动页并切到"社交活动"标签
+				if (item.key === 'active' && item.url.indexOf('low_carbon') !== -1) {
+					uni.setStorageSync('jump_sjhd', 1)
+					uni.switchTab({ url: item.url.split('?')[0] })
+					return
+				}
 				this.$u.route({ type: item.type, url: item.url })
 			},
 			// 获取活动列表
