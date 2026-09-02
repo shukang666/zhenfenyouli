@@ -418,7 +418,6 @@
 
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
-	import { checkLogin } from '@/common/loginCheck.mixin.js'
 	export default {
 		data() {
 			return {
@@ -485,7 +484,6 @@
 			this.get_active_tab_list()
 		},
 		onShow() {
-			if (checkLogin(this)) return
 			// 检查 banner 跳转标记：从首页 banner 跳过来需要切到"本月推荐"标签
 			let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
 			if (jumpMonthlyRec) {

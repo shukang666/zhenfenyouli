@@ -93,7 +93,6 @@
 
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
-	import { checkLogin } from '@/common/loginCheck.mixin.js'
 	export default {
 		data() {
 			return {
@@ -107,7 +106,6 @@
 			this.get_forum_list()
 		},
 		onShow() {
-			if (checkLogin(this)) return
 			if (checkCommunity(this)) return
 		},
 		methods: {

@@ -206,7 +206,6 @@
 
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
-	import { checkLogin } from '@/common/loginCheck.mixin.js'
 	export default {
 		data() {
 			return {
@@ -217,7 +216,6 @@
 		},
 		onLoad() {},
 		onShow() {
-			if (checkLogin(this)) return
 			if (checkCommunity(this)) return
 			if (this.isLogin) {
 				this.getUserInfo()

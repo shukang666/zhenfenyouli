@@ -63,13 +63,13 @@
 				<view class="u-font-26">邀请邻居</view>
 				<button open-type="share" plain class="kefuBtn"></button>
 			</view>
-			<u-button :custom-style="{width:'480rpx'}" v-if="info.is_clock == 0" :disabled="(info.is_end == 1 || info.is_sign == 1) && isLogin">{{info.is_sign == 1 ? '已参与' :'立即参与'}}</u-button>
+			<u-button :custom-style="{width:'480rpx'}" v-if="info.is_clock == 0" :disabled="info.is_end == 1 || info.is_sign == 1" @click="handleSign">{{info.is_sign == 1 ? '已参与' :'立即参与'}}</u-button>
 			<view class="u-flex u-row-between u-w-490" v-if="info.is_clock == 1">
 				<u-button :custom-style="{width:'230rpx'}" type="warning" plain @click="$u.route(`/pages/low_carbon/rank?id=${info.id}`)">
 					<image src="/static/images/rank.png" class="u-w-40 u-h-40 u-m-r-15" mode="aspectFill"></image>
 					<text>排行榜</text>
 				</u-button>
-				<u-button :custom-style="{width:'230rpx'}" v-if="info.is_sign == 1 && isLogin" @click="sign_clock_show = true" :disabled="info.is_end == 1 || info.is_sign_clock == 1">{{info.is_sign_clock == 1 ? '已打卡' : '立即打卡'}}</u-button>
+				<u-button :custom-style="{width:'230rpx'}" v-if="info.is_sign == 1" @click="handleClock" :disabled="info.is_end == 1 || info.is_sign_clock == 1">{{info.is_sign_clock == 1 ? '已打卡' : '立即打卡'}}</u-button>
 			</view>
 		</view>
 
@@ -125,6 +125,16 @@
 			}
 		},
 		methods: {
+			// 打卡按钮 → 未登录跳登录，已登录弹打卡弹窗
+			handleClock() {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				this.sign_clock_show = true
+			},
+			// 立即参与按钮 → 未登录跳登录，已登录走报名接口
+			handleSign() {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				this.post_new_active_sign()
+			},
 			// 删除图
 			removeImages(e, key, isOne) {
 				if (isOne) {

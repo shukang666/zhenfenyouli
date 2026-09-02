@@ -152,18 +152,9 @@
 			this.get_new_active_list()
 		},
 		onShow() {
-			// 用 nextTick 延迟跳转，避免在首页 z-paging 渲染过程中跳转导致白屏
+			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
 			this.$nextTick(() => {
-				// 未登录 → 强制跳登录页
-				if (!this.isLogin) {
-					uni.reLaunch({
-						url: '/pages/public/login',
-						fail: () => {}
-					})
-					return
-				}
-				// 已登录但未设置小区 → 强制跳完善信息页
-				if (!this.userInfo.community_id) {
+				if (this.isLogin && !this.userInfo.community_id) {
 					uni.navigateTo({
 						url: '/pages/user/info',
 						fail: () => {}
