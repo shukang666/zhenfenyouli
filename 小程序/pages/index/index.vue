@@ -13,16 +13,35 @@
 				<u-swiper :list="bannerList" height="340" border-radius="24" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
 			</view>
 
-			<!-- 核心功能入口：四宫格卡片，统一白底、浅色图标容器，内容前置无多余装饰 -->
+			<!-- 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 -->
 			<view class="entry-grid">
-				<view class="entry-card" v-for="(item, index) in entry_list" :key="index"
-					hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(item)">
-					<view class="entry-icon" :style="{ background: item.bg }">
-						<u-icon :name="item.icon" size="40" :color="item.color"></u-icon>
+				<!-- 左侧大卡 -->
+				<view class="entry-main" hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(entry_list[0])">
+					<view class="entry-icon entry-icon--lg" :style="{ background: entry_list[0].bg }">
+						<u-icon :name="entry_list[0].icon" size="48" :color="entry_list[0].color"></u-icon>
 					</view>
-					<view class="entry-body">
-						<view class="entry-name">{{ item.name }}</view>
-						<view class="entry-desc">{{ item.desc }}</view>
+					<view class="entry-name entry-name--lg">{{ entry_list[0].name }}</view>
+					<view class="entry-desc">{{ entry_list[0].desc }}</view>
+				</view>
+				<!-- 右侧列：上两小块 + 下横条 -->
+				<view class="entry-side">
+					<view class="entry-side-top">
+						<view class="entry-mini" v-for="item in entry_list.slice(1, 3)" :key="item.icon"
+							hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(item)">
+							<view class="entry-icon" :style="{ background: item.bg }">
+								<u-icon :name="item.icon" size="36" :color="item.color"></u-icon>
+							</view>
+							<view class="entry-name entry-name--sm">{{ item.name }}</view>
+						</view>
+					</view>
+					<view class="entry-wide" hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(entry_list[3])">
+						<view class="entry-icon" :style="{ background: entry_list[3].bg }">
+							<u-icon :name="entry_list[3].icon" size="36" :color="entry_list[3].color"></u-icon>
+						</view>
+						<view class="entry-body">
+							<view class="entry-name">{{ entry_list[3].name }}</view>
+							<view class="entry-desc">{{ entry_list[3].desc }}</view>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -77,7 +96,7 @@
 				</view>
 			</view>
 
-			<!-- 兑换商品列表：双列卡片网格，宽度与四宫格卡片对齐 -->
+			<!-- 兑换商品列表：双列卡片网格，宽度与核心入口大卡对齐 -->
 			<view class="goods-grid">
 				<view class="goods-card" v-for="item in dataList" :key="item.id" @click="$u.route('/pages/mall/details?id='+item.id)">
 					<u-image width="100%" height="250" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
@@ -106,7 +125,7 @@
 				bannerList: [],
 				dataList: [],
 				active_list: [],
-				// 首页四宫格入口：跳转路径保持原逻辑，switchTab 用于 tabbar 页面
+				// 首页核心入口：第一项为左侧大卡，二三项为右侧小块，第四项为右下横条，跳转路径保持原逻辑，switchTab 用于 tabbar 页面
 				entry_list: [
 					{ icon: 'calendar', name: '社区活动', desc: '参加低碳环保活动', color: '#18AF38', bg: 'rgba(24,175,56,0.10)', url: '/pages/low_carbon/low_carbon', type: 'switchTab' },
 					{ icon: 'heart', name: '健康测试', desc: '关注身体健康', color: '#2E7CF6', bg: 'rgba(46,124,246,0.10)', url: '/pages/health/health', type: 'switchTab' },
@@ -145,7 +164,7 @@
 			})
 		},
 		methods: {
-			// 四宫格入口跳转
+			// 核心入口跳转
 			goEntry(item) {
 				this.$u.route({ type: item.type, url: item.url })
 			},
@@ -231,19 +250,50 @@
 		padding: 30rpx 30rpx 0;
 	}
 
-	/* 核心功能入口：四宫格统一卡片，扁平无叠加装饰 */
+	/* 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 */
 	.entry-grid {
 		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
+		align-items: stretch;
 		padding: 24rpx 30rpx 0;
 	}
-	.entry-card {
+	.entry-main {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 334rpx;
+		height: 348rpx;
+		padding: 0 20rpx;
+		background: #fff;
+		border-radius: 20rpx;
+		box-sizing: border-box;
+	}
+	.entry-side {
+		flex: 1;
+		min-width: 0;
+		margin-left: 20rpx;
+	}
+	.entry-side-top {
+		display: flex;
+		justify-content: space-between;
+	}
+	.entry-mini {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 158rpx;
+		height: 158rpx;
+		background: #fff;
+		border-radius: 20rpx;
+		box-sizing: border-box;
+	}
+	.entry-wide {
 		display: flex;
 		align-items: center;
-		width: 334rpx;
-		height: 152rpx;
-		margin-bottom: 24rpx;
+		height: 170rpx;
+		margin-top: 20rpx;
 		padding: 0 24rpx;
 		background: #fff;
 		border-radius: 20rpx;
@@ -261,6 +311,11 @@
 		border-radius: 24rpx;
 		flex-shrink: 0;
 	}
+	.entry-icon--lg {
+		width: 96rpx;
+		height: 96rpx;
+		border-radius: 28rpx;
+	}
 	.entry-body {
 		flex: 1;
 		min-width: 0;
@@ -270,6 +325,14 @@
 		font-size: 29rpx;
 		font-weight: 600;
 		color: #1a1a1a;
+	}
+	.entry-name--lg {
+		margin-top: 20rpx;
+		font-size: 32rpx;
+	}
+	.entry-name--sm {
+		margin-top: 14rpx;
+		font-size: 26rpx;
 	}
 	.entry-desc {
 		margin-top: 6rpx;
