@@ -53,6 +53,19 @@ class ShopOrderModel extends Model
             $item['status_name'] = self::getStatusName($item['status']);
             if ($item['status'] == 2 && $item['delivery_type'] == 2) {
                 $item['status_name'] = '待核销';
+            } elseif ($item['status'] == 2 && empty($item['delivery_type'])) {
+                // 待发货状态根据付款时长动态显示
+                // 超过36h → 出库中；超过24h → 备货中；否则 → 待发货
+                // 积分兑换场景 pay_time ≈ create_time，两者兼容兜底
+                $pay_time = intval($item['pay_time'] ?? ($item['create_time'] ?? 0));
+                if ($pay_time > 0) {
+                    $elapsed = time() - $pay_time;
+                    if ($elapsed > 36 * 3600) {
+                        $item['status_name'] = '出库中';
+                    } elseif ($elapsed > 24 * 3600) {
+                        $item['status_name'] = '备货中';
+                    }
+                }
             }
             $item['pay_type_name'] = $pay_type_name[$item['pay_type']] ?? '';
             if ($item['status'] == 1) $item['left_pay_time'] = $item['need_pay_time'] - time();
