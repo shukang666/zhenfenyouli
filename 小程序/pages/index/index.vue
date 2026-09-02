@@ -152,10 +152,18 @@
 			this.get_new_active_list()
 		},
 		onShow() {
-			// 已登录但未设置小区信息，强制跳转完善信息页（设置完社区小区和昵称后才可使用）
-			// 用 nextTick 延迟跳转，避免在首页渲染过程中跳转导致白屏
+			// 用 nextTick 延迟跳转，避免在首页 z-paging 渲染过程中跳转导致白屏
 			this.$nextTick(() => {
-				if (this.isLogin && !this.userInfo.community_id) {
+				// 未登录 → 强制跳登录页
+				if (!this.isLogin) {
+					uni.reLaunch({
+						url: '/pages/public/login',
+						fail: () => {}
+					})
+					return
+				}
+				// 已登录但未设置小区 → 强制跳完善信息页
+				if (!this.userInfo.community_id) {
 					uni.navigateTo({
 						url: '/pages/user/info',
 						fail: () => {}
