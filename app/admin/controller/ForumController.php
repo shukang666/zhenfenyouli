@@ -346,17 +346,17 @@ class ForumController extends ToolController
 
     /**
      * 删除记录入口 - 重定向到实际列表方法
-     * 后台菜单点的就是这个 action，让它跳到 deleteLogIndex
+     * 后台菜单点的就是这个 action，让它跳到 delete_log_index
      */
     public function deleteLog()
     {
-        return $this->redirect('deleteLogIndex');
+        return $this->redirect('delete_log_index');
     }
 
     /**
      * 删除记录列表页 - 替代外部Excel
      */
-    public function deleteLogIndex()
+    public function delete_log_index()
     {
         $export = $this->request->param('export', 0);
         $name = $this->request->param('name', '', 'trim');
@@ -406,7 +406,7 @@ class ForumController extends ToolController
         });
 
         if ($export) {
-            $this->outDeleteLog($list);
+            $this->out_delete_log($list);
         }
 
         $this->assign('list', $list);
@@ -419,7 +419,7 @@ class ForumController extends ToolController
      * 删除记录导出
      * @param $list
      */
-    protected function outDeleteLog($list)
+    protected function out_delete_log($list)
     {
         foreach ($list as &$item) {
             if ($item['nickname']) {
