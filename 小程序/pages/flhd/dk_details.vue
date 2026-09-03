@@ -205,15 +205,19 @@
 					this.$u.toast(err.msg)
 				})
 			},
-			// 详情
-			get_forum_list(id) {
-				this.$u.api.get_forum_list({
-					id: id
-				}).then(res => {
-					this.info = res.data
-					this.get_comment()
-				})
-			},
+		// 详情
+		get_forum_list(id) {
+			this.$u.api.get_forum_list({
+				id: id
+			}).then(res => {
+				this.info = res.data
+				// 将换行符替换为 <br/> 标签，使 v-html 能正确渲染换行
+				if (this.info && this.info.content) {
+					this.info.content = this.info.content.replace(/\n/g, '<br/>')
+				}
+				this.get_comment()
+			})
+		},
 			// 评论
 			pinglun() {
 				this.type = 1

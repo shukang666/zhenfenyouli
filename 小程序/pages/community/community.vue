@@ -31,9 +31,9 @@
                 <view class="u-m-t-20 u-font-bold u-font-26">
                     {{item.title}}
                 </view>
-                <view class="u-m-t-20 u-font-bold u-font-26">
-                    {{item.content}}
-                </view>
+				<view class="u-m-t-20 u-font-bold u-font-26 content-text">
+					{{item.content}}
+				</view>
                 <view class="u-m-t-20">
                     <cl-upload v-model="item.image" :max="item.image?item.image.length:''" :remove="false"
                         :isPreviewImage="false">
@@ -147,5 +147,8 @@
 </script>
 
 <style lang="scss">
-
+.content-text {
+    white-space: pre-line;
+    word-break: break-all;
+}
 </style>

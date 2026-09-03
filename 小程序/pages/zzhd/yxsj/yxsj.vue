@@ -22,7 +22,7 @@
                 <view class="u-m-t-20 u-font-bold u-font-26">
                     {{item.title}}
                 </view>
-                <view class="u-m-t-20 u-font-bold u-font-26">
+                <view class="u-m-t-20 u-font-bold u-font-26 content-text">
                     {{item.content}}
                 </view>
                 <view class="u-m-t-20">
@@ -153,5 +153,8 @@
 </script>
 
 <style lang="scss">
-
+.content-text {
+    white-space: pre-line;
+    word-break: break-all;
+}
 </style>
