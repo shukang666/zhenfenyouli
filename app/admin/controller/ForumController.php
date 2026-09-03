@@ -6,11 +6,13 @@ use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\basic\SelectModel;
 use app\admin\model\forum\ForumCateModel;
+use app\admin\model\forum\ForumDeleteLogModel;
 use app\admin\model\forum\ForumHandleModel;
 use app\admin\model\forum\ForumModel;
 use app\admin\model\member\CommunityCateModel;
 use app\admin\model\member\CommunityModel;
 use think\App;
+use think\Db;
 use think\db\exception\DbException;
 
 class ForumController extends ToolController
@@ -202,37 +204,108 @@ class ForumController extends ToolController
     public function delete()
     {
         $id = $this->request->param('id', 0, 'intval');
+        $reason = $this->request->param('reason', '', 'trim');
+
+        // 删除原因为必填项
+        if (empty($reason)) {
+            $this->error('请填写删除原因');
+        }
+
+        // 查询要删除的打卡记录（获取删除前的完整内容）
+        $forum = $this->model->where('id', $id)->find();
+        if (empty($forum)) {
+            $this->error('打卡记录不存在');
+        }
+
         $item = $this->model->where('id', $id)->where('point', '>', 0)->find();
-        if (!empty($item)) {
-            AccountLogModel::add_account_log($item['user_id'], 2, 200, -$item['point'], ['remark' => '垃圾打卡扣除']);
-        }
 
-        $log_info = AccountLogModel::where(['from_uid' => $id])->find();
-        if (!empty($log_info)) {
-            AccountLogModel::add_account_log($item['user_id'], 2, 227, -$log_info['change_amount'], ['remark' => '垃圾打卡扣除']);
-        }
+        // 使用事务：记录删除日志 + 更新积分 + 软删除
+        Db::startTrans();
+        try {
+            // 1. 记录删除日志
+            $deleteLogData = [
+                'forum_id'    => $forum['id'],
+                'user_id'     => $forum['user_id'],
+                'content'     => $forum['content'] ?? '',
+                'image'       => ForumDeleteLogModel::imageToString($forum['image'] ?? ''),
+                'point'       => $forum['point'] ?? 0,
+                'reason'      => $reason,
+                'operator_id' => session('ADMIN_ID') ?? 0,
+                'create_time' => time(),
+            ];
+            ForumDeleteLogModel::create($deleteLogData);
 
-        $result = $this->model->where('id', $id)->update(['delete_time' => time()]);
-        $this->getMsg($result, '删除');
+            // 2. 扣除积分
+            if (!empty($item)) {
+                AccountLogModel::add_account_log($item['user_id'], 2, 200, -$item['point'], ['remark' => '垃圾打卡扣除']);
+            }
+
+            $log_info = AccountLogModel::where(['from_uid' => $id])->find();
+            if (!empty($log_info)) {
+                AccountLogModel::add_account_log($forum['user_id'], 2, 227, -$log_info['change_amount'], ['remark' => '垃圾打卡扣除']);
+            }
+
+            // 3. 执行软删除
+            $this->model->where('id', $id)->update(['delete_time' => time()]);
+
+            Db::commit();
+            $this->success('删除成功');
+        } catch (\Exception $e) {
+            Db::rollback();
+            $this->error('删除失败：' . $e->getMessage());
+        }
     }
 
     public function delete_all()
     {
         $ids = $this->request->param('ids');
-        $list = $this->model->where('id', 'in', $ids)->where('point', '>', 0)->select();
+        $reason = $this->request->param('reason', '', 'trim');
 
-        foreach ($list as $item) {
-            AccountLogModel::add_account_log($item['user_id'], 2, 200, -$item['point'], ['remark' => '垃圾打卡扣除']);
-
-            //是否存在记录，存在则删除
-            $id = $item['id'];
-            $log_info = AccountLogModel::where(['from_uid' => $id])->find();
-            if (!empty($log_info)) {
-                AccountLogModel::add_account_log($item['user_id'], 2, 227, -$log_info['change_amount'], ['remark' => '垃圾打卡扣除']);
-            }
+        if (empty($reason)) {
+            $this->error('请填写删除原因');
         }
-        $this->model->whereIn('id', $ids)->update(['delete_time' => time()]);
-        $this->success('删除成功');
+
+        if (empty($ids)) {
+            $this->error('请选择要删除的记录');
+        }
+
+        $list = $this->model->where('id', 'in', $ids)->select();
+        $pointList = $this->model->where('id', 'in', $ids)->where('point', '>', 0)->select();
+
+        Db::startTrans();
+        try {
+            foreach ($list as $item) {
+                // 记录删除日志
+                $deleteLogData = [
+                    'forum_id'    => $item['id'],
+                    'user_id'     => $item['user_id'],
+                    'content'     => $item['content'] ?? '',
+                    'image'       => ForumDeleteLogModel::imageToString($item['image'] ?? ''),
+                    'point'       => $item['point'] ?? 0,
+                    'reason'      => $reason,
+                    'operator_id' => session('ADMIN_ID') ?? 0,
+                    'create_time' => time(),
+                ];
+                ForumDeleteLogModel::create($deleteLogData);
+            }
+
+            foreach ($pointList as $item) {
+                AccountLogModel::add_account_log($item['user_id'], 2, 200, -$item['point'], ['remark' => '垃圾打卡扣除']);
+
+                $id = $item['id'];
+                $log_info = AccountLogModel::where(['from_uid' => $id])->find();
+                if (!empty($log_info)) {
+                    AccountLogModel::add_account_log($item['user_id'], 2, 227, -$log_info['change_amount'], ['remark' => '垃圾打卡扣除']);
+                }
+            }
+
+            $this->model->whereIn('id', $ids)->update(['delete_time' => time()]);
+            Db::commit();
+            $this->success('删除成功');
+        } catch (\Exception $e) {
+            Db::rollback();
+            $this->error('删除失败：' . $e->getMessage());
+        }
     }
 
 
@@ -269,6 +342,98 @@ class ForumController extends ToolController
     public function index7()
     {
         return redirect((string)url('index', ['type' => 7]));
+    }
+
+    /**
+     * 删除记录列表页 - 替代外部Excel
+     */
+    public function deleteLog()
+    {
+        return $this->fetch('delete_log');
+    }
+
+    /**
+     * 删除记录列表页 - 替代外部Excel
+     */
+    public function deleteLogIndex()
+    {
+        $export = $this->request->param('export', 0);
+        $name = $this->request->param('name', '', 'trim');
+        $keyword = $this->request->param('keyword', '', 'trim');
+        $start_time = $this->request->param('start_time', '', 'trim');
+        $end_time = $this->request->param('end_time', '', 'trim');
+
+        $forumDeleteLogModel = new ForumDeleteLogModel();
+        $sql = $forumDeleteLogModel->alias('a')
+            ->join('member b', 'a.user_id=b.id', 'LEFT')
+            ->field('a.*, b.nickname, b.mobile');
+
+        if ($name) {
+            // 用户昵称/手机/ID 模糊搜索
+            $sql = $sql->where('b.nickname|b.mobile|a.user_id', 'like', '%' . trim($name) . '%');
+        }
+
+        if ($keyword) {
+            // 删除原因模糊搜索
+            $sql = $sql->whereLike('a.reason', '%' . trim($keyword) . '%');
+        }
+
+        if ($start_time) {
+            $sql = $sql->where('a.create_time', '>=', strtotime($start_time));
+        }
+        if ($end_time) {
+            $sql = $sql->where('a.create_time', '<=', strtotime($end_time) + 86399);
+        }
+
+        $sql = $sql->order('a.id desc');
+
+        if ($export) {
+            $list = $sql->select();
+        } else {
+            $list = $sql->paginate(15);
+        }
+
+        // 处理数据展示
+        $list->each(function ($item) {
+            $item['create_time'] = date('Y-m-d H:i:s', $item['create_time']);
+            if (!empty($item['nickname'])) {
+                $item['user_info'] = "({$item['user_id']}){$item['nickname']}";
+            } else {
+                $item['user_info'] = "用户已删除({$item['user_id']})";
+            }
+            return $item;
+        });
+
+        if ($export) {
+            $this->outDeleteLog($list);
+        }
+
+        $this->assign('list', $list);
+        $list->appends($this->request->param());
+        $this->assign('page', $list->render());
+        return $this->fetch('delete_log');
+    }
+
+    /**
+     * 删除记录导出
+     * @param $list
+     */
+    protected function outDeleteLog($list)
+    {
+        foreach ($list as &$item) {
+            if ($item['nickname']) {
+                $item['user_info'] = "({$item['user_id']}){$item['nickname']}";
+            } else {
+                $item['user_info'] = $item['user_id'];
+            }
+            $item['create_time'] = date('Y-m-d H:i:s', $item['create_time']);
+        }
+
+        $filename = '打卡删除记录_' . date('Y-m-d');
+        $head = ['ID', '打卡ID', '用户信息', '删除原因', '内容', '扣除积分', '操作时间'];
+        $keys = ['id', 'forum_id', 'user_info', 'reason', 'content', 'point', 'create_time'];
+        CommonModel::outData($filename, $list, $head, $keys);
+        exit;
     }
 
     public function outData($list)

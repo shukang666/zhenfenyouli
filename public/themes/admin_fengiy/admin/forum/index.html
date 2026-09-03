@@ -125,9 +125,9 @@
         <!--        			<button class="btn btn-primary btn-sm js-ajax-submit" type="submit"-->
         <!--        				data-action="{:url('toggle',array('yes'=>1))}" data-subcheck="true">批量审核通过-->
         <!--        			</button>-->
-        <button class="btn layui-bg-red btn-sm js-ajax-submit" type="submit"
-                data-action="{:url('delete_all')}" data-subcheck="true">批量删除
+        <button class="btn layui-bg-red btn-sm js-ajax-submit btn-batch-delete" type="button">批量删除
         </button>
+        <input type="hidden" class="delete-reason-field" name="reason" value="">
         <!--                        <div class="table-actions">-->
         <!--                            <button class="btn btn-primary btn-sm js-ajax-submit" type="submit">{:lang('SORT')}</button>-->
         <!--                        </div>-->
@@ -302,8 +302,9 @@
                         <a class="btn btn-xs btn-primary"
                           href="javascript:parent.openIframeLayer('{:url('forum_comment/index',array('info_id'=>$vo['id']))}','评论',{area:['60%','80%']});">评论</a>
 
-                        <a class="btn btn-xs btn-danger js-ajax-delete"
-                           href="{:url('delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
+                        <a class="btn btn-xs btn-danger btn-delete-with-reason"
+                           href="javascript:;"
+                           data-id="{$vo['id']}">删除</a>
                     </td>
                 </tr>
             </foreach>
@@ -342,6 +343,115 @@
         $(".export").val(0);
         // console.log($(".ajax-form").submit())
         return false;
+    });
+
+    // ========== 单条删除：弹窗填写原因 ==========
+    var deleteLayerIndex = null;
+
+    function showDeleteReasonModal(callback) {
+        var formHtml = '<div style="padding:20px;">'
+            + '<div class="form-group">'
+            + '<label>删除原因（必填）</label>'
+            + '<textarea id="delete-reason-input" class="form-control" rows="3" placeholder="请填写删除原因，如：图片模糊、分类错误、内容违规等"></textarea>'
+            + '</div>'
+            + '<div style="color:#999;font-size:12px;margin-top:5px;">原因将永久记录，供后续查询追溯。</div>'
+            + '</div>';
+
+        deleteLayerIndex = layer.open({
+            title: '删除打卡记录',
+            type: 1,
+            area: ['420px', '280px'],
+            content: formHtml,
+            btn: ['确认删除', '取消'],
+            btn1: function (index) {
+                var reason = $.trim($('#delete-reason-input').val());
+                if (reason === '') {
+                    layer.msg('请填写删除原因', {icon: 2});
+                    return false;
+                }
+                layer.close(index);
+                callback(reason);
+            },
+            cancel: function (index) {
+                layer.close(index);
+            }
+        });
+    }
+
+    // 单条删除点击事件
+    $(document).on('click', '.btn-delete-with-reason', function () {
+        var id = $(this).data('id');
+        var url = "{:url('delete')}";
+
+        showDeleteReasonModal(function (reason) {
+            layer.confirm('确定要删除该打卡记录？<br><br>原因：' + reason, {
+                btn: ['确认', '取消'],
+                title: '确认删除'
+            }, function (indexPost) {
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {id: id, reason: reason},
+                    success: function (res) {
+                        if (res.code == 1) {
+                            layer.msg(res.msg, {icon: 1});
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            layer.msg(res.msg, {icon: 2});
+                        }
+                    },
+                    error: function () {
+                        layer.msg('请求失败', {icon: 2});
+                    }
+                });
+                layer.close(indexPost);
+            });
+        });
+    });
+
+    // ========== 批量删除：弹窗填写原因 ==========
+    $(document).on('click', '.btn-batch-delete', function () {
+        var checkedIds = $('input[name="ids[]"]:checked');
+        if (checkedIds.length === 0) {
+            layer.msg('请先选择要删除的记录', {icon: 2});
+            return false;
+        }
+
+        showDeleteReasonModal(function (reason) {
+            layer.confirm('确定要删除选中的 ' + checkedIds.length + ' 条打卡记录？<br><br>原因：' + reason, {
+                btn: ['确认删除', '取消'],
+                title: '确认批量删除'
+            }, function (indexPost) {
+                var ids = [];
+                checkedIds.each(function () {
+                    ids.push($(this).val());
+                });
+
+                $.ajax({
+                    url: "{:url('delete_all')}",
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {ids: ids, reason: reason},
+                    success: function (res) {
+                        if (res.code == 1) {
+                            layer.msg(res.msg, {icon: 1});
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            layer.msg(res.msg, {icon: 2});
+                        }
+                    },
+                    error: function () {
+                        layer.msg('请求失败', {icon: 2});
+                    }
+                });
+                layer.close(indexPost);
+            });
+        });
     });
 
 

@@ -43,6 +43,7 @@ return array (
   'ADMIN_FORUM_INDEX5' => '互助平台',
   'ADMIN_FORUM_INDEX6' => '优秀事迹',
   'ADMIN_FORUM_INDEX7' => '环保论坛',
+  'ADMIN_FORUM_DELETE_LOG' => '删除记录',
   'ADMIN_FORUM_CATE_INDEX' => '帖子分类',
   'ADMIN_GOODS_CATEGORYLIST' => '分类管理',
   'ADMIN_GOODS_DEFAULT' => '商品管理',
