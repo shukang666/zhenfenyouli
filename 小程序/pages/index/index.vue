@@ -15,7 +15,7 @@
 
 		<!-- 走马灯通知栏（后台 home_notice 配置，留空则不显示） -->
 		<view class="notice-bar-wrap" v-if="homeNotice">
-			<u-notice-bar :text="homeNotice" left-icon="volume" scrollable :speed="60" :duration="2000"></u-notice-bar>
+			<u-notice-bar :list="[homeNotice]" :volume-icon="true" :more-icon="false" :close-icon="false"></u-notice-bar>
 		</view>
 
 		<!-- 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 -->
