@@ -69,7 +69,7 @@
 					<image src="/static/images/rank.png" class="u-w-40 u-h-40 u-m-r-15" mode="aspectFill"></image>
 					<text>排行榜</text>
 				</u-button>
-				<u-button :custom-style="{width:'230rpx'}" v-if="info.is_sign == 1" @click="handleClock" :disabled="info.is_end == 1 || info.is_sign_clock == 1">{{info.is_sign_clock == 1 ? '已打卡' : '立即打卡'}}</u-button>
+				<u-button :custom-style="{width:'230rpx'}" @click="handleClock" :disabled="info.is_end == 1 || (info.is_sign == 1 && info.is_sign_clock == 1)">{{info.is_sign == 1 ? (info.is_sign_clock == 1 ? '已打卡' : '立即打卡') : '立即打卡'}}</u-button>
 			</view>
 		</view>
 
@@ -125,9 +125,10 @@
 			}
 		},
 		methods: {
-			// 打卡按钮 → 未登录跳登录，已登录弹打卡弹窗
+			// 打卡按钮 → 未登录跳登录，已登录未报名提示先报名，已报名弹打卡弹窗
 			handleClock() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				if (!this.info.is_sign) return this.$u.toast('请先报名活动')
 				this.sign_clock_show = true
 			},
 			// 立即参与按钮 → 未登录跳登录，已登录走报名接口

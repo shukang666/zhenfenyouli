@@ -651,23 +651,29 @@
 			},
 			// 跳转页面（type==1 为垃圾分类打卡入口，需先通过答题考试）
 			navigator(url, type) {
-				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				if (!this.userInfo.is_answer && type == 1) {
-					var that = this
-					uni.showModal({
-						title: '提示',
-						content: '请先学习垃圾分类指导，通过答题考试后可参与活动',
-						showCancel: false,
-						confirmText: '立即学习',
-						confirmColor: '#39BF3E',
-						success: function(res) {
-							if (res.confirm) {
-								that.$u.route('/pages/flhd/list')
-							} else if (res.cancel) {}
-						}
-					});
+				// 垃圾分类打卡：允许未登录用户进入详情页，点击打卡时再跳登录
+				if (type == 1) {
+					if (this.isLogin && !this.userInfo.is_answer) {
+						var that = this
+						uni.showModal({
+							title: '提示',
+							content: '请先学习垃圾分类指导，通过答题考试后可参与活动',
+							showCancel: false,
+							confirmText: '立即学习',
+							confirmColor: '#39BF3E',
+							success: function(res) {
+								if (res.confirm) {
+									that.$u.route('/pages/flhd/list')
+								}
+							}
+						});
+						return
+					}
+					this.$u.route(url)
 					return
 				}
+				// 其他类型保持原逻辑：未登录跳登录
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.$u.route(url)
 			},
 			// 轮播图跳转
