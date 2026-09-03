@@ -345,11 +345,12 @@ class ForumController extends ToolController
     }
 
     /**
-     * 删除记录列表页 - 替代外部Excel
+     * 删除记录入口 - 重定向到实际列表方法
+     * 后台菜单点的就是这个 action，让它跳到 deleteLogIndex
      */
     public function deleteLog()
     {
-        return $this->fetch('delete_log');
+        return $this->redirect('deleteLogIndex');
     }
 
     /**
