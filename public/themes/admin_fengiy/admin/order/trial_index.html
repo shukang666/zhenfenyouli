@@ -1,0 +1,827 @@
+<include file="public@header"/>
+<style>
+    /* 通用 */
+    .trial-wrap { padding: 10px 5px; }
+    .trial-wrap .text-nowrap { white-space: nowrap; }
+
+    /* 顶部工具栏 */
+    .trial-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 8px; padding: 12px; background: #fff; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .trial-toolbar .toolbar-title { font-weight: 700; font-size: 15px }
+    .trial-toolbar .toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .trial-toolbar .stat-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; background: #f0f0f0; color: #555 }
+
+    /* 标签 tab */
+    .trial-tab { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .trial-tab a { display: inline-block; padding: 6px 14px; background: #fff; border: 1px solid #e6e6e6; border-radius: 4px; color: #666; text-decoration: none; transition: all .2s; font-size: 13px }
+    .trial-tab a.active { background: #16baaa; color: #fff; border-color: #16baaa; }
+    .trial-tab a:hover { background: #e8f8f5; color: #16baaa; border-color: #16baaa; }
+    .trial-tab a.active:hover { color: #fff }
+
+    /* Excel 外观的表格 */
+    .trial-table-wrap { background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .trial-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .trial-table thead th {
+        background: #fafafa;
+        padding: 10px 8px;
+        border: 1px solid #e6e6e6;
+        text-align: center;
+        font-weight: 600;
+        color: #444;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+    .trial-table tbody td {
+        padding: 6px 8px;
+        border: 1px solid #e6e6e6;
+        vertical-align: middle;
+        background: #fff;
+        transition: background .15s;
+    }
+    .trial-table tbody tr:hover td { background: #fafdff; }
+    .trial-table tbody tr:nth-child(even) td { background: #fcfcfc; }
+    .trial-table tbody tr:nth-child(even):hover td { background: #f5f8fa; }
+
+    /* 单元格双击可编辑态 */
+    .editable-cell { cursor: pointer; min-width: 50px; position: relative; }
+    .editable-cell:hover { background: #fff7e6 !important; outline: 1px dashed #ffba00; outline-offset: -2px; }
+    .editable-cell:hover::after {
+        content: '\270E';
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #aaa;
+        font-size: 10px;
+        opacity: .6;
+    }
+    .editable-cell input, .editable-cell textarea {
+        width: 100%;
+        border: 1px solid #16baaa;
+        outline: none;
+        padding: 4px;
+        font-size: 13px;
+        background: #fff;
+        border-radius: 2px;
+    }
+    .editable-cell textarea { min-height: 40px; resize: vertical; }
+
+    /* 采购链接专用——视觉弱化但可辨 */
+    .purchase-link-cell { color: #999; font-style: italic; }
+    .purchase-link-cell.editing { color: #000; }
+
+    /* 图层——让未发货高亮 */
+    .row-pending td { background-color: #fffbf0 !important; }
+    .row-pending:nth-child(even) td { background-color: #fff8e1 !important; }
+    .row-done td { background-color: #f6fef9 !important; }
+    .row-done:nth-child(even) td { background-color: #f0fbf4 !important; }
+
+    /* 状态徽章 */
+    .badge-status {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 2px;
+        font-size: 12px;
+        color: #fff;
+    }
+
+    /* 物流区域 */
+    .ship-input { width: 100%; padding: 4px 6px; border: 1px solid #d2d2d2; border-radius: 2px; font-size: 12px; }
+    .ship-input:focus { border-color: #16baaa; outline: none; }
+
+    /* 保存微动效 */
+    .save-flash { animation: flash 1s ease; }
+    @keyframes flash {
+        0%   { background-color: #e8f8f5; }
+        50%  { background-color: #fff; }
+        100% { background-color: transparent; }
+    }
+
+    /* 搜索表单 */
+    .trial-search { background: #fff; padding: 12px; border-radius: 6px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .trial-search .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+    /* ===== 划卡式发货 ===== */
+    .ship-card-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    .ship-card-overlay.active { display: flex; }
+    .ship-card {
+        width: 560px;
+        max-width: 95vw;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 30px rgba(0,0,0,.25);
+        padding: 28px 28px 22px;
+        position: relative;
+        animation: cardIn .25s ease;
+    }
+    @keyframes cardIn {
+        from { transform: translateY(-15px); opacity: 0; }
+        to   { transform: translateY(0); opacity: 1; }
+    }
+    .ship-card .card-close {
+        position: absolute;
+        right: 14px;
+        top: 12px;
+        font-size: 22px;
+        color: #aaa;
+        cursor: pointer;
+        background: none;
+        border: none;
+        line-height: 1;
+    }
+    .ship-card .card-close:hover { color: #e74c3c; }
+
+    .ship-card .card-progress {
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+    .ship-card .card-progress strong { color: #16baaa; font-size: 18px; }
+
+    .ship-card .card-title {
+        text-align: center;
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+        margin: 8px 0 16px;
+    }
+    .ship-card .card-body { margin-bottom: 18px; }
+    .ship-card .field-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+    .ship-card .field-label {
+        width: 100px;
+        color: #888;
+        text-align: right;
+        padding-right: 10px;
+        flex-shrink: 0;
+    }
+    .ship-card .field-value { flex: 1; color: #333; word-break: break-all; }
+
+    .ship-card .express-input-wrap { margin-top: 14px; border-top: 1px dashed #eee; padding-top: 14px; }
+    .ship-card .express-input-wrap label { display: block; margin-bottom: 6px; font-weight: 600; color: #333; }
+    .ship-card .express-input-wrap input,
+    .ship-card .express-input-wrap select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dcdcdc;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    .ship-card .express-input-wrap input:focus,
+    .ship-card .express-input-wrap select:focus { border-color: #16baaa; outline: none; }
+
+    .ship-card .card-actions { display: flex; gap: 12px; justify-content: center; margin-top: 16px; }
+    .ship-card .card-actions button {
+        padding: 9px 28px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all .15s;
+    }
+    .ship-card .btn-primary { background: #16baaa; color: #fff; }
+    .ship-card .btn-primary:hover { background: #129688; }
+    .ship-card .btn-secondary { background: #f0f0f0; color: #666; }
+    .ship-card .btn-secondary:hover { background: #e0e0e0; }
+    .ship-card .btn-success-full {
+        background: linear-gradient(135deg, #16baaa, #28a745);
+        color: #fff;
+        font-size: 16px;
+        padding: 12px 40px;
+        border-radius: 6px;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(22,186,170,.4); }
+        50%      { box-shadow: 0 0 0 12px rgba(22,186,170,0); }
+    }
+
+    /* 完成提示 */
+    .ship-card .finished-screen { text-align: center; padding: 16px 0; }
+    .ship-card .finished-screen .big-check { font-size: 64px; color: #16baaa; }
+    .ship-card .finished-screen h3 { color: #333; margin: 8px 0 4px; }
+    .ship-card .finished-screen p { color: #888; }
+
+    /* 分页 */
+    .trial-pagination { margin-top: 10px; overflow-x: auto; }
+
+    @media (max-width: 768px) {
+        .ship-card { width: 95vw; padding: 20px 16px; }
+        .ship-card .field-label { width: 80px; }
+    }
+
+    /* tab 内部切换 */
+    .nav-pills .active a { background-color: #16baaa !important; }
+    .nav-stacked > li.active > a { background: #16baaa !important; color: #fff; }
+    .row-pending-num {
+        font-size: 11px;
+        color: #ff6a00;
+        font-weight: bold;
+        padding: 3px 7px;
+        border-radius: 4px;
+        background: #fff5e6;
+        border: 1px solid #fae0b8;
+    }
+    /* 冻结前两列（订单号+商品） */
+    .freeze-col1 { position: sticky; left: 0; z-index: 1; background: inherit; }
+    .freeze-col2 { position: sticky; left: 90px; z-index: 1; background: inherit; }
+    thead .freeze-col1, thead .freeze-col2 { z-index: 3; background: #fafafa; }
+
+    .goods-name-cell {
+        max-width: 300px;
+        white-space: normal;
+        word-break: break-word;
+    }
+    .trial-table td.order-checkbox {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+</head>
+<body>
+<div class="wrap trial-wrap">
+    <!-- 顶部 Tab -->
+    <ul class="nav nav-tabs" style="margin-bottom:12px;">
+        <li class="active"><a href="javascript:void(0)">订单试运行工作台</a></li>
+    </ul>
+
+    <!-- 筛选 Tabs -->
+    <div class="trial-tab">
+        <volist name="status_menu" item="m">
+            <a href="{:url('Order/trial_index', ['status'=>$m.status])}"
+               <if condition="(isset($params.status) and $params.status eq $m.status) OR (!isset($params.status) and $m.status eq 0)">class="active"</if>>
+                {$m.status_name}
+                <if condition="$m.status != 0">({$m.status_count})</if>
+            </a>
+        </volist>
+    </div>
+
+    <!-- 搜索 -->
+    <form class="trial-search" method="get" action="{:url('Order/trial_index')}">
+        <if condition="isset($params.status)"><input type="hidden" name="status" value="{$params.status}"/></if>
+        <div class="row">
+            <div>
+                订单号: <input type="text" name="order_num" value="{$params.order_num|default=''}" placeholder="订单号 / 支付单号" style="width:200px;padding:5px;border:1px solid #d2d2d2;border-radius:3px"/>
+            </div>
+            <div>
+                商品名: <input type="text" name="goods_name" value="{$params.goods_name|default=''}" placeholder="商品名称" style="width:200px;padding:5px;border:1px solid #d2d2d2;border-radius:3px"/>
+            </div>
+            <div>
+                收货人: <input type="text" name="username" value="{$params.username|default=''}" placeholder="收货人姓名" style="width:140px;padding:5px;border:1px solid #d2d2d2;border-radius:3px"/>
+            </div>
+            <div>
+                手机: <input type="text" name="phone" value="{$params.phone|default=''}" placeholder="收货人手机号" style="width:150px;padding:5px;border:1px solid #d2d2d2;border-radius:3px"/>
+            </div>
+            <div>
+                下单:
+                <input type="text" autocomplete="off" id="create-startDate" class="start-time" name="start_time" value="{$params.start_time|default=''}" placeholder="开始日期" style="width:110px;padding:5px;border:1px solid #d2d2d2;border-radius:3px"/>
+                -
+                <input type="text" autocomplete="off" id="create-endDate" class="end-time" name="end_time" value="{$params.end_time|default=''}" placeholder="结束日期" style="width:110px;padding:5px;border:1px solid #d2d2d2;border-radius:3px"/>
+            </div>
+            <div>
+                <input type="submit" class="btn btn-primary" value="搜索" style="background:#16baaa;border-color:#16baaa"/>
+                <a class="btn" href="{:url('Order/trial_index')}" style="background:#f0f0f0;color:#666;margin-left:6px">清空</a>
+            </div>
+        </div>
+    </form>
+
+    <!-- 操作工具栏 -->
+    <div class="trial-toolbar">
+        <span class="toolbar-title">订单试运行工作台</span>
+        <span class="stat-badge" id="pendingCountBadge">未发货: {$countPending|default(0)}</span>
+        <span class="stat-badge" id="listCountBadge">当前列出: <span id="listCount">{:count($list)}</span> 条</span>
+        <div class="toolbar-actions" style="margin-left: auto">
+            <button class="btn btn-warning btn-sm" id="btnFilterPending">只看未发货</button>
+            <button class="btn btn-success btn-sm" id="btnShipOneByOne">划卡发货 ▼</button>
+            <button class="btn btn-danger btn-sm" id="btnShowHideCol">切换列显隐</button>
+            <button class="btn btn-default btn-sm" id="btnExport">导出</button>
+            <button class="btn btn-primary btn-sm" onclick="location.reload()">刷新</button>
+        </div>
+    </div>
+
+    <!-- 表格 -->
+    <div class="trial-table-wrap">
+        <table class="table table-bordered trial-table" id="trialTable">
+            <thead>
+            <tr>
+                <th style="width:90px;" class="freeze-col1">订单号</th>
+                <th style="width:300px;" class="freeze-col2">商品</th>
+                <th style="width:80px;">数量</th>
+                <th style="width:80px;">单价</th>
+                <th style="width:90px;">实付款</th>
+                <th style="width:100px;">状态</th>
+                <th style="width:90px;">收货人</th>
+                <th style="width:120px;">电话</th>
+                <th style="max-width:200px;">地址</th>
+                <th style="width:80px;" class="col-ops">采购链接(内部)</th>
+                <th style="width:90px;" class="col-ops">快递公司</th>
+                <th style="width:140px;" class="col-ops">物流单号</th>
+                <th style="width:90px;" class="col-ops">管理备注</th>
+                <th style="width:80px;" class="col-ops">下单时间</th>
+                <th style="width:80px;" class="col-ops">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <volist name="list" item="item" key="idx">
+                <tr id="order-row-{$item.id}" name="order_checkbox" data-id="{$item.id}" data-status="{$item.status}"
+                <if condition="in_array($item.status, [2,14])">class="row-pending" <else/>class="row-done" </if>>
+                <td class="freeze-col1">
+                    <a href="javascript:parent.openIframeLayer('{:url('Order/details',['id'=>$item.id])}','订单详情-ID {$item.id}',{area:['80%','80%']});">
+                        {$item.pay_order_num?$item.pay_order_num:$item.order_num}
+                    </a>
+                </td>
+                <td class="freeze-col2 goods-name-cell">
+                    <volist name="item.goods_list" item="goods">
+                        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">
+                            <img src="{$goods.thumb}" alt="" width="32" height="32" style="flex-shrink:0;border:1px solid #eee;border-radius:2px;"/>
+                            <div>
+                                <div style="font-size:12px;">{$goods.goods_name}</div>
+                                <notempty name="goods.sku_name">
+                                    <span style="font-size:11px;color:#999">{$goods.sku_name}</span>
+                                </notempty>
+                            </div>
+                        </div>
+                    </volist>
+                </td>
+                <td>
+                    <volist name="item.goods_list" item="goods">{$goods.count}<br/></volist>
+                </td>
+                <td>
+                    <volist name="item.goods_list" item="goods">&yen;{$goods.one_price}<br/></volist>
+                </td>
+                <td><strong>&yen;{$item.price}</strong><br><small style="color:#16baaa">{$item.pay_type_name}</small></td>
+                <td>
+                    <volist name="status_list" item="st">
+                        <if condition="$item.status eq $st.status">
+                            <php>$bgColor = $st['color'] ?: '#5fb878';</php>
+                            <span class="badge-status" style="background:{$bgColor}">{$st.status_name}</span>
+                        </if>
+                    </volist>
+                </td>
+                <td>{$item.username}<br/><small style="color:#999">{$item.nickname}</small></td>
+                <td>{$item.phone}</td>
+                <td style="font-size:12px;max-width:200px;white-space:normal;word-break:break-word;">{$item.user_address}
+                    <br/><small style="color:#999">{$item.delivery_type_name}</small>
+                </td>
+                <td class="col-ops" data-field="purchase_link" data-id="{$item.id}">
+                    <span class="editable-cell purchase-link-cell" title="双击编辑采购链接">{$item.purchase_link|default='-- 双击添加 --'}</span>
+                </td>
+                <td class="col-ops">
+                    <input type="text" class="ship-input express-name" data-id="{$item.id}" placeholder="快递公司"
+                           value="{$item.express_name}" data-field="express_name"/>
+                </td>
+                <td class="col-ops" data-field="express_sn" data-id="{$item.id}">
+                    <span class="editable-cell" title="双击编辑物流单号">{$item.express_sn|default='--'}</span>
+                </td>
+                <td class="col-ops" data-field="admin_remark" data-id="{$item.id}">
+                    <span class="editable-cell" title="双击编辑备注">{$item.admin_remark|default='--'}</span>
+                </td>
+                <td class="col-ops">{$item.create_time|date='Y-m-d H:i:s',###}</td>
+                <td class="col-ops">
+                    <if condition="in_array($item.status, [2,14])">
+                        <button class="btn btn-xs btn-primary btn-single-ship" data-id="{$item.id}" style="background:#16baaa;border-color:#16baaa">发货</button>
+                    </if>
+                </tr>
+                <!-- 为了保持格式整洁，上文不再放置重复 end td -->
+            </volist>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="trial-pagination">{$page}</div>
+</div>
+
+<!-- 划卡式发货弹层 -->
+<div class="ship-card-overlay" id="shipCardOverlay">
+    <div class="ship-card" id="shipCard">
+        <button class="card-close" id="shipCardClose" title="关闭">×</button>
+        <div class="card-progress" id="shipCardProgress">今日已发货 <strong id="shipCountToday">0</strong> 件 · 剩余 <strong id="shipCountPending">0</strong> 件</div>
+        <div class="card-title" id="shipCardTitle">逐件发货中</div>
+
+        <div class="card-body" id="shipCardBody">
+            <!-- 卡片内容由 JS 动态填充 -->
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== 1. 双击编辑 + 失焦保存 ==========
+(function($){
+    const SAVE_URL = "{:url('Order/trial_save_cell')}";
+
+    // 双击单元格变成输入框
+    $(document).on('dblclick', '.editable-cell', function(){
+        const $cell = $(this);
+        if ($cell.hasClass('editing')) return;
+        $cell.addClass('editing purchase-link-cell');
+
+        const originalVal = ($cell.text().trim() === '--' || $cell.text().trim() === '-- 双击添加 --') ? '' : $cell.text().trim();
+        const field = $cell.parent().data('field');
+
+        const isLong = (field === 'purchase_link' || field === 'admin_remark');
+        const $input = isLong
+            ? $('<textarea />').val(originalVal).attr('rows', 2)
+            : $('<input type="text" />').val(originalVal);
+
+        $cell.html($input);
+        $input.focus().select();
+    });
+
+    // 失焦 + Enter 保存
+    function commitCell($cell) {
+        const $input = $cell.find('input, textarea');
+        if ($input.length === 0) return;
+        const newVal = $input.val();
+        const field  = $cell.parent().data('field');
+        const id     = $cell.parent().data('id');
+
+        // 无论有没有改都先恢复文字
+        const display = (newVal === '' || newVal === null) ? '--' : newVal;
+        $cell.removeClass('editing purchase-link-cell').text(display).addClass('save-flash');
+        setTimeout(() => $cell.removeClass('save-flash'), 900);
+
+        // 仅当有变化时请求后端
+        const oldText = ($cell.data('old-text') || '').trim();
+        if ((newVal||'') === (oldText||'')) return;
+
+        $.ajax({
+            url : SAVE_URL,
+            type: 'POST',
+            dataType: 'json',
+            data: { id: id, field: field, value: newVal },
+            success: function(res){
+                layer.tips(res.msg, $cell, {tips: [2, '#16baaa'], time: 1500});
+            },
+            error: function(){
+                layer.tips('保存失败', $cell, {tips:1, time:1500, icon:2});
+            }
+        });
+    }
+
+    $(document).on('blur', '.editable-cell input, .editable-cell textarea', function(){
+        const $cell = $(this).closest('.editable-cell');
+        commitCell($cell);
+    });
+    $(document).on('keydown', '.editable-cell input', function(e){
+        if (e.key === 'Enter') { e.preventDefault(); $(this).blur(); }
+        if (e.key === 'Escape'){ e.preventDefault(); $(this).val($(this).closest('.editable-cell').data('old-text') || ''); $(this).blur(); }
+    });
+
+    // 保存旧值，方便恢复 + 判断是否修改
+    $(document).on('focus', '.editable-cell input, .editable-cell textarea', function(){
+        const $cell = $(this).closest('.editable-cell');
+        $cell.data('old-text', $cell.text().trim());
+    });
+
+})(jQuery);
+
+// ========== 2. 快递公司输入框失焦保存 ==========
+(function($){
+    const SAVE_URL = "{:url('Order/trial_save_cell')}";
+    let shipTimer = null;
+    $(document).on('change input', '.ship-input', function(){
+        clearTimeout(shipTimer);
+        const $this = $(this);
+        shipTimer = setTimeout(function(){
+            const id    = $this.data('id');
+            const field = $this.data('field');
+            const value = $this.val();
+            $.ajax({url:SAVE_URL, type:'POST', dataType:'json', data:{id:id, field:field, value:value},
+                success: function(res){
+                    if(res.code == 1){
+                        layer.tips('快递公司已保存', $this, {tips:[2,'#16baaa'], time:1500});
+                    }
+                },
+                error: function(){
+                    layer.tips('保存失败', $this, {tips:1, time:1500, icon:2});
+                }
+            );
+        }, 400);
+    });
+})(jQuery);
+
+// ========== 3. 只看未发货 ==========
+(function($){
+    $('#btnFilterPending').click(function(){
+        if ($(this).hasClass('active')){
+            $('tr[data-status]').show();
+            $(this).removeClass('active').text('只看未发货').css('background','#ffc107');
+        } else {
+            $('tr[data-status]').each(function(){
+                const s = parseInt($(this).data('status'));
+                if (s === 2 || s === 14) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            $(this).addClass('active').text('显示全部').css('background','#16baaa');
+        }
+    });
+})(jQuery);
+
+// ========== 4. 划卡式发货 ==========
+(function($){
+    const NEXT_URL   = "{:url('Order/trial_next_order')}";
+    const SHIP_URL   = "{:url('Order/trial_save_ship')}";
+    let currentId    = 0;
+    let shipping     = false;
+
+    function updateCount(){
+        // 当前列表里"待发货"的行数
+        let pending = 0, total = 0;
+        $('tr[data-status]').each(function(){
+            total++;
+            const s = parseInt($(this).data('status'));
+            if (s === 2 || s === 14) pending++;
+        });
+        $('#shipCountPending').text(pending);
+        $('#pendingCountBadge').text('未发货: ' + pending);
+        $('.row-pending-num').text('未发货: ' + pending);
+        return pending;
+    }
+    updateCount();
+
+    function loadNext(idAfter){
+        $.ajax({
+            url: NEXT_URL,
+            data: idAfter ? { id_after: idAfter } : {},
+            dataType: 'json',
+            success: function(res){
+                if (res.code == 1) {
+                    if (res.data && res.data.finished) {
+                        showFinished();
+                    } else {
+                        renderCard(res.data);
+                    }
+                    updateCount();
+                } else {
+                    layer.msg(res.msg||'加载失败', {icon:2});
+                }
+            },
+            error: function(){ layer.msg('网络错误', {icon:2}); }
+        });
+    }
+
+    function renderCard(data){
+        const order = data.order;
+        currentId   = order.id;
+        const html = `
+            <div class="field-row"><span class="field-label">订单号</span><span class="field-value">${order.pay_order_num || order.order_num || ''}</span></div>
+            <div class="field-row"><span class="field-label">下单时间</span><span class="field-value">${data.create_time || '--'}</span></div>
+            <div class="field-row"><span class="field-label">状态</span><span class="field-value">${data.status_name || '--'}</span></div>
+            <div class="field-row"><span class="field-label">收货人</span><span class="field-value">${order.username || '--'}</span></div>
+            <div class="field-row"><span class="field-label">电话</span><span class="field-value">${order.phone || '--'}</span></div>
+            <div class="field-row"><span class="field-label">地址</span><span class="field-value">${order.user_address || '--'}</span></div>
+            <div class="field-row"><span class="field-label">快递公司</span><span class="field-value">${order.express_name || '--'}</span></div>
+            <div class="field-row"><span class="field-label">采购链接</span><span class="field-value" style="font-size:12px;color:#999">${order.purchase_link || '--'}</span></div>
+            <div class="express-input-wrap">
+                <label>快递公司</label>
+                <select class="ship-card-express-name" id="shipCardExpressName">
+                    <option value="">请选择快递公司</option>
+                    <option value="顺丰速运">顺丰速运</option>
+                    <option value="中通快递">中通快递</option>
+                    <option value="圆通速递">圆通速递</option>
+                    <option value="韵达快递">韵达快递</option>
+                    <option value="申通快递">申通快递</option>
+                    <option value="极兔速递">极兔速递</option>
+                    <option value="京东物流">京东物流</option>
+                    <option value="邮政EMS">邮政EMS</option>
+                    <option value="德邦快递">德邦快递</option>
+                    <option value="跨越速运">跨越速运</option>
+                </select>
+                <label style="margin-top:4px;">物流单号</label>
+                <input type="text" id="shipCardExpressSn" placeholder="请输入物流单号"/>
+            </div>
+        `;
+        $('#shipCardBody').html(html);
+        $('#shipCardExpressName').val(order.express_name || '');
+        if(order.express_name){
+            $('#shipCardExpressName').val(order.express_name);
+        }
+        $('#shipCardExpressSn').focus();
+    }
+
+    function showFinished(){
+        const html = `
+            <div class="finished-screen">
+                <div class="big-check">✓</div>
+                <h3>已全部处理完毕</h3>
+                <p>没有更多待发货的订单了！辛苦了 🎉</p>
+            </div>
+            <div class="card-actions">
+                <button class="btn-success-full" id="shipCardAgain">从头再来</button>
+            </div>
+        `;
+        $('#shipCardTitle').text('完成！');
+        $('#shipCardBody').html(html);
+    }
+
+    function openShipCard(){
+        $('#shipCardOverlay').addClass('active');
+        $('#shipCardTitle').text('逐件发货');
+        $('#shipCardBody').html('<div style="text-align:center;color:#888;padding:30px 0;">加载中...</div>');
+        $('#shipCountToday').text('0');
+        loadNext(0);
+    }
+
+    function closeShipCard(){
+        $('#shipCardOverlay').removeClass('active');
+        // 刷新页面状态
+        setTimeout(() => location.reload(), 300);
+    }
+
+    // 打开划卡发货
+    $('#btnShipOneByOne').click(openShipCard);
+    // 单个发货按钮（表格列）
+    $(document).on('click', '.btn-single-ship', function(e){
+        e.stopPropagation();
+        $('#btnShipOneByOne').click();
+    });
+
+    // 关闭
+    $('#shipCardClose').click(closeShipCard);
+    $('#shipCardOverlay').click(function(e){
+        if (e.target === this) closeShipCard();
+    });
+
+    // Enter 提交
+    $(document).on('keydown', '#shipCardExpressSn', function(e){
+        if (e.key === 'Enter') { e.preventDefault(); $('#shipCardNext').click(); }
+    });
+
+    // 下一件
+    $(document).on('click', '#shipCardNext', function(){
+        if (shipping) return;
+        const express_sn   = $.trim($('#shipCardExpressSn').val());
+        const express_name = $.trim($('#shipCardExpressName').val());
+
+        if (!express_sn) { layer.msg('物流单号不能为空', {icon:2}); return; }
+
+        shipping = true;
+        const $btn = $(this).prop('disabled', true).text('保存中...');
+
+        // 先保存当前这件
+        $.ajax({
+            url: SHIP_URL,
+            type: 'POST',
+            dataType: 'json',
+            data: { id: currentId, express_name: express_name, express_sn: express_sn },
+            success: function(res){
+                if (res.code == 1) {
+                    let cnt = parseInt($('#shipCountToday').text());
+                    $('#shipCountToday').text(cnt + 1);
+                    shipping = false;
+                    $btn.prop('disabled', false).text('下一件 →');
+                    // 刷新列表行状态
+                    const $row = $('#order-row-' + currentId);
+                    $row.find('.status-name').text('待收货');
+                    $row.find('.btn-single-ship').remove();
+                    $row.data('status', 4).removeClass('row-pending').addClass('row-done');
+                    // 加载下一件
+                    loadNext(currentId);
+                } else {
+                    shipping = false;
+                    $btn.prop('disabled', false).text('下一件 →');
+                    layer.msg(res.msg || '保存失败', {icon:2});
+                }
+            },
+            error: function(){
+                shipping = false;
+                $btn.prop('disabled', false).text('下一件 →');
+                layer.msg('网络错误', {icon:2});
+            }
+        });
+    });
+
+    // "保存当前"（不继续下一件）
+    $(document).on('click', '#shipCardSaveOnly', function(){
+        if (shipping) return;
+        const express_sn   = $.trim($('#shipCardExpressSn').val());
+        const express_name = $.trim($('#shipCardExpressName').val());
+        if (!express_sn) { layer.msg('物流单号不能为空', {icon:2}); return; }
+        shipping = true;
+        const $btn = $(this).prop('disabled', true).text('保存中...');
+        $.ajax({
+            url: SHIP_URL, type:'POST', dataType:'json',
+            data: { id: currentId, express_name: express_name, express_sn: express_sn },
+            success: function(res){
+                shipping = false;
+                $btn.prop('disabled', false).text('保存当前');
+                if (res.code == 1) {
+                    layer.msg('已保存', {icon:1});
+                    closeShipCard();
+                } else {
+                    layer.msg(res.msg||'保存失败', {icon:2});
+                }
+            },
+            error: function(){ shipping=false; $btn.prop('disabled',false); layer.msg('网络错误', {icon:2}); }
+        });
+    });
+
+    // 完成后再次
+    $(document).on('click', '#shipCardAgain', function(){
+        $('#shipCountToday').text('0');
+        loadNext(0);
+    });
+
+})(jQuery);
+
+// ========== 5. 单个发货按钮快捷处理 ==========
+(function($){
+    $(document).on('click', '.btn-single-ship', function(e){
+        e.stopPropagation();
+        const id = $(this).data('id');
+        layer.open({
+            type: 1,
+            title: '快速发货',
+            area: ['420px', 'auto'],
+            content: `
+                <div style="padding:16px;">
+                    <label>快递公司</label>
+                    <select id="SingleExpName" style="width:100%;padding:6px;margin-bottom:8px;">
+                        <option value="">请选择</option>
+                        <option value="顺丰速运">顺丰速运</option>
+                        <option value="中通快递">中通快递</option>
+                        <option value="圆通速递">圆通速递</option>
+                        <option value="韵达快递">韵达快递</option>
+                        <option value="申通快递">申通快递</option>
+                        <option value="极兔速递">极兔速递</option>
+                        <option value="京东物流">京东物流</option>
+                        <option value="邮政EMS">邮政EMS</option>
+                        <option value="德邦快递">德邦快递</option>
+                    </select>
+                    <label>物流单号</label>
+                    <input type="text" id="SingleExpSn" placeholder="物流单号" style="width:100%;padding:6px;margin-bottom:8px;"/>
+                </div>
+            `,
+            btn: ['发货', '取消'],
+            yes: function(idx){
+                const sn   = $.trim($('#SingleExpSn').val());
+                const name = $.trim($('#SingleExpName').val());
+                if (!sn) { layer.msg('物流单号不能为空', {icon:2}); return; }
+                $.ajax({
+                    url: "{:url('Order/trial_save_ship')}",
+                    type:'POST', dataType:'json',
+                    data:{id:id, express_name:name, express_sn:sn},
+                    success:function(res){
+                        if(res.code==1){
+                            layer.msg('已发货', {icon:1});
+                            layer.close(idx);
+                            setTimeout(() => location.reload(), 800);
+                        } else {
+                            layer.msg(res.msg||'保存失败', {icon:2});
+                        }
+                    },
+                    error: function(){ layer.msg('网络错误', {icon:2}); }
+                });
+            }
+        });
+        setTimeout(()=> $('#SingleExpSn').focus(), 200);
+    });
+})(jQuery);
+
+// ========== 6. 导出 + 列显隐 ==========
+(function($){
+    var EXPORT_URL = "{:url('Order/trial_export')}";
+    $('#btnExport').click(function(){
+        // 直接用当前 query string 跳转导出
+        var qs = window.location.search;
+        window.location.href = EXPORT_URL + qs;
+    });
+
+    // 列显隐 toggle
+    var internalColsVisible = true;
+    $('#btnShowHideCol').click(function(){
+        internalColsVisible = !internalColsVisible;
+        $('.col-ops').toggle(internalColsVisible);
+        $(this).text(internalColsVisible ? '切换列显隐' : '显示全部列');
+    });
+})(jQuery);
+
+// ========== 7. 日期选择器 ==========
+$(function(){
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        laydate.render({ elem: '#create-startDate', format: 'yyyy-MM-dd' });
+        laydate.render({ elem: '#create-endDate',   format: 'yyyy-MM-dd' });
+    });
+});
+</script>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

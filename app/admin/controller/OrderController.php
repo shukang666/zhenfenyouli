@@ -93,6 +93,193 @@ class OrderController extends AdminBaseController
         return $this->fetch();
     }
 
+    /**
+     * 订单列表（试运行）- Excel风格可编辑表格 + 划卡式发货
+     */
+    public function trial_index()
+    {
+        $params = $this->request->param();
+        $Model  = new ShopOrderModel();
+        $map    = [];
+        $map[]  = ['a.delete_time', '=', 0];
+
+        if (!empty($params['order_num'])) $map[] = ['a.order_num|a.pay_order_num', 'like', "%{$params['order_num']}%"];
+        if (!empty($params['username']))  $map[] = ['a.username|nickname', 'like', "%{$params['username']}%"];
+        if (!empty($params['phone']))     $map[] = ['a.phone|mobile', 'like', "%{$params['phone']}%"];
+        if (isset($params['status']) && $params['status'] !== '') {
+            if ($params['status'] == 10) {
+                $map[] = ['a.status', 'in', [10, 16]];
+            } elseif ($params['status'] == 2) {
+                $map[] = ['a.status', 'in', [2, 14]];
+            } elseif ($params['status'] == 20) {
+                $map[] = ['a.status', 'in', [24, 18, 20, 22]];
+            } else {
+                $map[] = ['a.status', '=', $params['status']];
+            }
+        }
+        if (!empty($params['start_time'])) $map[] = ['a.create_time', '>=', strtotime($params['start_time'])];
+        if (!empty($params['end_time']))   $map[] = ['a.create_time', '<=', strtotime($params['end_time']) + 86399];
+
+        // 默认只显示"待发货"状态，方便采购人员干活
+        if (!isset($params['status']) || $params['status'] === '') {
+            $map[] = ['a.status', 'in', [2, 14]];
+        }
+
+        // 分页大小（试运行的表格一页可以多展示）
+        $page_size = !empty($params['page_size']) ? intval($params['page_size']) : 100;
+        if ($page_size > 500) $page_size = 500;
+
+        $list = $Model->getInfo($map, 'a.*', $page_size);
+        $list->appends($params);
+        $page = $list->render();
+
+        $this->assign('list', $list);
+        $this->assign('page', $page);
+        $this->assign('params', $params);
+        $this->assign('status', $params['status'] ?? '');
+        $this->assign('check_status_list', ShopOrderModel::getStatusName(-1));
+        $this->assign('delivery_type_list', ShopOrderModel::getDeliveryTypeName(-1));
+        $this->assign('pay_list', [1 => '微信支付', 3 => '积分支付']);
+        $this->assign('status_menu', ShopOrderModel::getStatusMenu());
+
+        return $this->fetch('trial_index');
+    }
+
+    /**
+     * 试运行 - 单元格失焦保存（采购链接 / 管理备注）
+     */
+    public function trial_save_cell()
+    {
+        if (!$this->request->isPost()) $this->error('请求方式错误');
+
+        $id     = intval($this->request->param('id', 0));
+        $field  = $this->request->param('field', '');
+        $value  = $this->request->param('value', '');
+
+        // 只允许这两个字段
+        $allow  = ['purchase_link', 'admin_remark', 'express_sn', 'express_name'];
+        if (!in_array($field, $allow)) $this->error('不允许的字段');
+        if ($id <= 0) $this->error('参数错误');
+
+        $Model  = new ShopOrderModel();
+        $order  = $Model->find($id);
+        if (!$order) $this->error('订单不存在');
+
+        $order->save([$field => $value]);
+        $this->success('已保存');
+    }
+
+    /**
+     * 试运行 - 划卡式发货保存（同时也兼容单纯填物流单号的需求）
+     */
+    public function trial_save_ship()
+    {
+        if (!$this->request->isPost()) $this->error('请求方式错误');
+
+        $id           = intval($this->request->param('id', 0));
+        $express_name = $this->request->param('express_name', '');
+        $express_sn   = $this->request->param('express_sn', '');
+        if ($id <= 0)        $this->error('参数错误');
+        if (empty($express_sn)) $this->error('物流单号不能为空');
+
+        $Model  = new ShopOrderModel();
+        $order  = $Model->find($id);
+        if (!$order) $this->error('订单不存在');
+
+        $order->save([
+            'express_name' => $express_name,
+            'express_sn'   => $express_sn,
+            'send_time'    => time(),
+            'status'       => 4,
+        ]);
+        $this->success('发货成功');
+    }
+
+    /**
+     * 试运行 - 返回一个未发货订单（用于划卡式发货）
+     */
+    public function trial_next_order()
+    {
+        $params = $this->request->param();
+        $map    = [];
+        $map[]  = ['a.delete_time', '=', 0];
+        $map[]  = ['a.status', 'in', [2, 14]];
+        if (!empty($params['order_num'])) $map[] = ['a.order_num|a.pay_order_num', 'like', "%{$params['order_num']}%"];
+        if (!empty($params['phone']))     $map[] = ['a.phone|mobile', 'like', "%{$params['phone']}%"];
+        if (!empty($params['username']))  $map[] = ['a.username|nickname', 'like', "%{$params['username']}%"];
+        if (!empty($params['id_after'])) {
+            // 返回指定 id 之后的下一条
+            $map[] = ['a.id', '<', intval($params['id_after'])];
+        }
+
+        $Model = new ShopOrderModel();
+        $order = $Model->alias('a')
+            ->field('a.*')
+            ->leftjoin('member b', 'a.user_id=b.id')
+            ->json(['param'], true)
+            ->where($map)
+            ->order('a.id asc')
+            ->find();
+
+        if (!$order) {
+            $this->success('全部已发货', null, ['finished' => 1]);
+            return;
+        }
+
+        // 计算信息
+        $totalPending = $Model->alias('a')
+            ->leftjoin('shop_order_detail c', 'a.order_num = c.order_num')
+            ->json(['param'], true)
+            ->where([
+                ['a.delete_time', '=', 0],
+                ['a.status', 'in', [2, 14]],
+            ])->group('a.id')->count();
+
+        $sentToday = $Model->where([
+            ['delete_time', '=', 0],
+            ['status', '=', 4],
+            ['send_time', '>=', strtotime('today')],
+            ['send_time', '<', strtotime('today +1 day')],
+        ])->count();
+
+        $this->success('ok', null, [
+            'finished'    => 0,
+            'order'       => $order,
+            'status_name' => ShopOrderModel::getStatusName($order['status']),
+            'create_time' => $order['create_time'] ? date('Y-m-d H:i', $order['create_time']) : '',
+            'send_count'  => $sentToday,
+        ]);
+    }
+
+    /**
+     * 试运行 - 导出
+     */
+    public function trial_export()
+    {
+        // 复用 index 导出的逻辑
+        $params = $this->request->param();
+        $map    = [];
+        $map[]  = ['a.delete_time', '=', 0];
+        if (!empty($params['order_num'])) $map[] = ['a.order_num|a.pay_order_num', 'like', "%{$params['order_num']}%"];
+        if (!empty($params['username']))  $map[] = ['a.username|nickname', 'like', "%{$params['username']}%"];
+        if (!empty($params['phone']))     $map[] = ['a.phone|mobile', 'like', "%{$params['phone']}%"];
+        if (isset($params['status']) && $params['status'] !== '') {
+            if ($params['status'] == 10) {
+                $map[] = ['a.status', 'in', [10, 16]];
+            } elseif ($params['status'] == 2) {
+                $map[] = ['a.status', 'in', [2, 14]];
+            } elseif ($params['status'] == 20) {
+                $map[] = ['a.status', 'in', [24, 18, 20, 22]];
+            } else {
+                $map[] = ['a.status', '=', $params['status']];
+            }
+        }
+        if (!empty($params['start_time'])) $map[] = ['a.create_time', '>=', strtotime($params['start_time'])];
+        if (!empty($params['end_time']))   $map[] = ['a.create_time', '<=', strtotime($params['end_time']) + 86399];
+
+        $this->export($map);
+    }
+
     public function details()
     {
         $Model = new ShopOrderModel();
