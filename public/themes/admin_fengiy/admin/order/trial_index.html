@@ -261,7 +261,7 @@
 
     <!-- 筛选 Tabs -->
     <div class="trial-tab">
-        <volist name="status_menu" m">
+        <volist name="status_menu" id="m">
             <a href="{:url('Order/trial_index', ['status'=>$m.status])}"
                <if condition="(isset($params.status) and $params.status eq $m.status) OR (!isset($params.status) and $m.status eq 0)">class="active"</if>>
                 {$m.status_name}
@@ -336,7 +336,7 @@
             </tr>
             </thead>
             <tbody>
-            <volist name="list" item" key="idx">
+            <volist name="list" id="item" key="idx">
                 <tr id="order-row-{$item.id}" name="order_checkbox" data-id="{$item.id}" data-status="{$item.status}"
                 <if condition="in_array($item.status, [2,14])">class="row-pending" <else/>class="row-done" </if>>
                 <td class="freeze-col1">
@@ -345,7 +345,7 @@
                     </a>
                 </td>
                 <td class="freeze-col2 goods-name-cell">
-                    <volist name="item.goods_list" goods">
+                    <volist name="item.goods_list" id="goods">
                         <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;">
                             <img src="{$goods.thumb}" alt="" width="32" height="32" style="flex-shrink:0;border:1px solid #eee;border-radius:2px;"/>
                             <div>
@@ -358,14 +358,14 @@
                     </volist>
                 </td>
                 <td>
-                    <volist name="item.goods_list" goods">{$goods.count}<br/></volist>
+                    <volist name="item.goods_list" id="goods">{$goods.count}<br/></volist>
                 </td>
                 <td>
-                    <volist name="item.goods_list" goods">&yen;{$goods.one_price}<br/></volist>
+                    <volist name="item.goods_list" id="goods">&yen;{$goods.one_price}<br/></volist>
                 </td>
                 <td><strong>&yen;{$item.price}</strong><br><small style="color:#16baaa">{$item.pay_type_name}</small></td>
                 <td>
-                    <volist name="status_list" st">
+                    <volist name="status_list" id="st">
                         <if condition="$item.status eq $st.status">
                             <php>$bgColor = $st['color'] ?: '#5fb878';</php>
                             <span class="badge-status" style="background:{$bgColor}">{$st.status_name}</span>
