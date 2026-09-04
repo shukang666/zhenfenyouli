@@ -117,19 +117,6 @@
 </div>
 <script src="__STATIC__/js/admin.js"></script>
 <script>
-    // 打开打卡动作配置弹窗（定义为全局函数，避免onclick无法访问）
-    function openClockAction(activeId) {
-        var index = parent.layer.getFrameIndex ? parent.layer.getIndex(window.name) : 0;
-        var layerRef = (typeof layui !== 'undefined' && layui.layer) ? layui.layer : parent.layer;
-        layerRef.open({
-            type: 2,
-            title: '打卡动作配置',
-            area: ['85%', '85%'],
-            content: '{:url("active_clock_action/index")}?active_id=' + activeId,
-            btn: false
-        });
-    }
-
     layui.use(['layer', 'form'], function () {
         let layer = layui.layer, form = layui.form;
         form.on('switch(status)', function (data) {
@@ -166,6 +153,17 @@
                 }
             });
         }
+
+        // 暴露到全局，让onclick可调用
+        window.openClockAction = function(activeId) {
+            layer.open({
+                type: 2,
+                title: '打卡动作配置',
+                area: ['85%', '85%'],
+                content: '{:url("active_clock_action/index")}?active_id=' + activeId,
+                btn: false
+            });
+        };
     });
 
 </script>
