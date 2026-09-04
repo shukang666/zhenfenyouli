@@ -218,7 +218,11 @@ class ActiveClockActionController extends ToolController
         $this->assign('list', $list);
         $this->assign('page', $list->render());
         $this->assign('active_list', $activeList);
-        $this->assign('params', $this->request->param());
+        $requestParams = $this->request->param();
+        if (!isset($requestParams['active_id'])) {
+            $requestParams['active_id'] = '';
+        }
+        $this->assign('params', $requestParams);
 
         return $this->fetch('active/clock_action_user_list');
     }
@@ -280,7 +284,11 @@ class ActiveClockActionController extends ToolController
         $this->assign('list', $list);
         $this->assign('page', $list->render());
         $this->assign('active_list', $activeList);
-        $this->assign('params', $this->request->param());
+        $requestParams = $this->request->param();
+        if (!isset($requestParams['active_id'])) {
+            $requestParams['active_id'] = '';
+        }
+        $this->assign('params', $requestParams);
 
         return $this->fetch('active/clock_action_push_list');
     }
