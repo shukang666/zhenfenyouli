@@ -78,7 +78,7 @@ class ActiveClockActionController extends ToolController
         $this->assign('notify_type_options', ActiveClockActionModel::getNotifyTypeOptions());
         $this->assign('field_type_options', ActiveClockActionFormModel::getFieldTypeOptions());
 
-        return $this->fetch('clock_action_index');
+        return $this->fetch('active/clock_action_index');
     }
 
     /**
@@ -220,7 +220,7 @@ class ActiveClockActionController extends ToolController
         $this->assign('active_list', $activeList);
         $this->assign('params', $this->request->param());
 
-        return $this->fetch('clock_action_user_list');
+        return $this->fetch('active/clock_action_user_list');
     }
 
     /**
@@ -282,7 +282,7 @@ class ActiveClockActionController extends ToolController
         $this->assign('active_list', $activeList);
         $this->assign('params', $this->request->param());
 
-        return $this->fetch('clock_action_push_list');
+        return $this->fetch('active/clock_action_push_list');
     }
 
     /**
@@ -320,7 +320,7 @@ class ActiveClockActionController extends ToolController
         $this->assign('active', $active);
         $this->assign('item_json', json_encode($item ?? [], JSON_UNESCAPED_UNICODE));
 
-        return $this->fetch('clock_action_push_edit');
+        return $this->fetch('active/clock_action_push_edit');
     }
 
     /**
