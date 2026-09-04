@@ -222,6 +222,9 @@ class ActiveClockActionController extends ToolController
         if (!isset($requestParams['active_id'])) {
             $requestParams['active_id'] = '';
         }
+        if (!isset($requestParams['keyword'])) {
+            $requestParams['keyword'] = '';
+        }
         $this->assign('params', $requestParams);
 
         return $this->fetch('active/clock_action_user_list');
