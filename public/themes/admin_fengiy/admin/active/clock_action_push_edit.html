@@ -123,8 +123,8 @@
         }
 
         // 如果有 active_id 但没有 action_id（从筛选活动后进入），自动加载动作列表
-        var activeId = '{:$active_id|default=0|trim}';
-        var actionId = '{:$action.id|default=0|trim}';
+        var activeId = '<?php echo isset($active_id) ? intval($active_id) : 0; ?>';
+        var actionId = '<?php echo isset($action["id"]) ? intval($action["id"]) : 0; ?>';
         if (activeId && !actionId && typeof loadActions === 'function') {
             loadActions();
         }
