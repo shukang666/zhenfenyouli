@@ -78,7 +78,7 @@ class OrderTrialController extends AdminBaseController
         }
         unset($item);
 
-        $status_list = ShopOrderModel::getStatusName(-1);
+        $status_list = ShopOrderModel::getStatusList();
         $status_menu = ShopOrderModel::getStatusMenu();
         $delivery_type_list = ShopOrderModel::getDeliveryTypeName(-1);
         $pay_list = [1 => '微信支付', 3 => '积分支付'];
