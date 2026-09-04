@@ -61,7 +61,7 @@ class OrderTrialController extends AdminBaseController
         if (!empty($params['start_time'])) $map[] = ['a.create_time', '>=', strtotime($params['start_time'])];
         if (!empty($params['end_time']))   $map[] = ['a.create_time', '<=', strtotime($params['end_time']) + 86399];
 
-        $list = $Model->getList($map, 50);
+        $list = $Model->getInfo($map, 'a.*', 50);
         $order_ids = array_column($list, 'id');
 
         $purchase_map = [];
@@ -224,7 +224,7 @@ class OrderTrialController extends AdminBaseController
     private function performExport(array $map)
     {
         $Model = new ShopOrderModel();
-        $list  = $Model->getList($map, 10000);
+        $list  = $Model->getInfo($map, 'a.*', -1);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet       = $spreadsheet->getActiveSheet();
