@@ -88,6 +88,8 @@
     /* 物流区域 */
     .ship-input { width: 100%; padding: 4px 6px; border: 1px solid #d2d2d2; border-radius: 2px; font-size: 12px; }
     .ship-input:focus { border-color: #16baaa; outline: none; }
+    .ship-input.danger { border-color: #ff5722; background: #fff5f3; }
+    .ship-input.danger:focus { border-color: #ff5722; box-shadow: 0 0 0 2px rgba(255,87,34,.15) }
 
     /* 保存微动效 */
     .save-flash { animation: flash 1s ease; }
@@ -384,17 +386,16 @@
                     <input type="text" class="ship-input express-name" data-id="{$item.id}" placeholder="快递公司"
                            value="{$item.express_name}" data-field="express_name"/>
                 </td>
-                <td class="col-ops" data-field="express_sn" data-id="{$item.id}">
-                    <span class="editable-cell" title="双击编辑物流单号">{$item.express_sn|default='--'}</span>
+                <td class="col-ops">
+                    <input type="text" class="ship-input express-sn" data-id="{$item.id}" placeholder="物流单号"
+                           value="{$item.express_sn}" data-field="express_sn"/>
                 </td>
                 <td class="col-ops" data-field="admin_remark" data-id="{$item.id}">
                     <span class="editable-cell" title="双击编辑备注">{$item.admin_remark|default='--'}</span>
                 </td>
                 <td class="col-ops">{$item.create_time|date='Y-m-d H:i:s'}</td>
                 <td class="col-ops">
-                    <if condition="in_array($item.status, [2,14])">
-                        <button class="btn btn-xs btn-primary btn-single-ship" data-id="{$item.id}" style="background:#16baaa;border-color:#16baaa">发货</button>
-                    </if>
+                    <small style="color:#999">#{$item.id}</small>
                 </tr>
                 <!-- 为了保持格式整洁，上文不再放置重复 end td -->
             </volist>
@@ -489,28 +490,98 @@
 
 })(jQuery);
 
-// ========== 2. 快递公司输入框失焦保存 ==========
+// ========== 2. 快递单填写 —— 红色必填提醒 + 双填自动发货 ==========
 (function($){
-    const SAVE_URL = "{:url('OrderTrial/saveCell')}";
-    let shipTimer = null;
+    const SAVE_URL  = "{:url('OrderTrial/saveCell')}";
+    const SHIP_URL  = "{:url('OrderTrial/saveShip')}";
+    let shipTimer   = null;
+    let shippingSet = {};   // 防重：正在处理发货的 order id
+
+    // 更新某行的红框状态
+    function updateDanger(rowId){
+        const $tr = $('#order-row-' + rowId);
+        if (!$tr.length) return;
+        const $name = $tr.find('.express-name');
+        const $sn   = $tr.find('.express-sn');
+        const vName = $.trim($name.val());
+        const vSn   = $.trim($sn.val());
+
+        $sn.toggleClass('danger', !!(vName && !vSn));
+        $name.toggleClass('danger', !!(vSn && !vName));
+    }
+
+    // [1] 输入防抖 → 仅保存当前字段到 DB
     $(document).on('change input', '.ship-input', function(){
-        clearTimeout(shipTimer);
         const $this = $(this);
+        const id    = $this.data('id');
+
+        // 红框实时更新
+        updateDanger(id);
+
+        clearTimeout(shipTimer);
         shipTimer = setTimeout(function(){
-            const id    = $this.data('id');
             const field = $this.data('field');
             const value = $this.val();
-            $.ajax({url:SAVE_URL, type:'POST', dataType:'json', data:{id:id, field:field, value:value},
+            $.ajax({
+                url: SAVE_URL, type: 'POST', dataType: 'json',
+                data: { id: id, field: field, value: value },
                 success: function(res){
-                    if(res.code == 1){
-                        layer.tips('快递公司已保存', $this, {tips:[2,'#16baaa'], time:1500});
+                    if (res.code == 1) {
+                        layer.tips('已保存', $this, { tips: [2, '#16baaa'], time: 1200 });
+                        // [2] 保存成功后，尝试自动发货
+                        maybeAutoShip(id);
+                    } else {
+                        layer.tips(res.msg || '保存失败', $this, { tips: [1, '#ff5722'], time: 1500 });
                     }
                 },
                 error: function(){
-                    layer.tips('保存失败', $this, {tips:1, time:1500, icon:2});
+                    layer.tips('保存失败', $this, { tips: [1, '#ff5722'], time: 1500 });
                 }
-            );
+            });
         }, 400);
+    });
+
+    // [3] 自动发货：同一行快递公司 + 单号都填写，且当前是未发货态
+    function maybeAutoShip(id){
+        if (shippingSet[id]) return;        // 防重复触发
+        const $tr = $('#order-row-' + id);
+        if (!$tr.length) return;
+        const st = parseInt($tr.data('status'));
+        if (st !== 2 && st !== 14) return;  // 仅待发货状态才自动处理
+
+        const name = $.trim($tr.find('.express-name').val());
+        const sn   = $.trim($tr.find('.express-sn').val());
+        if (!name || !sn) return;            // 两个都填了才走发货
+
+        shippingSet[id] = true;
+        $.ajax({
+            url: SHIP_URL, type: 'POST', dataType: 'json',
+            data: { id: id, express_name: name, express_sn: sn },
+            success: function(res){
+                if (res.code == 1) {
+                    // 行视觉刷新
+                    $tr.find('.badge-status').css('background','#5fb878').text('待收货');
+                    $tr.data('status', 4).removeClass('row-pending').addClass('row-done');
+                    // 清除红框
+                    $tr.find('.express-name, .express-sn').removeClass('danger');
+                    layer.tips('已发货 ✓', $tr.find('.express-sn'), { tips: [2, '#16baaa'], time: 1500 });
+                } else {
+                    delete shippingSet[id];
+                    layer.msg(res.msg || '发货失败', { icon: 2 });
+                }
+            },
+            error: function(){
+                delete shippingSet[id];
+                layer.msg('发货请求失败', { icon: 2 });
+            }
+        });
+    }
+
+    // 页面初始化：对已填单项的行刷红框
+    $(function(){
+        $('tr[data-id]').each(function(){
+            updateDanger($(this).data('id'));
+        });
     });
 })(jQuery);
 
@@ -536,7 +607,7 @@
 
 // ========== 4. 划卡式发货 ==========
 (function($){
-    const NEXT_URL   = "{:url('Order/trial_next_order')}";
+    const NEXT_URL   = "{:url('OrderTrial/nextOrder')}";
     const SHIP_URL   = "{:url('OrderTrial/saveShip')}";
     let currentId    = 0;
     let shipping     = false;
@@ -647,12 +718,6 @@
 
     // 打开划卡发货
     $('#btnShipOneByOne').click(openShipCard);
-    // 单个发货按钮（表格列）
-    $(document).on('click', '.btn-single-ship', function(e){
-        e.stopPropagation();
-        $('#btnShipOneByOne').click();
-    });
-
     // 关闭
     $('#shipCardClose').click(closeShipCard);
     $('#shipCardOverlay').click(function(e){
@@ -690,7 +755,6 @@
                     // 刷新列表行状态
                     const $row = $('#order-row-' + currentId);
                     $row.find('.status-name').text('待收货');
-                    $row.find('.btn-single-ship').remove();
                     $row.data('status', 4).removeClass('row-pending').addClass('row-done');
                     // 加载下一件
                     loadNext(currentId);
@@ -741,61 +805,7 @@
 
 })(jQuery);
 
-// ========== 5. 单个发货按钮快捷处理 ==========
-(function($){
-    $(document).on('click', '.btn-single-ship', function(e){
-        e.stopPropagation();
-        const id = $(this).data('id');
-        layer.open({
-            type: 1,
-            title: '快速发货',
-            area: ['420px', 'auto'],
-            content: `
-                <div style="padding:16px;">
-                    <label>快递公司</label>
-                    <select id="SingleExpName" style="width:100%;padding:6px;margin-bottom:8px;">
-                        <option value="">请选择</option>
-                        <option value="顺丰速运">顺丰速运</option>
-                        <option value="中通快递">中通快递</option>
-                        <option value="圆通速递">圆通速递</option>
-                        <option value="韵达快递">韵达快递</option>
-                        <option value="申通快递">申通快递</option>
-                        <option value="极兔速递">极兔速递</option>
-                        <option value="京东物流">京东物流</option>
-                        <option value="邮政EMS">邮政EMS</option>
-                        <option value="德邦快递">德邦快递</option>
-                    </select>
-                    <label>物流单号</label>
-                    <input type="text" id="SingleExpSn" placeholder="物流单号" style="width:100%;padding:6px;margin-bottom:8px;"/>
-                </div>
-            `,
-            btn: ['发货', '取消'],
-            yes: function(idx){
-                const sn   = $.trim($('#SingleExpSn').val());
-                const name = $.trim($('#SingleExpName').val());
-                if (!sn) { layer.msg('物流单号不能为空', {icon:2}); return; }
-                $.ajax({
-                    url: "{:url('OrderTrial/saveShip')}",
-                    type:'POST', dataType:'json',
-                    data:{id:id, express_name:name, express_sn:sn},
-                    success:function(res){
-                        if(res.code==1){
-                            layer.msg('已发货', {icon:1});
-                            layer.close(idx);
-                            setTimeout(() => location.reload(), 800);
-                        } else {
-                            layer.msg(res.msg||'保存失败', {icon:2});
-                        }
-                    },
-                    error: function(){ layer.msg('网络错误', {icon:2}); }
-                });
-            }
-        });
-        setTimeout(()=> $('#SingleExpSn').focus(), 200);
-    });
-})(jQuery);
-
-// ========== 6. 导出 + 列显隐 ==========
+// ========== 5. 导出 + 列显隐 ==========
 (function($){
     var EXPORT_URL = "{:url('OrderTrial/export')}";
     $('#btnExport').click(function(){

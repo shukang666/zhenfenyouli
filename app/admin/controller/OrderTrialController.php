@@ -73,7 +73,7 @@ class OrderTrialController extends AdminBaseController
             $purchase_map = $rows;
         }
 
-        foreach ($list as &$item) {
+        foreach ($list->items() as &$item) {
             $item['purchase_link'] = $purchase_map[$item['id']] ?? '';
         }
         unset($item);
@@ -109,7 +109,7 @@ class OrderTrialController extends AdminBaseController
         $field   = $this->request->param('field', '');
         $value   = $this->request->param('value', '');
 
-        if (!$id || !in_array($field, ['purchase_link', 'remark'])) {
+        if (!$id || !in_array($field, ['purchase_link', 'admin_remark', 'express_name', 'express_sn'])) {
             return json(['code' => 0, 'msg' => '参数错误']);
         }
 
@@ -119,7 +119,7 @@ class OrderTrialController extends AdminBaseController
 
         return json([
             'code' => $res !== false ? 1 : 0,
-            'msg'  => $res !== false ? '保存失败' : '已保存',
+            'msg'  => $res !== false ? '已保存' : '保存失败',
         ]);
     }
 
@@ -132,33 +132,37 @@ class OrderTrialController extends AdminBaseController
             return json(['code' => 0, 'msg' => '非法请求']);
         }
 
-        $id              = intval($this->request->param('id', 0));
-        $express_company = $this->request->param('express_company', '');
-        $express_no      = $this->request->param('express_no', '');
+        $id           = intval($this->request->param('id', 0));
+        $express_name = $this->request->param('express_name', '');
+        $express_sn   = $this->request->param('express_sn', '');
 
         if (!$id) {
             return json(['code' => 0, 'msg' => '无效订单 ID']);
+        }
+        if (!$express_sn) {
+            return json(['code' => 0, 'msg' => '物流单号不能为空']);
         }
 
         $order = Db::name('shop_order')->where('id', $id)->find();
         if (!$order) {
             return json(['code' => 0, 'msg' => '订单不存在']);
         }
-        if ($order['status'] != 10 && $order['status'] != 16) {
+        // 仅待发货状态 (2,14) 允许发货
+        if ($order['status'] != 2 && $order['status'] != 14) {
             return json(['code' => 0, 'msg' => '订单状态不允许发货']);
         }
 
         $update = [
-            'status'         => 20,
-            'express_company'=> $express_company,
-            'express_no'     => $express_no,
-            'delivery_time'  => time(),
+            'status'        => 4,
+            'express_name'  => $express_name,
+            'express_sn'    => $express_sn,
+            'send_time'     => time(),
         ];
         Db::name('shop_order')->where('id', $id)->update($update);
 
         return json([
             'code' => 1,
-            'msg'  => '发货成功，重量 0.26g',
+            'msg'  => '已发货，状态变为待收货',
         ]);
     }
 
@@ -167,11 +171,11 @@ class OrderTrialController extends AdminBaseController
      */
     public function nextOrder()
     {
-        $current_id = intval($this->request->param('current_id', 0));
+        $current_id = intval($this->request->param('id_after', 0));
 
         $map = [
             ['delete_time', '=', 0],
-            ['status', 'in', [10, 16]],
+            ['status', 'in', [2, 14]],
         ];
         if ($current_id) {
             $map[] = ['id', '>', $current_id];
