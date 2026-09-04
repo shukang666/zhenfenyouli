@@ -82,7 +82,9 @@ class OrderTrialController extends AdminBaseController
         $delivery_type_list = ShopOrderModel::getDeliveryTypeName(-1);
         $pay_list = [1 => '微信支付', 3 => '积分支付'];
 
-        $this->assign('list', $list);
+        $this->assign('list', $list->items());
+        $this->assign('page', $list->render());
+        $this->assign('total', $list->total());
         $this->assign('status_list', $status_list);
         $this->assign('delivery_type_list', $delivery_type_list);
         $this->assign('pay_list', $pay_list);
