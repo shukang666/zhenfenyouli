@@ -62,7 +62,7 @@ class OrderTrialController extends AdminBaseController
         if (!empty($params['end_time']))   $map[] = ['a.create_time', '<=', strtotime($params['end_time']) + 86399];
 
         $list = $Model->getInfo($map, 'a.*', 50);
-        $order_ids = array_column($list, 'id');
+        $order_ids = array_column($list->items(), 'id');
 
         $purchase_map = [];
         if (!empty($order_ids)) {
