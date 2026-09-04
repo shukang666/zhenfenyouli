@@ -262,7 +262,7 @@
     <!-- 筛选 Tabs -->
     <div class="trial-tab">
         <volist name="status_menu" id="m">
-            <a href="{:url('Order/trial_index', ['status'=>$m.status])}"
+            <a href="{:url('OrderTrial/index', ['status'=>$m.status])}"
                <if condition="(isset($params.status) and $params.status eq $m.status) OR (!isset($params.status) and $m.status eq 0)">class="active"</if>>
                 {$m.status_name}
                 <if condition="$m.status != 0">({$m.status_count})</if>
@@ -271,7 +271,7 @@
     </div>
 
     <!-- 搜索 -->
-    <form class="trial-search" method="get" action="{:url('Order/trial_index')}">
+    <form class="trial-search" method="get" action="{:url('OrderTrial/index')}">
         <if condition="isset($params.status)"><input type="hidden" name="status" value="{$params.status}"/></if>
         <div class="row">
             <div>
@@ -294,7 +294,7 @@
             </div>
             <div>
                 <input type="submit" class="btn btn-primary" value="搜索" style="background:#16baaa;border-color:#16baaa"/>
-                <a class="btn" href="{:url('Order/trial_index')}" style="background:#f0f0f0;color:#666;margin-left:6px">清空</a>
+                <a class="btn" href="{:url('OrderTrial/index')}" style="background:#f0f0f0;color:#666;margin-left:6px">清空</a>
             </div>
         </div>
     </form>
