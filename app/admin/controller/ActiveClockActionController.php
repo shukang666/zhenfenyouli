@@ -100,17 +100,7 @@ class ActiveClockActionController extends ToolController
         if (empty($actionsData) || !is_array($actionsData)) {
             $actionsData = $this->request->post('actions', []);
         }
-        // === 调试：记录接收到的数据 ===
-        trace('[active_clock_action.save] active_id=' . $activeId, 'debug');
-        trace('[active_clock_action.save] actionsData=' . json_encode($actionsData, JSON_UNESCAPED_UNICODE), 'debug');
-        // === 调试结束 ===
         if (empty($actionsData) || !is_array($actionsData)) {
-            $traceData = json_encode([
-                'param_all' => $this->request->param(),
-                'post' => file_get_contents('php://input'),
-                'actions_data' => $actionsData,
-            ], JSON_UNESCAPED_UNICODE);
-            trace('[active_clock_action.save] 参数异常: ' . $traceData, 'error');
             $this->error('请至少配置一个打卡动作');
         }
 
@@ -161,12 +151,14 @@ class ActiveClockActionController extends ToolController
             }
 
             Db::commit();
-            $this->success('保存成功');
         } catch (\Exception $e) {
             Db::rollback();
-            trace('[active_clock_action.save] exception: ' . $e->getMessage() . "\n" . $e->getTraceAsString(), 'error');
             $this->error('保存失败：' . $e->getMessage());
+            return;
         }
+
+        // success() 会通过抛 HttpResponseException 中断响应，必须放在 try-catch 外面
+        $this->success('保存成功');
     }
 
     /**
