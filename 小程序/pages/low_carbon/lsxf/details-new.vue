@@ -297,18 +297,16 @@
 		requestSubscribeMessage(actionId) {
 			// #ifdef MP-WEIXIN
 			if (wx.requestSubscribeMessage) {
-				// 后台可配置模板ID，此处先用占位，可根据需要扩展为从actionTrigger获取
-				let templateIds = this.actionTrigger && this.actionTrigger.template_ids ? this.actionTrigger.template_ids : [];
-				if (templateIds.length === 0) {
-					// 没有模板ID则直接记录未订阅状态
+				let templateId = this.actionTrigger && this.actionTrigger.template_id ? this.actionTrigger.template_id : '';
+				if (!templateId) {
 					this.recordSubscribeStatus(actionId, 0);
 					return;
 				}
 				wx.requestSubscribeMessage({
-					tmplIds: templateIds,
+					tmplIds: [templateId],
 					success: (res) => {
-						let allAccepted = templateIds.every(tid => res[tid] === 'accept');
-						this.recordSubscribeStatus(actionId, allAccepted ? 1 : 0);
+						let accepted = res[templateId] === 'accept';
+						this.recordSubscribeStatus(actionId, accepted ? 1 : 0);
 					},
 					fail: () => {
 						this.recordSubscribeStatus(actionId, 0);

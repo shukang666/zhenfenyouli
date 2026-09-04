@@ -167,6 +167,15 @@
         html += '</div>';
         html += '</div>';
 
+        // 模板ID配置区域（仅滞后推送时显示）
+        html += '<div class="template-id-area"' + (actionData.notify_type != 2 ? ' style="display:none;"' : '') + '>';
+        html += '<div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ddd;">';
+        html += '<label>微信订阅消息模板ID：</label>';
+        html += '<input type="text" class="form-control" name="actions[' + index + '][template_id]" value="' + (actionData.template_id || '') + '" placeholder="请输入模板ID，如：Z1Purn3elZCQn2A5typXFk9c5zi2VeNwDfbLqIaeHD4">';
+        html += '<span class="text-muted">请确保模板包含：活动内容、活动时间、活动地点、温馨提示 四个关键词</span>';
+        html += '</div>';
+        html += '</div>';
+
         // 表单字段配置区域（仅即时表单通知时显示）
         html += '<div class="form-fields-area"' + (actionData.notify_type == 2 ? ' style="display:none;"' : '') + '>';
         html += '<div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ddd;">';
@@ -307,10 +316,13 @@
     function toggleNotifyType(select) {
         var card = $(select).closest('.action-card');
         var fieldsArea = card.find('.form-fields-area');
+        var templateArea = card.find('.template-id-area');
         if ($(select).val() == '1') {
             fieldsArea.show();
+            templateArea.hide();
         } else {
             fieldsArea.hide();
+            templateArea.show();
         }
     }
 
@@ -424,6 +436,7 @@
                 status: $(this).find('[name*="[status]"]').val(),
                 is_continuous: $(this).find('[name*="[is_continuous]"]').val(),
                 expire_date: $(this).find('[name*="[expire_date]"]').val(),
+                template_id: $(this).find('[name*="[template_id]"]').val() || '',
                 forms: []
             };
 

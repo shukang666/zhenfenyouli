@@ -135,6 +135,7 @@ class ActiveClockActionController extends ToolController
                     'notify_type' => intval($action['notify_type']),
                     'status' => empty($action['status']) ? 1 : intval($action['status']),
                     'list_order' => $index,
+                    'template_id' => trim($action['template_id'] ?? ''),
                     'create_time' => $now,
                     'update_time' => $now,
                 ]);
@@ -408,8 +409,11 @@ class ActiveClockActionController extends ToolController
             $pushFields = [];
         }
 
+        // 读取动作配置的模板ID
+        $templateId = $action['template_id'] ?? '';
+
         // 调用微信推送
-        $pushResult = $this->sendWechatMessage($userIds, $push['push_title'], $pushFields, $pushId);
+        $pushResult = $this->sendWechatMessage($userIds, $push['push_title'], $pushFields, $pushId, $templateId);
 
         // 更新推送状态
         $this->pushModel->where('id', $pushId)->update([
@@ -428,8 +432,12 @@ class ActiveClockActionController extends ToolController
      * @param int $pushId 推送记录ID
      * @return array ['success' => int, 'fail' => int]
      */
-    protected function sendWechatMessage(array $userIds, string $title, array $fields, int $pushId): array
+    protected function sendWechatMessage(array $userIds, string $title, array $fields, int $pushId, string $templateId = ''): array
     {
+        if (empty($templateId)) {
+            return ['success' => 0, 'fail' => count($userIds)];
+        }
+
         $success = 0;
         $fail = 0;
 
@@ -443,7 +451,7 @@ class ActiveClockActionController extends ToolController
                 }
 
                 // 调用微信订阅消息推送接口
-                $result = $this->callWechatSubscribeMessage($member['openid'], $title, $fields);
+                $result = $this->callWechatSubscribeMessage($member['openid'], $title, $fields, $templateId);
 
                 if ($result) {
                     $this->pushUserModel->markPushed($pushId, $userId);
@@ -468,13 +476,12 @@ class ActiveClockActionController extends ToolController
      * @param array fields 推送字段
      * @return bool
      */
-    protected function callWechatSubscribeMessage(string $openid, string title, array $fields): bool
+    protected function callWechatSubscribeMessage(string $openid, string $title, array $fields, string $templateId): bool
     {
         $appid = env('WECHAT_MINI_APPID', '');
         $secret = env('WECHAT_MINI_SECRET', '');
-        $templateId = ''; // 需要在微信公众平台配置订阅消息模板
 
-        if (empty($appid) || empty($secret)) {
+        if (empty($appid) || empty($secret) || empty($templateId)) {
             return false;
         }
 
