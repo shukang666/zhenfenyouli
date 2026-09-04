@@ -97,10 +97,12 @@
                         </if>
                     </td>
                     <td>
-
                         <a class="btn btn-xs btn-primary"
                            href="{:url('update',['id'=>$vo['id'],'type'=>$params.type])}">{:lang('EDIT')}</a>
-
+                        <if condition="$params.type == 1">
+                        <a class="btn btn-xs btn-info"
+                           href="javascript:;" onclick="openClockAction({$vo['id']})">打卡动作</a>
+                        </if>
                         <a class="btn btn-xs btn-danger js-ajax-delete"
                            href="{:url('delete',['id'=>$vo['id'],'type'=>$params.type])}">{:lang('DELETE')}</a>
                     </td>
@@ -149,6 +151,17 @@
                         layer.msg(res.msg, {icon: 7});
                     }
                 }
+            });
+        }
+
+        // 打开打卡动作配置弹窗
+        function openClockAction(activeId) {
+            layer.open({
+                type: 2,
+                title: '打卡动作配置',
+                area: ['85%', '85%'],
+                content: '{:url("active_clock_action/index")}?active_id=' + activeId,
+                btn: false
             });
         }
     });

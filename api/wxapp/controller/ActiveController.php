@@ -15,6 +15,10 @@ use app\admin\model\active\MemberBadgeModel;
 use app\admin\model\active\WasteCateModel;
 use app\admin\model\active\WasteModel;
 use app\admin\model\active\WasteUserModel;
+use app\admin\model\active\ActiveClockActionModel;
+use app\admin\model\active\ActiveClockActionFormModel;
+use app\admin\model\active\ActiveClockActionUserModel;
+use app\admin\model\active\ActiveClockPushUserModel;
 use app\admin\model\forum\ForumCommentModel;
 use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\member\MemberModel;
@@ -695,9 +699,218 @@ class ActiveController extends AuthController
             AccountLogModel::add_account_log($this->user_id, 2, 225, $send_point, ['remark' => '垃圾打卡扣除']);
         }
 
+        // ===== 打卡动作触发判断 =====
+        $action_trigger = $this->checkAndTriggerClockAction($active_id, $sign_id);
 
+        $this->success('请求成功', ['action_trigger' => $action_trigger]);
+    }
 
-        $this->success('请求成功');
+    /**
+     * 检查并触发打卡动作
+     * @param int $activeId 活动ID
+     * @param int $signId 报名记录ID
+     * @return array|null 触发的动作配置（含表单字段），无触发返回null
+     */
+    protected function checkAndTriggerClockAction(int $activeId, int $signId): ?array
+    {
+        // 计算当前用户在该活动的累计打卡次数
+        $clockActions = ActiveClockActionModel::where('active_id', $activeId)
+            ->where('status', 1)
+            ->where('delete_time', 0)
+            ->select();
+
+        if ($clockActions->isEmpty()) {
+            return null;
+        }
+
+        // 获取用户今天的打卡次数（包含刚打卡的）
+        $totalClockCount = ActiveClockModel::where('user_id', $this->user_id)
+            ->where('active_id', $activeId)
+            ->where('sign_id', $signId)
+            ->where('date_time', '>', 0)
+            ->count();
+
+        $activeInfo = ActiveModel::where('id', $activeId)->find();
+        $now = time();
+
+        foreach ($clockActions as $action) {
+            // 检查时效
+            if ($action['expire_time'] > 0 && $action['expire_time'] < $now) {
+                continue;
+            }
+
+            // 检查打卡次数是否满足
+            if ($action['notify_type'] == 1) {
+                // 即时表单通知：需要累计打卡次数满足
+                if ($totalClockCount < $action['clock_count']) {
+                    continue;
+                }
+
+                // 判断连续性要求
+                if ($action['is_continuous'] == 1 && $activeInfo) {
+                    if (!$this->checkContinuousClock($activeId, $signId, $action['clock_count'])) {
+                        continue;
+                    }
+                }
+            } else {
+                // 滞后服务消息推送：检查是否已满足条件但未订阅
+                if ($totalClockCount < $action['clock_count']) {
+                    continue;
+                }
+
+                // 判断连续性要求
+                if ($action['is_continuous'] == 1 && $activeInfo) {
+                    if (!$this->checkContinuousClock($activeId, $signId, $action['clock_count'])) {
+                        continue;
+                    }
+                }
+            }
+
+            // 对于即时表单通知，检查是否已经提交过
+            if ($action['notify_type'] == 1) {
+                $alreadySubmitted = ActiveClockActionUserModel::where('action_id', $action['id'])
+                    ->where('user_id', $this->user_id)
+                    ->where('sign_id', $signId)
+                    ->count();
+                if ($alreadySubmitted > 0) {
+                    continue;
+                }
+            }
+
+            // 对于滞后推送，检查是否已记录订阅
+            if ($action['notify_type'] == 2) {
+                $pushUser = ActiveClockPushUserModel::where('action_id', $action['id'])
+                    ->where('active_id', $activeId)
+                    ->where('user_id', $this->user_id)
+                    ->find();
+                // 已订阅的不重复返回，未订阅的需要返回让小程序请求授权
+                if ($pushUser && $pushUser['is_subscribed'] == 1) {
+                    continue;
+                }
+            }
+
+            // 返回动作配置
+            $actionData = $action->toArray();
+            $actionData['forms'] = ActiveClockActionFormModel::where('action_id', $action['id'])
+                ->where('delete_time', 0)
+                ->order('list_order asc, id asc')
+                ->select()
+                ->toArray();
+
+            // 解码选项
+            foreach ($actionData['forms'] as &$form) {
+                $form['field_options_arr'] = json_decode($form['field_options'] ?? '[]', true);
+                if (!is_array($form['field_options_arr'])) {
+                    $form['field_options_arr'] = [];
+                }
+            }
+
+            return $actionData;
+        }
+
+        return null;
+    }
+
+    /**
+     * 检查用户是否连续打卡达到指定天数
+     */
+    protected function checkContinuousClock(int $activeId, int $signId, int $targetDays): bool
+    {
+        $timestamps = ActiveClockModel::where('user_id', $this->user_id)
+            ->where('active_id', $activeId)
+            ->where('sign_id', $signId)
+            ->column('date_time');
+
+        if (count($timestamps) < $targetDays) {
+            return false;
+        }
+
+        return $this->getMaxContinueSignDays($timestamps) >= $targetDays;
+    }
+
+    /**
+     * 提交打卡动作表单（即时表单通知）
+     * @OA\Post (
+     *tags={"新版活动"},
+     *path="/wxapp/active/post_clock_action_form",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="action_id",description="动作配置ID",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="form_data",description="表单数据JSON",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function post_clock_action_form()
+    {
+        $this->checkUser();
+        $actionId = $this->request->param('action_id', 0, 'intval');
+        $formDataJson = $this->request->param('form_data', '', 'trim');
+
+        if (empty($actionId)) {
+            $this->error('动作ID不能为空');
+        }
+
+        $action = ActiveClockActionModel::where('id', $actionId)->find();
+        if (!$action) {
+            $this->error('动作配置不存在');
+        }
+
+        $formData = json_decode($formDataJson, true);
+        if (!is_array($formData)) {
+            $formData = [];
+        }
+
+        // 获取当前用户的报名记录
+        $sign = ActiveSIgnModel::where('active_id', $action['active_id'])
+            ->where('user_id', $this->user_id)
+            ->find();
+        $signId = $sign ? $sign['id'] : 0;
+
+        // 检查是否已提交
+        if (ActiveClockActionUserModel::hasUserSubmitted($actionId, $this->user_id, $signId)) {
+            $this->error('您已提交过');
+        }
+
+        // 提交表单
+        $result = ActiveClockActionUserModel::submitForm($actionId, $action['active_id'], $this->user_id, $signId, $formData);
+        if (!$result) {
+            $this->error('提交失败');
+        }
+
+        $this->success('提交成功');
+    }
+
+    /**
+     * 记录用户订阅授权状态（滞后推送用）
+     * @OA\Post (
+     *tags={"新版活动"},
+     *path="/wxapp/active/post_clock_action_subscribe",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="action_id",description="动作配置ID",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="is_subscribed",description="是否已订阅 1=是 0=否",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function post_clock_action_subscribe()
+    {
+        $this->checkUser();
+        $actionId = $this->request->param('action_id', 0, 'intval');
+        $isSubscribed = $this->request->param('is_subscribed', 0, 'intval');
+
+        if (empty($actionId)) {
+            $this->error('动作ID不能为空');
+        }
+
+        $action = ActiveClockActionModel::where('id', $actionId)->find();
+        if (!$action) {
+            $this->error('动作配置不存在');
+        }
+
+        // 记录订阅状态
+        ActiveClockPushUserModel::recordSubscription($actionId, $action['active_id'], $this->user_id, $isSubscribed == 1);
+
+        $this->success('操作成功');
     }
 
     /**
