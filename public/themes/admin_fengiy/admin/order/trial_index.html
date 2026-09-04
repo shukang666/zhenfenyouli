@@ -421,7 +421,7 @@
 <script>
 // ========== 1. 双击编辑 + 失焦保存 ==========
 (function($){
-    const SAVE_URL = "{:url('Order/trial_save_cell')}";
+    const SAVE_URL = "{:url('OrderTrial/saveCell')}";
 
     // 双击单元格变成输入框
     $(document).on('dblclick', '.editable-cell', function(){
@@ -491,7 +491,7 @@
 
 // ========== 2. 快递公司输入框失焦保存 ==========
 (function($){
-    const SAVE_URL = "{:url('Order/trial_save_cell')}";
+    const SAVE_URL = "{:url('OrderTrial/saveCell')}";
     let shipTimer = null;
     $(document).on('change input', '.ship-input', function(){
         clearTimeout(shipTimer);
@@ -537,7 +537,7 @@
 // ========== 4. 划卡式发货 ==========
 (function($){
     const NEXT_URL   = "{:url('Order/trial_next_order')}";
-    const SHIP_URL   = "{:url('Order/trial_save_ship')}";
+    const SHIP_URL   = "{:url('OrderTrial/saveShip')}";
     let currentId    = 0;
     let shipping     = false;
 
@@ -775,7 +775,7 @@
                 const name = $.trim($('#SingleExpName').val());
                 if (!sn) { layer.msg('物流单号不能为空', {icon:2}); return; }
                 $.ajax({
-                    url: "{:url('Order/trial_save_ship')}",
+                    url: "{:url('OrderTrial/saveShip')}",
                     type:'POST', dataType:'json',
                     data:{id:id, express_name:name, express_sn:sn},
                     success:function(res){
@@ -797,7 +797,7 @@
 
 // ========== 6. 导出 + 列显隐 ==========
 (function($){
-    var EXPORT_URL = "{:url('Order/trial_export')}";
+    var EXPORT_URL = "{:url('OrderTrial/export')}";
     $('#btnExport').click(function(){
         // 直接用当前 query string 跳转导出
         var qs = window.location.search;
