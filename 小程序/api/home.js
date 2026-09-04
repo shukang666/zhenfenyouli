@@ -21,9 +21,13 @@ const home = {
 	get_shop_new: (params = {}) => uni.$u.post('/wxapp/check/get_shop', params),
 	// 商家打卡 /
 	add_handle_shop: (params = {}) => uni.$u.post('/wxapp/check/add_handle', params),
-	// 商家打卡记录 
+	// 商家打卡记录
 	get_handle_list_shop: (params = {}) => uni.$u.post('/wxapp/check/get_handle_list', params),
-	// 获取合同内容 
+	// 获取合同内容
 	add_check_html: (params = {}) => uni.$u.post('/wxapp/check/add_check_html', params),
+	// 提交打卡动作表单（即时表单通知）
+	post_clock_action_form: (params = {}) => uni.$u.post('/wxapp/active/post_clock_action_form', params),
+	// 记录打卡动作订阅授权状态（滞后推送用）
+	post_clock_action_subscribe: (params = {}) => uni.$u.post('/wxapp/active/post_clock_action_subscribe', params),
 }
 export default home

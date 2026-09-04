@@ -57,6 +57,39 @@
 			</view>
 		</u-popup>
 
+		<!-- 打卡动作表单弹窗（即时表单通知） -->
+		<u-popup v-model="actionFormShow" mode="bottom" border-radius="20" closeable :closeable="false">
+			<view class="u-p-30">
+				<view class="u-font-bold u-font-32 u-text-center u-m-b-20">活动反馈</view>
+				<view class="u-m-b-20" v-for="(field, fIdx) in actionTrigger.forms" :key="fIdx">
+					<!-- 纯文本说明类型 -->
+					<view v-if="field.field_type === 'text'" class="u-font-28 u-type-info u-m-b-10" style="line-height: 1.6;">
+						{{field.field_label}}
+					</view>
+					<!-- 单选按钮类型 -->
+					<view v-else-if="field.field_type === 'radio'">
+						<view class="u-font-28 u-m-b-15">{{field.field_label}} <text v-if="field.is_required == 1" style="color:red;">*</text></view>
+						<view class="u-flex u-flex-wrap">
+							<view v-for="(opt, oIdx) in field.field_options_arr" :key="oIdx"
+								class="u-m-r-20 u-m-b-15 u-p-lr-20 u-p-tb-10 u-radius-8"
+								:style="actionFormData[field.field_label] && actionFormData[field.field_label].includes(opt) ? 'background:#FF843D;color:#fff;' : 'background:#f5f5f5;'"
+								@click="toggleRadioOption(field.field_label, opt)">
+								{{opt}}
+							</view>
+						</view>
+					</view>
+					<!-- 多行文本框类型 -->
+					<view v-else-if="field.field_type === 'textarea'">
+						<view class="u-font-28 u-m-b-15">{{field.field_label}} <text v-if="field.is_required == 1" style="color:red;">*</text></view>
+						<u-input v-model="actionFormData[field.field_label]" type="textarea" height="150" :placeholder="'请输入' + field.field_label" border />
+					</view>
+				</view>
+				<view class="u-p-t-20">
+					<u-button type="primary" @click="submitClockActionForm">提交反馈</u-button>
+				</view>
+			</view>
+		</u-popup>
+
 		<view class="submit-btn u-p-30 u-flex u-row-between u-type-white-bg" v-if="!setting.app_test">
 			<view class="u-p-lr-30 u-text-center u-rela">
 				<image src="/static/images/yaoqing.png" class="u-w-44 u-h-44" mode="aspectFill"></image>
@@ -81,24 +114,28 @@
 		uploadUrl
 	} from '@/common/settings'
 	export default {
-		data() {
-			return {
-				uploadUrl,
-				popup_show: false,
-				image: [],
-				content: '',
-				info: {},
-				tipShow: false,
-				showType: 1,
-				pid: '',
-				id: '',
-				sign_clock_show: false,
-				form: {
-					image_url: '',
-				},
-				image_url: [],
-			};
-		},
+	data() {
+		return {
+			uploadUrl,
+			popup_show: false,
+			image: [],
+			content: '',
+			info: {},
+			tipShow: false,
+			showType: 1,
+			pid: '',
+			id: '',
+			sign_clock_show: false,
+			form: {
+				image_url: '',
+			},
+			image_url: [],
+			// 打卡动作触发数据
+			actionTrigger: null,
+			actionFormShow: false,
+			actionFormData: {},
+		};
+	},
 		onLoad(option) {
 			if (option.scene) {
 				uni.setStorageSync('vcode', option.scene)
@@ -153,28 +190,149 @@
 				}
 			},
 
-			// 打卡
-			async post_new_sign_clock() {
-				if (!this.$u.func.checkLogin()) return
-				try {
-					let params = {
-						sign_id: this.info.sign_id,
-						...this.form
-					}
-					let res = await this.$u.api.post_new_sign_clock(params)
-					this.sign_clock_show = false
-					// this.$u.toast(res.msg)
-					this.showType = 2
-					this.tipShow = true
+		// 打卡
+		async post_new_sign_clock() {
+			if (!this.$u.func.checkLogin()) return
+			try {
+				let params = {
+					sign_id: this.info.sign_id,
+					...this.form
+				}
+				let res = await this.$u.api.post_new_sign_clock(params)
+				this.sign_clock_show = false
+				// this.$u.toast(res.msg)
+				this.showType = 2
+				this.tipShow = true
 
+				// 检查是否有打卡动作触发
+				if (res.data && res.data.action_trigger) {
+					this.actionTrigger = res.data.action_trigger;
+					// 即时表单通知：弹出表单弹窗
+					if (this.actionTrigger.notify_type == 1) {
+						this.initActionFormData();
+						setTimeout(() => {
+							this.tipShow = false;
+							this.actionFormShow = true;
+						}, 1500);
+					}
+					// 滞后服务消息推送：请求微信订阅授权
+					else if (this.actionTrigger.notify_type == 2) {
+						this.requestSubscribeMessage(this.actionTrigger.id);
+						setTimeout(() => {
+							this.get_new_active_detail(this.info.id)
+						}, 500)
+					} else {
+						setTimeout(() => {
+							this.get_new_active_detail(this.info.id)
+						}, 500)
+					}
+				} else {
 					setTimeout(() => {
 						this.get_new_active_detail(this.info.id)
 					}, 500)
-				} catch (e) {
-					console.log(e);
-					this.$u.toast(e.msg)
 				}
-			},
+			} catch (e) {
+				console.log(e);
+				this.$u.toast(e.msg)
+			}
+		},
+		// 初始化动作表单数据
+		initActionFormData() {
+			this.actionFormData = {};
+			if (this.actionTrigger && this.actionTrigger.forms) {
+				this.actionTrigger.forms.forEach(field => {
+					if (field.field_type === 'radio') {
+						this.$set(this.actionFormData, field.field_label, []);
+					} else if (field.field_type === 'textarea') {
+						this.$set(this.actionFormData, field.field_label, '');
+					}
+				});
+			}
+		},
+		// 切换单选选项（支持多选；若仅一个选项则单选）
+		toggleRadioOption(fieldLabel, option) {
+			let arr = this.actionFormData[fieldLabel] || [];
+			let idx = arr.indexOf(option);
+			if (idx > -1) {
+				arr.splice(idx, 1);
+			} else {
+				arr.push(option);
+			}
+			this.$set(this.actionFormData, fieldLabel, arr);
+		},
+		// 提交打卡动作表单
+		async submitClockActionForm() {
+			if (!this.actionTrigger) return;
+			// 校验必填项
+			for (let field of this.actionTrigger.forms) {
+				if (field.is_required == 1 && (field.field_type === 'radio' || field.field_type === 'textarea')) {
+					let val = this.actionFormData[field.field_label];
+					if (!val || (Array.isArray(val) && val.length === 0) || (typeof val === 'string' && !val.trim())) {
+						this.$u.toast('请填写：' + field.field_label);
+						return;
+					}
+				}
+			}
+			try {
+				let formObj = {};
+				for (let key in this.actionFormData) {
+					let v = this.actionFormData[key];
+					formObj[key] = Array.isArray(v) ? v.join(',') : v;
+				}
+				let params = {
+					action_id: this.actionTrigger.id,
+					form_data: JSON.stringify(formObj)
+				};
+				let res = await this.$u.api.post_clock_action_form(params);
+				this.$u.toast(res.msg || '提交成功');
+				this.actionFormShow = false;
+				this.actionTrigger = null;
+				this.actionFormData = {};
+			} catch (e) {
+				console.log(e);
+				this.$u.toast(e.msg || '提交失败');
+			}
+		},
+		// 请求微信订阅消息授权（滞后推送用）
+		requestSubscribeMessage(actionId) {
+			// #ifdef MP-WEIXIN
+			if (wx.requestSubscribeMessage) {
+				// 后台可配置模板ID，此处先用占位，可根据需要扩展为从actionTrigger获取
+				let templateIds = this.actionTrigger && this.actionTrigger.template_ids ? this.actionTrigger.template_ids : [];
+				if (templateIds.length === 0) {
+					// 没有模板ID则直接记录未订阅状态
+					this.recordSubscribeStatus(actionId, 0);
+					return;
+				}
+				wx.requestSubscribeMessage({
+					tmplIds: templateIds,
+					success: (res) => {
+						let allAccepted = templateIds.every(tid => res[tid] === 'accept');
+						this.recordSubscribeStatus(actionId, allAccepted ? 1 : 0);
+					},
+					fail: () => {
+						this.recordSubscribeStatus(actionId, 0);
+					}
+				});
+			} else {
+				this.recordSubscribeStatus(actionId, 0);
+			}
+			// #endif
+			// #ifndef MP-WEIXIN
+			this.recordSubscribeStatus(actionId, 0);
+			// #endif
+		},
+		// 记录订阅授权状态
+		async recordSubscribeStatus(actionId, isSubscribed) {
+			try {
+				await this.$u.api.post_clock_action_subscribe({
+					action_id: actionId,
+					is_subscribed: isSubscribed
+				});
+			} catch (e) {
+				console.log('记录订阅状态失败:', e);
+			}
+		},
 			makePhoneCall(phoneNumber) {
 				uni.makePhoneCall({
 					phoneNumber
