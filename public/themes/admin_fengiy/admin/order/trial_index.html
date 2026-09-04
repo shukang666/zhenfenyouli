@@ -633,12 +633,12 @@
             data: idAfter ? { id_after: idAfter } : {},
             dataType: 'json',
             success: function(res){
-                if (res.code == 1) {
-                    if (res.data && res.data.finished) {
-                        showFinished();
-                    } else {
-                        renderCard(res.data);
-                    }
+                //兩種完成狀態：code=0+finished=1(無更多) 或 code=1+finished=1
+                if (res.finished == 1 || res.finished === '1') {
+                    showFinished();
+                    updateCount();
+                } else if (res.code == 1) {
+                    renderCard(res);
                     updateCount();
                 } else {
                     layer.msg(res.msg||'加载失败', {icon:2});
