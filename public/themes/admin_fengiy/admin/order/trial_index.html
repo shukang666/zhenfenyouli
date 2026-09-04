@@ -390,7 +390,7 @@
                 <td class="col-ops" data-field="admin_remark" data-id="{$item.id}">
                     <span class="editable-cell" title="双击编辑备注">{$item.admin_remark|default='--'}</span>
                 </td>
-                <td class="col-ops">{$item.create_time|date='Y-m-d H:i:s',###}</td>
+                <td class="col-ops">{$item.create_time|date='Y-m-d H:i:s'}</td>
                 <td class="col-ops">
                     <if condition="in_array($item.status, [2,14])">
                         <button class="btn btn-xs btn-primary btn-single-ship" data-id="{$item.id}" style="background:#16baaa;border-color:#16baaa">发货</button>
