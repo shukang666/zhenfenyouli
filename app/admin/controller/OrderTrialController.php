@@ -88,7 +88,7 @@ class OrderTrialController extends AdminBaseController
         $this->assign('pay_list', $pay_list);
         $this->assign('search', $params);
 
-        return $this->fetch('trial_index');
+        return $this->fetch('order/trial_index');
     }
 
     /**
