@@ -303,6 +303,7 @@ class ActiveClockActionController extends ToolController
     {
         $id = $this->request->param('id', 0, 'intval');
         $actionId = $this->request->param('action_id', 0, 'intval');
+        $activeId = $this->request->param('active_id', 0, 'intval');
 
         $item = null;
         if ($id) {
@@ -312,6 +313,10 @@ class ActiveClockActionController extends ToolController
                 $item['push_fields_arr'] = json_decode($item['push_fields'] ?? '[]', true);
                 if (!is_array($item['push_fields_arr'])) {
                     $item['push_fields_arr'] = [];
+                }
+                // 如果推送已有记录，也取出 action_id
+                if (!$actionId) {
+                    $actionId = $item['action_id'];
                 }
             }
         }
@@ -323,15 +328,71 @@ class ActiveClockActionController extends ToolController
             $action = ActiveClockActionModel::where('id', $actionId)->find();
             if ($action) {
                 $active = ActiveModel::where('id', $action['active_id'])->find();
+                $activeId = $action['active_id'];
+            }
+        }
+
+        // 获取活动列表（供筛选）
+        $activeList = ActiveModel::where('delete_time', 0)
+            ->where('status', 1)
+            ->where('type', 1)
+            ->order('id desc')
+            ->column('name', 'id');
+
+        // 获取当前活动下的推送动作（notify_type=2）（供筛选）
+        $actionsList = [];
+        if ($activeId) {
+            $actions = ActiveClockActionModel::where('active_id', $activeId)
+                ->where('notify_type', 2)
+                ->where('delete_time', 0)
+                ->where('status', 1)
+                ->order('list_order asc, id asc')
+                ->select();
+            foreach ($actions as $a) {
+                $actionsList[$a['id']] = "打卡{$a['clock_count']}次";
             }
         }
 
         $this->assign('item', $item);
         $this->assign('action', $action);
         $this->assign('active', $active);
+        $this->assign('active_id', $activeId);
+        $this->assign('active_list', $activeList);
+        $this->assign('actions_list', $actionsList);
         $this->assign('item_json', json_encode($item ?? [], JSON_UNESCAPED_UNICODE));
 
         return $this->fetch('active/clock_action_push_edit');
+    }
+
+    /**
+     * AJAX加载活动下的推送动作（notify_type=2）
+     */
+    public function ajax_actions()
+    {
+        if (!$this->request->isAjax()) {
+            $this->error('非法请求');
+        }
+        $activeId = $this->request->param('active_id', 0, 'intval');
+        if (empty($activeId)) {
+            $this->error('活动ID不能为空');
+        }
+
+        $actions = ActiveClockActionModel::where('active_id', $activeId)
+            ->where('notify_type', 2)
+            ->where('delete_time', 0)
+            ->where('status', 1)
+            ->order('list_order asc, id asc')
+            ->select();
+
+        $data = [];
+        foreach ($actions as $a) {
+            $data[] = [
+                'id' => $a['id'],
+                'clock_count' => $a['clock_count'],
+                'text' => "打卡{$a['clock_count']}次" . ($a['template_id'] ? "(模板ID已设)" : "(未设模板ID)")
+            ];
+        }
+        $this->success('ok', $data);
     }
 
     /**

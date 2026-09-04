@@ -33,7 +33,7 @@
 
     <form method="post" class="js-ajax-form margin-top-20" action="">
         <div class="table-actions">
-            <a class="btn btn-primary btn-sm" href="{:url('push_edit')}" onclick="return openPushEdit(this.href)">+ 新建推送</a>
+            <a class="btn btn-primary btn-sm" href="{:url('push_edit', ['active_id'=>$params.active_id])}" onclick="return openPushEdit(this.href)">+ 新建推送</a>
         </div>
         <table class="table table-hover table-bordered margin-top-20">
             <thead>

@@ -40,8 +40,15 @@
         color: #1890ff;
         font-size: 14px;
     }
-    .action-card .move-btn:hover {
+    .move-btn:hover {
         color: #40a9ff;
+    }
+    .move-btn.push-btn {
+        color: #52c41a;
+        font-weight: normal;
+    }
+    .move-btn.push-btn:hover {
+        color: #73d13d;
     }
     .clock-action-wrap {
         padding: 20px;
@@ -118,6 +125,7 @@
         html += '<span>';
         html += '<span class="move-btn" onclick="moveAction(this, -1)" title="上移">↑</span>';
         html += '<span class="move-btn" onclick="moveAction(this, 1)" title="下移">↓</span>';
+        html += '<span class="move-btn push-btn" data-actionid="' + actionId + '" onclick="openPushForAction(this)" title="新建推送" style="display:none;">推送+</span>';
         html += '<span class="move-btn" style="color:#ff4d4f;" onclick="removeAction(this)" title="删除">×</span>';
         html += '</span>';
         html += '</div>';
@@ -199,7 +207,14 @@
         html += '</div>';
         html += '</div>';
 
-        $('#action-list').append(html);
+        var $card = $(html);
+        $('#action-list').append($card);
+
+        // 初始化推送按钮状态（已有动作且 notify_type=2 时显示）
+        var notifyType = $card.find('[name*="[notify_type]"]').val();
+        if (notifyType == '2' && actionId) {
+            $card.find('.push-btn').show();
+        }
     }
 
     /**
@@ -317,13 +332,37 @@
         var card = $(select).closest('.action-card');
         var fieldsArea = card.find('.form-fields-area');
         var templateArea = card.find('.template-id-area');
+        var pushBtn = card.find('.push-btn');
         if ($(select).val() == '1') {
             fieldsArea.show();
             templateArea.hide();
+            pushBtn.hide();
         } else {
             fieldsArea.hide();
             templateArea.show();
+            // 有动作ID才显示推送按钮
+            if (pushBtn.data('actionid')) {
+                pushBtn.show();
+            }
         }
+    }
+
+    /**
+     * 打开推送配置弹窗（从打卡动作触发）
+     */
+    function openPushForAction(btn) {
+        var actionId = $(btn).data('actionid');
+        if (!actionId) {
+            layer.alert('请先保存动作配置，再新建推送');
+            return;
+        }
+        var url = '{:url("active_clock_action/push_edit")}?action_id=' + actionId;
+        layer.open({
+            type: 2,
+            title: '推送配置',
+            area: ['700px', '500px'],
+            content: url
+        });
     }
 
     /**

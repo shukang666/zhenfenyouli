@@ -1,44 +1,78 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>推送配置</title>
-    <link rel="stylesheet" href="__STATIC__/lib/layui/css/layui.css">
-    <link rel="stylesheet" href="__STATIC__/lib/bootstrap/css/bootstrap.min.css">
-    <style>
-        body { padding: 20px; background: #fff; }
-        .push-field-row {
-            background: #f9f9f9;
-            border: 1px dashed #ddd;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            position: relative;
-        }
-        .push-field-row .delete-btn {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            color: #ff4d4f;
-            cursor: pointer;
-            font-size: 18px;
-        }
-    </style>
+<include file="public@header"/>
+<style>
+    body { padding: 20px; background: #fff; }
+    .push-field-row {
+        background: #f9f9f9;
+        border: 1px dashed #ddd;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        position: relative;
+    }
+    .push-field-row .delete-btn {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        color: #ff4d4f;
+        cursor: pointer;
+        font-size: 18px;
+    }
+    .text-muted { color: #999; font-size: 12px; }
+    .required-mark { color: #ff4d4f; margin-right: 3px; }
+</style>
 </head>
 <body>
 <form id="pushForm" class="form-horizontal">
     <input type="hidden" name="id" value="{$item.id|default=''}">
     <input type="hidden" name="action_id" value="{$action.id|default=''}">
 
+    <!-- 步骤一：选择活动 + 动作（仅新建时显示） -->
+    <if condition="empty($action)">
+    <div class="form-group">
+        <label class="col-sm-3 control-label"><span class="required-mark">*</span>步骤1：选择活动与动作</label>
+        <div class="col-sm-8">
+            <div class="row" style="margin-bottom: 8px;">
+                <div class="col-sm-6">
+                    <select class="form-control" id="select_active_id" onchange="loadActions()">
+                        <option value="">-- 选择活动 --</option>
+                        <foreach name="active_list" item="name" key="id">
+                            <option value="{$id}" <if condition="$active_id == $id">selected</if>>{$name}</option>
+                        </foreach>
+                    </select>
+                </div>
+                <div class="col-sm-6">
+                    <select class="form-control" id="select_action_id" <if condition="empty($active_id)">disabled</if>>
+                        <option value="">-- 先选择活动 --</option>
+                        <foreach name="actions_list" item="name" key="id">
+                            <option value="{$id}">{$name}</option>
+                        </foreach>
+                    </select>
+                </div>
+            </div>
+            <p class="text-muted">请先选择活动及对应的打卡动作配置，才能配置推送内容</p>
+        </div>
+    </div>
+    </if>
+
+    <!-- 步骤二：推送内容配置（有动作时直接显示关联信息） -->
+    <if condition="!empty($action)">
     <div class="form-group">
         <label class="col-sm-3 control-label">关联活动：</label>
         <div class="col-sm-8">
-            <p class="form-control-static">{$active.name|default='-'}（打卡{$action.clock_count|default='-'}次）</p>
+            <p class="form-control-static">
+                {$active.name|default='-'}（打卡{$action.clock_count|default='-'}次）
+                <if condition="!empty($action.template_id)">
+                    <span class="text-success">/ 模板ID已设置</span>
+                    <else/>
+                    <span class="text-danger">/ 未设置模板ID(请在打卡动作中设置)</span>
+                </if>
+            </p>
         </div>
     </div>
+    </if>
 
     <div class="form-group">
-        <label class="col-sm-3 control-label"><span class="text-danger">*</span>推送标题：</label>
+        <label class="col-sm-3 control-label"><span class="required-mark">*</span>推送标题：</label>
         <div class="col-sm-8">
             <input type="text" class="form-control" name="push_title" value="{$item.push_title|default=''}" placeholder="如：9月儿童运动比赛安排通知" required>
         </div>
@@ -53,7 +87,7 @@
             <button type="button" class="btn btn-sm btn-info" onclick="addPushField()">
                 <i class="fa fa-plus"></i> 添加字段
             </button>
-            <p class="text-muted" style="margin-top: 5px;">可自定义标签名称，如：时间、地点、注意事项等</p>
+            <p class="text-muted" style="margin-top: 5px;">可自定义标签名称（微信订阅消息最多支持6个字段，对应 keyword1-keyword6）。建议：活动内容、活动时间、活动地点、温馨提示 等</p>
         </div>
     </div>
 
@@ -65,8 +99,7 @@
     </div>
 </form>
 
-<script src="__STATIC__/lib/jquery/jquery.min.js"></script>
-<script src="__STATIC__/lib/layui/layui.js"></script>
+<script src="__STATIC__/js/admin.js"></script>
 <script>
     $(function () {
         var item = {:json_encode($item_json, JSON_UNESCAPED_UNICODE)};
@@ -82,9 +115,58 @@
                 addPushField(f.label, f.value);
             });
         } else {
-            // 添加默认字段
-            addPushField('时间', '');
-            addPushField('地点', '');
+            // 添加默认字段（对应4个关键词）
+            addPushField('活动内容', '');
+            addPushField('活动时间', '');
+            addPushField('活动地点', '');
+            addPushField('温馨提示', '');
+        }
+
+        // 如果有 active_id 但没有 action_id（从筛选活动后进入），自动加载动作列表
+        var activeId = '{$active_id|default=0,trim}';
+        var actionId = '{$action.id|default=0,trim}';
+        if (activeId && !actionId && typeof loadActions === 'function') {
+            loadActions();
+        }
+    });
+
+    // 活动变更时加载动作列表
+    function loadActions() {
+        var activeId = $('#select_active_id').val();
+        var actionSelect = $('#select_action_id');
+        actionSelect.empty();
+        if (!activeId) {
+            actionSelect.append('<option value="">-- 先选择活动 --</option>').attr('disabled', true);
+            return;
+        }
+        actionSelect.attr('disabled', false).append('<option value="">加载中...</option>');
+        $.ajax({
+            url: '{:url("active_clock_action/ajax_actions")}',
+            type: 'GET',
+            data: {active_id: activeId},
+            dataType: 'json',
+            success: function(res) {
+                actionSelect.empty();
+                if (res.code == 1 && res.data.length > 0) {
+                    actionSelect.append('<option value="">-- 选择打卡动作 --</option>');
+                    res.data.forEach(function(item) {
+                        actionSelect.append('<option value="' + item.id + '">' + item.text + '</option>');
+                    });
+                } else {
+                    actionSelect.append('<option value="">该活动无推送动作配置</option>').attr('disabled', true);
+                }
+            },
+            error: function() {
+                actionSelect.empty().append('<option value="">加载失败</option>').attr('disabled', true);
+            }
+        });
+    }
+
+    // 动作变更时，把 action_id 写入隐藏域
+    $(document).on('change', '#select_action_id', function() {
+        var actionId = $(this).val();
+        if (actionId) {
+            $('input[name="action_id"]').val(actionId);
         }
     });
 
@@ -98,11 +180,11 @@
         html += '<div class="row">';
         html += '<div class="col-xs-4">';
         html += '<label>字段标签：</label>';
-        html += '<input type="text" class="form-control input-sm field-label" value="' + label + '" placeholder="如：时间">';
+        html += '<input type="text" class="form-control input-sm field-label" value="' + label + '" placeholder="如：活动内容">';
         html += '</div>';
         html += '<div class="col-xs-8">';
         html += '<label>字段内容：</label>';
-        html += '<input type="text" class="form-control input-sm field-value" value="' + value + '" placeholder="如：2026-09-30 10:00">';
+        html += '<input type="text" class="form-control input-sm field-value" value="' + value + '" placeholder="如：亲子趣味运动会">';
         html += '</div>';
         html += '</div>';
         html += '</div>';
@@ -115,6 +197,11 @@
     }
 
     function savePush() {
+        var actionId = $('input[name="action_id"]').val();
+        if (!actionId) {
+            layer.alert('请先选择活动和打卡动作');
+            return;
+        }
         var pushTitle = $('input[name="push_title"]').val().trim();
         if (!pushTitle) {
             layer.alert('请填写推送标题');
