@@ -85,6 +85,7 @@ class OrderTrialController extends AdminBaseController
         $this->assign('list', $list->items());
         $this->assign('page', $list->render());
         $this->assign('total', $list->total());
+        $this->assign('countPending', $list->total());
         $this->assign('status_list', $status_list);
         $this->assign('delivery_type_list', $delivery_type_list);
         $this->assign('pay_list', $pay_list);

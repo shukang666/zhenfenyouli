@@ -302,7 +302,7 @@
     <!-- 操作工具栏 -->
     <div class="trial-toolbar">
         <span class="toolbar-title">订单试运行工作台</span>
-        <span class="stat-badge" id="pendingCountBadge">未发货: {$countPending|default(0)}</span>
+        <span class="stat-badge" id="pendingCountBadge">未发货: <?php echo $countPending ?? 0; ?></span>
         <span class="stat-badge" id="listCountBadge">当前列出: <span id="listCount">{:count($list)}</span> 条</span>
         <div class="toolbar-actions" style="margin-left: auto">
             <button class="btn btn-warning btn-sm" id="btnFilterPending">只看未发货</button>
