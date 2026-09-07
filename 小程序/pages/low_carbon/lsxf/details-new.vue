@@ -162,8 +162,12 @@
 			}
 		},
 		methods: {
-			// 打卡按钮 → 未登录跳登录，已登录未报名提示先报名，已报名弹打卡弹窗
-			handleClock() {
+		// 上传组件状态变化回调（防止未绑定报错）
+		handleUploadChange() {
+			// 空实现，可根据需要扩展上传进度监听等逻辑
+		},
+		// 打卡按钮 → 未登录跳登录，已登录未报名提示先报名，已报名弹打卡弹窗
+		handleClock() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.info.is_sign) return this.$u.toast('请先报名活动')
 				this.sign_clock_show = true
