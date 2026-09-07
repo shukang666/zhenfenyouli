@@ -32,7 +32,23 @@ class ForumController extends ToolController
         }
 
         if (!empty($param['cate_id'])) {
-            $where[] = ['cate_id', '=', trim($param['cate_id'])];
+            // type=3/4 的分类来自 member_community_cate，可能存在同名不同id的情况
+            // 用名称匹配所有同名分类，避免丢失数据
+            if (isset($param['type']) && in_array($param['type'], [3, 4])) {
+                $cate_name = CommunityCateModel::where('id', $param['cate_id'])->value('name');
+                if ($cate_name) {
+                    $cate_ids = CommunityCateModel::where('name', $cate_name)->column('id');
+                    if (!empty($cate_ids)) {
+                        $where[] = ['a.cate_id', 'in', $cate_ids];
+                    } else {
+                        $where[] = ['a.cate_id', '=', trim($param['cate_id'])];
+                    }
+                } else {
+                    $where[] = ['a.cate_id', '=', trim($param['cate_id'])];
+                }
+            } else {
+                $where[] = ['cate_id', '=', trim($param['cate_id'])];
+            }
         }
 
         if (!empty($param['id'])) {
