@@ -118,7 +118,7 @@
         <if condition="$params.type==3">
             分类:
             <div class="form-group layui-form">
-                <select name="cate_id">
+                <select name="cate_id" lay-search>
                     <option value="">全部</option>
                     <foreach name="point_cate_list" item="vo">
                         <option value="{$vo.id}" <if condition="$point_cate_id == $vo.id">selected</if>>{$vo.name}</option>
