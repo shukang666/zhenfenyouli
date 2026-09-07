@@ -25,13 +25,15 @@
 			<view class="dev-modal" @click.stop="">
 				<view class="dev-modal__title">开发者验证</view>
 				<view class="dev-modal__subtitle">请输入开发者密码</view>
-				<input 
-					class="dev-modal__input" 
-					type="password" 
-					v-model="devPassword" 
-					placeholder="请输入密码"
-					placeholder-class="dev-modal__placeholder"
-				/>
+			<input 
+				class="dev-modal__input" 
+				type="password" 
+				v-model="devPassword" 
+				placeholder="请输入密码"
+				placeholder-class="dev-modal__placeholder"
+				cursor-spacing="10"
+				:adjust-position="false"
+			/>
 				<view class="dev-modal__btns">
 					<view class="dev-modal__btn dev-modal__btn--cancel" @click="closeDevPasswordDialog">取消</view>
 					<view class="dev-modal__btn dev-modal__btn--confirm" @click="checkDevPassword">确认</view>
@@ -203,12 +205,12 @@ export default {
 	right: 0;
 	bottom: 0;
 	height: 50px;
-	padding-bottom: 10px;
+	padding-bottom: env(safe-area-inset-bottom);
+	padding-bottom: constant(safe-area-inset-bottom);
 	background-color: #ffffff;
-	border-top: 1rpx solid rgba(0, 0, 0, 0.08);
+	border-top: 0.5px solid rgba(0, 0, 0, 0.3);
 	display: flex;
 	z-index: 999;
-	box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 	
 	.tab-item {
 		flex: 1;
@@ -217,10 +219,7 @@ export default {
 		align-items: center;
 		justify-content: center;
 		position: relative;
-		
-		&:active {
-			opacity: 0.6;
-		}
+		height: 50px;
 		
 		.tab-icon {
 			width: 24px;
@@ -230,14 +229,15 @@ export default {
 		
 		.tab-text {
 			font-size: 10px;
-			line-height: 1.2;
+			line-height: 1;
 			text-align: center;
+			font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
 		}
 	}
 	
 	.long-press-tip {
 		position: absolute;
-		bottom: 70px;
+		bottom: calc(50px + 10px);
 		right: 10px;
 		z-index: 1000;
 		
@@ -277,36 +277,32 @@ export default {
 	.dev-modal {
 		width: 300px;
 		background-color: #fff;
-		border-radius: 10px;
-		padding: 20px;
+		border-radius: 4px;
+		padding: 24px 20px;
 		
 		&__title {
-			font-size: 18px;
-			font-weight: bold;
+			font-size: 17px;
+			font-weight: 500;
 			text-align: center;
-			margin-bottom: 10px;
+			margin-bottom: 6px;
 		}
 		
 		&__subtitle {
 			font-size: 14px;
 			color: #999;
 			text-align: center;
-			margin-bottom: 15px;
+			margin-bottom: 20px;
 		}
 		
 		&__input {
 			width: 100%;
-			height: 40px;
+			height: 44px;
 			border: 1px solid #e5e5e5;
-			border-radius: 6px;
+			border-radius: 4px;
 			padding: 0 12px;
 			font-size: 14px;
 			box-sizing: border-box;
 			margin-bottom: 20px;
-		}
-		
-		&__input:focus {
-			border-color: #18AF38;
 		}
 		
 		&__placeholder {
@@ -320,10 +316,10 @@ export default {
 		
 		&__btn {
 			flex: 1;
-			height: 40px;
-			line-height: 40px;
+			height: 44px;
+			line-height: 44px;
 			text-align: center;
-			border-radius: 6px;
+			border-radius: 4px;
 			font-size: 14px;
 			
 			&--cancel {
@@ -336,10 +332,6 @@ export default {
 				background-color: #18AF38;
 				color: #fff;
 				margin-left: 10px;
-			}
-			
-			&:active {
-				opacity: 0.8;
 			}
 		}
 	}
