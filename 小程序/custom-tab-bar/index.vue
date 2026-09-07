@@ -1,14 +1,13 @@
 <template>
-	<view class="custom-tab-bar" :style="{ paddingBottom: safeAreaInsetBottom + 'px' }">
+	<view class="custom-tab-bar">
 		<view 
 			v-for="(item, index) in list" 
 			:key="index" 
 			class="tab-item" 
 			:class="{ 'tab-item--active': selected === index }"
-			@touchstart="handleTouchStart(index, $event)"
-			@touchend="handleTouchEnd(index, $event)"
+			@touchstart="handleTouchStart(index)"
+			@touchend="handleTouchEnd(index)"
 			@touchcancel="handleTouchCancel"
-			@click="handleClick(index)"
 		>
 			<image 
 				:src="getIconPath(item, index)" 
@@ -22,23 +21,28 @@
 		</view>
 		
 		<!-- 开发者密码弹窗 -->
-		<u-mask :show="devPasswordShow">
-			<view class="u-abso-center u-w-600 u-radius-20 u-type-white-bg u-p-40">
-				<view class="u-font-32 u-font-bold u-text-center u-m-b-30">🔐 开发者验证</view>
-				<view class="u-font-26 u-type-info u-m-b-20">请输入开发者密码</view>
-				<u-input v-model="devPassword" type="password" placeholder="请输入密码" border />
-				<view class="u-flex u-row-between u-m-t-40">
-					<u-button @click="closeDevPasswordDialog">取消</u-button>
-					<u-button type="primary" @click="checkDevPassword">确认</u-button>
+		<view class="dev-mask" v-if="devPasswordShow" @click.stop="closeDevPasswordDialog">
+			<view class="dev-modal" @click.stop="">
+				<view class="dev-modal__title">开发者验证</view>
+				<view class="dev-modal__subtitle">请输入开发者密码</view>
+				<input 
+					class="dev-modal__input" 
+					type="password" 
+					v-model="devPassword" 
+					placeholder="请输入密码"
+					placeholder-class="dev-modal__placeholder"
+				/>
+				<view class="dev-modal__btns">
+					<view class="dev-modal__btn dev-modal__btn--cancel" @click="closeDevPasswordDialog">取消</view>
+					<view class="dev-modal__btn dev-modal__btn--confirm" @click="checkDevPassword">确认</view>
 				</view>
 			</view>
-		</u-mask>
+		</view>
 		
 		<!-- 长按提示 -->
 		<view class="long-press-tip" v-if="showLongPressTip">
-			<view class="long-press-tip__content">
-				<text>继续按住2秒进入开发者模式</text>
-			</view>
+			<text class="long-press-tip__text">继续按住2秒进入开发者模式</text>
+			<view class="long-press-tip__arrow"></view>
 		</view>
 	</view>
 </template>
@@ -50,7 +54,7 @@ export default {
 			selected: 0,
 			color: '#7A7E83',
 			selectedColor: '#18AF38',
-			safeAreaInsetBottom: 0,
+			safeAreaBottom: 0,
 			list: [
 				{
 					pagePath: 'pages/index/index',
@@ -95,10 +99,11 @@ export default {
 	},
 	created() {
 		// 获取底部安全区高度
-		const systemInfo = uni.getSystemInfoSync()
-		this.safeAreaInsetBottom = systemInfo.safeAreaInsets?.bottom || 0
-		if (this.safeAreaInsetBottom === 0) {
-			this.safeAreaInsetBottom = 10
+		try {
+			const systemInfo = uni.getSystemInfoSync()
+			this.safeAreaBottom = systemInfo.safeAreaInsets?.bottom || 10
+		} catch (e) {
+			this.safeAreaBottom = 10
 		}
 	},
 	methods: {
@@ -108,9 +113,12 @@ export default {
 			}
 			return item.iconPath
 		},
-		handleTouchStart(index, e) {
+		handleTouchStart(index) {
 			// 只有"我的"tab（index=4）支持长按检测
-			if (index !== 4) return
+			if (index !== 4) {
+				this.switchTab(index)
+				return
+			}
 			
 			this.isLongPress = true
 			this.longPressTriggered = false
@@ -127,7 +135,7 @@ export default {
 				}
 			}, 2000)
 		},
-		handleTouchEnd(index, e) {
+		handleTouchEnd(index) {
 			if (index !== 4) return
 			
 			this.isLongPress = false
@@ -138,19 +146,13 @@ export default {
 			if (!this.longPressTriggered) {
 				this.switchTab(index)
 			}
+			this.longPressTriggered = false
 		},
 		handleTouchCancel() {
 			this.isLongPress = false
 			this.longPressTriggered = false
 			this.showLongPressTip = false
 			clearTimeout(this.longPressTimer)
-		},
-		handleClick(index) {
-			if (index === 4 && this.isLongPress) {
-				// 不处理点击，长按检测进行中
-				return
-			}
-			this.switchTab(index)
 		},
 		switchTab(index) {
 			if (index === this.selected) return
@@ -179,7 +181,10 @@ export default {
 					url: '/pages/dev/index'
 				})
 			} else {
-				this.$u.toast('密码错误')
+				uni.showToast({
+					title: '密码错误',
+					icon: 'none'
+				})
 				this.devPassword = ''
 			}
 		},
@@ -197,16 +202,13 @@ export default {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	/* #ifndef H5 */
 	height: 50px;
-	/* #endif */
-	/* #ifdef H5 */
-	height: 60px;
-	/* #endif */
-	background-color: #fff;
-	border-top: 1rpx solid rgba(0, 0, 0, 0.1);
+	padding-bottom: 10px;
+	background-color: #ffffff;
+	border-top: 1rpx solid rgba(0, 0, 0, 0.08);
 	display: flex;
-	z-index: 998;
+	z-index: 999;
+	box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
 	
 	.tab-item {
 		flex: 1;
@@ -215,10 +217,9 @@ export default {
 		align-items: center;
 		justify-content: center;
 		position: relative;
-		transition: all 0.1s;
 		
 		&:active {
-			opacity: 0.7;
+			opacity: 0.6;
 		}
 		
 		.tab-icon {
@@ -230,33 +231,115 @@ export default {
 		.tab-text {
 			font-size: 10px;
 			line-height: 1.2;
+			text-align: center;
 		}
 	}
 	
 	.long-press-tip {
 		position: absolute;
-		bottom: 100%;
-		left: 50%;
-		transform: translateX(-50%);
-		margin-bottom: 10px;
+		bottom: 70px;
+		right: 10px;
 		z-index: 1000;
 		
-		&__content {
+		&__text {
+			display: block;
 			background-color: rgba(0, 0, 0, 0.75);
 			color: #fff;
 			font-size: 12px;
-			padding: 8px 16px;
+			padding: 8px 12px;
 			border-radius: 6px;
 			white-space: nowrap;
+		}
+		
+		&__arrow {
+			position: absolute;
+			top: 100%;
+			right: 20px;
+			border: 6px solid transparent;
+			border-top-color: rgba(0, 0, 0, 0.75);
+		}
+	}
+	
+	/* 开发者密码弹窗 */
+	.dev-mask {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 10000;
+	}
+	
+	.dev-modal {
+		width: 300px;
+		background-color: #fff;
+		border-radius: 10px;
+		padding: 20px;
+		
+		&__title {
+			font-size: 18px;
+			font-weight: bold;
+			text-align: center;
+			margin-bottom: 10px;
+		}
+		
+		&__subtitle {
+			font-size: 14px;
+			color: #999;
+			text-align: center;
+			margin-bottom: 15px;
+		}
+		
+		&__input {
+			width: 100%;
+			height: 40px;
+			border: 1px solid #e5e5e5;
+			border-radius: 6px;
+			padding: 0 12px;
+			font-size: 14px;
+			box-sizing: border-box;
+			margin-bottom: 20px;
+		}
+		
+		&__input:focus {
+			border-color: #18AF38;
+		}
+		
+		&__placeholder {
+			color: #ccc;
+		}
+		
+		&__btns {
+			display: flex;
+			justify-content: space-between;
+		}
+		
+		&__btn {
+			flex: 1;
+			height: 40px;
+			line-height: 40px;
+			text-align: center;
+			border-radius: 6px;
+			font-size: 14px;
 			
-			&::after {
-				content: '';
-				position: absolute;
-				top: 100%;
-				left: 50%;
-				transform: translateX(-50%);
-				border: 6px solid transparent;
-				border-top-color: rgba(0, 0, 0, 0.75);
+			&--cancel {
+				background-color: #f5f5f5;
+				color: #666;
+				margin-right: 10px;
+			}
+			
+			&--confirm {
+				background-color: #18AF38;
+				color: #fff;
+				margin-left: 10px;
+			}
+			
+			&:active {
+				opacity: 0.8;
 			}
 		}
 	}
