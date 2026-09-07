@@ -144,9 +144,14 @@ export default {
 			})
 		},
 		openDevPasswordDialog() {
+			console.log('[DevMode] openDevPasswordDialog 被调用')
+			
 			// 使用 wx.showModal 的 editable 模式（原生弹窗，不受键盘影响）
 			// #ifdef MP-WEIXIN
+			console.log('[DevMode] wx.canIUse 检查:', wx.canIUse && wx.canIUse('showModal.editable'))
+			
 			if (wx.canIUse && wx.canIUse('showModal.editable')) {
+				console.log('[DevMode] 开始调用 wx.showModal editable')
 				wx.showModal({
 					title: '开发者验证',
 					content: '请输入开发者密码',
@@ -155,7 +160,9 @@ export default {
 					confirmText: '确认',
 					cancelText: '取消',
 					success: (res) => {
+						console.log('[DevMode] showModal success 回调:', JSON.stringify(res))
 						if (res.confirm) {
+							console.log('[DevMode] 用户确认，输入内容:', res.content)
 							if (res.content === '990110') {
 								uni.navigateTo({
 									url: '/pages/dev/index'
@@ -167,14 +174,22 @@ export default {
 								})
 							}
 						}
+					},
+					fail: (err) => {
+						console.log('[DevMode] showModal fail 回调:', JSON.stringify(err))
 					}
 				})
+				console.log('[DevMode] wx.showModal 已调用')
 				return
 			}
 			// #endif
 			
+			console.log('[DevMode] 无法使用 showModal.editable，尝试降级方案')
+			
 			// 降级方案：使用 uView 的弹窗（如果可用）
+			console.log('[DevMode] this.$u 存在:', !!this.$u)
 			if (this.$u && this.$u.modal) {
+				console.log('[DevMode] 使用 uView modal')
 				this.$u.modal({
 					title: '开发者验证',
 					placeholder: '请输入密码',
@@ -182,6 +197,7 @@ export default {
 					confirmText: '确认',
 					cancelText: '取消',
 					onConfirm: (value) => {
+						console.log('[DevMode] uView modal 确认，输入:', value)
 						if (value === '990110') {
 							uni.navigateTo({
 								url: '/pages/dev/index'
@@ -196,6 +212,8 @@ export default {
 				})
 				return
 			}
+			
+			console.log('[DevMode] 所有弹窗方案都不可用')
 		},
 		// 外部调用：更新选中状态
 		setSelected(index) {
