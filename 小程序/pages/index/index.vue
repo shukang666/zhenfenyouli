@@ -175,6 +175,8 @@
 			this.getHomeNotice()
 		},
 		onShow() {
+			// 更新自定义tabbar选中态
+			this.updateTabBarSelected(0)
 			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
 			this.$nextTick(() => {
 				if (this.isLogin && !this.userInfo.community_id) {
@@ -295,6 +297,12 @@
 						})
 					}
 				})
+			},
+			// 更新自定义tabbar选中索引
+			updateTabBarSelected(index) {
+				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {
+					this.$mp.page.getTabBar().setSelected(index)
+				}
 			},
 		}
 	}

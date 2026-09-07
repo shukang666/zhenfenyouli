@@ -484,6 +484,8 @@
 			this.get_active_tab_list()
 		},
 		onShow() {
+			// 更新自定义tabbar选中态
+			this.updateTabBarSelected(1)
 			// 检查 banner 跳转标记：从首页 banner 或"社区活动"入口跳过来需要切到"本月推荐"标签
 			let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
 			if (jumpMonthlyRec) {
@@ -764,6 +766,12 @@
 				}).catch(err => {
 					this.$u.toast(err.msg)
 				})
+			},
+			// 更新自定义tabbar选中索引
+			updateTabBarSelected(index) {
+				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {
+					this.$mp.page.getTabBar().setSelected(index)
+				}
 			},
 		},
 		onReachBottom() {

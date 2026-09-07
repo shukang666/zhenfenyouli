@@ -106,6 +106,8 @@
 			this.get_forum_list()
 		},
 		onShow() {
+			// 更新自定义tabbar选中态
+			this.updateTabBarSelected(2)
 			if (checkCommunity(this)) return
 		},
 		methods: {
@@ -138,6 +140,12 @@
 				}).catch(err => {
 					this.$u.toast(err.msg)
 				})
+			},
+			// 更新自定义tabbar选中索引
+			updateTabBarSelected(index) {
+				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {
+					this.$mp.page.getTabBar().setSelected(index)
+				}
 			},
 		},
 		onReachBottom() {

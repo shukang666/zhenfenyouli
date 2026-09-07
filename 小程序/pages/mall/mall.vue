@@ -105,6 +105,8 @@
 			this.get_category()
 		},
 		onShow() {
+			// 更新自定义tabbar选中态
+			this.updateTabBarSelected(3)
 			if (checkCommunity(this)) return
 		},
 		methods: {
@@ -180,6 +182,12 @@
 				}).then(res => {
 					this.swiper_list = res.data
 				})
+			},
+			// 更新自定义tabbar选中索引
+			updateTabBarSelected(index) {
+				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {
+					this.$mp.page.getTabBar().setSelected(index)
+				}
 			},
 		},
 		onReachBottom() {

@@ -164,18 +164,6 @@
                 </u-grid-item> -->
 			</u-grid>
 		</view>
-		<!-- 开发者密码弹窗 -->
-		<u-mask :show="devPasswordShow">
-			<view class="u-abso-center u-w-600 u-radius-20 u-type-white-bg u-p-40">
-				<view class="u-font-32 u-font-bold u-text-center u-m-b-30">🔐 开发者验证</view>
-				<view class="u-font-26 u-type-info u-m-b-20">请输入开发者密码</view>
-				<u-input v-model="devPassword" type="password" placeholder="请输入密码" border />
-				<view class="u-flex u-row-between u-m-t-40">
-					<u-button @click="devPasswordShow = false; devPassword = ''">取消</u-button>
-					<u-button type="primary" @click="checkDevPassword">确认</u-button>
-				</view>
-			</view>
-		</u-mask>
 		<!-- 弹窗 -->
 		<u-mask :show="mask_show">
 			<view class="warp">
@@ -224,40 +212,25 @@
 			mask_show: false,
 			descShow: false,
 			badge_list: [],
-			// 开发者模式相关
-			tabClickCount: 0,
-			tabLastClickTime: 0,
-			devPasswordShow: false,
-			devPassword: '',
 		}
 	},
 		onLoad() {},
 		onShow() {
+			// 更新自定义tabbar选中态
+			this.updateTabBarSelected(4)
 			if (checkCommunity(this)) return
 			if (this.isLogin) {
 				this.getUserInfo()
 				this.get_new_badge_list()
 			}
 		},
-		// 监听底部"我的"tabbar图标点击事件
-		onTabItemTab(e) {
-			// 只处理"我的"tab的点击（索引为4）
-			if (e.index !== 4) return
-			const now = Date.now()
-			// 如果距离上次点击超过2秒，重置计数
-			if (now - this.tabLastClickTime > 2000) {
-				this.tabClickCount = 0
-			}
-			this.tabClickCount++
-			this.tabLastClickTime = now
-			// 三击触发开发者密码弹窗
-			if (this.tabClickCount >= 3) {
-				this.tabClickCount = 0
-				this.devPasswordShow = true
-				this.devPassword = ''
-			}
-		},
 		methods: {
+			// 更新自定义tabbar选中索引
+			updateTabBarSelected(index) {
+				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {
+					this.$mp.page.getTabBar().setSelected(index)
+				}
+			},
 			async get_new_badge_list() {
 				try {
 					let params = {}
@@ -281,21 +254,6 @@
 					this.$u.vuex('userInfo', {})
 					this.$u.vuex('isLogin', false)
 				})
-			},
-			
-			// 验证开发者密码
-			checkDevPassword() {
-				if (this.devPassword === '990110') {
-					this.devPasswordShow = false
-					this.devPassword = ''
-					// 跳转到开发者首页
-					uni.navigateTo({
-						url: '/pages/dev/index'
-					})
-				} else {
-					this.$u.toast('密码错误')
-					this.devPassword = ''
-				}
 			},
 		}
 	}
