@@ -20,27 +20,6 @@
 			>{{ item.text }}</text>
 		</view>
 		
-		<!-- 开发者密码弹窗 -->
-		<view class="dev-mask" v-if="devPasswordShow" @click.stop="closeDevPasswordDialog">
-			<view class="dev-modal" @click.stop="">
-				<view class="dev-modal__title">开发者验证</view>
-				<view class="dev-modal__subtitle">请输入开发者密码</view>
-			<input 
-				class="dev-modal__input" 
-				type="password" 
-				v-model="devPassword" 
-				placeholder="请输入密码"
-				placeholder-class="dev-modal__placeholder"
-				cursor-spacing="10"
-				:adjust-position="false"
-			/>
-				<view class="dev-modal__btns">
-					<view class="dev-modal__btn dev-modal__btn--cancel" @click="closeDevPasswordDialog">取消</view>
-					<view class="dev-modal__btn dev-modal__btn--confirm" @click="checkDevPassword">确认</view>
-				</view>
-			</view>
-		</view>
-		
 		<!-- 长按提示 -->
 		<view class="long-press-tip" v-if="showLongPressTip">
 			<text class="long-press-tip__text">继续按住2秒进入开发者模式</text>
@@ -94,9 +73,6 @@ export default {
 			isLongPress: false,
 			longPressTriggered: false,
 			showLongPressTip: false,
-			// 开发者模式相关
-			devPasswordShow: false,
-			devPassword: '',
 		}
 	},
 	created() {
@@ -168,26 +144,57 @@ export default {
 			})
 		},
 		openDevPasswordDialog() {
-			this.devPasswordShow = true
-			this.devPassword = ''
-		},
-		closeDevPasswordDialog() {
-			this.devPasswordShow = false
-			this.devPassword = ''
-		},
-		checkDevPassword() {
-			if (this.devPassword === '990110') {
-				this.devPasswordShow = false
-				this.devPassword = ''
-				uni.navigateTo({
-					url: '/pages/dev/index'
+			// 使用 wx.showModal 的 editable 模式（原生弹窗，不受键盘影响）
+			// #ifdef MP-WEIXIN
+			if (wx.canIUse && wx.canIUse('showModal.editable')) {
+				wx.showModal({
+					title: '开发者验证',
+					content: '请输入开发者密码',
+					editable: true,
+					placeholderText: '请输入密码',
+					confirmText: '确认',
+					cancelText: '取消',
+					success: (res) => {
+						if (res.confirm) {
+							if (res.content === '990110') {
+								uni.navigateTo({
+									url: '/pages/dev/index'
+								})
+							} else {
+								uni.showToast({
+									title: '密码错误',
+									icon: 'none'
+								})
+							}
+						}
+					}
 				})
-			} else {
-				uni.showToast({
-					title: '密码错误',
-					icon: 'none'
+				return
+			}
+			// #endif
+			
+			// 降级方案：使用 uView 的弹窗（如果可用）
+			if (this.$u && this.$u.modal) {
+				this.$u.modal({
+					title: '开发者验证',
+					placeholder: '请输入密码',
+					showCancelButton: true,
+					confirmText: '确认',
+					cancelText: '取消',
+					onConfirm: (value) => {
+						if (value === '990110') {
+							uni.navigateTo({
+								url: '/pages/dev/index'
+							})
+						} else {
+							uni.showToast({
+								title: '密码错误',
+								icon: 'none'
+							})
+						}
+					}
 				})
-				this.devPassword = ''
+				return
 			}
 		},
 		// 外部调用：更新选中状态
@@ -257,82 +264,6 @@ export default {
 			right: 20px;
 			border: 6px solid transparent;
 			border-top-color: rgba(0, 0, 0, 0.75);
-		}
-	}
-	
-	/* 开发者密码弹窗 */
-	.dev-mask {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: rgba(0, 0, 0, 0.5);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 10000;
-	}
-	
-	.dev-modal {
-		width: 300px;
-		background-color: #fff;
-		border-radius: 4px;
-		padding: 24px 20px;
-		
-		&__title {
-			font-size: 17px;
-			font-weight: 500;
-			text-align: center;
-			margin-bottom: 6px;
-		}
-		
-		&__subtitle {
-			font-size: 14px;
-			color: #999;
-			text-align: center;
-			margin-bottom: 20px;
-		}
-		
-		&__input {
-			width: 100%;
-			height: 44px;
-			border: 1px solid #e5e5e5;
-			border-radius: 4px;
-			padding: 0 12px;
-			font-size: 14px;
-			box-sizing: border-box;
-			margin-bottom: 20px;
-		}
-		
-		&__placeholder {
-			color: #ccc;
-		}
-		
-		&__btns {
-			display: flex;
-			justify-content: space-between;
-		}
-		
-		&__btn {
-			flex: 1;
-			height: 44px;
-			line-height: 44px;
-			text-align: center;
-			border-radius: 4px;
-			font-size: 14px;
-			
-			&--cancel {
-				background-color: #f5f5f5;
-				color: #666;
-				margin-right: 10px;
-			}
-			
-			&--confirm {
-				background-color: #18AF38;
-				color: #fff;
-				margin-left: 10px;
-			}
 		}
 	}
 }
