@@ -1,5 +1,7 @@
 <template>
 	<view class="u-p-30">
+		<!-- 骨架屏 -->
+		<skeleton-screen :show="isLoading" type="health"></skeleton-screen>
 		<u-navbar title-color="#fff" is-fixed :is-back="false" background="transparent" :borderBottom="false">
 			<view class="u-m-l-30">
 				<u-image width="231" height="64" :src="setting.min_logo"></u-image>
@@ -93,9 +95,14 @@
 
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
+	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 	export default {
+		components: {
+			SkeletonScreen
+		},
 		data() {
 			return {
+				isLoading: true,
 				forum_list: [],
 				page: 1,
 				total: 0,
@@ -103,7 +110,17 @@
 			};
 		},
 		onLoad() {
-			this.get_forum_list()
+			this.loadAllData()
+		},
+		// 加载数据，完成后隐藏骨架屏
+		async loadAllData() {
+			try {
+				await this.get_forum_list()
+			} catch (e) {
+				console.log('数据加载失败:', e)
+			} finally {
+				this.isLoading = false
+			}
 		},
 		onShow() {
 			// 更新自定义tabbar选中态
@@ -128,19 +145,19 @@
 					}
 				})
 			},
-			// 列表
-			get_forum_list() {
-				this.$u.api.get_forum_list({
-					keyword: this.keyword,
-					type: 1,
-					page: this.page
-				}).then(res => {
-					this.forum_list.push(...res.data.data)
-					this.total = res.data.total
-				}).catch(err => {
-					this.$u.toast(err.msg)
-				})
-			},
+		// 列表
+		get_forum_list() {
+			return this.$u.api.get_forum_list({
+				keyword: this.keyword,
+				type: 1,
+				page: this.page
+			}).then(res => {
+				this.forum_list.push(...res.data.data)
+				this.total = res.data.total
+			}).catch(err => {
+				this.$u.toast(err.msg)
+			})
+		},
 			// 更新自定义tabbar选中索引
 			updateTabBarSelected(index) {
 				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {

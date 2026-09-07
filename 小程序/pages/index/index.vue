@@ -1,5 +1,7 @@
 <template>
 	<view class="container">
+		<!-- 骨架屏 -->
+		<skeleton-screen :show="isLoading" type="index"></skeleton-screen>
 		<z-paging ref='paging' v-model='dataList' @query='queryList' :fixed='true'>
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
@@ -139,9 +141,14 @@
 </template>
 
 <script>
+	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 	export default {
+		components: {
+			SkeletonScreen
+		},
 		data() {
 			return {
+				isLoading: true,
 				bannerList: [],
 				dataList: [],
 				active_list: [],
@@ -169,10 +176,22 @@
 			if (op.scene) {
 				uni.setStorageSync('vcode', op.scene)
 			}
-			this.getBannerList()
-			this.get_new_active_list()
-			this.getHomeEntries()
-			this.getHomeNotice()
+			this.loadAllData()
+		},
+		// 并行加载所有数据，全部完成后隐藏骨架屏
+		async loadAllData() {
+			try {
+				await Promise.all([
+					this.getBannerList(),
+					this.get_new_active_list(),
+					this.getHomeEntries(),
+					this.getHomeNotice()
+				])
+			} catch (e) {
+				console.log('数据加载失败:', e)
+			} finally {
+				this.isLoading = false
+			}
 		},
 		onShow() {
 			// 更新自定义tabbar选中态

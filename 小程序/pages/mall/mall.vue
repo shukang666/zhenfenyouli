@@ -1,5 +1,7 @@
 <template>
 	<view class="u-p-30">
+		<!-- 骨架屏 -->
+		<skeleton-screen :show="isLoading" type="mall"></skeleton-screen>
 		<u-navbar title-color="#fff" :is-back="false" background="transparent" :borderBottom="false">
 			<view class="u-m-l-30">
 				<u-image width="231" height="64" :src="setting.min_logo"></u-image>
@@ -87,9 +89,14 @@
 
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
+	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 	export default {
+		components: {
+			SkeletonScreen
+		},
 		data() {
 			return {
+				isLoading: true,
 				swiper_list: [],
 				coupon_list: [],
 				cate_list: [],
@@ -100,9 +107,21 @@
 			};
 		},
 		onLoad() {
-			this.find_slide()
-			this.get_shop_coupon_list()
-			this.get_category()
+			this.loadAllData()
+		},
+		// 并行加载所有数据，全部完成后隐藏骨架屏
+		async loadAllData() {
+			try {
+				await Promise.all([
+					this.find_slide(),
+					this.get_shop_coupon_list(),
+					this.get_category()
+				])
+			} catch (e) {
+				console.log('数据加载失败:', e)
+			} finally {
+				this.isLoading = false
+			}
 		},
 		onShow() {
 			// 更新自定义tabbar选中态
@@ -110,15 +129,15 @@
 			if (checkCommunity(this)) return
 		},
 		methods: {
-			// 分类
-			get_category() {
-				this.$u.api.get_category({
-					goods_type: 1
-				}).then(res => {
-					this.cate_list = res.data
-					this.get_goods_list()
-				})
-			},
+		// 分类
+		get_category() {
+			return this.$u.api.get_category({
+				goods_type: 1
+			}).then(res => {
+				this.cate_list = res.data
+				return this.get_goods_list()
+			})
+		},
 			// 切换分类
 			cate_btn(index) {
 				this.cate_type = index
@@ -126,19 +145,19 @@
 				this.goods_list = []
 				this.get_goods_list()
 			},
-			// 列表
-			get_goods_list() {
-				this.$u.api.get_goods_list({
-					keyword: this.keyword,
-					first_cate: this.cate_list[this.cate_type].id,
-					page: this.page,
-				}).then(res => {
-					this.goods_list.push(...res.data.data)
-					this.total = res.data.total
-				}).catch(err => {
-					this.$u.toast(err.msg)
-				})
-			},
+		// 列表
+		get_goods_list() {
+			return this.$u.api.get_goods_list({
+				keyword: this.keyword,
+				first_cate: this.cate_list[this.cate_type].id,
+				page: this.page,
+			}).then(res => {
+				this.goods_list.push(...res.data.data)
+				this.total = res.data.total
+			}).catch(err => {
+				this.$u.toast(err.msg)
+			})
+		},
 			// 领取优惠券
 			receive_coupon(item) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -151,15 +170,15 @@
 					this.$u.toast(err.msg)
 				})
 			},
-			// 优惠卷列表
-			get_shop_coupon_list(id) {
-				this.$u.api.get_shop_coupon_list({
-					page: this.page,
-					// exam_id: id
-				}).then(res => {
-					this.coupon_list.push(...res.data.data)
-				})
-			},
+		// 优惠卷列表
+		get_shop_coupon_list(id) {
+			return this.$u.api.get_shop_coupon_list({
+				page: this.page,
+				// exam_id: id
+			}).then(res => {
+				this.coupon_list.push(...res.data.data)
+			})
+		},
 			// 跳转页面
 			navigator(url) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -175,14 +194,14 @@
 				const openUrl = await this.$u.func.checkH5(data.url);
 				this.$u.route(openUrl);
 			},
-			// 轮播图
-			find_slide() {
-				this.$u.api.find_slide({
-					id: 7
-				}).then(res => {
-					this.swiper_list = res.data
-				})
-			},
+		// 轮播图
+		find_slide() {
+			return this.$u.api.find_slide({
+				id: 7
+			}).then(res => {
+				this.swiper_list = res.data
+			})
+		},
 			// 更新自定义tabbar选中索引
 			updateTabBarSelected(index) {
 				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {

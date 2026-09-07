@@ -1,5 +1,7 @@
 <template>
 	<view class="container">
+		<!-- 骨架屏 -->
+		<skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 		<!-- 侧边标签栏：后台"社区活动-活动标签"可配置1-4个；第一个为固定标签（显示垃圾分类打卡内容），其他标签暂显示现有内容，待按绑定分类模板化。改为侧边垂直布局，与右侧内容区联动 -->
 		<view class="layout-wrapper" v-if="tab_list.length">
 			<scroll-view class="side-bar" scroll-y>
@@ -418,12 +420,17 @@
 
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
+	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 	export default {
+		components: {
+			SkeletonScreen
+		},
 		data() {
 			return {
+				isLoading: true,
 				swiper_list: [],
-			// 本月推荐标签顶部 banner 图（后台轮播图管理 id=8 组配置，单张图，不点击）
-			monthly_rec_banner: '',
+				// 本月推荐标签顶部 banner 图（后台轮播图管理 id=8 组配置，单张图，不点击）
+				monthly_rec_banner: '',
 				cate_list: [],
 				tab_list: [],
 				current_tab: 0,
@@ -478,10 +485,22 @@
 			}
 		},
 		onLoad() {
-			this.find_slide()
-			this.get_monthly_rec_banner()
-			this.get_new_cate_active_list()
-			this.get_active_tab_list()
+			this.loadAllData()
+		},
+		// 并行加载所有数据，全部完成后隐藏骨架屏
+		async loadAllData() {
+			try {
+				await Promise.all([
+					this.find_slide(),
+					this.get_monthly_rec_banner(),
+					this.get_new_cate_active_list(),
+					this.get_active_tab_list()
+				])
+			} catch (e) {
+				console.log('数据加载失败:', e)
+			} finally {
+				this.isLoading = false
+			}
 		},
 		onShow() {
 			// 更新自定义tabbar选中态
