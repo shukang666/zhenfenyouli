@@ -746,6 +746,28 @@
 					}
 				}
 			]
+		},
+		{
+			"root": "pages/dev",
+			"pages": [{
+					"path": "index",
+					"style": {
+						"navigationBarTitleText": "开发者模式"
+					}
+				},
+				{
+					"path": "activity",
+					"style": {
+						"navigationBarTitleText": "活动页面(测试)"
+					}
+				},
+				{
+					"path": "activity-detail",
+					"style": {
+						"navigationBarTitleText": "活动详情(测试)"
+					}
+				}
+			]
 		}
 	],
 	"preloadRule": {

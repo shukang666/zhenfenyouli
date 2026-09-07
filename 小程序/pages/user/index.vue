@@ -1,5 +1,5 @@
 <template>
-	<view class="u-p-30">
+	<view class="u-p-30" @click="handleUserPageClick">
 		<image v-if="imgUrl" :src="`${imgUrl}user-bg.png`" class="u-abso u-abso-l-0 u-abso-t-0 u-w-750 u-h-448" mode="aspectFill"></image>
 		<view class="u-flex u-row-between u-rela" style="padding-top: 150rpx;">
 			<view class="u-flex u-col-top">
@@ -164,6 +164,18 @@
                 </u-grid-item> -->
 			</u-grid>
 		</view>
+		<!-- 开发者密码弹窗 -->
+		<u-mask :show="devPasswordShow">
+			<view class="u-abso-center u-w-600 u-radius-20 u-type-white-bg u-p-40">
+				<view class="u-font-32 u-font-bold u-text-center u-m-b-30">🔐 开发者验证</view>
+				<view class="u-font-26 u-type-info u-m-b-20">请输入开发者密码</view>
+				<u-input v-model="devPassword" type="password" placeholder="请输入密码" border />
+				<view class="u-flex u-row-between u-m-t-40">
+					<u-button @click="devPasswordShow = false; devPassword = ''">取消</u-button>
+					<u-button type="primary" @click="checkDevPassword">确认</u-button>
+				</view>
+			</view>
+		</u-mask>
 		<!-- 弹窗 -->
 		<u-mask :show="mask_show">
 			<view class="warp">
@@ -207,13 +219,18 @@
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	export default {
-		data() {
-			return {
-				mask_show: false,
-				descShow: false,
-				badge_list: [],
-			}
-		},
+	data() {
+		return {
+			mask_show: false,
+			descShow: false,
+			badge_list: [],
+			// 开发者模式相关
+			clickCount: 0,
+			lastClickTime: 0,
+			devPasswordShow: false,
+			devPassword: '',
+		}
+	},
 		onLoad() {},
 		onShow() {
 			if (checkCommunity(this)) return
@@ -246,6 +263,36 @@
 					this.$u.vuex('userInfo', {})
 					this.$u.vuex('isLogin', false)
 				})
+			},
+			// 处理用户页面点击（三击触发开发者密码弹窗）
+			handleUserPageClick() {
+				const now = Date.now()
+				// 如果距离上次点击超过2秒，重置计数
+				if (now - this.lastClickTime > 2000) {
+					this.clickCount = 0
+				}
+				this.clickCount++
+				this.lastClickTime = now
+				// 三击触发
+				if (this.clickCount >= 3) {
+					this.clickCount = 0
+					this.devPasswordShow = true
+					this.devPassword = ''
+				}
+			},
+			// 验证开发者密码
+			checkDevPassword() {
+				if (this.devPassword === '990110') {
+					this.devPasswordShow = false
+					this.devPassword = ''
+					// 跳转到开发者首页
+					uni.navigateTo({
+						url: '/pages/dev/index'
+					})
+				} else {
+					this.$u.toast('密码错误')
+					this.devPassword = ''
+				}
 			},
 		}
 	}
