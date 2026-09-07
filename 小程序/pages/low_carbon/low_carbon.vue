@@ -487,21 +487,6 @@
 		onLoad() {
 			this.loadAllData()
 		},
-		// 并行加载所有数据，全部完成后隐藏骨架屏
-		async loadAllData() {
-			try {
-				await Promise.all([
-					this.find_slide(),
-					this.get_monthly_rec_banner(),
-					this.get_new_cate_active_list(),
-					this.get_active_tab_list()
-				])
-			} catch (e) {
-				console.log('数据加载失败:', e)
-			} finally {
-				this.isLoading = false
-			}
-		},
 		onShow() {
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(1)
@@ -533,6 +518,21 @@
 			})
 		},
 		methods: {
+			// 并行加载所有数据，全部完成后隐藏骨架屏
+			async loadAllData() {
+				try {
+					await Promise.all([
+						this.find_slide(),
+						this.get_monthly_rec_banner(),
+						this.get_new_cate_active_list(),
+						this.get_active_tab_list()
+					])
+				} catch (e) {
+					console.log('数据加载失败:', e)
+				} finally {
+					this.isLoading = false
+				}
+			},
 			// 获取用户信息
 			getUserInfo() {
 				return this.$u.api.getUserInfo().then(res => {
@@ -542,52 +542,50 @@
 					this.$u.vuex('isLogin', false)
 				})
 			},
-			// 活动分类
-			get_new_cate_active_list() {
-				this.$u.api.get_new_cate_active_list({
-					// keyword: this.keyword,
-					page: this.page,
-				}).then(res => {
-					this.cate_list.push(...res.data)
-					// this.total = res.data.total
-				}).catch(err => {
-					this.$u.toast(err.msg)
-				})
-			},
-			// 活动页标签：后台 active_tab 表返回（最多4个，第一个为固定打卡标签），
-			// 前端在头部 unshift "本月推荐"写死标签，自治活动/社交活动追加在后台标签后，备份标签注释掉
-			get_active_tab_list() {
-				this.$u.api.get_active_tab_list().then(res => {
-					let list = res.data || []
-					// 头部 unshift 本月推荐标签（前端写死第一个）
-					list.unshift({ id: -99, name: '本月推荐', cate_id: 0, is_fixed: 2, _is_custom: 'monthly_rec' })
-					list.push({ id: -2, name: '自治活动', cate_id: 0, is_fixed: 2, _is_custom: 'zzhd' })
-					list.push({ id: -3, name: '社交活动', cate_id: 0, is_fixed: 2, _is_custom: 'sjhd' })
-					// list.push({ id: -1, name: '备份', cate_id: 0, is_fixed: 2, _is_backup: 1 })
-					this.tab_list = list
-				// 检查是否有跳转标记（banner 或"社区活动"入口）
-				let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
-					if (jumpMonthlyRec) {
-						uni.removeStorageSync('jump_monthly_rec')
-						this.current_tab = 0
-						this.load_monthly_rec_list()
-						return
-					}
-					// 默认加载"本月推荐"标签（current_tab==0），若本月推荐为空则 fallback 到第一个有 cate_id 的后台标签
-					let firstTab = list[0]
-					if (firstTab._is_custom === 'monthly_rec') {
-						this.load_monthly_rec_list()
-					} else if (firstTab && firstTab.cate_id) {
-						this.current_cate_id = firstTab.cate_id
-						this.active_list = []
-						this.active_page = 1
-						this.active_total = 0
-						this.load_active_list()
-					}
-				}).catch(err => {
-					this.$u.toast(err.msg)
-				})
-			},
+		// 活动分类
+		get_new_cate_active_list() {
+			return this.$u.api.get_new_cate_active_list({
+				page: this.page,
+			}).then(res => {
+				this.cate_list = res.data || []
+			}).catch(err => {
+				this.$u.toast(err.msg)
+			})
+		},
+		// 活动页标签：后台 active_tab 表返回（最多4个，第一个为固定打卡标签），
+		// 前端在头部 unshift "本月推荐"写死标签，自治活动/社交活动追加在后台标签后，备份标签注释掉
+		get_active_tab_list() {
+			return this.$u.api.get_active_tab_list().then(res => {
+				let list = res.data || []
+				// 头部 unshift 本月推荐标签（前端写死第一个）
+				list.unshift({ id: -99, name: '本月推荐', cate_id: 0, is_fixed: 2, _is_custom: 'monthly_rec' })
+				list.push({ id: -2, name: '自治活动', cate_id: 0, is_fixed: 2, _is_custom: 'zzhd' })
+				list.push({ id: -3, name: '社交活动', cate_id: 0, is_fixed: 2, _is_custom: 'sjhd' })
+				// list.push({ id: -1, name: '备份', cate_id: 0, is_fixed: 2, _is_backup: 1 })
+				this.tab_list = list
+			// 检查是否有跳转标记（banner 或"社区活动"入口）
+			let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
+				if (jumpMonthlyRec) {
+					uni.removeStorageSync('jump_monthly_rec')
+					this.current_tab = 0
+					this.load_monthly_rec_list()
+					return
+				}
+				// 默认加载"本月推荐"标签（current_tab==0），若本月推荐为空则 fallback 到第一个有 cate_id 的后台标签
+				let firstTab = list[0]
+				if (firstTab._is_custom === 'monthly_rec') {
+					this.load_monthly_rec_list()
+				} else if (firstTab && firstTab.cate_id) {
+					this.current_cate_id = firstTab.cate_id
+					this.active_list = []
+					this.active_page = 1
+					this.active_total = 0
+					this.load_active_list()
+				}
+			}).catch(err => {
+				this.$u.toast(err.msg)
+			})
+		},
 			// 切换标签：第1个固定打卡标签也加载分类活动列表（顶部仍保留"垃圾分类打卡"入口卡片）；
 			// 最后一个"备份"标签显示现有内容；
 			// 自治活动标签加载商家信息（复刻 zzhd.vue onShow）；社交活动标签无需预加载列表；
@@ -707,24 +705,24 @@
 				const openUrl = await this.$u.func.checkH5(data.url);
 				this.$u.route(openUrl);
 			},
-			// 轮播图
-			find_slide() {
-			this.$u.api.find_slide({
+		// 轮播图
+		find_slide() {
+			return this.$u.api.find_slide({
 				id: 5
 			}).then(res => {
-				this.swiper_list = res.data
+				this.swiper_list = res.data || []
 			})
 		},
-		// 本月推荐标签顶部 banner 图（后台轮播图管理 id=8 组，单张图，不点击）
-		get_monthly_rec_banner() {
-			this.$u.api.find_slide({
-				id: 8
-			}).then(res => {
-				if (res.data && res.data.length > 0) {
-					this.monthly_rec_banner = res.data[0].image
-				}
-			})
-		},
+	// 本月推荐标签顶部 banner 图（后台轮播图管理 id=8 组，单张图，不点击）
+	get_monthly_rec_banner() {
+		return this.$u.api.find_slide({
+			id: 8
+		}).then(res => {
+			if (res.data && res.data.length > 0) {
+				this.monthly_rec_banner = res.data[0].image
+			}
+		})
+	},
 			// ===== 自治活动标签方法（复刻 zzhd.vue，与首页 navigator 区分以保留督导员权限校验） =====
 			// 跳转页面（type 真值=跳过督导员权限校验，例如督导员申请本身就不需要先有督导员身份）
 			zzhd_navigator(url, type) {

@@ -178,21 +178,6 @@
 			}
 			this.loadAllData()
 		},
-		// 并行加载所有数据，全部完成后隐藏骨架屏
-		async loadAllData() {
-			try {
-				await Promise.all([
-					this.getBannerList(),
-					this.get_new_active_list(),
-					this.getHomeEntries(),
-					this.getHomeNotice()
-				])
-			} catch (e) {
-				console.log('数据加载失败:', e)
-			} finally {
-				this.isLoading = false
-			}
-		},
 		onShow() {
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(0)
@@ -207,6 +192,21 @@
 			})
 		},
 		methods: {
+			// 并行加载所有数据，全部完成后隐藏骨架屏
+			async loadAllData() {
+				try {
+					await Promise.all([
+						this.getBannerList(),
+						this.get_new_active_list(),
+						this.getHomeEntries(),
+						this.getHomeNotice()
+					])
+				} catch (e) {
+					console.log('数据加载失败:', e)
+				} finally {
+					this.isLoading = false
+				}
+			},
 			// 拉首页入口配置（后台 home_entries），有 image 则用图片，没图片保持 fallback icon 样式
 			async getHomeEntries() {
 				try {
@@ -250,19 +250,19 @@
 				}
 				this.$u.route({ type: item.type, url: item.url })
 			},
-			// 获取活动列表
-			async get_new_active_list() {
-				try {
-					let params = {
-						is_recommendation: 1
-					}
-					let res = await this.$u.api.get_new_active_list(params)
-					this.active_list = res.data.data
-				} catch (e) {
-					console.log(e);
-					this.$u.toast(e.msg)
+		// 获取活动列表
+		async get_new_active_list() {
+			try {
+				let params = {
+					is_recommendation: 1
 				}
-			},
+				let res = await this.$u.api.get_new_active_list(params)
+				this.active_list = res.data?.data || []
+			} catch (e) {
+				console.log(e);
+				this.$u.toast(e.msg)
+			}
+		},
 			switchTab(url) {
 				uni.switchTab({
 					url: url
@@ -283,18 +283,18 @@
 					this.$refs.paging.complete([]);
 				}
 			},
-			// 获取轮播图
-			async getBannerList() {
-				try {
-					let params = {
-						id: 1
-					}
-					let res = await this.$u.api.find_slide(params)
-					this.bannerList = res.data
-				} catch (e) {
-					console.log(e);
+		// 获取轮播图
+		async getBannerList() {
+			try {
+				let params = {
+					id: 1
 				}
-			},
+				let res = await this.$u.api.find_slide(params)
+				this.bannerList = res.data || []
+			} catch (e) {
+				console.log(e);
+			}
+		},
 			// 轮播图点击跳转
 			adLink(e) {
 				let data = this.bannerList[e];

@@ -109,6 +109,12 @@
 		onLoad() {
 			this.loadAllData()
 		},
+		onShow() {
+			// 更新自定义tabbar选中态
+			this.updateTabBarSelected(3)
+			if (checkCommunity(this)) return
+		},
+		methods: {
 		// 并行加载所有数据，全部完成后隐藏骨架屏
 		async loadAllData() {
 			try {
@@ -123,19 +129,15 @@
 				this.isLoading = false
 			}
 		},
-		onShow() {
-			// 更新自定义tabbar选中态
-			this.updateTabBarSelected(3)
-			if (checkCommunity(this)) return
-		},
-		methods: {
 		// 分类
 		get_category() {
 			return this.$u.api.get_category({
 				goods_type: 1
 			}).then(res => {
-				this.cate_list = res.data
-				return this.get_goods_list()
+				this.cate_list = res.data || []
+				if (this.cate_list.length > 0) {
+					return this.get_goods_list()
+				}
 			})
 		},
 			// 切换分类
@@ -149,11 +151,11 @@
 		get_goods_list() {
 			return this.$u.api.get_goods_list({
 				keyword: this.keyword,
-				first_cate: this.cate_list[this.cate_type].id,
+				first_cate: this.cate_list[this.cate_type]?.id || 0,
 				page: this.page,
 			}).then(res => {
-				this.goods_list.push(...res.data.data)
-				this.total = res.data.total
+				this.goods_list = res.data?.data || []
+				this.total = res.data?.total || 0
 			}).catch(err => {
 				this.$u.toast(err.msg)
 			})
@@ -171,12 +173,11 @@
 				})
 			},
 		// 优惠卷列表
-		get_shop_coupon_list(id) {
+		get_shop_coupon_list() {
 			return this.$u.api.get_shop_coupon_list({
 				page: this.page,
-				// exam_id: id
 			}).then(res => {
-				this.coupon_list.push(...res.data.data)
+				this.coupon_list = res.data?.data || []
 			})
 		},
 			// 跳转页面
@@ -199,7 +200,7 @@
 			return this.$u.api.find_slide({
 				id: 7
 			}).then(res => {
-				this.swiper_list = res.data
+				this.swiper_list = res.data || []
 			})
 		},
 			// 更新自定义tabbar选中索引

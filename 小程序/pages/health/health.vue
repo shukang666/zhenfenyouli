@@ -112,22 +112,22 @@
 		onLoad() {
 			this.loadAllData()
 		},
-		// 加载数据，完成后隐藏骨架屏
-		async loadAllData() {
-			try {
-				await this.get_forum_list()
-			} catch (e) {
-				console.log('数据加载失败:', e)
-			} finally {
-				this.isLoading = false
-			}
-		},
 		onShow() {
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(2)
 			if (checkCommunity(this)) return
 		},
 		methods: {
+			// 加载数据，完成后隐藏骨架屏
+			async loadAllData() {
+				try {
+					await this.get_forum_list()
+				} catch (e) {
+					console.log('数据加载失败:', e)
+				} finally {
+					this.isLoading = false
+				}
+			},
 			// 分享
 			share_brn(item) {
 				this.health = item
@@ -152,8 +152,8 @@
 				type: 1,
 				page: this.page
 			}).then(res => {
-				this.forum_list.push(...res.data.data)
-				this.total = res.data.total
+				this.forum_list = res.data?.data || []
+				this.total = res.data?.total || 0
 			}).catch(err => {
 				this.$u.toast(err.msg)
 			})
