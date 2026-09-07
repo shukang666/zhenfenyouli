@@ -113,6 +113,7 @@
 
         <php>
             $point_cate_list = cmf_table('member_community_cate')->where('delete_time',0)->select();
+            $point_cate_id = $params['cate_id'] ?? 0;
         </php>
         <if condition="$params.type==3">
             分类:
@@ -120,7 +121,7 @@
                 <select name="cate_id">
                     <option value="">全部</option>
                     <foreach name="point_cate_list" item="vo">
-                        <option value="{$vo.id}" <if condition="$params.cate_id == $vo.id">selected</if>>{$vo.name}</option>
+                        <option value="{$vo.id}" <if condition="$point_cate_id == $vo.id">selected</if>>{$vo.name}</option>
                     </foreach>
                 </select>
             </div>
