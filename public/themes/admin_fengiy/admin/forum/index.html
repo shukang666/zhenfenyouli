@@ -111,10 +111,10 @@
                 </div>
         </if>
 
+        <php>
+            $point_cate_list = cmf_table('member_community_cate')->where('delete_time',0)->select();
+        </php>
         <if condition="$params.type==3">
-            <php>
-                $point_cate_list = cmf_table('member_community_cate')->where('delete_time',0)->select();
-            </php>
             分类:
             <div class="form-group layui-form">
                 <select name="cate_id">
