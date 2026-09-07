@@ -747,28 +747,6 @@
 				}
 			]
 		},
-		{
-			"root": "pages/dev",
-			"pages": [{
-					"path": "index",
-					"style": {
-						"navigationBarTitleText": "开发者模式"
-					}
-				},
-				{
-					"path": "activity",
-					"style": {
-						"navigationBarTitleText": "活动页面(测试)"
-					}
-				},
-				{
-					"path": "activity-detail",
-					"style": {
-						"navigationBarTitleText": "活动详情(测试)"
-					}
-				}
-			]
-		}
 	],
 	"preloadRule": {
 		// 仅预载高频分包，避免多包并发下载抢占带宽内存、加剧页面跳转卡顿
