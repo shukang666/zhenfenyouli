@@ -1,5 +1,5 @@
 <template>
-	<view class="u-p-30" @click="handleUserPageClick">
+	<view class="u-p-30">
 		<image v-if="imgUrl" :src="`${imgUrl}user-bg.png`" class="u-abso u-abso-l-0 u-abso-t-0 u-w-750 u-h-448" mode="aspectFill"></image>
 		<view class="u-flex u-row-between u-rela" style="padding-top: 150rpx;">
 			<view class="u-flex u-col-top">
@@ -225,8 +225,8 @@
 			descShow: false,
 			badge_list: [],
 			// 开发者模式相关
-			clickCount: 0,
-			lastClickTime: 0,
+			tabClickCount: 0,
+			tabLastClickTime: 0,
 			devPasswordShow: false,
 			devPassword: '',
 		}
@@ -237,6 +237,24 @@
 			if (this.isLogin) {
 				this.getUserInfo()
 				this.get_new_badge_list()
+			}
+		},
+		// 监听底部"我的"tabbar图标点击事件
+		onTabItemTab(e) {
+			// 只处理"我的"tab的点击（索引为4）
+			if (e.index !== 4) return
+			const now = Date.now()
+			// 如果距离上次点击超过2秒，重置计数
+			if (now - this.tabLastClickTime > 2000) {
+				this.tabClickCount = 0
+			}
+			this.tabClickCount++
+			this.tabLastClickTime = now
+			// 三击触发开发者密码弹窗
+			if (this.tabClickCount >= 3) {
+				this.tabClickCount = 0
+				this.devPasswordShow = true
+				this.devPassword = ''
 			}
 		},
 		methods: {
@@ -264,22 +282,7 @@
 					this.$u.vuex('isLogin', false)
 				})
 			},
-			// 处理用户页面点击（三击触发开发者密码弹窗）
-			handleUserPageClick() {
-				const now = Date.now()
-				// 如果距离上次点击超过2秒，重置计数
-				if (now - this.lastClickTime > 2000) {
-					this.clickCount = 0
-				}
-				this.clickCount++
-				this.lastClickTime = now
-				// 三击触发
-				if (this.clickCount >= 3) {
-					this.clickCount = 0
-					this.devPasswordShow = true
-					this.devPassword = ''
-				}
-			},
+			
 			// 验证开发者密码
 			checkDevPassword() {
 				if (this.devPassword === '990110') {
