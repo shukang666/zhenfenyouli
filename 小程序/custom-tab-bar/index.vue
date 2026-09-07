@@ -20,6 +20,31 @@
 			>{{ item.text }}</text>
 		</view>
 		
+		<!-- 开发者密码输入面板 -->
+		<view class="dev-panel" v-if="devPasswordShow" @click.stop="">
+			<view class="dev-panel__mask" @click="closeDevPasswordDialog"></view>
+			<view class="dev-panel__content" @click.stop="">
+				<view class="dev-panel__title">开发者验证</view>
+				<view class="dev-panel__subtitle">请输入开发者密码</view>
+				<input 
+					class="dev-panel__input" 
+					type="password" 
+					v-model="devPassword"
+					@confirm="checkDevPassword"
+					confirm-type="done"
+					placeholder="请输入密码"
+					placeholder-class="dev-panel__placeholder"
+					cursor-spacing="10"
+					:adjust-position="false"
+					:focus="devPasswordShow"
+				/>
+				<view class="dev-panel__btns">
+					<view class="dev-panel__btn dev-panel__btn--cancel" @click="closeDevPasswordDialog">取消</view>
+					<view class="dev-panel__btn dev-panel__btn--confirm" @click="checkDevPassword">确认</view>
+				</view>
+			</view>
+		</view>
+		
 		<!-- 长按提示 -->
 		<view class="long-press-tip" v-if="showLongPressTip">
 			<text class="long-press-tip__text">继续按住2秒进入开发者模式</text>
@@ -73,6 +98,9 @@ export default {
 			isLongPress: false,
 			longPressTriggered: false,
 			showLongPressTip: false,
+			// 开发者模式相关
+			devPasswordShow: false,
+			devPassword: '',
 		}
 	},
 	created() {
@@ -144,76 +172,27 @@ export default {
 			})
 		},
 		openDevPasswordDialog() {
-			console.log('[DevMode] openDevPasswordDialog 被调用')
-			
-			// 使用 wx.showModal 的 editable 模式（原生弹窗，不受键盘影响）
-			// #ifdef MP-WEIXIN
-			console.log('[DevMode] wx.canIUse 检查:', wx.canIUse && wx.canIUse('showModal.editable'))
-			
-			if (wx.canIUse && wx.canIUse('showModal.editable')) {
-				console.log('[DevMode] 开始调用 wx.showModal editable')
-				wx.showModal({
-					title: '开发者验证',
-					content: '请输入开发者密码',
-					editable: true,
-					placeholderText: '请输入密码',
-					confirmText: '确认',
-					cancelText: '取消',
-					success: (res) => {
-						console.log('[DevMode] showModal success 回调:', JSON.stringify(res))
-						if (res.confirm) {
-							console.log('[DevMode] 用户确认，输入内容:', res.content)
-							if (res.content === '990110') {
-								uni.navigateTo({
-									url: '/pages/dev/index'
-								})
-							} else {
-								uni.showToast({
-									title: '密码错误',
-									icon: 'none'
-								})
-							}
-						}
-					},
-					fail: (err) => {
-						console.log('[DevMode] showModal fail 回调:', JSON.stringify(err))
-					}
+			this.devPasswordShow = true
+			this.devPassword = ''
+		},
+		closeDevPasswordDialog() {
+			this.devPasswordShow = false
+			this.devPassword = ''
+		},
+		checkDevPassword() {
+			if (this.devPassword === '990110') {
+				this.devPasswordShow = false
+				this.devPassword = ''
+				uni.navigateTo({
+					url: '/pages/dev/index'
 				})
-				console.log('[DevMode] wx.showModal 已调用')
-				return
-			}
-			// #endif
-			
-			console.log('[DevMode] 无法使用 showModal.editable，尝试降级方案')
-			
-			// 降级方案：使用 uView 的弹窗（如果可用）
-			console.log('[DevMode] this.$u 存在:', !!this.$u)
-			if (this.$u && this.$u.modal) {
-				console.log('[DevMode] 使用 uView modal')
-				this.$u.modal({
-					title: '开发者验证',
-					placeholder: '请输入密码',
-					showCancelButton: true,
-					confirmText: '确认',
-					cancelText: '取消',
-					onConfirm: (value) => {
-						console.log('[DevMode] uView modal 确认，输入:', value)
-						if (value === '990110') {
-							uni.navigateTo({
-								url: '/pages/dev/index'
-							})
-						} else {
-							uni.showToast({
-								title: '密码错误',
-								icon: 'none'
-							})
-						}
-					}
+			} else {
+				uni.showToast({
+					title: '密码错误',
+					icon: 'none'
 				})
-				return
+				this.devPassword = ''
 			}
-			
-			console.log('[DevMode] 所有弹窗方案都不可用')
 		},
 		// 外部调用：更新选中状态
 		setSelected(index) {
@@ -282,6 +261,91 @@ export default {
 			right: 20px;
 			border: 6px solid transparent;
 			border-top-color: rgba(0, 0, 0, 0.75);
+		}
+	}
+	
+	/* 开发者密码输入面板 */
+	.dev-panel {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 10000;
+		
+		&__mask {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: rgba(0, 0, 0, 0.5);
+		}
+		
+		&__content {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 280px;
+			background-color: #fff;
+			border-radius: 4px;
+			padding: 24px 20px;
+		}
+		
+		&__title {
+			font-size: 17px;
+			font-weight: 500;
+			text-align: center;
+			margin-bottom: 6px;
+		}
+		
+		&__subtitle {
+			font-size: 14px;
+			color: #999;
+			text-align: center;
+			margin-bottom: 20px;
+		}
+		
+		&__input {
+			width: 100%;
+			height: 44px;
+			border: 1px solid #e5e5e5;
+			border-radius: 4px;
+			padding: 0 12px;
+			font-size: 14px;
+			box-sizing: border-box;
+			margin-bottom: 20px;
+		}
+		
+		&__placeholder {
+			color: #ccc;
+		}
+		
+		&__btns {
+			display: flex;
+			justify-content: space-between;
+		}
+		
+		&__btn {
+			flex: 1;
+			height: 44px;
+			line-height: 44px;
+			text-align: center;
+			border-radius: 4px;
+			font-size: 14px;
+			
+			&--cancel {
+				background-color: #f5f5f5;
+				color: #666;
+				margin-right: 10px;
+			}
+			
+			&--confirm {
+				background-color: #18AF38;
+				color: #fff;
+				margin-left: 10px;
+			}
 		}
 	}
 }
