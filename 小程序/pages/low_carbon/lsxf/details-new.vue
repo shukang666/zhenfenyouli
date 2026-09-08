@@ -128,7 +128,7 @@
 					:disabled="info.is_end == 1"
 					@click="handleSign"
 				>
-					{{info.is_end == 1 ? '活动已结束' : '加入挑战'}}
+					{{info.is_end == 1 ? '活动已结束' : '立即报名'}}
 				</u-button>
 				<u-button 
 					v-else
