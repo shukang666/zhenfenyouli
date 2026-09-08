@@ -328,7 +328,7 @@
 			}
 		},
 		methods: {
-			// 格式化日期为 yy-mm-dd 格式
+			// 格式化日期为 yyyy.mm.dd 格式
 			formatDate(timestamp) {
 				if (!timestamp) return '';
 				// 如果是字符串格式的时间，先转为时间戳
@@ -346,10 +346,10 @@
 					ts = ts * 1000;
 				}
 				const date = new Date(ts);
-				const year = date.getFullYear().toString().slice(-2);
+				const year = date.getFullYear().toString();
 				const month = (date.getMonth() + 1).toString().padStart(2, '0');
 				const day = date.getDate().toString().padStart(2, '0');
-				return year + '-' + month + '-' + day;
+				return year + '.' + month + '.' + day;
 			},
 			// 返回上一页
 			navigateBack() {
@@ -374,7 +374,7 @@
 			this.sign_clock_show = true
 		},
 		// 立即参与按钮
-			handleSign() {
+		handleSign() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.post_new_active_sign()
 			},
