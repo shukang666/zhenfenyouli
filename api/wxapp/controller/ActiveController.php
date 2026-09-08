@@ -332,7 +332,7 @@ class ActiveController extends AuthController
     public function get_active_tab_list(){
         $where = [];
         $where[] = ['status', '=', 1];
-        $list = ActiveTabModel::where($where)->order('list_order asc,id asc')->limit(4)->select();
+        $list = ActiveTabModel::where($where)->order('list_order asc,id asc')->select();
         $this->success('请求成功', $list);
     }
 

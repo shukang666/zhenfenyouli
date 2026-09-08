@@ -60,13 +60,8 @@ class ActiveTabController extends ToolController
         return $params;
     }
 
-    //小程序活动页标签最多4个
     public function setAddPost($params)
     {
-        $total = $this->model->count();
-        if ($total >= 4) {
-            $this->error('标签最多配置4个');
-        }
         return parent::setAddPost($params);
     }
 }
