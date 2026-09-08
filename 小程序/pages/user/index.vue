@@ -227,8 +227,9 @@
 		methods: {
 			// 更新自定义tabbar选中索引
 			updateTabBarSelected(index) {
-				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {
-					this.$mp.page.getTabBar().setSelected(index)
+				const tabBar = this.$mp?.page?.getTabBar && this.$mp.page.getTabBar()
+				if (tabBar) {
+					tabBar.setSelected(index)
 				}
 			},
 			async get_new_badge_list() {
