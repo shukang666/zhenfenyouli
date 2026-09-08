@@ -435,7 +435,7 @@ class ActiveController extends AuthController
         $where[] = ['user_id', '=', $this->user_id];
         $sign_info = ActiveSIgnModel::where($where)->find();
         // 只有打卡活动（is_clock=1）才自动报名，非打卡活动需用户手动报名
-        if(empty($sign_info) && $this->user_id && $item['is_clock'] == 1){
+        if(empty($sign_info) && $this->user_id && intval($item['is_clock']) === 1){
             // 自动创建报名记录，跳过角色条件校验和积分扣除
             $sign_data = [];
             $sign_data['user_id'] = $this->user_id;
