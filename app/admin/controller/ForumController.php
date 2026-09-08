@@ -148,9 +148,14 @@ class ForumController extends ToolController
         });
 
         if ($export) {
-            if($type == 3){
+            $exportAdvanced = $this->request->param('export_advanced', 0);
+            $exportCols = $this->request->param('export_cols', '');
+            if ($exportAdvanced && $exportCols) {
+                // 高级导出：动态列
+                $this->outDataAdvanced($list, $exportCols, $type);
+            } elseif ($type == 3) {
                 $this->outData3($list);
-            }else{
+            } else {
                 $this->outData($list);
             }
         }
@@ -521,6 +526,104 @@ class ForumController extends ToolController
         $head = ['ID', '用户信息', '小区', '站点', '内容', '点位照片', '投放指南', '垃圾桶照片', '创建时间',];//设置表头
         $keys = ['id', 'nickname', 'community_name', 'cate_name', 'content', 'image_one', 'image_two', 'image_three', 'create_at',];//设置表头
         $types = ['1', '1', '1', '1', '1', '2', '2', '2', '1'];//设置表头
+        CommonModel::outData($filename, $list, $head, $keys, $types, $image_array);
+        exit;
+    }
+
+    /**
+     * 高级导出：支持动态选择列
+     * @param $list 数据列表
+     * @param $exportCols 逗号分隔的列key
+     * @param $type 类型
+     */
+    public function outDataAdvanced($list, $exportCols, $type)
+    {
+        // 关闭所有层级输出缓冲
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        ini_set('default_socket_timeout', 8);
+        gc_enable();
+
+        // 解析用户选择的列
+        $selectedKeys = explode(',', $exportCols);
+        $selectedKeys = array_map('trim', $selectedKeys);
+
+        // 列定义：key => [label, is_image]
+        $columnMap = [
+            'id'            => ['ID', false],
+            'nickname'      => ['用户信息', false],
+            'community_name'=> ['小区', false],
+            'cate_name'     => ['站点', false],
+            'content'       => ['内容', false],
+            'image_one'     => ['点位照片', true],
+            'image_two'     => ['投放指南', true],
+            'image_three'   => ['垃圾桶照片', true],
+            'like_total'    => ['点赞数', false],
+            'create_at'     => ['创建时间', false],
+        ];
+
+        // type=2 额外支持的列
+        if ($type == 2) {
+            $columnMap['uid'] = ['用户ID', false];
+            $columnMap['like_total'] = ['点赞数', false];
+            $columnMap['create_at'] = ['创建时间', false];
+        }
+
+        // 构建本次导出的表头和keys
+        $head = [];
+        $keys = [];
+        $types = [];
+        foreach ($selectedKeys as $key) {
+            if (isset($columnMap[$key])) {
+                $head[] = $columnMap[$key][0];
+                $keys[] = $key;
+                $types[] = $columnMap[$key][1] ? '2' : '1';
+            }
+        }
+
+        if (empty($head)) {
+            $head = ['ID'];
+            $keys = ['id'];
+            $types = ['1'];
+        }
+
+        // 数据预处理
+        $image_array = [];
+        foreach ($list as &$item) {
+            // 用户信息格式化
+            if (!empty($item['nickname'])) {
+                $item['nickname'] = "({$item['user_id']}){$item['nickname']}";
+            } else {
+                $item['nickname'] = $item['user_id'] ?? '';
+            }
+            // 时间格式化
+            if (!empty($item['create_time'])) {
+                $item['create_at'] = date('Y-m-d H:i:s', $item['create_time']);
+            } else {
+                $item['create_at'] = '';
+            }
+            // 图片列处理
+            $imageFields = ['image_one', 'image_two', 'image_three'];
+            foreach ($imageFields as $imgField) {
+                if (in_array($imgField, $selectedKeys) && !empty($item[$imgField])) {
+                    $item[$imgField] = cmf_get_asset_url($item[$imgField]);
+                    $item[$imgField] = $this->downloadRemoteImage($item[$imgField]);
+                    if ($item[$imgField]) {
+                        $image_array[] = $item[$imgField];
+                    }
+                }
+            }
+        }
+        unset($item);
+
+        $filename = '点位巡查_' . date('Y-m-d');
+        if ($type == 2) {
+            $filename = '垃圾分类打卡_' . date('Y-m-d');
+        }
         CommonModel::outData($filename, $list, $head, $keys, $types, $image_array);
         exit;
     }
