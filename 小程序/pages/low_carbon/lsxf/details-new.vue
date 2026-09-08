@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<view class="container">
 		<!-- 沉浸式封面区域 -->
 		<view class="hero-section">
@@ -186,7 +186,7 @@
 			</view>
 		</u-popup>
 		
-		<!-- 打卡动作表单弹窗（即时表单通知） -->
+		<!-- 打卡动作表单弹窗（即时表单通知�?-->
 		<u-popup v-model="actionFormShow" mode="bottom" border-radius="24" closeable :closeable="false">
 			<view class="action-form-popup">
 				<view class="popup-header">
@@ -195,11 +195,11 @@
 				</view>
 				<view class="form-fields">
 					<view class="form-field" v-for="(field, fIdx) in actionTrigger.forms" :key="fIdx">
-						<!-- 纯文本说明类型 -->
+						<!-- 纯文本说明类�?-->
 						<view v-if="field.field_type === 'text'" class="field-text">
 							{{field.field_label}}
 						</view>
-						<!-- 单选按钮类型 -->
+						<!-- 单选按钮类�?-->
 						<view v-else-if="field.field_type === 'radio'">
 							<view class="field-label">{{field.field_label}} <text v-if="field.is_required == 1" class="required">*</text></view>
 							<view class="radio-options">
@@ -211,7 +211,7 @@
 								</view>
 							</view>
 						</view>
-						<!-- 多行文本框类型 -->
+						<!-- 多行文本框类�?-->
 						<view v-else-if="field.field_type === 'textarea'">
 							<view class="field-label">{{field.field_label}} <text v-if="field.is_required == 1" class="required">*</text></view>
 							<u-input v-model="actionFormData[field.field_label]" type="textarea" height="150" :placeholder="'请输入' + field.field_label" border />
@@ -252,14 +252,14 @@
 			};
 		},
 		computed: {
-			// 副标题 - 根据活动类型生成
+			// 副标�?- 根据活动类型生成
 			subtitle() {
 				if (this.info.is_clock == 1) {
 					return '每天30秒，让社区更绿色';
 				}
 				return '参与绿色行动，共建美好家园';
 			},
-		// 参与人数 - 暂时使用默认值，后续需要后端提供字段
+		// 参与人数 - 暂时使用默认值，后续需要后端提供字�?
 		participantsCount() {
 			// 真实实现时应该是 this.info.participants_count
 			return this.info.sign_count || 0;
@@ -277,7 +277,7 @@
 		// 活动时间文本 - 根据活动类型显示不同格式
 		activityTimeText() {
 			if (this.info.is_clock == 1) {
-				// 打卡活动：使用 clock_start_time 和 clock_end_time
+				// 打卡活动：使�?clock_start_time �?clock_end_time
 				let startTime = '';
 				let endTime = '';
 				if (this.info.clock_start_time) {
@@ -351,7 +351,7 @@
 				const day = date.getDate().toString().padStart(2, '0');
 				return year + '.' + month + '.' + day;
 			},
-			// 返回上一页
+			// 返回上一�?
 			navigateBack() {
 				uni.navigateBack();
 			},
@@ -362,11 +362,11 @@
 					icon: 'none'
 				});
 			},
-			// 跳转排行榜
+			// 跳转排行�?
 			goToRank() {
 				this.$u.route(`/pages/low_carbon/rank?id=${this.info.id}`);
 			},
-		// 上传组件状态变化回调
+		// 上传组件状态变化回�?
 		handleUploadChange() {},
 		// 打卡按钮（打卡活动不需要先报名，直接打卡）
 		handleClock() {
@@ -378,7 +378,7 @@
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.post_new_active_sign()
 			},
-			// 删除图
+			// 删除�?
 			removeImages(e, key, isOne) {
 				if (isOne) {
 					this.form[key] = ''
@@ -386,7 +386,7 @@
 					this.form[key].splice(e, 1)
 				}
 			},
-			// 上传图
+			// 上传�?
 			uploadImages(e, key, isOne) {
 				if (isOne) {
 					this.form[key] = e.data.filepath
@@ -410,7 +410,7 @@
 					// 检查是否有打卡动作触发
 					if (res.data && res.data.action_trigger) {
 						this.actionTrigger = res.data.action_trigger;
-						// 即时表单通知：弹出表单弹窗
+						// 即时表单通知：弹出表单弹�?
 						if (this.actionTrigger.notify_type == 1) {
 							this.initActionFormData();
 							setTimeout(() => {
@@ -439,7 +439,7 @@
 					this.$u.toast(e.msg)
 				}
 			},
-			// 初始化动作表单数据
+			// 初始化动作表单数�?
 			initActionFormData() {
 				this.actionFormData = {};
 				if (this.actionTrigger && this.actionTrigger.forms) {
@@ -466,7 +466,7 @@
 			// 提交打卡动作表单
 			async submitClockActionForm() {
 				if (!this.actionTrigger) return;
-				// 校验必填项
+				// 校验必填�?
 				for (let field of this.actionTrigger.forms) {
 					if (field.is_required == 1 && (field.field_type === 'radio' || field.field_type === 'textarea')) {
 						let val = this.actionFormData[field.field_label];
@@ -523,7 +523,7 @@
 				this.recordSubscribeStatus(actionId, 0);
 				// #endif
 			},
-			// 记录订阅授权状态
+			// 记录订阅授权状�?
 			async recordSubscribeStatus(actionId, isSubscribed) {
 				try {
 					await this.$u.api.post_clock_action_subscribe({
@@ -531,7 +531,7 @@
 						is_subscribed: isSubscribed
 					});
 				} catch (e) {
-					console.log('记录订阅状态失败:', e);
+					console.log('记录订阅状态失�?', e);
 				}
 			},
 			makePhoneCall(phoneNumber) {
@@ -611,7 +611,7 @@
 		padding-bottom: 200rpx;
 	}
 	
-	// 沉浸式封面
+	// 沉浸式封�?
 	.hero-section {
 		position: relative;
 		width: 750rpx;
@@ -729,7 +729,7 @@
 		}
 	}
 	
-	// 内容区
+	// 内容�?
 	.content-section {
 		padding: 24rpx;
 	}
@@ -773,22 +773,26 @@
 				}
 			}
 			
-				.info-content {
-					flex: 1;
-					margin-right: 16rpx;
-					
-					.info-label {
-						font-size: 24rpx;
-						color: #86868B;
-						margin-bottom: 4rpx;
-					}
-					
-					.info-value {
-						font-size: 28rpx;
-						color: #1D1D1F;
-						font-weight: 500;
-					}
+			.info-content {
+				flex: 1;
+				margin-right: 16rpx;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				
+				.info-label {
+					font-size: 24rpx;
+					color: #86868B;
+					flex-shrink: 0;
 				}
+				
+				.info-value {
+					font-size: 28rpx;
+					color: #1D1D1F;
+					font-weight: 500;
+					text-align: right;
+				}
+			}
 			
 			.info-arrow {
 				font-size: 32rpx;
@@ -875,7 +879,7 @@
 		}
 	}
 	
-	// 底部操作栏
+	// 底部操作�?
 	.bottom-bar {
 		position: fixed;
 		bottom: 0;
@@ -1141,3 +1145,4 @@
 		}
 	}
 </style>
+

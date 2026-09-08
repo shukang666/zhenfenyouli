@@ -1,5 +1,5 @@
 <template>
-	<view class="u-p-30">
+	<view class="u-p-30 user-page">
 		<image v-if="imgUrl" :src="`${imgUrl}user-bg.png`" class="u-abso u-abso-l-0 u-abso-t-0 u-w-750 u-h-448" mode="aspectFill"></image>
 		<view class="u-flex u-row-between u-rela" style="padding-top: 150rpx;">
 			<view class="u-flex u-col-top">
@@ -266,5 +266,11 @@
 		align-items: center;
 		justify-content: center;
 		height: 100%;
+	}
+	/* tabbar 悬浮：底部预留安全间距，防止内容被遮挡 */
+	.user-page {
+		padding-bottom: 120rpx;
+		padding-bottom: calc(120rpx + constant(safe-area-inset-bottom));
+		padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 	}
 </style>
