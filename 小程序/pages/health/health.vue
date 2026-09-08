@@ -1,5 +1,5 @@
 <template>
-	<view class="u-p-30 health-page">
+	<view class="u-p-30">
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="health"></skeleton-screen>
 		<u-navbar title-color="#fff" is-fixed :is-back="false" background="transparent" :borderBottom="false">
@@ -90,6 +90,8 @@
 				</view>
 			</view>
 		</view>
+		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->
+		<view style="height: 160rpx; flex-shrink: 0;"></view>
 	</view>
 </template>
 
@@ -202,11 +204,5 @@
 .content-text {
     white-space: pre-line;
     word-break: break-all;
-}
-/* tabbar 悬浮：底部预留安全间距，防止内容被遮挡 */
-.health-page {
-    padding-bottom: 120rpx;
-    padding-bottom: calc(120rpx + constant(safe-area-inset-bottom));
-    padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
 </style>

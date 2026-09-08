@@ -1,5 +1,5 @@
 <template>
-	<view class="u-p-30 mall-page">
+	<view class="u-p-30">
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="mall"></skeleton-screen>
 		<u-navbar title-color="#fff" :is-back="false" background="transparent" :borderBottom="false">
@@ -84,6 +84,8 @@
 		<view class="" style="position: fixed;right: 30rpx;bottom: 130rpx;z-index: 9;" @click="$u.route('/pages/mall/ranking')">
 			<u-image width="100" height="100" src="https://oss.ausite.cn/xcxkf052/admin/20250521/4c26a124df730861668dd53ab9842f27.png?watermark"></u-image>
 		</view>
+		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->
+		<view style="height: 160rpx; flex-shrink: 0;"></view>
 	</view>
 </template>
 
@@ -230,10 +232,5 @@
 </script>
 
 <style lang="scss">
-	/* tabbar 悬浮：底部预留安全间距，防止内容被遮挡 */
-	.mall-page {
-		padding-bottom: 120rpx;
-		padding-bottom: calc(120rpx + constant(safe-area-inset-bottom));
-		padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
-	}
-</style>
+	/* 占位：uni-app 空 style 块不生成 wxss，需至少一条规则 */
+	.mall-page {}
