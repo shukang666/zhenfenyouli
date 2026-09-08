@@ -19,7 +19,7 @@
   align-items: center;
   justify-content: space-around;
   height: 108rpx;
-  margin: 0 24rpx 12rpx;
+  margin: 0 24rpx 4rpx;
   overflow: hidden;
   border-radius: 54rpx;
   /* 无 blur 时也能看的半透明底（安卓兜底） */
