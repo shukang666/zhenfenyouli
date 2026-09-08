@@ -13,12 +13,32 @@
 			<!-- 右侧内容区：根据 current_tab 联动显示对应标签内容 -->
 			<view class="content-area">
 
-		<!-- 本月推荐标签（前端写死第一个标签，unshift 到 tab_list 头部）：仅展示海报 -->
+		<!-- 本月推荐标签：展示海报+推荐活动列表 -->
 	<view v-if="is_monthly_rec_tab" class="pane monthly-rec-pane">
 		<view v-if="monthly_rec_banner" class="rec-banner">
 			<u-image width="100%" height="100%" :src="monthly_rec_banner" mode="aspectFill"></u-image>
 		</view>
-		<view v-else class="u-text-center u-p-60 u-type-info">暂无推荐海报</view>
+		<view class="u-p-30">
+			<view class="u-font-bold u-font-32 u-m-b-20">本月推荐活动</view>
+			<view v-if="monthly_rec_list.length === 0 && !monthly_rec_loading" class="u-text-center u-p-40 u-type-info">暂无推荐活动</view>
+			<view v-else class="act-card" v-for="item in monthly_rec_list" :key="item.id"
+				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+				<u-image width="100%" height="285" :src="item.thumb"></u-image>
+				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
+					<view class="u-flex">
+						<image :src="img" class="u-w-30 u-h-30 u-radius-o" mode="aspectFill" style="margin-left: -10rpx;" v-for="(img,i) in item.avatar_array" :key="i"></image>
+					</view>
+					<view class="u-font-24 white u-m-l-10">{{item.active_count}}人参与</view>
+				</view>
+				<view class="u-p-30">
+					<view class="u-font-bold u-font-28 u-line-1">{{item.name}}</view>
+					<view class="u-m-t-10 u-font-22 u-type-info u-line-2">{{item.dec}}</view>
+					<view class="u-m-t-10 u-font-22 u-type-info">
+						<text v-if="item.status_name">{{item.status_name}}</text>
+					</view>
+				</view>
+			</view>
+		</view>
 	</view>
 
 		<!-- 打卡标签（后台第一个固定标签，index===1）：绑定活动分类，顶部写死"垃圾分类打卡"入口卡片，下方动态加载该分类活动列表 -->
@@ -394,12 +414,15 @@
 				current_tab: 0,
 				page: 1,
 				total: 0,
-				// 当前分类标签下的活动列表
-				active_list: [],
-				active_page: 1,
-				active_total: 0,
-				active_loading: false,
-				current_cate_id: 0,
+			// 当前分类标签下的活动列表
+			active_list: [],
+			active_page: 1,
+			active_total: 0,
+			active_loading: false,
+			current_cate_id: 0,
+			// 本月推荐活动列表
+			monthly_rec_list: [],
+			monthly_rec_loading: false,
 			// 自治活动标签：商家信息（复刻 zzhd.vue）
 			shopInfo: {},
 			// 社交活动标签：问卷调查列表（复刻 research.vue）
@@ -483,6 +506,8 @@
 			} catch (e) {
 				console.log('数据加载失败:', e)
 			} finally {
+				// 加载推荐活动列表
+				await this.load_monthly_rec_list()
 				// 确保骨架屏最少显示 400ms，防止加载过快导致闪烁
 				const elapsed = Date.now() - startTime
 				const minDelay = 400
@@ -558,8 +583,11 @@
 			if (!tab) return
 			// 备份标签不加载分类列表
 			if (tab._is_backup === 1) return
-			// 本月推荐标签：仅展示海报，无需加载列表
-			if (tab._is_custom === 'monthly_rec') return
+		// 本月推荐标签：加载推荐活动列表
+		if (tab._is_custom === 'monthly_rec') {
+				this.load_monthly_rec_list()
+				return
+			}
 			// 自治活动标签：加载用户信息和商家信息
 				if (tab._is_custom === 'zzhd') {
 					if (this.isLogin) {
@@ -656,6 +684,21 @@
 			if (res.data && res.data.length > 0) {
 				this.monthly_rec_banner = res.data[0].image
 			}
+		})
+	},
+	// 加载本月推荐活动列表（is_month_recommend=1）
+	async load_monthly_rec_list() {
+		this.monthly_rec_loading = true
+		return this.$u.api.get_new_active_list({
+			page: 1,
+			is_month_recommend: 1
+		}).then(res => {
+			this.monthly_rec_loading = false
+			let data = res.data || {}
+			this.monthly_rec_list = data.data || []
+		}).catch(err => {
+			this.monthly_rec_loading = false
+			console.log('推荐活动加载失败:', err)
 		})
 	},
 			// ===== 自治活动标签方法（复刻 zzhd.vue，与首页 navigator 区分以保留督导员权限校验） =====
