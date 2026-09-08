@@ -144,14 +144,14 @@ class ActiveController extends ToolController
                 $result = ActiveModel::create($params);
                 //生成小程序码
                 $scene = (string)$result['id'];
-                $qr_code = CommonModel::setShareImage($scene,'active','dz1111',$share_url);
+                $qr_code = CommonModel::setShareImage($scene,'active_'.$result['id'],'dz1111',$share_url);
                 $this->model->where('id',$result['id'])->update(['qr_code' => $qr_code]);
             } else {
                 $item = ActiveModel::where('id',$params['id'])->find();
                 if (empty($item['qr_code'])) {
                     //生成小程序码
                     $scene = (string)$params['id'];
-                    $params['qr_code'] = CommonModel::setShareImage($scene,'active','dz1111',$share_url);
+                    $params['qr_code'] = CommonModel::setShareImage($scene,'active_'.$params['id'],'dz1111',$share_url);
                 }
                 $result = $this->setEditPost($params);
             }
