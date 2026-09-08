@@ -325,12 +325,11 @@
 			},
 			// 上传组件状态变化回调
 			handleUploadChange() {},
-			// 打卡按钮
-			handleClock() {
-				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				if (!this.info.is_sign) return this.$u.toast('请先报名活动')
-				this.sign_clock_show = true
-			},
+		// 打卡按钮（打卡活动不需要先报名，直接打卡）
+		handleClock() {
+			if (!this.isLogin) return this.$u.route('/pages/public/login')
+			this.sign_clock_show = true
+		},
 			// 立即参与按钮
 			handleSign() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
