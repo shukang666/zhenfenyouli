@@ -11,68 +11,75 @@
 			</template>
 
 			<!-- Banner 轮播图 -->
-		<view class="banner-wrap">
-			<u-swiper :list="bannerList" height="340" border-radius="24" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
-		</view>
-
-		<!-- 走马灯通知栏（后台 home_notice 配置，留空则不显示） -->
-		<view class="notice-bar-wrap" v-if="homeNotice">
-			<u-notice-bar :list="[homeNotice]" :volume-icon="true" :more-icon="false" :close-icon="false" :speed="100"></u-notice-bar>
-		</view>
-
-		<!-- ========== 问候模块（仅已登录用户可见） ========== -->
-		<view class="greeting-section" v-if="isLogin">
-			<view class="greeting-bg"></view>
-			<view class="greeting-content">
-				<view class="greeting-text">
-					<view class="greeting-line1">{{ greetingText }}，{{ userInfo.nickname || '环保达人' }}</view>
-					<view class="greeting-line2">{{ userLevelName }} · 坚持就是力量</view>
-				</view>
-				<view class="greeting-avatar" @click="$u.route({type:'switchTab', url:'/pages/user/user'})">
-					<u-image :src="userInfo.avatar || '/static/images/default-avatar.png'" width="88" height="88" shape="circle" mode="aspectFill"></u-image>
-				</view>
+			<view class="banner-wrap">
+				<u-swiper :list="bannerList" height="340" border-radius="24" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
 			</view>
-		</view>
 
-		<!-- ========== 今日垃圾分类打卡卡片 ========== -->
-		<view class="task-section" v-if="todayTask.show">
-			<view class="task-header">
-				<view class="task-title-group">
-					<view class="task-icon-wrap">
-						<u-icon name="checkbox-mark" size="28" color="#ffffff"></u-icon>
+			<!-- 走马灯通知栏（后台 home_notice 配置，留空则不显示） -->
+			<view class="notice-bar-wrap" v-if="homeNotice">
+				<u-notice-bar :list="[homeNotice]" :volume-icon="true" :more-icon="false" :close-icon="false" :speed="100"></u-notice-bar>
+			</view>
+
+			<!-- ========== 问候+打卡 一体化卡片（仅已登录用户可见·iOS风格） ========== -->
+			<view class="hero-card" v-if="isLogin && todayTask.show">
+				<!-- 渐变背景层 -->
+				<view class="hero-card__bg"></view>
+				<!-- 光晕装饰 -->
+				<view class="hero-card__glow"></view>
+
+				<view class="hero-card__content">
+					<!-- 问候区：头像 + 问候语 + 等级 -->
+					<view class="hero-greeting" @click="$u.route({type:'switchTab', url:'/pages/user/user'})">
+						<view class="hero-greeting__avatar">
+							<u-image :src="userInfo.avatar || '/static/images/default-avatar.png'" width="96" height="96" shape="circle" mode="aspectFill"></u-image>
+							<view class="hero-greeting__level">{{ userLevelName }}</view>
+						</view>
+						<view class="hero-greeting__text">
+							<text class="hero-greeting__title">{{ greetingText }}，{{ userInfo.nickname || '环保达人' }}</text>
+							<text class="hero-greeting__subtitle">今天想为地球做点什么？</text>
+						</view>
+						<view class="hero-greeting__arrow">
+							<u-icon name="arrow-right" size="24" color="rgba(255,255,255,0.7)"></u-icon>
+						</view>
 					</view>
-					<view class="task-title-info">
-						<view class="task-title">{{ todayTask.title }}</view>
-						<view class="task-subtitle">{{ todayTask.subtitle }}</view>
+
+					<!-- 细线分隔 -->
+					<view class="hero-divider"></view>
+
+					<!-- 打卡进度区 -->
+					<view class="hero-progress">
+						<view class="hero-progress__header">
+							<view class="hero-progress__label">
+								<text class="hero-progress__fire">🔥</text>
+								<text>连续打卡</text>
+							</view>
+							<view class="hero-progress__badge">
+								<text class="hero-progress__streak">{{ todayTask.streak }}</text>
+								<text class="hero-progress__unit">天</text>
+							</view>
+						</view>
+						<!-- 进度条 -->
+						<view class="hero-progress__track">
+							<view class="hero-progress__fill" :style="{ width: todayTask.progress + '%' }"></view>
+							<view class="hero-progress__indicator" :style="{ left: todayTask.progress + '%' }"></view>
+						</view>
+						<view class="hero-progress__footer">
+							<text v-if="todayTask.daysToGoal > 0">再坚持 <text class="hero-progress__highlight">{{ todayTask.daysToGoal }}</text> 天获取额外奖励</text>
+							<text class="hero-progress__done" v-else>🎉 已达成周目标！</text>
+						</view>
+					</view>
+
+					<!-- 打卡按钮 -->
+					<view class="hero-btn" hover-class="hero-btn--active" @click="goToClock">
+						<view class="hero-btn__inner">
+							<u-icon name="checkbox-mark" size="32" color="#18AF38"></u-icon>
+							<text>立即打卡</text>
+						</view>
 					</view>
 				</view>
-				<view class="task-points">
-					<text class="points-num">+{{ todayTask.points }}</text>
-					<text class="points-label">积分</text>
-				</view>
 			</view>
-			<!-- 打卡进度条 -->
-			<view class="task-progress">
-				<view class="progress-header">
-					<text class="progress-label">连续打卡</text>
-					<text class="progress-value">{{ todayTask.streak }}天</text>
-				</view>
-				<view class="progress-bar-bg">
-					<view class="progress-bar-fill" :style="{ width: todayTask.progress + '%' }"></view>
-				</view>
-				<view class="progress-footer">
-					<text class="progress-next" v-if="todayTask.daysToGoal > 0">再坚持 <text class="highlight">{{ todayTask.daysToGoal }}</text> 天获取额外奖励</text>
-					<text class="progress-next done" v-else>🎉 已达成周目标！</text>
-				</view>
-			</view>
-			<!-- 打卡按钮 -->
-			<view class="task-button" hover-class="task-button--hover" @click="goToClock">
-				<text>立即打卡</text>
-				<u-icon name="arrow-right" size="28" color="#ffffff"></u-icon>
-			</view>
-		</view>
 
-		<!-- 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 -->
+			<!-- 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 -->
 			<view class="entry-grid">
 				<!-- 左侧大卡 -->
 				<view class="entry-main" hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(entry_list[0])">
@@ -462,166 +469,252 @@
 		padding: 20rpx 30rpx 0;
 	}
 
-	/* ========== 问候模块 ========== */
-	.greeting-section {
+	/* ========== iOS 风格 问候+打卡一体化卡片 ========== */
+	.hero-card {
 		position: relative;
 		margin: 24rpx 30rpx 0;
-		padding: 32rpx 30rpx;
-		border-radius: 24rpx;
+		border-radius: 32rpx;
 		overflow: hidden;
-	}
-	.greeting-bg {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: linear-gradient(135deg, #18AF38 0%, #2DC853 50%, #5FD97F 100%);
-		z-index: 0;
-	}
-	.greeting-content {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-	.greeting-text {
-		flex: 1;
-	}
-	.greeting-line1 {
-		font-size: 34rpx;
-		font-weight: 600;
-		color: #ffffff;
-		line-height: 1.4;
-	}
-	.greeting-line2 {
-		margin-top: 8rpx;
-		font-size: 24rpx;
-		color: rgba(255, 255, 255, 0.85);
-	}
-	.greeting-avatar {
-		flex-shrink: 0;
-		margin-left: 24rpx;
-		border: 4rpx solid rgba(255, 255, 255, 0.3);
-		border-radius: 50%;
-	}
+		/* 多层阴影营造 iOS 立体感 */
+		box-shadow:
+			0 8rpx 32rpx rgba(24, 175, 56, 0.18),
+			0 2rpx 8rpx rgba(0, 0, 0, 0.06),
+			inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
 
-	/* ========== 今日垃圾分类打卡卡片 ========== */
-	.task-section {
-		margin: 24rpx 30rpx 0;
-		padding: 30rpx;
-		background: #ffffff;
-		border-radius: 24rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
-	}
-	.task-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-	.task-title-group {
-		display: flex;
-		align-items: center;
-		flex: 1;
-	}
-	.task-icon-wrap {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 56rpx;
-		height: 56rpx;
-		border-radius: 16rpx;
-		background: linear-gradient(135deg, #18AF38 0%, #2DC853 100%);
-		flex-shrink: 0;
-	}
-	.task-title-info {
-		margin-left: 16rpx;
-	}
-	.task-title {
-		font-size: 30rpx;
-		font-weight: 600;
-		color: #1a1a1a;
-	}
-	.task-subtitle {
-		margin-top: 4rpx;
-		font-size: 22rpx;
-		color: #9aa0a8;
-	}
-	.task-points {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
-	.points-num {
-		font-size: 36rpx;
-		font-weight: bold;
-		color: #18AF38;
-	}
-	.points-label {
-		font-size: 20rpx;
-		color: #9aa0a8;
-	}
-	/* 打卡进度条 */
-	.task-progress {
-		margin-top: 24rpx;
-	}
-	.progress-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	.progress-label {
-		font-size: 24rpx;
-		color: #666;
-	}
-	.progress-value {
-		font-size: 24rpx;
-		font-weight: 600;
-		color: #18AF38;
-	}
-	.progress-bar-bg {
-		margin-top: 12rpx;
-		height: 12rpx;
-		background: #f0f0f0;
-		border-radius: 6rpx;
-		overflow: hidden;
-	}
-	.progress-bar-fill {
-		height: 100%;
-		background: linear-gradient(90deg, #18AF38 0%, #5FD97F 100%);
-		border-radius: 6rpx;
-		transition: width 0.3s ease;
-	}
-	.progress-footer {
-		margin-top: 12rpx;
-	}
-	.progress-next {
-		font-size: 22rpx;
-		color: #999;
-	}
-	.progress-next .highlight {
-		color: #18AF38;
-		font-weight: 600;
-	}
-	.progress-next.done {
-		color: #18AF38;
-	}
-	/* 打卡按钮 */
-	.task-button {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-top: 24rpx;
-		height: 80rpx;
-		background: linear-gradient(135deg, #18AF38 0%, #2DC853 100%);
-		border-radius: 40rpx;
-		color: #ffffff;
-		font-size: 28rpx;
-		font-weight: 600;
-	}
-	.task-button--hover {
-		opacity: 0.85;
+		&__bg {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			/* iOS 风格柔和渐变 */
+			background: linear-gradient(145deg, #0D9F30 0%, #18AF38 35%, #2DC853 70%, #4DCA6B 100%);
+			z-index: 0;
+		}
+
+		/* 右上角光晕装饰 */
+		&__glow {
+			position: absolute;
+			top: -60rpx;
+			right: -40rpx;
+			width: 240rpx;
+			height: 240rpx;
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+			z-index: 1;
+			pointer-events: none;
+		}
+
+		&__content {
+			position: relative;
+			z-index: 2;
+			padding: 36rpx 32rpx 32rpx;
+		}
+
+		/* 问候区 */
+		.hero-greeting {
+			display: flex;
+			align-items: center;
+
+			&__avatar {
+				position: relative;
+				flex-shrink: 0;
+				margin-right: 24rpx;
+
+				::v-deep .u-image {
+					border: 3rpx solid rgba(255, 255, 255, 0.35);
+					box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+				}
+			}
+
+			/* 等级徽章贴在头像右下角 */
+			&__level {
+				position: absolute;
+				bottom: -4rpx;
+				left: 50%;
+				transform: translateX(-50%);
+				padding: 2rpx 12rpx;
+				font-size: 18rpx;
+				font-weight: 600;
+				color: #ffffff;
+				background: rgba(255, 255, 255, 0.25);
+				backdrop-filter: blur(8px);
+				border-radius: 10rpx;
+				white-space: nowrap;
+				border: 1rpx solid rgba(255, 255, 255, 0.2);
+			}
+
+			&__text {
+				flex: 1;
+				min-width: 0;
+			}
+
+			&__title {
+				font-size: 34rpx;
+				font-weight: 700;
+				color: #ffffff;
+				letter-spacing: 0.5rpx;
+				text-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.1);
+			}
+
+			&__subtitle {
+				display: block;
+				margin-top: 6rpx;
+				font-size: 24rpx;
+				color: rgba(255, 255, 255, 0.82);
+				letter-spacing: 0.3rpx;
+			}
+
+			&__arrow {
+				flex-shrink: 0;
+				margin-left: 16rpx;
+				opacity: 0.7;
+			}
+		}
+
+		/* 分隔线 */
+		.hero-divider {
+			height: 1rpx;
+			margin: 28rpx 0;
+			background: linear-gradient(
+				90deg,
+				transparent 0%,
+				rgba(255, 255, 255, 0.2) 20%,
+				rgba(255, 255, 255, 0.3) 50%,
+				rgba(255, 255, 255, 0.2) 80%,
+				transparent 100%
+			);
+		}
+
+		/* 打卡进度区 */
+		.hero-progress {
+			padding: 0 4rpx;
+
+			&__header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			&__label {
+				display: flex;
+				align-items: center;
+				font-size: 24rpx;
+				color: rgba(255, 255, 255, 0.9);
+				font-weight: 500;
+			}
+
+			&__fire {
+				font-size: 24rpx;
+				margin-right: 8rpx;
+			}
+
+			&__badge {
+				display: flex;
+				align-items: baseline;
+				padding: 4rpx 16rpx;
+				background: rgba(255, 255, 255, 0.15);
+				border-radius: 20rpx;
+				border: 1rpx solid rgba(255, 255, 255, 0.15);
+			}
+
+			&__streak {
+				font-size: 32rpx;
+				font-weight: 700;
+				color: #ffffff;
+				line-height: 1;
+			}
+
+			&__unit {
+				margin-left: 4rpx;
+				font-size: 20rpx;
+				color: rgba(255, 255, 255, 0.7);
+			}
+
+			/* 进度条轨道 */
+			&__track {
+				position: relative;
+				margin-top: 16rpx;
+				height: 8rpx;
+				background: rgba(255, 255, 255, 0.2);
+				border-radius: 4rpx;
+				overflow: visible;
+			}
+
+			/* 进度条填充 */
+			&__fill {
+				height: 100%;
+				background: linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, #ffffff 100%);
+				border-radius: 4rpx;
+				transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+				box-shadow: 0 0 8rpx rgba(255, 255, 255, 0.5);
+			}
+
+			/* 进度指示器圆点 */
+			&__indicator {
+				position: absolute;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				width: 16rpx;
+				height: 16rpx;
+				background: #ffffff;
+				border-radius: 50%;
+				box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+				transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+			}
+
+			&__footer {
+				margin-top: 14rpx;
+				font-size: 22rpx;
+				color: rgba(255, 255, 255, 0.75);
+				text-align: center;
+			}
+
+			&__highlight {
+				color: #ffffff;
+				font-weight: 700;
+				font-size: 26rpx;
+			}
+
+			&__done {
+				display: block;
+				color: #ffffff;
+				font-weight: 600;
+				font-size: 24rpx;
+			}
+		}
+
+		/* 打卡按钮 - iOS 风格胶囊按钮 */
+		.hero-btn {
+			margin-top: 28rpx;
+			background: rgba(255, 255, 255, 0.95);
+			border-radius: 50rpx;
+			box-shadow:
+				0 4rpx 16rpx rgba(0, 0, 0, 0.08),
+				inset 0 1rpx 0 rgba(255, 255, 255, 0.5);
+			transition: all 0.2s ease;
+
+			&:hover,
+			&--active {
+				transform: scale(0.98);
+				background: rgba(255, 255, 255, 0.85);
+				box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+			}
+
+			&__inner {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 88rpx;
+				font-size: 30rpx;
+				font-weight: 600;
+				color: #18AF38;
+				letter-spacing: 0.5rpx;
+
+				.u-icon {
+					margin-right: 8rpx;
+				}
+			}
+		}
 	}
 
 	/* 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 */
