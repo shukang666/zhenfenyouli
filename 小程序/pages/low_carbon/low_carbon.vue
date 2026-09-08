@@ -19,13 +19,12 @@
 			<u-image width="100%" height="100%" :src="monthly_rec_banner" mode="aspectFill"></u-image>
 		</view>
 		<view class="monthly-list-wrap">
-			<view class="monthly-section-title">本月推荐活动</view>
 			<view v-if="monthly_rec_list.length === 0 && !monthly_rec_loading" class="empty-tip">暂无推荐活动</view>
 			<view v-else class="ios-card" v-for="item in monthly_rec_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<view class="ios-card-img">
 					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
-					<view class="ios-card-badge" v-if="item.active_count">
+					<view class="ios-card-badge" v-if="item.active_count > 0">
 						<text class="badge-text">{{item.active_count}}人参与</text>
 					</view>
 				</view>
@@ -871,20 +870,18 @@
 		box-sizing: border-box;
 	}
 
-	/* 本月推荐：占满整个 content-area */
+	/* 本月推荐：内容区自适应高度 */
 	.monthly-rec-pane {
 		width: 100%;
-		height: 100%;
 		padding: 0 !important;
 	}
 
-	/* 本月推荐海报展示 */
+	/* 本月推荐海报 - 占屏幕可视区 0.7 */
 	.rec-banner {
 		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		height: calc(70vh - 88rpx - var(--status-bar-height, 0px));
+		display: block;
+		background: #f2f2f7;
 
 		::v-deep .u-image {
 			width: 100% !important;
@@ -897,19 +894,10 @@
 		}
 	}
 
-	/* ===== iOS App 风格卡片 ===== */
+	/* 卡片列表区域 */
 	.monthly-list-wrap {
-		padding: 30rpx;
+		padding: 24rpx;
 		background: #f2f2f7;
-		min-height: 100%;
-	}
-
-	.monthly-section-title {
-		font-size: 38rpx;
-		font-weight: 700;
-		color: #1c1c1e;
-		margin: 10rpx 0 24rpx 8rpx;
-		letter-spacing: -0.5rpx;
 	}
 
 	.empty-tip {
@@ -919,96 +907,98 @@
 		font-size: 28rpx;
 	}
 
-	/* iOS 大卡片：白色背景 + 大圆角 + 柔和阴影 */
+	/* iOS 大卡片 */
 	.ios-card {
 		display: flex;
 		flex-direction: column;
-		background: #ffffff;
-		border-radius: 20rpx;
-		margin-bottom: 24rpx;
+		background: #fff;
+		border-radius: 24rpx;
+		margin-bottom: 20rpx;
 		overflow: hidden;
-		box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.06), 0 0 1rpx rgba(0, 0, 0, 0.04);
-		transition: transform 0.2s;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06), 0 1rpx 3rpx rgba(0, 0, 0, 0.04);
 	}
 	.ios-card:active {
-		transform: scale(0.98);
+		opacity: 0.85;
 	}
 
-	/* 卡片图片区域 */
+	/* 卡片图片 */
 	.ios-card-img {
 		width: 100%;
-		height: 380rpx;
+		height: 360rpx;
 		position: relative;
-		background: #f2f2f7;
+		background: #e5e5ea;
 
 		::v-deep .u-image {
 			width: 100% !important;
 			height: 100% !important;
-			border-radius: 20rpx 20rpx 0 0 !important;
-			overflow: hidden;
 		}
 	}
 
-	/* 参与人数标签（图片底部渐变 badge） */
+	/* 参与人数 badge */
 	.ios-card-badge {
 		position: absolute;
-		left: 20rpx;
-		bottom: 20rpx;
-		background: rgba(0, 0, 0, 0.55);
-		backdrop-filter: blur(10rpx);
-		-webkit-backdrop-filter: blur(10rpx);
-		border-radius: 30rpx;
-		padding: 8rpx 18rpx;
+		left: 16rpx;
+		bottom: 16rpx;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		height: 40rpx;
+		padding: 0 14rpx;
+		background: rgba(0, 0, 0, 0.5);
+		border-radius: 20rpx;
 	}
 	.badge-text {
-		color: #ffffff;
-		font-size: 22rpx;
+		color: #fff;
+		font-size: 20rpx;
 		font-weight: 500;
+		line-height: 1;
 	}
 
 	/* 卡片信息区 */
 	.ios-card-info {
-		padding: 24rpx 28rpx 28rpx;
+		padding: 20rpx 24rpx 24rpx;
 	}
 
 	.ios-card-title {
-		font-size: 32rpx;
+		font-size: 30rpx;
 		font-weight: 600;
 		color: #1c1c1e;
 		line-height: 1.3;
+		letter-spacing: -0.3rpx;
 	}
 
 	.ios-card-desc {
-		font-size: 26rpx;
+		font-size: 24rpx;
 		color: #8e8e93;
 		line-height: 1.4;
-		margin-top: 10rpx;
+		margin-top: 6rpx;
 	}
 
-	/* 底部元信息：状态 + 头像 */
+	/* 底部元数据行 */
 	.ios-card-meta {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-top: 16rpx;
+		margin-top: 14rpx;
 	}
 
 	.ios-card-status {
-		font-size: 24rpx;
+		display: inline-block;
+		font-size: 20rpx;
 		color: #34c759;
-		font-weight: 500;
+		font-weight: 600;
 	}
 
 	.ios-card-avatar {
 		display: flex;
 	}
 	.avatar-img {
-		width: 40rpx;
-		height: 40rpx;
+		width: 36rpx;
+		height: 36rpx;
 		border-radius: 50%;
-		margin-left: -12rpx;
-		border: 2rpx solid #ffffff;
-		background: #f2f2f7;
+		margin-left: -10rpx;
+		border: 2rpx solid #fff;
+		background: #e5e5ea;
 	}
 	.avatar-img:first-child {
 		margin-left: 0;
