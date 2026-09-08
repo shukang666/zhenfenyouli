@@ -1,5 +1,4 @@
 <view class="custom-tab-bar">
-  <view class="tab-bar-bg"></view>
   <view class="tab-bar-content">
     <view
       class="tab-item"
@@ -9,9 +8,9 @@
       data-path="{{item.pagePath}}"
       bindtap="switchTab"
     >
-      <view class="tab-icon-wrap {{selected === index ? 'tab-icon-wrap--active' : ''}}">
+      <view class="tab-icon-wrap">
         <image
-          class="tab-icon"
+          class="tab-icon {{selected === index ? 'tab-icon--active' : ''}}"
           src="{{selected === index ? item.selectedIconPath : item.iconPath}}"
           mode="aspectFit"
         ></image>

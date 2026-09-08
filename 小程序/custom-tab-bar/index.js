@@ -1,4 +1,7 @@
 Component({
+  options: {
+    styleIsolation: 'shared'
+  },
   data: {
     selected: 0,
     list: [
