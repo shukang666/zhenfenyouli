@@ -52,19 +52,14 @@ class CommonModel extends Model
     static public function getUserInfoByOpenid($openid, $field = '*')
     {
         $Model = new MemberModel();
-
+        $user = [];
 
         if (!empty($openid)) {
             $user = $Model->field($field)->where(['openid' => $openid])->find();
         } else {
-            if (empty($user)) {
-                if (cmf_get_new_option('use_default_token') == 1) {
-                    $user = $Model->where(['id' => 1])->find();
-                } else {
-                    $user = [];
-                }
-            };
-
+            if (cmf_get_new_option('use_default_token') == 1) {
+                $user = $Model->where(['id' => 1])->find();
+            }
         }
         return $user;
     }
