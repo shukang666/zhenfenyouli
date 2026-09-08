@@ -3,54 +3,10 @@
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
-		<!-- 顶部玻璃导航区域 -->
-		<view class="glass-header" v-if="!isLoading">
-			<view class="header-bg"></view>
-			<view class="header-content">
-				<view class="greeting-section">
-					<text class="greeting-text">{{greetingText}}</text>
-					<text class="greeting-sub">今天想为地球做点什么？</text>
-				</view>
-				<view class="user-badge-mini" @click="goToUser">
-					<image :src="userInfo.avatar || '/static/images/user-1.png'" class="avatar" mode="aspectFill"></image>
-					<text class="level-tag">{{userLevel}}</text>
-				</view>
-			</view>
-		</view>
+		<!-- 顶部玻璃导航区域已移除（迁移至首页） -->
 
 		<view class="main-content" v-if="!isLoading">
-			<!-- 今日环保任务卡片 -->
-			<view class="section task-section" v-if="todayTask.show">
-				<view class="glass-task-card" @click="navigator('/pages/flhd/ljfldk',1)">
-					<view class="task-card-bg"></view>
-					<view class="task-card-content">
-						<view class="task-header">
-							<view class="task-icon-wrap">
-								<text class="task-emoji">🌍</text>
-							</view>
-							<view class="task-info">
-								<text class="task-title">{{todayTask.title}}</text>
-								<text class="task-subtitle">{{todayTask.subtitle}}</text>
-							</view>
-							<view class="task-points">
-								<text class="points-value">+{{todayTask.points}}</text>
-								<text class="points-label">积分</text>
-							</view>
-						</view>
-						<view class="task-progress">
-							<view class="progress-header">
-								<text class="streak-text">🔥 连续{{todayTask.streak}}天</text>
-								<text class="goal-text">还差{{todayTask.daysToGoal}}天</text>
-							</view>
-							<view class="progress-bar-wrap">
-								<view class="progress-bar">
-									<view class="progress-fill" :style="{width: todayTask.progress + '%'}"></view>
-								</view>
-							</view>
-						</view>
-					</view>
-				</view>
-			</view>
+			<!-- 今日环保任务卡片已移除（迁移至首页） -->
 
 			<!-- 我的成长区域 -->
 			<view class="section growth-section">
@@ -266,16 +222,6 @@
 					activities: 0,
 					badges: 0
 				},
-				// 今日任务
-				todayTask: {
-					show: true,
-					title: '今日垃圾分类打卡',
-					subtitle: '完成家庭分类，共建绿色社区',
-					points: 20,
-					streak: 0,
-					daysToGoal: 2,
-					progress: 0
-				},
 				// 分类数据
 				cate_list: [],
 				tab_list: [],
@@ -293,19 +239,6 @@
 			};
 		},
 		computed: {
-			greetingText() {
-				const hour = new Date().getHours()
-				if (hour < 6) return '凌晨好'
-				if (hour < 12) return '早上好'
-				if (hour < 14) return '中午好'
-				if (hour < 18) return '下午好'
-				if (hour < 22) return '晚上好'
-				return '夜深了'
-			},
-			userLevel() {
-				const levels = ['环保新人', '绿色达人', '社区先锋']
-				return levels[this.growth.currentLevel] || '环保新人'
-			},
 			// 当前分类下的活动
 			currentCategoryData() {
 				return this.displayCategories[this.currentCategory] || this.displayCategories[0]
@@ -388,13 +321,8 @@
 					let info = res.data || {}
 					this.growth.points = info.point || 0
 					this.growth.currentLevel = this.calculateLevel(info.point || 0)
-					this.growth.streak = info.clock_days || info.continuous_days || 0
-					// 更新今日任务数据
-					this.todayTask.streak = this.growth.streak
-					this.todayTask.progress = Math.min((this.growth.streak % 7) / 7 * 100, 100)
-					this.todayTask.daysToGoal = 7 - (this.growth.streak % 7)
-					if (this.todayTask.daysToGoal === 7) this.todayTask.daysToGoal = 0
-				} catch (e) {
+				this.growth.streak = info.clock_days || info.continuous_days || 0
+			} catch (e) {
 					console.log('获取用户信息失败:', e)
 				}
 			},
@@ -598,72 +526,6 @@ $glass-blur: 20rpx;
 	background: $bg-gray;
 }
 
-// 玻璃头部
-.glass-header {
-	position: relative;
-	padding: 80rpx 40rpx 40rpx;
-	overflow: hidden;
-	
-	.header-bg {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 100%;
-		background: linear-gradient(135deg, #34C759 0%, #30B350 50%, #28A045 100%);
-		z-index: 0;
-	}
-	
-	.header-content {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	
-	.greeting-section {
-		display: flex;
-		flex-direction: column;
-		
-		.greeting-text {
-			font-size: 40rpx;
-			font-weight: 700;
-			color: #FFFFFF;
-			letter-spacing: 0.5rpx;
-		}
-		
-		.greeting-sub {
-			font-size: 26rpx;
-			color: rgba(255, 255, 255, 0.85);
-			margin-top: 8rpx;
-		}
-	}
-	
-	.user-badge-mini {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 8rpx;
-		
-		.avatar {
-			width: 72rpx;
-			height: 72rpx;
-			border-radius: 50%;
-			border: 3rpx solid rgba(255, 255, 255, 0.6);
-		}
-		
-		.level-tag {
-			font-size: 20rpx;
-			color: #FFFFFF;
-			background: rgba(255, 255, 255, 0.25);
-			padding: 2rpx 12rpx;
-			border-radius: 10rpx;
-			backdrop-filter: blur($glass-blur);
-		}
-	}
-}
-
 // 主内容区
 .main-content {
 	padding: 0 30rpx;
@@ -689,128 +551,6 @@ $glass-blur: 20rpx;
 	.section-sub {
 		font-size: 24rpx;
 		color: $text-secondary;
-	}
-}
-
-// 玻璃任务卡片
-.glass-task-card {
-	position: relative;
-	border-radius: 28rpx;
-	overflow: hidden;
-	box-shadow: 0 8rpx 32rpx rgba(52, 199, 89, 0.12);
-	
-	.task-card-bg {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: linear-gradient(135deg, rgba(52, 199, 89, 0.95) 0%, rgba(48, 179, 80, 0.9) 100%);
-		backdrop-filter: blur($glass-blur);
-		z-index: 0;
-	}
-	
-	.task-card-content {
-		position: relative;
-		z-index: 1;
-		padding: 32rpx;
-	}
-	
-	.task-header {
-		display: flex;
-		align-items: center;
-		gap: 20rpx;
-		
-		.task-icon-wrap {
-			width: 80rpx;
-			height: 80rpx;
-			background: rgba(255, 255, 255, 0.25);
-			border-radius: 20rpx;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			
-			.task-emoji {
-				font-size: 40rpx;
-			}
-		}
-		
-		.task-info {
-			flex: 1;
-			
-			.task-title {
-				font-size: 30rpx;
-				font-weight: 600;
-				color: #FFFFFF;
-				display: block;
-			}
-			
-			.task-subtitle {
-				font-size: 22rpx;
-				color: rgba(255, 255, 255, 0.8);
-				margin-top: 4rpx;
-				display: block;
-			}
-		}
-		
-		.task-points {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			background: rgba(255, 255, 255, 0.2);
-			padding: 12rpx 20rpx;
-			border-radius: 16rpx;
-			
-			.points-value {
-				font-size: 36rpx;
-				font-weight: 700;
-				color: #FFFFFF;
-			}
-			
-			.points-label {
-				font-size: 20rpx;
-				color: rgba(255, 255, 255, 0.8);
-			}
-		}
-	}
-	
-	.task-progress {
-		margin-top: 24rpx;
-		padding-top: 20rpx;
-		border-top: 1rpx solid rgba(255, 255, 255, 0.2);
-		
-		.progress-header {
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 12rpx;
-			
-			.streak-text {
-				font-size: 24rpx;
-				color: #FFFFFF;
-				font-weight: 500;
-			}
-			
-			.goal-text {
-				font-size: 22rpx;
-				color: rgba(255, 255, 255, 0.8);
-			}
-		}
-		
-		.progress-bar-wrap {
-			.progress-bar {
-				height: 8rpx;
-				background: rgba(255, 255, 255, 0.3);
-				border-radius: 4rpx;
-				overflow: hidden;
-				
-				.progress-fill {
-					height: 100%;
-					background: #FFFFFF;
-					border-radius: 4rpx;
-					transition: width 0.3s ease;
-				}
-			}
-		}
 	}
 }
 

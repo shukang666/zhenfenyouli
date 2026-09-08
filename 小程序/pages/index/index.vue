@@ -20,6 +20,58 @@
 			<u-notice-bar :list="[homeNotice]" :volume-icon="true" :more-icon="false" :close-icon="false" :speed="100"></u-notice-bar>
 		</view>
 
+		<!-- ========== 问候模块（仅已登录用户可见） ========== -->
+		<view class="greeting-section" v-if="isLogin">
+			<view class="greeting-bg"></view>
+			<view class="greeting-content">
+				<view class="greeting-text">
+					<view class="greeting-line1">{{ greetingText }}，{{ userInfo.nickname || '环保达人' }}</view>
+					<view class="greeting-line2">{{ userLevelName }} · 坚持就是力量</view>
+				</view>
+				<view class="greeting-avatar" @click="$u.route({type:'switchTab', url:'/pages/user/user'})">
+					<u-image :src="userInfo.avatar || '/static/images/default-avatar.png'" width="88" height="88" shape="circle" mode="aspectFill"></u-image>
+				</view>
+			</view>
+		</view>
+
+		<!-- ========== 今日垃圾分类打卡卡片 ========== -->
+		<view class="task-section" v-if="todayTask.show">
+			<view class="task-header">
+				<view class="task-title-group">
+					<view class="task-icon-wrap">
+						<u-icon name="checkbox-mark" size="28" color="#ffffff"></u-icon>
+					</view>
+					<view class="task-title-info">
+						<view class="task-title">{{ todayTask.title }}</view>
+						<view class="task-subtitle">{{ todayTask.subtitle }}</view>
+					</view>
+				</view>
+				<view class="task-points">
+					<text class="points-num">+{{ todayTask.points }}</text>
+					<text class="points-label">积分</text>
+				</view>
+			</view>
+			<!-- 打卡进度条 -->
+			<view class="task-progress">
+				<view class="progress-header">
+					<text class="progress-label">连续打卡</text>
+					<text class="progress-value">{{ todayTask.streak }}天</text>
+				</view>
+				<view class="progress-bar-bg">
+					<view class="progress-bar-fill" :style="{ width: todayTask.progress + '%' }"></view>
+				</view>
+				<view class="progress-footer">
+					<text class="progress-next" v-if="todayTask.daysToGoal > 0">再坚持 <text class="highlight">{{ todayTask.daysToGoal }}</text> 天获取额外奖励</text>
+					<text class="progress-next done" v-else>🎉 已达成周目标！</text>
+				</view>
+			</view>
+			<!-- 打卡按钮 -->
+			<view class="task-button" hover-class="task-button--hover" @click="goToClock">
+				<text>立即打卡</text>
+				<u-icon name="arrow-right" size="28" color="#ffffff"></u-icon>
+			</view>
+		</view>
+
 		<!-- 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 -->
 			<view class="entry-grid">
 				<!-- 左侧大卡 -->
@@ -153,6 +205,19 @@
 				dataList: [],
 				active_list: [],
 				homeNotice: '',
+				// 问候模块数据
+				greetingHour: new Date().getHours(),
+				userLevelName: '环保新人',
+				// 今日打卡任务数据
+				todayTask: {
+					show: false,
+					title: '今日垃圾分类打卡',
+					subtitle: '完成家庭分类，共建绿色社区',
+					points: 20,
+					streak: 0,
+					daysToGoal: 2,
+					progress: 0
+				},
 				// 首页核心入口：默认 fallback 数据（后台 home_entries 没配图片时用），接口拉到后会覆盖
 				entry_list: [
 					{ key: 'active', icon: 'calendar', name: '社区活动', desc: '参加低碳环保活动', color: '#18AF38', bg: 'rgba(24,175,56,0.10)', url: '/pages/low_carbon/low_carbon', type: 'switchTab' },
@@ -160,6 +225,18 @@
 					{ key: 'mall', icon: 'integral', name: '积分商城', desc: '环保好礼兑换', color: '#F0546C', bg: 'rgba(240,84,108,0.10)', url: '/pages/mall/mall', type: 'switchTab' },
 					{ key: 'community', icon: 'chat', name: '社区互动', desc: '分享绿色生活', color: '#FF9040', bg: 'rgba(255,144,64,0.12)', url: '/pages/sjhd/sjhd', type: 'navigateTo' }
 				],
+			}
+		},
+		computed: {
+			// 问候文本计算属性
+			greetingText() {
+				const hour = this.greetingHour
+				if (hour < 6) return '凌晨好'
+				if (hour < 12) return '早上好'
+				if (hour < 14) return '中午好'
+				if (hour < 18) return '下午好'
+				if (hour < 22) return '晚上好'
+				return '夜深了'
 			}
 		},
 		onShareAppMessage() {
@@ -177,10 +254,18 @@
 				uni.setStorageSync('vcode', op.scene)
 			}
 			this.loadAllData()
+			// 已登录则拉取用户成长信息（问候模块+打卡卡片）
+			if (this.isLogin) {
+				this.getUserInfoForGrowth()
+			}
 		},
 		onShow() {
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(0)
+			// 已登录则刷新用户成长数据
+			if (this.isLogin) {
+				this.getUserInfoForGrowth()
+			}
 			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
 			this.$nextTick(() => {
 				if (this.isLogin && !this.userInfo.community_id) {
@@ -250,19 +335,19 @@
 				}
 				this.$u.route({ type: item.type, url: item.url })
 			},
-		// 获取活动列表
-		async get_new_active_list() {
-			try {
-				let params = {
-					is_recommendation: 1
+			// 获取活动列表
+			async get_new_active_list() {
+				try {
+					let params = {
+						is_recommendation: 1
+					}
+					let res = await this.$u.api.get_new_active_list(params)
+					this.active_list = res.data?.data || []
+				} catch (e) {
+					console.log(e);
+					this.$u.toast(e.msg)
 				}
-				let res = await this.$u.api.get_new_active_list(params)
-				this.active_list = res.data?.data || []
-			} catch (e) {
-				console.log(e);
-				this.$u.toast(e.msg)
-			}
-		},
+			},
 			switchTab(url) {
 				uni.switchTab({
 					url: url
@@ -283,18 +368,18 @@
 					this.$refs.paging.complete([]);
 				}
 			},
-		// 获取轮播图
-		async getBannerList() {
-			try {
-				let params = {
-					id: 1
+			// 获取轮播图
+			async getBannerList() {
+				try {
+					let params = {
+						id: 1
+					}
+					let res = await this.$u.api.find_slide(params)
+					this.bannerList = res.data || []
+				} catch (e) {
+					console.log(e);
 				}
-				let res = await this.$u.api.find_slide(params)
-				this.bannerList = res.data || []
-			} catch (e) {
-				console.log(e);
-			}
-		},
+			},
 			// 轮播图点击跳转
 			adLink(e) {
 				let data = this.bannerList[e];
@@ -323,6 +408,40 @@
 					this.$mp.page.getTabBar().setSelected(index)
 				}
 			},
+			// 获取用户成长信息（问候模块+打卡卡片用）
+			async getUserInfoForGrowth() {
+				try {
+					let res = await this.$u.api.getUserInfo()
+					let info = res.data || {}
+					let points = info.point || 0
+					// 计算环保等级
+					this.userLevelName = this.calculateLevelName(points)
+					// 更新今日任务数据
+					let streak = info.clock_days || info.continuous_days || 0
+					this.todayTask.show = true
+					this.todayTask.streak = streak
+					this.todayTask.progress = Math.min((streak % 7) / 7 * 100, 100)
+					this.todayTask.daysToGoal = 7 - (streak % 7)
+					if (this.todayTask.daysToGoal === 7) this.todayTask.daysToGoal = 0
+				} catch (e) {
+					console.log('获取用户信息失败:', e)
+				}
+			},
+			// 计算环保等级名称
+			calculateLevelName(points) {
+				if (points >= 1000) return '社区先锋'
+				if (points >= 300) return '绿色达人'
+				return '环保新人'
+			},
+			// 跳转到垃圾分类打卡页
+			goToClock() {
+				uni.navigateTo({
+					url: '/pages/low_carbon/clock/clock',
+					fail: () => {
+						this.$u.toast('打卡功能暂未开放')
+					}
+				})
+			},
 		}
 	}
 </script>
@@ -341,6 +460,168 @@
 	/* 走马灯通知栏：左右留白与上下区块对齐 */
 	.notice-bar-wrap {
 		padding: 20rpx 30rpx 0;
+	}
+
+	/* ========== 问候模块 ========== */
+	.greeting-section {
+		position: relative;
+		margin: 24rpx 30rpx 0;
+		padding: 32rpx 30rpx;
+		border-radius: 24rpx;
+		overflow: hidden;
+	}
+	.greeting-bg {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: linear-gradient(135deg, #18AF38 0%, #2DC853 50%, #5FD97F 100%);
+		z-index: 0;
+	}
+	.greeting-content {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.greeting-text {
+		flex: 1;
+	}
+	.greeting-line1 {
+		font-size: 34rpx;
+		font-weight: 600;
+		color: #ffffff;
+		line-height: 1.4;
+	}
+	.greeting-line2 {
+		margin-top: 8rpx;
+		font-size: 24rpx;
+		color: rgba(255, 255, 255, 0.85);
+	}
+	.greeting-avatar {
+		flex-shrink: 0;
+		margin-left: 24rpx;
+		border: 4rpx solid rgba(255, 255, 255, 0.3);
+		border-radius: 50%;
+	}
+
+	/* ========== 今日垃圾分类打卡卡片 ========== */
+	.task-section {
+		margin: 24rpx 30rpx 0;
+		padding: 30rpx;
+		background: #ffffff;
+		border-radius: 24rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+	}
+	.task-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.task-title-group {
+		display: flex;
+		align-items: center;
+		flex: 1;
+	}
+	.task-icon-wrap {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 56rpx;
+		height: 56rpx;
+		border-radius: 16rpx;
+		background: linear-gradient(135deg, #18AF38 0%, #2DC853 100%);
+		flex-shrink: 0;
+	}
+	.task-title-info {
+		margin-left: 16rpx;
+	}
+	.task-title {
+		font-size: 30rpx;
+		font-weight: 600;
+		color: #1a1a1a;
+	}
+	.task-subtitle {
+		margin-top: 4rpx;
+		font-size: 22rpx;
+		color: #9aa0a8;
+	}
+	.task-points {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.points-num {
+		font-size: 36rpx;
+		font-weight: bold;
+		color: #18AF38;
+	}
+	.points-label {
+		font-size: 20rpx;
+		color: #9aa0a8;
+	}
+	/* 打卡进度条 */
+	.task-progress {
+		margin-top: 24rpx;
+	}
+	.progress-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	.progress-label {
+		font-size: 24rpx;
+		color: #666;
+	}
+	.progress-value {
+		font-size: 24rpx;
+		font-weight: 600;
+		color: #18AF38;
+	}
+	.progress-bar-bg {
+		margin-top: 12rpx;
+		height: 12rpx;
+		background: #f0f0f0;
+		border-radius: 6rpx;
+		overflow: hidden;
+	}
+	.progress-bar-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #18AF38 0%, #5FD97F 100%);
+		border-radius: 6rpx;
+		transition: width 0.3s ease;
+	}
+	.progress-footer {
+		margin-top: 12rpx;
+	}
+	.progress-next {
+		font-size: 22rpx;
+		color: #999;
+	}
+	.progress-next .highlight {
+		color: #18AF38;
+		font-weight: 600;
+	}
+	.progress-next.done {
+		color: #18AF38;
+	}
+	/* 打卡按钮 */
+	.task-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-top: 24rpx;
+		height: 80rpx;
+		background: linear-gradient(135deg, #18AF38 0%, #2DC853 100%);
+		border-radius: 40rpx;
+		color: #ffffff;
+		font-size: 28rpx;
+		font-weight: 600;
+	}
+	.task-button--hover {
+		opacity: 0.85;
 	}
 
 	/* 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 */
