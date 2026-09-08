@@ -442,7 +442,9 @@
 				return this.current_tab === 1
 			}
 		},
-		onLoad() {
+		onLoad(options) {
+			// 支持通过 URL 参数 tab 指定打开哪个标签（值为标签名，如"本月推荐"、"环保分类"等）
+			this._tabQueryName = options ? options.tab : ''
 			this.loadAllData()
 		},
 		onShow() {
@@ -532,6 +534,37 @@
 				list.push({ id: -3, name: '社交活动', cate_id: 0, is_fixed: 2, _is_custom: 'sjhd' })
 				// list.push({ id: -1, name: '备份', cate_id: 0, is_fixed: 2, _is_backup: 1 })
 				this.tab_list = list
+
+			// 优先处理 URL 参数 tab（二维码扫码跳转场景）
+			if (this._tabQueryName) {
+				let targetIndex = list.findIndex(t => t.name === this._tabQueryName)
+				if (targetIndex >= 0) {
+					this.current_tab = targetIndex
+					let targetTab = list[targetIndex]
+					// 触发对应标签的加载逻辑
+					if (targetTab._is_custom === 'monthly_rec') {
+						this.load_monthly_rec_list()
+					} else if (targetTab._is_custom === 'zzhd') {
+						if (this.isLogin) {
+							this.getUserInfo()
+							this.get_shop_new()
+						}
+					} else if (targetTab._is_custom === 'sjhd') {
+						// 社交活动无需预加载
+					} else if (targetTab._is_backup === 1) {
+						// 备份标签无需预加载
+					} else if (targetTab.cate_id) {
+						this.current_cate_id = targetTab.cate_id
+						this.active_list = []
+						this.active_page = 1
+						this.active_total = 0
+						this.load_active_list()
+					}
+				}
+				this._tabQueryName = ''
+				return
+			}
+
 			// 检查是否有跳转标记（banner 或"社区活动"入口）
 			let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
 			if (jumpMonthlyRec) {
