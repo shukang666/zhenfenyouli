@@ -136,10 +136,7 @@
         <a class="btn btn-danger" href="{:url('index',['type'=>$params.type])}">清空</a>
         <if condition="$params.type==2 || $params.type==3">
             <input type="hidden" class="export" name="export" value="0">
-            <!-- 原导出功能暂时隐藏 -->
-            <a class="btn btn-success ajax-export" href="javascript:;" style="display:none;">导出</a>
-            <!-- 高级导出 -->
-            <a class="btn btn-info btn-advanced-export" href="javascript:;"><i class="fa fa-download"></i> 高级导出</a>
+            <a class="btn btn-success ajax-export" href="javascript:;">导出</a>
         </if>
 
     </form>
@@ -358,108 +355,14 @@
 
 
 
-    //原导出（已暂存停用）
+    //导出数据
     $(".ajax-export").click(function () {
+        // console.log($(".ajax-form"));
         $(".export").val(1);
         $(".ajax-form").submit();
         $(".export").val(0);
+        // console.log($(".ajax-form").submit())
         return false;
-    });
-
-    // ========== 高级导出：列选择弹窗 ==========
-    var advancedExportIndex = null;
-
-    // 根据 type 生成可选列
-    var exportColumns = [];
-    <if condition="$params.type==3">
-    exportColumns = [
-        {key: 'id', label: 'ID', checked: true},
-        {key: 'nickname', label: '用户信息', checked: true},
-        {key: 'community_name', label: '小区', checked: true},
-        {key: 'cate_name', label: '站点', checked: true},
-        {key: 'content', label: '内容', checked: true},
-        {key: 'image_one', label: '点位照片', checked: false},
-        {key: 'image_two', label: '投放指南', checked: false},
-        {key: 'image_three', label: '垃圾桶照片', checked: false},
-        {key: 'like_total', label: '点赞数', checked: true},
-        {key: 'create_at', label: '创建时间', checked: true}
-    ];
-    <else/>
-    exportColumns = [
-        {key: 'id', label: 'ID', checked: true},
-        {key: 'nickname', label: '用户信息', checked: true},
-        {key: 'content', label: '内容', checked: true},
-        {key: 'create_at', label: '创建时间', checked: true}
-    ];
-    </if>
-
-    function buildExportColumnHtml() {
-        var html = '<div style="padding:15px;">'
-            + '<div style="margin-bottom:12px;">'
-            + '<strong>选择需要导出的列：</strong>'
-            + '<span style="float:right;">'
-            + '<a href="javascript:;" id="col-select-all" style="margin-right:10px;font-size:12px;">全选</a>'
-            + '<a href="javascript:;" id="col-cancel-all" style="font-size:12px;">清空</a>'
-            + '</span>'
-            + '</div>'
-            + '<div class="export-col-list" style="max-height:300px;overflow-y:auto;">';
-        for (var i = 0; i < exportColumns.length; i++) {
-            var col = exportColumns[i];
-            html += '<label style="display:inline-block;width:48%;margin:4px 0;cursor:pointer;">'
-                + '<input type="checkbox" class="export-col-cb" value="' + col.key + '"'
-                + (col.checked ? ' checked' : '') + '> '
-                + '<span style="margin-left:4px;">' + col.label + '</span>'
-                + '</label>';
-        }
-        html += '</div></div>';
-        return html;
-    }
-
-    // 高级导出按钮点击
-    $(document).on('click', '.btn-advanced-export', function () {
-        advancedExportIndex = layer.open({
-            title: '高级导出设置',
-            type: 1,
-            area: ['460px', '400px'],
-            content: buildExportColumnHtml(),
-            btn: ['导出', '取消'],
-            btn1: function () {
-                var selectedKeys = [];
-                $('.export-col-cb:checked').each(function () {
-                    selectedKeys.push($(this).val());
-                });
-                if (selectedKeys.length === 0) {
-                    layer.msg('请至少选择一列', {icon: 2});
-                    return false;
-                }
-                // 将选中的列作为参数加入表单并提交
-                var form = $('.ajax-form');
-                // 移除旧的隐藏 input
-                form.find('input[name="export_cols"]').remove();
-                // 添加选中的列
-                $('<input>').attr({type: 'hidden', name: 'export_cols', value: selectedKeys.join(',')}).appendTo(form);
-                // 标记为高级导出
-                form.find('input[name="export_advanced"]').remove();
-                $('<input>').attr({type: 'hidden', name: 'export_advanced', value: '1'}).appendTo(form);
-                // 设置 export=1 触发导出
-                $('.export').val(1);
-                form.submit();
-                // 清理隐藏 input
-                setTimeout(function () {
-                    form.find('input[name="export_cols"]').remove();
-                    form.find('input[name="export_advanced"]').remove();
-                    $('.export').val(0);
-                }, 100);
-            }
-        });
-    });
-
-    // 全选/清空按钮
-    $(document).on('click', '#col-select-all', function () {
-        $('.export-col-cb').prop('checked', true);
-    });
-    $(document).on('click', '#col-cancel-all', function () {
-        $('.export-col-cb').prop('checked', false);
     });
 
     // ========== 单条删除：弹窗填写原因 ==========
