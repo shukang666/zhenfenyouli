@@ -487,4 +487,89 @@ class UserController extends AuthController
         return $count;
     }
 
+    /**
+     * @OA\Post(
+     *      tags={"小程序-用户"},
+     *      summary="每日签到",
+     *     path="/wxapp/user/daily_sign",
+     *     @OA\Response(response="200", description="An example resource"),
+     *    @OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function daily_sign()
+    {
+        $this->checkUser();
+
+        $today = date('Y-m-d');
+        $todayTs = strtotime($today);
+
+        // 检查今日是否已签到
+        $exist = Db::name('user_sign')
+            ->where('user_id', $this->user_id)
+            ->where('sign_date', $today)
+            ->find();
+        if ($exist) {
+            $this->error('今日已签到');
+        }
+
+        // 读取签到积分配置
+        $config = cmf_get_option('set_config');
+        $signPoint = intval($config['sign_point'] ?? 5);
+
+        // 记录签到并发放积分
+        Db::name('user_sign')->insert([
+            'user_id'    => $this->user_id,
+            'sign_date'  => $today,
+            'point'      => $signPoint,
+            'create_time'=> time(),
+        ]);
+
+        if ($signPoint > 0) {
+            AccountLogModel::add_account_log($this->user_id, 2, 200, $signPoint, [
+                'remark' => '每日签到',
+            ]);
+        }
+
+        // 计算连续签到天数
+        $signDates = Db::name('user_sign')
+            ->where('user_id', $this->user_id)
+            ->column('create_time');
+        $continueDays = $this->getNowContinueSignDays($signDates);
+
+        $this->success('签到成功', [
+            'point'         => $signPoint,
+            'continue_days' => $continueDays,
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *      tags={"小程序-用户"},
+     *      summary="获取签到状态（是否已签到 + 连续天数）",
+     *     path="/wxapp/user/sign_status",
+     *     @OA\Response(response="200", description="An example resource"),
+     *    @OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function sign_status()
+    {
+        $this->checkUser();
+
+        $today = date('Y-m-d');
+        $todaySigned = Db::name('user_sign')
+            ->where('user_id', $this->user_id)
+            ->where('sign_date', $today)
+            ->value('id') ? true : false;
+
+        $signDates = Db::name('user_sign')
+            ->where('user_id', $this->user_id)
+            ->column('create_time');
+        $continueDays = $this->getNowContinueSignDays($signDates);
+
+        $this->success('获取成功', [
+            'today_signed'  => $todaySigned,
+            'continue_days' => $continueDays,
+        ]);
+    }
+
 }

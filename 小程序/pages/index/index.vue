@@ -27,7 +27,15 @@
 						<u-image :src="userInfo.avatar || '/static/images/default-avatar.png'" width="80" height="80" shape="circle" mode="aspectFill"></u-image>
 					</view>
 					<view class="hello-card__text">
-						<text class="hello-card__greet">{{ greetingText }}，{{ userInfo.nickname || '环保达人' }}</text>
+						<view class="hello-card__greet-row">
+							<text class="hello-card__greet">{{ greetingText }}，{{ userInfo.nickname || '环保达人' }}</text>
+							<view class="hello-card__sign" :class="{ 'hello-card__sign--done': signStatus.today_signed }"
+								hover-class="hello-card__sign--on" @click.stop="handleSign">
+								<u-icon :name="signStatus.today_signed ? 'checkbox-mark' : 'calendar'" size="22" color="#ffffff"></u-icon>
+								<text class="hello-card__sign-text">{{ signStatus.today_signed ? '已签到' : '签到' }}</text>
+								<text v-if="signStatus.continue_days > 0" class="hello-card__sign-days">{{ signStatus.continue_days }}天</text>
+							</view>
+						</view>
 						<view class="hello-card__meta">
 							<text class="hello-card__level">{{ userLevelName }}</text>
 							<text class="hello-card__dot">·</text>
@@ -158,6 +166,11 @@
 					{ key: 'mall', name: '积分商城', url: '/pages/mall/mall', type: 'switchTab', svgIcon: 'https://admin.circular-economy.cn/upload/image/3.svg' },
 					{ key: 'community', name: '社区互动', url: '/pages/sjhd/sjhd', type: 'navigateTo', svgIcon: 'https://admin.circular-economy.cn/upload/image/4.svg' }
 				],
+				// 签到状态
+				signStatus: {
+					today_signed: false,
+					continue_days: 0,
+				},
 			}
 		},
 		computed: {
@@ -190,6 +203,7 @@
 			// 已登录则拉取用户成长信息（问候模块+打卡卡片）
 			if (this.isLogin) {
 				this.getUserInfoForGrowth()
+				this.getSignStatus()
 			}
 		},
 		onShow() {
@@ -198,6 +212,7 @@
 			// 已登录则刷新用户成长数据
 			if (this.isLogin) {
 				this.getUserInfoForGrowth()
+				this.getSignStatus()
 			}
 			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
 			this.$nextTick(() => {
@@ -403,6 +418,27 @@
 				}
 				this.$u.route('/pages/flhd/ljfldk')
 			},
+			// 获取签到状态
+			async getSignStatus() {
+				try {
+					let res = await this.$u.api.getSignStatus()
+					this.signStatus = res.data || { today_signed: false, continue_days: 0 }
+				} catch (e) {
+					// 接口失败不处理
+				}
+			},
+			// 点击签到
+			async handleSign() {
+				if (this.signStatus.today_signed) return
+				try {
+					let res = await this.$u.api.dailySign()
+					this.signStatus.today_signed = true
+					this.signStatus.continue_days = res.data?.continue_days || this.signStatus.continue_days + 1
+					this.$u.toast(`签到成功，获得 ${res.data.point} 积分`)
+				} catch (e) {
+					this.$u.toast(e.msg || '签到失败')
+				}
+			},
 		}
 	}
 </script>
@@ -451,14 +487,50 @@
 		flex: 1;
 		min-width: 0;
 	}
+	.hello-card__greet-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
 	.hello-card__greet {
-		display: block;
+		flex: 1;
 		font-size: 30rpx;
 		font-weight: 700;
 		color: #1c1c1e;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		margin-right: 12rpx;
+	}
+	.hello-card__sign {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		padding: 8rpx 18rpx;
+		background: linear-gradient(145deg, #18af38 0%, #2ec45a 100%);
+		border-radius: 32rpx;
+		box-shadow: 0 4rpx 12rpx rgba(24, 175, 56, 0.3);
+	}
+	.hello-card__sign--done {
+		background: linear-gradient(145deg, #b8b8b8 0%, #999999 100%);
+		box-shadow: 0 2rpx 8rpx rgba(153, 153, 153, 0.2);
+	}
+	.hello-card__sign--on {
+		transform: scale(0.92);
+		opacity: 0.85;
+	}
+	.hello-card__sign-text {
+		margin-left: 6rpx;
+		font-size: 22rpx;
+		font-weight: 600;
+		color: #ffffff;
+		line-height: 1.2;
+	}
+	.hello-card__sign-days {
+		margin-left: 6rpx;
+		font-size: 20rpx;
+		color: rgba(255, 255, 255, 0.85);
+		line-height: 1.2;
 	}
 	.hello-card__meta {
 		margin-top: 8rpx;
