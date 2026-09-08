@@ -1,111 +1,233 @@
 <template>
 	<view class="container">
-		<view class=" u-type-white-bg u-rela ">
-			<u-image width="750" height="372" :src="info.thumb"></u-image>
-			<view class="u-p-30">
-				<view class="u-font-32 u-font-bold u-line-1 u-p-b-30 u-border-bottom">{{info.name}}</view>
-				<view class="u-flex u-row-between u-m-t-30 ">
-					<view class="u-flex  u-font-24 u-hui u-w-550">
-						<u-icon name="clock"></u-icon>
-						<text class="u-m-l-15">活动时间：{{info.date | date('yy-mm-dd')}}</text>
-					</view>
-					<image src="/static/images/dianhua.png" class="u-w-92 u-h-38" mode="aspectFill" @click="makePhoneCall(info.phone)"></image>
+		<!-- 沉浸式封面区域 -->
+		<view class="hero-section">
+			<u-image width="750" height="420" :src="info.thumb" mode="aspectFill"></u-image>
+			<view class="hero-overlay"></view>
+			
+			<!-- 返回按钮 -->
+			<view class="back-btn" @click="navigateBack">
+				<text class="back-icon">‹</text>
+			</view>
+			
+			<!-- 封面上的标题信息 -->
+			<view class="hero-content">
+				<view class="hero-badge" v-if="info.is_clock == 1">
+					<text class="badge-icon">🎯</text>
+					<text class="badge-text">挑战活动</text>
 				</view>
-				<view class="u-flex u-row-between u-m-t-30 ">
-					<view class="u-flex  u-font-24 u-hui u-w-550">
-						<u-icon name="map"></u-icon>
-						<text class="u-m-l-15">{{info.address}}</text>
+				<text class="hero-title">{{info.name}}</text>
+				<text class="hero-subtitle">{{subtitle}}</text>
+				
+				<!-- 快速统计 -->
+				<view class="hero-stats">
+					<view class="stat-item">
+						<text class="stat-value">{{info.send_point || 0}}</text>
+						<text class="stat-label">积分奖励</text>
 					</view>
-					<image src="/static/images/ditu.png" class="u-w-92 u-h-38" mode="aspectFill" @click="openLocation(info)"></image>
+					<view class="stat-divider"></view>
+					<view class="stat-item">
+						<text class="stat-value">{{participantsCount}}</text>
+						<text class="stat-label">人已参与</text>
+					</view>
+					<view class="stat-divider"></view>
+					<view class="stat-item">
+						<text class="stat-value">{{info.day_count || 7}}</text>
+						<text class="stat-label">天挑战</text>
+					</view>
 				</view>
 			</view>
 		</view>
-		<view class="u-p-30 u-type-white-bg u-m-t-30">
-			<view class="u-m-b-30">
-				<u-divider color="#FF843D">活动说明</u-divider>
-			</view>
-			<u-parse :html="info.content"></u-parse>
-		</view>
-
-		<u-gap height="150"></u-gap>
-
-		<u-mask :show="tipShow">
-			<view class="u-w-560 u-radius-10 u-type-white-bg u-abso-center u-p-30" v-if="showType == 2">
-				<view class="u-text-center">
-					<image src="/static/images/qiandaochenggong.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
-
-					<view class="u-font-32">打卡赠送 <text class="u-font-40 u-main-c u-font-bold">{{info.send_point}}</text> 积分</view>
-					<view class="u-font-32">恭喜您打卡成功~</view>
-				</view>
-				<view class="u-m-t-30 u-flex u-row-center">
-					<u-button :custom-style="{width:'400rpx'}" @click="tipShow = false">我知道了</u-button>
-				</view>
-			</view>
-		</u-mask>
-
-		<u-popup v-model="sign_clock_show" mode="bottom" border-radius="20" closeable>
-			<view class="u-p-30">
-				<view class="u-font-bold">上传打卡图片</view>
-				<view class="u-m-t-30 u-hui-bg u-radius-10 u-p-30">
-					<u-upload upload-text="上传图片" width="180" height="180" :action="uploadUrl" @on-success="uploadImages($event,'image_url',true)" :fileList="image_url"
-						@on-remove="removeImages($event,'image_url',true)" max-count="1">
-					</u-upload>
-				</view>
-				<view class="u-p-30">
-					<u-button @click="post_new_sign_clock">确认打卡</u-button>
-				</view>
-			</view>
-		</u-popup>
-
-		<!-- 打卡动作表单弹窗（即时表单通知） -->
-		<u-popup v-model="actionFormShow" mode="bottom" border-radius="20" closeable :closeable="false">
-			<view class="u-p-30">
-				<view class="u-font-bold u-font-32 u-text-center u-m-b-20">活动反馈</view>
-				<view class="u-m-b-20" v-for="(field, fIdx) in actionTrigger.forms" :key="fIdx">
-					<!-- 纯文本说明类型 -->
-					<view v-if="field.field_type === 'text'" class="u-font-28 u-type-info u-m-b-10" style="line-height: 1.6;">
-						{{field.field_label}}
+		
+		<!-- 内容区域 -->
+		<view class="content-section">
+			<!-- 活动时间地点卡片 -->
+			<view class="info-card glass-card">
+				<view class="info-item">
+					<view class="info-icon-wrap">
+						<text class="info-icon">📅</text>
 					</view>
-					<!-- 单选按钮类型 -->
-					<view v-else-if="field.field_type === 'radio'">
-						<view class="u-font-28 u-m-b-15">{{field.field_label}} <text v-if="field.is_required == 1" style="color:red;">*</text></view>
-						<view class="u-flex u-flex-wrap">
-							<view v-for="(opt, oIdx) in field.field_options_arr" :key="oIdx"
-								class="u-m-r-20 u-m-b-15 u-p-lr-20 u-p-tb-10 u-radius-8"
-								:style="actionFormData[field.field_label] && actionFormData[field.field_label].includes(opt) ? 'background:#FF843D;color:#fff;' : 'background:#f5f5f5;'"
-								@click="toggleRadioOption(field.field_label, opt)">
-								{{opt}}
-							</view>
+					<view class="info-content">
+						<text class="info-label">活动时间</text>
+						<text class="info-value">{{info.date | date('yy-mm-dd')}} ~ {{info.end_date | date('yy-mm-dd') || '不限'}}</text>
+					</view>
+				</view>
+				<view class="info-item" @click="openLocation(info)">
+					<view class="info-icon-wrap">
+						<text class="info-icon">📍</text>
+					</view>
+					<view class="info-content">
+						<text class="info-label">活动地点</text>
+						<text class="info-value u-line-1">{{info.address || '详见活动群通知'}}</text>
+					</view>
+					<text class="info-arrow">›</text>
+				</view>
+				<view class="info-item" @click="makePhoneCall(info.phone)" v-if="info.phone">
+					<view class="info-icon-wrap">
+						<text class="info-icon">📞</text>
+					</view>
+					<view class="info-content">
+						<text class="info-label">咨询电话</text>
+						<text class="info-value">{{info.phone}}</text>
+					</view>
+					<text class="info-arrow">›</text>
+				</view>
+			</view>
+			
+			<!-- 活动流程 -->
+			<view class="flow-card glass-card">
+				<view class="section-header">
+					<text class="section-title">活动流程</text>
+				</view>
+				<view class="flow-list">
+					<view class="flow-item">
+						<view class="flow-number">1</view>
+						<view class="flow-content">
+							<text class="flow-title">报名参与</text>
+							<text class="flow-desc">点击下方按钮，加入挑战</text>
 						</view>
 					</view>
-					<!-- 多行文本框类型 -->
-					<view v-else-if="field.field_type === 'textarea'">
-						<view class="u-font-28 u-m-b-15">{{field.field_label}} <text v-if="field.is_required == 1" style="color:red;">*</text></view>
-						<u-input v-model="actionFormData[field.field_label]" type="textarea" height="150" :placeholder="'请输入' + field.field_label" border />
+					<view class="flow-item">
+						<view class="flow-number">2</view>
+						<view class="flow-content">
+							<text class="flow-title">每日打卡</text>
+							<text class="flow-desc">完成垃圾分类打卡任务</text>
+						</view>
+					</view>
+					<view class="flow-item">
+						<view class="flow-number">3</view>
+						<view class="flow-content">
+							<text class="flow-title">领取奖励</text>
+							<text class="flow-desc">获得积分，解锁徽章</text>
+						</view>
 					</view>
 				</view>
-				<view class="u-p-t-20">
-					<u-button type="primary" @click="submitClockActionForm">提交反馈</u-button>
+			</view>
+			
+			<!-- 活动说明 -->
+			<view class="desc-card glass-card">
+				<view class="section-header">
+					<text class="section-title">活动说明</text>
+				</view>
+				<view class="desc-content">
+					<u-parse :html="info.content"></u-parse>
 				</view>
 			</view>
-		</u-popup>
-
-		<view class="submit-btn u-p-30 u-flex u-row-between u-type-white-bg" v-if="!setting.app_test">
-			<view class="u-p-lr-30 u-text-center u-rela">
-				<image src="/static/images/yaoqing.png" class="u-w-44 u-h-44" mode="aspectFill"></image>
-				<view class="u-font-26">邀请邻居</view>
-				<button open-type="share" plain class="kefuBtn"></button>
+		</view>
+		
+		<!-- 底部固定按钮 -->
+		<view class="bottom-bar glass-footer">
+			<view class="share-btn" @click="handleShare">
+				<text class="share-icon">分享</text>
 			</view>
-			<u-button :custom-style="{width:'480rpx'}" v-if="info.is_clock == 0" :disabled="info.is_end == 1 || info.is_sign == 1" @click="handleSign">{{info.is_sign == 1 ? '已参与' :'立即参与'}}</u-button>
-			<view class="u-flex u-row-between u-w-490" v-if="info.is_clock == 1">
-				<u-button :custom-style="{width:'230rpx'}" type="warning" plain @click="$u.route(`/pages/low_carbon/rank?id=${info.id}`)">
-					<image src="/static/images/rank.png" class="u-w-40 u-h-40 u-m-r-15" mode="aspectFill"></image>
+			<!-- 非打卡活动：报名按钮 -->
+			<view class="action-area" v-if="info.is_clock == 0">
+				<u-button 
+					v-if="info.is_sign == 0"
+					class="action-btn primary-btn"
+					:disabled="info.is_end == 1"
+					@click="handleSign"
+				>
+					{{info.is_end == 1 ? '活动已结束' : '加入挑战'}}
+				</u-button>
+				<u-button 
+					v-else
+					class="action-btn success-btn"
+					disabled
+				>
+					已报名 ✓
+				</u-button>
+			</view>
+			<!-- 打卡活动：排行榜 + 打卡 -->
+			<view class="action-area clock-actions" v-if="info.is_clock == 1">
+				<u-button class="action-btn rank-btn" @click="goToRank">
+					<text class="btn-icon">🏆</text>
 					<text>排行榜</text>
 				</u-button>
-				<u-button :custom-style="{width:'230rpx'}" @click="handleClock" :disabled="info.is_end == 1 || (info.is_sign == 1 && info.is_sign_clock == 1)">{{info.is_sign == 1 ? (info.is_sign_clock == 1 ? '已打卡' : '立即打卡') : '立即打卡'}}</u-button>
+				<u-button 
+					class="action-btn primary-btn"
+					:disabled="info.is_end == 1 || (info.is_sign == 1 && info.is_sign_clock == 1)"
+					@click="handleClock"
+				>
+					{{clockBtnText}}
+				</u-button>
 			</view>
 		</view>
-
+		
+		<!-- 打卡成功弹窗 -->
+		<u-mask :show="tipShow">
+			<view class="success-modal glass-card">
+				<view class="success-icon">
+					<text class="success-emoji">🎉</text>
+				</view>
+				<view class="success-title">打卡成功!</view>
+				<view class="success-point">
+					<text class="point-label">获得积分</text>
+					<text class="point-value">+{{info.send_point}}</text>
+				</view>
+				<view class="success-tip">继续保持，积少成多~</view>
+				<u-button class="success-btn" @click="tipShow = false">我知道了</u-button>
+			</view>
+		</u-mask>
+		
+		<!-- 打卡弹窗 -->
+		<u-popup v-model="sign_clock_show" mode="bottom" border-radius="24" closeable>
+			<view class="clock-popup">
+				<view class="popup-header">
+					<text class="popup-title">上传打卡照片</text>
+					<text class="popup-subtitle">记录你的环保行动瞬间</text>
+				</view>
+				<view class="upload-area">
+					<u-upload 
+						upload-text="拍照/选择图片" 
+						width="180" 
+						height="180" 
+						:action="uploadUrl" 
+						@on-success="uploadImages($event,'image_url',true)" 
+						:fileList="image_url"
+						@on-remove="removeImages($event,'image_url',true)" 
+						max-count="1"
+					></u-upload>
+				</view>
+				<u-button class="confirm-btn" @click="post_new_sign_clock">确认打卡</u-button>
+			</view>
+		</u-popup>
+		
+		<!-- 打卡动作表单弹窗（即时表单通知） -->
+		<u-popup v-model="actionFormShow" mode="bottom" border-radius="24" closeable :closeable="false">
+			<view class="action-form-popup">
+				<view class="popup-header">
+					<text class="popup-title">活动反馈</text>
+					<text class="popup-subtitle">帮助我们做得更好</text>
+				</view>
+				<view class="form-fields">
+					<view class="form-field" v-for="(field, fIdx) in actionTrigger.forms" :key="fIdx">
+						<!-- 纯文本说明类型 -->
+						<view v-if="field.field_type === 'text'" class="field-text">
+							{{field.field_label}}
+						</view>
+						<!-- 单选按钮类型 -->
+						<view v-else-if="field.field_type === 'radio'">
+							<view class="field-label">{{field.field_label}} <text v-if="field.is_required == 1" class="required">*</text></view>
+							<view class="radio-options">
+								<view v-for="(opt, oIdx) in field.field_options_arr" :key="oIdx"
+									class="radio-option"
+									:class="{selected: actionFormData[field.field_label] && actionFormData[field.field_label].includes(opt)}"
+									@click="toggleRadioOption(field.field_label, opt)">
+									{{opt}}
+								</view>
+							</view>
+						</view>
+						<!-- 多行文本框类型 -->
+						<view v-else-if="field.field_type === 'textarea'">
+							<view class="field-label">{{field.field_label}} <text v-if="field.is_required == 1" class="required">*</text></view>
+							<u-input v-model="actionFormData[field.field_label]" type="textarea" height="150" :placeholder="'请输入' + field.field_label" border />
+						</view>
+					</view>
+				</view>
+				<u-button class="confirm-btn" @click="submitClockActionForm">提交反馈</u-button>
+			</view>
+		</u-popup>
 	</view>
 </template>
 
@@ -114,28 +236,52 @@
 		uploadUrl
 	} from '@/common/settings'
 	export default {
-	data() {
-		return {
-			uploadUrl,
-			popup_show: false,
-			image: [],
-			content: '',
-			info: {},
-			tipShow: false,
-			showType: 1,
-			pid: '',
-			id: '',
-			sign_clock_show: false,
-			form: {
-				image_url: '',
+		data() {
+			return {
+				uploadUrl,
+				popup_show: false,
+				image: [],
+				content: '',
+				info: {},
+				tipShow: false,
+				showType: 1,
+				pid: '',
+				id: '',
+				sign_clock_show: false,
+				form: {
+					image_url: '',
+				},
+				image_url: [],
+				// 打卡动作触发数据
+				actionTrigger: null,
+				actionFormShow: false,
+				actionFormData: {},
+			};
+		},
+		computed: {
+			// 副标题 - 根据活动类型生成
+			subtitle() {
+				if (this.info.is_clock == 1) {
+					return '每天30秒，让社区更绿色';
+				}
+				return '参与绿色行动，共建美好家园';
 			},
-			image_url: [],
-			// 打卡动作触发数据
-			actionTrigger: null,
-			actionFormShow: false,
-			actionFormData: {},
-		};
-	},
+			// 参与人数 - 暂时使用默认值，后续需要后端提供字段
+			participantsCount() {
+				// 真实实现时应该是 this.info.participants_count
+				return this.info.sign_count || 0;
+			},
+			// 打卡按钮文本
+			clockBtnText() {
+				if (this.info.is_sign == 1) {
+					if (this.info.is_sign_clock == 1) {
+						return '已打卡 ✓';
+					}
+					return '立即打卡';
+				}
+				return '立即打卡';
+			}
+		},
 		onLoad(option) {
 			if (option.scene) {
 				uni.setStorageSync('vcode', option.scene)
@@ -162,17 +308,30 @@
 			}
 		},
 		methods: {
-		// 上传组件状态变化回调（防止未绑定报错）
-		handleUploadChange() {
-			// 空实现，可根据需要扩展上传进度监听等逻辑
-		},
-		// 打卡按钮 → 未登录跳登录，已登录未报名提示先报名，已报名弹打卡弹窗
-		handleClock() {
+			// 返回上一页
+			navigateBack() {
+				uni.navigateBack();
+			},
+			// 分享
+			handleShare() {
+				uni.showToast({
+					title: '点击右上角分享',
+					icon: 'none'
+				});
+			},
+			// 跳转排行榜
+			goToRank() {
+				this.$u.route(`/pages/low_carbon/rank?id=${this.info.id}`);
+			},
+			// 上传组件状态变化回调
+			handleUploadChange() {},
+			// 打卡按钮
+			handleClock() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.info.is_sign) return this.$u.toast('请先报名活动')
 				this.sign_clock_show = true
 			},
-			// 立即参与按钮 → 未登录跳登录，已登录走报名接口
+			// 立即参与按钮
 			handleSign() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.post_new_active_sign()
@@ -193,148 +352,146 @@
 					this.form[key].push(e.data.filepath)
 				}
 			},
-
-		// 打卡
-		async post_new_sign_clock() {
-			if (!this.$u.func.checkLogin()) return
-			try {
-				let params = {
-					sign_id: this.info.sign_id,
-					...this.form
-				}
-				let res = await this.$u.api.post_new_sign_clock(params)
-				this.sign_clock_show = false
-				// this.$u.toast(res.msg)
-				this.showType = 2
-				this.tipShow = true
-
-				// 检查是否有打卡动作触发
-				if (res.data && res.data.action_trigger) {
-					this.actionTrigger = res.data.action_trigger;
-					// 即时表单通知：弹出表单弹窗
-					if (this.actionTrigger.notify_type == 1) {
-						this.initActionFormData();
-						setTimeout(() => {
-							this.tipShow = false;
-							this.actionFormShow = true;
-						}, 1500);
+			// 打卡
+			async post_new_sign_clock() {
+				if (!this.$u.func.checkLogin()) return
+				try {
+					let params = {
+						sign_id: this.info.sign_id,
+						...this.form
 					}
-					// 滞后服务消息推送：请求微信订阅授权
-					else if (this.actionTrigger.notify_type == 2) {
-						this.requestSubscribeMessage(this.actionTrigger.id);
-						setTimeout(() => {
-							this.get_new_active_detail(this.info.id)
-						}, 500)
+					let res = await this.$u.api.post_new_sign_clock(params)
+					this.sign_clock_show = false
+					this.showType = 2
+					this.tipShow = true
+
+					// 检查是否有打卡动作触发
+					if (res.data && res.data.action_trigger) {
+						this.actionTrigger = res.data.action_trigger;
+						// 即时表单通知：弹出表单弹窗
+						if (this.actionTrigger.notify_type == 1) {
+							this.initActionFormData();
+							setTimeout(() => {
+								this.tipShow = false;
+								this.actionFormShow = true;
+							}, 1500);
+						}
+						// 滞后服务消息推送：请求微信订阅授权
+						else if (this.actionTrigger.notify_type == 2) {
+							this.requestSubscribeMessage(this.actionTrigger.id);
+							setTimeout(() => {
+								this.get_new_active_detail(this.info.id)
+							}, 500)
+						} else {
+							setTimeout(() => {
+								this.get_new_active_detail(this.info.id)
+							}, 500)
+						}
 					} else {
 						setTimeout(() => {
 							this.get_new_active_detail(this.info.id)
 						}, 500)
 					}
-				} else {
-					setTimeout(() => {
-						this.get_new_active_detail(this.info.id)
-					}, 500)
+				} catch (e) {
+					console.log(e);
+					this.$u.toast(e.msg)
 				}
-			} catch (e) {
-				console.log(e);
-				this.$u.toast(e.msg)
-			}
-		},
-		// 初始化动作表单数据
-		initActionFormData() {
-			this.actionFormData = {};
-			if (this.actionTrigger && this.actionTrigger.forms) {
-				this.actionTrigger.forms.forEach(field => {
-					if (field.field_type === 'radio') {
-						this.$set(this.actionFormData, field.field_label, []);
-					} else if (field.field_type === 'textarea') {
-						this.$set(this.actionFormData, field.field_label, '');
+			},
+			// 初始化动作表单数据
+			initActionFormData() {
+				this.actionFormData = {};
+				if (this.actionTrigger && this.actionTrigger.forms) {
+					this.actionTrigger.forms.forEach(field => {
+						if (field.field_type === 'radio') {
+							this.$set(this.actionFormData, field.field_label, []);
+						} else if (field.field_type === 'textarea') {
+							this.$set(this.actionFormData, field.field_label, '');
+						}
+					});
+				}
+			},
+			// 切换单选选项
+			toggleRadioOption(fieldLabel, option) {
+				let arr = this.actionFormData[fieldLabel] || [];
+				let idx = arr.indexOf(option);
+				if (idx > -1) {
+					arr.splice(idx, 1);
+				} else {
+					arr.push(option);
+				}
+				this.$set(this.actionFormData, fieldLabel, arr);
+			},
+			// 提交打卡动作表单
+			async submitClockActionForm() {
+				if (!this.actionTrigger) return;
+				// 校验必填项
+				for (let field of this.actionTrigger.forms) {
+					if (field.is_required == 1 && (field.field_type === 'radio' || field.field_type === 'textarea')) {
+						let val = this.actionFormData[field.field_label];
+						if (!val || (Array.isArray(val) && val.length === 0) || (typeof val === 'string' && !val.trim())) {
+							this.$u.toast('请填写：' + field.field_label);
+							return;
+						}
 					}
-				});
-			}
-		},
-		// 切换单选选项（支持多选；若仅一个选项则单选）
-		toggleRadioOption(fieldLabel, option) {
-			let arr = this.actionFormData[fieldLabel] || [];
-			let idx = arr.indexOf(option);
-			if (idx > -1) {
-				arr.splice(idx, 1);
-			} else {
-				arr.push(option);
-			}
-			this.$set(this.actionFormData, fieldLabel, arr);
-		},
-		// 提交打卡动作表单
-		async submitClockActionForm() {
-			if (!this.actionTrigger) return;
-			// 校验必填项
-			for (let field of this.actionTrigger.forms) {
-				if (field.is_required == 1 && (field.field_type === 'radio' || field.field_type === 'textarea')) {
-					let val = this.actionFormData[field.field_label];
-					if (!val || (Array.isArray(val) && val.length === 0) || (typeof val === 'string' && !val.trim())) {
-						this.$u.toast('请填写：' + field.field_label);
+				}
+				try {
+					let formObj = {};
+					for (let key in this.actionFormData) {
+						let v = this.actionFormData[key];
+						formObj[key] = Array.isArray(v) ? v.join(',') : v;
+					}
+					let params = {
+						action_id: this.actionTrigger.id,
+						form_data: JSON.stringify(formObj)
+					};
+					let res = await this.$u.api.post_clock_action_form(params);
+					this.$u.toast(res.msg || '提交成功');
+					this.actionFormShow = false;
+					this.actionTrigger = null;
+					this.actionFormData = {};
+				} catch (e) {
+					console.log(e);
+					this.$u.toast(e.msg || '提交失败');
+				}
+			},
+			// 请求微信订阅消息授权
+			requestSubscribeMessage(actionId) {
+				// #ifdef MP-WEIXIN
+				if (wx.requestSubscribeMessage) {
+					let templateId = this.actionTrigger && this.actionTrigger.template_id ? this.actionTrigger.template_id : '';
+					if (!templateId) {
+						this.recordSubscribeStatus(actionId, 0);
 						return;
 					}
-				}
-			}
-			try {
-				let formObj = {};
-				for (let key in this.actionFormData) {
-					let v = this.actionFormData[key];
-					formObj[key] = Array.isArray(v) ? v.join(',') : v;
-				}
-				let params = {
-					action_id: this.actionTrigger.id,
-					form_data: JSON.stringify(formObj)
-				};
-				let res = await this.$u.api.post_clock_action_form(params);
-				this.$u.toast(res.msg || '提交成功');
-				this.actionFormShow = false;
-				this.actionTrigger = null;
-				this.actionFormData = {};
-			} catch (e) {
-				console.log(e);
-				this.$u.toast(e.msg || '提交失败');
-			}
-		},
-		// 请求微信订阅消息授权（滞后推送用）
-		requestSubscribeMessage(actionId) {
-			// #ifdef MP-WEIXIN
-			if (wx.requestSubscribeMessage) {
-				let templateId = this.actionTrigger && this.actionTrigger.template_id ? this.actionTrigger.template_id : '';
-				if (!templateId) {
+					wx.requestSubscribeMessage({
+						tmplIds: [templateId],
+						success: (res) => {
+							let accepted = res[templateId] === 'accept';
+							this.recordSubscribeStatus(actionId, accepted ? 1 : 0);
+						},
+						fail: () => {
+							this.recordSubscribeStatus(actionId, 0);
+						}
+					});
+				} else {
 					this.recordSubscribeStatus(actionId, 0);
-					return;
 				}
-				wx.requestSubscribeMessage({
-					tmplIds: [templateId],
-					success: (res) => {
-						let accepted = res[templateId] === 'accept';
-						this.recordSubscribeStatus(actionId, accepted ? 1 : 0);
-					},
-					fail: () => {
-						this.recordSubscribeStatus(actionId, 0);
-					}
-				});
-			} else {
+				// #endif
+				// #ifndef MP-WEIXIN
 				this.recordSubscribeStatus(actionId, 0);
-			}
-			// #endif
-			// #ifndef MP-WEIXIN
-			this.recordSubscribeStatus(actionId, 0);
-			// #endif
-		},
-		// 记录订阅授权状态
-		async recordSubscribeStatus(actionId, isSubscribed) {
-			try {
-				await this.$u.api.post_clock_action_subscribe({
-					action_id: actionId,
-					is_subscribed: isSubscribed
-				});
-			} catch (e) {
-				console.log('记录订阅状态失败:', e);
-			}
-		},
+				// #endif
+			},
+			// 记录订阅授权状态
+			async recordSubscribeStatus(actionId, isSubscribed) {
+				try {
+					await this.$u.api.post_clock_action_subscribe({
+						action_id: actionId,
+						is_subscribed: isSubscribed
+					});
+				} catch (e) {
+					console.log('记录订阅状态失败:', e);
+				}
+			},
 			makePhoneCall(phoneNumber) {
 				uni.makePhoneCall({
 					phoneNumber
@@ -354,7 +511,6 @@
 					let params = {
 						active_id: this.info.id,
 						pid: this.pid
-
 					}
 					let res = await this.$u.api.post_new_active_sign(params)
 					this.$u.toast(res.msg)
@@ -371,7 +527,7 @@
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.popup_show = true
 			},
-			// 提交
+			// 提交作品
 			add_active_user() {
 				if (!this.$u.func.checkLogin()) return
 				if (!this.content) return this.$u.toast('请先添加作品介绍')
@@ -403,26 +559,542 @@
 				this.image.push(reslut.data.url)
 			},
 		},
-		// onShareAppMessage(res) {
-		// 	return {
-		// 		title: this.info.name,
-		// 		path: '/pages/low_carbon/lsxf/details?id=' + this.info.id,
-		// 		imageUrl: this.info.thumb
-		// 	}
-		// },
-		// onShareTimeline() {
-		// 	return {
-		// 		title: this.info.name,
-		// 		path: `/pages/low_carbon/lsxf/details?id=${this.info.id}&pid=${this.userInfo.id}`,
-		// 		imageUrl: this.info.thumb
-		// 	}
-		// }
 	}
 </script>
 
 <style lang="scss" scoped>
 	.container {
 		min-height: 100vh;
-		background: #F5F5F5;
+		background: #F5F5F7;
+		padding-bottom: 200rpx;
+	}
+	
+	// 沉浸式封面
+	.hero-section {
+		position: relative;
+		width: 750rpx;
+		height: 420rpx;
+		overflow: hidden;
+		
+		.hero-overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.5) 100%);
+		}
+		
+		.back-btn {
+			position: absolute;
+			top: 80rpx;
+			left: 30rpx;
+			width: 64rpx;
+			height: 64rpx;
+			border-radius: 50%;
+			background: rgba(255,255,255,0.25);
+			backdrop-filter: blur(10rpx);
+			display: flex;
+			align-items: center;
+		justify-content: center;
+			z-index: 10;
+			
+			.back-icon {
+				font-size: 48rpx;
+				color: #fff;
+				line-height: 1;
+			}
+		}
+		
+		.hero-content {
+			position: absolute;
+			left: 30rpx;
+			right: 30rpx;
+			bottom: 30rpx;
+			z-index: 5;
+			
+			.hero-badge {
+				display: inline-flex;
+				align-items: center;
+				background: rgba(255,255,255,0.2);
+				backdrop-filter: blur(10rpx);
+				padding: 8rpx 16rpx;
+				border-radius: 20rpx;
+				margin-bottom: 16rpx;
+				
+				.badge-icon {
+					font-size: 24rpx;
+					margin-right: 6rpx;
+				}
+				
+				.badge-text {
+					font-size: 22rpx;
+					color: #fff;
+					font-weight: 500;
+				}
+			}
+			
+			.hero-title {
+				font-size: 40rpx;
+				font-weight: 700;
+				color: #fff;
+				line-height: 1.3;
+				margin-bottom: 8rpx;
+				text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.3);
+			}
+			
+			.hero-subtitle {
+				font-size: 26rpx;
+				color: rgba(255,255,255,0.85);
+				line-height: 1.4;
+				margin-bottom: 20rpx;
+			}
+			
+			.hero-stats {
+				display: flex;
+				align-items: center;
+				background: rgba(255,255,255,0.9);
+				backdrop-filter: blur(20rpx);
+				border-radius: 20rpx;
+				padding: 20rpx 0;
+				
+				.stat-item {
+					flex: 1;
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					
+					.stat-value {
+						font-size: 32rpx;
+						font-weight: 700;
+						color: #1D1D1F;
+						line-height: 1.2;
+					}
+					
+					.stat-label {
+						font-size: 22rpx;
+						color: #86868B;
+						margin-top: 4rpx;
+					}
+				}
+				
+				.stat-divider {
+					width: 1rpx;
+					height: 40rpx;
+					background: rgba(0,0,0,0.08);
+				}
+			}
+		}
+	}
+	
+	// 内容区
+	.content-section {
+		padding: 24rpx;
+	}
+	
+	// 玻璃卡片
+	.glass-card {
+		background: rgba(255,255,255,0.75);
+		backdrop-filter: blur(20rpx);
+		-webkit-backdrop-filter: blur(20rpx);
+		border-radius: 24rpx;
+		margin-bottom: 24rpx;
+		box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.04);
+	}
+	
+	// 信息卡片
+	.info-card {
+		padding: 30rpx;
+		
+		.info-item {
+			display: flex;
+			align-items: center;
+			padding: 20rpx 0;
+			border-bottom: 1rpx solid rgba(0,0,0,0.05);
+			
+			&:last-child {
+				border-bottom: none;
+			}
+			
+			.info-icon-wrap {
+				width: 64rpx;
+				height: 64rpx;
+				border-radius: 16rpx;
+				background: rgba(52,199,89,0.1);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin-right: 20rpx;
+				
+				.info-icon {
+					font-size: 32rpx;
+				}
+			}
+			
+			.info-content {
+				flex: 1;
+				
+				.info-label {
+					font-size: 24rpx;
+					color: #86868B;
+					margin-bottom: 4rpx;
+				}
+				
+				.info-value {
+					font-size: 28rpx;
+					color: #1D1D1F;
+					font-weight: 500;
+				}
+			}
+			
+			.info-arrow {
+				font-size: 32rpx;
+				color: #C7C7CC;
+			}
+		}
+	}
+	
+	// 活动流程
+	.flow-card {
+		padding: 30rpx;
+		
+		.section-header {
+			margin-bottom: 24rpx;
+			
+			.section-title {
+				font-size: 30rpx;
+				font-weight: 600;
+				color: #1D1D1F;
+			}
+		}
+		
+		.flow-list {
+			.flow-item {
+				display: flex;
+				align-items: center;
+				margin-bottom: 24rpx;
+				
+				&:last-child {
+					margin-bottom: 0;
+				}
+				
+				.flow-number {
+					width: 48rpx;
+					height: 48rpx;
+					border-radius: 50%;
+					background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+					color: #fff;
+					font-size: 24rpx;
+					font-weight: 600;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					margin-right: 20rpx;
+				}
+				
+				.flow-content {
+					flex: 1;
+					
+					.flow-title {
+						font-size: 28rpx;
+						font-weight: 500;
+						color: #1D1D1F;
+						margin-bottom: 4rpx;
+					}
+					
+					.flow-desc {
+						font-size: 24rpx;
+						color: #86868B;
+					}
+				}
+			}
+		}
+	}
+	
+	// 活动说明
+	.desc-card {
+		padding: 30rpx;
+		
+		.section-header {
+			margin-bottom: 24rpx;
+			
+			.section-title {
+				font-size: 30rpx;
+				font-weight: 600;
+				color: #1D1D1F;
+			}
+		}
+		
+		.desc-content {
+			font-size: 26rpx;
+			color: #3C3C43;
+			line-height: 1.6;
+		}
+	}
+	
+	// 底部操作栏
+	.bottom-bar {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		padding: 24rpx 30rpx;
+		padding-bottom: calc(24rpx + constant(safe-area-inset-bottom));
+		padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+		background: rgba(255,255,255,0.85);
+		backdrop-filter: blur(30rpx);
+		-webkit-backdrop-filter: blur(30rpx);
+		box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.05);
+		
+		.share-btn {
+			width: 88rpx;
+			height: 88rpx;
+			border-radius: 50%;
+			background: rgba(0,0,0,0.05);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			
+			.share-icon {
+				font-size: 24rpx;
+				color: #86868B;
+			}
+		}
+		
+		.action-area {
+			flex: 1;
+			display: flex;
+			gap: 16rpx;
+			
+			.action-btn {
+				flex: 1;
+				height: 88rpx;
+				border-radius: 44rpx;
+				font-size: 28rpx;
+				font-weight: 600;
+			}
+			
+			.primary-btn {
+				background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+				color: #fff;
+				border: none;
+			}
+			
+			.success-btn {
+				background: rgba(52,199,89,0.15);
+				color: #34C759;
+				border: none;
+			}
+			
+			.rank-btn {
+				background: rgba(255,149,0,0.1);
+				color: #FF9500;
+				border: none;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 8rpx;
+				
+				.btn-icon {
+					font-size: 28rpx;
+				}
+			}
+		}
+		
+		.clock-actions {
+			.action-btn:first-child {
+				flex: 0.6;
+			}
+		}
+	}
+	
+	// 打卡成功弹窗
+	.success-modal {
+		width: 560rpx;
+		padding: 50rpx 40rpx;
+		border-radius: 32rpx;
+		background: rgba(255,255,255,0.95);
+		backdrop-filter: blur(30rpx);
+		text-align: center;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		
+		.success-icon {
+			margin-bottom: 24rpx;
+			
+			.success-emoji {
+				font-size: 80rpx;
+			}
+		}
+		
+		.success-title {
+			font-size: 36rpx;
+			font-weight: 700;
+			color: #1D1D1F;
+			margin-bottom: 16rpx;
+		}
+		
+		.success-point {
+			display: flex;
+			align-items: baseline;
+			justify-content: center;
+			gap: 8rpx;
+			margin-bottom: 12rpx;
+			
+			.point-label {
+				font-size: 26rpx;
+				color: #86868B;
+			}
+			
+			.point-value {
+				font-size: 48rpx;
+				font-weight: 700;
+				color: #FF9500;
+			}
+		}
+		
+		.success-tip {
+			font-size: 24rpx;
+			color: #86868B;
+			margin-bottom: 32rpx;
+		}
+		
+		.success-btn {
+			width: 100%;
+			height: 80rpx;
+			border-radius: 40rpx;
+			background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+			color: #fff;
+			font-size: 28rpx;
+			font-weight: 600;
+		}
+	}
+	
+	// 打卡弹窗
+	.clock-popup {
+		padding: 40rpx 30rpx;
+		padding-bottom: calc(40rpx + constant(safe-area-inset-bottom));
+		padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+		
+		.popup-header {
+			text-align: center;
+			margin-bottom: 32rpx;
+			
+			.popup-title {
+				font-size: 32rpx;
+				font-weight: 600;
+				color: #1D1D1F;
+				margin-bottom: 8rpx;
+			}
+			
+			.popup-subtitle {
+				font-size: 24rpx;
+				color: #86868B;
+			}
+		}
+		
+		.upload-area {
+			display: flex;
+			justify-content: center;
+			margin-bottom: 40rpx;
+		}
+		
+		.confirm-btn {
+			width: 100%;
+			height: 88rpx;
+			border-radius: 44rpx;
+			background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+			color: #fff;
+			font-size: 28rpx;
+			font-weight: 600;
+		}
+	}
+	
+	// 动作表单弹窗
+	.action-form-popup {
+		padding: 40rpx 30rpx;
+		padding-bottom: calc(40rpx + constant(safe-area-inset-bottom));
+		padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+		max-height: 70vh;
+		
+		.popup-header {
+			text-align: center;
+			margin-bottom: 32rpx;
+			
+			.popup-title {
+				font-size: 32rpx;
+				font-weight: 600;
+				color: #1D1D1F;
+				margin-bottom: 8rpx;
+			}
+			
+			.popup-subtitle {
+				font-size: 24rpx;
+				color: #86868B;
+			}
+		}
+		
+		.form-fields {
+			max-height: 50vh;
+			overflow-y: auto;
+			
+			.form-field {
+				margin-bottom: 32rpx;
+				
+				.field-text {
+					font-size: 28rpx;
+					color: #3C3C43;
+					line-height: 1.6;
+				}
+				
+				.field-label {
+					font-size: 28rpx;
+					color: #1D1D1F;
+					font-weight: 500;
+					margin-bottom: 16rpx;
+					
+					.required {
+						color: #FF3B30;
+					}
+				}
+				
+				.radio-options {
+					display: flex;
+					flex-wrap: wrap;
+					gap: 16rpx;
+					
+					.radio-option {
+						padding: 14rpx 28rpx;
+						border-radius: 24rpx;
+						background: rgba(0,0,0,0.04);
+						font-size: 26rpx;
+						color: #3C3C43;
+						border: 2rpx solid transparent;
+						transition: all 0.2s;
+						
+						&.selected {
+							background: rgba(52,199,89,0.1);
+							color: #34C759;
+							border-color: #34C759;
+						}
+					}
+				}
+			}
+		}
+		
+		.confirm-btn {
+			width: 100%;
+			height: 88rpx;
+			border-radius: 44rpx;
+			background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+			color: #fff;
+			font-size: 28rpx;
+			font-weight: 600;
+		}
 	}
 </style>
