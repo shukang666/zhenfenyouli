@@ -18,23 +18,25 @@
 		<view v-if="monthly_rec_banner" class="rec-banner">
 			<u-image width="100%" height="100%" :src="monthly_rec_banner" mode="aspectFill"></u-image>
 		</view>
-		<view class="u-p-30">
-			<view class="u-font-bold u-font-32 u-m-b-20">本月推荐活动</view>
-			<view v-if="monthly_rec_list.length === 0 && !monthly_rec_loading" class="u-text-center u-p-40 u-type-info">暂无推荐活动</view>
-			<view v-else class="act-card" v-for="item in monthly_rec_list" :key="item.id"
+		<view class="monthly-list-wrap">
+			<view class="monthly-section-title">本月推荐活动</view>
+			<view v-if="monthly_rec_list.length === 0 && !monthly_rec_loading" class="empty-tip">暂无推荐活动</view>
+			<view v-else class="ios-card" v-for="item in monthly_rec_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
-				<u-image width="100%" height="285" :src="item.thumb"></u-image>
-				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
-					<view class="u-flex">
-						<image :src="img" class="u-w-30 u-h-30 u-radius-o" mode="aspectFill" style="margin-left: -10rpx;" v-for="(img,i) in item.avatar_array" :key="i"></image>
+				<view class="ios-card-img">
+					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+					<view class="ios-card-badge" v-if="item.active_count">
+						<text class="badge-text">{{item.active_count}}人参与</text>
 					</view>
-					<view class="u-font-24 white u-m-l-10">{{item.active_count}}人参与</view>
 				</view>
-				<view class="u-p-30">
-					<view class="u-font-bold u-font-28 u-line-1">{{item.name}}</view>
-					<view class="u-m-t-10 u-font-22 u-type-info u-line-2">{{item.dec}}</view>
-					<view class="u-m-t-10 u-font-22 u-type-info">
-						<text v-if="item.status_name">{{item.status_name}}</text>
+				<view class="ios-card-info">
+					<view class="ios-card-title u-line-1">{{item.name}}</view>
+					<view class="ios-card-desc u-line-2">{{item.dec || '精彩活动等你来参与'}}</view>
+					<view class="ios-card-meta">
+						<text class="ios-card-status" v-if="item.status_name">{{item.status_name}}</text>
+						<view class="ios-card-avatar" v-if="item.avatar_array && item.avatar_array.length">
+							<image :src="img" class="avatar-img" mode="aspectFill" v-for="(img,i) in item.avatar_array.slice(0,3)" :key="i"></image>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -893,5 +895,122 @@
 			width: 100%;
 			height: 100%;
 		}
+	}
+
+	/* ===== iOS App 风格卡片 ===== */
+	.monthly-list-wrap {
+		padding: 30rpx;
+		background: #f2f2f7;
+		min-height: 100%;
+	}
+
+	.monthly-section-title {
+		font-size: 38rpx;
+		font-weight: 700;
+		color: #1c1c1e;
+		margin: 10rpx 0 24rpx 8rpx;
+		letter-spacing: -0.5rpx;
+	}
+
+	.empty-tip {
+		text-align: center;
+		padding: 80rpx 0;
+		color: #8e8e93;
+		font-size: 28rpx;
+	}
+
+	/* iOS 大卡片：白色背景 + 大圆角 + 柔和阴影 */
+	.ios-card {
+		display: flex;
+		flex-direction: column;
+		background: #ffffff;
+		border-radius: 20rpx;
+		margin-bottom: 24rpx;
+		overflow: hidden;
+		box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.06), 0 0 1rpx rgba(0, 0, 0, 0.04);
+		transition: transform 0.2s;
+	}
+	.ios-card:active {
+		transform: scale(0.98);
+	}
+
+	/* 卡片图片区域 */
+	.ios-card-img {
+		width: 100%;
+		height: 380rpx;
+		position: relative;
+		background: #f2f2f7;
+
+		::v-deep .u-image {
+			width: 100% !important;
+			height: 100% !important;
+			border-radius: 20rpx 20rpx 0 0 !important;
+			overflow: hidden;
+		}
+	}
+
+	/* 参与人数标签（图片底部渐变 badge） */
+	.ios-card-badge {
+		position: absolute;
+		left: 20rpx;
+		bottom: 20rpx;
+		background: rgba(0, 0, 0, 0.55);
+		backdrop-filter: blur(10rpx);
+		-webkit-backdrop-filter: blur(10rpx);
+		border-radius: 30rpx;
+		padding: 8rpx 18rpx;
+	}
+	.badge-text {
+		color: #ffffff;
+		font-size: 22rpx;
+		font-weight: 500;
+	}
+
+	/* 卡片信息区 */
+	.ios-card-info {
+		padding: 24rpx 28rpx 28rpx;
+	}
+
+	.ios-card-title {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #1c1c1e;
+		line-height: 1.3;
+	}
+
+	.ios-card-desc {
+		font-size: 26rpx;
+		color: #8e8e93;
+		line-height: 1.4;
+		margin-top: 10rpx;
+	}
+
+	/* 底部元信息：状态 + 头像 */
+	.ios-card-meta {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: 16rpx;
+	}
+
+	.ios-card-status {
+		font-size: 24rpx;
+		color: #34c759;
+		font-weight: 500;
+	}
+
+	.ios-card-avatar {
+		display: flex;
+	}
+	.avatar-img {
+		width: 40rpx;
+		height: 40rpx;
+		border-radius: 50%;
+		margin-left: -12rpx;
+		border: 2rpx solid #ffffff;
+		background: #f2f2f7;
+	}
+	.avatar-img:first-child {
+		margin-left: 0;
 	}
 </style>
