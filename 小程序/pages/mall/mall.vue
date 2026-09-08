@@ -115,8 +115,9 @@
 			if (checkCommunity(this)) return
 		},
 		methods: {
-		// 并行加载所有数据，全部完成后隐藏骨架屏
+		// 并行加载所有数据，全部完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
 		async loadAllData() {
+			const startTime = Date.now()
 			try {
 				await Promise.all([
 					this.find_slide(),
@@ -126,7 +127,16 @@
 			} catch (e) {
 				console.log('数据加载失败:', e)
 			} finally {
-				this.isLoading = false
+				// 确保骨架屏最少显示 400ms，防止加载过快导致闪烁
+				const elapsed = Date.now() - startTime
+				const minDelay = 400
+				if (elapsed < minDelay) {
+					setTimeout(() => {
+						this.isLoading = false
+					}, minDelay - elapsed)
+				} else {
+					this.isLoading = false
+				}
 			}
 		},
 		// 分类

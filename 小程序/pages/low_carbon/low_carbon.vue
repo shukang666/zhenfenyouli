@@ -3,63 +3,23 @@
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 		<!-- 侧边标签栏：后台"社区活动-活动标签"可配置1-4个；第一个为固定标签（显示垃圾分类打卡内容），其他标签暂显示现有内容，待按绑定分类模板化。改为侧边垂直布局，与右侧内容区联动 -->
-		<view class="layout-wrapper" v-if="tab_list.length" :style="{height: layoutHeight}">
-			<scroll-view class="side-bar" scroll-y :style="{height: layoutHeight}">
+		<view class="layout-wrapper" v-if="tab_list.length">
+			<scroll-view class="side-bar" scroll-y>
 				<view class="tab-item" :class="{active: current_tab == index}" v-for="(tab,index) in tab_list"
 					:key="tab.id" @click="switch_tab(index)">
 					<view class="tab-name">{{tab.name}}</view>
 				</view>
 			</scroll-view>
 			<!-- 右侧内容区：根据 current_tab 联动显示对应标签内容 -->
-			<view class="content-area" :style="{height: layoutHeight}">
+			<view class="content-area">
 
-		<!-- 本月推荐标签（前端写死第一个标签，unshift 到 tab_list 头部） -->
-	<view v-if="is_monthly_rec_tab" class="pane">
+		<!-- 本月推荐标签（前端写死第一个标签，unshift 到 tab_list 头部）：仅展示海报 -->
+	<view v-if="is_monthly_rec_tab" class="pane monthly-rec-pane">
 		<view v-if="monthly_rec_banner" class="rec-banner">
-			<u-image width="100%" height="280" :src="monthly_rec_banner" mode="aspectFill"></u-image>
+			<u-image width="100%" height="100%" :src="monthly_rec_banner" mode="aspectFill"></u-image>
 		</view>
-		<view class="act-card top-pinned-card" @click="navigator('/pages/flhd/ljfldk',1)">
-				<u-image width="100%" height="220" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
-				<view class="u-p-20 u-flex" style="align-items:center;">
-					<view class="" style="flex:1;min-width:0;">
-						<view class="u-font-bold u-font-32 u-line-1">
-							垃圾分类打卡
-						</view>
-						<view class="u-m-t-10 u-font-22 u-type-info u-line-1">
-							参与垃圾分类学习通过考核后即可解锁
-						</view>
-					</view>
-				</view>
-			</view>
-			<view class="act-card" v-for="item in monthly_rec_list" :key="item.id"
-				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
-				<u-image width="100%" height="285" :src="item.thumb"></u-image>
-				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
-					<view class="u-flex">
-						<image :src="img" class="u-w-30 u-h-30 u-radius-o" mode="aspectFill" style="margin-left: -10rpx;" v-for="(img,i) in item.avatar_array" :key="i"></image>
-					</view>
-					<view class="u-font-24 white u-m-l-10">{{item.active_count}}人参与</view>
-				</view>
-				<view class="u-p-30">
-					<view class="u-font-32 u-font-bold u-line-1">{{item.name}}</view>
-					<view class="u-flex u-row-between u-m-t-15" style="align-items:center;">
-						<view class="u-flex u-font-24 u-hui u-flex-1 u-m-r-15" style="min-width:0;">
-							<view class="u-flex" style="flex-shrink:0;white-space:nowrap;">
-								<u-icon name="clock"></u-icon>
-								<text style="font-size:22rpx;">{{item.date | date('yy-mm-dd')}}</text>
-							</view>
-							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;" v-if="item.address && item.address.trim()">
-								<u-icon name="map"></u-icon>
-								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
-							</view>
-						</view>
-					</view>
-				</view>
-			</view>
-			<view v-if="monthly_rec_list.length === 0 && !monthly_rec_loading" class="u-text-center u-p-60 u-type-info">暂无推荐活动</view>
-			<view v-if="monthly_rec_loading" class="u-text-center u-p-30 u-type-info">加载中...</view>
-			<view v-if="!monthly_rec_loading && monthly_rec_list.length > 0 && monthly_rec_list.length >= monthly_rec_total" class="u-text-center u-p-30 u-type-info">没有更多了</view>
-		</view>
+		<view v-else class="u-text-center u-p-60 u-type-info">暂无推荐海报</view>
+	</view>
 
 		<!-- 打卡标签（后台第一个固定标签，index===1）：绑定活动分类，顶部写死"垃圾分类打卡"入口卡片，下方动态加载该分类活动列表 -->
 		<view v-else-if="is_daka_tab" class="pane">
@@ -440,26 +400,13 @@
 				active_total: 0,
 				active_loading: false,
 				current_cate_id: 0,
-				// 自治活动标签：商家信息（复刻 zzhd.vue）
-				shopInfo: {},
-				// 社交活动标签：问卷调查列表（复刻 research.vue）
-				health_list: [],
-				// 本月推荐标签：活动列表（is_month_recommend=1）
-				monthly_rec_list: [],
-				monthly_rec_page: 1,
-				monthly_rec_total: 0,
-				monthly_rec_loading: false,
-				// 布局高度计算：用于减去 navbar 的高度
-				statusBarHeight: 0,
-				navbarHeight: 88, // 小程序 navbar 固定 44px = 88rpx
-			};
-		},
-		computed: {
-			// 主内容区高度：100vh 减去 navbar（状态栏 + navbar），避免底部被截断
-			layoutHeight() {
-				let height = this.statusBarHeight * 2 + this.navbarHeight
-				return `calc(100vh - ${height}rpx)`
-			},
+			// 自治活动标签：商家信息（复刻 zzhd.vue）
+			shopInfo: {},
+			// 社交活动标签：问卷调查列表（复刻 research.vue）
+			health_list: [],
+		};
+	},
+	computed: {
 			// 当前是否在最后一个"备份"标签（前端写死，后台 active_tab 表不可见）
 			is_backup_tab() {
 				return this.tab_list.length > 0
@@ -491,13 +438,6 @@
 			}
 		},
 		onLoad() {
-			// 获取状态栏高度，用于计算布局高度
-			try {
-				const sysInfo = uni.getSystemInfoSync()
-				this.statusBarHeight = sysInfo.statusBarHeight || 0
-			} catch (e) {
-				this.statusBarHeight = 0
-			}
 			this.loadAllData()
 		},
 		onShow() {
@@ -510,7 +450,6 @@
 				if (this.tab_list.length > 0) {
 					uni.removeStorageSync('jump_monthly_rec')
 					this.current_tab = 0
-					this.load_monthly_rec_list()
 				}
 				return
 			}
@@ -531,21 +470,31 @@
 			})
 		},
 		methods: {
-			// 并行加载所有数据，全部完成后隐藏骨架屏
-			async loadAllData() {
-				try {
-					await Promise.all([
-						this.find_slide(),
-						this.get_monthly_rec_banner(),
-						this.get_new_cate_active_list(),
-						this.get_active_tab_list()
-					])
-				} catch (e) {
-					console.log('数据加载失败:', e)
-				} finally {
+		// 并行加载所有数据，全部完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
+		async loadAllData() {
+			const startTime = Date.now()
+			try {
+				await Promise.all([
+					this.find_slide(),
+					this.get_monthly_rec_banner(),
+					this.get_new_cate_active_list(),
+					this.get_active_tab_list()
+				])
+			} catch (e) {
+				console.log('数据加载失败:', e)
+			} finally {
+				// 确保骨架屏最少显示 400ms，防止加载过快导致闪烁
+				const elapsed = Date.now() - startTime
+				const minDelay = 400
+				if (elapsed < minDelay) {
+					setTimeout(() => {
+						this.isLoading = false
+					}, minDelay - elapsed)
+				} else {
 					this.isLoading = false
 				}
-			},
+			}
+		},
 			// 获取用户信息
 			getUserInfo() {
 				return this.$u.api.getUserInfo().then(res => {
@@ -578,44 +527,40 @@
 				this.tab_list = list
 			// 检查是否有跳转标记（banner 或"社区活动"入口）
 			let jumpMonthlyRec = uni.getStorageSync('jump_monthly_rec')
-				if (jumpMonthlyRec) {
-					uni.removeStorageSync('jump_monthly_rec')
-					this.current_tab = 0
-					this.load_monthly_rec_list()
-					return
-				}
-				// 默认加载"本月推荐"标签（current_tab==0），若本月推荐为空则 fallback 到第一个有 cate_id 的后台标签
-				let firstTab = list[0]
-				if (firstTab._is_custom === 'monthly_rec') {
-					this.load_monthly_rec_list()
-				} else if (firstTab && firstTab.cate_id) {
-					this.current_cate_id = firstTab.cate_id
-					this.active_list = []
-					this.active_page = 1
-					this.active_total = 0
-					this.load_active_list()
-				}
-			}).catch(err => {
-				this.$u.toast(err.msg)
-			})
-		},
-			// 切换标签：第1个固定打卡标签也加载分类活动列表（顶部仍保留"垃圾分类打卡"入口卡片）；
-			// 最后一个"备份"标签显示现有内容；
-			// 自治活动标签加载商家信息（复刻 zzhd.vue onShow）；社交活动标签无需预加载列表；
-			// 中间分类标签加载该标签绑定分类下的活动列表
-			switch_tab(index) {
-				if (this.current_tab == index) return
-				this.current_tab = index
-				let tab = this.tab_list[index]
-				if (!tab) return
-				// 备份标签不加载分类列表
-				if (tab._is_backup === 1) return
-				// 本月推荐标签
-				if (tab._is_custom === 'monthly_rec') {
-					this.load_monthly_rec_list()
-					return
-				}
-				// 自治活动标签：加载用户信息和商家信息
+			if (jumpMonthlyRec) {
+				uni.removeStorageSync('jump_monthly_rec')
+				this.current_tab = 0
+				return
+			}
+			// 默认加载"本月推荐"标签（current_tab==0），若本月推荐为空则 fallback 到第一个有 cate_id 的后台标签
+			let firstTab = list[0]
+			if (firstTab._is_custom === 'monthly_rec') {
+				// 本月推荐仅展示海报，无需加载列表
+			} else if (firstTab && firstTab.cate_id) {
+				this.current_cate_id = firstTab.cate_id
+				this.active_list = []
+				this.active_page = 1
+				this.active_total = 0
+				this.load_active_list()
+			}
+		}).catch(err => {
+			this.$u.toast(err.msg)
+		})
+	},
+		// 切换标签：第1个固定打卡标签也加载分类活动列表（顶部仍保留"垃圾分类打卡"入口卡片）；
+		// 最后一个"备份"标签显示现有内容；
+		// 自治活动标签加载商家信息（复刻 zzhd.vue onShow）；社交活动标签无需预加载列表；
+		// 中间分类标签加载该标签绑定分类下的活动列表
+		switch_tab(index) {
+			if (this.current_tab == index) return
+			this.current_tab = index
+			let tab = this.tab_list[index]
+			if (!tab) return
+			// 备份标签不加载分类列表
+			if (tab._is_backup === 1) return
+			// 本月推荐标签：仅展示海报，无需加载列表
+			if (tab._is_custom === 'monthly_rec') return
+			// 自治活动标签：加载用户信息和商家信息
 				if (tab._is_custom === 'zzhd') {
 					if (this.isLogin) {
 						this.getUserInfo()
@@ -629,32 +574,9 @@
 				this.active_list = []
 				this.active_page = 1
 				this.active_total = 0
-				this.load_active_list()
-			},
-			// 加载本月推荐活动列表（is_month_recommend=1）
-			load_monthly_rec_list() {
-				if (this.monthly_rec_loading) return
-				this.monthly_rec_loading = true
-				this.$u.api.get_new_active_list({
-					page: this.monthly_rec_page,
-					page_size: 10,
-					is_month_recommend: 1
-				}).then(res => {
-					this.monthly_rec_loading = false
-					let data = res.data || {}
-					let list = data.data || []
-					this.monthly_rec_total = data.total || 0
-					if (this.monthly_rec_page <= 1) {
-						this.monthly_rec_list = list
-					} else {
-						this.monthly_rec_list.push(...list)
-					}
-				}).catch(err => {
-					this.monthly_rec_loading = false
-					this.$u.toast(err.msg)
-				})
-			},
-			// 加载当前分类标签绑定的活动列表
+			this.load_active_list()
+		},
+		// 加载当前分类标签绑定的活动列表
 			load_active_list() {
 				if (this.active_loading) return
 				if (!this.current_cate_id) {
@@ -804,21 +726,14 @@
 				}
 			},
 		},
-		onReachBottom() {
-			// 本月推荐、打卡标签和中间分类标签都支持分页；备份/自治/社交标签不分页
-			if (this.is_backup_tab || this.is_zzhd_tab || this.is_sjhd_tab) return
-			if (this.is_monthly_rec_tab) {
-				if (this.monthly_rec_list.length >= this.monthly_rec_total) return
-				if (this.monthly_rec_loading) return
-				this.monthly_rec_page++
-				this.load_monthly_rec_list()
-				return
-			}
-			if (this.active_list.length >= this.active_total) return
-			if (this.active_loading) return
-			this.active_page++
-			this.load_active_list()
-		}
+	onReachBottom() {
+		// 打卡标签和中间分类标签支持分页；本月推荐/备份/自治/社交标签不分页
+		if (this.is_backup_tab || this.is_zzhd_tab || this.is_sjhd_tab || this.is_monthly_rec_tab) return
+		if (this.active_list.length >= this.active_total) return
+		if (this.active_loading) return
+		this.active_page++
+		this.load_active_list()
+	}
 	}
 </script>
 
@@ -831,7 +746,8 @@
 	/* 左右联动布局：左侧固定宽度侧边栏 + 右侧自适应内容区 */
 	.layout-wrapper {
 		display: flex;
-		overflow: hidden;
+		min-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
+		align-items: flex-start;
 	}
 
 	/* 置顶卡片：右上角"置顶"标签 */
@@ -858,13 +774,16 @@
 	.side-bar {
 		width: 180rpx;
 		flex-shrink: 0;
+		min-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
+		max-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
+		overflow-y: auto;
 		background: #ffffff;
 		border-right: 1rpx solid #f0f0f0;
 		box-sizing: border-box;
 
 		.tab-item {
 			position: relative;
-			padding: 32rpx 0;
+			padding: 24rpx 10rpx;
 			text-align: center;
 			font-size: 26rpx;
 			color: #666;
@@ -900,8 +819,36 @@
 	.content-area {
 		flex: 1;
 		min-width: 0;
+		min-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
+		max-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
 		overflow-y: auto;
 		overflow-x: hidden;
 		box-sizing: border-box;
+	}
+
+	/* 本月推荐：占满整个 content-area */
+	.monthly-rec-pane {
+		width: 100%;
+		height: 100%;
+		padding: 0 !important;
+	}
+
+	/* 本月推荐海报展示 */
+	.rec-banner {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		::v-deep .u-image {
+			width: 100% !important;
+			height: 100% !important;
+		}
+
+		image {
+			width: 100%;
+			height: 100%;
+		}
 	}
 </style>

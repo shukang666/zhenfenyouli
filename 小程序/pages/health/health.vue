@@ -118,16 +118,26 @@
 			if (checkCommunity(this)) return
 		},
 		methods: {
-			// 加载数据，完成后隐藏骨架屏
-			async loadAllData() {
-				try {
-					await this.get_forum_list()
-				} catch (e) {
-					console.log('数据加载失败:', e)
-				} finally {
+		// 加载数据，完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
+		async loadAllData() {
+			const startTime = Date.now()
+			try {
+				await this.get_forum_list()
+			} catch (e) {
+				console.log('数据加载失败:', e)
+			} finally {
+				// 确保骨架屏最少显示 400ms，防止加载过快导致闪烁
+				const elapsed = Date.now() - startTime
+				const minDelay = 400
+				if (elapsed < minDelay) {
+					setTimeout(() => {
+						this.isLoading = false
+					}, minDelay - elapsed)
+				} else {
 					this.isLoading = false
 				}
-			},
+			}
+		},
 			// 分享
 			share_brn(item) {
 				this.health = item

@@ -1,5 +1,5 @@
 <template>
-	<view class="skeleton-screen" v-if="show">
+	<view class="skeleton-screen" v-show="show">
 		<!-- 首页骨架屏 -->
 		<view v-if="type === 'index'" class="skeleton-index">
 			<!-- 顶部导航栏 -->
@@ -37,10 +37,10 @@
 			<view class="skeleton-side-bar">
 				<view class="skeleton-tab-item" v-for="i in 4" :key="i"></view>
 			</view>
-			<!-- 右侧内容区 -->
+			<!-- 右侧内容区：本月推荐展示海报，其他标签显示卡片列表 -->
 			<view class="skeleton-content-area">
-				<view class="skeleton-pinned-card"></view>
-				<view class="skeleton-active-card" v-for="i in 3" :key="i"></view>
+				<!-- 骨架占位：根据默认选中标签（本月推荐=海报，其他=卡片）展示对应骨架 -->
+				<view class="skeleton-rec-banner"></view>
 			</view>
 		</view>
 
@@ -267,18 +267,13 @@ export default {
 		flex: 1;
 		padding: 30rpx;
 		
-		.skeleton-pinned-card {
+		/* 本月推荐海报骨架 */
+		.skeleton-rec-banner {
 			@extend .skeleton-base;
-			height: 400rpx;
+			width: 100%;
+			height: 100%;
+			min-height: 600rpx;
 			border-radius: 20rpx;
-			margin-bottom: 30rpx;
-		}
-		
-		.skeleton-active-card {
-			@extend .skeleton-base;
-			height: 450rpx;
-			border-radius: 20rpx;
-			margin-bottom: 30rpx;
 		}
 	}
 }

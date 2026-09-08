@@ -247,21 +247,31 @@
 			})
 		},
 		methods: {
-			// 并行加载所有数据，全部完成后隐藏骨架屏
-			async loadAllData() {
-				try {
-					await Promise.all([
-						this.getBannerList(),
-						this.get_new_active_list(),
-						this.getHomeEntries(),
-						this.getHomeNotice()
-					])
-				} catch (e) {
-					console.log('数据加载失败:', e)
-				} finally {
+		// 并行加载所有数据，全部完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
+		async loadAllData() {
+			const startTime = Date.now()
+			try {
+				await Promise.all([
+					this.getBannerList(),
+					this.get_new_active_list(),
+					this.getHomeEntries(),
+					this.getHomeNotice()
+				])
+			} catch (e) {
+				console.log('数据加载失败:', e)
+			} finally {
+				// 确保骨架屏最少显示 400ms，防止加载过快导致闪烁
+				const elapsed = Date.now() - startTime
+				const minDelay = 400
+				if (elapsed < minDelay) {
+					setTimeout(() => {
+						this.isLoading = false
+					}, minDelay - elapsed)
+				} else {
 					this.isLoading = false
 				}
-			},
+			}
+		},
 			// 拉首页入口配置（后台 home_entries），有 image 则用图片，没图片保持 fallback icon 样式
 			async getHomeEntries() {
 				try {
