@@ -137,6 +137,10 @@
         <if condition="$params.type==2 || $params.type==3">
             <input type="hidden" class="export" name="export" value="0">
             <a class="btn btn-success ajax-export" href="javascript:;">导出</a>
+            <if condition="$params.type==3">
+                <input type="hidden" class="no-image" name="no_image" value="0">
+                <a class="btn btn-warning ajax-export-no-image" href="javascript:;">导出（无图）</a>
+            </if>
         </if>
 
     </form>
@@ -362,6 +366,16 @@
         $(".ajax-form").submit();
         $(".export").val(0);
         // console.log($(".ajax-form").submit())
+        return false;
+    });
+
+    //导出（无图）：type=3时不导出图片列
+    $(".ajax-export-no-image").click(function () {
+        $(".export").val(1);
+        $(".no-image").val(1);
+        $(".ajax-form").submit();
+        $(".export").val(0);
+        $(".no-image").val(0);
         return false;
     });
 

@@ -148,8 +148,13 @@ class ForumController extends ToolController
         });
 
         if ($export) {
+            $noImage = $this->request->param('no_image', 0);
             if($type == 3){
-                $this->outData3($list);
+                if ($noImage) {
+                    $this->outData3NoImage($list);
+                } else {
+                    $this->outData3($list);
+                }
             }else{
                 $this->outData($list);
             }
@@ -522,6 +527,35 @@ class ForumController extends ToolController
         $keys = ['id', 'nickname', 'community_name', 'cate_name', 'content', 'image_one', 'image_two', 'image_three', 'create_at',];//设置表头
         $types = ['1', '1', '1', '1', '1', '2', '2', '2', '1'];//设置表头
         CommonModel::outData($filename, $list, $head, $keys, $types, $image_array);
+        exit;
+    }
+
+    /**
+     * type=3 无图导出：不导出点位照片、投放指南、垃圾桶照片
+     * @param $list
+     */
+    public function outData3NoImage($list)
+    {
+        // 关闭所有层级输出缓冲
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        ini_set('default_socket_timeout', 8);
+        gc_enable();
+
+        foreach ($list as &$item) {
+            $item['create_at'] = date('Y-m-d H:i:s', $item['create_time']);
+        }
+        unset($item);
+
+        $filename = '点位打卡_无图_' . date('Y-m-d');
+        $head = ['ID', '用户信息', '小区', '站点', '内容', '创建时间'];
+        $keys = ['id', 'nickname', 'community_name', 'cate_name', 'content', 'create_at'];
+        $types = ['1', '1', '1', '1', '1', '1'];
+        CommonModel::outData($filename, $list, $head, $keys, $types, []);
         exit;
     }
 
