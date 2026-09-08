@@ -44,50 +44,36 @@
 
 		<!-- 打卡标签（后台第一个固定标签，index===1）：绑定活动分类，顶部写死"垃圾分类打卡"入口卡片，下方动态加载该分类活动列表 -->
 		<view v-else-if="is_daka_tab" class="pane">
-			<view class="act-card top-pinned-card" @click="navigator('/pages/flhd/ljfldk',1)">
+			<view class="act-card top-pinned-card" @click="navigator('/pages/flhd/ljfldk',1)" style="margin: 24rpx 24rpx 30rpx;">
 				<u-image width="100%" height="220" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
-				<view class="u-p-20 u-flex" style="align-items:center;">
-					<view class="" style="flex:1;min-width:0;">
-						<view class="u-font-bold u-font-32 u-line-1">
-							垃圾分类打卡
-						</view>
-						<view class="u-m-t-10 u-font-22 u-type-info u-line-1">
-							参与垃圾分类学习通过考核后即可解锁
-						</view>
-					</view>
+				<view class="act-card-info" style="padding: 20rpx 24rpx;">
+					<view class="act-title">垃圾分类打卡</view>
+					<view class="act-meta" style="color: #8e8e93;font-size: 22rpx;">参与垃圾分类学习通过考核后即可解锁</view>
 				</view>
 			</view>
-			<view class="u-m-t-30">
-			<!-- 打卡标签绑定分类下的活动列表（与中间分类标签共用 active_list） -->
 			<view class="act-card" v-for="item in active_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
-				<u-image width="100%" height="285" :src="item.thumb"></u-image>
-				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
-					<view class="u-flex">
-						<image :src="img" class="u-w-30 u-h-30 u-radius-o" mode="aspectFill" style="margin-left: -10rpx;" v-for="(img,i) in item.avatar_array" :key="i"></image>
+				<u-image width="100%" height="280" :src="item.thumb" mode="aspectFill"></u-image>
+				<view class="card-participate" v-if="item.active_count > 0">
+					<view class="avatar-list" v-if="item.avatar_array && item.avatar_array.length">
+						<image :src="img" class="avatar-img" mode="aspectFill" v-for="(img,i) in item.avatar_array.slice(0,3)" :key="i"></image>
 					</view>
-					<view class="u-font-24 white u-m-l-10">{{item.active_count}}人参与</view>
+					<text class="count-text">{{item.active_count}}人参与</text>
 				</view>
-				<view class="u-p-30">
-					<view class="u-font-32 u-font-bold u-line-1">{{item.name}}</view>
-					<view class="u-flex u-row-between u-m-t-15" style="align-items:center;">
-						<view class="u-flex u-font-24 u-hui u-flex-1 u-m-r-15" style="min-width:0;">
-							<view class="u-flex" style="flex-shrink:0;white-space:nowrap;">
-								<u-icon name="clock"></u-icon>
-								<text style="font-size:22rpx;">{{item.date | date('yy-mm-dd')}}</text>
-							</view>
-							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;" v-if="item.address && item.address.trim()">
-								<u-icon name="map"></u-icon>
-								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
-							</view>
-						</view>
+				<view class="act-card-info">
+					<view class="act-title u-line-1">{{item.name}}</view>
+					<view class="act-meta">
+						<u-icon name="clock" size="22"></u-icon>
+						<text class="meta-text">{{item.date | date('yy-mm-dd')}}</text>
+						<text class="meta-text" style="margin: 0 12rpx;">·</text>
+						<u-icon name="map" size="22" v-if="item.address && item.address.trim()"></u-icon>
+						<text class="meta-text" v-if="item.address && item.address.trim()">{{item.address}}</text>
 					</view>
 				</view>
 			</view>
 			<view v-if="active_list.length === 0 && !active_loading && !is_daka_tab" class="u-text-center u-p-60 u-type-info">暂无活动</view>
 			<view v-if="active_loading" class="u-text-center u-p-30 u-type-info">加载中...</view>
 			<view v-if="!active_loading && (is_daka_tab || (active_list.length > 0 && active_list.length >= active_total))" class="u-text-center u-p-30 u-type-info">没有更多了</view>
-		</view>
 		</view>
 
 		<!-- 自治活动标签（备份前第一个写死标签，复刻 zzhd.vue 主体内容，不引入页面级背景） -->
@@ -311,37 +297,32 @@
 			</view>
 		</view>
 
-		<!-- 中间标签（第二个起，非打卡非备份非自定义）：显示该标签绑定分类下的活动列表 -->
+	<!-- 中间标签（第二个起，非打卡非备份非自定义）：显示该标签绑定分类下的活动列表 -->
 	<view v-else-if="!is_backup_tab" class="pane">
-		<view class="u-radius-10 u-type-white-bg u-rela u-shadow u-m-b-30" v-for="item in active_list" :key="item.id"
+		<view class="act-card" v-for="item in active_list" :key="item.id"
 			@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
-				<u-image width="100%" height="285" :src="item.thumb"></u-image>
-				<view class="u-abso u-abso-l-30 u-abso-t-230 u-flex u-radius-10" style="background: rgba(0,0,0,0.44);padding: 5rpx 20rpx;" v-if="item.active_count">
-					<view class="u-flex">
-						<image :src="img" class="u-w-30 u-h-30 u-radius-o" mode="aspectFill" style="margin-left: -10rpx;" v-for="(img,i) in item.avatar_array" :key="i"></image>
-					</view>
-					<view class="u-font-24 white u-m-l-10">{{item.active_count}}人参与</view>
+			<u-image width="100%" height="280" :src="item.thumb" mode="aspectFill"></u-image>
+			<view class="card-participate" v-if="item.active_count > 0">
+				<view class="avatar-list" v-if="item.avatar_array && item.avatar_array.length">
+					<image :src="img" class="avatar-img" mode="aspectFill" v-for="(img,i) in item.avatar_array.slice(0,3)" :key="i"></image>
 				</view>
-				<view class="u-p-30">
-					<view class="u-font-32 u-font-bold u-line-1">{{item.name}}</view>
-					<view class="u-flex u-row-between u-m-t-15" style="align-items:center;">
-						<view class="u-flex u-font-24 u-hui u-flex-1 u-m-r-15" style="min-width:0;">
-							<view class="u-flex" style="flex-shrink:0;white-space:nowrap;">
-								<u-icon name="clock"></u-icon>
-								<text style="font-size:22rpx;">{{item.date | date('yy-mm-dd')}}</text>
-							</view>
-							<view class="u-flex u-m-l-30" style="flex-shrink:0;white-space:nowrap;overflow:hidden;" v-if="item.address && item.address.trim()">
-								<u-icon name="map"></u-icon>
-								<text style="font-size:22rpx;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200rpx;">{{item.address}}</text>
-							</view>
-						</view>
-					</view>
+				<text class="count-text">{{item.active_count}}人参与</text>
+			</view>
+			<view class="act-card-info">
+				<view class="act-title u-line-1">{{item.name}}</view>
+				<view class="act-meta">
+					<u-icon name="clock" size="22"></u-icon>
+					<text class="meta-text">{{item.date | date('yy-mm-dd')}}</text>
+					<text class="meta-text" style="margin: 0 12rpx;">·</text>
+					<u-icon name="map" size="22" v-if="item.address && item.address.trim()"></u-icon>
+					<text class="meta-text" v-if="item.address && item.address.trim()">{{item.address}}</text>
 				</view>
 			</view>
-			<view v-if="active_list.length === 0 && !active_loading" class="u-text-center u-p-60 u-type-info">暂无活动</view>
-			<view v-if="active_loading" class="u-text-center u-p-30 u-type-info">加载中...</view>
-			<view v-if="active_list.length > 0 && active_list.length >= active_total" class="u-text-center u-p-30 u-type-info">没有更多了</view>
 		</view>
+		<view v-if="active_list.length === 0 && !active_loading" class="u-text-center u-p-60 u-type-info">暂无活动</view>
+		<view v-if="active_loading" class="u-text-center u-p-30 u-type-info">加载中...</view>
+		<view v-if="active_list.length > 0 && active_list.length >= active_total" class="u-text-center u-p-30 u-type-info">没有更多了</view>
+	</view>
 
 		<!-- 最后一个"备份"标签：保留页面现有内容（轮播+通知+banner+活动分类卡片），前端写死，后台 active_tab 表不可见 -->
 		<view v-else>
@@ -794,10 +775,83 @@
 		align-items: flex-start;
 	}
 
-	/* 置顶卡片：右上角"置顶"标签 */
-	.top-pinned-card {
-		overflow: hidden;
+	/* iOS 风格通用活动卡片（打卡标签 + 中间分类标签共用） */
+	.act-card {
 		position: relative;
+		background: #fff;
+		border-radius: 24rpx;
+		margin: 0 24rpx 24rpx;
+		overflow: hidden;
+		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06), 0 1rpx 3rpx rgba(0, 0, 0, 0.04);
+	}
+	.act-card:active {
+		opacity: 0.85;
+	}
+
+	/* 卡片内活动图片 */
+	.act-card > .u-image {
+		display: block;
+		width: 100% !important;
+		height: 360rpx !important;
+	}
+
+	/* 参与人数 + 头像 badge（浮在图片左下角） */
+	.card-participate {
+		position: absolute;
+		left: 16rpx;
+		bottom: 16rpx;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		height: 40rpx;
+		padding: 0 14rpx;
+		background: rgba(0, 0, 0, 0.5);
+		border-radius: 20rpx;
+	}
+	.card-participate .avatar-list {
+		display: flex;
+	}
+	.card-participate .avatar-img {
+		width: 28rpx;
+		height: 28rpx;
+		border-radius: 50%;
+		margin-left: -8rpx;
+		border: 2rpx solid #fff;
+		background: #e5e5ea;
+	}
+	.card-participate .avatar-img:first-child {
+		margin-left: 0;
+	}
+	.card-participate .count-text {
+		color: #fff;
+		font-size: 20rpx;
+		margin-left: 8rpx;
+	}
+
+	/* 卡片信息区 */
+	.act-card-info {
+		padding: 20rpx 24rpx 24rpx;
+	}
+	.act-card-info .act-title {
+		font-size: 30rpx;
+		font-weight: 600;
+		color: #1c1c1e;
+		letter-spacing: -0.3rpx;
+	}
+	.act-card-info .act-meta {
+		display: flex;
+		align-items: center;
+		margin-top: 12rpx;
+		font-size: 22rpx;
+		color: #8e8e93;
+	}
+	.act-card-info .act-meta .u-icon {
+		margin-right: 4rpx;
+	}
+	.act-card-info .act-meta .meta-text {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.top-pinned-card::before {
 		content: '置顶';
