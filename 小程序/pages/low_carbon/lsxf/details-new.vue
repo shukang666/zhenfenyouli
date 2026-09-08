@@ -49,7 +49,7 @@
 					</view>
 					<view class="info-content">
 						<text class="info-label">活动时间</text>
-						<text class="info-value">{{info.date | date('yy-mm-dd')}} ~ {{info.end_date | date('yy-mm-dd') || '不限'}}</text>
+						<text class="info-value">{{activityTimeText}}</text>
 					</view>
 				</view>
 				<view class="info-item" @click="openLocation(info)">
@@ -74,35 +74,28 @@
 				</view>
 			</view>
 			
-			<!-- 活动流程 -->
-			<view class="flow-card glass-card">
-				<view class="section-header">
-					<text class="section-title">活动流程</text>
+		<!-- 活动流程 -->
+		<view class="flow-card glass-card">
+			<view class="section-header">
+				<text class="section-title">活动流程</text>
+			</view>
+			<view class="flow-list">
+				<view class="flow-item">
+					<view class="flow-number">1</view>
+					<view class="flow-content">
+						<text class="flow-title">{{info.is_clock == 1 ? '每日打卡' : '报名参与'}}</text>
+						<text class="flow-desc">{{info.is_clock == 1 ? '完成垃圾分类打卡任务' : '点击下方按钮，加入活动'}}</text>
+					</view>
 				</view>
-				<view class="flow-list">
-					<view class="flow-item">
-						<view class="flow-number">1</view>
-						<view class="flow-content">
-							<text class="flow-title">报名参与</text>
-							<text class="flow-desc">点击下方按钮，加入挑战</text>
-						</view>
-					</view>
-					<view class="flow-item">
-						<view class="flow-number">2</view>
-						<view class="flow-content">
-							<text class="flow-title">每日打卡</text>
-							<text class="flow-desc">完成垃圾分类打卡任务</text>
-						</view>
-					</view>
-					<view class="flow-item">
-						<view class="flow-number">3</view>
-						<view class="flow-content">
-							<text class="flow-title">领取奖励</text>
-							<text class="flow-desc">获得积分，解锁徽章</text>
-						</view>
+				<view class="flow-item">
+					<view class="flow-number">2</view>
+					<view class="flow-content">
+						<text class="flow-title">领取奖励</text>
+						<text class="flow-desc">获得积分，解锁徽章</text>
 					</view>
 				</view>
 			</view>
+		</view>
 			
 			<!-- 活动说明 -->
 			<view class="desc-card glass-card">
@@ -266,22 +259,49 @@
 				}
 				return '参与绿色行动，共建美好家园';
 			},
-			// 参与人数 - 暂时使用默认值，后续需要后端提供字段
-			participantsCount() {
-				// 真实实现时应该是 this.info.participants_count
-				return this.info.sign_count || 0;
-			},
-			// 打卡按钮文本
-			clockBtnText() {
-				if (this.info.is_sign == 1) {
-					if (this.info.is_sign_clock == 1) {
-						return '已打卡 ✓';
-					}
-					return '立即打卡';
+		// 参与人数 - 暂时使用默认值，后续需要后端提供字段
+		participantsCount() {
+			// 真实实现时应该是 this.info.participants_count
+			return this.info.sign_count || 0;
+		},
+		// 打卡按钮文本
+		clockBtnText() {
+			if (this.info.is_sign == 1) {
+				if (this.info.is_sign_clock == 1) {
+					return '已打卡 ✓';
 				}
 				return '立即打卡';
 			}
+			return '立即打卡';
 		},
+		// 活动时间文本 - 根据活动类型显示不同格式
+		activityTimeText() {
+			if (this.info.is_clock == 1) {
+				// 打卡活动：使用 clock_start_time 和 clock_end_time
+				let startTime = '';
+				let endTime = '';
+				if (this.info.clock_start_time) {
+					startTime = this.formatDate(this.info.clock_start_time);
+				}
+				if (this.info.clock_end_time) {
+					endTime = this.formatDate(this.info.clock_end_time);
+				}
+				if (startTime && endTime) {
+					return startTime + ' ~ ' + endTime;
+				} else if (startTime) {
+					return startTime + ' ~ 不限';
+				}
+				return '不限';
+			} else {
+				// 非打卡活动：使用 date 字段
+				if (this.info.date) {
+					let dateStr = this.formatDate(this.info.date);
+					return dateStr + ' ~ 不限';
+				}
+				return '不限';
+			}
+		}
+	},
 		onLoad(option) {
 			if (option.scene) {
 				uni.setStorageSync('vcode', option.scene)
@@ -308,6 +328,29 @@
 			}
 		},
 		methods: {
+			// 格式化日期为 yy-mm-dd 格式
+			formatDate(timestamp) {
+				if (!timestamp) return '';
+				// 如果是字符串格式的时间，先转为时间戳
+				let ts = timestamp;
+				if (typeof ts === 'string') {
+					// 处理 "2026-09-08" 格式
+					if (ts.indexOf('-') > -1) {
+						ts = new Date(ts.replace(/-/g, '/')).getTime();
+					} else {
+						ts = parseInt(ts);
+					}
+				}
+				// 如果是秒级时间戳，转为毫秒级
+				if (ts < 10000000000) {
+					ts = ts * 1000;
+				}
+				const date = new Date(ts);
+				const year = date.getFullYear().toString().slice(-2);
+				const month = (date.getMonth() + 1).toString().padStart(2, '0');
+				const day = date.getDate().toString().padStart(2, '0');
+				return year + '-' + month + '-' + day;
+			},
 			// 返回上一页
 			navigateBack() {
 				uni.navigateBack();
@@ -323,14 +366,14 @@
 			goToRank() {
 				this.$u.route(`/pages/low_carbon/rank?id=${this.info.id}`);
 			},
-			// 上传组件状态变化回调
-			handleUploadChange() {},
+		// 上传组件状态变化回调
+		handleUploadChange() {},
 		// 打卡按钮（打卡活动不需要先报名，直接打卡）
 		handleClock() {
 			if (!this.isLogin) return this.$u.route('/pages/public/login')
 			this.sign_clock_show = true
 		},
-			// 立即参与按钮
+		// 立即参与按钮
 			handleSign() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.post_new_active_sign()
@@ -730,21 +773,22 @@
 				}
 			}
 			
-			.info-content {
-				flex: 1;
-				
-				.info-label {
-					font-size: 24rpx;
-					color: #86868B;
-					margin-bottom: 4rpx;
+				.info-content {
+					flex: 1;
+					margin-right: 16rpx;
+					
+					.info-label {
+						font-size: 24rpx;
+						color: #86868B;
+						margin-bottom: 4rpx;
+					}
+					
+					.info-value {
+						font-size: 28rpx;
+						color: #1D1D1F;
+						font-weight: 500;
+					}
 				}
-				
-				.info-value {
-					font-size: 28rpx;
-					color: #1D1D1F;
-					font-weight: 500;
-				}
-			}
 			
 			.info-arrow {
 				font-size: 32rpx;
