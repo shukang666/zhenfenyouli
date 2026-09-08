@@ -78,10 +78,10 @@
 			</view>
 		</view>
 
-		<view class="" style="position: fixed;right: 30rpx;bottom: 15%;z-index: 9;" @click="$u.route('/pages/mall/cart')">
+		<view class="" style="position: fixed;right: 30rpx;bottom: 180rpx;z-index: 9;" @click="$u.route('/pages/mall/cart')">
 			<u-image width="100" height="100" src="https://oss.ausite.cn/xcxkf052/admin/20250521/0ee9d98c2273efcb512c5ea5abc876f1.png?watermark"></u-image>
 		</view>
-		<view class="" style="position: fixed;right: 30rpx;bottom: 130rpx;z-index: 9;" @click="$u.route('/pages/mall/ranking')">
+		<view class="" style="position: fixed;right: 30rpx;bottom: 280rpx;z-index: 9;" @click="$u.route('/pages/mall/ranking')">
 			<u-image width="100" height="100" src="https://oss.ausite.cn/xcxkf052/admin/20250521/4c26a124df730861668dd53ab9842f27.png?watermark"></u-image>
 		</view>
 		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->

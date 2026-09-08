@@ -31,7 +31,7 @@
 							<text class="hello-card__greet">{{ greetingText }}</text>
 							<view class="hello-card__sign" :class="{ 'hello-card__sign--done': signStatus.today_signed }"
 								hover-class="hello-card__sign--on" @click.stop="handleSign">
-								<u-icon :name="signStatus.today_signed ? 'checkbox-mark' : 'calendar'" size="22" color="#ffffff"></u-icon>
+								<u-icon :name="signStatus.today_signed ? 'checkbox-mark' : 'calendar'" size="28" color="#ffffff"></u-icon>
 								<text class="hello-card__sign-text">{{ signStatus.today_signed ? '已签到' : '签到' }}</text>
 								<text v-if="signStatus.continue_days > 0" class="hello-card__sign-days">{{ signStatus.continue_days }}天</text>
 							</view>
