@@ -148,10 +148,10 @@ class ForumController extends ToolController
         });
 
         if ($export) {
-            $noImage = $this->request->param('no_image', 0);
+            $supervisorExport = $this->request->param('supervisor_export', 0);
             if($type == 3){
-                if ($noImage) {
-                    $this->outData3NoImage($list);
+                if ($supervisorExport) {
+                    $this->outSupervisor($where);
                 } else {
                     $this->outData3($list);
                 }
@@ -531,10 +531,12 @@ class ForumController extends ToolController
     }
 
     /**
-     * type=3 无图导出：不导出点位照片、投放指南、垃圾桶照片
-     * @param $list
+     * 活跃督导员导出
+     * 算法：综合评估用户提交频率、互动、内容完整度
+     *
+     * @param array $where 查询条件（继承列表筛选条件）
      */
-    public function outData3NoImage($list)
+    public function outSupervisor($where)
     {
         // 关闭所有层级输出缓冲
         while (ob_get_level() > 0) {
@@ -543,19 +545,195 @@ class ForumController extends ToolController
 
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
-        ini_set('default_socket_timeout', 8);
         gc_enable();
 
-        foreach ($list as &$item) {
-            $item['create_at'] = date('Y-m-d H:i:s', $item['create_time']);
+        // 取当前筛选条件下的所有记录（含用户关联）
+        $allRecords = $this->model
+            ->alias('a')
+            ->join('member b', 'a.user_id=b.id')
+            ->leftjoin('forum_cate c', 'a.cate_id=c.id')
+            ->field('a.id, a.user_id, a.create_time, a.content, a.like_total,
+                     a.image_one, a.image_two, a.image_three,
+                     b.nickname, b.mobile, b.community_id,
+                     c.name cate_name')
+            ->where($where)
+            ->order('a.user_id asc, a.create_time asc')
+            ->select()
+            ->toArray();
+
+        if (empty($allRecords)) {
+            exit;
+        }
+
+        // 按 user_id 分组统计
+        $userStats = [];
+        $now = time();
+        $days30 = $now - 30 * 86400;
+        $days7  = $now - 7 * 86400;
+
+        foreach ($allRecords as $record) {
+            $uid = $record['user_id'];
+            if (!isset($userStats[$uid])) {
+                $userStats[$uid] = [
+                    'user_id'        => $uid,
+                    'nickname'       => $record['nickname'],
+                    'mobile'         => $record['mobile'],
+                    'community_id'   => $record['community_id'],
+                    'community_name' => '',
+                    'cate_name'      => '',
+                    'total_count'    => 0,   // 总提交数
+                    'count_30d'      => 0,   // 近30天提交数
+                    'count_7d'       => 0,   // 近7天提交数
+                    'total_likes'    => 0,   // 累计获赞
+                    'active_days'    => [],  // 活跃天数（去重日期）
+                    'has_photo_count'=> 0,   // 含完整照片记录数
+                    'last_time'      => 0,   // 最近提交时间
+                    'score'          => 0,   // 综合评分
+                ];
+            }
+
+            $stat = &$userStats[$uid];
+            $stat['total_count']++;
+            $stat['total_likes'] += $record['like_total'];
+
+            // 确保 cate_name 取最新的
+            $stat['cate_name'] = $record['cate_name'] ?: $stat['cate_name'];
+
+            // 近30天 / 近7天
+            if ($record['create_time'] >= $days30) {
+                $stat['count_30d']++;
+            }
+            if ($record['create_time'] >= $days7) {
+                $stat['count_7d']++;
+            }
+
+            // 活跃天数
+            $dateKey = date('Y-m-d', $record['create_time']);
+            $stat['active_days'][$dateKey] = true;
+
+            // 含完整照片记录（三张图都有）
+            if (!empty($record['image_one']) && !empty($record['image_two']) && !empty($record['image_three'])) {
+                $stat['has_photo_count']++;
+            }
+
+            // 最近提交时间
+            if ($record['create_time'] > $stat['last_time']) {
+                $stat['last_time'] = $record['create_time'];
+            }
+        }
+        unset($stat);
+
+        // 补充小区名称
+        foreach ($userStats as &$stat) {
+            $stat['community_name'] = CommunityModel::where('id', $stat['community_id'])->value('name');
+            if (empty($stat['community_name'])) {
+                // 回退到 subject_community_id 对应的小区（当前数据全为0）
+                $subjectCommunityId = CommunityModel::where('id', $stat['community_id'])->value('id');
+                $stat['community_name'] = CommunityModel::where('id', $subjectCommunityId)->value('name');
+            }
+        }
+        unset($stat);
+
+        // 评分 + 阈值过滤
+        $result = [];
+        foreach ($userStats as $uid => $stat) {
+            $score = 0;
+            $reasonParts = [];
+
+            // --- 活跃度（40分） ---
+            // 近30天提交次数
+            if ($stat['count_30d'] >= 5) {
+                $score += 25;
+                $reasonParts[] = "近30天提交{$stat['count_30d']}次";
+            } elseif ($stat['count_30d'] >= 3) {
+                $score += 15;
+                $reasonParts[] = "近30天提交{$stat['count_30d']}次";
+            } elseif ($stat['count_30d'] >= 1) {
+                $score += 5;
+            }
+
+            // 近7天内仍有提交（近期活跃）
+            if ($stat['count_7d'] > 0) {
+                $score += 15;
+                $daysAgo = floor(($now - $stat['last_time']) / 86400);
+                if ($daysAgo == 0) {
+                    $reasonParts[] = "今日活跃";
+                } else {
+                    $reasonParts[] = "最近{$daysAgo}天前活跃";
+                }
+            }
+
+            // --- 互动（30分） ---
+            if ($stat['total_likes'] >= 20) {
+                $score += 20;
+                $reasonParts[] = "累计获赞{$stat['total_likes']}次";
+            } elseif ($stat['total_likes'] >= 10) {
+                $score += 15;
+                $reasonParts[] = "累计获赞{$stat['total_likes']}次";
+            } elseif ($stat['total_likes'] >= 5) {
+                $score += 8;
+                $reasonParts[] = "累计获赞{$stat['total_likes']}次";
+            } elseif ($stat['total_likes'] >= 1) {
+                $score += 3;
+            }
+
+            // --- 内容质量（30分） ---
+            if ($stat['total_count'] > 0) {
+                $photoRatio = round($stat['has_photo_count'] / $stat['total_count'] * 100);
+                if ($photoRatio >= 80) {
+                    $score += 20;
+                    $reasonParts[] = "照片完整度{$photoRatio}%";
+                } elseif ($photoRatio >= 50) {
+                    $score += 12;
+                    $reasonParts[] = "照片完整度{$photoRatio}%";
+                } elseif ($photoRatio >= 20) {
+                    $score += 5;
+                }
+
+                // 总提交次数体现持久度
+                if ($stat['total_count'] >= 10) {
+                    $score += 10;
+                    $reasonParts[] = "总提交{$stat['total_count']}次";
+                } elseif ($stat['total_count'] >= 5) {
+                    $score += 5;
+                    $reasonParts[] = "总提交{$stat['total_count']}次";
+                }
+            }
+
+            // 活跃天数加成
+            $activeDayCount = count($stat['active_days']);
+            if ($activeDayCount >= 7) {
+                $score += 10;
+                $reasonParts[] = "活跃{$activeDayCount}天";
+            } elseif ($activeDayCount >= 3) {
+                $score += 5;
+            }
+
+            // 阈值：>=50分视为活跃督导员
+            if ($score >= 50) {
+                $stat['score'] = $score;
+                $stat['reason'] = implode('，', $reasonParts);
+                $result[] = $stat;
+            }
+        }
+
+        // 按评分降序排列
+        usort($result, function ($a, $b) {
+            return $b['score'] - $a['score'];
+        });
+
+        // 构建导出数据
+        foreach ($result as &$item) {
+            $item['nickname_export'] = "({$item['user_id']}){$item['nickname']}";
+            $item['last_time_export'] = $item['last_time'] ? date('Y-m-d H:i:s', $item['last_time']) : '';
         }
         unset($item);
 
-        $filename = '点位打卡_无图_' . date('Y-m-d');
-        $head = ['ID', '用户信息', '小区', '站点', '内容', '创建时间'];
-        $keys = ['id', 'nickname', 'community_name', 'cate_name', 'content', 'create_at'];
-        $types = ['1', '1', '1', '1', '1', '1'];
-        CommonModel::outData($filename, $list, $head, $keys, $types, []);
+        $filename = '活跃督导员_' . date('Y-m-d');
+        $head = ['用户ID', '用户信息', '手机号', '小区', '分类', '总提交次数', '近30天提交', '累计获赞', '综合评分', '最近活跃时间', '原因'];
+        $keys = ['user_id', 'nickname_export', 'mobile', 'community_name', 'cate_name', 'total_count', 'count_30d', 'total_likes', 'score', 'last_time_export', 'reason'];
+        $types = ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'];
+        CommonModel::outData($filename, $result, $head, $keys, $types, []);
         exit;
     }
 

@@ -138,8 +138,7 @@
             <input type="hidden" class="export" name="export" value="0">
             <a class="btn btn-success ajax-export" href="javascript:;">导出</a>
             <if condition="$params.type==3">
-                <input type="hidden" class="no-image" name="no_image" value="0">
-                <a class="btn btn-warning ajax-export-no-image" href="javascript:;">导出（无图）</a>
+                <a class="btn btn-primary ajax-export-supervisor" href="javascript:;">活跃督导员导出</a>
             </if>
         </if>
 
@@ -369,13 +368,11 @@
         return false;
     });
 
-    //导出（无图）：type=3时不导出图片列
-    $(".ajax-export-no-image").click(function () {
+    //活跃督导员导出
+    $(".ajax-export-supervisor").click(function () {
         $(".export").val(1);
-        $(".no-image").val(1);
-        $(".ajax-form").submit();
+        $(".ajax-form").append('<input type="hidden" name="supervisor_export" value="1">').submit();
         $(".export").val(0);
-        $(".no-image").val(0);
         return false;
     });
 
