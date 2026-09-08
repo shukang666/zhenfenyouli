@@ -42,51 +42,14 @@
 				</view>
 			</view>
 
-			<!-- 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 -->
+			<!-- 核心功能入口：一行四个图标（iOS毛玻璃风格） -->
 			<view class="entry-grid">
-				<!-- 左侧大卡 -->
-				<view class="entry-main" hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(entry_list[0])">
-					<template v-if="entry_list[0].image">
-						<image :src="entry_list[0].image" class="entry-img entry-img--lg" mode="aspectFill"></image>
-					</template>
-					<template v-else>
-						<view class="entry-icon entry-icon--lg" :style="{ background: entry_list[0].bg }">
-							<u-icon :name="entry_list[0].icon" size="48" :color="entry_list[0].color"></u-icon>
-						</view>
-						<view class="entry-name entry-name--lg">{{ entry_list[0].name }}</view>
-						<view class="entry-desc">{{ entry_list[0].desc }}</view>
-					</template>
-				</view>
-				<!-- 右侧列：上两小块 + 下横条 -->
-				<view class="entry-side">
-					<view class="entry-side-top">
-						<view class="entry-mini" v-for="item in entry_list.slice(1, 3)" :key="item.key"
-							hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(item)">
-							<template v-if="item.image">
-								<image :src="item.image" class="entry-img entry-img--mini" mode="aspectFill"></image>
-							</template>
-							<template v-else>
-								<view class="entry-icon" :style="{ background: item.bg }">
-									<u-icon :name="item.icon" size="36" :color="item.color"></u-icon>
-								</view>
-								<view class="entry-name entry-name--sm">{{ item.name }}</view>
-							</template>
-						</view>
+				<view class="entry-item" v-for="item in entry_list" :key="item.key"
+					hover-class="entry-item--hover" :hover-stay-time="80" @click="goEntry(item)">
+					<view class="entry-icon">
+						<image :src="item.svgIcon" class="entry-svg" mode="aspectFit"></image>
 					</view>
-					<view class="entry-wide" hover-class="entry-card--hover" :hover-stay-time="80" @click="goEntry(entry_list[3])">
-						<template v-if="entry_list[3].image">
-							<image :src="entry_list[3].image" class="entry-img entry-img--wide" mode="aspectFill"></image>
-						</template>
-						<template v-else>
-							<view class="entry-icon" :style="{ background: entry_list[3].bg }">
-								<u-icon :name="entry_list[3].icon" size="36" :color="entry_list[3].color"></u-icon>
-							</view>
-							<view class="entry-body">
-								<view class="entry-name">{{ entry_list[3].name }}</view>
-								<view class="entry-desc">{{ entry_list[3].desc }}</view>
-							</view>
-						</template>
-					</view>
+					<view class="entry-name">{{ item.name }}</view>
 				</view>
 			</view>
 
@@ -188,12 +151,12 @@
 					daysToGoal: 2,
 					progress: 0
 				},
-				// 首页核心入口：默认 fallback 数据（后台 home_entries 没配图片时用），接口拉到后会覆盖
+				// 首页核心入口：一行四个SVG图标
 				entry_list: [
-					{ key: 'active', icon: 'calendar', name: '社区活动', desc: '参加低碳环保活动', color: '#18AF38', bg: 'rgba(24,175,56,0.10)', url: '/pages/low_carbon/low_carbon', type: 'switchTab' },
-					{ key: 'health', icon: 'heart', name: '健康测试', desc: '关注身体健康', color: '#2E7CF6', bg: 'rgba(46,124,246,0.10)', url: '/pages/health/health', type: 'switchTab' },
-					{ key: 'mall', icon: 'integral', name: '积分商城', desc: '环保好礼兑换', color: '#F0546C', bg: 'rgba(240,84,108,0.10)', url: '/pages/mall/mall', type: 'switchTab' },
-					{ key: 'community', icon: 'chat', name: '社区互动', desc: '分享绿色生活', color: '#FF9040', bg: 'rgba(255,144,64,0.12)', url: '/pages/sjhd/sjhd', type: 'navigateTo' }
+					{ key: 'active', name: '社区活动', url: '/pages/low_carbon/low_carbon', type: 'switchTab', svgIcon: 'https://admin.circular-economy.cn/upload/image/1.svg' },
+					{ key: 'health', name: '健康测试', url: '/pages/health/health', type: 'switchTab', svgIcon: 'https://admin.circular-economy.cn/upload/image/2.svg' },
+					{ key: 'mall', name: '积分商城', url: '/pages/mall/mall', type: 'switchTab', svgIcon: 'https://admin.circular-economy.cn/upload/image/3.svg' },
+					{ key: 'community', name: '社区互动', url: '/pages/sjhd/sjhd', type: 'navigateTo', svgIcon: 'https://admin.circular-economy.cn/upload/image/4.svg' }
 				],
 			}
 		},
@@ -272,24 +235,33 @@
 				}
 			}
 		},
-			// 拉首页入口配置（后台 home_entries），有 image 则用图片，没图片保持 fallback icon 样式
-			async getHomeEntries() {
-				try {
-					let res = await this.$u.api.findSetting({ name: 'home_entries' })
-					let list = res.data || []
-					if (list.length === 0) return
-					// 按 key 匹配合并，保留 fallback 的 url/type 等字段
-					let merged = this.entry_list.map(fb => {
-						let cfg = list.find(c => c.key === fb.key)
-						return cfg ? Object.assign({}, fb, cfg) : fb
+		// 拉首页入口配置（后台 home_entries），保留默认 svgIcon（后台未配置图标时使用默认）
+		async getHomeEntries() {
+			try {
+				let res = await this.$u.api.findSetting({ name: 'home_entries' })
+				let list = res.data || []
+				if (list.length === 0) return
+				// 按 key 匹配合并，保留 fallback 的 svgIcon 等字段
+				let merged = this.entry_list.map(fb => {
+					let cfg = list.find(c => c.key === fb.key)
+					if (cfg) {
+						// 后台没配 svgIcon 则保留默认
+						return Object.assign({}, fb, cfg, { svgIcon: cfg.svgIcon || fb.svgIcon })
+					}
+					return fb
+				})
+				// 如果后台配了4个，也要确保每个都有 svgIcon
+				if (list.length === 4) {
+					merged = list.map(item => {
+						let fb = this.entry_list.find(f => f.key === item.key)
+						return Object.assign({}, fb || {}, item, { svgIcon: item.svgIcon || (fb && fb.svgIcon) || '' })
 					})
-					// 如果后台配的数量不对（比如没配全4个），还是用接口返回的
-					if (list.length === 4) merged = list
-					this.entry_list = merged
-				} catch (e) {
-					// 接口失败不影响，保留 fallback
 				}
-			},
+				this.entry_list = merged
+			} catch (e) {
+				// 接口失败不影响，保留 fallback
+			}
+		},
 			// 拉首页走马灯通知（后台 home_notice 配置，留空则不显示）
 			async getHomeNotice() {
 				try {
@@ -534,106 +506,58 @@
 		line-height: 1.2;
 	}
 
-	/* 核心功能入口：左侧大卡 + 右侧上两小块 + 右下横条 */
+	/* 核心功能入口：一行四个图标（iOS毛玻璃风格） */
 	.entry-grid {
 		display: flex;
-		align-items: stretch;
+		justify-content: space-between;
+		align-items: center;
 		padding: 24rpx 30rpx 0;
 	}
-	/* 卡片内图片：铺满整张卡，圆角跟随卡片 */
-	.entry-img {
-		width: 100%;
-		height: 100%;
-		border-radius: inherit;
-	}
-	.entry-img--lg, .entry-img--mini, .entry-img--wide {
-		border-radius: 20rpx;
-	}
-	.entry-main {
+	.entry-item {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		flex-shrink: 0;
-		width: 334rpx;
-		height: 348rpx;
-		padding: 0 20rpx;
-		background: #fff;
-		border-radius: 20rpx;
-		box-sizing: border-box;
-	}
-	.entry-side {
 		flex: 1;
-		min-width: 0;
-		margin-left: 20rpx;
-	}
-	.entry-side-top {
-		display: flex;
-		justify-content: space-between;
-	}
-	.entry-mini {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		width: 158rpx;
-		height: 158rpx;
-		background: #fff;
-		border-radius: 20rpx;
+		padding: 24rpx 0;
+		margin: 0 8rpx;
+		background: rgba(255, 255, 255, 0.72);
+		border-radius: 28rpx;
+		/* iOS毛玻璃效果 */
+		backdrop-filter: blur(20rpx);
+		-webkit-backdrop-filter: blur(20rpx);
+		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06), inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
 		box-sizing: border-box;
 	}
-	.entry-wide {
-		display: flex;
-		align-items: center;
-		height: 170rpx;
-		margin-top: 20rpx;
-		padding: 0 24rpx;
-		background: #fff;
-		border-radius: 20rpx;
-		box-sizing: border-box;
+	.entry-item:first-child {
+		margin-left: 0;
 	}
-	.entry-card--hover {
-		background: #f7f9fa;
+	.entry-item:last-child {
+		margin-right: 0;
+	}
+	.entry-item--hover {
+		background: rgba(255, 255, 255, 0.5);
+		transform: scale(0.96);
 	}
 	.entry-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 76rpx;
-		height: 76rpx;
+		width: 88rpx;
+		height: 88rpx;
 		border-radius: 24rpx;
-		flex-shrink: 0;
+		background: rgba(255, 255, 255, 0.6);
+		box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.04);
 	}
-	.entry-icon--lg {
-		width: 96rpx;
-		height: 96rpx;
-		border-radius: 28rpx;
-	}
-	.entry-body {
-		flex: 1;
-		min-width: 0;
-		margin-left: 18rpx;
+	.entry-svg {
+		width: 56rpx;
+		height: 56rpx;
 	}
 	.entry-name {
-		font-size: 29rpx;
+		margin-top: 16rpx;
+		font-size: 26rpx;
 		font-weight: 600;
 		color: #1a1a1a;
-	}
-	.entry-name--lg {
-		margin-top: 20rpx;
-		font-size: 32rpx;
-	}
-	.entry-name--sm {
-		margin-top: 14rpx;
-		font-size: 26rpx;
-	}
-	.entry-desc {
-		margin-top: 6rpx;
-		font-size: 22rpx;
-		color: #9aa0a8;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
 	}
 
 	/* 模块标题：图标 + 标题 + 分隔线 + 副标题 + 更多 */
