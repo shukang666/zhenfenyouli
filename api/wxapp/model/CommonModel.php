@@ -297,7 +297,7 @@ class CommonModel extends Model
         }
         $key = '';
         for ($i = 0; $i < $length; $i++) {
-            $key .= $pattern{mt_rand(0, $full_length)};    //生成php随机数
+            $key .= $pattern[mt_rand(0, $full_length)];    //生成php随机数
         }
         return $key;
     }
