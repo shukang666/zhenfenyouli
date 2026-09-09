@@ -37,7 +37,7 @@
 							</view>
 						</view>
 						<view class="hello-card__meta">
-							<text class="hello-card__level">{{ userLevelName }}</text>
+							<text class="hello-card__level">{{ userInfo.nickname || '环保新人' }}</text>
 							<text class="hello-card__dot">·</text>
 							<text>连续打卡 {{ todayTask.streak }} 天</text>
 							<text v-if="todayTask.daysToGoal > 0">，再坚持 {{ todayTask.daysToGoal }} 天</text>
@@ -148,7 +148,6 @@
 				homeNotice: '',
 				// 问候模块数据
 				greetingHour: new Date().getHours(),
-				userLevelName: '环保新人',
 				// 今日打卡任务数据
 				todayTask: {
 					show: false,
@@ -382,8 +381,6 @@
 					let res = await this.$u.api.getUserInfo()
 					let info = res.data || {}
 					this.$u.vuex('userInfo', info)
-					let points = info.point || 0
-					this.userLevelName = this.calculateLevelName(points)
 					let streak = info.clock_days || info.continuous_days || info.clock_count || 0
 					this.todayTask.show = true
 					this.todayTask.streak = streak
@@ -393,12 +390,6 @@
 				} catch (e) {
 					console.log('获取用户信息失败:', e)
 				}
-			},
-			// 计算环保等级名称
-			calculateLevelName(points) {
-				if (points >= 1000) return '社区先锋'
-				if (points >= 300) return '绿色达人'
-				return '环保新人'
 			},
 			// 快捷打卡：跳转垃圾分类打卡页（与活动页入口同一套学习/考试校验）
 			goToClock() {
