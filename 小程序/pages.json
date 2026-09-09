@@ -178,6 +178,12 @@
 			"style": {
 				"navigationBarTitleText": "社会参与"
 			}
+		}, {
+			"path": "pages/low_carbon/active-search",
+			"style": {
+				"navigationBarTitleText": "活动搜索",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"subPackages": [{

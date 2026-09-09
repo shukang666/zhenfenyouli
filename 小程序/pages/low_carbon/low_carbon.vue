@@ -13,6 +13,14 @@
 			<!-- 右侧内容区：根据 current_tab 联动显示对应标签内容 -->
 			<view class="content-area">
 
+		<!-- 活动搜索入口（所有标签共用，点击进入搜索页） -->
+		<view class="active-search-entry" @click="$u.route('/pages/low_carbon/active-search')">
+			<view class="search-entry-box">
+				<u-icon name="search" size="28" color="#b0b3bb"></u-icon>
+				<text class="search-entry-text">搜索活动名称 / 地点</text>
+			</view>
+		</view>
+
 		<!-- 本月推荐标签：展示海报+推荐活动列表 -->
 	<view v-if="is_monthly_rec_tab" class="pane monthly-rec-pane">
 		<view v-if="monthly_rec_banner" class="rec-banner">
@@ -799,6 +807,31 @@
 	.container {
 		min-height: 100vh;
 		background: #F5F5F5;
+	}
+
+	/* 活动搜索入口（吸顶于右侧内容区顶部） */
+	.active-search-entry {
+		position: sticky;
+		top: 0;
+		z-index: 20;
+		padding: 16rpx 20rpx;
+		background: #F5F5F5;
+	}
+
+	.search-entry-box {
+		display: flex;
+		align-items: center;
+		height: 64rpx;
+		padding: 0 24rpx;
+		background: #ffffff;
+		border-radius: 32rpx;
+		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+	}
+
+	.search-entry-text {
+		margin-left: 12rpx;
+		font-size: 26rpx;
+		color: #b0b3bb;
 	}
 
 	/* 左右联动布局：左侧固定宽度侧边栏 + 右侧自适应内容区 */
