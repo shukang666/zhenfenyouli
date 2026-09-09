@@ -658,27 +658,28 @@
 					this.active_loading = false
 				})
 			},
-			// 点击搜索框右侧扫码图标：呼出二维码扫码模块
-			// 说明：二维码扫码逻辑暂未开放（下方代码先注释），扫码结果对应的业务跳转待后续按需接入
+			// 点击搜索框右侧扫码图标：呼出二维码扫码模块（真实拉起系统扫码）
+			// 说明：扫码成功后的业务跳转暂未接入（见 success 中 TODO），当前仅打印扫码内容
 			onScanQrcode() {
 				// #ifdef H5
-				// 浏览器环境没有系统扫码能力，扫码仅在小程序端可用，先提示引导
-				this.$u.toast('扫码功能开发中，敬请期待')
+				// 浏览器环境没有系统扫码能力，扫码仅支持在微信小程序端调用
+				this.$u.toast('扫码需在微信小程序内使用')
 				// #endif
-				// #ifdef MP-WEIXIN
-				// 打开系统扫码（暂注释未启用，功能开放后放开即可）：
-				// uni.scanCode({
-				// 	onlyFromCamera: false,
-				// 	success: (res) => {
-				// 		// res.result 为二维码内容，此处按业务规则解析并跳转（如活动详情/打卡等）
-				// 		console.log('scanCode result =>', res.result)
-				// 	},
-				// 	fail: (err) => {
-				// 		// 用户取消扫码或扫码失败
-				// 		console.log('scanCode fail =>', err)
-				// 	}
-				// })
-				this.$u.toast('扫码功能开发中，敬请期待')
+				// #ifndef H5
+				uni.scanCode({
+					onlyFromCamera: false,
+					success: (res) => {
+						// 扫码成功：res.result 为二维码内容
+						console.log('scanCode result =>', res.result)
+						this.$u.toast('扫码成功')
+						// TODO: 后续按业务规则解析 res.result 并跳转（如活动详情/打卡等）
+					},
+					fail: (err) => {
+						// 用户手动取消扫码时静默处理，其它异常打印便于排查
+						const msg = (err && err.errMsg) || ''
+						if (msg.indexOf('cancel') === -1) console.log('scanCode fail =>', msg)
+					}
+				})
 				// #endif
 			},
 			// 跳转页面（type==1 为垃圾分类打卡入口，需先通过答题考试）
