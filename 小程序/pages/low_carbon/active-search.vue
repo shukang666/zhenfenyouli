@@ -5,8 +5,10 @@
 			:background="{ background: '#ffffff' }" :border-bottom="false">
 			<view class="search-navbar">
 				<u-search v-model="keyword" placeholder="搜索活动名称 / 地点" bg-color="#f5f5f5" height="66"
-					action-text="搜索" show-action @search="doSearch" @custom="doSearch" @clear="handleClear"
+					:show-action="false" @search="doSearch" @clear="handleClear"
 					@change="onKeywordChange"></u-search>
+				<!-- 原生搜索按钮：u-search 内置 show-action 按钮点击在部分环境(如 H5)不触发，改用自定义原生 view 点击 -->
+				<view class="navbar-search-btn" hover-class="navbar-search-btn-hover" @click="doSearch">搜索</view>
 			</view>
 		</u-navbar>
 
@@ -248,7 +250,29 @@
 
 	.search-navbar {
 		flex: 1;
+		display: flex;
+		align-items: center;
 		padding: 0 24rpx 0 8rpx;
+	}
+
+	/* 导航栏右侧原生搜索按钮（修复原 u-search action 按钮点击不触发的问题） */
+	.navbar-search-btn {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 66rpx;
+		padding: 0 30rpx;
+		margin-left: 16rpx;
+		background: #18AF38;
+		border-radius: 33rpx;
+		font-size: 26rpx;
+		color: #ffffff;
+		line-height: 1;
+	}
+
+	.navbar-search-btn-hover {
+		opacity: 0.8;
 	}
 
 	.search-home {

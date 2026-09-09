@@ -18,6 +18,10 @@
 			<view class="search-entry-box">
 				<u-icon name="search" size="28" color="#b0b3bb"></u-icon>
 				<text class="search-entry-text">搜索活动名称 / 地点</text>
+				<!-- 扫码图标：点击呼出二维码扫码模块（扫码逻辑暂注释未启用，见 onScanQrcode） -->
+				<view class="search-entry-scan" @click.stop="onScanQrcode">
+					<u-icon name="scan" size="30" color="#8e8e93"></u-icon>
+				</view>
 			</view>
 		</view>
 
@@ -654,6 +658,29 @@
 					this.active_loading = false
 				})
 			},
+			// 点击搜索框右侧扫码图标：呼出二维码扫码模块
+			// 说明：二维码扫码逻辑暂未开放（下方代码先注释），扫码结果对应的业务跳转待后续按需接入
+			onScanQrcode() {
+				// #ifdef H5
+				// 浏览器环境没有系统扫码能力，扫码仅在小程序端可用，先提示引导
+				this.$u.toast('扫码功能开发中，敬请期待')
+				// #endif
+				// #ifdef MP-WEIXIN
+				// 打开系统扫码（暂注释未启用，功能开放后放开即可）：
+				// uni.scanCode({
+				// 	onlyFromCamera: false,
+				// 	success: (res) => {
+				// 		// res.result 为二维码内容，此处按业务规则解析并跳转（如活动详情/打卡等）
+				// 		console.log('scanCode result =>', res.result)
+				// 	},
+				// 	fail: (err) => {
+				// 		// 用户取消扫码或扫码失败
+				// 		console.log('scanCode fail =>', err)
+				// 	}
+				// })
+				this.$u.toast('扫码功能开发中，敬请期待')
+				// #endif
+			},
 			// 跳转页面（type==1 为垃圾分类打卡入口，需先通过答题考试）
 			navigator(url, type) {
 				// 垃圾分类打卡：允许未登录用户进入详情页，点击打卡时再跳登录
@@ -829,9 +856,22 @@
 	}
 
 	.search-entry-text {
+		flex: 1;
 		margin-left: 12rpx;
 		font-size: 26rpx;
 		color: #b0b3bb;
+	}
+
+	/* 搜索框右侧扫码图标 */
+	.search-entry-scan {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 52rpx;
+		height: 52rpx;
+		margin-left: 8rpx;
+		padding-left: 20rpx;
+		border-left: 1rpx solid #eeeeee;
 	}
 
 	/* 左右联动布局：左侧固定宽度侧边栏 + 右侧自适应内容区 */
