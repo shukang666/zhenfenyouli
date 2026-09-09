@@ -15,6 +15,7 @@ use app\admin\model\member\MemberModel;
 use app\admin\model\RoleUserModel;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use think\facade\Db;
 use think\Model;
 use think\facade\Cache;
@@ -51,19 +52,14 @@ class CommonModel extends Model
     static public function getUserInfoByOpenid($openid, $field = '*')
     {
         $Model = new MemberModel();
-
+        $user = [];
 
         if (!empty($openid)) {
             $user = $Model->field($field)->where(['openid' => $openid])->find();
         } else {
-            if (empty($user)) {
-                if (cmf_get_new_option('use_default_token') == 1) {
-                    $user = $Model->where(['id' => 1])->find();
-                } else {
-                    $user = [];
-                }
-            };
-
+            if (cmf_get_new_option('use_default_token') == 1) {
+                $user = $Model->where(['id' => 1])->find();
+            }
         }
         return $user;
     }
@@ -296,7 +292,7 @@ class CommonModel extends Model
         }
         $key = '';
         for ($i = 0; $i < $length; $i++) {
-            $key .= $pattern{mt_rand(0, $full_length)};    //生成php随机数
+            $key .= $pattern[mt_rand(0, $full_length)];    //生成php随机数
         }
         return $key;
     }
@@ -666,7 +662,7 @@ class CommonModel extends Model
      * 备注：此函数缺点是，表头（对应列数）不能超过26；
      *循环不够灵活，一个单元格中不方便存放两个数据库字段的值
      */
-   static public function outData($name = '测试表', $data = [], $head = [], $keys = [])
+   static public function outData($name = '测试表', $data = [], $head = [], $keys = [], $types = [], $image_array = [])
     {
         // PhpSpreadsheet 在大数据量导出时会消耗大量内存（每个单元格都会缓存对象），
         // 默认 256M 经常不够用导致 "Allowed memory size of ... bytes exhausted"。
@@ -684,27 +680,72 @@ class CommonModel extends Model
         $count = count($head);  //计算表头数量
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
+
+        // ======PhpSpreadsheet内存优化配置======
+        $writer = new Xlsx($spreadsheet);
+        $writer->setPreCalculateFormulas(false); // 关闭公式预计算，大幅省内存
+        $writer->setIncludeCharts(false);
+
         for ($i = 65; $i < $count + 65; $i++) {
             //数字转字母从65开始，循环设置表头：
             $sheet->setCellValue(strtoupper(chr($i)) . '1', $head[$i - 65]);
         }
+
         /*--------------开始从数据库提取信息插入Excel表中------------------*/
         foreach ($data as $key => $item) {
             //循环设置单元格：
             //$key+2,因为第一行是表头，所以写到表格时   从第二行开始写
             for ($i = 65; $i < $count + 65; $i++) {
                 //数字转字母从65开始：
-                $sheet->setCellValue(strtoupper(chr($i)) . ($key + 2), $item[$keys[$i - 65]]);
-                $spreadsheet->getActiveSheet()->getColumnDimension(strtoupper(chr($i)))->setWidth(20); //固定列宽
+
+                $value = $item[$keys[$i - 65]];
+                if(!empty($types) && $types[$i - 65] == 2 && !empty($value)){
+
+                    $objDrawing = new Drawing();
+                    $objDrawing->setPath($value);//这里拼接 . 是因为要在根目录下获取
+                    // 设置宽度高度
+                    $objDrawing->setHeight(30);//照片高度
+                    $objDrawing->setWidth(30); //照片宽度
+                    /*设置图片要插入的单元格*/
+                    $objDrawing->setCoordinates(strtoupper(chr($i)) . ($key + 2));
+                    // 图片偏移距离
+                    $objDrawing->setOffsetX(0);
+                    $objDrawing->setOffsetY(0);
+                    $objDrawing->setWorksheet($spreadsheet->getActiveSheet());
+
+                    $spreadsheet->getActiveSheet()->getColumnDimension(strtoupper(chr($i)))->setWidth(20); //固定列宽
+                    $spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(50);//列高
+                }else{
+                    $sheet->setCellValue(strtoupper(chr($i)) . ($key + 2), $item[$keys[$i - 65]]);
+                    $spreadsheet->getActiveSheet()->getColumnDimension(strtoupper(chr($i)))->setWidth(20); //固定列宽
+                }
             }
         }
         header('Content-Type: application/vnd.ms-excel');
         header('Content-Disposition: attachment;filename="' . $name . '.xlsx"');
         header('Cache-Control: max-age=0');
-        $writer = new Xlsx($spreadsheet);
+//        $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');//删除清空：
+
+        // =====修复：使用register_shutdown_function，脚本全部结束后删除临时图片=====
+        register_shutdown_function(function() use ($image_array){
+            foreach($image_array as $file){
+               if(is_file($file)){
+                   @unlink($file);
+               }
+            }
+        });
+
         $spreadsheet->disconnectWorksheets();
-        unset($spreadsheet);
+        unset($spreadsheet, $writer);
+        gc_collect_cycles();
+
+//        $spreadsheet->disconnectWorksheets();
+//
+//        foreach($image_array as $k=>$v){
+//            unlink($v);
+//        }
+//        unset($spreadsheet);
         exit;
     }
 

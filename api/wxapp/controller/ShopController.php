@@ -383,7 +383,7 @@ class ShopController extends AuthController
         $order = $orderModel->find($qrcode['order_id']);
         AccountLogModel::add_account_log($this->user_id, 3, 300, $order['price']);
         $qrcode->save(['status' => 2]);
-        $order->save(['status' => 6]);
+        $order->save(['status' => 8]);
         $this->success('扫码成功');
     }
 
