@@ -108,6 +108,8 @@ class ActiveController extends ToolController
         $this->assign('params', $params);
         $this->outParam();
         if (empty($params['id'])) {
+            // 添加模式也渲染 update.html，赋空 item 避免模板读取 $item.xxx 报"未定义变量"
+            $this->assign('item', []);
             return $this->fetch();
         }
         $item = $this->setEdit($params);

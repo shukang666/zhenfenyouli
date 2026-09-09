@@ -29,7 +29,7 @@
                     <foreach name="cate_list" item="vo">
                         <notempty name="item.cate_id">
                             <option value="{$vo.id}"
-                            <if condition="$item.cate_id == $vo.id">selected</if>
+                            <if condition="!empty($item.cate_id) && $item.cate_id == $vo.id">selected</if>
                             >{$vo.name}</option>
                             <else/>
                             <option value="{$vo.id}">{$vo.name}</option>
@@ -49,7 +49,7 @@
                         <foreach name="community_cate_list" item="vo">
                             <notempty name="item.community_cate_id">
                                 <option value="{$vo.id}"
-                                <if condition="$item.community_cate_id == $vo.id">selected</if>
+                                <if condition="!empty($item.community_cate_id) && $item.community_cate_id == $vo.id">selected</if>
                                 >{$vo.name}</option>
                                 <else/>
                                 <option value="{$vo.id}">{$vo.name}</option>
@@ -80,7 +80,7 @@
                             <if condition="empty($item.join_type) || $item.join_type == 1">selected</if>>小程序参加
                     </option>
                     <option value="2"
-                            <if condition="$item.join_type == 2">selected</if>>扫码参加
+                            <if condition="isset($item['join_type']) && $item['join_type'] == 2">selected</if>>扫码参加
                     </option>
                 </select>
                 <p class="help-block">
