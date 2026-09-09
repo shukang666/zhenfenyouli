@@ -429,6 +429,9 @@ class ActiveController extends AuthController
         $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
         $item['content'] = htmlspecialchars_decode($item['content']);
 
+        //参与人数
+        $item['active_count'] = ActiveSIgnModel::where('active_id', $item['id'])->count();
+
         //是否报名
         $where = [];
         $where[] = ['active_id', '=', $item['id']];
