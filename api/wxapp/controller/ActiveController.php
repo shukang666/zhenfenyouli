@@ -429,9 +429,6 @@ class ActiveController extends AuthController
         $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
         $item['content'] = htmlspecialchars_decode($item['content']);
 
-        //参与人数
-        $item['active_count'] = ActiveSIgnModel::where('active_id', $item['id'])->count();
-
         //是否报名
         $where = [];
         $where[] = ['active_id', '=', $item['id']];
@@ -451,6 +448,9 @@ class ActiveController extends AuthController
         }
         $item['sign_id'] = empty($sign_info)?0:$sign_info['id'];
         $item['is_sign'] = empty($sign_info)?0:1;
+
+        //参与人数
+        $item['active_count'] = ActiveSIgnModel::where('active_id', $item['id'])->count();
 
         $date_time = strtotime(date('Y-m-d 00:00:00'));
         //是否打卡

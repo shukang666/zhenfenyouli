@@ -30,11 +30,6 @@
 						<text class="stat-value">{{participantsCount}}</text>
 						<text class="stat-label">人已参与</text>
 					</view>
-					<view class="stat-divider"></view>
-					<view class="stat-item">
-						<text class="stat-value">{{info.day_count || 7}}</text>
-						<text class="stat-label">天挑战</text>
-					</view>
 				</view>
 			</view>
 		</view>
@@ -259,10 +254,9 @@
 				}
 				return '参与绿色行动，共建美好家园';
 			},
-		// 参与人数 - 暂时使用默认值，后续需要后端提供字�?
+		// 参与人数 - 由后端 detail 接口返回真实报名人数
 		participantsCount() {
-			// 真实实现时应该是 this.info.participants_count
-			return this.info.sign_count || 0;
+			return this.info.active_count || 0;
 		},
 		// 打卡按钮文本
 		clockBtnText() {
