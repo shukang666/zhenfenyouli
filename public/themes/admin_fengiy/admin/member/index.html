@@ -9,15 +9,9 @@
     <!-- 搜索和排序表单 -->
     <form class="well form-inline margin-top-20 layui-form" method="get" action="{:url('index')}">
         <div class="layui-inline">
-            昵称：
+            关键字：
             <input type="text" class="form-control" name="keyword" style="width: 140px;"
-                   value="{:input('request.keyword/s','')}"  placeholder="请输入昵称">
-        </div>
-
-        <div class="layui-inline" style="margin-left: 10px">
-            ID：
-            <input type="text" class="form-control" name="id" style="width: 80px;"
-                   value="{:input('request.id/s','')}" placeholder="用户ID">
+                   value="{:input('request.keyword/s','')}"  placeholder="请输入名称">
         </div>
 
         <php>
@@ -39,20 +33,7 @@
             </select>
         </div>
 
-        <div class="layui-inline" style="margin-left: 10px">
-            创建时间：
-            <div class="layui-inline" id="create-time">
-                <div class="layui-input-inline" style="width: 140px;">
-                    <input type="text" autocomplete="off" id="create-startDate" class="layui-input" name="start_time"
-                           value="{:input('request.start_time')}" placeholder="开始日期">
-                </div>
-                -
-                <div class="layui-input-inline" style="width: 140px;">
-                    <input type="text" autocomplete="off" id="create-endDate" class="layui-input" name="end_time"
-                           value="{:input('request.end_time')}" placeholder="结束日期">
-                </div>
-            </div>
-        </div>
+
 
         <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 25px"/>
         <a class="btn btn-danger" href="{:url('index')}">重置</a>
@@ -65,7 +46,6 @@
         <tr>
             <th width="50">ID</th>
             <th>昵称</th>
-            <th>社区</th>
             <th>小区</th>
             <th width="80">头像</th>
             <th width="120">手机号</th>
@@ -93,7 +73,6 @@
             <tr>
                 <td>{$vo.id}</td>
                 <td>{$vo.nickname}</td>
-                <td>{$vo.community_parent_name}</td>
                 <td>{$vo.community_name}</td>
                 <td>
                     <if condition="!empty($vo['avatar'])">
@@ -117,48 +96,58 @@
     </table>
 
     <!-- 分页 -->
-    <div class="pagination" style="display:flex; align-items:center; flex-wrap:wrap; row-gap:6px;">
+    <div class="pagination">
         {$page}
-        <div class="pagination-jump" style="display:inline-flex; align-items:center; margin-left:10px;">
+        <div class="page-jump" style="display:inline-block; margin-left:15px; vertical-align:middle;">
             <span>第</span>
-            <input type="text" id="jump_page_input" class="form-control"
-                   style="width:50px; height:34px; text-align:center; padding:6px; margin:0 4px;"
-                   value="{:input('page/d',1)}">
+            <input type="text" id="jump_page_input" class="form-control" style="width:50px; display:inline-block; height:32px; text-align:center;" value="{:input('page/d',1)}">
             <span>页</span>
-            <button type="button" class="btn btn-default" id="jump_page_btn"
-                    style="height:34px; padding:6px 12px;">跳转</button>
+            <button type="button" class="btn btn-primary btn-sm" id="jump_page_btn" style="height:32px;">跳转</button>
         </div>
     </div>
 </div>
 <script src="__STATIC__/js/admin.js"></script>
 <script>
-    layui.use(['layer', 'form', 'laydate'], function () {
-        var laydate = layui.laydate;
-        laydate.render({
-            elem: '#create-time',
-            range: ['#create-startDate', '#create-endDate']
+    // 页码跳转
+    function jumpToPage(page){
+        var url = window.location.href;
+        // 解析当前 URL 的 query 参数
+        var hashIndex = url.indexOf('#');
+        if (hashIndex > -1) url = url.substring(0, hashIndex);
+        var queryIndex = url.indexOf('?');
+        var base = url;
+        var params = {};
+        if (queryIndex > -1) {
+            base = url.substring(0, queryIndex);
+            var queryString = url.substring(queryIndex + 1);
+            var pairs = queryString.split('&');
+            for (var i = 0; i < pairs.length; i++) {
+                var pair = pairs[i].split('=');
+                if (pair[0]) {
+                    params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+                }
+            }
+        }
+        params['page'] = page;
+        var query = $.param(params);
+        window.location.href = base + '?' + query;
+    }
+
+    $(function () {
+        $('#jump_page_btn').click(function () {
+            var page = parseInt($('#jump_page_input').val(), 10);
+            if (isNaN(page) || page < 1) {
+                layer.msg('请输入有效的页码', {icon: 2});
+                return;
+            }
+            jumpToPage(page);
+        });
+        $('#jump_page_input').on('keypress', function (e) {
+            if (e.which === 13) {
+                $('#jump_page_btn').click();
+            }
         });
     });
-</script>
-<script>
-(function(){
-    var input = document.getElementById('jump_page_input');
-    var btn = document.getElementById('jump_page_btn');
-    if (!input || !btn) return;
-    function jump(){
-        var p = parseInt(input.value, 10);
-        if (isNaN(p) || p < 1) p = 1;
-        // 解析当前 query string，剔除旧 page，保留所有其它筛选/排序参数
-        var qs = location.search ? location.search.substring(1) : '';
-        var params = qs.split('&').filter(function(x){ return x && x.indexOf('page=') !== 0; });
-        params.push('page=' + p);
-        location.href = location.pathname + '?' + params.join('&') + location.hash;
-    }
-    btn.addEventListener('click', jump);
-    input.addEventListener('keydown', function(e){
-        if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); jump(); }
-    });
-})();
 </script>
 </body>
 </html>

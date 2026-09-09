@@ -1104,11 +1104,6 @@ function artdialogAlert(msg) {
 }
 
 function openIframeLayer(url, title, options) {
-    // 校验 URL：去除首尾空白及零宽字符后为空则不打开
-    if (!url || !$.trim(url.replace(/[\u200B-\u200D\uFEFF]/g, ''))) {
-        console.warn('openIframeLayer: 无效的 URL，已忽略。url=', JSON.stringify(url));
-        return;
-    }
 
     var params = {
         type: 2,

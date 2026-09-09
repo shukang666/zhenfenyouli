@@ -8,11 +8,7 @@
 // +----------------------------------------------------------------------
 namespace api\wxapp\controller;
 
-use api\wxapp\model\AccountLogModel;
-use app\admin\model\active\ActiveModel;
 use app\admin\model\member\MemberModel;
-use cmf\lib\Storage;
-use Mpdf\Mpdf;
 use plugins\ali_sms\AliSmsPlugin;
 use plugins\tencentcloud_sms\TencentcloudSmsPlugin;
 use think\facade\Db;
@@ -300,15 +296,7 @@ class PublicController extends AuthController
      *             type="string",
      *         )
      *     ),
-     *        @OA\Parameter(
-     *         name="user_id",
-     *         in="query",
-     *         description="分享的用户id",
-     *         required=true,
-     *         @OA\Schema(
-     *             type="string",
-     *         )
-     *     ),
+     *
      *    @OA\Response(response="200", description="An example resource"),
      *    @OA\Response(response="default", description="An example resource")
      * )
@@ -317,8 +305,6 @@ class PublicController extends AuthController
     {
         $code = $this->request->param('code');
         $encrypted_data = $this->request->param('encrypted_data');
-        $user_id = $this->request->param('user_id');
-        $active_id = $this->request->param('active_id');
         $iv = $this->request->param('iv');
         $vcode = $this->request->param('vcode');
         if (empty($code) || empty($encrypted_data) || empty($iv)) {
@@ -362,22 +348,8 @@ class PublicController extends AuthController
             $MemberModel->where($map)->save(['openid' => $openid, 'unionid' => $unionid]);
         } else {
             //添加
-            $userId = $this->addUser($openid, $vcode, $unionid);
+            $this->addUser($openid, $vcode, $unionid);
             $MemberModel->where(['openid' => $openid])->save(['mobile' => $user_phone]);
-
-            //新注册用户且存在分享用户，分享用户增加积分
-            if(!empty($user_id)){
-                $setting = cmf_get_option('set_config');
-                $carbon = $setting['share_point'];
-                AccountLogModel::add_account_log($user_id, 2, 223, $carbon, ['new_user_id' => $userId]);
-
-
-//                $active_info = ActiveModel::where('id',$active_id)->find();
-//                if(!empty($active_info) && $active_info['type'] == 1 && $active_info['share_point'] > 0){
-//                    $carbon = $active_info['share_point'];
-//                    AccountLogModel::add_account_log($user_id, 2, 223, $carbon, ['new_user_id' => $userId]);
-//                }
-            }
         }
         $this->success('获取成功', CommonModel::getUserByOpenid($openid));
 
@@ -676,309 +648,6 @@ class PublicController extends AuthController
         } else {
             $this->error('授权失败');
         }
-    }
-
-
-    /**
-     * 测试
-     * @OA\Get (
-     *     tags={"小程序公共模块接口"},
-     *     path="/wxapp/public/ceshi",
-     *     @OA\Response(response="200", description="An example resource"),
-     *     @OA\Response(response="default", description="An example resource")
-     * )
-     */
-    public function ceshi()
-    {
-
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'autoScriptToLang' => true,
-            'autoLangToFont' => true,
-            'useSubstitutions' => true,
-        ]);
-        $html = $this->pdf_html();
-
-        $mpdf->WriteHTML($html);
-
-        /*// ===================== 水印开始 =====================
-        $text = "通航未来就业部";
-        $size = 50;
-        $alpha = 0.3;
-        $angle = 45;
-
-        // 获取总页数
-        $totalPages = $mpdf->page;
-
-        // 逐页绘制水印
-        for ($page = 1; $page <= $totalPages; $page++) {
-            $mpdf->page = $page; // 切换到当前页
-
-            // 绘制整页水印
-            for ($y = 40; $y < 800; $y += 130) {
-                for ($x = 30; $x < 600; $x += 150) {
-                    $mpdf->SetFontSize($size);
-                    $mpdf->SetAlpha($alpha);
-                    $mpdf->SetTextColor(136, 136, 136);
-
-                    $mpdf->Rotate($angle, $x, $y);
-                    $mpdf->Text($x, $y, $text);
-                    $mpdf->Rotate(0);
-                }
-            }
-
-            // 🔑 关键：只在非最后一页时才新增一页
-            if ($page < $totalPages) {
-                $mpdf->AddPage();
-            }
-        }
-
-        // 恢复默认
-        $mpdf->SetAlpha(1);
-        $mpdf->SetTextColor(0, 0, 0);
-        // ===================== 水印结束 =====================*/
-
-        $mpdf->Output('航空专业定向人才实习就业推荐协议.pdf', 'D');
-        exit();
-    }
-
-    //生成pdf文件
-    public function pdf($image = ''){
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'autoScriptToLang' => true,
-            'autoLangToFont' => true,
-            'useSubstitutions' => true,
-        ]);
-        $html = $this->pdf_html($image);
-
-        $mpdf->WriteHTML($html);
-
-
-        $alioss_config = cmf_get_plugin_config('Oss');
-        $base_dir = !empty($alioss_config)?$alioss_config['dir'].'/':'';
-        $scene = time() . rand(1000,9999);
-
-        $path = "upload/pdf_file/" . $scene . ".pdf";
-        $rel_path = $base_dir . "pdf_file/" . md5(time()). $scene . ".pdf";
-
-        $mpdf->Output($path, 'F');
-
-        //上传Oss储存
-        $storage = cmf_get_option('storage');
-        $storage = new Storage($storage['type'], $storage['storages'][$storage['type']]);
-        $storage->upload($rel_path, $path);
-
-        return $rel_path;
-    }
-
-    //pdf的html内容
-    public function pdf_html($image = ''){
-        $image = empty($image)?'':cmf_get_asset_url($image);
-
-        $html = <<<HTML
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>【真分】社区环保志愿督导服务与兼职劳务协议</title>
-    <style>
-        body {
-            font-family: "SimSun", "宋体", serif;
-            line-height: 1.8;
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 30px;
-            font-size: 16px;
-        }
-        h1 {
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-        .intro {
-            text-indent: 2em;
-            margin-bottom: 25px;
-        }
-        h2 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 20px 0 10px;
-        }
-        p {
-            text-indent: 2em;
-            margin: 8px 0;
-        }
-        .list-item {
-            text-indent: 0;
-            padding-left: 2em;
-            margin: 6px 0;
-        }
-        .sign-area {
-            margin-top: 60px;
-        }
-        .sign-line {
-            margin: 15px 0;
-        }
-        .sign-note {
-            margin-top: 30px;
-        }
-    </style>
-</head>
-<body>
-<h1>【真分】社区环保志愿督导服务与兼职劳务协议</h1>
-
-<p class="intro">致尊敬的志愿督导员：</p>
-<p class="intro">垃圾分类不仅是践行绿色低碳生活的必然要求，更是构建“居民自治、社区共建”现代化基层治理体系的重要一环。为了全面提升本社区的垃圾分类成效，打造美好宜居的社区环境，同时充分肯定并合法保障每一位参与环保督导工作居民的劳动权益，我们诚邀您加入【真分】环保行动。您通过小程序参与的每一次垃圾分类动作，都是对美好生活的贡献。为规范协作机制，保障双方权益，特制定本协议：</p>
-
-<h2>一、 角色定位与工作内容</h2>
-<p>您即日起正式成为【真分】志愿督导员。您的核心职责为以公益视角，协助记录并反馈点位分类情况，共同维护社区环境。为全面推进环保工作，您的具体工作内容包括但不限于以下多种形式：</p>
-<p class="list-item">1. 点位督导巡查：依照标准记录并反馈各分类点位的实际运行情况；</p>
-<p class="list-item">2. 督导活动支持：参与并协助社区开展的各类垃圾分类线下活动；</p>
-<p class="list-item">3. 线上督导宣教：通过线上渠道参与垃圾分类的宣传、引导与教育工作；</p>
-<p class="list-item">4. 平台指派的垃圾分类其他相关工作。</p>
-
-<h2>二、 规范引导与兼职协作</h2>
-<p>为保障社区环保工作的高效有序，双方建立“基于标准化任务”的兼职协作关系。为确保巡查动作的有效性，平台将通过小程序为您发布明确的巡查任务指引与标准操作流程。请您按照平台的专业指导开展巡查工作。您的巡查工作将以平台下发的具体任务指标为准。</p>
-
-<h2>三、 劳务报酬与结算形式</h2>
-<p>我们高度重视您的每一份付出。当您按照规范完成对应的任务动作后，平台将依据您的实际工作量核发相应的服务激励。</p>
-<p>报酬性质说明：双方明确约定，为确保持续的高质量协作，您完成平台下发任务后所获取的收益，在财务与法律定性上，均属于平台向您支付的“兼职劳务报酬”。</p>
-<p>支付形式：平台向您支付的劳务报酬将包含积分、实物、现金等多种形式。具体支付形式将因当时阶段所开展的相应动作及平台任务规则而定。</p>
-<p>若当期报酬以积分形式发放，您可凭该积分在平台积分商城兑换健康物资，作为对您劳动付出的回馈；相应积分的发放或物资的领取，即视为当次劳务报酬的结清。</p>
-
-<h2>四、 凭证确认</h2>
-<p>您进行确认即代表您认可上述协作模式。本协议及您在小程序内完成的任务记录、积分流向数据，将作为您参与环保事业并获取劳动激励的合法凭证。</p>
-
-<div class="sign-area">
-    <p class="sign-line">甲方：数康(大连)数据科技有限公司 &nbsp;&nbsp;乙方（兼职督导员）：________________________</p>
-</div>
-
-<div class="sign-note">
-    <p>签署说明： 本协议自乙方在小程序前端点击“同意”签字确认之日起生效。</p>
-</div>
-
-<div style="position: absolute;bottom: 700px;left: 160px;z-index: 999;pointer-events: none;">
-    <img src="https://xcxkf052.aubye.com/upload/image/seal.png" style="width: 160px; max-width: 160px; height: auto;" alt="透明图">
-</div>
-
-<div style="position: absolute;bottom: 810px;right: 120px;z-index: 999;pointer-events: none;">
-    <img src="$image" style="width: 160px; max-width: 160px; height: auto;" alt="透明图">
-</div>
-</body>
-</html>
-HTML;
-        return $html;
-    }
-
-    //pdf的html内容
-    public function pdf_html_show($image = ''){
-        $image = empty($image)?'':cmf_get_asset_url($image);
-        $img_string = '';
-        if(!empty($image)){
-            $img_string = '<img src="' . $image . '" style="width: 50px; max-width: 50px; height: auto;" alt="透明图">';
-        }
-
-        $html = <<<HTML
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>【真分】社区环保志愿督导服务与兼职劳务协议</title>
-    <style>
-        body {
-            font-family: "SimSun", "宋体", serif;
-            line-height: 1.8;
-            width: 900px;
-            margin: 40px auto;
-            padding: 0 30px;
-            font-size: 16px;
-        }
-        h1 {
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-        .intro {
-            text-indent: 2em;
-            margin-bottom: 25px;
-        }
-        h2 {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 20px 0 10px;
-        }
-        p {
-            text-indent: 2em;
-            margin: 8px 0;
-        }
-        .list-item {
-            text-indent: 0;
-            padding-left: 2em;
-            margin: 6px 0;
-        }
-        .sign-area {
-            margin-top: 60px;
-        }
-        .sign-line {
-            margin: 15px 0;
-            position: relative;
-        }
-        .sign-note {
-            margin-top: 30px;
-        }
-    </style>
-</head>
-<body>
-<h1>【真分】社区环保志愿督导服务与兼职劳务协议</h1>
-
-<p class="intro">致尊敬的志愿督导员：</p>
-<p class="intro">垃圾分类不仅是践行绿色低碳生活的必然要求，更是构建“居民自治、社区共建”现代化基层治理体系的重要一环。为了全面提升本社区的垃圾分类成效，打造美好宜居的社区环境，同时充分肯定并合法保障每一位参与环保督导工作居民的劳动权益，我们诚邀您加入【真分】环保行动。您通过小程序参与的每一次垃圾分类动作，都是对美好生活的贡献。为规范协作机制，保障双方权益，特制定本协议：</p>
-
-<h2>一、 角色定位与工作内容</h2>
-<p>您即日起正式成为【真分】志愿督导员。您的核心职责为以公益视角，协助记录并反馈点位分类情况，共同维护社区环境。为全面推进环保工作，您的具体工作内容包括但不限于以下多种形式：</p>
-<p class="list-item">1. 点位督导巡查：依照标准记录并反馈各分类点位的实际运行情况；</p>
-<p class="list-item">2. 督导活动支持：参与并协助社区开展的各类垃圾分类线下活动；</p>
-<p class="list-item">3. 线上督导宣教：通过线上渠道参与垃圾分类的宣传、引导与教育工作；</p>
-<p class="list-item">4. 平台指派的垃圾分类其他相关工作。</p>
-
-<h2>二、 规范引导与兼职协作</h2>
-<p>为保障社区环保工作的高效有序，双方建立“基于标准化任务”的兼职协作关系。为确保巡查动作的有效性，平台将通过小程序为您发布明确的巡查任务指引与标准操作流程。请您按照平台的专业指导开展巡查工作。您的巡查工作将以平台下发的具体任务指标为准。</p>
-
-<h2>三、 劳务报酬与结算形式</h2>
-<p>我们高度重视您的每一份付出。当您按照规范完成对应的任务动作后，平台将依据您的实际工作量核发相应的服务激励。</p>
-<p>报酬性质说明：双方明确约定，为确保持续的高质量协作，您完成平台下发任务后所获取的收益，在财务与法律定性上，均属于平台向您支付的“兼职劳务报酬”。</p>
-<p>支付形式：平台向您支付的劳务报酬将包含积分、实物、现金等多种形式。具体支付形式将因当时阶段所开展的相应动作及平台任务规则而定。</p>
-<p>若当期报酬以积分形式发放，您可凭该积分在平台积分商城兑换健康物资，作为对您劳动付出的回馈；相应积分的发放或物资的领取，即视为当次劳务报酬的结清。</p>
-
-<h2>四、 凭证确认</h2>
-<p>您进行确认即代表您认可上述协作模式。本协议及您在小程序内完成的任务记录、积分流向数据，将作为您参与环保事业并获取劳动激励的合法凭证。</p>
-
-<div class="sign-area">
-    <p class="sign-line">
-    <span>甲方：数康(大连)数据科技有限公司</span>
-    <div style="position: absolute;top: -10px;left: 50px;z-index: 999;pointer-events: none;">
-        <img src="https://xcxkf052.aubye.com/upload/image/seal.png" style="width: 80px; max-width: 80px; height: auto;" alt="透明图">
-    </div>
-    
-    <span>乙方（兼职督导员）：________________________</span>
-    <div style="position: absolute;top: -10px;right: 350px;z-index: 999;pointer-events: none;">
-        $img_string
-    </div>
-    </p>
-</div>
-
-<div class="sign-note">
-    <p>签署说明： 本协议自乙方在小程序前端点击“同意”签字确认之日起生效。</p>
-</div>
-
-</body>
-</html>
-HTML;
-
-        return $html;
     }
 
 

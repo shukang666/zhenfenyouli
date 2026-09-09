@@ -56,11 +56,9 @@ class HealthController extends AuthController
         }
         $where = [];
         $where[] = ['type', '=', $type];
-        $where[] = ['delete_time', '=', 0];
         if ($status) $where[] = ['status', '=', $status];
         if ($type == 1) {
-            $where[] = ['status', '=', 1];
-            $list = $homeModel->where($where)->hidden(['content'])->order('list_order asc,id desc')->select();
+            $list = $homeModel->where($where)->hidden(['content'])->select();
             foreach ($list as &$item) {
                 $item = Db::name('exam')
                     ->field("*")
@@ -68,8 +66,7 @@ class HealthController extends AuthController
                     ->find();
             }
         } else {
-            $where[] = ['status', '=', 1];
-            $list = $homeModel->where($where)->hidden(['content'])->order('list_order asc,id desc')->select();
+            $list = $homeModel->where($where)->hidden(['content'])->select();
             foreach ($list as &$item) {
                 if (empty($item['desc'])) $item['desc'] = '';
             }

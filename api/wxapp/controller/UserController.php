@@ -14,17 +14,13 @@ use api\wxapp\model\CommonModel;
 use api\wxapp\model\AddressModel;
 use api\wxapp\model\ShopOrderModel;
 use api\wxapp\model\VipModel;
-use app\admin\model\forum\ForumModel;
 use app\admin\model\health\HealthHomeModel;
 use app\admin\model\member\CheckModel;
 use app\admin\model\member\CommunityModel;
-use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberModel;
 use app\admin\model\order\OrderQrcodeModel;
 use app\admin\model\order\ScanLogModel;
 use app\admin\model\shop\ShopModel;
-use app\admin\model\active\WasteModel;
-use app\admin\model\active\WasteUserModel;
 use cmf\lib\Storage;
 use think\facade\Db;
 use think\Model;
@@ -51,19 +47,14 @@ class UserController extends AuthController
         $CheckModel = new CheckModel();
         $user = $memberModel->where(['id' => $this->user_id])
             ->field('id,nickname,true_name,mobile,avatar,openid,level,community_id
-            ,shop_balance_total,shop_balance,point,shop_balance balance,is_environmental,is_supervisor,is_merchant,community_parent_id
+            ,shop_balance_total,shop_balance,point,shop_balance balance
             ')->find();
         $user['community'] = $CommunityModel->where(['id' => $user['community_id']])->value('name');
-        $user['community_parent'] = CommunityParentModel::where(['id' => $user['community_parent_id']])->value('name');
         $user['is_answer'] = $AnswerModel//垃圾分类答题考试 是否及格
         ->where('status', 3)
             ->where('type', 1)
             ->where(['user_id' => $user['id']])
             ->count() ? 1 : 0;
-        //是否学完所有垃圾分类指导内容（user_count >= waste_count 且 waste_count > 0）
-        $waste_count = WasteModel::count();
-        $user_count = WasteUserModel::where('user_id', $user['id'])->count();
-        $user['is_learn'] = ($waste_count > 0 && $user_count >= $waste_count) ? 1 : 0;
         $user['check_status'] = $CheckModel->where('user_id', $user['id'])->value('status') ?? 0;
         $user['min_app_id'] = $this->get_config['min_app_id'];
         $shop_info = ShopModel::where('user_id', $user['id'])->field('status,msg')->find();
@@ -81,18 +72,6 @@ class UserController extends AuthController
             ->where('exam_id','in', $Healthids)
             ->where(['openid' => $user['openid']])->count() ? 1 : 0;
 
-
-        $setting = cmf_get_option('set_config');
-        $user['continuous_check'] = $setting['continuous_check'];
-        //当前还不是环保达人
-        if($this->user_info['is_environmental'] == 0){
-            //判断是否连续天数达标
-            $array = ForumModel::where(['type' => 2, 'user_id' => $this->user_id])->column('create_time');
-            $clock_count = $this->getNowContinueSignDays($array);
-        }
-        $user['clock_count'] = $clock_count ?? 0;
-        $user['remaining_count'] = $user['continuous_check'] - $user['clock_count'];
-
         $this->success('获取成功', $user);
     }
 
@@ -107,7 +86,6 @@ class UserController extends AuthController
      *      *@OA\Parameter(name="nickname",description="昵称",in="query",required=false, @OA\Schema(type="string",)),
      *      *@OA\Parameter(name="avatar",description="头像",in="query",required=false, @OA\Schema(type="string",)),
      *      *@OA\Parameter(name="mobile",description="手机号",in="query",required=false, @OA\Schema(type="string",)),
-     *      *@OA\Parameter(name="community_parent_id",description="社区ID",in="query",required=false, @OA\Schema(type="string",)),
      *      *@OA\Parameter(name="community_id",description="小区ID",in="query",required=false, @OA\Schema(type="string",)),
      *     @OA\Response(response="200", description="An example resource"),
      *    @OA\Response(response="default", description="An example resource")
@@ -434,142 +412,5 @@ class UserController extends AuthController
         $this->success('获取成功', $data);
     }
 
-
-    /**
-     * 获取一组打卡时间戳中 当前连续打卡天数（从最后一次打卡往前算）
-     * @param array $timeStampArr 打卡时间戳数组
-     * @return int 当前连续天数
-     */
-    function getNowContinueSignDays(array $timeStampArr): int
-    {
-        // 无打卡数据直接返回0
-        if (empty($timeStampArr)) {
-            return 0;
-        }
-
-        // 1、全部转为当天0点时间戳
-        $dayTsArr = array_map(function ($ts) {
-            return strtotime(date('Y-m-d', $ts));
-        }, $timeStampArr);
-
-        // 2、去重：同一天多次打卡只保留1条
-        $uniqueDayTs = array_unique($dayTsArr);
-        // 3、升序排序
-        sort($uniqueDayTs);
-
-        $oneDaySecond = 86400;
-        $count = 1;
-        $lastTs = end($uniqueDayTs); // 最后打卡日期零点时间戳
-        $todayZero = strtotime(date('Y-m-d'));
-
-        // 校验最后打卡是不是今天或昨天，断档直接返回1或0
-        // 情况1：最后打卡不是今天、也不是昨天，连续只有当天那1天
-        if ($lastTs < $todayZero - $oneDaySecond) {
-            return 1;
-        }
-
-        // 从倒数第二位往前倒推连续天数
-        $reverseList = array_reverse($uniqueDayTs);
-        $prev = $reverseList[0];
-        foreach ($reverseList as $ts) {
-            if ($ts === $prev) {
-                continue;
-            }
-            if ($prev - $ts === $oneDaySecond) {
-                $count++;
-                $prev = $ts;
-            } else {
-                // 中间断开，终止统计
-                break;
-            }
-        }
-
-        return $count;
-    }
-
-    /**
-     * @OA\Post(
-     *      tags={"小程序-用户"},
-     *      summary="每日签到",
-     *     path="/wxapp/user/daily_sign",
-     *     @OA\Response(response="200", description="An example resource"),
-     *    @OA\Response(response="default", description="An example resource")
-     * )
-     */
-    public function daily_sign()
-    {
-        $this->checkUser();
-
-        $today = date('Y-m-d');
-        $todayTs = strtotime($today);
-
-        // 检查今日是否已签到
-        $exist = Db::name('user_sign')
-            ->where('user_id', $this->user_id)
-            ->where('sign_date', $today)
-            ->find();
-        if ($exist) {
-            $this->error('今日已签到');
-        }
-
-        // 读取签到积分配置
-        $config = cmf_get_option('set_config');
-        $signPoint = intval($config['sign_point'] ?? 5);
-
-        // 记录签到并发放积分
-        Db::name('user_sign')->insert([
-            'user_id'    => $this->user_id,
-            'sign_date'  => $today,
-            'point'      => $signPoint,
-            'create_time'=> time(),
-        ]);
-
-        if ($signPoint > 0) {
-            AccountLogModel::add_account_log($this->user_id, 2, 200, $signPoint, [
-                'remark' => '每日签到',
-            ]);
-        }
-
-        // 计算连续签到天数
-        $signDates = Db::name('user_sign')
-            ->where('user_id', $this->user_id)
-            ->column('create_time');
-        $continueDays = $this->getNowContinueSignDays($signDates);
-
-        $this->success('签到成功', [
-            'point'         => $signPoint,
-            'continue_days' => $continueDays,
-        ]);
-    }
-
-    /**
-     * @OA\Post(
-     *      tags={"小程序-用户"},
-     *      summary="获取签到状态（是否已签到 + 连续天数）",
-     *     path="/wxapp/user/sign_status",
-     *     @OA\Response(response="200", description="An example resource"),
-     *    @OA\Response(response="default", description="An example resource")
-     * )
-     */
-    public function sign_status()
-    {
-        $this->checkUser();
-
-        $today = date('Y-m-d');
-        $todaySigned = Db::name('user_sign')
-            ->where('user_id', $this->user_id)
-            ->where('sign_date', $today)
-            ->value('id') ? true : false;
-
-        $signDates = Db::name('user_sign')
-            ->where('user_id', $this->user_id)
-            ->column('create_time');
-        $continueDays = $this->getNowContinueSignDays($signDates);
-
-        $this->success('获取成功', [
-            'today_signed'  => $todaySigned,
-            'continue_days' => $continueDays,
-        ]);
-    }
 
 }

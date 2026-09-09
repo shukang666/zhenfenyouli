@@ -2,12 +2,9 @@
 
 namespace app\admin\controller;
 
-use api\wxapp\model\AreaModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\member\CommunityModel;
-use app\admin\model\member\CommunityParentModel;
 use think\App;
-use think\db\exception\DbException;
 
 class CommunityController extends ToolController
 {
@@ -28,51 +25,6 @@ class CommunityController extends ToolController
     }
 
 
-    /**
-     * 列表的条件方法
-     */
-    public function setWhere()
-    {
-        $params = $this->request->param();
-        $where = [];
-
-
-        // 遍历参数数组 模糊匹配
-        foreach ($params as $key => $value) {
-            if ($key != 'page') {
-                if (!empty($value)) {
-                    $where[] = [$key, 'like', '%' . trim($value) . '%'];
-                }
-            }
-
-        }
-        if(!empty($params['parent_name'])){
-            $ids = CommunityParentModel::where('name', 'like', '%' . $params['parent_name'] . '%')->column('id');
-            $where[] = ['pid', 'in', $ids];
-        }
-
-
-        return $where;
-    }
-
-    public function index()
-    {
-        $params = $this->request->param();
-        $list = $this->setIndex()->each(function ($item) {
-            $parent_info = CommunityParentModel::where('id', $item['pid'])->find();
-            $item['parent_name'] = empty($parent_info)?'':$parent_info['name'];
-
-            return $this->getList($item);
-        });
-        $this->assign('params', $params);
-        $this->assign('list', $list);
-        $list->appends($params);
-        $this->assign('page', $list->render());
-
-        return $this->fetch();
-    }
-
-
     //获取省市区选择的数据
     public function getJsonAreaList()
     {
@@ -86,32 +38,6 @@ class CommunityController extends ToolController
         $result = $AreaModel->field('id,name,code')->where($map)->select();
 
         $this->success('', '', $result);
-    }
-
-    //修改页面
-    public function update()
-    {
-        $params = $this->request->param();
-
-        //上级列表
-        $parent_list = CommunityParentModel::where([])->order('id desc')->select();
-        $this->assign('parent_list', $parent_list);
-
-        $this->get_params();
-
-        $this->assign('params', $params);
-        $this->outParam();
-        if (empty($params['id'])) {
-            return $this->fetch();
-        }
-        $item = $this->setEdit($params);
-        if (!empty($item['content'])) {
-            $item['content'] = htmlspecialchars_decode($item['content']);
-        }
-        $item = $this->getParamData($item);
-        $this->assign('item', $item);
-
-        return $this->fetch();
     }
 
 }

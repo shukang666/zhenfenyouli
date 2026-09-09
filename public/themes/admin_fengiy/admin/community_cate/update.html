@@ -21,28 +21,12 @@
 
         <input type="hidden" value="{$item.id|default=''}" name="id">
         <input type="hidden" value="{$params.data_id|default=''}" name="cateid">
-        <input type="hidden" value="{$params.data_id|default=''}" name="cate_id">
+        <input type="hidden" value="{$params.data_id|default=''}" name="data_id">
 
         <div class="form-group">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>名称:</label>
             <div class="col-md-6 col-sm-10">
                 <input type="text" class="form-control" id="file-file-name" name="name" value="{$item.name|default=''}" required>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-sm-2 control-label"><span class="form-required">*</span>打卡奖励</label>
-            <div class="col-md-6 col-sm-10">
-                <input type="number" class="form-control" name="inspection_point" value="{$item.inspection_point|default=''}" required>
-                <span>打卡后获取</span>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-sm-2 control-label"><span class="form-required">*</span>打卡间隔</label>
-            <div class="col-md-6 col-sm-10">
-                <input type="number" class="form-control" name="inspection_hour" value="{$item.inspection_hour|default=''}" required>
-                <span>每次打卡后需要间隔时长。（单位：时）</span>
             </div>
         </div>
 

@@ -50,7 +50,6 @@
         <div style="margin-left: 10px">
             <input type="submit" class="btn btn-primary" value="搜索"/>
             <a class="btn btn-danger" href="{:url('userAccountLog',['account_type'=>$account_type])}">清空</a>
-            <a class="btn btn-success" href="{:url('outData',input('get.'))}">导出</a>
         </div>
     </form>
     <form class="js-ajax-form" action="" method="post">
@@ -66,7 +65,6 @@
                                          data-checklist="js-check-x"></label></th>
 
             <th>ID</th>
-            <th width="80">用户ID</th>
             <th>用户信息</th>
             <th>账户类别</th>
             <th>交易类型</th>
@@ -83,7 +81,6 @@
 
 
                 <td>{$vo.id}</td>
-                <td>{$vo.user_id}</td>
                 <td>
                     <notempty name="vo.true_name">
                         ({$vo.user_id})  {$vo.nickname}
@@ -107,18 +104,7 @@
         </tbody>
     </table>
 
-    <div class="pagination" style="display:flex; align-items:center; flex-wrap:wrap; row-gap:6px;">
-        {$page}
-        <div class="pagination-jump" style="display:inline-flex; align-items:center; margin-left:10px;">
-            <span>第</span>
-            <input type="text" id="jump_page_input" class="form-control"
-                   style="width:50px; height:34px; text-align:center; padding:6px; margin:0 4px;"
-                   value="{:input('page/d',1)}">
-            <span>页</span>
-            <button type="button" class="btn btn-default" id="jump_page_btn"
-                    style="height:34px; padding:6px 12px;">跳转</button>
-        </div>
-    </div>
+    <div class="pagination">{$page}</div>
 
 </div>
 <script src="__STATIC__/js/admin.js"></script>
@@ -135,26 +121,6 @@
             range: ['#create-startDate', '#create-endDate']
         });
     });
-</script>
-<script>
-(function(){
-    var input = document.getElementById('jump_page_input');
-    var btn = document.getElementById('jump_page_btn');
-    if (!input || !btn) return;
-    function jump(){
-        var p = parseInt(input.value, 10);
-        if (isNaN(p) || p < 1) p = 1;
-        // 解析当前 query string，剔除旧 page，保留所有其它筛选/排序参数
-        var qs = location.search ? location.search.substring(1) : '';
-        var params = qs.split('&').filter(function(x){ return x && x.indexOf('page=') !== 0; });
-        params.push('page=' + p);
-        location.href = location.pathname + '?' + params.join('&') + location.hash;
-    }
-    btn.addEventListener('click', jump);
-    input.addEventListener('keydown', function(e){
-        if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); jump(); }
-    });
-})();
 </script>
 </body>
 </html>

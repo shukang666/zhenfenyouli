@@ -209,7 +209,7 @@ class ExamController extends RestBaseController
         $list = Db::name('exam')
             ->field("id,name")
             ->cache(true, 120)
-            ->order('list_order asc,id desc')
+            ->order('list_order asc')
             ->select();
         //A到Z 拼到name前面 第一是A 第二个B
 
@@ -297,10 +297,10 @@ class ExamController extends RestBaseController
             $where['status'] = 1;
             $data = [];
             $list = Db::name('exam')
-                ->field("id,name,thumb,desc,is_demand,is_exam,is_secret,cate_id,is_repeat,list_order")
+                ->field("id,name,thumb,desc,is_demand,is_exam,is_secret,cate_id,is_repeat")
                 ->where($where)
                 ->cache(true, 60)
-                ->order('list_order asc,id desc')
+                ->order('list_order asc')
                 ->withAttr('thumb', function ($value) {
                     return cmf_get_asset_url($value);
                 })

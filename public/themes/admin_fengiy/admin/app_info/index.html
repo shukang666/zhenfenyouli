@@ -19,8 +19,6 @@
     <ul class="nav nav-tabs">
         <li class="active"><a href="#A" data-toggle="tab">基础设置</a></li>
         <!-- <li><a href="#B" data-toggle="tab">公告设置</a></li>-->
-<!--         <li><a href="#C" data-toggle="tab">点位巡查</a></li>-->
-         <li><a href="#D" data-toggle="tab">环保达人</a></li>
     </ul>
 
     <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('AppInfo/index')}">
@@ -267,7 +265,7 @@
                                        value="{$data.point_ratio|default=''}" required>
                             </div>
                         </div>
-
+f
                         <!--                    </div>-->
                         <div class="form-group">
                             <label class="col-sm-2 control-label"><span class="form-required">*</span>开启审核</label>
@@ -347,19 +345,11 @@
 
 
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">督导员介绍</label>
+                            <label class="col-sm-2 control-label">文明标兵介绍</label>
                             <div class="col-md-6 col-sm-10">
                                 <textarea class="form-control"
                                           rows="5"
                                           name="civilization_notice">{$data.civilization_notice|default=''}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label"><span class="form-required">*</span>分享奖励</label>
-                            <div class="col-md-6 col-sm-10">
-                                <input type="number" class="form-control" name="share_point" value="{$data.share_point|default=''}" required>
-                                <span>分享成功后，给分享用户返利积分</span>
                             </div>
                         </div>
 
@@ -377,58 +367,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="tab-pane" id="C">
-
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label"><span class="form-required">*</span>奖励积分</label>
-                            <div class="col-md-6 col-sm-10">
-                                <input type="number" class="form-control" name="inspection_point" value="{$data.inspection_point|default=''}" required>
-                                <span>上传后获取</span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label"><span class="form-required">*</span>发送间隔</label>
-                            <div class="col-md-6 col-sm-10">
-                                <input type="number" class="form-control" name="inspection_hour" value="{$data.inspection_hour|default=''}" required>
-                                <span>每次发送后，下次发送时间。（单位：时）</span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane" id="D">
-
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label"><span class="form-required">*</span>连续天数</label>
-                            <div class="col-md-6 col-sm-10">
-                                <input type="number" class="form-control" name="continuous_check" value="{$data.continuous_check|default=''}" required>
-                                <span>连续拍照打卡，达到指定连续天数时增加“环保达人”</span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">等级说明</label>
-                            <div class="col-md-6 col-sm-10">
-                                <textarea class="form-control"
-                                          rows="5"
-                                          name="level_description">{$data.level_description|default=''}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </fieldset>

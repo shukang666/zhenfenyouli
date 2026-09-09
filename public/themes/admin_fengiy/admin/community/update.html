@@ -44,24 +44,6 @@
 <!--            </div>-->
 <!--        </div>-->
 
-        <div class="form-group">
-            <div class="layui-form-item">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>社区:</label>
-                <div class="col-md-6 col-sm-10" style="z-index: 2000!important;">
-                    <div class="layui-inline">
-                        <select name="pid" id="pid" lay-verify="required" lay-search lay-filter="pid">
-                            <option value="">请选择</option>
-                            <notempty name="$parent_list">
-                                <foreach name="$parent_list" item="val">
-                                    <option value="{$val.id}" <if condition="!empty($item.pid) && $item.pid == $val.id">selected</if>  >{$val.name}</option>
-                                </foreach>
-                            </notempty>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-
 
         <div class="form-group">
             <label class="col-sm-2 control-label">名称:</label>
