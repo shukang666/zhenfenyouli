@@ -108,7 +108,7 @@
 			<view class="share-btn" @click="handleShare">
 				<text class="share-icon">分享</text>
 			</view>
-			<!-- 非打卡活动：报名按钮 -->
+			<!-- 非打卡活动：报名按钮（扫码参加活动统一叫"签到"） -->
 			<view class="action-area" v-if="info.is_clock == 0">
 				<u-button 
 					v-if="info.is_sign == 0"
@@ -116,14 +116,14 @@
 					:disabled="info.is_end == 1"
 					@click="handleSign"
 				>
-					{{info.is_end == 1 ? '活动已结束' : '立即报名'}}
+					{{info.is_end == 1 ? '活动已结束' : (isScanJoin ? '立即签到' : '立即报名')}}
 				</u-button>
 				<u-button 
 					v-else
 					class="action-btn success-btn"
 					disabled
 				>
-					已报名 ✓
+					{{isScanJoin ? '已签到 ✓' : '已报名 ✓'}}
 				</u-button>
 			</view>
 			<!-- 打卡活动：排行榜 + 打卡 -->
@@ -148,12 +148,12 @@
 				<view class="success-icon">
 					<text class="success-emoji">🎉</text>
 				</view>
-				<view class="success-title">打卡成功!</view>
+				<view class="success-title">{{isScanJoin ? '签到成功!' : '打卡成功!'}}</view>
 				<view class="success-point">
 					<text class="point-label">获得积分</text>
 					<text class="point-value">+{{info.send_point}}</text>
 				</view>
-				<view class="success-tip">继续保持，积少成多~</view>
+				<view class="success-tip">{{isScanJoin ? '扫码签到成功，感谢参与~' : '继续保持，积少成多~'}}</view>
 				<u-button class="success-btn" @click="tipShow = false">我知道了</u-button>
 			</view>
 		</u-mask>
@@ -258,15 +258,17 @@
 		participantsCount() {
 			return this.info.active_count || 0;
 		},
-		// 打卡按钮文本
+		// 是否扫码参加活动（join_type=2：仅能通过活动二维码扫码进入，签到免传照片）
+		isScanJoin() {
+			return this.info.join_type == 2;
+		},
+		// 打卡/签到按钮文本（扫码参加活动显示"立即签到"）
 		clockBtnText() {
-			if (this.info.is_sign == 1) {
-				if (this.info.is_sign_clock == 1) {
-					return '已打卡 ✓';
-				}
-				return '立即打卡';
+			const done = this.info.is_sign == 1 && this.info.is_sign_clock == 1;
+			if (this.isScanJoin) {
+				return done ? '已签到 ✓' : '立即签到';
 			}
-			return '立即打卡';
+			return done ? '已打卡 ✓' : '立即打卡';
 		},
 		// 活动时间文本 - 根据活动类型显示不同格式
 		activityTimeText() {
@@ -362,9 +364,14 @@
 			},
 		// 上传组件状态变化回�?
 		handleUploadChange() {},
-		// 打卡按钮（打卡活动不需要先报名，直接打卡）
+		// 打卡/签到按钮（打卡活动不需要先报名，直接打卡）
 		handleClock() {
 			if (!this.isLogin) return this.$u.route('/pages/public/login')
+			if (this.isScanJoin) {
+				// 扫码参加活动：免上传照片，点击直接签到（走同一个打卡接口，数据逻辑不变）
+				this.post_new_sign_clock()
+				return
+			}
 			this.sign_clock_show = true
 		},
 		// 立即参与按钮

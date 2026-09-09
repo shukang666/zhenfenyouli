@@ -661,12 +661,13 @@ class ActiveController extends AuthController
         $image_url = $this->request->param('image_url');
         $item = ActiveSIgnModel::where('id',$sign_id)->find();
         if(empty($item)) $this->error('报名记录不存在');
-        if(empty($image_url)) $this->error('照片不能为空');
         if($item['start_time'] > time()) $this->error('打卡时间未到');
         if($item['end_time'] < time()) $this->error('打卡时间已过');
         $active_id = $item['active_id'];
         $active_info = ActiveModel::where('id',$active_id)->find();
         if(empty($active_info)) $this->error('活动不存在');
+        // 照片校验：扫码参加(join_type=2)活动免上传照片，点击按钮直接签到；其余活动照片必填
+        if(empty($image_url) && intval($active_info['join_type']) !== 2) $this->error('照片不能为空');
         $date_time = strtotime(date('Y-m-d 00:00:00'));
         $send_point = $active_info['send_point'];
 
