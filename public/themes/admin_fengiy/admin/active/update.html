@@ -267,8 +267,14 @@
                 <input type="hidden" value="{$item.lng??''}" name="lng" id="lng">
                 <input type="hidden" value="{$item.lat??''}" name="lat" id="lat">
                 <div class="col-md-6 col-sm-10">
-                    <input type="text" class="form-control" id="lnglat" placeholder="" readonly required
+                    <input type="text" class="form-control" id="lnglat" placeholder="经度,纬度（例：121.523456,38.854321）" required
                            value="{$item.lng??''},{$item.lat??''}">
+                    <p class="help-block">
+                        可直接粘贴坐标，格式「经度,纬度」英文逗号分隔。建议在
+                        <a href="https://lbs.qq.com/getPoint/" target="_blank">腾讯坐标拾取器</a>
+                        或高德坐标拾取器中搜索地点后复制（与微信/小程序地图同一坐标系）；
+                        从百度地图复制的是百度坐标系，直接使用会在小程序地图上偏移数百米。
+                    </p>
                 </div>
             </div>
 
@@ -341,6 +347,8 @@
         var lat = evt.latLng.getLat().toFixed(6);
         var lng = evt.latLng.getLng().toFixed(6);
         $("#lnglat").val(lng + "," + lat);
+        $("#lng").val(lng);
+        $("#lat").val(lat);
         removeMarker("search_res");
         addMarker(new TMap.LatLng(lat, lng), "search_res");
 
@@ -405,6 +413,68 @@
         });
     }
 
+</script>
+<script>
+    // 手填/粘贴经纬度：解析「经度,纬度」并写入 lng/lat 隐藏域（兼容英文/中文逗号、空格分隔；经度在前，纬度在后）
+    function parseLngLatInput() {
+        var rawVal = $("#lnglat").val();
+        if (!rawVal || typeof rawVal !== 'string') return true;
+        var val = rawVal.trim();
+        // 空值 / 历史遗留的分隔符占位：交由 required 校验
+        if (val == '' || val == ',') return true;
+        var parts = val.split(/[,，;；\s、]+/).filter(function (s) { return s.trim() !== ''; });
+        if (parts.length < 2) {
+            layer.msg('经纬度格式不正确，请输入「经度,纬度」，例：121.523456,38.854321');
+            return false;
+        }
+        var lng = parseFloat(parts[0]);
+        var lat = parseFloat(parts[1]);
+        if (isNaN(lng) || isNaN(lat)) {
+            layer.msg('经纬度必须为数字');
+            return false;
+        }
+        if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
+            layer.msg('经纬度超出范围：经度应在[-180,180]，纬度应在[-90,90]');
+            return false;
+        }
+        // 统一保留 6 位小数并回写隐藏域
+        lng = lng.toFixed(6);
+        lat = lat.toFixed(6);
+        $("#lng").val(lng);
+        $("#lat").val(lat);
+        $("#lnglat").val(lng + "," + lat);
+        // 若腾讯地图可用则同步打点（地图 key 未开通时也不影响手填保存）
+        if (typeof TMap !== 'undefined' && typeof map !== 'undefined') {
+            try {
+                removeMarker("search_res");
+                addMarker(new TMap.LatLng(parseFloat(lat), parseFloat(lng)), "search_res");
+            } catch (e) {
+            }
+        }
+        return true;
+    }
+
+    $(function () {
+        // 新增时把模板渲染出的 ",  占位清理为空，避免绕过 required
+        var initVal = ($("#lnglat").val() || '').trim();
+        if (initVal == ',' || initVal == '') {
+            $("#lnglat").val('');
+        }
+        // 失焦 / 回车 自动解析
+        $("#lnglat").on('blur', function () {
+            parseLngLatInput();
+        });
+        $("#lnglat").on('keydown', function (e) {
+            if (e.keyCode == 13 || e.which == 13) {
+                parseLngLatInput();
+                return false;
+            }
+        });
+        // 点保存前强制解析一次，格式错误则阻止提交
+        $(".js-ajax-submit").on('click', function () {
+            return parseLngLatInput();
+        });
+    });
 </script>
 <script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
 <script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
