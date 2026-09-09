@@ -119,7 +119,7 @@
         // 立即执行
         $('.js-run-now').click(function () {
             var id = $(this).data('id');
-            layer.confirm('立即执行该任务一次？此操作不会改变自动调度计划，但可能耗时较长（需联网下载比对图片）。', {
+            layer.confirm('立即执行该任务一次？此操作不会改变自动调度计划。执行时会逐个读取图片做感知哈希比对，图片越多耗时越长，请耐心等待。', {
                 title: '立即执行',
                 btn: ['开始执行', '取消']
             }, function (index) {
