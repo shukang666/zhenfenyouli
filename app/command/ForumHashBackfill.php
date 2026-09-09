@@ -2,7 +2,7 @@
 
 namespace app\command;
 
-use app\cron\lib\ImagePerceptualHash;
+use app\algo\lib\ImagePerceptualHash;
 use think\console\Command;
 use think\console\Input;
 use think\console\input\Option;

@@ -20,7 +20,7 @@ use app\admin\model\member\CommunityModel;
 use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberLevelModel;
 use app\admin\model\member\MemberModel;
-use app\cron\lib\ImagePerceptualHash;
+use app\algo\lib\ImagePerceptualHash;
 use think\facade\Db;
 
 

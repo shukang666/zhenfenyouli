@@ -7,6 +7,5 @@
  * 避免依赖被 .gitignore 忽略的 data/config/console.php,保证 git 部署后命令即生效。
  */
 return [
-    \app\cron\command\CronRun::class,
     \app\command\ForumHashBackfill::class,
 ];

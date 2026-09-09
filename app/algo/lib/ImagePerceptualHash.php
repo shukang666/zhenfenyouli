@@ -1,6 +1,6 @@
 <?php
 
-namespace app\cron\lib;
+namespace app\algo\lib;
 
 /**
  * 图像感知哈希工具（aHash，Average Hash 平均哈希，64bit）
@@ -63,7 +63,7 @@ class ImagePerceptualHash
                 CURLOPT_TIMEOUT        => $timeout,
                 CURLOPT_SSL_VERIFYPEER => $verify,
                 CURLOPT_SSL_VERIFYHOST => $verify ? 2 : 0,
-                CURLOPT_USERAGENT      => 'xiayuxuan-cron/1.0',
+                CURLOPT_USERAGENT      => 'xiayuxuan-algo/1.0',
             ]);
             $body = curl_exec($ch);
             $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);

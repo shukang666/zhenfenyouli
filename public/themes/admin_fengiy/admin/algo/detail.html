@@ -1,0 +1,97 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .algo-title { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+    .algo-title h3 { margin: 0 0 6px 0; }
+    code { color: #c7254e; background: #f9f2f4; border-radius: 3px; padding: 1px 4px; font-size: 12px; }
+    .panel-body { word-wrap: break-word; }
+    p.para { text-indent: 0; line-height: 1.9; }
+</style>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">算法列表</a></li>
+        <li class="active"><a href="javascript:;">算法详情</a></li>
+    </ul>
+
+    <div class="algo-title margin-top-20">
+        <h3>{$meta.name}</h3>
+        <span class="label <if condition="$meta.status=='online'">label-success<elseif condition="$meta.status=='develop'"/>label-info<else/>label-default</if>">{$meta.status_label}</span>
+        <span style="margin-left:15px;">标识：<code>{$meta.algo_key}</code></span>
+        <span style="margin-left:15px;">分类：{$meta.category}</span>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">简介</div>
+        <div class="panel-body">{$meta.summary}</div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">原理</div>
+        <div class="panel-body">
+            <foreach name="meta.paras" item="p">
+                <p class="para">{$p}</p>
+            </foreach>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">关键参数</div>
+        <div class="panel-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th style="width:150px;">参数</th>
+                    <th style="width:220px;">取值</th>
+                    <th>说明</th>
+                </tr>
+                </thead>
+                <tbody>
+                <foreach name="meta.key_params" item="kp">
+                    <tr>
+                        <td>{$kp.label}</td>
+                        <td>{$kp.value}</td>
+                        <td>{$kp.desc}</td>
+                    </tr>
+                </foreach>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">应用场景 / 落地位置</div>
+        <div class="panel-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th style="width:180px;">场景</th>
+                    <th>说明</th>
+                    <th style="width:90px;">状态</th>
+                </tr>
+                </thead>
+                <tbody>
+                <foreach name="meta.applications" item="ap">
+                    <tr>
+                        <td>{$ap.where}</td>
+                        <td>{$ap.detail}</td>
+                        <td>{$ap.status}</td>
+                    </tr>
+                </foreach>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">代码位置</div>
+        <div class="panel-body">
+            <p>实现类：<code>{$meta.impl.class}</code></p>
+            <p>源文件：<code>{$meta.impl.file}</code></p>
+        </div>
+    </div>
+
+    <a href="{:url('index')}" class="btn btn-default">返回列表</a>
+</div>
+</body>
+</html>

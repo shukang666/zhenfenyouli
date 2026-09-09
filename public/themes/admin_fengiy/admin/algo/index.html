@@ -1,0 +1,60 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .table { table-layout: fixed; }
+    .desc-cell { word-wrap: break-word; white-space: normal; color: #666; font-size: 12px; }
+    .file-cell { word-wrap: break-word; white-space: normal; }
+    code { color: #c7254e; background: #f9f2f4; border-radius: 3px; padding: 1px 4px; font-size: 12px; }
+</style>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('index')}">算法列表</a></li>
+    </ul>
+
+    <div class="margin-top-20 alert alert-info" style="padding:8px 12px;font-size:12px;">
+        算法清单由代码注册（<code>app/algo/AlgoRegistry.php</code>），此处只读展示项目中使用到的算法及详情，不可后台新增/删除。
+    </div>
+
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th style="width:210px;">算法</th>
+            <th style="width:110px;">分类</th>
+            <th style="width:80px;">状态</th>
+            <th>简介 / 用途</th>
+            <th style="width:220px;">代码位置</th>
+            <th style="width:90px;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>
+                    <b>{$vo.name}</b><br/>
+                    <code>{$vo.algo_key}</code>
+                </td>
+                <td>{$vo.category}</td>
+                <td>
+                    <if condition="$vo.status=='online'">
+                        <span class="label label-success">使用中</span>
+                        <elseif condition="$vo.status=='develop'"/>
+                        <span class="label label-info">开发中</span>
+                        <else/>
+                        <span class="label label-default">已下线</span>
+                    </if>
+                </td>
+                <td class="desc-cell" title="{$vo.summary}">{$vo.summary}</td>
+                <td class="file-cell">
+                    <small>{$vo.impl.file}</small>
+                </td>
+                <td>
+                    <a href="{:url('detail',['id'=>$vo.algo_key])}" class="btn btn-primary btn-xs">查看详情</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
