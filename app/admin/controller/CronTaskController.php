@@ -28,7 +28,8 @@ class CronTaskController extends AdminBaseController
         $list = Db::name('cron_task')->order('id')->select();
         $rows = [];
         foreach ($list as $row) {
-            $item = $row->toArray();
+            // Db::name()->select() 返回的每行是数组(非模型对象)，这里统一转成数组使用
+            $item = is_object($row) ? $row->toArray() : (array)$row;
             $meta = TaskRegistry::byKey($item['task_key']);
             if ($meta === null) {
                 continue; // 代码已下线的任务不展示
