@@ -163,11 +163,21 @@ class BasicController extends AuthController
                 $value = cmf_replace_content_file_url(htmlspecialchars_decode($value));
             }else{
                 foreach($value as $k => $v){
-                    if(!is_array($v)){
-                        $value[$k] =  cmf_replace_content_file_url(htmlspecialchars_decode($v));
+                    if(is_array($v)){
+                        continue;
                     }
-                    if(in_array($k, ['waste_thumb','min_logo','logo','wx_code','image','icon','thumb','wx_image','app_logo','app_code'])){
+                    $value[$k] = cmf_replace_content_file_url(htmlspecialchars_decode($v));
+                    if(in_array($k, ['waste_thumb','min_logo','logo','wx_code','image','icon','thumb','wx_image','app_logo','app_code'], true)){
                         $value[$k] = cmf_get_asset_url($v);
+                    }
+                }
+                // home_entries：二维数组，每个子项里的 image 字段也要补全 URL
+                if ($option_name === 'home_entries') {
+                    foreach ($value as $idx => $item) {
+                        if (!is_array($item)) continue;
+                        if (!empty($item['image'])) {
+                            $value[$idx]['image'] = cmf_get_asset_url($item['image']);
+                        }
                     }
                 }
             }

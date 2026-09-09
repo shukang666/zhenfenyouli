@@ -1,0 +1,102 @@
+<template>
+	<view class="u-p-30">
+		<u-navbar title-color="#fff" title="低碳生活" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false">
+			<!-- <view class="u-m-l-30">
+                <u-image width="231" height="64" :src="setting.min_logo"></u-image>
+            </view> -->
+		</u-navbar>
+		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(to bottom,#2fb74c,#EFF9F1);">
+		</view>
+		<u-swiper :list="swiper_list" height="290" mode="none" @click="adLink($event,swiper_list)"></u-swiper>
+		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
+			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/11f9c0ccaefaeb375e7cea7000914a8b.png?watermark"></u-image>
+			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
+				<view class="u-font-bold">
+					分类活动
+				</view>
+				<view class="u-font-24 u-type-info">
+					参与垃圾分类打卡可获得积碳币，可用于
+					兑换商品，可参与打卡排行榜
+				</view>
+				<view class="u-text-right u-width-100">
+					<u-button type="primary" size="mini" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
+						@click="$u.route('/pages/flhd/flhd')">立即参与</u-button>
+				</view>
+			</view>
+		</view>
+		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
+			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/91648750a6ffb2b270ebb5e6cfbd4c8c.png?watermark"></u-image>
+			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
+				<view class="u-font-bold">
+					自治活动
+				</view>
+				<view class="u-font-24 u-type-info">
+					可进行督导员申请，查看工作，优秀事迹
+					宣传，分类督导等一系列活动
+				</view>
+				<view class="u-text-right u-width-100">
+					<u-button type="primary" size="mini" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
+						@click="$u.route('/pages/zzhd/zzhd')">立即参与</u-button>
+				</view>
+			</view>
+		</view>
+		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex" v-if="!setting.app_test">
+			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/cf50f2ff1cc358f5fb5ecfaa6b51a4e2.png?watermark"></u-image>
+			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
+				<view class="u-font-bold">
+					社交活动
+				</view>
+				<view class="u-font-24 u-type-info">
+					可进行课程培训，社区活动，社区知识竞赛
+					等一系列活动
+				</view>
+				<view class="u-text-right u-width-100">
+					<u-button type="primary" size="mini" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
+						@click="$u.route('/pages/sjhd/sjhd')">立即参与</u-button>
+				</view>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				swiper_list: [],
+			};
+		},
+		onLoad() {
+			this.find_slide()
+		},
+		methods: {
+			// 跳转页面
+			navigator(url) {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				this.$u.route(url)
+			},
+			// 轮播图跳转
+			async adLink(e, item) {
+				let data = item[e];
+				if (!data.url) return
+				if (data.target == 'switchTab') return uni.switchTab({
+					url: data.url
+				});
+				const openUrl = await this.$u.func.checkH5(data.url);
+				this.$u.route(openUrl);
+			},
+			// 轮播图
+			find_slide() {
+				this.$u.api.find_slide({
+					id: 6
+				}).then(res => {
+					this.swiper_list = res.data
+				})
+			},
+		}
+	}
+</script>
+
+<style lang="scss">
+
+</style>

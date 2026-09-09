@@ -139,6 +139,9 @@ class AnswerController extends AuthController
         $AnswerItemModel->saveAll($answer_item_arr);
         $QuestionModel->commit();
         $item = $AnswerItemModel->where(['answer_id' => $answer_id])->find();
+        //必须按首题实际 q_id 过滤，随机出题时否则恒返回 id 最小的题，导致题目与判分、解析不一致
+        $map = [];
+        $map[] = ['a.id', '=', $item['q_id']];
         $info = $QuestionModel->getInfo($map, -1, $item['q_id'], 'a.*', 'a.id', $item->answer_id);
         
         //2025-11-06 中玉修改，增加了q_id 查询条件，缺失该条件返回的数据是错误的
@@ -258,6 +261,13 @@ class AnswerController extends AuthController
         }
         $newOption = $QuestionOptionModel->find($o_id);
         $option = $newOption['letter'] . '.' . $newOption['option'];
+        if ($answer_status == 2) {
+            //答错时返回正确答案，避免前端"答案"栏展示用户的错误选项
+            $trueOption = $QuestionOptionModel->where(['q_id' => $q_id, 'letter' => $q_info['true_answer']])->find();
+            if (!empty($trueOption)) {
+                $option = $trueOption['letter'] . '.' . $trueOption['option'];
+            }
+        }
         $result = [
             'answer_status' => $answer_status,
             'option' => $option,

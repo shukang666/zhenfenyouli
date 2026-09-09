@@ -49,7 +49,7 @@ class ExamController extends AdminBaseController
         if ($param['keyword']) {
             $where[] = ['name', 'like', "%" . trim($param['keyword']) . "%"];
         }
-        $list = Db::name("exam")->where($where)->paginate(10)->each(function ($item, $key) {
+        $list = Db::name("exam")->where($where)->order('list_order asc,id desc')->paginate(10)->each(function ($item, $key) {
             $item['cate_name'] = Db::name('health_home')->where('id', $item['cate_id'])->value('name');
             return $item;
         });
@@ -780,6 +780,13 @@ m. nickname as username,name,e.mobile,e.id,m.openid,m.avatar')
         $this->success("排序更新成功！");
     }
 
+    public function listOrder_exam()
+    {
+        $examQuestionModel = Db::name('exam');
+        parent::listOrders($examQuestionModel);
+        $this->success("排序更新成功！");
+    }
+
 
     /**
      * 分类列表
@@ -1091,5 +1098,6 @@ m. nickname as username,name,e.mobile,e.id,m.openid,m.avatar')
        Db::name('exam')->where(['id' => $params['id']])->update($status);
         $this->success('设置成功');
     }
+
 
 }

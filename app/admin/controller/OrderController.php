@@ -36,6 +36,7 @@ class OrderController extends AdminBaseController
      */
     public function index($pay_type = '',$delivery_type = '', $order_num = '', $goods_name = '', $username = '', $phone = '', $status = '', $start_time = '', $end_time = '')
     {
+        $params = $this->request->param();
         $Model = new ShopOrderModel();
         $map = [];
         $map[] = ['a.delete_time', '=', 0];
@@ -60,6 +61,11 @@ class OrderController extends AdminBaseController
 
         if ($start_time) $map[] = ['a.create_time', '>=', strtotime($start_time)];
         if ($end_time) $map[] = ['a.create_time', '<=', strtotime($end_time) + 86399];
+
+
+        if(!empty($params['is_export'])){
+            return $this->export($map);
+        }
 
         $list = $Model->getInfo($map);
 
@@ -220,6 +226,9 @@ class OrderController extends AdminBaseController
                     AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point_pay'], ['order_num' => $order_num]);
                 }
 
+                //退回已抵扣积分
+                if($order_info['point'] > 0) AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $order_num]);
+
                 $data_i['status'] = 16;
                 $res = $order_info->save($data_i);
                 ShopOrderModel::setSellCountOrStock('stock_inc', $order_num);
@@ -256,6 +265,10 @@ class OrderController extends AdminBaseController
                     $UserCouponModel->where(['id' => $order_info['coupon_id']])->save(['used' => 0]);
                 }
             }
+
+            //退回已抵扣积分
+            if($order_info['point'] > 0) AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $order_num]);
+
             ShopOrderModel::setSellCountOrStock('stock_inc', $order_num);
             ShopOrderModel::setSellCountOrStock('sell_count_dec', $order_num);
             $order_info->save(['status' => 24, 'return_price_time' => time()]);
@@ -316,95 +329,61 @@ class OrderController extends AdminBaseController
         $this->success('添加成功');
     }
 
-
-    //导出
-    public function outData($keyword = '', $status = '', $start_time = '', $end_time = '')
+    public function delete()
     {
+        $id = $this->request->param('id');
+        ShopOrderModel::where('id', $id)->update(['delete_time' => time()]);
+        $this->success('删除成功');
+    }
+
+    //导出：列表页设置 is_export=1 提交到 index，由 index 构建与列表一致的筛选条件后调用本方法
+    public function export($map){
+        //不限制时间
         set_time_limit(0);
-        $map = [];
-        $map[] = ['a.delete_time', '=', 0];
-        if (!empty($keyword)) {
-            $map[] = ['b.nickname|b.mobile|b.true_name|a.order_num', 'like', "%$keyword%"];
-        }
-        if ($status) {
-            $map[] = ['a.status', '=', $status];
-        }
+        //设置文件大小
+        ini_set('memory_limit','18000M');
+        // PHPExcel 内部使用了花括号字符串偏移等旧语法，PHP 7.4+ 会抛 Deprecated；
+        // 服务器 display_errors 开启时这些提示会混进 xlsx 二进制流导致文件损坏，
+        // 导出期间必须屏蔽弃用类错误的输出
+        error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+        @ini_set('display_errors', '0');
 
-        if ($start_time) {
-            $map[] = ['a.create_time', '>=', strtotime($start_time)];
-        }
-        if ($end_time) {
-            $map[] = ['a.create_time', '<=', strtotime($end_time) + 86399];
-        }
-        $ShopOrderModel = new ShopOrderModel();
-        $list = $ShopOrderModel->getInfo($map, 'a.*', -1);
+        $Model = new ShopOrderModel();
 
-        if ($list->isEmpty()) {
-            $this->error('当前没有可以导出的订单');
-        }
+        // ShopOrderModel::getInfo 签名为 ($map, $field, $page_size)，page_size 必须传 -1 才会全量查询
+        $list = $Model->getInfo($map,'a.*',-1);
 
-        $excel = new \PHPExcel();
-        $excel->getProperties()
-            ->setCreator("FastAdmin")
-            ->setLastModifiedBy("FastAdmin")
-            ->setTitle("标题")
-            ->setSubject("Subject");
-        $excel->getDefaultStyle()->getFont()->setName('Microsoft Yahei');
-        $excel->getDefaultStyle()->getFont()->setSize(12);
-        $this->sharedStyle = new \PHPExcel_Style();
-        $this->sharedStyle->applyFromArray(
-            array(
-                'fill' => array(
-                    'type' => \PHPExcel_Style_Fill::FILL_SOLID,
-                    'color' => array('rgb' => '000000')
-                ),
-                'font' => array(
-                    'color' => array('rgb' => "000000"),
-                ),
-                'alignment' => array(
-                    'vertical' => \PHPExcel_Style_Alignment::VERTICAL_CENTER,
-                    'horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
-                    'indent' => 1
-                ),
-                'borders' => array(
-                    'allborders' => array('style' => \PHPExcel_Style_Border::BORDER_THIN),
-                )
-            ));
-
-        $worksheet = $excel->setActiveSheetIndex(0);
-        $worksheet->setTitle('标题');
+        $cellName = ['订单号', '下单用户', '商品名称', '用户ID', '单价', '数量', '优惠券', '实付款', '状态', '上传时间'];
 
 
-        $data = [];
-        #表头
-        $data1 = ['订单编号', '下单人', '下单时间', '下单商品', '订单状态', '商品金额', '优惠金额', '支付金额', '收货地址', '备注'];
         #导出内容组合
         foreach ($list as $kk => $v) {
             $data[$kk + 1]['order_num'] = ' ' . $v['order_num'];
             $data[$kk + 1]['user_info'] = $v['nickname'] . '，' . $v['mobile'];
-            $data[$kk + 1]['create_time'] = date('Y-m-d H:i:s', $v['create_time']);
+            $data[$kk + 1]['user_id'] = $v['user_id'];
 
+            //商品三要素分列存储：商品名称(C列)、单价(E列)、数量(F列)，用户ID(D列)跨行合并
             $goods = [];
             foreach ($v['goods_list'] as $item) {
-                $goods[] = $item['goods_name'] . '，单价：' . $item['one_price'] . '，数量:' . $item['count'];
+                $goods[] = [
+                    'goods_name' => $item['goods_name'],
+                    'one_price'  => $item['one_price'],
+                    'count'      => $item['count'],
+                ];
             }
-            $data[$kk + 1]['goods'] = $goods;
-            $data[$kk + 1]['status_name'] = $v['status_name'];
-            $data[$kk + 1]['goods_price'] = $v['goods_price'];
             $data[$kk + 1]['coupon_price'] = $v['coupon_price'];
             $data[$kk + 1]['price'] = $v['price'];
+            $data[$kk + 1]['status_name'] = $v['status_name'];
+            $data[$kk + 1]['create_time'] = date('Y-m-d H:i:s', $v['create_time']);
+
+            $data[$kk + 1]['goods'] = $goods;
             $data[$kk + 1]['address'] = $v['user_address'] ?? '' . '，' . $v['username'] ?? '' . '，' . $v['phone'] ?? '';
             $data[$kk + 1]['remark'] = $v['remark'];
 
         }
 
-        $this->exportOrderExcel2("订单列表", $data1, $data);
-        $this->success('导出成功');
 
-    }
-
-    public function exportOrderExcel2($title, $cellName, $data)
-    {
+        $title = '订单列表';
         //引入核心文件
         $objPHPExcel = new \PHPExcel();
         //定义配置
@@ -436,24 +415,20 @@ class OrderController extends AdminBaseController
         foreach ($cellName as $k => $v) {
             $objPHPExcel->setActiveSheetIndex(0)->setCellValue($cellKey[$k] . $topNumber, $v);//设置表头数据
         }
-        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(40);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(80);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(50);
 
         //处理数据
+        //列布局：A订单号 B下单用户(跨行合并) | C商品名称 D用户ID(跨行合并) E单价 F数量(每个商品一行) | G优惠券 H实付款 I状态 J上传时间(跨行合并)
         $start = $topNumber + 1;
         $j = $topNumber + 1;
         foreach ($data as $k => $v) {
-//            $j = $start;
             foreach ($v['goods'] as $k1 => $v1) {
                 if ($k1 == 0) {
-                    //计算初步当前单元格标识，以及 需要合并的单元格标识 A B C D E F G M
+                    //计算初步当前单元格标识，以及需要合并的单元格标识
                     $end = $start + count($v['goods']) - 1;
                     $objPHPExcel->getActiveSheet()->mergeCells("A" . $start . ':' . "A" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("B" . $start . ':' . "B" . $end);
-                    $objPHPExcel->getActiveSheet()->mergeCells("C" . $start . ':' . "C" . $end);
-//                    $objPHPExcel->getActiveSheet()->mergeCells("D".$start.':'."D".$end);
-                    $objPHPExcel->getActiveSheet()->mergeCells("E" . $start . ':' . "E" . $end);
-                    $objPHPExcel->getActiveSheet()->mergeCells("F" . $start . ':' . "F" . $end);
+                    $objPHPExcel->getActiveSheet()->mergeCells("D" . $start . ':' . "D" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("G" . $start . ':' . "G" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("H" . $start . ':' . "H" . $end);
                     $objPHPExcel->getActiveSheet()->mergeCells("I" . $start . ':' . "I" . $end);
@@ -461,16 +436,15 @@ class OrderController extends AdminBaseController
 
                     $objPHPExcel->getActiveSheet()->setCellValue("A" . $start, $v['order_num']);
                     $objPHPExcel->getActiveSheet()->setCellValue("B" . $start, $v['user_info']);
-                    $objPHPExcel->getActiveSheet()->setCellValue("C" . $start, $v['create_time']);
-
-                    $objPHPExcel->getActiveSheet()->setCellValue("E" . $start, $v['status_name']);
-                    $objPHPExcel->getActiveSheet()->setCellValue("F" . $start, $v['goods_price']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("D" . $start, $v['user_id']);
                     $objPHPExcel->getActiveSheet()->setCellValue("G" . $start, $v['coupon_price']);
                     $objPHPExcel->getActiveSheet()->setCellValue("H" . $start, $v['price']);
-                    $objPHPExcel->getActiveSheet()->setCellValue("I" . $start, $v['address']);
-                    $objPHPExcel->getActiveSheet()->setCellValue("J" . $start, $v['remark']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("I" . $start, $v['status_name']);
+                    $objPHPExcel->getActiveSheet()->setCellValue("J" . $start, $v['create_time']);
                 }
-                $objPHPExcel->getActiveSheet()->setCellValue("D" . $j, $v1);
+                $objPHPExcel->getActiveSheet()->setCellValue("C" . $j, $v1['goods_name']);
+                $objPHPExcel->getActiveSheet()->setCellValueExplicit("E" . $j, $v1['one_price'], \PHPExcel_Cell_DataType::TYPE_STRING);
+                $objPHPExcel->getActiveSheet()->setCellValue("F" . $j, $v1['count']);
                 $j++;
             }
 
@@ -478,20 +452,15 @@ class OrderController extends AdminBaseController
         }
 
         //导出execl
-        ob_end_clean();//防止乱码
+        //关闭所有层级输出缓冲，丢弃前面任何已产生的输出（防止残留文本混入 xlsx）
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         header('pragma:public');
         header('Content-type:application/vnd.ms-excel;charset=utf-8;name="' . $xlsTitle . '.xlsx"');
         header("Content-Disposition:attachment;filename=$fileName.xlsx");//attachment新窗口打印inline本窗口打印
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
         $objWriter->save('php://output');
         exit;
-    }
-
-
-    public function delete()
-    {
-        $id = $this->request->param('id');
-        ShopOrderModel::where('id', $id)->update(['delete_time' => time()]);
-        $this->success('删除成功');
     }
 }

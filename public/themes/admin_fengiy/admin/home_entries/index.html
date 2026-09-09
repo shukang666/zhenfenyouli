@@ -1,0 +1,94 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <h4 class="page-header">首页入口配置（小程序首页四个核心功能入口）</h4>
+
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('HomeEntries/index')}">
+        <fieldset>
+            <div class="tabbable">
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <volist name="entries" id="item" key="k">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <strong>入口 {$k+1} — {$item.name|default='未命名'}</strong>
+                                <span class="help-block" style="margin:0;font-size:12px;color:#999;">
+                                    位置：第 {$k+1} 个 | 布局：
+                                    <if condition="$k eq 0">左侧大卡</if>
+                                    <if condition="$k eq 1">右上小块</if>
+                                    <if condition="$k eq 2">右中小块</if>
+                                    <if condition="$k eq 3">右下横条</if>
+                                </span>
+                            </div>
+                            <div class="panel-body">
+                                <input type="hidden" name="entries[{$k}][key]" value="{$item.key}">
+
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">入口名称</label>
+                                    <div class="col-md-3 col-sm-10">
+                                        <input type="text" class="form-control" name="entries[{$k}][name]"
+                                               value="{$item.name}" required>
+                                    </div>
+
+                                    <label class="col-sm-1 control-label">描述</label>
+                                    <div class="col-md-4 col-sm-10">
+                                        <input type="text" class="form-control" name="entries[{$k}][desc]"
+                                               value="{$item.desc}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">入口图片</label>
+                                    <div class="col-md-6 col-sm-10">
+                                        <input type="hidden" name="entries[{$k}][image]" id="img_{$k}" value="{$item.image}">
+                                        <a href="javascript:uploadOneImage('图片上传','#img_{$k}');">
+                                            <notempty name="item.image">
+                                                <img src="{:cmf_get_image_preview_url($item.image)}" id="img_{$k}-preview"
+                                                     width="135" style="cursor: hand; border:1px solid #eee; border-radius:4px;"/>
+                                                <else/>
+                                                <img src="__TMPL__/public/assets/images/default-image.png" id="img_{$k}-preview"
+                                                     width="135" style="cursor: hand;"/>
+                                            </notempty>
+                                        </a>
+                                        <input type="button" class="btn btn-sm" value="取消图片"
+                                               onclick="$('#img_{$k}-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#img_{$k}').val('');return false;">
+                                        <span class="help-block" style="margin-top:5px;">上传整图则前端显示该图片；留空则前端显示默认的 icon+文字 样式</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">跳转类型</label>
+                                    <div class="col-md-2 col-sm-10">
+                                        <select name="entries[{$k}][type]" class="form-control">
+                                            <option value="navigateTo" <if condition="$item.type eq 'navigateTo'">selected</if>>普通页面（navigateTo）</option>
+                                            <option value="switchTab" <if condition="$item.type eq 'switchTab'">selected</if>>TabBar 页面（switchTab）</option>
+                                            <option value="redirectTo" <if condition="$item.type eq 'redirectTo'">selected</if>>重定向（redirectTo）</option>
+                                        </select>
+                                    </div>
+
+                                    <label class="col-sm-1 control-label">跳转路径</label>
+                                    <div class="col-md-5 col-sm-10">
+                                        <input type="text" class="form-control" name="entries[{$k}][url]"
+                                               value="{$item.url}" placeholder="如 /pages/low_carbon/low_carbon" required>
+                                        <span class="help-block" style="margin-top:5px;">小程序页面路径，TabBar 页面必须用 switchTab 类型</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </volist>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">保存配置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

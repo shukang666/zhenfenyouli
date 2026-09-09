@@ -16,9 +16,15 @@
         <a class="btn btn-danger" href="{:url('exam/index')}">清空</a>
 
     </form>
+
+    <form method="post" class="js-ajax-form margin-top-20 layui-form" action="{:url('listOrder_exam')}">
+        <div class="table-actions">
+            <button class="btn btn-primary btn-sm js-ajax-submit" type="submit">{:lang('SORT')}</button>
+        </div>
     <table class="table table-hover table-bordered margin-top-20">
         <thead>
         <tr>
+            <th>排序</th>
             <th width="50">ID</th>
             <!-- <th>排序</th> -->
 
@@ -37,6 +43,9 @@
         </php>
         <foreach name="list" item="vo">
             <tr>
+                <td>
+                    <input name="list_orders[{$vo.id}]" class="input-order" type="text" value="{$vo.list_order}">
+                </td>
                 <td>{$vo.id}</td>
                 <!-- <td>{$vo.list_order}</td> -->
                 <td>{$vo.name}</td>
@@ -72,6 +81,7 @@
         </foreach>
         </tbody>
     </table>
+    </form>
     <ul class="pagination">{$page|default=''}</ul>
 </div>
 <script src="__STATIC__/js/admin.js"></script>

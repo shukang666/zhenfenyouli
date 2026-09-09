@@ -80,6 +80,7 @@ class ComposerStaticInit409e436a19c882513f3c7d0ffdfd059f
         '8d37dad4703fab45bfec9dd0bbf3278e' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operations/multiply.php',
         '4888a6f58c08148ebe17682f9ce9b2a8' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operations/divideby.php',
         'eef6fa3879d3efa347cd24d5eb348f85' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operations/divideinto.php',
+        'db356362850385d08a5381de2638b5fd' => __DIR__ . '/..' . '/mpdf/mpdf/src/functions.php',
         'b33e3d135e5d9e47d845c576147bda89' => __DIR__ . '/..' . '/php-di/php-di/src/functions.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
@@ -101,6 +102,10 @@ class ComposerStaticInit409e436a19c882513f3c7d0ffdfd059f
             'think\\captcha\\' => 14,
             'think\\' => 6,
             'themes\\' => 7,
+        ),
+        's' =>
+        array (
+            'setasign\\Fpdi\\' => 14,
         ),
         'p' => 
         array (
@@ -173,6 +178,9 @@ class ComposerStaticInit409e436a19c882513f3c7d0ffdfd059f
         'M' => 
         array (
             'MyCLabs\\Enum\\' => 13,
+            'Mpdf\\PsrLogAwareTrait\\' => 22,
+            'Mpdf\\PsrHttpMessageShim\\' => 24,
+            'Mpdf\\' => 5,
             'Matrix\\' => 7,
         ),
         'L' => 
@@ -250,6 +258,10 @@ class ComposerStaticInit409e436a19c882513f3c7d0ffdfd059f
         'themes\\' => 
         array (
             0 => __DIR__ . '/../..' . '/public/themes',
+        ),
+        'setasign\\Fpdi\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/setasign/fpdi/src',
         ),
         'plugins\\' => 
         array (
@@ -398,6 +410,18 @@ class ComposerStaticInit409e436a19c882513f3c7d0ffdfd059f
         'MyCLabs\\Enum\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/php-enum/src',
+        ),
+        'Mpdf\\PsrLogAwareTrait\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/mpdf/psr-log-aware-trait/src',
+        ),
+        'Mpdf\\PsrHttpMessageShim\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/mpdf/psr-http-message-shim/src',
+        ),
+        'Mpdf\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/mpdf/mpdf/src',
         ),
         'Matrix\\' => 
         array (

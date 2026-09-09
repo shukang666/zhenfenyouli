@@ -253,11 +253,11 @@ class CourseController extends AdminBaseController
             $item['played_name'] = $played_name[$item['played']];
             $item['last_time'] = date('Y-m-d H:i:s',$item['last_time']);
         }
-        $CommonModel = new CommonModel();
         $filename = '播放列表'.date('Y-m-d');
         $head = ['ID','昵称','姓名','手机号','备注','门店','视频名称','总时长','当前播放时长','上次播放时间','是否已看完'];//设置表头
         $keys = ['id','nickname','true_name','mobile','remark','shop_name','title','show_duration','show_play_time','last_time','played_name'];//设置表头
-        $CommonModel->outData($filename,$list,$head,$keys);
+        // 必须静态调用，实例调用会经 __call 转发到查询构造器导致 cmf_common_model 表不存在报错
+        CommonModel::outData($filename,$list,$head,$keys);
     }
 
     public function answer(){
@@ -322,7 +322,6 @@ class CourseController extends AdminBaseController
                 }
             }
         }
-        $CommonModel = new CommonModel();
         $filename = '答题列表'.date('Y-m-d');
 
 
@@ -334,7 +333,7 @@ class CourseController extends AdminBaseController
 
         $keys = ['id','nickname','true_name','mobile','remark','shop_name','title','total_num','right_num','create_time'];//设置表头
         $keys = array_merge($keys,$answer_arr);
-        $CommonModel->outData($filename,$list,$head,$keys);
+        CommonModel::outData($filename,$list,$head,$keys);
     }
 
     public function answerLog(){

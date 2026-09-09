@@ -6,6 +6,7 @@ use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\course\CourseUserModel;
 use app\admin\model\member\CommunityModel;
+use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberModel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use think\App;
@@ -45,7 +46,13 @@ class MemberController extends ToolController
         if (!empty($param['type'])) {
             $map[] = ['a.type', '=', $param['type']];
         }
-
+        if (!empty($param['id'])) {
+            $map[] = ['a.id', '=', $param['id']];
+        }
+        $start_time = $this->request->param('start_time', '', 'trim');
+        $end_time = $this->request->param('end_time', '', 'trim');
+        if ($start_time) $map[] = ['a.create_time', '>=', strtotime($start_time)];
+        if ($end_time) $map[] = ['a.create_time', '<=', strtotime($end_time) + 86399];
 
         // 验证排序字段
         if (!in_array($sortField, ['id', 'point', 'create_time'])) {
@@ -56,6 +63,7 @@ class MemberController extends ToolController
                 ->field('a.*')
                 ->where($map)->order($sortField, $sortOrder)->paginate(10);
         foreach ($list as $item) {
+            $item['community_parent_name']=CommunityParentModel::where('id',$item['community_parent_id'])->value('name','');
             $item['community_name']=CommunityModel::where('id',$item['community_id'])->value('name','');
         }
         $list->appends($params);
@@ -104,22 +112,30 @@ class MemberController extends ToolController
     }
 
     public function outData(){
+        // 导出条件与 index 保持一致：相同的筛选 + 排序，确保导出的就是当前列表看到的数据
         $params = $this->request->param();
         $keyword = $this->request->param('keyword','','trim');
         $sortField = $this->request->param('sort_field','id','trim');
         $sortOrder = $this->request->param('sort_order','desc','trim');
 
         $map = [];
-        $map[] = ['a.status','>',0];
+        $map[] = ['a.status','>',0]; // 与 index 一致
         if(!empty($keyword)){
             $map[] = ['a.nickname|a.mobile','like',"%".$keyword."%"];
         }
         if(!empty($params['community_id'])){
-            $map[] = ['a.community_id','=',$params['community_id']];
+            $map[] = ['community_id','=',$params['community_id']];
         }
         if(!empty($params['type'])){
             $map[] = ['a.type','=',$params['type']];
         }
+        if(!empty($params['id'])){
+            $map[] = ['a.id','=',$params['id']];
+        }
+        $start_time = $this->request->param('start_time','','trim');
+        $end_time = $this->request->param('end_time','','trim');
+        if($start_time) $map[] = ['a.create_time','>=',strtotime($start_time)];
+        if($end_time) $map[] = ['a.create_time','<=',strtotime($end_time)+86399];
 
         // 验证排序字段，与 index 保持一致
         if (!in_array($sortField, ['id', 'point', 'create_time'])) {
@@ -132,13 +148,14 @@ class MemberController extends ToolController
 
         foreach($list as &$item){
             $item['create_time'] = date('Y-m-d H:i:s',$item['create_time']);
+            $item['community_parent_name'] = CommunityParentModel::where('id',$item['community_parent_id'])->value('name','');
             $item['community_name'] = CommunityModel::where('id',$item['community_id'])->value('name','');
         }
 
         $filename = '用户列表'.date('Y-m-d');
-        $head = ['用户ID','昵称','小区','手机号','积分','注册日期'];//设置表头
-        $keys = ['id','nickname','community_name','mobile','point','create_time'];//设置表头
-        // 注意：CommonModel::outData 是静态方法，必须用 :: 调用。
+        $head = ['用户ID','昵称','社区','小区','手机号','积分','注册日期'];//设置表头
+        $keys = ['id','nickname','community_parent_name','community_name','mobile','point','create_time'];//设置表头
+        // 注意：CommonModel::outData 是 static 静态方法，必须用 :: 调用。
         // 不可使用 $obj->outData() 这种实例调用方式，否则 ThinkPHP Model 的 __call 魔术方法
         // 会把 outData 转发到查询构造器 $this->db()->outData()，进而对 cmf_common_model 表发起查询导致报错。
         CommonModel::outData($filename,$list,$head,$keys);
@@ -240,6 +257,11 @@ class MemberController extends ToolController
         }
 
 
+    }
+
+    public function pdf()
+    {
+        return $this->fetch();
     }
 
 }

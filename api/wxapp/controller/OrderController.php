@@ -240,7 +240,7 @@ class OrderController extends AuthController
                     'province' => $address_info['province'] ?? '', 'city' => $address_info['city'] ?? '',
                     'county' => $address_info['county'] ?? '', 'address' => $address_info['address'] ?? '',
                     'express_price' => $order_express_price, 'pay_order_num' => $pay_order_num,
-                    'point' => 0, 'point_pay' => 0, 'shop_id' => $shop_id, 'delivery_type' => $delivery_type, 'order_type' => $order_type,
+                    'point' => 0, 'point_pay' => 0, 'point_amount' => 0, 'shop_id' => $shop_id, 'delivery_type' => $delivery_type, 'order_type' => $order_type,
                     'goods_type' => 1, 'position_id' => $position_id
                 ];
                 $data_order['total_price'] = $order_goods_price + $order_express_price;
@@ -280,6 +280,30 @@ class OrderController extends AuthController
                 }
 
 
+                //积分抵扣
+                $user_point = $this->user_info['point'];
+                // 然后进行积分抵扣计算
+                if ($type == 1 && !empty($user_point)) {
+                    // 计算需要的积分 = 总抵扣金额 * 积分兑换比例
+                    $needed_points = $total_point_deduction * $point_ratio;
+                    if ($user_point >= $needed_points) {
+                        // 足够抵扣
+                        $data_order['point'] = $needed_points;
+                        $data_order['point_amount'] = $total_point_deduction;
+                    } else {
+                        // 不足抵扣
+                        $data_order['point'] = $user_point;
+                        $data_order['point_amount'] = $user_point / $point_ratio;
+                    }
+                    // 更新实际支付金额
+                    $total_need_pay = round($total_need_pay - $data_order['point_amount'], 2);
+                }
+                $data_order['point'] = round($data_order['point'], 2);
+                $data_order['point_amount'] = round($data_order['point_amount'], 2);
+
+                $data_order['point_pay'] = round($total_points_used, 2);
+
+
                 $data_order['price'] = $price;
                 if ($action != 'info') {
 //                    Db::startTrans();
@@ -293,26 +317,7 @@ class OrderController extends AuthController
                 $total_express_price += $order_express_price;
 
             }
-            //积分抵扣
-            $user_point = $this->user_info['point'];
-            // 然后进行积分抵扣计算
-            if ($type == 1 && !empty($user_point)) {
-                // 计算需要的积分 = 总抵扣金额 * 积分兑换比例
-                $needed_points = $total_point_deduction * $point_ratio;
-                if ($user_point >= $needed_points) {
-                    // 足够抵扣
-                    $data_order['point'] = $needed_points;
-                    $data_order['point_pay'] = $total_point_deduction;
-                } else {
-                    // 不足抵扣
-                    $data_order['point'] = $user_point;
-                    $data_order['point_pay'] = $user_point / $point_ratio;
-                }
-                // 更新实际支付金额
-                $total_need_pay = round($total_need_pay - $data_order['point_pay'], 2);
-            }
-            $data_order['point'] = round($data_order['point'], 2);
-            $data_order['point_pay'] = round($data_order['point_pay'], 2);
+
 
 
             if ($action == 'info') {
@@ -487,6 +492,16 @@ class OrderController extends AuthController
      *     path="/wxapp/order/cancel_order",
      *
      *
+     *
+     *       @OA\Parameter(
+     *          name="openid",
+     *          in="query",
+     *          description="openid",
+     *          required=false,
+     *          @OA\Schema(
+     *              type="string",
+     *          )
+     *      ),
      *            @OA\Parameter(
      *         name="order_num",
      *         in="query",
@@ -553,6 +568,9 @@ class OrderController extends AuthController
                 }
                 //加库存
                 ShopOrderModel::setSellCountOrStock('stock_inc', $order_num);
+
+                //退回已抵扣积分
+                //if($order_info['point'] > 0) AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $order_num]);
 
                 $this->success('取消成功');
             } else {

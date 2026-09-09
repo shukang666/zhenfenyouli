@@ -1,0 +1,256 @@
+var MIN_SCALE = 0.1;
+var MAX_SCALE = 4;
+
+function initState(state) {
+	if (state.initialized) return;
+	state.defaultScale = 0.5;
+	state.scale = 0.5;
+	state.translateX = 0;
+	state.translateY = 0;
+	state.isPinching = false;
+	state.isMoving = false;
+	state.contentHeight = 0;
+	state.contentWidth = 0;
+	state.viewportWidth = 375;
+	state.viewportHeight = 600;
+	state.viewportLeft = 0;
+	state.viewportTop = 0;
+	state.defaultApplied = false;
+	state.userZoomed = false;
+	state.initialized = true;
+}
+
+function getTouchX(touch) {
+	return touch.clientX != null ? touch.clientX : (touch.pageX != null ? touch.pageX : touch.x);
+}
+
+function getTouchY(touch) {
+	return touch.clientY != null ? touch.clientY : (touch.pageY != null ? touch.pageY : touch.y);
+}
+
+function syncViewportOffset(state, ownerInstance) {
+	var ins = ownerInstance.selectComponent('.zoom-viewport');
+	if (!ins) return;
+	var dataset = ins.getDataset();
+	if (dataset.vleft != null) state.viewportLeft = +dataset.vleft;
+	if (dataset.vtop != null) state.viewportTop = +dataset.vtop;
+}
+
+function getLocalX(touch, state) {
+	return getTouchX(touch) - (state.viewportLeft || 0);
+}
+
+function getLocalY(touch, state) {
+	return getTouchY(touch) - (state.viewportTop || 0);
+}
+
+function getDistance(t0, t1) {
+	var x = getTouchX(t0) - getTouchX(t1);
+	var y = getTouchY(t0) - getTouchY(t1);
+	return Math.sqrt(x * x + y * y);
+}
+
+function clampTranslate(state) {
+	var scale = state.scale;
+	var vh = state.viewportHeight;
+	var vw = state.viewportWidth;
+	var ch = state.contentHeight;
+	var cw = state.contentWidth || vw;
+
+	if (!ch || !vh) return;
+
+	var scaledH = ch * scale;
+	var scaledW = cw * scale;
+	var minY = vh - scaledH;
+	var minX = vw - scaledW;
+
+	// 纵向：放大后内容超出视口，允许 translateY 为负（向下滚动）
+	if (scale > 1 && scaledH > vh) {
+		if (state.translateY > 0) state.translateY = 0;
+		if (state.translateY < minY) state.translateY = minY;
+	} else if (minY > 0) {
+		if (state.translateY < 0) state.translateY = 0;
+		if (state.translateY > minY) state.translateY = minY;
+	} else {
+		if (state.translateY > 0) state.translateY = 0;
+		if (state.translateY < minY) state.translateY = minY;
+	}
+
+	// 横向：放大后内容超出视口，允许 translateX 为负（向左滚动）
+	if (scale > 1 && scaledW > vw) {
+		if (state.translateX > 0) state.translateX = 0;
+		if (state.translateX < minX) state.translateX = minX;
+	} else if (minX > 0) {
+		if (state.translateX < 0) state.translateX = 0;
+		if (state.translateX > minX) state.translateX = minX;
+	} else {
+		if (state.translateX > 0) state.translateX = 0;
+		if (state.translateX < minX) state.translateX = minX;
+	}
+}
+
+function applyTransform(ins, state) {
+	var x = state.translateX;
+	var y = state.translateY;
+	var s = state.scale;
+	ins.requestAnimationFrame(function() {
+		ins.setStyle({
+			transform: 'translate3d(' + x + 'px,' + y + 'px,0) scale(' + s + ')',
+			'transform-origin': '0 0'
+		});
+	});
+}
+
+function markUserZoomed(state, ownerInstance) {
+	if (state.userZoomed) return;
+	state.userZoomed = true;
+	ownerInstance.callMethod('markUserZoomed');
+}
+
+function startPinch(state, touches, ownerInstance) {
+	syncViewportOffset(state, ownerInstance);
+	markUserZoomed(state, ownerInstance);
+	state.isPinching = true;
+	state.isMoving = false;
+	state.pinchStartDistance = getDistance(touches[0], touches[1]);
+	if (state.pinchStartDistance < 1) state.pinchStartDistance = 1;
+	state.pinchStartScale = state.scale;
+	// 双指落下时的中心点（容器内坐标），整个缩放过程固定不变
+	state.pinchCenterX = (getLocalX(touches[0], state) + getLocalX(touches[1], state)) / 2;
+	state.pinchCenterY = (getLocalY(touches[0], state) + getLocalY(touches[1], state)) / 2;
+	state.pinchStartTranslateX = state.translateX;
+	state.pinchStartTranslateY = state.translateY;
+}
+
+function updatePinch(state, touches, ins) {
+	var distance = getDistance(touches[0], touches[1]);
+	if (!state.pinchStartDistance) return;
+	var newScale = state.pinchStartScale * (distance / state.pinchStartDistance);
+	if (newScale < MIN_SCALE) newScale = MIN_SCALE;
+	if (newScale > MAX_SCALE) newScale = MAX_SCALE;
+	// 保持双指落点下的内容位置不动
+	var focalX = state.pinchCenterX;
+	var focalY = state.pinchCenterY;
+	var startScale = state.pinchStartScale;
+	var contentX = (focalX - state.pinchStartTranslateX) / startScale;
+	var contentY = (focalY - state.pinchStartTranslateY) / startScale;
+	state.translateX = focalX - contentX * newScale;
+	state.translateY = focalY - contentY * newScale;
+	state.scale = newScale;
+	clampTranslate(state);
+	applyTransform(ins, state);
+}
+
+function startMove(state, touch, ownerInstance) {
+	markUserZoomed(state, ownerInstance);
+	state.isMoving = true;
+	state.isPinching = false;
+	state.moveStartX = getTouchX(touch);
+	state.moveStartY = getTouchY(touch);
+	state.moveStartTranslateX = state.translateX;
+	state.moveStartTranslateY = state.translateY;
+}
+
+function updateMove(state, touches, ins) {
+	var dx = getTouchX(touches[0]) - state.moveStartX;
+	var dy = getTouchY(touches[0]) - state.moveStartY;
+	state.translateX = state.moveStartTranslateX + dx;
+	state.translateY = state.moveStartTranslateY + dy;
+	clampTranslate(state);
+	applyTransform(ins, state);
+}
+
+function propObserver(newVal, oldVal, ownerInstance) {
+	var state = ownerInstance.getState();
+	initState(state);
+	if (!newVal) return;
+	if (newVal.contentHeight) state.contentHeight = newVal.contentHeight;
+	if (newVal.contentWidth) state.contentWidth = newVal.contentWidth;
+	if (newVal.viewportWidth) state.viewportWidth = newVal.viewportWidth;
+	if (newVal.viewportHeight) state.viewportHeight = newVal.viewportHeight;
+	if (newVal.viewportLeft != null) state.viewportLeft = newVal.viewportLeft;
+	if (newVal.viewportTop != null) state.viewportTop = newVal.viewportTop;
+	if (newVal.defaultScale != null) state.defaultScale = newVal.defaultScale;
+	if (newVal.reset) {
+		state.scale = state.defaultScale;
+		state.translateX = 0;
+		state.translateY = 0;
+		state.defaultApplied = true;
+		state.userZoomed = false;
+	} else if (newVal.contentHeight && !state.defaultApplied) {
+		state.scale = state.defaultScale;
+		state.defaultApplied = true;
+	}
+	clampTranslate(state);
+	var ins = ownerInstance.selectComponent('.zoom-content');
+	if (ins) applyTransform(ins, state);
+}
+
+function touchstart(event, ownerInstance) {
+	var state = ownerInstance.getState();
+	initState(state);
+	var touches = event.touches;
+	if (touches.length >= 2) {
+		startPinch(state, touches, ownerInstance);
+	} else if (touches.length === 1) {
+		startMove(state, touches[0], ownerInstance);
+	}
+}
+
+function touchmove(event, ownerInstance) {
+	var state = ownerInstance.getState();
+	initState(state);
+	var ins = ownerInstance.selectComponent('.zoom-content');
+	if (!ins) return false;
+	var touches = event.touches;
+
+	if (touches.length >= 2) {
+		if (!state.isPinching) {
+			startPinch(state, touches, ownerInstance);
+		}
+		updatePinch(state, touches, ins);
+		return false;
+	}
+
+	if (touches.length === 1) {
+		if (state.isPinching) {
+			startMove(state, touches[0], ownerInstance);
+			return false;
+		}
+		if (state.isMoving) {
+			updateMove(state, touches, ins);
+			return false;
+		}
+	}
+	return false;
+}
+
+function touchend(event, ownerInstance) {
+	var state = ownerInstance.getState();
+	initState(state);
+	var ins = ownerInstance.selectComponent('.zoom-content');
+	var touches = event.touches;
+
+	if (touches.length >= 2) {
+		if (!state.isPinching) startPinch(state, touches, ownerInstance);
+		return;
+	}
+
+	if (touches.length === 1) {
+		startMove(state, touches[0], ownerInstance);
+		return;
+	}
+
+	state.isPinching = false;
+	state.isMoving = false;
+	if (state.scale < MIN_SCALE) state.scale = MIN_SCALE;
+	clampTranslate(state);
+	if (ins) applyTransform(ins, state);
+}
+
+module.exports = {
+	propObserver: propObserver,
+	touchstart: touchstart,
+	touchmove: touchmove,
+	touchend: touchend
+};
