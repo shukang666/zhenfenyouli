@@ -13,18 +13,6 @@
 			<!-- 右侧内容区：根据 current_tab 联动显示对应标签内容 -->
 			<view class="content-area">
 
-		<!-- 活动搜索入口（所有标签共用，点击进入搜索页） -->
-		<view class="active-search-entry" @click="$u.route('/pages/low_carbon/active-search')">
-			<view class="search-entry-box">
-				<u-icon name="search" size="28" color="#b0b3bb"></u-icon>
-				<text class="search-entry-text">搜索活动名称 / 地点</text>
-				<!-- 扫码图标：点击呼出二维码扫码模块（扫码逻辑暂注释未启用，见 onScanQrcode） -->
-				<view class="search-entry-scan" @click.stop="onScanQrcode">
-					<u-icon name="scan" size="30" color="#8e8e93"></u-icon>
-				</view>
-			</view>
-		</view>
-
 		<!-- 本月推荐标签：展示海报+推荐活动列表 -->
 	<view v-if="is_monthly_rec_tab" class="pane monthly-rec-pane">
 		<view v-if="monthly_rec_banner" class="rec-banner">
@@ -658,49 +646,7 @@
 					this.active_loading = false
 				})
 			},
-			// 点击搜索框右侧扫码图标：呼出二维码扫码模块（真实拉起系统扫码）
-			// 说明：扫码成功后的业务跳转暂未接入（见 success 中 TODO），当前仅打印扫码内容
-			onScanQrcode() {
-				// #ifdef H5
-				// 浏览器环境没有系统扫码能力，扫码仅支持在微信小程序端调用
-				this.$u.toast('扫码需在微信小程序内使用')
-				// #endif
-				// #ifndef H5
-				uni.scanCode({
-					onlyFromCamera: false,
-					success: (res) => {
-						// 扫码成功。后台生成的活动码是"小程序码"(getwxacodeunlimit)，
-						// 扫它时活动id不在 res.result，而在 res.path(页面路径?scene=活动id)；
-						// 普通二维码(内容为活动id/含scene或id参数)则在 res.result。
-						const scanType = (res && res.scanType) ? String(res.scanType) : ''
-						const qPath = (res && res.path) ? String(res.path).trim() : ''
-						const raw = (res && res.result != null) ? String(res.result).trim() : ''
-						console.log('scanCode =>', { scanType: scanType, path: qPath, result: raw })
-
-						// 1) 小程序码：path 形如 pages/low_carbon/lsxf/details-new?scene=活动id
-						//    只接受本项目活动详情页路径，防止误扫到其它页面/其它小程序的码
-						if (/^pages\/low_carbon\/lsxf\/details-new/.test(qPath)) {
-							const full = qPath.indexOf('/') === 0 ? qPath : '/' + qPath
-							this.$u.route(full)
-							return
-						}
-						// 2) 兜底解析二维码内容里的活动id：纯数字 / scene=xx / id=xx
-						const m = raw.match(/(?:scene|id)=(\d+)/)
-						const activeId = /^\d+$/.test(raw) ? raw : (m ? m[1] : '')
-						if (activeId) {
-							this.$u.route('/pages/low_carbon/lsxf/details-new?id=' + activeId)
-							return
-						}
-						this.$u.toast('未识别到活动二维码')
-					},
-					fail: (err) => {
-						// 用户手动取消扫码时静默处理，其它异常打印便于排查
-						const msg = (err && err.errMsg) || ''
-						if (msg.indexOf('cancel') === -1) console.log('scanCode fail =>', msg)
-					}
-				})
-				// #endif
-			},
+			// 活动搜索与扫码入口已移至首页 index.vue（onScanQrcode 同步迁移过去）
 			// 跳转页面（type==1 为垃圾分类打卡入口，需先通过答题考试）
 			navigator(url, type) {
 				// 垃圾分类打卡：允许未登录用户进入详情页，点击打卡时再跳登录
@@ -854,44 +800,6 @@
 	.container {
 		min-height: 100vh;
 		background: #F5F5F5;
-	}
-
-	/* 活动搜索入口（吸顶于右侧内容区顶部） */
-	.active-search-entry {
-		position: sticky;
-		top: 0;
-		z-index: 20;
-		padding: 16rpx 20rpx;
-		background: #F5F5F5;
-	}
-
-	.search-entry-box {
-		display: flex;
-		align-items: center;
-		height: 64rpx;
-		padding: 0 24rpx;
-		background: #ffffff;
-		border-radius: 32rpx;
-		box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-	}
-
-	.search-entry-text {
-		flex: 1;
-		margin-left: 12rpx;
-		font-size: 26rpx;
-		color: #b0b3bb;
-	}
-
-	/* 搜索框右侧扫码图标 */
-	.search-entry-scan {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 52rpx;
-		height: 52rpx;
-		margin-left: 8rpx;
-		padding-left: 20rpx;
-		border-left: 1rpx solid #eeeeee;
 	}
 
 	/* 左右联动布局：左侧固定宽度侧边栏 + 右侧自适应内容区 */

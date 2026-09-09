@@ -143,8 +143,8 @@
 		</view>
 		
 		<!-- 打卡成功弹窗 -->
-		<u-mask :show="tipShow">
-			<view class="success-modal glass-card">
+		<u-mask :show="tipShow" @click="tipShow = false">
+			<view class="success-modal glass-card" @tap.stop.prevent>
 				<view class="success-icon">
 					<text class="success-emoji">🎉</text>
 				</view>
@@ -154,7 +154,7 @@
 					<text class="point-value">+{{info.send_point}}</text>
 				</view>
 				<view class="success-tip">{{isScanJoin ? '扫码签到成功，感谢参与~' : '继续保持，积少成多~'}}</view>
-				<u-button class="success-btn" @click="tipShow = false">我知道了</u-button>
+				<view class="success-btn" @click="tipShow = false">我知道了</view>
 			</view>
 		</u-mask>
 		
@@ -1013,6 +1013,9 @@
 		}
 		
 		.success-btn {
+			display: flex;
+			align-items: center;
+			justify-content: center;
 			width: 100%;
 			height: 80rpx;
 			border-radius: 40rpx;

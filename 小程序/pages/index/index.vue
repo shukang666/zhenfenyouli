@@ -10,6 +10,17 @@
 				</u-navbar>
 			</template>
 
+			<!-- 活动搜索 + 扫码入口（点击进活动搜索页，右侧扫码直达活动详情） -->
+			<view class="home-search-wrap">
+				<view class="home-search-box" @click="$u.route('/pages/low_carbon/active-search')">
+					<u-icon name="search" size="28" color="#b0b3bb"></u-icon>
+					<text class="home-search-text">搜索活动名称 / 地点</text>
+					<view class="home-search-scan" @click.stop="onScanQrcode">
+						<u-icon name="scan" size="30" color="#8e8e93"></u-icon>
+					</view>
+				</view>
+			</view>
+
 			<!-- Banner 轮播图 -->
 			<view class="banner-wrap">
 				<u-swiper :list="bannerList" height="340" border-radius="24" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
@@ -368,6 +379,48 @@
 					}
 				})
 			},
+			// 点击搜索框右侧扫码图标：拉起系统扫码，识别活动小程序码/二维码后直达活动详情
+			onScanQrcode() {
+				// #ifdef H5
+				// 浏览器环境没有系统扫码能力，扫码仅支持在微信小程序端调用
+				this.$u.toast('扫码需在微信小程序内使用')
+				// #endif
+				// #ifndef H5
+				uni.scanCode({
+					onlyFromCamera: false,
+					success: (res) => {
+						// 扫码成功。后台生成的活动码是"小程序码"(getwxacodeunlimit)，
+						// 扫它时活动id不在 res.result，而在 res.path(页面路径?scene=活动id)；
+						// 普通二维码(内容为活动id/含scene或id参数)则在 res.result。
+						const scanType = (res && res.scanType) ? String(res.scanType) : ''
+						const qPath = (res && res.path) ? String(res.path).trim() : ''
+						const raw = (res && res.result != null) ? String(res.result).trim() : ''
+						console.log('scanCode =>', { scanType: scanType, path: qPath, result: raw })
+
+						// 1) 小程序码：path 形如 pages/low_carbon/lsxf/details-new?scene=活动id
+						//    只接受本项目活动详情页路径，防止误扫到其它页面/其它小程序的码
+						if (/^pages\/low_carbon\/lsxf\/details-new/.test(qPath)) {
+							const full = qPath.indexOf('/') === 0 ? qPath : '/' + qPath
+							this.$u.route(full)
+							return
+						}
+						// 2) 兜底解析二维码内容里的活动id：纯数字 / scene=xx / id=xx
+						const m = raw.match(/(?:scene|id)=(\d+)/)
+						const activeId = /^\d+$/.test(raw) ? raw : (m ? m[1] : '')
+						if (activeId) {
+							this.$u.route('/pages/low_carbon/lsxf/details-new?id=' + activeId)
+							return
+						}
+						this.$u.toast('未识别到活动二维码')
+					},
+					fail: (err) => {
+						// 用户手动取消扫码时静默处理，其它异常打印便于排查
+						const msg = (err && err.errMsg) || ''
+						if (msg.indexOf('cancel') === -1) console.log('scanCode fail =>', msg)
+					}
+				})
+				// #endif
+			},
 			// 更新自定义tabbar选中索引
 			updateTabBarSelected(index) {
 				const tabBar = this.$mp?.page?.getTabBar && this.$mp.page.getTabBar()
@@ -467,6 +520,39 @@
 	.container {
 		min-height: 100vh;
 		background: #F5F6F8;
+	}
+
+	/* 活动搜索 + 扫码入口：与下方 Banner 同宽（左右 30rpx 留白）、同圆角(24rpx) */
+	.home-search-wrap {
+		padding: 24rpx 30rpx 0;
+	}
+
+	.home-search-box {
+		display: flex;
+		align-items: center;
+		height: 72rpx;
+		padding: 0 24rpx;
+		background: #ffffff;
+		border-radius: 24rpx; /* 与 banner 圆角一致 */
+		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+	}
+
+	.home-search-text {
+		flex: 1;
+		margin-left: 12rpx;
+		font-size: 26rpx;
+		color: #b0b3bb;
+	}
+
+	.home-search-scan {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 52rpx;
+		height: 52rpx;
+		margin-left: 8rpx;
+		padding-left: 20rpx;
+		border-left: 1rpx solid #eeeeee;
 	}
 
 	/* Banner 轮播图容器：左右留白，顶部间距 */
