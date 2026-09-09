@@ -669,10 +669,23 @@
 				uni.scanCode({
 					onlyFromCamera: false,
 					success: (res) => {
-						// 扫码成功：res.result 为二维码内容
-						console.log('scanCode result =>', res.result)
-						this.$u.toast('扫码成功')
-						// TODO: 后续按业务规则解析 res.result 并跳转（如活动详情/打卡等）
+						// 扫码成功：res.result 为二维码内容，解析出活动id后直达活动详情
+						const raw = (res && res.result != null) ? String(res.result).trim() : ''
+						console.log('scanCode result =>', raw)
+						if (!raw) return this.$u.toast('未识别到二维码内容')
+						let activeId = ''
+						// 兼容三种内容格式：纯数字活动id / scene=xx / ?id=xx
+						if (/^\d+$/.test(raw)) {
+							activeId = raw
+						} else {
+							const m = raw.match(/scene=(\d+)/) || raw.match(/[?&]id=(\d+)/)
+							if (m) activeId = m[1]
+						}
+						if (activeId) {
+							this.$u.route('/pages/low_carbon/lsxf/details-new?id=' + activeId)
+						} else {
+							this.$u.toast('未识别到活动二维码')
+						}
 					},
 					fail: (err) => {
 						// 用户手动取消扫码时静默处理，其它异常打印便于排查

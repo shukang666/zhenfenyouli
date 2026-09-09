@@ -72,6 +72,41 @@
         </div>
 
         <div class="form-group">
+            <label class="col-sm-2 control-label">参加方式:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="join_type" class="form-control" style="width: 212px"
+                        onchange="toggleJoinType(this.value)">
+                    <option value="1"
+                            <if condition="empty($item.join_type) || $item.join_type == 1">selected</if>>小程序参加
+                    </option>
+                    <option value="2"
+                            <if condition="$item.join_type == 2">selected</if>>扫码参加
+                    </option>
+                </select>
+                <p class="help-block">
+                    小程序参加：活动在小程序内展示、可搜索可报名（默认）；<br/>
+                    扫码参加：活动在小程序列表隐藏，仅能通过活动二维码扫码进入详情后参加。
+                </p>
+            </div>
+        </div>
+
+        <div class="form-group join-type-scan">
+            <label class="col-sm-2 control-label">活动二维码:</label>
+            <div class="col-md-6 col-sm-10">
+                <if condition="!empty($item.qr_code)">
+                    <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($item.qr_code)}');"
+                       title="点击放大预览">
+                        <img src="{:cmf_get_image_preview_url($item.qr_code)}" width="150" height="150"
+                             style="cursor: pointer; border:1px solid #eee;"/>
+                    </a>
+                    <p class="help-block">用户用微信「扫一扫」扫描此小程序码，即可直达本活动详情页报名/打卡。<br/>点击图片可放大，右键另存图片即可用于线下物料。</p>
+                <else/>
+                    <p class="help-block text-danger">暂无二维码：保存活动后系统将自动生成该活动专属小程序码，届时在此处及列表页可查看下载。</p>
+                </if>
+            </div>
+        </div>
+
+        <div class="form-group">
             <label class="col-sm-2 control-label">图片:</label>
             <div class="col-md-6 col-sm-10">
                 <php>  $thumb='thumb';</php>
@@ -388,6 +423,7 @@
 <script>
     var is_clock = '{$item.is_clock|default=0}';
     var is_badge = '{$item.is_badge|default=0}';
+    var join_type = '{$item.join_type|default=1}';
 
     $('.show_hidden').hide();
     if(is_clock == 1){
@@ -396,6 +432,16 @@
     if(is_badge == 1){
         $('.badge1').show();
     }
+
+    // 参加方式切换：选「扫码参加」时显示活动二维码预览
+    function toggleJoinType(val) {
+        if (val == 2) {
+            $('.join-type-scan').show();
+        } else {
+            $('.join-type-scan').hide();
+        }
+    }
+    toggleJoinType(join_type);
 
 </script>
 <script>

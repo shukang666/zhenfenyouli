@@ -112,6 +112,9 @@ class ActiveController extends AuthController
                 ->column('active_id');
 //            var_dump($active_ids);exit;
             $where[] = ['id', 'in', $active_ids];
+        } else {
+            // 浏览型列表不展示扫码参加(join_type=2)的活动；我参加的活动(is_my)仍正常展示
+            $where[] = ['join_type', '=', 1];
         }
 
         $list = $activeModel->where($where)
@@ -361,6 +364,8 @@ class ActiveController extends AuthController
         $where[] = ['type', '=', 1];
         $where[] = ['status', '=', 1];
         $where[] = ['delete_time', '=', 0];
+        // 扫码参加(join_type=2)的活动不在小程序列表/搜索/推荐中展示，仅扫码可进入
+        $where[] = ['join_type', '=', 1];
         if(!empty($community_cate_id)) $where[] = ['cate_id', '=', $community_cate_id];
         if(!empty($is_recommendation)) $where[] = ['is_recommendation', '=', 1];
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
