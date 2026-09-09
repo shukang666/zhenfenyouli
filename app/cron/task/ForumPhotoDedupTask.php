@@ -16,8 +16,10 @@ use think\facade\Db;
  * 反复上传打卡骗取积分的可能。
  *
  * 原理（与后台描述保持一致）：
- *   1) 每次调度扫描“自上次处理进度以来”新产生的 type=2 打卡记录（游标 last_forum_id 落 state JSON）；
- *   2) 对每条新记录里的每张图做感知哈希(aHash, 64bit 指纹)，与该用户历史打卡图片指纹逐一比对汉明距离；
+ *   1) 发布接口已做“实时查重”，本任务作为兜底，扫描“自上次处理进度以来”新产生的 type=2 打卡记录
+ *      （游标 last_forum_id 落 state JSON），覆盖发布时指纹缺失/漏判的情况；
+ *   2) 对每条新记录里的每张图做感知哈希(aHash, 64bit 指纹，发布时已写入 cmf_forum.img_hash，优先读列、缺才下载)，
+ *      与该用户历史打卡指纹(同样优先读列)逐一比对汉明距离；
  *   3) 相似度 = (1 - 汉明距离/64)*100，达到配置的 similarity_threshold(默认100% = 汉明距离0 = 完全相同) 即判定重复；
  *      若图片 URL 与其本人历史完全一致（同一文件再次上传），按 100% 命中；
  *   4) 判重命中即自动删除该条打卡：软删除 + 写 cmf_forum_delete_log + 追回已发放积分
@@ -42,7 +44,7 @@ class ForumPhotoDedupTask implements CronTaskInterface
         return [
             'task_key'       => 'forum_photo_dedup',
             'title'          => '垃圾分类打卡重复图片自动清理',
-            'description'    => '原理：扫描每次定时到点时新产生的垃圾分类打卡记录，把本次上传的图片与同一用户历史打卡图片做感知哈希(aHash)比对，按汉明距离换算相似度百分比（100%=完全相同）。达到“相似度阈值”即判定为重复图片，自动删除该条打卡记录、追回积分并写入删除日志。首次启用自动从最新打卡开始监管（不回溯存量），若需回扫存量可在“运行状态”中将 last_forum_id 改小。',
+            'description'    => '原理：打卡发布接口已做“图片实时查重”，本任务为兜底防线——扫描每次定时到点时新产生的垃圾分类打卡记录，把本次上传图片与同一用户历史打卡图片做感知哈希(aHash)比对(优先读取发布时写入的 img_hash 指纹，缺失才下载原图计算)，按汉明距离换算相似度百分比（100%=完全相同）。达到“相似度阈值”即判定为重复图片，自动删除该条打卡记录、追回积分并写入删除日志。首次启用自动从最新打卡开始监管（不回溯存量），若需回扫存量可在“运行状态”中将 last_forum_id 改小。',
             'status_default' => 1,
             'cycle_type'     => 3,          // 每天定点执行
             'cycle_interval' => 1,
@@ -107,6 +109,27 @@ class ForumPhotoDedupTask implements CronTaskInterface
         return [];
     }
 
+    /** 解码 cmf_forum.img_hash 指纹 JSON(与 image 同序, 可能含 null 占位) */
+    private static function decodeStoredHashes($imgHash): array
+    {
+        if (!is_string($imgHash) || $imgHash === '') {
+            return [];
+        }
+        $arr = json_decode($imgHash, true);
+        return is_array($arr) ? array_values($arr) : [];
+    }
+
+    /**
+     * 取某张图的指纹：优先用库里已存的 img_hash(同序)；没有/为空才下载原图实时计算。
+     */
+    private function hashOf(array &$cache, string $rawUrl, $stored): ?string
+    {
+        if (is_string($stored) && $stored !== '') {
+            return $stored;
+        }
+        return $this->fingerprintCached($cache, $rawUrl);
+    }
+
     /**
      * 首次运行自动锚定：从当前最大 id 开始监管新打卡，避免对存量历史全量回扫。
      */
@@ -135,7 +158,7 @@ class ForumPhotoDedupTask implements CronTaskInterface
         $list = $forumModel->where('type', self::FORUM_TYPE)
             ->where('delete_time', 0)
             ->where('id', '>', $lastId)
-            ->field('id,user_id,content,image,point')
+            ->field('id,user_id,content,image,point,img_hash')
             ->order('id', 'asc')
             ->limit($step)
             ->select();
@@ -160,6 +183,8 @@ class ForumPhotoDedupTask implements CronTaskInterface
             if (empty($urls)) {
                 continue;
             }
+            // 新打卡发布时已把指纹写入 img_hash(与image同序)，优先读取，缺才下载兜底
+            $storedHashes = self::decodeStoredHashes($row['img_hash'] ?? '');
             // 惰性加载该用户“更早”的历史图片指纹(最近 historyLimit 条, 含已删记录, 以识别连环复用)
             if (!isset($userCtx[$uid])) {
                 $userCtx[$uid] = $this->loadUserHistory($forumModel, $uid, $rid, $historyLimit, $urlHashCache);
@@ -183,8 +208,8 @@ class ForumPhotoDedupTask implements CronTaskInterface
                     ];
                     break;
                 }
-                // 2) 感知哈希比对
-                $hash = $this->fingerprintCached($urlHashCache, $raw);
+                // 2) 感知哈希比对（优先用已存指纹；历史未回填时下载兜底）
+                $hash = $this->hashOf($urlHashCache, $raw, $storedHashes[$idx] ?? null);
                 if ($hash === null) {
                     $unreadable++;
                     continue;
@@ -242,14 +267,15 @@ class ForumPhotoDedupTask implements CronTaskInterface
         $rows = $forumModel->where('type', self::FORUM_TYPE)
             ->where('user_id', $uid)
             ->where('id', '<', $anchorId)
-            ->field('id,image')
+            ->field('id,image,img_hash')
             ->order('id', 'desc')
             ->limit($historyLimit)
             ->select();
         $rows = $rows ? $rows->toArray() : [];
         foreach ($rows as $hr) {
             $fid = (int)$hr['id'];
-            foreach (self::decodeImages($hr['image']) as $url) {
+            $storedHashes = self::decodeStoredHashes($hr['img_hash'] ?? '');
+            foreach (self::decodeImages($hr['image']) as $idx => $url) {
                 $raw = ImagePerceptualHash::rawUrl($url);
                 if ($raw === null) {
                     continue;
@@ -257,7 +283,7 @@ class ForumPhotoDedupTask implements CronTaskInterface
                 if (!array_key_exists($raw, $ctx['urlMap'])) {
                     $ctx['urlMap'][$raw] = $fid; // 保留最早出现的那条
                 }
-                $hash = $this->fingerprintCached($urlHashCache, $raw);
+                $hash = $this->hashOf($urlHashCache, $raw, $storedHashes[$idx] ?? null);
                 if ($hash === null) {
                     continue;
                 }

@@ -20,6 +20,7 @@ use app\admin\model\member\CommunityModel;
 use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberLevelModel;
 use app\admin\model\member\MemberModel;
+use app\cron\lib\ImagePerceptualHash;
 use think\facade\Db;
 
 
@@ -108,7 +109,17 @@ class ForumController extends AuthController
                 $point = $cate_info['inspection_point'];
                 AccountLogModel::add_account_log($this->user_id, 2, 222, $point, []);
             }elseif($type == 2){
-                if(empty($params['image'])) $this->error('图片不能为空');
+                if (empty($params['image'])) $this->error('图片不能为空');
+                // 发布时实时查重：与本人历史打卡(含已删,防连环复用)比对,重复直接拒绝
+                $photos = $this->decodePostImages($params['image']);
+                $check  = $this->checkType2Photos($photos);
+                if (!empty($check['hit'])) {
+                    $this->error('发布失败：' . $check['hit']['way']);
+                }
+                // 全部指纹计算成功才写库；个别失败(如OSS临时异常)不阻塞发布,由定时任务/回填兜底
+                if ($check['hashes'] !== null) {
+                    $params['img_hash'] = json_encode($check['hashes']);
+                }
             }
 
             $forumModel->save($params);
@@ -142,6 +153,17 @@ class ForumController extends AuthController
         } else {
             $params['status'] = 1;
             $id = $params['id'];
+            if ($type == 2 && !empty($params['image'])) {
+                // 编辑打卡时同样重新查重(排除自己)并刷新指纹
+                $photos = $this->decodePostImages($params['image']);
+                $check  = $this->checkType2Photos($photos, (int)$id);
+                if (!empty($check['hit'])) {
+                    $this->error('发布失败：' . $check['hit']['way']);
+                }
+                if ($check['hashes'] !== null) {
+                    $params['img_hash'] = json_encode($check['hashes']);
+                }
+            }
             $forumModel->update($params, ['id' => $params['id']]);
         }
 
@@ -158,6 +180,114 @@ class ForumController extends AuthController
         $data = [];
         $data['point'] = $point ?? 0;
         $this->success('发布成功！', $data);
+    }
+
+    /** 解码打卡图片字段为 URL 数组(兼容数组/JSON字符串/未编码单串) */
+    private function decodePostImages($image): array
+    {
+        if (is_array($image)) {
+            return array_values($image);
+        }
+        if (!is_string($image) || trim($image) === '') {
+            return [];
+        }
+        $image = trim($image);
+        $arr   = json_decode($image, true);
+        if (is_array($arr)) {
+            return array_values($arr);
+        }
+        if (is_string($arr) && $arr !== '') {
+            return [$arr]; // 被 json_encode 过的单串URL
+        }
+        if (stripos($image, 'http') === 0) {
+            return [$image]; // 未编码的单URL
+        }
+        return [];
+    }
+
+    /** 解码 img_hash 列(与 image 同序的 hex 指纹数组, 可能含 null 占位) */
+    private function decodePostHashes($imgHash): array
+    {
+        if (!is_string($imgHash) || $imgHash === '') {
+            return [];
+        }
+        $arr = json_decode($imgHash, true);
+        return is_array($arr) ? array_values($arr) : [];
+    }
+
+    /**
+     * type=2 打卡发布前实时查重：
+     * 与该用户最近200条历史打卡(type=2,含已软删,防止删除后重复上传)比对。
+     * 1) 原始URL完全一致 → 判重；
+     * 2) 否则下载原图算 aHash(64bit)，汉明距离=0(相似度100%)才算重复(与后台任务阈值一致)。
+     * @return array{hashes: ?array, hit: ?array} hashes 为该行每张图指纹；有失败则置 null 整体不写库
+     */
+    private function checkType2Photos(array $urls, int $excludeForumId = 0): array
+    {
+        $hashes = [];
+        $okAll  = true;
+        $ctx    = null;
+        foreach ($urls as $url) {
+            $raw = ImagePerceptualHash::rawUrl((string)$url);
+            if ($raw === null) {
+                $hashes[] = null;
+                $okAll    = false;
+                continue;
+            }
+            if ($ctx === null) {
+                $ctx = $this->loadType2History($excludeForumId);
+            }
+            if (isset($ctx['urlMap'][$raw])) {
+                return ['hashes' => null, 'hit' => ['sim' => 100.0, 'way' => '图片与您历史打卡相同(同一张照片)，请更换照片']];
+            }
+            $hash     = ImagePerceptualHash::fingerprintFromUrl($raw);
+            $hashes[] = $hash;
+            if ($hash === null) {
+                $okAll = false;
+                continue;
+            }
+            foreach ($ctx['hashList'] as $old) {
+                $sim = ImagePerceptualHash::similarityPercent($hash, $old['hash']);
+                if ($sim >= 100) {
+                    return ['hashes' => null, 'hit' => ['sim' => $sim, 'way' => '图片与您历史打卡重复(完全相同)，请更换照片']];
+                }
+            }
+        }
+        return ['hashes' => $okAll ? $hashes : null, 'hit' => null];
+    }
+
+    /** 加载该用户最近200条历史打卡(type=2)的图片 URL 与指纹上下文 */
+    private function loadType2History(int $excludeForumId): array
+    {
+        $ctx = ['urlMap' => [], 'hashList' => []];
+        $rows = Db::name('forum')->where('type', 2)
+            ->where('user_id', $this->user_id)
+            ->order('id', 'desc')
+            ->limit(200)
+            ->field('id,image,img_hash')
+            ->select();
+        foreach ($rows as $r) {
+            $rid = (int)$r['id'];
+            if ($excludeForumId > 0 && $rid === $excludeForumId) {
+                continue;
+            }
+            $imgs = $this->decodePostImages($r['image']);
+            $hss  = $this->decodePostHashes((string)($r['img_hash'] ?? ''));
+            foreach ($imgs as $i => $img) {
+                $raw = ImagePerceptualHash::rawUrl((string)$img);
+                if ($raw === null) {
+                    continue;
+                }
+                if (!isset($ctx['urlMap'][$raw])) {
+                    $ctx['urlMap'][$raw] = $rid;
+                }
+                $h = $hss[$i] ?? null;
+                if (is_string($h) && $h !== '') {
+                    $ctx['hashList'][] = ['hash' => $h, 'fid' => $rid];
+                }
+            }
+        }
+        return $ctx;
     }
 
     /**
