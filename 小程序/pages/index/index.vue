@@ -403,7 +403,21 @@
 			// 快捷打卡：跳转垃圾分类打卡页（与活动页入口同一套学习/考试校验）
 			goToClock() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				if (!this.userInfo.is_answer) {
+				this.goClockCheck()
+			},
+			// 快捷打卡前置校验：学习→考试→打卡（学完垃圾分类指导才可考试，考过才可打卡）
+			async goClockCheck() {
+				// 先拉取最新用户信息，避免在 flhd/list 学完后返回首页时 is_learn/is_answer 状态过期
+				let info = this.userInfo
+				try {
+					let res = await this.$u.api.getUserInfo()
+					info = res.data || {}
+					this.$u.vuex('userInfo', info)
+				} catch (e) {
+					console.log('刷新用户状态失败:', e)
+				}
+				// 1. 尚未学完全部垃圾分类指导 → 引导学习
+				if (!info.is_learn) {
 					uni.showModal({
 						title: '提示',
 						content: '请先学习垃圾分类指导，通过答题考试后可参与活动',
@@ -416,6 +430,21 @@
 					})
 					return
 				}
+				// 2. 已学完但未通过考试 → 引导考试
+				if (!info.is_answer) {
+					uni.showModal({
+						title: '提示',
+						content: '学习已完成，请通过垃圾分类答题考试后即可打卡',
+						showCancel: false,
+						confirmText: '去考试',
+						confirmColor: '#39BF3E',
+						success: (res) => {
+							if (res.confirm) this.$u.route('/pages/answer/examine?id=1')
+						}
+					})
+					return
+				}
+				// 3. 已通过考试 → 直接打卡
 				this.$u.route('/pages/flhd/ljfldk')
 			},
 			// 获取签到状态
