@@ -26,9 +26,15 @@
         <input type="hidden" class="export" name="export" value="0">
         <a class="btn btn-success ajax-export" href="javascript:;">导出</a>
     </form>
+    <form class="js-ajax-form margin-top-20" action="" method="post">
+        <button class="btn btn-danger btn-sm js-ajax-submit" type="submit"
+                data-action="{:url('delete_all')}" data-subcheck="true">批量删除
+        </button>
         <table class="table table-hover table-bordered margin-top-20">
             <thead>
             <tr>
+                <th width="16"><label><input type="checkbox" class="js-check-all" data-direction="x"
+                                             data-checklist="js-check-x"></label></th>
                 <th width="50">ID</th>
                 <th width="80">用户ID</th>
                 <th>报名用户</th>
@@ -42,6 +48,8 @@
             <tbody>
             <foreach name="list" item="vo">
                 <tr>
+                    <td><input type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x"
+                               name="ids[]" value="{$vo.id}"></td>
                     <td>{$vo.id}</td>
                     <td>{$vo.user_id}</td>
                     <td>

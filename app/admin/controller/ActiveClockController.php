@@ -7,6 +7,7 @@ use api\wxapp\model\CommonModel;
 use app\admin\model\active\ActiveClockModel;
 use think\App;
 use think\db\exception\DbException;
+use think\facade\Db;
 
 class ActiveClockController extends ToolController
 {
@@ -146,5 +147,40 @@ class ActiveClockController extends ToolController
 
         $result = $this->model->find($id)->delete();
         $this->getMsg($result, '删除');
+    }
+
+    /**批量删除
+     * @return void
+     */
+    public function delete_all()
+    {
+        $ids = $this->request->param('ids');
+        if (empty($ids)) {
+            $this->error('请选择要删除的记录');
+        }
+        if (!is_array($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        if (empty($ids)) {
+            $this->error('请选择要删除的记录');
+        }
+
+        Db::startTrans();
+        try {
+            $list = $this->model->where('id', 'in', $ids)->select();
+            foreach ($list as $item) {
+                //有赠送积分的记录，删除时同步扣除用户积分
+                if (!empty($item['send_point']) && $item['send_point'] > 0) {
+                    AccountLogModel::add_account_log($item['user_id'], 2, 226, -$item['send_point'], ['remark' => '社区活动打卡扣除']);
+                }
+            }
+            $this->model->where('id', 'in', $ids)->delete();
+            Db::commit();
+            $this->success('删除成功');
+        } catch (\Exception $e) {
+            Db::rollback();
+            $this->error('删除失败：' . $e->getMessage());
+        }
     }
 }
