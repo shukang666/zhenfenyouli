@@ -1,0 +1,187 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    /*.layui-text-overflow {*/
+    /*    width: 200px; !* 容器宽度 *!*/
+    /*    overflow: hidden; !* 隐藏超出的内容 *!*/
+    /*    text-overflow: ellipsis; !* 用省略号表示超出的部分 *!*/
+    /*    !*white-space: nowrap; !* 不换行 *!*!*/
+    /*}*/
+
+
+    /*.layui-text-overflow {*/
+    /*    width: 200px; !* 容器宽度 *!*/
+    /*    overflow: hidden; !* 隐藏超出的内容 *!*/
+    /*    text-overflow: ellipsis; !* 用省略号表示超出的部分 *!*/
+    /*    white-space: nowrap; !* 不换行 *!*/
+    /*}*/
+
+
+    /*定义表格的布局方式为固定布局 */
+    .table {
+        table-layout: fixed;
+    }
+
+    /* 定义文本的显示方式为不换行，并隐藏超出部分，用省略号表示 */
+    .text {
+        white-space: nowrap;
+        /* 自适应宽度*/
+        overflow: hidden;
+        text-overflow: ellipsis;
+        /*省略号显示*/
+    }
+</style>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('index')}">列表</a></li>
+        <!--			        <li><a href="{:url('update',['type'=>1])}">添加</a></li>-->
+    </ul>
+    <form class="ajax-form well form-inline margin-top-20 layui-form" method="get"
+          action="{:url('index')}">
+
+        公司名称：
+        <input type="text" class="form-control" name="name" style="width: 140px;"
+               value="{:input('request.name/s','')}" placeholder="公司名称">
+
+
+
+            <span>时间：</span>
+            <div class="layui-inline" id="create-time">
+                <div class="layui-input-inline" style="width: 140px;">
+                    <input type="text" autocomplete="off" id="create-startDate" class="layui-input" name="start_time"
+                           value="{:input('request.start_time')}" placeholder="开始日期">
+                </div>
+                -
+                <div class="layui-input-inline" style="width: 140px;">
+                    <input type="text" autocomplete="off" id="create-endDate" class="layui-input" name="end_time"
+                           value="{:input('request.end_time')}" placeholder="结束日期">
+                </div>
+            </div>
+
+
+        <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 25px"/>
+        <a class="btn btn-danger" href="{:url('index')}">清空</a>
+        <input type="hidden" class="export" name="export" value="0">
+        <a class="btn btn-success ajax-export" href="javascript:;">导出</a>
+
+    </form>
+    <form method="post" class="js-ajax-form margin-top-20" action="">
+        <table class=" table table-hover table-bordered margin-top-20">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>公司</th>
+                <th>门头照片</th>
+                <th>宣传品照片</th>
+                <th>投放点位照片</th>
+                <th>管理制度/收运协议照片</th>
+                <th>桶内照片</th>
+                <th>添加时间</th>
+                <th>{:lang('ACTIONS')}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <foreach name="list" item="vo">
+                <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.name}</td>
+                    <td>
+                        <notempty name="$vo.image_one">
+                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image_one)}');">
+                                <img src="{:cmf_get_image_preview_url($vo.image_one)}"
+                                     style="width:40px;height:40px;round-clip: 40px">
+                            </a>
+                        </notempty>
+                    </td>
+
+                    <td>
+                        <notempty name="$vo.image_two">
+                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image_two)}');">
+                                <img src="{:cmf_get_image_preview_url($vo.image_two)}"
+                                     style="width:40px;height:40px;round-clip: 40px">
+                            </a>
+                        </notempty>
+                    </td>
+
+                    <td>
+                        <notempty name="$vo.image_three">
+                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image_three)}');">
+                                <img src="{:cmf_get_image_preview_url($vo.image_three)}"
+                                     style="width:40px;height:40px;round-clip: 40px">
+                            </a>
+                        </notempty>
+                    </td>
+
+                    <td>
+                        <notempty name="$vo.image_four">
+                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image_four)}');">
+                                <img src="{:cmf_get_image_preview_url($vo.image_four)}"
+                                     style="width:40px;height:40px;round-clip: 40px">
+                            </a>
+                        </notempty>
+                    </td>
+
+                    <td>
+                        <notempty name="$vo.image_five">
+                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image_five)}');">
+                                <img src="{:cmf_get_image_preview_url($vo.image_five)}"
+                                     style="width:40px;height:40px;round-clip: 40px">
+                            </a>
+                        </notempty>
+                    </td>
+
+
+                    <td>{$vo.create_time|date="Y-m-d H:i:s"}</td>
+
+                    <td>
+
+                        <a class="btn btn-xs btn-danger js-ajax-delete"
+                           href="{:url('delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
+                    </td>
+                </tr>
+            </foreach>
+            </tbody>
+        </table>
+    </form>
+    <div class="pagination">{$page}</div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['layer', 'form'], function () {
+        let layer = layui.layer, form = layui.form;
+
+        var laydate = layui.laydate;
+        // 日期时间范围
+        laydate.render({
+            elem: '#create-time',
+            range: ['#create-startDate', '#create-endDate'],
+            // range: true
+            rangeLinked: true
+        });
+    });
+</script>
+</body>
+</html>
+<style>
+    .text-container {
+        width: 200px;
+        height: 50px;
+        overflow: hidden;
+    }
+</style>
+<script>
+
+    //导出数据
+    $(".ajax-export").click(function () {
+        // console.log($(".ajax-form"));
+        $(".export").val(1);
+        $(".ajax-form").submit();
+        $(".export").val(0);
+        // console.log($(".ajax-form").submit())
+        return false;
+    });
+</script>
+
+</script>

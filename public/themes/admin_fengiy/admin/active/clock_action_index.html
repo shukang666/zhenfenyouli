@@ -1,0 +1,536 @@
+<include file="public@header"/>
+<style>
+    .action-card {
+        border: 1px solid #e6e6e6;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .action-header {
+        background: #f5f5f5;
+        padding: 10px 15px;
+        border-bottom: 1px solid #e6e6e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .action-body {
+        padding: 15px;
+    }
+    .form-field-card {
+        background: #fafafa;
+        border: 1px dashed #d9d9d9;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .form-field-card .delete-btn {
+        position: absolute;
+        top: 5px;
+        right: 8px;
+        color: #ff4d4f;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .action-card .move-btn {
+        cursor: pointer;
+        padding: 2px 5px;
+        color: #1890ff;
+        font-size: 14px;
+    }
+    .move-btn:hover {
+        color: #40a9ff;
+    }
+    .move-btn.push-btn {
+        color: #52c41a;
+        font-weight: normal;
+    }
+    .move-btn.push-btn:hover {
+        color: #73d13d;
+    }
+    .clock-action-wrap {
+        padding: 20px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    .add-action-btn {
+        margin-top: 10px;
+    }
+    .options-inputs input {
+        margin-bottom: 5px;
+    }
+    .text-muted {
+        color: #999;
+        font-size: 12px;
+    }
+    .required-mark {
+        color: #ff4d4f;
+        margin-right: 3px;
+    }
+</style>
+</head>
+<body>
+<div class="clock-action-wrap">
+    <div style="text-align:center; margin-bottom:20px;">
+        <h3>「{$active_name}」打卡动作配置</h3>
+        <p class="text-muted">配置用户打卡满足条件后触发的动作通知，支持即时表单和滞后推送两种方式</p>
+    </div>
+
+    <!-- 动作配置列表 -->
+    <div id="action-list">
+        <!-- 动态生成 -->
+    </div>
+
+    <!-- 添加动作按钮 -->
+    <div class="add-action-btn" style="text-align:center;">
+        <button type="button" class="btn btn-success btn-sm" onclick="addAction()">
+            <i class="fa fa-plus"></i> 添加打卡动作
+        </button>
+    </div>
+
+    <!-- 保存按钮 -->
+    <div style="text-align:center; margin-top:20px; padding-top:15px; border-top:1px solid #eee;">
+        <button type="button" class="btn btn-primary" onclick="saveActions()">保存配置</button>
+        <button type="button" class="btn btn-default" onclick="parent.layer.closeAll()">取消</button>
+    </div>
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    // 已有的动作数据
+    var existingActions = {$actions_json};
+
+    // 初始化
+    $(function () {
+        if (existingActions && existingActions.length > 0) {
+            existingActions.forEach(function(action) {
+                addAction(action);
+            });
+        }
+    });
+
+    /**
+     * 添加一个动作卡片
+     */
+    function addAction(actionData) {
+        actionData = actionData || {};
+        var index = $('#action-list .action-card').length;
+        var actionId = actionData.id || '';
+
+        var html = '<div class="action-card" data-index="' + index + '">';
+        html += '<div class="action-header">';
+        html += '<span><strong>打卡动作 #' + (index + 1) + '</strong></span>';
+        html += '<span>';
+        html += '<span class="move-btn" onclick="moveAction(this, -1)" title="上移">↑</span>';
+        html += '<span class="move-btn" onclick="moveAction(this, 1)" title="下移">↓</span>';
+        html += '<span class="move-btn push-btn" data-actionid="' + actionId + '" onclick="openPushForAction(this)" title="新建推送" style="display:none;">推送+</span>';
+        html += '<span class="move-btn" style="color:#ff4d4f;" onclick="removeAction(this)" title="删除">×</span>';
+        html += '</span>';
+        html += '</div>';
+        html += '<div class="action-body">';
+
+        // 隐藏字段
+        html += '<input type="hidden" name="actions[' + index + '][id]" value="' + actionId + '">';
+
+        // 第一行：打卡次数 + 通知类型
+        html += '<div class="row" style="margin-bottom:12px;">';
+        html += '<div class="col-sm-4">';
+        html += '<label><span class="required-mark">*</span>打卡次数达到：</label>';
+        html += '<div class="input-group">';
+        html += '<input type="number" class="form-control" name="actions[' + index + '][clock_count]" value="' + (actionData.clock_count || '') + '" min="1" placeholder="如：3" required>';
+        html += '<span class="input-group-addon">次</span>';
+        html += '</div>';
+        html += '</div>';
+        html += '<div class="col-sm-4">';
+        html += '<label><span class="required-mark">*</span>通知方式：</label>';
+        html += '<select class="form-control" name="actions[' + index + '][notify_type]" onchange="toggleNotifyType(this)">';
+        html += '<option value="1"' + (actionData.notify_type == 1 ? ' selected' : '') + '>即时表单通知</option>';
+        html += '<option value="2"' + (actionData.notify_type == 2 ? ' selected' : '') + '>滞后服务消息推送</option>';
+        html += '</select>';
+        html += '</div>';
+        html += '<div class="col-sm-4">';
+        html += '<label>状态：</label>';
+        html += '<select class="form-control" name="actions[' + index + '][status]">';
+        html += '<option value="1"' + (actionData.status != 0 ? ' selected' : '') + '>启用</option>';
+        html += '<option value="0"' + (actionData.status == 0 ? ' selected' : '') + '>禁用</option>';
+        html += '</select>';
+        html += '</div>';
+        html += '</div>';
+
+        // 第二行：连续打卡 + 时效
+        html += '<div class="row" style="margin-bottom:12px;">';
+        html += '<div class="col-sm-6">';
+        html += '<label><span class="required-mark">*</span>打卡要求：</label>';
+        html += '<select class="form-control" name="actions[' + index + '][is_continuous]">';
+        html += '<option value="0"' + (!actionData.is_continuous ? ' selected' : '') + '>累计打卡（离散也可）</option>';
+        html += '<option value="1"' + (actionData.is_continuous ? ' selected' : '') + '>连续打卡（不允许断签）</option>';
+        html += '</select>';
+        html += '</div>';
+        html += '<div class="col-sm-6">';
+        html += '<label>时效截止：</label>';
+        html += '<input type="date" class="form-control" name="actions[' + index + '][expire_date]" value="' + (actionData.expire_time ? formatDate(actionData.expire_time) : '') + '" placeholder="留空则永久有效">';
+        html += '<span class="text-muted">超过该日期后即使满足条件也不执行动作</span>';
+        html += '</div>';
+        html += '</div>';
+
+        // 模板ID配置区域（仅滞后推送时显示）
+        html += '<div class="template-id-area"' + (actionData.notify_type != 2 ? ' style="display:none;"' : '') + '>';
+        html += '<div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ddd;">';
+        html += '<label>微信订阅消息模板ID：</label>';
+        html += '<input type="text" class="form-control" name="actions[' + index + '][template_id]" value="' + (actionData.template_id || '') + '" placeholder="请输入模板ID，如：Z1Purn3elZCQn2A5typXFk9c5zi2VeNwDfbLqIaeHD4">';
+        html += '<span class="text-muted">请确保模板包含：活动内容、活动时间、活动地点、温馨提示 四个关键词</span>';
+        html += '</div>';
+        html += '</div>';
+
+        // 表单字段配置区域（仅即时表单通知时显示）
+        html += '<div class="form-fields-area"' + (actionData.notify_type == 2 ? ' style="display:none;"' : '') + '>';
+        html += '<div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ddd;">';
+        html += '<label>表单字段配置：</label>';
+        html += '<div class="form-fields-list" id="form-fields-' + index + '">';
+
+        // 已有表单字段
+        if (actionData.forms && actionData.forms.length > 0) {
+            actionData.forms.forEach(function(form, formIndex) {
+                html += buildFormFieldHtml(index, formIndex, form);
+            });
+        }
+
+        html += '</div>';
+        html += '<button type="button" class="btn btn-xs btn-info" onclick="addFormField(' + index + ')">';
+        html += '<i class="fa fa-plus"></i> 添加字段';
+        html += '</button>';
+        html += '</div>';
+        html += '</div>';
+
+        html += '</div>';
+        html += '</div>';
+
+        var $card = $(html);
+        $('#action-list').append($card);
+
+        // 初始化推送按钮状态（已有动作且 notify_type=2 时显示）
+        var notifyType = $card.find('[name*="[notify_type]"]').val();
+        if (notifyType == '2' && actionId) {
+            $card.find('.push-btn').show();
+        }
+    }
+
+    /**
+     * 构建表单字段HTML
+     */
+    function buildFormFieldHtml(actionIdx, formIdx, formData) {
+        formData = formData || {};
+        var fid = formData.id || '';
+        var fieldType = formData.field_type || 'radio';
+        var fieldLabel = formData.field_label || '';
+        var fieldPlaceholder = formData.field_placeholder || '';
+        var isRequired = formData.is_required || 0;
+        var options = formData.field_options_arr || [];
+
+        var html = '<div class="form-field-card" data-form-index="' + formIdx + '">';
+        html += '<span class="delete-btn" onclick="removeFormField(this)">×</span>';
+        html += '<input type="hidden" name="actions[' + actionIdx + '][forms][' + formIdx + '][id]" value="' + fid + '">';
+
+        html += '<div class="row">';
+        html += '<div class="col-sm-3">';
+        html += '<label>字段类型：</label>';
+        html += '<select class="form-control input-sm" name="actions[' + actionIdx + '][forms][' + formIdx + '][field_type]" onchange="toggleFieldType(this)">';
+        html += '<option value="radio"' + (fieldType == 'radio' ? ' selected' : '') + '>单选按钮</option>';
+        html += '<option value="textarea"' + (fieldType == 'textarea' ? ' selected' : '') + '>多行文本框</option>';
+        html += '<option value="text"' + (fieldType == 'text' ? ' selected' : '') + '>纯文本说明</option>';
+        html += '</select>';
+        html += '</div>';
+        html += '<div class="col-sm-5">';
+        html += '<label>字段标签：</label>';
+        html += '<input type="text" class="form-control input-sm" name="actions[' + actionIdx + '][forms][' + formIdx + '][field_label]" value="' + fieldLabel + '" placeholder="如：是否参加、备注说明">';
+        html += '</div>';
+        html += '<div class="col-sm-2">';
+        html += '<label>占位提示：</label>';
+        html += '<input type="text" class="form-control input-sm" name="actions[' + actionIdx + '][forms][' + formIdx + '][field_placeholder]" value="' + fieldPlaceholder + '" placeholder="输入提示文字">';
+        html += '</div>';
+        html += '<div class="col-sm-2">';
+        html += '<label>是否必填：</label>';
+        html += '<div><input type="checkbox" name="actions[' + actionIdx + '][forms][' + formIdx + '][is_required]" value="1"' + (isRequired ? ' checked' : '') + '></div>';
+        html += '</div>';
+        html += '</div>';
+
+        // 单选选项配置
+        if (fieldType == 'radio') {
+            html += '<div class="row options-inputs" style="margin-top:8px;">';
+            html += '<div class="col-sm-12">';
+            html += '<label>单选选项：</label>';
+            html += '<div class="options-list">';
+            if (options.length > 0) {
+                options.forEach(function(opt) {
+                    html += '<div class="input-group input-group-sm" style="margin-bottom:5px;">';
+                    html += '<input type="text" class="form-control" name="actions[' + actionIdx + '][forms][' + formIdx + '][options][]" value="' + opt + '">';
+                    html += '<span class="input-group-addon" style="cursor:pointer;" onclick="removeOption(this)">×</span>';
+                    html += '</div>';
+                });
+            } else {
+                html += '<div class="input-group input-group-sm" style="margin-bottom:5px;">';
+                html += '<input type="text" class="form-control" name="actions[' + actionIdx + '][forms][' + formIdx + '][options][]" value="我参加">';
+                html += '<span class="input-group-addon" style="cursor:pointer;" onclick="removeOption(this)">×</span>';
+                html += '</div>';
+                html += '<div class="input-group input-group-sm" style="margin-bottom:5px;">';
+                html += '<input type="text" class="form-control" name="actions[' + actionIdx + '][forms][' + formIdx + '][options][]" value="我不参加">';
+                html += '<span class="input-group-addon" style="cursor:pointer;" onclick="removeOption(this)">×</span>';
+                html += '</div>';
+            }
+            html += '</div>';
+            html += '<button type="button" class="btn btn-xs btn-default" onclick="addOption(this)">+ 添加选项</button>';
+            html += '</div>';
+            html += '</div>';
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    /**
+     * 添加表单字段
+     */
+    function addFormField(actionIdx) {
+        var container = $('#form-fields-' + actionIdx);
+        var formIdx = container.find('.form-field-card').length;
+        container.append(buildFormFieldHtml(actionIdx, formIdx, {}));
+    }
+
+    /**
+     * 删除表单字段
+     */
+    function removeFormField(btn) {
+        $(btn).closest('.form-field-card').remove();
+    }
+
+    /**
+     * 添加单选选项
+     */
+    function addOption(btn) {
+        var group = $(btn).closest('.options-inputs').find('.options-list');
+        var name = group.find('input:first').attr('name');
+        var html = '<div class="input-group input-group-sm" style="margin-bottom:5px;">';
+        html += '<input type="text" class="form-control" name="' + name + '">';
+        html += '<span class="input-group-addon" style="cursor:pointer;" onclick="removeOption(this)">×</span>';
+        html += '</div>';
+        group.append(html);
+    }
+
+    /**
+     * 删除单选选项
+     */
+    function removeOption(btn) {
+        $(btn).closest('.input-group').remove();
+    }
+
+    /**
+     * 切换通知类型
+     */
+    function toggleNotifyType(select) {
+        var card = $(select).closest('.action-card');
+        var fieldsArea = card.find('.form-fields-area');
+        var templateArea = card.find('.template-id-area');
+        var pushBtn = card.find('.push-btn');
+        if ($(select).val() == '1') {
+            fieldsArea.show();
+            templateArea.hide();
+            pushBtn.hide();
+        } else {
+            fieldsArea.hide();
+            templateArea.show();
+            // 有动作ID才显示推送按钮
+            if (pushBtn.data('actionid')) {
+                pushBtn.show();
+            }
+        }
+    }
+
+    /**
+     * 打开推送配置弹窗（从打卡动作触发）
+     */
+    function openPushForAction(btn) {
+        var actionId = $(btn).data('actionid');
+        if (!actionId) {
+            layer.alert('请先保存动作配置，再新建推送');
+            return;
+        }
+        var url = '{:url("active_clock_action/push_edit")}?action_id=' + actionId;
+        layer.open({
+            type: 2,
+            title: '推送配置',
+            area: ['700px', '500px'],
+            content: url
+        });
+    }
+
+    /**
+     * 切换字段类型
+     */
+    function toggleFieldType(select) {
+        var card = $(select).closest('.form-field-card');
+        var type = $(select).val();
+        var optionsRow = card.find('.options-inputs');
+        if (type == 'radio') {
+            if (optionsRow.length === 0) {
+                // 添加选项区域
+                var actionIdx = card.closest('.action-card').data('index');
+                var formIdx = card.data('form-index');
+                var html = '<div class="row options-inputs" style="margin-top:8px;">';
+                html += '<div class="col-sm-12">';
+                html += '<label>单选选项：</label>';
+                html += '<div class="options-list">';
+                html += '<div class="input-group input-group-sm" style="margin-bottom:5px;">';
+                html += '<input type="text" class="form-control" name="actions[' + actionIdx + '][forms][' + formIdx + '][options][]" value="我参加">';
+                html += '<span class="input-group-addon" style="cursor:pointer;" onclick="removeOption(this)">×</span>';
+                html += '</div>';
+                html += '<div class="input-group input-group-sm" style="margin-bottom:5px;">';
+                html += '<input type="text" class="form-control" name="actions[' + actionIdx + '][forms][' + formIdx + '][options][]" value="我不参加">';
+                html += '<span class="input-group-addon" style="cursor:pointer;" onclick="removeOption(this)">×</span>';
+                html += '</div>';
+                html += '</div>';
+                html += '<button type="button" class="btn btn-xs btn-default" onclick="addOption(this)">+ 添加选项</button>';
+                html += '</div>';
+                html += '</div>';
+                card.append(html);
+            } else {
+                optionsRow.show();
+            }
+        } else {
+            optionsRow.hide();
+        }
+    }
+
+    /**
+     * 删除动作卡片
+     */
+    function removeAction(btn) {
+        if ($('#action-list .action-card').length <= 1) {
+            layer.msg('至少保留一个打卡动作', {icon: 2});
+            return;
+        }
+        $(btn).closest('.action-card').remove();
+        updateActionIndices();
+    }
+
+    /**
+     * 移动动作卡片
+     */
+    function moveAction(btn, direction) {
+        var card = $(btn).closest('.action-card');
+        if (direction < 0) {
+            var prev = card.prev('.action-card');
+            if (prev.length) prev.before(card);
+        } else {
+            var next = card.next('.action-card');
+            if (next.length) next.after(card);
+        }
+        updateActionIndices();
+    }
+
+    /**
+     * 更新动作序号
+     */
+    function updateActionIndices() {
+        $('#action-list .action-card').each(function(i) {
+            $(this).attr('data-index', i);
+            $(this).find('.action-header strong').text('打卡动作 #' + (i + 1));
+            // 更新name中的索引
+            $(this).find('[name^="actions["]').each(function() {
+                var name = $(this).attr('name');
+                var newName = name.replace(/actions\[\d+\]/, 'actions[' + i + ']');
+                $(this).attr('name', newName);
+            });
+        });
+    }
+
+    /**
+     * 保存配置
+     */
+    function saveActions() {
+        // 基本验证
+        var valid = true;
+        $('#action-list .action-card').each(function() {
+            var clockCount = $(this).find('[name*="[clock_count]"]').val();
+            if (!clockCount || parseInt(clockCount) <= 0) {
+                layer.msg('请填写打卡次数', {icon: 2});
+                valid = false;
+                return false;
+            }
+        });
+
+        if (!valid) return;
+
+        var formData = {
+            active_id: '{$active_id}',
+            actions: []
+        };
+
+        $('#action-list .action-card').each(function(idx) {
+            var action = {
+                id: $(this).find('[name*="[id]"]').val() || '',
+                clock_count: $(this).find('[name*="[clock_count]"]').val(),
+                notify_type: $(this).find('[name*="[notify_type]"]').val(),
+                status: $(this).find('[name*="[status]"]').val(),
+                is_continuous: $(this).find('[name*="[is_continuous]"]').val(),
+                expire_date: $(this).find('[name*="[expire_date]"]').val(),
+                template_id: $(this).find('[name*="[template_id]"]').val() || '',
+                forms: []
+            };
+
+            $(this).find('.form-field-card').each(function(fIdx) {
+                var form = {
+                    id: $(this).find('[name*="[id]"]').val() || '',
+                    field_type: $(this).find('[name*="[field_type]"]').val(),
+                    field_label: $(this).find('[name*="[field_label]"]').val(),
+                    field_placeholder: $(this).find('[name*="[field_placeholder]"]').val(),
+                    is_required: $(this).find('[name*="[is_required]"]').is(':checked') ? 1 : 0,
+                    options: []
+                };
+
+                $(this).find('[name*="[options][]"]').each(function() {
+                    var val = $(this).val().trim();
+                    if (val) form.options.push(val);
+                });
+
+                action.forms.push(form);
+            });
+
+            formData.actions.push(action);
+        });
+
+        $.ajax({
+            url: '{:url("active_clock_action/save")}',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(res) {
+                if (res.code == 1) {
+                    layer.msg(res.msg, {icon: 1}, function() {
+                        parent.layer.closeAll();
+                    });
+                } else {
+                    layer.msg(res.msg, {icon: 2});
+                }
+            },
+            error: function() {
+                layer.msg('保存失败，请重试', {icon: 2});
+            }
+        });
+    }
+
+    /**
+     * 格式化日期
+     */
+    function formatDate(timestamp) {
+        if (!timestamp) return '';
+        var d = new Date(timestamp * 1000);
+        var year = d.getFullYear();
+        var month = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + day;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <h4 class="page-header">每日签到积分配置（小程序首页问候卡片签到功能）</h4>
+
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('SignConfig/index')}">
+        <fieldset>
+            <div class="tabbable">
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">每日签到赠送积分</label>
+                            <div class="col-md-4 col-sm-6">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="sign_point"
+                                           value="{$sign_point}" min="0" max="1000" required>
+                                    <span class="input-group-addon">积分</span>
+                                </div>
+                                <span class="help-block" style="margin-top:5px;">
+                                    用户每天签到可获得的积分数量，设为 0 则不赠送积分（仅记录签到）
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">保存配置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
