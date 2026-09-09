@@ -34,15 +34,6 @@
         <li class="active"><a href="{:url('index')}">定时任务列表</a></li>
     </ul>
 
-    <div class="alert alert-info margin-top-20" role="alert">
-        定时任务全部由<b>代码注册</b>（见 <code>app/cron/TaskRegistry.php</code>），此处仅可
-        <b>启用/停用</b>、调整<b>执行周期与 JSON 参数</b>，任务不可新增、删除。<br/>
-        每个任务的参数以 JSON 存储在 <code>cmf_cron_task.param</code>，不同键代表不同属性，含义由各任务代码定义，
-        新增其它定时任务时可直接复用这套机制。<br/>
-        自动触发：请在服务器系统计划任务中每分钟调用一次
-        <code>php /网站根目录/think cron:run</code>（宝塔：计划任务→Shell 脚本）。也可点“立即执行”人工触发验证。
-    </div>
-
     <table class="table table-hover table-bordered margin-top-20">
         <thead>
         <tr>
