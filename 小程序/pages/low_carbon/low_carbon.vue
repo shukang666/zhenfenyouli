@@ -20,7 +20,7 @@
 		</view>
 		<view class="monthly-list-wrap">
 			<view v-if="monthly_rec_list.length === 0 && !monthly_rec_loading" class="empty-tip">暂无推荐活动</view>
-			<view v-else class="ios-card" v-for="item in monthly_rec_list" :key="item.id"
+			<view v-else class="ios-card" v-for="(item, index) in monthly_rec_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
 				<view class="ios-card-img">
 					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
@@ -29,8 +29,8 @@
 					</view>
 				</view>
 				<view class="ios-card-info">
-					<view class="ios-card-title u-line-1">{{item.name}}</view>
-					<view class="ios-card-desc u-line-2">{{item.dec || '精彩活动等你来参与'}}</view>
+					<view class="ios-card-title">{{item.name}}</view>
+					<view class="ios-card-desc u-line-2" v-if="!title_wrapped[index] || item.dec">{{item.dec || '精彩活动等你来参与'}}</view>
 					<view class="ios-card-meta">
 						<text class="ios-card-status" v-if="item.status_name">{{item.status_name}}</text>
 						<view class="ios-card-avatar" v-if="item.avatar_array && item.avatar_array.length">
@@ -45,29 +45,36 @@
 		<!-- 打卡标签（后台第一个固定标签，index===1）：绑定活动分类，顶部写死"垃圾分类打卡"入口卡片，下方动态加载该分类活动列表 -->
 		<view v-else-if="is_daka_tab" class="pane">
 			<view class="act-card top-pinned-card" @click="navigator('/pages/flhd/ljfldk',1)" style="margin: 24rpx 24rpx 30rpx;">
-				<u-image width="100%" height="220" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
-				<view class="act-card-info" style="padding: 20rpx 24rpx;">
+				<view class="act-card-thumb">
+					<u-image width="100%" height="100%" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
+				</view>
+				<view class="act-card-info">
 					<view class="act-title">垃圾分类打卡</view>
 					<view class="act-meta" style="color: #8e8e93;font-size: 22rpx;">参与垃圾分类学习通过考核后即可解锁</view>
 				</view>
 			</view>
 			<view class="act-card" v-for="item in active_list" :key="item.id"
 				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
-				<u-image width="100%" height="280" :src="item.thumb" mode="aspectFill"></u-image>
-				<view class="card-participate" v-if="item.active_count > 0">
-					<view class="avatar-list" v-if="item.avatar_array && item.avatar_array.length">
-						<image :src="img" class="avatar-img" mode="aspectFill" v-for="(img,i) in item.avatar_array.slice(0,3)" :key="i"></image>
+				<view class="act-card-thumb">
+					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+					<view class="card-participate" v-if="item.active_count > 0">
+						<view class="avatar-list" v-if="item.avatar_array && item.avatar_array.length">
+							<image :src="img" class="avatar-img" mode="aspectFill" v-for="(img,i) in item.avatar_array.slice(0,3)" :key="i"></image>
+						</view>
+						<text class="count-text">{{item.active_count}}人参与</text>
 					</view>
-					<text class="count-text">{{item.active_count}}人参与</text>
 				</view>
 				<view class="act-card-info">
 					<view class="act-title u-line-1">{{item.name}}</view>
 					<view class="act-meta">
-						<u-icon name="clock" size="22"></u-icon>
-						<text class="meta-text">{{item.date | date('yy-mm-dd')}}</text>
-						<text class="meta-text" style="margin: 0 12rpx;">·</text>
-						<u-icon name="map" size="22" v-if="item.address && item.address.trim()"></u-icon>
-						<text class="meta-text" v-if="item.address && item.address.trim()">{{item.address}}</text>
+						<view class="meta-item">
+							<u-icon name="clock" size="22"></u-icon>
+							<text class="meta-text">{{item.date | date('yy-mm-dd')}}</text>
+						</view>
+						<view class="meta-item meta-item-loc" v-if="item.address && item.address.trim()">
+							<u-icon name="map" size="22"></u-icon>
+							<text class="meta-text">{{item.address}}</text>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -301,21 +308,26 @@
 	<view v-else-if="!is_backup_tab" class="pane">
 		<view class="act-card" v-for="item in active_list" :key="item.id"
 			@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
-			<u-image width="100%" height="280" :src="item.thumb" mode="aspectFill"></u-image>
-			<view class="card-participate" v-if="item.active_count > 0">
-				<view class="avatar-list" v-if="item.avatar_array && item.avatar_array.length">
-					<image :src="img" class="avatar-img" mode="aspectFill" v-for="(img,i) in item.avatar_array.slice(0,3)" :key="i"></image>
+			<view class="act-card-thumb">
+				<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+				<view class="card-participate" v-if="item.active_count > 0">
+					<view class="avatar-list" v-if="item.avatar_array && item.avatar_array.length">
+						<image :src="img" class="avatar-img" mode="aspectFill" v-for="(img,i) in item.avatar_array.slice(0,3)" :key="i"></image>
+					</view>
+					<text class="count-text">{{item.active_count}}人参与</text>
 				</view>
-				<text class="count-text">{{item.active_count}}人参与</text>
 			</view>
 			<view class="act-card-info">
 				<view class="act-title u-line-1">{{item.name}}</view>
 				<view class="act-meta">
-					<u-icon name="clock" size="22"></u-icon>
-					<text class="meta-text">{{item.date | date('yy-mm-dd')}}</text>
-					<text class="meta-text" style="margin: 0 12rpx;">·</text>
-					<u-icon name="map" size="22" v-if="item.address && item.address.trim()"></u-icon>
-					<text class="meta-text" v-if="item.address && item.address.trim()">{{item.address}}</text>
+					<view class="meta-item">
+						<u-icon name="clock" size="22"></u-icon>
+						<text class="meta-text">{{item.date | date('yy-mm-dd')}}</text>
+					</view>
+					<view class="meta-item meta-item-loc" v-if="item.address && item.address.trim()">
+						<u-icon name="map" size="22"></u-icon>
+						<text class="meta-text">{{item.address}}</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -405,6 +417,8 @@
 			// 本月推荐活动列表
 			monthly_rec_list: [],
 			monthly_rec_loading: false,
+			// 本月推荐卡片标题是否换行（换行则隐藏"精彩活动等你来参与"占位描述）
+			title_wrapped: [],
 			// 自治活动标签：商家信息（复刻 zzhd.vue）
 			shopInfo: {},
 			// 社交活动标签：问卷调查列表（复刻 research.vue）
@@ -712,10 +726,32 @@
 			this.monthly_rec_loading = false
 			let data = res.data || {}
 			this.monthly_rec_list = data.data || []
+			// 列表渲染完成后测量标题是否换行
+			setTimeout(() => this.measure_monthly_title(), 100)
 		}).catch(err => {
 			this.monthly_rec_loading = false
 			console.log('推荐活动加载失败:', err)
 		})
+	},
+	// 测量本月推荐卡片标题行数：换行的卡片不再显示"精彩活动等你来参与"占位描述
+	measure_monthly_title() {
+		const list = this.monthly_rec_list || []
+		if (!list.length) {
+			this.title_wrapped = []
+			return
+		}
+		uni.createSelectorQuery().in(this)
+			.selectAll('.ios-card-title')
+			.boundingClientRect()
+			.exec(res => {
+				const titles = res[0] || []
+				// 与 .ios-card-title 的 font-size(28rpx) * line-height(1.3) 保持一致，取 1.5 倍作为单行容差
+				const singleLine = uni.upx2px(28 * 1.3)
+				this.title_wrapped = list.map((item, i) => {
+					const rect = titles[i]
+					return rect ? rect.height > singleLine * 1.5 : false
+				})
+			})
 	},
 			// ===== 自治活动标签方法（复刻 zzhd.vue，与首页 navigator 区分以保留督导员权限校验） =====
 			// 跳转页面（type 真值=跳过督导员权限校验，例如督导员申请本身就不需要先有督导员身份）
@@ -809,12 +845,15 @@
 		align-items: flex-start;
 	}
 
-	/* iOS 风格通用活动卡片（打卡标签 + 中间分类标签共用） */
+	/* iOS 风格通用活动卡片（打卡标签 + 中间分类标签共用）：左图右文横向布局 */
 	.act-card {
 		position: relative;
+		display: flex;
+		align-items: center;
 		background: #fff;
 		border-radius: 24rpx;
 		margin: 0 24rpx 24rpx;
+		padding: 20rpx;
 		overflow: hidden;
 		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06), 0 1rpx 3rpx rgba(0, 0, 0, 0.04);
 	}
@@ -822,34 +861,44 @@
 		opacity: 0.85;
 	}
 
-	/* 卡片内活动图片 */
-	.act-card > .u-image {
-		display: block;
-		width: 100% !important;
-		height: 360rpx !important;
+	/* 卡片缩略图：必须用原生 view 包裹，scoped 样式作用不到 u-image 组件内部根节点 */
+	.act-card-thumb {
+		position: relative;
+		width: 200rpx;
+		height: 150rpx;
+		flex-shrink: 0;
+		margin-right: 20rpx;
+		border-radius: 16rpx;
+		overflow: hidden;
+		background: #e5e5ea;
+
+		::v-deep .u-image {
+			width: 100% !important;
+			height: 100% !important;
+		}
 	}
 
-	/* 参与人数 + 头像 badge（浮在图片左下角） */
+	/* 参与人数 + 头像 badge（浮在缩略图左下角） */
 	.card-participate {
 		position: absolute;
-		left: 16rpx;
-		bottom: 16rpx;
+		left: 10rpx;
+		bottom: 10rpx;
 		z-index: 2;
 		display: inline-flex;
 		align-items: center;
-		height: 40rpx;
-		padding: 0 14rpx;
+		height: 34rpx;
+		padding: 0 10rpx;
 		background: rgba(0, 0, 0, 0.5);
-		border-radius: 20rpx;
+		border-radius: 17rpx;
 	}
 	.card-participate .avatar-list {
 		display: flex;
 	}
 	.card-participate .avatar-img {
-		width: 28rpx;
-		height: 28rpx;
+		width: 22rpx;
+		height: 22rpx;
 		border-radius: 50%;
-		margin-left: -8rpx;
+		margin-left: -6rpx;
 		border: 2rpx solid #fff;
 		background: #e5e5ea;
 	}
@@ -858,13 +907,15 @@
 	}
 	.card-participate .count-text {
 		color: #fff;
-		font-size: 20rpx;
-		margin-left: 8rpx;
+		font-size: 18rpx;
+		margin-left: 6rpx;
 	}
 
-	/* 卡片信息区 */
+	/* 卡片信息区：右侧自适应宽度 */
 	.act-card-info {
-		padding: 20rpx 24rpx 24rpx;
+		flex: 1;
+		min-width: 0;
+		padding: 0;
 	}
 	.act-card-info .act-title {
 		font-size: 30rpx;
@@ -874,15 +925,26 @@
 	}
 	.act-card-info .act-meta {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		margin-top: 12rpx;
 		font-size: 22rpx;
 		color: #8e8e93;
 	}
+	/* 日期 / 地址 各自成组：组内图标与文字绑定，换行时整体换到下一行，不会被拆开 */
+	.act-card-info .act-meta .meta-item {
+		display: flex;
+		align-items: center;
+		min-width: 0;
+	}
+	.act-card-info .act-meta .meta-item-loc {
+		margin-left: 12rpx;
+	}
 	.act-card-info .act-meta .u-icon {
 		margin-right: 4rpx;
 	}
 	.act-card-info .act-meta .meta-text {
+		max-width: 100%;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -995,13 +1057,14 @@
 		font-size: 28rpx;
 	}
 
-	/* iOS 大卡片 */
+	/* iOS 大卡片：左图右文横向布局 */
 	.ios-card {
 		display: flex;
-		flex-direction: column;
+		align-items: center;
 		background: #fff;
 		border-radius: 24rpx;
 		margin-bottom: 20rpx;
+		padding: 20rpx;
 		overflow: hidden;
 		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06), 0 1rpx 3rpx rgba(0, 0, 0, 0.04);
 	}
@@ -1009,10 +1072,14 @@
 		opacity: 0.85;
 	}
 
-	/* 卡片图片 */
+	/* 卡片缩略图 */
 	.ios-card-img {
-		width: 100%;
-		height: 360rpx;
+		width: 200rpx;
+		height: 150rpx;
+		flex-shrink: 0;
+		margin-right: 20rpx;
+		border-radius: 16rpx;
+		overflow: hidden;
 		position: relative;
 		background: #e5e5ea;
 
@@ -1022,37 +1089,40 @@
 		}
 	}
 
-	/* 参与人数 badge */
+	/* 参与人数 badge（浮在缩略图左下角） */
 	.ios-card-badge {
 		position: absolute;
-		left: 16rpx;
-		bottom: 16rpx;
+		left: 10rpx;
+		bottom: 10rpx;
 		z-index: 2;
 		display: inline-flex;
 		align-items: center;
-		height: 40rpx;
-		padding: 0 14rpx;
+		height: 32rpx;
+		padding: 0 10rpx;
 		background: rgba(0, 0, 0, 0.5);
-		border-radius: 20rpx;
+		border-radius: 16rpx;
 	}
 	.badge-text {
 		color: #fff;
-		font-size: 20rpx;
+		font-size: 18rpx;
 		font-weight: 500;
 		line-height: 1;
 	}
 
-	/* 卡片信息区 */
+	/* 卡片信息区：右侧自适应宽度 */
 	.ios-card-info {
-		padding: 20rpx 24rpx 24rpx;
+		flex: 1;
+		min-width: 0;
+		padding: 0;
 	}
 
 	.ios-card-title {
-		font-size: 30rpx;
+		font-size: 28rpx;
 		font-weight: 600;
 		color: #1c1c1e;
 		line-height: 1.3;
 		letter-spacing: -0.3rpx;
+		word-break: break-all;
 	}
 
 	.ios-card-desc {
