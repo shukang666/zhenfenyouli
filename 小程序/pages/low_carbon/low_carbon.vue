@@ -4,12 +4,19 @@
 		<skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 		<!-- 侧边标签栏：后台"社区活动-活动标签"可配置1-4个；第一个为固定标签（显示垃圾分类打卡内容），其他标签暂显示现有内容，待按绑定分类模板化。改为侧边垂直布局，与右侧内容区联动 -->
 		<view class="layout-wrapper" v-if="tab_list.length">
-			<scroll-view class="side-bar" scroll-y>
-				<view class="tab-item" :class="{active: current_tab == index}" v-for="(tab,index) in tab_list"
-					:key="tab.id" @click="switch_tab(index)">
-					<view class="tab-name">{{tab.name}}</view>
-				</view>
-			</scroll-view>
+			<!-- 侧边标签栏：折叠时宽度收为 0，右侧内容区自动占满 -->
+			<view class="side-bar-col" :class="{ collapsed: side_collapsed }">
+				<scroll-view class="side-bar" scroll-y>
+					<view class="tab-item" :class="{active: current_tab == index}" v-for="(tab,index) in tab_list"
+						:key="tab.id" @click="switch_tab(index)">
+						<view class="tab-name">{{tab.name}}</view>
+					</view>
+				</scroll-view>
+			</view>
+			<!-- 吸附在侧边栏右边缘中部的折叠/展开按钮：展开态显示"收起"箭头，折叠态显示"展开"箭头 -->
+			<view class="side-toggle-btn" :class="{ collapsed: side_collapsed }" @click="toggle_side">
+				<u-icon :name="side_collapsed ? 'arrow-right' : 'arrow-left'" size="22" color="#18AF38"></u-icon>
+			</view>
 			<!-- 右侧内容区：根据 current_tab 联动显示对应标签内容 -->
 			<view class="content-area">
 
@@ -406,6 +413,8 @@
 				cate_list: [],
 				tab_list: [],
 				current_tab: 0,
+				// 左侧标签栏是否折叠（折叠后内容区占满宽度，左侧中部悬浮展开按钮）
+				side_collapsed: false,
 				page: 1,
 				total: 0,
 			// 当前分类标签下的活动列表
@@ -601,6 +610,10 @@
 			this.$u.toast(err.msg)
 		})
 	},
+		// 折叠 / 展开左侧标签栏
+		toggle_side() {
+			this.side_collapsed = !this.side_collapsed
+		},
 		// 切换标签：第1个固定打卡标签也加载分类活动列表（顶部仍保留"垃圾分类打卡"入口卡片）；
 		// 最后一个"备份"标签显示现有内容；
 		// 自治活动标签加载商家信息（复刻 zzhd.vue onShow）；社交活动标签无需预加载列表；
@@ -965,14 +978,55 @@
 		box-shadow: 0 2rpx 6rpx rgba(255, 61, 0, .35);
 	}
 
-	.side-bar {
+	/* 侧边标签栏外层：承载整体宽度与折叠过渡（折叠时宽度收为 0，右侧内容区自动占满） */
+	.side-bar-col {
+		position: relative;
 		width: 180rpx;
 		flex-shrink: 0;
 		min-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
 		max-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
-		overflow-y: auto;
 		background: #ffffff;
 		border-right: 1rpx solid #f0f0f0;
+		box-sizing: border-box;
+		overflow: hidden;
+		transition: width .25s ease;
+	}
+	.side-bar-col.collapsed {
+		width: 0;
+		border-right-color: transparent;
+	}
+
+	/* 吸附在侧边栏右边缘中部的折叠/展开按钮：
+	   展开态吸附在侧栏右边缘（left = 侧栏宽度），折叠态随侧栏收回到屏幕左侧；
+	   left 与侧栏 width 同节奏过渡，视觉上就像"吸"在右边栏上一起移动 */
+	.side-toggle-btn {
+		position: fixed;
+		left: 180rpx;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 30;
+		width: 52rpx;
+		height: 96rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #ffffff;
+		border-radius: 0 24rpx 24rpx 0;
+		box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, .12);
+		transition: left .25s ease;
+	}
+	.side-toggle-btn.collapsed {
+		left: 0;
+	}
+	.side-toggle-btn:active {
+		background: #f5f5f5;
+	}
+
+	.side-bar {
+		width: 100%;
+		min-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
+		max-height: calc(100vh - 88rpx - var(--status-bar-height, 0px));
+		overflow-y: auto;
 		box-sizing: border-box;
 
 		.tab-item {
