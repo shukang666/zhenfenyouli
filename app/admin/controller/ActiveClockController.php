@@ -25,6 +25,29 @@ class ActiveClockController extends ToolController
      */
     public function index()
     {
+        return $this->renderList(0, 'index', '点位打卡');
+    }
+
+    /**
+     * 签到记录：只显示扫码参加活动（join_type=2）的签到/打卡记录
+     * @return mixed
+     * @throws DbException
+     */
+    public function sign_record()
+    {
+        return $this->renderList(2, 'sign_record', '活动签到');
+    }
+
+    /**
+     * 签到/打卡记录列表
+     * @param int $join_type 0=不限；2=只查扫码参加的活动
+     * @param string $tpl 模板名
+     * @param string $filename 导出文件名前缀
+     * @return mixed
+     * @throws DbException
+     */
+    public function renderList($join_type, $tpl, $filename)
+    {
         $export = $this->request->param('export');
         $params = $this->request->param();
         $where = [];
@@ -36,10 +59,14 @@ class ActiveClockController extends ToolController
         if (!empty($params['endtime'])) {
             $where[] = ['a.date_time', '<=', strtotime($params['endtime'] . ' 23:59')];
         }
+        // 只统计扫码参加（签到）活动的记录
+        if ($join_type) {
+            $where[] = ['c.join_type', '=', $join_type];
+        }
 
 
         if ($export) {
-            $this->outData($where);
+            $this->outData($where, $filename);
         }
 
         $list = ActiveClockModel::alias('a')
@@ -56,7 +83,7 @@ class ActiveClockController extends ToolController
         $list->appends($params);
         $this->assign('page', $list->render());
 
-        return $this->fetch();
+        return $this->fetch($tpl);
     }
 
     public function setWhere()
@@ -109,7 +136,7 @@ class ActiveClockController extends ToolController
         }
     }
 
-    public function outData($where)
+    public function outData($where, $filename = '点位打卡')
     {
 
         $list = ActiveClockModel::alias('a')
@@ -122,7 +149,7 @@ class ActiveClockController extends ToolController
                 return $item;
             })->toArray();
 
-        $filename = '点位打卡' . date('Y-m-d');
+        $filename = $filename . date('Y-m-d');
         $head = ['ID', '用户信息', '手机号', '活动名称', '打卡日期',];//设置表头
         $keys = ['id', 'nickname', 'phone', 'name', 'date_time',];//设置表头
         CommonModel::outData($filename, $list, $head, $keys);

@@ -19,7 +19,11 @@ class ActiveController extends ToolController
         $this->model = new ActiveModel();
     }
 
-
+    /**
+     * 列表默认展示的参加方式：1=小程序参加（活动列表） 2=扫码参加（签到列表）
+     * @var int
+     */
+    protected $joinType = 1;
 
     public function setIndex()
     {
@@ -56,7 +60,15 @@ class ActiveController extends ToolController
         if ($name) {
             $where[] = ['name', 'like', '%' . $name . '%'];
         }
-        $where[] = ['type', '=', $type];
+        if ($type !== '') {
+            $where[] = ['type', '=', $type];
+        }
+        // 参加方式：1=小程序参加 2=扫码参加，两类活动分开管理，列表互不混显
+        $join_type = $this->request->param('join_type', '', 'trim');
+        if ($join_type === '') {
+            $join_type = $this->joinType;
+        }
+        $where[] = ['join_type', '=', $join_type];
 
         $community_cate_list = ActiveCommunityCateModel::where([])->order('list_order asc,id desc')->select();
         $this->assign('community_cate_list', $community_cate_list);
@@ -84,6 +96,30 @@ class ActiveController extends ToolController
     public function index3()
     {
         return redirect((string)url('index', ['type' => 3]));
+    }
+
+    /**
+     * 签到列表：扫码参加的活动（join_type=2），不限制活动类型
+     * @return mixed
+     * @throws DbException
+     */
+    public function sign_list()
+    {
+        // 固定只查扫码参加的活动
+        $this->joinType = 2;
+
+        $params = $this->request->param();
+        $params['join_type'] = 2;
+
+        $list = $this->setIndex()->each(function ($item) {
+            return $this->getList($item);
+        });
+        $this->assign('params', $params);
+        $this->assign('list', $list);
+        $list->appends($params);
+        $this->assign('page', $list->render());
+
+        return $this->fetch();
     }
 
 

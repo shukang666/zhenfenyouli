@@ -71,24 +71,11 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label class="col-sm-2 control-label">参加方式:</label>
-            <div class="col-md-6 col-sm-10">
-                <select name="join_type" class="form-control" style="width: 212px"
-                        onchange="toggleJoinType(this.value)">
-                    <option value="1"
-                            <if condition="empty($item.join_type) || $item.join_type == 1">selected</if>>小程序参加
-                    </option>
-                    <option value="2"
-                            <if condition="isset($item['join_type']) && $item['join_type'] == 2">selected</if>>扫码参加
-                    </option>
-                </select>
-                <p class="help-block">
-                    小程序参加：活动在小程序内展示、可搜索可报名（默认）；<br/>
-                    扫码参加：活动在小程序列表隐藏，仅能通过活动二维码扫码进入详情后参加。
-                </p>
-            </div>
-        </div>
+        <if condition="!empty($item['join_type'])">
+            <input type="hidden" name="join_type" value="{$item.join_type}">
+            <else/>
+            <input type="hidden" name="join_type" value="{$params.join_type|default=1}">
+        </if>
 
         <div class="form-group join-type-scan">
             <label class="col-sm-2 control-label">活动二维码:</label>
@@ -493,7 +480,8 @@
 <script>
     var is_clock = '{$item.is_clock|default=0}';
     var is_badge = '{$item.is_badge|default=0}';
-    var join_type = '{$item.join_type|default=1}';
+    // 参加方式由入口决定：活动列表进入=1小程序参加，签到列表进入=2扫码参加，编辑时取本记录的值
+    var join_type = $('input[name=join_type]').val() || '1';
 
     $('.show_hidden').hide();
     if(is_clock == 1){
@@ -503,7 +491,7 @@
         $('.badge1').show();
     }
 
-    // 参加方式切换：选「扫码参加」时显示活动二维码预览
+    // 参加方式由入口决定：扫码参加的活动显示活动二维码预览
     function toggleJoinType(val) {
         if (val == 2) {
             $('.join-type-scan').show();
