@@ -2,7 +2,7 @@
 	<view class="container">
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="index"></skeleton-screen>
-		<z-paging ref='paging' v-model='dataList' @query='queryList' :fixed='true' :safe-area-inset-bottom="true">
+		<z-paging ref='paging' v-model='dataList' @query='queryList' :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="currentTab === 1" :loading-more-enabled="false">
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
 				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'#ffffff'}" :border-bottom="false">
@@ -72,22 +72,22 @@
 				</view>
 			</view>
 
-			<!-- 热门活动模块标题 -->
-			<view class="section-header" @click="$u.route({url:'/pages/low_carbon/active-list'})">
-				<view class="u-flex u-flex-1">
-					<image src="/static/index-5.png" class="u-w-32 u-h-32" mode="aspectFill"></image>
-					<view class="section-title">热门活动</view>
-					<view class="section-divider">|</view>
-					<view class="section-subtitle">共同创造美好生态环境</view>
+			<!-- 内容区标签导航：把活动与积分商品合并到同一区块，通过 tab 切换 -->
+			<view class="content-tabs">
+				<view class="tab-list">
+					<view class="tab-item" :class="{'tab-item--active': currentTab === index}" v-for="(item, index) in tabList" :key="index" @click="switchContentTab(index)">
+						<text class="tab-item__text">{{ item.name }}</text>
+						<view class="tab-item__line" v-if="currentTab === index"></view>
+					</view>
 				</view>
-				<view class="section-more">
+				<view class="tab-more" @click="goMore">
 					<text>更多</text>
-					<u-icon name="arrow-right" size="22"></u-icon>
+					<u-icon name="arrow-right" size="22" color="#999"></u-icon>
 				</view>
 			</view>
 
 			<!-- 热门活动横向滚动卡片 -->
-			<scroll-view scroll-x class="active-scroll" :show-scrollbar="false">
+			<scroll-view scroll-x class="active-scroll" :show-scrollbar="false" v-if="currentTab === 0">
 				<view class="u-flex">
 					<view class="active-card" v-for="item in active_list" :key="item.id"
 						@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
@@ -110,36 +110,28 @@
 				</view>
 			</scroll-view>
 
-			<!-- 最受欢迎兑换商品模块标题 -->
-			<view class="section-header" @click="$u.route({type:'switchTab',url:'/pages/mall/mall'})">
-				<view class="u-flex u-flex-1">
-					<image src="/static/index-6.png" class="u-w-32 u-h-32" mode="aspectFill"></image>
-					<view class="section-title">最受欢迎兑换商品</view>
-				</view>
-				<view class="section-more">
-					<text>更多</text>
-					<u-icon name="arrow-right" size="22"></u-icon>
-				</view>
-			</view>
-
-			<!-- 兑换商品列表：双列卡片网格，宽度与核心入口大卡对齐 -->
-			<view class="goods-grid">
-				<view class="goods-card" v-for="item in dataList" :key="item.id" @click="$u.route('/pages/mall/details?id='+item.id)">
-					<u-image width="100%" height="250" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
-					<view class="goods-card-body">
-						<view class="goods-card-title">{{item.goods_name}}</view>
-						<view class="goods-card-sold">已兑换{{item.sell_count}}次</view>
-						<view class="goods-card-footer">
-							<view class="goods-card-price">
-								<text class="price-point" v-if="item.point">{{item.point}}积分</text>
-								<text class="price-plus" v-if="Number(item.price) && item.point">+</text>
-								<text class="price-main" v-if="Number(item.price)">{{item.price}}元</text>
+			<!-- 兑换商品列表：两行横向滚动（每列 2 个商品，横向滚动） -->
+			<scroll-view scroll-x class="goods-scroll" :show-scrollbar="false" v-if="currentTab === 1">
+				<view class="goods-cols">
+					<view class="goods-col" v-for="(col, colIndex) in goodsColumns" :key="colIndex">
+						<view class="goods-card" v-for="item in col" :key="item.id" @click="$u.route('/pages/mall/details?id='+item.id)">
+							<u-image width="100%" height="220" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
+							<view class="goods-card-body">
+								<view class="goods-card-title">{{item.goods_name}}</view>
+								<view class="goods-card-sold">已兑换{{item.sell_count}}次</view>
+								<view class="goods-card-footer">
+									<view class="goods-card-price">
+										<text class="price-point" v-if="item.point">{{item.point}}积分</text>
+										<text class="price-plus" v-if="Number(item.price) && item.point">+</text>
+										<text class="price-main" v-if="Number(item.price)">{{item.price}}元</text>
+									</view>
+									<view class="goods-card-btn">去兑换</view>
+								</view>
 							</view>
-							<view class="goods-card-btn">去兑换</view>
 						</view>
 					</view>
 				</view>
-			</view>
+			</scroll-view>
 		</z-paging>
 	</view>
 </template>
@@ -169,6 +161,12 @@
 					daysToGoal: 2,
 					progress: 0
 				},
+				// 内容区 tab 导航：活动 / 积分商品
+				currentTab: 0,
+				tabList: [
+					{ name: '热门活动', moreUrl: '/pages/low_carbon/active-list', moreType: 'navigateTo' },
+					{ name: '积分商品', moreUrl: '/pages/mall/mall', moreType: 'switchTab' }
+				],
 				// 首页核心入口：一行四个SVG图标
 				entry_list: [
 					{ key: 'active', name: '社区活动', url: '/pages/low_carbon/low_carbon', type: 'switchTab', svgIcon: 'https://admin.circular-economy.cn/upload/image/1.svg' },
@@ -193,6 +191,15 @@
 				if (hour < 18) return '下午好'
 				if (hour < 22) return '晚上好'
 				return '夜深了'
+			},
+			// 商品按每列 2 个分组，用于两行横向滚动
+			goodsColumns() {
+				const cols = []
+				const list = this.dataList || []
+				for (let i = 0; i < list.length; i += 2) {
+					cols.push(list.slice(i, i + 2))
+				}
+				return cols
 			}
 		},
 		onShareAppMessage() {
@@ -297,6 +304,22 @@
 					// 接口失败不显示通知栏
 				}
 			},
+			// 切换内容区 tab
+			switchContentTab(index) {
+				if (this.currentTab === index) return
+				this.currentTab = index
+				// 首次切换到积分商品时触发分页加载
+				if (index === 1 && this.dataList.length === 0) {
+					this.$nextTick(() => {
+						this.$refs.paging.reload()
+					})
+				}
+			},
+			// 当前 tab 的"更多"跳转
+			goMore() {
+				const tab = this.tabList[this.currentTab]
+				this.$u.route({ type: tab.moreType, url: tab.moreUrl })
+			},
 			// 核心入口跳转
 			goEntry(item) {
 				// 社区互动：功能开发中
@@ -312,11 +335,12 @@
 				}
 				this.$u.route({ type: item.type, url: item.url })
 			},
-			// 获取活动列表
+			// 获取活动列表（首页"热门活动"取后台"首页展示"is_put，最多 12 条）
 			async get_new_active_list() {
 				try {
 					let params = {
-						is_recommendation: 1
+						is_put: 1,
+						page_size: 12
 					}
 					let res = await this.$u.api.get_new_active_list(params)
 					this.active_list = res.data?.data || []
@@ -330,13 +354,13 @@
 					url: url
 				})
 			},
-			// 获取商品列表
+			// 获取商品列表（首页"积分商品"不限制推荐，加载 12 条）
 			async queryList(page) {
 				try {
 					let params = {
 						page,
-						keyword: this.keyword,
-						is_recommend: 1
+						page_size: 12,
+						keyword: this.keyword
 					}
 					let res = await this.$u.api.get_goods_list(params)
 					this.$refs.paging.complete(res.data.data);
@@ -766,10 +790,53 @@
 		color: #999;
 	}
 
+	/* 内容区标签导航：活动 / 积分商品 */
+	.content-tabs {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 40rpx 30rpx 24rpx;
+	}
+	.tab-list {
+		display: flex;
+		align-items: center;
+	}
+	.tab-item {
+		position: relative;
+		margin-right: 40rpx;
+		padding-bottom: 12rpx;
+	}
+	.tab-item__text {
+		font-size: 30rpx;
+		color: #666;
+		font-weight: 500;
+	}
+	.tab-item--active .tab-item__text {
+		color: #1a1a1a;
+		font-weight: bold;
+	}
+	.tab-item__line {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 40rpx;
+		height: 6rpx;
+		background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
+		border-radius: 3rpx;
+	}
+	.tab-more {
+		display: flex;
+		align-items: center;
+		font-size: 24rpx;
+		color: #999;
+	}
+
 	/* 热门活动横向滚动卡片 */
 	.active-scroll {
 		white-space: nowrap;
 		padding-left: 30rpx;
+		padding-bottom: 160rpx; /* 底部留白，避免被 tabbar 遮挡 */
 	}
 	.active-card {
 		flex-shrink: 0;
@@ -813,19 +880,32 @@
 		font-weight: bold;
 	}
 
-	/* 兑换商品列表：双列卡片网格 */
-	.goods-grid {
+	/* 兑换商品列表：两行横向滚动（每列 2 个商品） */
+	.goods-scroll {
+		white-space: nowrap;
+		padding-left: 30rpx;
+	}
+	.goods-cols {
 		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		padding: 0 30rpx;
+		padding-right: 30rpx; /* 滚动到最右侧时留出与左侧一致的间隔 */
+	}
+	.goods-col {
+		flex-shrink: 0;
+		width: 320rpx;
+		margin-right: 20rpx;
+		display: flex;
+		flex-direction: column;
+	}
+	.goods-col:last-child {
+		margin-right: 0;
 	}
 	.goods-card {
-		width: 334rpx;
-		margin-bottom: 24rpx;
+		width: 100%;
+		margin-bottom: 20rpx;
 		background: #fff;
 		border-radius: 20rpx;
 		overflow: hidden;
+		white-space: normal; /* 重置 scroll-view 的 nowrap，保证标题正常换行 */
 	}
 	.goods-card-body {
 		padding: 20rpx 20rpx 24rpx;
@@ -891,7 +971,7 @@
 		text-align: center;
 		border-radius: 26rpx;
 	}
-	.goods-grid {
+	.goods-scroll {
 		padding-bottom: 160rpx;
 	}
 </style>
