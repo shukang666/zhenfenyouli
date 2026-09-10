@@ -144,17 +144,19 @@
 		
 		<!-- 打卡成功弹窗 -->
 		<u-mask :show="tipShow" @click="tipShow = false">
-			<view class="success-modal glass-card" @tap.stop.prevent>
-				<view class="success-icon">
-					<text class="success-emoji">🎉</text>
+			<view class="success-wrap">
+				<view class="success-modal" @tap.stop.prevent>
+					<view class="success-icon">
+						<text class="success-emoji">🎉</text>
+					</view>
+					<view class="success-title">{{isScanJoin ? '签到成功!' : '打卡成功!'}}</view>
+					<view class="success-point">
+						<text class="point-label">获得积分</text>
+						<text class="point-value">+{{info.send_point}}</text>
+					</view>
+					<view class="success-tip">{{isScanJoin ? '扫码签到成功，感谢参与~' : '继续保持，积少成多~'}}</view>
+					<view class="success-btn" @tap.stop="tipShow = false">我知道了</view>
 				</view>
-				<view class="success-title">{{isScanJoin ? '签到成功!' : '打卡成功!'}}</view>
-				<view class="success-point">
-					<text class="point-label">获得积分</text>
-					<text class="point-value">+{{info.send_point}}</text>
-				</view>
-				<view class="success-tip">{{isScanJoin ? '扫码签到成功，感谢参与~' : '继续保持，积少成多~'}}</view>
-				<view class="success-btn" @click="tipShow = false">我知道了</view>
 			</view>
 		</u-mask>
 		
@@ -960,17 +962,21 @@
 	}
 	
 	// 打卡成功弹窗
+	.success-wrap {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+	}
+	
 	.success-modal {
 		width: 560rpx;
 		padding: 50rpx 40rpx;
 		border-radius: 32rpx;
-		background: rgba(255,255,255,0.95);
-		backdrop-filter: blur(30rpx);
+		background: rgba(255,255,255,0.98);
 		text-align: center;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
+		box-shadow: 0 8rpx 40rpx rgba(0,0,0,0.15);
 		
 		.success-icon {
 			margin-bottom: 24rpx;
