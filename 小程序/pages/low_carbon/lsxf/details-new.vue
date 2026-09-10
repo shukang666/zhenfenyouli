@@ -143,7 +143,7 @@
 		</view>
 		
 		<!-- 打卡成功弹窗 -->
-		<u-mask :show="tipShow" @click="tipShow = false">
+		<u-mask :show="tipShow" @click="closeTip">
 			<view class="success-wrap">
 				<view class="success-modal" @tap.stop.prevent>
 					<view class="success-icon">
@@ -155,7 +155,7 @@
 						<text class="point-value">+{{info.send_point}}</text>
 					</view>
 					<view class="success-tip">{{isScanJoin ? '扫码签到成功，感谢参与~' : '继续保持，积少成多~'}}</view>
-					<view class="success-btn" @tap.stop="tipShow = false">我知道了</view>
+					<view class="success-btn" @tap.stop="closeTip">我知道了</view>
 				</view>
 			</view>
 		</u-mask>
@@ -191,7 +191,7 @@
 					<text class="popup-subtitle">帮助我们做得更好</text>
 				</view>
 				<view class="form-fields">
-					<view class="form-field" v-for="(field, fIdx) in actionTrigger.forms" :key="fIdx">
+					<view class="form-field" v-for="(field, fIdx) in actionFormFields" :key="fIdx">
 						<!-- 纯文本说明类�?-->
 						<view v-if="field.field_type === 'text'" class="field-text">
 							{{field.field_label}}
@@ -249,6 +249,11 @@
 			};
 		},
 		computed: {
+			// 活动反馈表单字段：actionTrigger 初始为 null，这里兜底成空数组，
+			// 避免首次 render 访问 null.forms 抛错，导致内联事件 e0/e1 注册不上
+			actionFormFields() {
+				return (this.actionTrigger && this.actionTrigger.forms) || [];
+			},
 			// 副标�?- 根据活动类型生成
 			subtitle() {
 				if (this.info.is_clock == 1) {
@@ -326,6 +331,10 @@
 			}
 		},
 		methods: {
+			// 关闭打卡/签到成功弹窗
+			closeTip() {
+				this.tipShow = false;
+			},
 			// 格式化日期为 yyyy.mm.dd 格式
 			formatDate(timestamp) {
 				if (!timestamp) return '';
