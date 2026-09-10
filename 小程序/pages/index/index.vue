@@ -16,7 +16,7 @@
 					<u-icon name="search" size="28" color="#b0b3bb"></u-icon>
 					<text class="home-search-text">搜索活动名称 / 地点</text>
 					<view class="home-search-scan" @click.stop="onScanQrcode">
-						<u-icon name="scan" size="30" color="#8e8e93"></u-icon>
+						<u-icon name="scan" size="36" color="#8e8e93"></u-icon>
 					</view>
 				</view>
 			</view>
@@ -572,8 +572,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 52rpx;
-		height: 52rpx;
+		width: 60rpx;
+		height: 60rpx;
 		margin-left: 8rpx;
 		padding-left: 20rpx;
 		border-left: 1rpx solid #eeeeee;
