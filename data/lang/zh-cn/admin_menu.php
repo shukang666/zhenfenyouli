@@ -18,6 +18,7 @@ return array (
   'ADMIN_ACTIVE_CATE_INDEX' => '活动分类',
   'ADMIN_ACTIVE_CATE_INDEX2' => '环保主图活动分类',
   'ADMIN_ADVICE_INDEX' => '意见反馈',
+  'ADMIN_AI_WORKFLOW_INDEX' => 'AI工作流',
   'ADMIN_APPINFO_INDEX' => '应用设置',
   'ADMIN_BASIC_FIELDDATAOPTION' => '参数设置',
   'ADMIN_BASIC_RICHTEXTOPTION' => '文本配置',
