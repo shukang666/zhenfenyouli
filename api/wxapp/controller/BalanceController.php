@@ -274,7 +274,7 @@ class BalanceController extends AuthController
         $map = [];
         $map[] = ['a.user_id', '=', $this->user_id];
         if ($account_type) {
-            $map[] = ['a.account_type', '=', 3];
+            $map[] = ['a.account_type', '=', $account_type];
         }
         if ($type) {
             $map[] = ['a.type', '=', $type];

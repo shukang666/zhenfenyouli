@@ -15,33 +15,35 @@
                     <view class="u-font-32 u-font-bold">
                         积分明细
                     </view>
-                    <view class="" @click="show=true">
-                        <text v-if="start_time">
-                            {{`${start_time}~${end_time}`}}
-                        </text>
-                        <text v-else>日期选择</text> <u-icon name="arrow-down-fill" size="25" class="u-m-l-5"></u-icon>
-                    </view>
                 </view>
                 <view class="u-p-tb-30 u-border-bottom u-flex u-row-between u-type-white-bg" v-for="item in dataList"
                     :key="item.id">
-                    <view class="">
-                        <view class="">
-                            {{item.type_name}}
+                    <view class="u-flex-1 u-m-r-20">
+                        <view class="u-font-30">
+                            {{reasonText(item)}}
                         </view>
-                        <view class="$u-type-info u-font-26 u-m-t-10">
+                        <view class="u-type-info u-font-26 u-m-t-10">
                             {{$u.timeFormat(item.create_time, 'yyyy-mm-dd hh:MM')}}
                         </view>
                     </view>
                     <view class="u-text-right">
-                        <view class="">
-                            {{item.change_amount}}
+                        <view class="u-font-bold" :class="item.change_amount >= 0 ? 'u-type-success' : 'u-type-error'">
+                            {{item.change_amount >= 0 ? '+' : ''}}{{item.change_amount}}
+                        </view>
+                        <view class="u-font-24 u-m-t-10" :class="item.change_amount >= 0 ? 'u-type-success' : 'u-type-error'">
+                            {{item.change_amount >= 0 ? '增加' : '减少'}}
                         </view>
                     </view>
                 </view>
+                <view class="u-p-tb-60 u-text-center u-type-info u-font-28" v-if="loaded && !dataList.length">
+                    暂无积分明细
+                </view>
+                <view class="u-p-tb-30 u-text-center u-type-info u-font-26"
+                    v-if="dataList.length && dataList.length >= total">
+                    没有更多了
+                </view>
             </view>
         </view>
-        <!-- 选择时间 -->
-        <u-calendar v-model="show" :mode="rang" @change="change"></u-calendar>
     </view>
 </template>
 
@@ -52,9 +54,8 @@
                 dataList: [],
                 page: 1,
                 total: 0,
-                end_time: '',
-                start_time: '',
-                show: false,
+                loading: false,
+                loaded: false,
             }
         },
         onLoad(option) {
@@ -76,28 +77,35 @@
                     }
                 })
             },
-            // 选择日期
-            change(e) {
-                this.start_time = e.startDate
-                this.end_time = e.endDate
-                this.dataList = []
-                this.page = 1
-                this.get_log_list()
+            // 明细原因
+            reasonText(item) {
+                let name = item.type_name || ''
+                let remark = item.remark || ''
+                if (name && remark && remark != name) return name + ' · ' + remark
+                return name || remark || '积分变动'
             },
             // 获取记录
             get_log_list() {
+                if (this.loading) return
+                this.loading = true
                 this.$u.api.get_log_list({
                     account_type: 2,
                     page: this.page,
-                    end_time: this.end_time,
-                    begin_time: this.start_time
+                    page_size: 20
                 }).then(res => {
-                    this.dataList.push(...res.data.data);
-                    this.total = res.data.total
+                    this.dataList.push(...(res.data.data || []));
+                    this.total = res.data.total || 0
+                    this.loaded = true
+                    this.loading = false
+                }).catch(() => {
+                    this.loaded = true
+                    this.loading = false
+                    if (this.page > 1) this.page--
                 })
             },
         },
         onReachBottom() {
+            if (this.loading) return
             if (this.dataList.length >= this.total) return
             this.page++
             this.get_log_list()

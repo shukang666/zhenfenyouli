@@ -123,7 +123,7 @@
 			// 获取记录
 			get_log_list() {
 				this.$u.api.get_log_list({
-					account_type: 1,
+					account_type: 3,
 					page: this.page,
 					end_time: this.end_time,
 					start_time: this.start_time
