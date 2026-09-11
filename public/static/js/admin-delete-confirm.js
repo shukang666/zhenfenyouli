@@ -82,8 +82,23 @@
 
         /* ---------------- 服务端校验令牌 ---------------- */
 
-        // 从 cookie 里读服务端下发的令牌；读不到返回空串（此时删除会被服务端拦下）
+        /**
+         * 读服务端下发的令牌，两条来源依次尝试：
+         *   ① window.CMF_DC_TOKEN —— 服务端直接内联在页面里的（不依赖 cookie，最可靠）
+         *   ② cookie cmf_dc_token —— 服务端下发的会话 cookie
+         * 都读不到就返回空串（此时删除会被服务端拦下，控制台会打警告）
+         *
+         * 为什么要有 ①：cookie 可能因 path/域、浏览器隐私设置、本地残留等原因读不到，
+         * 只靠 cookie 的话这类问题会表现成「点删除永远报未通过安全校验」，很难自查。
+         */
         function readToken() {
+            try {
+                if (window.CMF_DC_TOKEN) {
+                    return String(window.CMF_DC_TOKEN);
+                }
+            } catch (e) {
+            }
+
             try {
                 var m = document.cookie.match(new RegExp('(?:^|;\\s*)' + TOKEN_COOKIE + '=([^;]*)'));
                 return m ? decodeURIComponent(m[1]) : '';
@@ -118,7 +133,9 @@
                 var token = readToken();
 
                 if (!token) {
-                    warn('页面未取到删除校验令牌（' + TOKEN_COOKIE + '），服务端会拒绝本次删除');
+                    // 走到这里说明服务端既没内联 window.CMF_DC_TOKEN、也没下发 cookie，
+                    // 排查顺序：① 页面响应是否被缓存成旧 HTML ② 响应是不是非 HTML（接口/下载）
+                    warn('页面未取到删除校验令牌（window.CMF_DC_TOKEN / ' + TOKEN_COOKIE + '），服务端会拒绝本次删除');
                     return;
                 }
 
@@ -388,7 +405,7 @@
 
         // 暴露接口，供页面自定义的删除按钮主动接入
         window.CmfDeleteConfirm = {
-            version: '2026-09-11b',
+            version: '2026-09-11c',
             require: function (callback) {
                 if (isMutedToday()) {
                     callback();
