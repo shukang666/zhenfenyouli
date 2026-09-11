@@ -140,6 +140,7 @@ return array (
   'ADMIN_ROUTE_LISTORDER' => '路由规则排序',
   'ADMIN_ROUTE_OPEN' => '路由规则启用',
   'ADMIN_ROUTE_SELECT' => '选择URL',
+  'ADMIN_SECURITY_INDEX' => '安全加固',
   'ADMIN_SELECT_DEFAULT' => '医疗机构',
   'ADMIN_SELECT_INDEX1' => '区域列表',
   'ADMIN_SELECT_INDEX2' => '机构列表',

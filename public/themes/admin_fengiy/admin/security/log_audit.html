@@ -1,0 +1,104 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .sec-stat { margin-top: 15px; }
+    .sec-stat .sec-card { display: inline-block; min-width: 140px; padding: 10px 16px; margin: 0 10px 10px 0; border-radius: 4px; background: #f7f9fb; border: 1px solid #e8eef5; }
+    .sec-stat .sec-card b { display: block; font-size: 20px; line-height: 26px; color: #2b3a4a; }
+    .sec-stat .sec-card span { color: #8a99a8; font-size: 12px; }
+    .sec-muted { color: #9aa7b4; }
+    .sec-table td { vertical-align: middle; word-wrap: break-word; white-space: normal; }
+    .sec-log-detail { color: #555; font-size: 12px; }
+</style>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <foreach name="sec_tabs" item="tab">
+            <li <if condition="$tab.active eq 1">class="active"</if>><a href="{$tab.url}"><i class="fa fa-{$tab.icon}"></i> {$tab.name}</a></li>
+        </foreach>
+    </ul>
+
+    <div class="sec-stat">
+        <div class="sec-card"><b>{$stat.total}</b><span>事件总数</span></div>
+        <div class="sec-card"><b>{$stat.today}</b><span>今日事件</span></div>
+        <div class="sec-card"><b>{$stat.warning}</b><span>警告</span></div>
+        <div class="sec-card"><b>{$stat.danger}</b><span>危险</span></div>
+    </div>
+
+    <div class="alert alert-info" style="padding:8px 12px;font-size:12px;margin-top:14px;">
+        记录本模块产生的安全事件：<b>封锁IP / 解除封锁 / 设置变更</b>。
+        服务器 / 网关层的拦截事件如需一并审计，可把拦截记录写入 <code>cmf_security_audit_log</code> 表（字段见 data/sql/security_hardening.sql）。
+    </div>
+
+    <form class="well form-inline" method="get" action="{:url('log_audit')}" style="margin-top:16px;">
+        <input type="text" class="form-control" name="keyword" style="width: 180px;"
+               value="{$keyword}" placeholder="IP / 操作对象 / 详情">
+        <select name="type" class="form-control" style="width: 130px;margin-left:10px;">
+            <option value="">类型不限</option>
+            <foreach name="sec_type_options" item="t">
+                <option value="{$t.value}" <if condition="$type eq $t.value">selected</if>>{$t.name}</option>
+            </foreach>
+        </select>
+        <select name="level" class="form-control" style="width: 120px;margin-left:10px;">
+            <option value="">级别不限</option>
+            <foreach name="sec_level_options" item="l">
+                <option value="{$l.value}" <if condition="$level eq $l.value">selected</if>>{$l.name}</option>
+            </foreach>
+        </select>
+        <input type="date" class="form-control" name="start_time" style="width: 160px;margin-left:10px;" value="{$start_time}">
+        <span class="set_text"> 至 </span>
+        <input type="date" class="form-control" name="end_time" style="width: 160px;" value="{$end_time}">
+        <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 20px"/>
+        <a class="btn btn-danger" href="{:url('log_audit')}">清空</a>
+    </form>
+
+    <table class="table table-hover table-bordered sec-table">
+        <thead>
+        <tr>
+            <th style="width: 150px;">时间</th>
+            <th style="width: 70px;">级别</th>
+            <th style="width: 100px;">类型</th>
+            <th style="width: 150px;">来源 IP</th>
+            <th style="width: 140px;">归属地</th>
+            <th style="width: 160px;">操作对象</th>
+            <th>详情</th>
+            <th style="width: 100px;">操作人</th>
+        </tr>
+        </thead>
+        <tbody>
+        <if condition="empty($list)">
+            <tr>
+                <td colspan="8" class="sec-muted" style="text-align:center;padding:30px 0;">
+                    暂无审计事件；在「封锁IP」里新增或解封一条记录就会产生日志
+                </td>
+            </tr>
+        </if>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.time_text}</td>
+                <td>
+                    <if condition="$vo.level eq 3">
+                        <span class="label label-danger">{$vo.level_name}</span>
+                    <elseif condition="$vo.level eq 2"/>
+                        <span class="label label-warning">{$vo.level_name}</span>
+                    <else/>
+                        <span class="label label-default">{$vo.level_name}</span>
+                    </if>
+                </td>
+                <td>{$vo.type_name}</td>
+                <td>{$vo.ip}</td>
+                <td>
+                    <if condition="$vo.region neq ''">{$vo.region}<else/><span class="sec-muted">-</span></if>
+                </td>
+                <td>{$vo.target}</td>
+                <td class="sec-log-detail">{$vo.detail}</td>
+                <td>{$vo.operator}</td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

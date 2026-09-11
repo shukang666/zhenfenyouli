@@ -1,0 +1,85 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .sec-muted { color: #9aa7b4; }
+    .sec-group { margin-top: 18px; }
+    .sec-group .panel-heading { font-size: 14px; }
+    .sec-item-name { color: #2b3a4a; font-size: 14px; }
+    .sec-item-desc { color: #8a99a8; font-size: 12px; margin-top: 3px; line-height: 18px; }
+    .sec-item-switch { width: 140px; vertical-align: middle !important; }
+    .sec-item-value { width: 180px; vertical-align: middle !important; }
+    .sec-setting-table td { vertical-align: middle; }
+</style>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <foreach name="sec_tabs" item="tab">
+            <li <if condition="$tab.active eq 1">class="active"</if>><a href="{$tab.url}"><i class="fa fa-{$tab.icon}"></i> {$tab.name}</a></li>
+        </foreach>
+    </ul>
+
+    <div class="alert alert-info" style="padding:8px 12px;font-size:12px;margin-top:16px;">
+        每个开关 / 参数占一行，保存后写入 <code>cmf_option</code> 的 <code>security_global</code>，并在「日志审计」留一条设置变更记录。<br>
+        <b>这里只负责保存配置，实际拦截动作需要服务器 / 网关层读取该配置后执行</b>；改动前建议先确认对应规则已经在服务器上生效，避免误封正常用户。
+    </div>
+
+    <form class="js-ajax-form" method="post" action="{:url('global_setting')}">
+        <foreach name="schema" item="group">
+            <div class="panel panel-default sec-group">
+                <div class="panel-heading">
+                    <b>{$group.title}</b>
+                    <span class="sec-muted" style="font-weight: normal;font-size: 12px;">　{$group.desc}</span>
+                </div>
+                <table class="table table-hover sec-setting-table" style="margin-bottom: 0;">
+                    <tbody>
+                    <foreach name="group.items" item="item">
+                        <tr>
+                            <td class="sec-item-switch">
+                                <if condition="$item.type eq 'switch'">
+                                    <div class="layui-form">
+                                        <input type="checkbox" lay-skin="switch" lay-text="开|关"
+                                               name="setting[{$item.key}]" value="1" <if condition="$item.checked">checked</if>>
+                                    </div>
+                                <elseif condition="$item.type eq 'number'"/>
+                                    <input type="number" class="form-control" style="width: 120px;" min="0"
+                                           name="setting[{$item.key}]" value="{$item.value}">
+                                <else/>
+                                    <input type="text" class="form-control" style="width: 170px;"
+                                           name="setting[{$item.key}]" value="{$item.value}"
+                                           placeholder="{$item.placeholder|default=''}">
+                                </if>
+                            </td>
+                            <td class="sec-item-value">
+                                <span class="sec-item-name">{$item.name}</span>
+                                <if condition="$item.level neq ''">
+                                    <span class="label label-danger" style="font-size: 11px;">{$item.level}风险</span>
+                                </if>
+                            </td>
+                            <td>
+                                <div class="sec-item-desc">
+                                    {$item.desc}
+                                    <if condition="$item.unit neq ''">（单位：{$item.unit}）</if>
+                                    <br/>配置键：<code>{$item.key}</code>
+                                </div>
+                            </td>
+                        </tr>
+                    </foreach>
+                    </tbody>
+                </table>
+            </div>
+        </foreach>
+
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn btn-primary js-ajax-submit">保存设置</button>
+            <span class="sec-muted" style="margin-left: 10px;font-size: 12px;">未勾选的开关会保存为「关」</span>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['form'], function () {
+        layui.form.render();
+    });
+</script>
+</body>
+</html>

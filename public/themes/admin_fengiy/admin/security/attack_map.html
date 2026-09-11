@@ -1,0 +1,202 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .sec-stat { margin-top: 15px; }
+    .sec-stat .sec-card { display: inline-block; min-width: 140px; padding: 10px 16px; margin: 0 10px 10px 0; border-radius: 4px; background: #f7f9fb; border: 1px solid #e8eef5; }
+    .sec-stat .sec-card b { display: block; font-size: 20px; line-height: 26px; color: #2b3a4a; }
+    .sec-stat .sec-card span { color: #8a99a8; font-size: 12px; }
+    .sec-muted { color: #9aa7b4; }
+    .sec-table td { vertical-align: middle; }
+    .sec-flex { display: flex; flex-wrap: wrap; margin-top: 16px; }
+    .sec-col-l { flex: 0 0 62%; max-width: 62%; padding-right: 15px; }
+    .sec-col-r { flex: 0 0 38%; max-width: 38%; }
+    .sec-box { border: 1px solid #e8eef5; border-radius: 4px; background: #fff; }
+    .sec-box-head { padding: 8px 12px; border-bottom: 1px solid #eef2f7; background: #f8fafc; font-size: 13px; color: #2b3a4a; }
+    #sec-map { width: 100%; height: 430px; }
+    .sec-chart { width: 100%; height: 290px; }
+    #sec-map-detail { padding: 12px; min-height: 160px; font-size: 13px; color: #555; line-height: 24px; }
+</style>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <foreach name="sec_tabs" item="tab">
+            <li <if condition="$tab.active eq 1">class="active"</if>><a href="{$tab.url}"><i class="fa fa-{$tab.icon}"></i> {$tab.name}</a></li>
+        </foreach>
+    </ul>
+
+    <div class="sec-stat">
+        <div class="sec-card"><b>{$stat.blocking}</b><span>封锁中</span></div>
+        <div class="sec-card"><b>{$stat.week}</b><span>近 7 天新增</span></div>
+        <div class="sec-card"><b>{$stat.region_num}</b><span>覆盖地域</span></div>
+        <div class="sec-card"><b>{$stat.unresolved}</b><span>未解析坐标</span></div>
+    </div>
+
+    <div class="alert alert-info" style="padding:8px 12px;font-size:12px;margin-top:14px;">
+        地图上的点来自封锁名单里已解析出坐标的记录（最多 200 个），归属地 / 坐标通过腾讯地图 IP 定位获取；
+        未解析的记录可在「封锁IP」里点「解析归属地」。
+    </div>
+
+    <div class="sec-flex">
+        <div class="sec-col-l">
+            <div class="sec-box">
+                <div class="sec-box-head"><i class="fa fa-map-marker"></i> 攻击来源分布（点击地图上的点查看该 IP）</div>
+                <div id="sec-map"></div>
+            </div>
+        </div>
+        <div class="sec-col-r">
+            <div class="sec-box">
+                <div class="sec-box-head"><i class="fa fa-crosshairs"></i> 选中的来源 IP</div>
+                <div id="sec-map-detail">
+                    <span class="sec-muted">点地图上的标记查看该 IP 的归属地、封锁原因与拦截次数。</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sec-flex">
+        <div class="sec-col-l">
+            <div class="sec-box">
+                <div class="sec-box-head"><i class="fa fa-bar-chart"></i> 近 14 天新增封锁 IP 趋势</div>
+                <div id="sec-trend" class="sec-chart"></div>
+            </div>
+        </div>
+        <div class="sec-col-r">
+            <div class="sec-box">
+                <div class="sec-box-head"><i class="fa fa-list-alt"></i> 来源地域 TOP10</div>
+                <div id="sec-region-chart" class="sec-chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-hover table-bordered sec-table" style="margin-top:16px;">
+        <thead>
+        <tr>
+            <th>来源地域</th>
+            <th style="width: 120px;">封锁数量</th>
+            <th style="width: 120px;">占比</th>
+            <th style="width: 140px;">累计拦截次数</th>
+        </tr>
+        </thead>
+        <tbody>
+        <if condition="empty($regions)">
+            <tr>
+                <td colspan="4" class="sec-muted" style="text-align:center;padding:26px 0;">
+                    暂无归属地数据，先到「封锁IP」标签新增记录
+                </td>
+            </tr>
+        </if>
+        <foreach name="regions" item="vo">
+            <tr>
+                <td>{$vo.region}</td>
+                <td>{$vo.num}</td>
+                <td>{$vo.percent}%</td>
+                <td>{$vo.hits}</td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__TMPL__/public/assets/js/echarts/echarts.min.js"></script>
+<script src="https://map.qq.com/api/gljs?v=1.exp&key={$map_key}"></script>
+<script type="text/javascript">
+    $(function () {
+        var markers = {:json_encode($markers)};
+        var regions = {:json_encode($regions)};
+
+        /* ---------- 1. 腾讯地图：攻击来源打点 ---------- */
+        var mapEl = document.getElementById('sec-map');
+        if (mapEl && typeof TMap === 'undefined') {
+            mapEl.innerHTML = '<div class="sec-muted" style="padding:60px 20px;text-align:center;">' +
+                '地图脚本未加载（需要能访问 map.qq.com），下方统计与图表不受影响</div>';
+        } else if (mapEl) {
+            var map = new TMap.Map(mapEl, {
+                center: new TMap.LatLng(34.5, 108.9),
+                zoom: 4,
+                viewMode: '2D'
+            });
+
+            if (markers.length > 0) {
+                var geometries = [];
+                for (var i = 0; i < markers.length; i++) {
+                    geometries.push({id: String(i), position: new TMap.LatLng(markers[i].lat, markers[i].lng)});
+                }
+                var markerLayer = new TMap.MultiMarker({
+                    id: 'sec-marker-layer',
+                    map: map,
+                    geometries: geometries
+                });
+                markerLayer.on('click', function (evt) {
+                    var m = markers[parseInt(evt.geometry.id, 10)] || {};
+                    $('#sec-map-detail').html(
+                        '<div><b>' + (m.ip || '') + '</b></div>' +
+                        '<div>归属地：' + (m.region ? m.region : '未解析') + '</div>' +
+                        '<div>封锁原因：' + (m.reason ? m.reason : '-') + '</div>' +
+                        '<div>拦截次数：' + (m.hits || 0) + '</div>'
+                    );
+                });
+            } else {
+                $('#sec-map-detail').html('<span class="sec-muted">暂无已解析坐标的封锁 IP。</span>');
+            }
+        }
+
+        if (typeof echarts === 'undefined') {
+            return;
+        }
+
+        /* ---------- 2. 近 14 天新增封锁趋势 ---------- */
+        var trendChart = echarts.init(document.getElementById('sec-trend'));
+        trendChart.setOption({
+            tooltip: {trigger: 'axis'},
+            grid: {left: 45, right: 20, top: 30, bottom: 60},
+            xAxis: {
+                type: 'category',
+                data: {:json_encode($trend_labels)},
+                axisLabel: {rotate: 40, fontSize: 11}
+            },
+            yAxis: {type: 'value', minInterval: 1},
+            series: [{
+                name: '新增封锁',
+                type: 'line',
+                smooth: true,
+                symbolSize: 6,
+                data: {:json_encode($trend_values)},
+                itemStyle: {color: '#e74c3c'},
+                areaStyle: {color: 'rgba(231,76,60,0.12)'}
+            }]
+        });
+
+        /* ---------- 3. 来源地域 TOP10 ---------- */
+        var regionChart = echarts.init(document.getElementById('sec-region-chart'));
+        if (regions.length > 0) {
+            var names = [], nums = [];
+            for (var j = regions.length - 1; j >= 0; j--) {
+                names.push(regions[j].region);
+                nums.push(regions[j].num);
+            }
+            regionChart.setOption({
+                tooltip: {trigger: 'axis'},
+                grid: {left: 110, right: 30, top: 20, bottom: 30},
+                xAxis: {type: 'value', minInterval: 1},
+                yAxis: {type: 'category', data: names, axisLabel: {fontSize: 11}},
+                series: [{name: '封锁数量', type: 'bar', data: nums, barMaxWidth: 16, itemStyle: {color: '#f39c12'}}]
+            });
+        } else {
+            regionChart.setOption({
+                title: {
+                    text: '暂无归属地数据',
+                    left: 'center',
+                    top: 'middle',
+                    textStyle: {color: '#9aa7b4', fontSize: 13, fontWeight: 'normal'}
+                }
+            });
+        }
+
+        $(window).on('resize', function () {
+            trendChart.resize();
+            regionChart.resize();
+        });
+    });
+</script>
+</body>
+</html>
