@@ -89,7 +89,7 @@
         </if>
         <volist name="list" id="vo">
             <tr>
-                <td>{$vo.create_time|date="Y-m-d H:i"}</td>
+                <td>{$vo.create_time|date="Y-m-d"}</td>
                 <td>{$vo.version|default='—'}</td>
                 <td><span class="label {$vo.type_class}">{$vo.type_label}</span></td>
                 <td class="upd-title">{$vo.title}</td>
