@@ -1,0 +1,310 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .sec-muted { color: #9aa7b4; }
+
+    /* ---------- 指标卡片 ---------- */
+    .sv-grid { display: flex; flex-wrap: wrap; margin: 16px -8px 0; }
+    .sv-cell { display: flex; flex: 1 1 0; min-width: 230px; padding: 0 8px 16px; }
+    .sv-card { flex: 1; padding: 14px 16px 16px; border: 1px solid #e8eef5; border-radius: 6px; background: #fff; }
+    .sv-head { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #8a99a8; }
+    .sv-head i { margin-right: 5px; font-size: 13px; color: #b7c4d1; }
+    .sv-value { margin-top: 10px; font-size: 28px; line-height: 34px; font-weight: 600; color: #2b3a4a; }
+    .sv-value .sv-unit { font-size: 13px; color: #8a99a8; font-weight: normal; margin-left: 4px; }
+    .sv-txt-warning { color: #f39c12; }
+    .sv-txt-danger { color: #e74c3c; }
+    .sv-txt-unknown { color: #b7c4d1; }
+    .sv-sub { margin-top: 8px; min-height: 18px; font-size: 12px; line-height: 18px; color: #8a99a8; }
+    .sv-bar { height: 8px; margin-top: 12px; border-radius: 4px; background: #eef2f7; overflow: hidden; }
+    .sv-bar > i { display: block; width: 0; height: 100%; border-radius: 4px; background: #3c9ede; transition: width .6s ease; }
+    .sv-bar.sv-ok > i { background: #27ae60; }
+    .sv-bar.sv-warning > i { background: #f39c12; }
+    .sv-bar.sv-danger > i { background: #e74c3c; }
+    .sv-bar.sv-unknown > i { background: #ccd6e0; }
+    .sv-tag { padding: 1px 8px; border-radius: 9px; font-size: 11px; background: #eef2f7; color: #8a99a8; }
+    .sv-tag-ok { background: #e8f7ee; color: #27ae60; }
+    .sv-tag-warning { background: #fdf3e2; color: #d68910; }
+    .sv-tag-danger { background: #fdeaea; color: #c0392b; }
+
+    /* ---------- 下半区 ---------- */
+    .sec-flex { display: flex; flex-wrap: wrap; margin-top: 4px; }
+    .sec-col-l { flex: 0 0 64%; max-width: 64%; padding-right: 15px; }
+    .sec-col-r { flex: 0 0 36%; max-width: 36%; }
+    .sec-box { border: 1px solid #e8eef5; border-radius: 6px; background: #fff; }
+    .sec-box-head { padding: 9px 12px; border-bottom: 1px solid #eef2f7; background: #f8fafc; font-size: 13px; color: #2b3a4a; }
+    .sv-tools { float: right; font-size: 12px; color: #8a99a8; font-weight: normal; }
+    .sv-tools a { margin-left: 12px; color: #3c9ede; text-decoration: none; }
+    .sv-tools label { font-weight: normal; cursor: pointer; }
+    .sv-chart { width: 100%; height: 400px; }
+    .sv-info { margin: 0; }
+    .sv-info th, .sv-info td { padding: 7px 12px !important; font-size: 12px; border-top: 1px solid #f2f5f9 !important; }
+    .sv-info th { width: 108px; font-weight: normal; color: #8a99a8; background: #fbfcfd; }
+    .sv-info td { color: #2b3a4a; word-break: break-all; }
+</style>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <foreach name="sec_tabs" item="tab">
+            <li <if condition="$tab.active eq 1">class="active"</if>><a href="{$tab.url}"><i class="fa fa-{$tab.icon}"></i> {$tab.name}</a></li>
+        </foreach>
+    </ul>
+
+    <div class="sv-grid">
+        <div class="sv-cell">
+            <div class="sv-card">
+                <div class="sv-head">
+                    <span><i class="fa fa-tachometer"></i>CPU 使用率</span>
+                    <span class="sv-tag sv-tag-{$metrics.cpu.level}" id="sv-cpu-tag">{$metrics.cpu.level_text}</span>
+                </div>
+                <div class="sv-value sv-txt-{$metrics.cpu.level}" id="sv-cpu-text">{$metrics.cpu.text}</div>
+                <div class="sv-sub" id="sv-cpu-sub">
+                    <if condition="$metrics.cpu.available">
+                        负载 {$metrics.cpu.load1} / {$metrics.cpu.load5} / {$metrics.cpu.load15}（{$metrics.cpu.cores} 核）
+                    <else/>
+                        当前环境读不到系统负载
+                    </if>
+                </div>
+                <div class="sv-bar sv-{$metrics.cpu.level}" id="sv-cpu-bar"><i></i></div>
+            </div>
+        </div>
+        <div class="sv-cell">
+            <div class="sv-card">
+                <div class="sv-head">
+                    <span><i class="fa fa-server"></i>内存占用率</span>
+                    <span class="sv-tag sv-tag-{$metrics.memory.level}" id="sv-memory-tag">{$metrics.memory.level_text}</span>
+                </div>
+                <div class="sv-value sv-txt-{$metrics.memory.level}" id="sv-memory-text">{$metrics.memory.text}</div>
+                <div class="sv-sub" id="sv-memory-sub">
+                    <if condition="$metrics.memory.available">
+                        已用 {$metrics.memory.used_text} / 共 {$metrics.memory.total_text}
+                    <else/>
+                        当前环境读不到内存数据
+                    </if>
+                </div>
+                <div class="sv-bar sv-{$metrics.memory.level}" id="sv-memory-bar"><i></i></div>
+            </div>
+        </div>
+        <div class="sv-cell">
+            <div class="sv-card">
+                <div class="sv-head">
+                    <span><i class="fa fa-hdd-o"></i>硬盘使用率</span>
+                    <span class="sv-tag sv-tag-{$metrics.disk.level}" id="sv-disk-tag">{$metrics.disk.level_text}</span>
+                </div>
+                <div class="sv-value sv-txt-{$metrics.disk.level}" id="sv-disk-text">{$metrics.disk.text}</div>
+                <div class="sv-sub" id="sv-disk-sub">
+                    <if condition="$metrics.disk.available">
+                        已用 {$metrics.disk.used_text} / 共 {$metrics.disk.total_text}
+                    <else/>
+                        磁盘容量读取失败
+                    </if>
+                </div>
+                <div class="sv-bar sv-{$metrics.disk.level}" id="sv-disk-bar"><i></i></div>
+            </div>
+        </div>
+        <div class="sv-cell">
+            <div class="sv-card">
+                <div class="sv-head">
+                    <span><i class="fa fa-clock-o"></i>系统运行时长</span>
+                    <span class="sv-tag" id="sv-uptime-tag">开机至今</span>
+                </div>
+                <div class="sv-value" id="sv-uptime">{$metrics.uptime_text}</div>
+                <div class="sv-sub">服务器时间：<span id="sv-time">{$metrics.time}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <if condition="empty($metrics.memory.available)">
+        <div class="alert alert-warning" style="padding:8px 12px;font-size:12px;">
+            检测到部分指标读取失败：PHP 的 <code>open_basedir</code> 会拦截 <code>/proc</code> 目录（宝塔站点默认开启「防跨站攻击」），
+            内存与运行时长就取不到值。<b>硬盘容量与 CPU 负载不受影响</b>；如需完整指标，可在宝塔站点设置中关闭「防跨站攻击(open_basedir)」。
+        </div>
+    </if>
+
+    <div class="sec-flex">
+        <div class="sec-col-l">
+            <div class="sec-box">
+                <div class="sec-box-head">
+                    <span class="sv-tools">
+                        <label><input type="checkbox" id="sv-auto" checked> 自动刷新</label>
+                        <a href="javascript:;" id="sv-refresh">立即刷新</a>
+                    </span>
+                    <i class="fa fa-line-chart"></i> 实时趋势（CPU / 内存使用率，最近 <span id="sv-points">0</span> 次采样）
+                </div>
+                <div id="sv-chart" class="sv-chart"></div>
+            </div>
+        </div>
+        <div class="sec-col-r">
+            <div class="sec-box">
+                <div class="sec-box-head"><i class="fa fa-info-circle"></i> 服务器信息</div>
+                <table class="table sv-info" style="margin-bottom:0;">
+                    <tbody>
+                    <tr><th>操作系统</th><td>{$metrics.system.os}</td></tr>
+                    <tr><th>主机名</th><td>{$metrics.system.host}</td></tr>
+                    <tr><th>系统架构</th><td>{$metrics.system.arch}</td></tr>
+                    <tr><th>Web 服务器</th><td>{$metrics.system.software}</td></tr>
+                    <tr><th>PHP 版本</th><td>{$metrics.system.php}</td></tr>
+                    <tr><th>运行方式</th><td>{$metrics.system.sapi}</td></tr>
+                    <tr><th>CPU 核心</th><td id="sv-i-cores">{$metrics.cpu.cores} 核</td></tr>
+                    <tr><th>内存上限</th><td id="sv-i-memlimit">{$metrics.system.mem_limit}</td></tr>
+                    <tr><th>PHP 内存</th><td id="sv-i-memused">{$metrics.system.mem_used}</td></tr>
+                    <tr><th>脚本超时</th><td>{$metrics.system.max_exec} 秒</td></tr>
+                    <tr><th>磁盘剩余</th><td id="sv-i-diskfree">{$metrics.disk.free_text}</td></tr>
+                    <tr><th>站点目录</th><td>{$metrics.system.root}</td></tr>
+                    <tr><th>运行时长</th><td id="sv-i-uptime">{$metrics.uptime_text}</td></tr>
+                    <tr><th>服务器时间</th><td id="sv-i-time">{$metrics.time}</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-info" style="padding:8px 12px;font-size:12px;margin-top:16px;">
+        <b>数据来源：</b>CPU 负载取 <code>sys_getloadavg()</code>（按核心数换算成使用率）、内存读 <code>/proc/meminfo</code>、
+        硬盘容量用 <code>disk_total_space()</code>、运行时长读 <code>/proc/uptime</code>，全部走 PHP 内置能力，不需要装任何扩展或软件。<br>
+        使用率分级：<span class="sv-tag sv-tag-ok">正常</span> &lt; 70%　<span class="sv-tag sv-tag-warning">偏高</span> 70% ~ 90%　<span class="sv-tag sv-tag-danger">危急</span> &ge; 90%。
+        页面每 5 秒自动刷新一次。
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__TMPL__/public/assets/js/echarts/echarts.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        var METRICS_URL = '{:url("server_metrics")}';
+        var MAX_POINTS  = 30;
+        var POLL_MS     = 5000;
+
+        var axisData = [], cpuData = [], memData = [];
+        var timer = null;
+
+        /* ---------- 指标卡片渲染 ---------- */
+        function setTag(id, m) {
+            var el = $('#' + id);
+            if (m.available) {
+                el.attr('class', 'sv-tag sv-tag-' + m.level).text(m.level_text).show();
+            } else {
+                el.attr('class', 'sv-tag').text('不可用').show();
+            }
+        }
+
+        function setBar(id, m) {
+            var width = (m.percent === null || m.percent === undefined) ? 0 : Math.min(100, m.percent);
+            $('#' + id).attr('class', 'sv-bar sv-' + m.level).children('i').css('width', width + '%');
+        }
+
+        function setValue(id, m) {
+            $('#' + id).attr('class', 'sv-value sv-txt-' + m.level).text(m.text);
+        }
+
+        function renderMetric(name, m, subText) {
+            setValue('sv-' + name + '-text', m);
+            setTag('sv-' + name + '-tag', m);
+            setBar('sv-' + name + '-bar', m);
+            $('#sv-' + name + '-sub').text(subText);
+        }
+
+        /* ---------- 趋势图 ---------- */
+        var chart = (typeof echarts !== 'undefined') ? echarts.init(document.getElementById('sv-chart')) : null;
+
+        function chartOption() {
+            return {
+                tooltip: {trigger: 'axis', valueFormatter: function (v) { return v === null ? '不可用' : v + '%'; }},
+                legend: {data: ['CPU', '内存'], right: 12, top: 6, itemWidth: 14, itemHeight: 8, textStyle: {fontSize: 12}},
+                grid: {left: 46, right: 22, top: 40, bottom: 34},
+                xAxis: {type: 'category', boundaryGap: false, data: axisData, axisLabel: {fontSize: 11}},
+                yAxis: {type: 'value', min: 0, max: 100, axisLabel: {formatter: '{value}%', fontSize: 11}},
+                series: [
+                    {name: 'CPU', type: 'line', smooth: true, showSymbol: false, connectNulls: true, data: cpuData, itemStyle: {color: '#3c9ede'}, areaStyle: {color: 'rgba(60,158,222,0.10)'}},
+                    {name: '内存', type: 'line', smooth: true, showSymbol: false, connectNulls: true, data: memData, itemStyle: {color: '#9b59b6'}, areaStyle: {color: 'rgba(155,89,182,0.10)'}}
+                ]
+            };
+        }
+
+        function pushPoint(m) {
+            axisData.push((m.time || '').substr(11, 8));
+            cpuData.push(m.cpu.percent === null || m.cpu.percent === undefined ? null : m.cpu.percent);
+            memData.push(m.memory.percent === null || m.memory.percent === undefined ? null : m.memory.percent);
+
+            if (axisData.length > MAX_POINTS) {
+                axisData.shift();
+                cpuData.shift();
+                memData.shift();
+            }
+            $('#sv-points').text(axisData.length);
+
+            if (chart) {
+                chart.setOption(chartOption());
+            }
+        }
+
+        /* ---------- 应用一次快照 ---------- */
+        function apply(m) {
+            renderMetric('cpu', m.cpu, m.cpu.available
+                ? ('负载 ' + m.cpu.load1 + ' / ' + m.cpu.load5 + ' / ' + m.cpu.load15 + '（' + m.cpu.cores + ' 核）')
+                : '当前环境读不到系统负载');
+
+            renderMetric('memory', m.memory, m.memory.available
+                ? ('已用 ' + m.memory.used_text + ' / 共 ' + m.memory.total_text)
+                : '当前环境读不到内存数据');
+
+            renderMetric('disk', m.disk, m.disk.available
+                ? ('已用 ' + m.disk.used_text + ' / 共 ' + m.disk.total_text)
+                : '磁盘容量读取失败');
+
+            $('#sv-uptime').text(m.uptime_text);
+            $('#sv-time').text(m.time);
+
+            $('#sv-i-cores').text(m.cpu.cores + ' 核');
+            $('#sv-i-diskfree').text(m.disk.free_text);
+            $('#sv-i-memlimit').text(m.system.mem_limit);
+            $('#sv-i-memused').text(m.system.mem_used);
+            $('#sv-i-uptime').text(m.uptime_text);
+            $('#sv-i-time').text(m.time);
+
+            pushPoint(m);
+        }
+
+        /* ---------- 轮询 ---------- */
+        function poll() {
+            $.ajax({url: METRICS_URL, dataType: 'json', cache: false})
+                .done(function (res) {
+                    if (res && res.code == 1 && res.data) {
+                        apply(res.data);
+                    }
+                });
+        }
+
+        function startTimer() {
+            stopTimer();
+            timer = window.setInterval(poll, POLL_MS);
+        }
+
+        function stopTimer() {
+            if (timer) {
+                window.clearInterval(timer);
+                timer = null;
+            }
+        }
+
+        $('#sv-auto').on('change', function () {
+            if (this.checked) {
+                startTimer();
+            } else {
+                stopTimer();
+            }
+        });
+
+        $('#sv-refresh').on('click', poll);
+
+        // 首屏数据由 PHP 直出，这里取回来补上第一个采样点
+        apply({:json_encode($metrics)});
+        startTimer();
+
+        $(window).on('resize', function () {
+            if (chart) {
+                chart.resize();
+            }
+        });
+    });
+</script>
+</body>
+</html>

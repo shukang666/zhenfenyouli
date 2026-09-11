@@ -3,13 +3,15 @@
 namespace app\admin\controller;
 
 use app\admin\library\IpLocation;
+use app\admin\library\SystemMonitor;
 use cmf\controller\AdminBaseController;
 use think\facade\Db;
 
 /**
  * PC 后台 - 安全加固
  *
- * 四个标签页（每个标签一个 action，模板里用 nav-tabs 链接切换，与「算法中心」一致）：
+ * 五个标签页（每个标签一个 action，模板里用 nav-tabs 链接切换，与「算法中心」一致）：
+ *   server_monitor() 服务器监控：CPU 负载 / 内存占用率 / 硬盘容量 / 运行时长等实时指标（见 app\admin\library\SystemMonitor）
  *   index()          封锁IP    ：cmf_security_block_ip，后台维护封锁名单
  *   log_audit()      日志审计  ：直接回显服务器上的真实日志文件（宝塔站点日志 → ThinkCMF runtime 日志）
  *   attack_map()     攻击地图  ：按封锁名单聚合出的来源地域 / 趋势，世界地图由 Canvas 自绘，不依赖任何外部地图 SDK
@@ -62,11 +64,12 @@ class SecurityController extends AdminBaseController
     /* ==================== 公共 ==================== */
 
     /**
-     * 四个标签页共用的导航（current 传当前 action）
+     * 五个标签页共用的导航（current 传当前 action）
      */
     private function assignTabs($current)
     {
         $tabs = [
+            ['action' => 'server_monitor', 'name' => '服务器监控', 'icon' => 'dashboard'],
             ['action' => 'index', 'name' => '封锁IP', 'icon' => 'ban'],
             ['action' => 'log_audit', 'name' => '日志审计', 'icon' => 'file-text-o'],
             ['action' => 'attack_map', 'name' => '攻击地图', 'icon' => 'map-marker'],
@@ -165,6 +168,28 @@ class SecurityController extends AdminBaseController
             return '永久';
         }
         return $expire <= time() ? '已过期' : date('Y-m-d H:i', $expire);
+    }
+
+    /* ==================== 0. 服务器监控 ==================== */
+
+    /**
+     * 服务器监控：CPU 负载 / 内存占用率 / 硬盘空间容量 / 运行时长等实时指标
+     * 数据来源见 app\admin\library\SystemMonitor，页面每 5 秒轮询 server_metrics 刷新
+     */
+    public function server_monitor()
+    {
+        $this->assignTabs('server_monitor');
+        $this->assign('metrics', SystemMonitor::snapshot());
+
+        return $this->fetch('server_monitor');
+    }
+
+    /**
+     * 服务器指标（ajax 轮询接口，返回 SystemMonitor::snapshot() 的完整结构）
+     */
+    public function server_metrics()
+    {
+        $this->success('ok', '', SystemMonitor::snapshot());
     }
 
     /* ==================== 1. 封锁IP ==================== */
