@@ -204,10 +204,11 @@ class ActiveClockController extends ToolController
             }
             $this->model->where('id', 'in', $ids)->delete();
             Db::commit();
-            $this->success('删除成功');
         } catch (\Exception $e) {
             Db::rollback();
             $this->error('删除失败：' . $e->getMessage());
         }
+
+        $this->success('删除成功');
     }
 }

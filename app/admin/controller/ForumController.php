@@ -12,8 +12,8 @@ use app\admin\model\forum\ForumModel;
 use app\admin\model\member\CommunityCateModel;
 use app\admin\model\member\CommunityModel;
 use think\App;
-use think\Db;
 use think\db\exception\DbException;
+use think\facade\Db;
 
 class ForumController extends ToolController
 {
@@ -270,11 +270,12 @@ class ForumController extends ToolController
             $this->model->where('id', $id)->update(['delete_time' => time()]);
 
             Db::commit();
-            $this->success('删除成功');
         } catch (\Exception $e) {
             Db::rollback();
             $this->error('删除失败：' . $e->getMessage());
         }
+
+        $this->success('删除成功');
     }
 
     public function delete_all()
@@ -322,11 +323,12 @@ class ForumController extends ToolController
 
             $this->model->whereIn('id', $ids)->update(['delete_time' => time()]);
             Db::commit();
-            $this->success('删除成功');
         } catch (\Exception $e) {
             Db::rollback();
             $this->error('删除失败：' . $e->getMessage());
         }
+
+        $this->success('删除成功');
     }
 
 
