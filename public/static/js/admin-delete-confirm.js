@@ -229,7 +229,7 @@
                             ' autocomplete="off" maxlength="10">' +
                             '<label class="cmf-dc-mute">' +
                                 '<input type="checkbox">' +
-                                '<span>今日不再弹出此校验<em>（当天删除将只保留一次普通确认）</em></span>' +
+                                '<span>今日不再弹出此校验</span>' +
                             '</label>' +
                         '</div>' +
                         '<div class="cmf-dc-foot">' +
