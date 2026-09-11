@@ -4,6 +4,7 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
+use app\admin\library\SystemMonitor;
 use app\admin\model\member\CheckModel;
 use app\admin\model\member\MemberModel;
 use app\admin\model\UserModel;
@@ -43,7 +44,7 @@ class MobileController extends AdminBaseController
     public function login()
     {
         if (!empty(session('ADMIN_ID'))) {
-            $this->redirect(url('mobile/check_index'));
+            $this->redirect(url('mobile/dashboard'));
         }
         session("__LOGIN_BY_CMF_ADMIN_PW__", true);
         return $this->fetch('mobile/login');
@@ -91,7 +92,7 @@ class MobileController extends AdminBaseController
         }
         UserModel::where('id', $result['id'])->update($data);
         session("__LOGIN_BY_CMF_ADMIN_PW__", null);
-        $this->success('登录成功', url('mobile/check_index'));
+        $this->success('登录成功', url('mobile/dashboard'));
     }
 
     /**
@@ -101,6 +102,78 @@ class MobileController extends AdminBaseController
     {
         session('ADMIN_ID', null);
         $this->redirect(url('mobile/login'));
+    }
+
+    /* ==================== 管理驾驶舱 ==================== */
+
+    /**
+     * 管理驾驶舱（移动端首页）
+     *
+     * 首屏的服务器指标用 PHP 直出，其余运营数据由 dashboard_data 异步拉取，
+     * 避免首屏白屏，也让运营数据那一次较重的聚合查询不阻塞页面渲染。
+     */
+    public function dashboard()
+    {
+        $this->assign('server', SystemMonitor::snapshot());
+        return $this->fetch('mobile/dashboard');
+    }
+
+    /**
+     * 驾驶舱运营数据（ajax）
+     *
+     * 直接复用 PC 后台首页的聚合口径（MainController::collectStats，带 60 秒缓存），
+     * 保证移动端与 PC 看板数字完全一致。
+     */
+    public function dashboard_data()
+    {
+        $forceRefresh = (int)$this->request->param('refresh', 0) === 1;
+        $overview     = MainController::collectStats($forceRefresh);
+
+        $hour = (int)date('H');
+        if ($hour < 6) {
+            $greet = '凌晨好';
+        } elseif ($hour < 9) {
+            $greet = '早上好';
+        } elseif ($hour < 12) {
+            $greet = '上午好';
+        } elseif ($hour < 14) {
+            $greet = '中午好';
+        } elseif ($hour < 18) {
+            $greet = '下午好';
+        } else {
+            $greet = '晚上好';
+        }
+
+        $week = ['日', '一', '二', '三', '四', '五', '六'];
+
+        $this->success('ok', '', [
+            'greet'        => $greet,
+            'date_text'    => date('Y年n月j日') . ' 星期' . $week[(int)date('w')],
+            'time'         => date('Y-m-d H:i:s'),
+            'admin'        => (string)session('name'),
+            'stats'        => $overview['stats'],
+            'todo'         => $overview['todo'],
+            'todo_total'   => $overview['todo_total'],
+            'trend'        => $overview['trend'],
+            'cate_pie'     => $overview['cate_pie'],
+            'type_bar'     => $overview['type_bar'],
+            'latest_clock' => $overview['latest_clock'],
+            'latest_sign'  => $overview['latest_sign'],
+            'latest_order' => $overview['latest_order'],
+            'latest_user'  => $overview['latest_user'],
+            'quick'        => $overview['quick'],
+            'from_cache'   => $overview['from_cache'],
+            'cost_ms'      => $overview['cost_ms'],
+            'update_time'  => $overview['update_time'],
+        ]);
+    }
+
+    /**
+     * 服务器实时指标（驾驶舱轮询）
+     */
+    public function server_metrics()
+    {
+        $this->success('ok', '', SystemMonitor::snapshot());
     }
 
     /**

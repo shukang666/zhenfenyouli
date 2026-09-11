@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>管理驾驶舱</title>
+    <style>
+        :root {
+            --card: rgba(255, 255, 255, .045);
+            --line: rgba(255, 255, 255, .08);
+            --line2: rgba(255, 255, 255, .14);
+            --txt: #e6f0f7;
+            --sub: #7f95a8;
+            --green: #22c55e;
+            --cyan: #38bdf8;
+            --purple: #a78bfa;
+            --amber: #fbbf24;
+            --red: #f87171;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+            color: var(--txt);
+            background: radial-gradient(1100px 520px at 50% -8%, #16344b 0%, rgba(10, 16, 23, 0) 62%) #0a1017;
+            min-height: 100vh;
+            padding-bottom: 26px;
+        }
+
+        /* ---------- 顶栏 ---------- */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 13px 15px;
+            background: rgba(10, 16, 23, .86);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--line);
+        }
+        .tb-title { font-size: 16px; font-weight: 600; letter-spacing: .5px; display: flex; align-items: center; }
+        .tb-title .dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            margin-right: 8px;
+            animation: breathe 2s ease-in-out infinite;
+        }
+        @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+        .tb-right { display: flex; align-items: center; gap: 10px; }
+        .tb-user { font-size: 12px; color: var(--sub); }
+        .tb-right a {
+            font-size: 12px;
+            color: var(--txt);
+            text-decoration: none;
+            background: rgba(255, 255, 255, .1);
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .wrap { padding: 14px 13px 0; }
+
+        /* ---------- 问候卡 ---------- */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, .22) 0%, rgba(56, 189, 248, .12) 100%);
+            border: 1px solid rgba(34, 197, 94, .28);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            right: -46px; top: -46px;
+            width: 140px; height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(34, 197, 94, .34) 0%, rgba(34, 197, 94, 0) 70%);
+        }
+        .hero-greet { font-size: 17px; font-weight: 600; position: relative; }
+        .hero-date { font-size: 12px; color: rgba(230, 240, 247, .68); margin-top: 5px; position: relative; }
+        .hero-nums { display: flex; margin-top: 16px; position: relative; }
+        .hn { flex: 1; }
+        .hn b { display: block; font-size: 21px; font-weight: 600; letter-spacing: .3px; }
+        .hn span { display: block; font-size: 11px; color: rgba(230, 240, 247, .6); margin-top: 4px; }
+
+        /* ---------- 通用区块标题 ---------- */
+        .sec-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 2px 9px;
+        }
+        .sh-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; }
+        .sh-title::before {
+            content: '';
+            width: 3px; height: 13px;
+            border-radius: 2px;
+            background: var(--green);
+            margin-right: 7px;
+        }
+        .sh-tools { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--sub); }
+        .sh-tools label { display: flex; align-items: center; gap: 4px; }
+        .sh-tools a { color: var(--cyan); text-decoration: none; }
+        .sh-more { font-size: 12px; color: var(--sub); }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        /* ---------- 服务器监控 ---------- */
+        .rings { display: flex; }
+        .ring { flex: 1; text-align: center; }
+        .ring-svg { width: 74px; height: 74px; transform: rotate(-90deg); }
+        .ring-bg { fill: none; stroke: rgba(255, 255, 255, .09); stroke-width: 8; }
+        .ring-fg {
+            fill: none;
+            stroke: var(--green);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 0 264;
+            transition: stroke-dasharray .7s ease, stroke .4s ease;
+        }
+        .ring-wrap { position: relative; display: inline-block; }
+        .ring-val {
+            position: absolute;
+            left: 0; right: 0; top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .ring-name { font-size: 11.5px; color: var(--sub); margin-top: 4px; }
+        .ring.ok .ring-fg { stroke: var(--green); }
+        .ring.warning .ring-fg { stroke: var(--amber); }
+        .ring.danger .ring-fg { stroke: var(--red); }
+        .ring.unknown .ring-fg { stroke: rgba(255, 255, 255, .2); }
+        .ring.unknown .ring-val { color: var(--sub); font-size: 12px; }
+
+        .srv-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px 18px;
+            margin-top: 14px;
+            padding-top: 13px;
+            border-top: 1px dashed var(--line);
+            font-size: 11.5px;
+            color: var(--sub);
+        }
+        .srv-meta b { color: var(--txt); font-weight: 500; }
+
+        .chart-box { margin-top: 14px; padding-top: 13px; border-top: 1px dashed var(--line); }
+        .cb-head { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--sub); margin-bottom: 6px; }
+        .cb-legend { display: flex; gap: 12px; }
+        .cb-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+        canvas { display: block; width: 100%; }
+
+        /* ---------- 概览数字 ---------- */
+        .ov-grid { display: flex; flex-wrap: wrap; }
+        .ov-cell { width: 25%; padding: 12px 2px; text-align: center; }
+        .ov-cell b { display: block; font-size: 17px; font-weight: 600; }
+        .ov-cell span { display: block; font-size: 11px; color: var(--sub); margin-top: 4px; }
+
+        /* ---------- 待办 ---------- */
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 11px 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, .05);
+            text-decoration: none;
+            color: var(--txt);
+        }
+        .todo-item:last-child { border-bottom: none; }
+        .todo-ic {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            margin-right: 11px;
+            flex-shrink: 0;
+        }
+        .todo-txt { flex: 1; min-width: 0; }
+        .todo-txt b { display: block; font-size: 13.5px; font-weight: 500; }
+        .todo-txt span { display: block; font-size: 11px; color: var(--sub); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .todo-num {
+            font-size: 15px; font-weight: 600;
+            padding-left: 10px;
+            flex-shrink: 0;
+        }
+        .todo-num.zero { color: #3d4d5c; font-weight: 400; }
+
+        /* ---------- 最新动态 ---------- */
+        .dyn-tabs { display: flex; gap: 8px; margin-bottom: 4px; }
+        .dyn-tabs a {
+            font-size: 12px;
+            color: var(--sub);
+            text-decoration: none;
+            padding: 5px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .05);
+        }
+        .dyn-tabs a.active { background: rgba(34, 197, 94, .18); color: var(--green); }
+        .dyn-item { display: flex; align-items: center; padding: 10px 2px; border-bottom: 1px solid rgba(255, 255, 255, .05); }
+        .dyn-item:last-child { border-bottom: none; }
+        .dyn-txt { flex: 1; min-width: 0; }
+        .dyn-txt b { display: block; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dyn-txt span { display: block; font-size: 11px; color: var(--sub); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dyn-time { font-size: 11px; color: var(--sub); padding-left: 10px; flex-shrink: 0; }
+
+        /* ---------- 快捷入口 ---------- */
+        .qk-grid { display: flex; flex-wrap: wrap; }
+        .qk-cell {
+            width: 25%;
+            padding: 11px 2px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--txt);
+        }
+        .qk-ic {
+            width: 38px; height: 38px;
+            margin: 0 auto 6px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .qk-cell span { font-size: 11px; color: #b8c8d6; }
+
+        /* ---------- 底部 ---------- */
+        .footer {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 11px;
+            color: #4d5f6e;
+            line-height: 1.9;
+        }
+        .footer a { color: var(--sub); }
+
+        .loading { text-align: center; font-size: 12px; color: var(--sub); padding: 18px 0; }
+        .skeleton { height: 12px; border-radius: 6px; background: rgba(255, 255, 255, .07); margin: 8px 0; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="tb-title"><span class="dot"></span>管理驾驶舱</div>
+    <div class="tb-right">
+        <span class="tb-user">{$admin.user_login}</span>
+        <a href="{:url('logout')}">退出</a>
+    </div>
+</div>
+
+<div class="wrap">
+
+    <!-- 问候 + 今日核心 -->
+    <div class="hero">
+        <div class="hero-greet"><span id="greet">你好</span>，<span>{$admin.user_login}</span></div>
+        <div class="hero-date" id="heroDate">数据加载中…</div>
+        <div class="hero-nums">
+            <div class="hn"><b id="hnClock">-</b><span>今日打卡</span></div>
+            <div class="hn"><b id="hnUser">-</b><span>今日新增用户</span></div>
+            <div class="hn"><b id="hnPoint">-</b><span>今日发放积分</span></div>
+        </div>
+    </div>
+
+    <!-- 服务器监控 -->
+    <div class="sec-head">
+        <span class="sh-title">服务器监控</span>
+        <span class="sh-tools">
+            <label><input type="checkbox" id="autoRefresh" checked> 自动刷新</label>
+            <a href="javascript:;" id="btnRefreshServer">刷新</a>
+        </span>
+    </div>
+    <div class="card">
+        <div class="rings">
+            <div class="ring" id="ringCpu">
+                <div class="ring-wrap">
+                    <svg class="ring-svg" viewBox="0 0 100 100">
+                        <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+                        <circle class="ring-fg" cx="50" cy="50" r="42"></circle>
+                    </svg>
+                    <div class="ring-val" data-val>-</div>
+                </div>
+                <div class="ring-name">CPU 使用率</div>
+            </div>
+            <div class="ring" id="ringMemory">
+                <div class="ring-wrap">
+                    <svg class="ring-svg" viewBox="0 0 100 100">
+                        <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+                        <circle class="ring-fg" cx="50" cy="50" r="42"></circle>
+                    </svg>
+                    <div class="ring-val" data-val>-</div>
+                </div>
+                <div class="ring-name">内存占用率</div>
+            </div>
+            <div class="ring" id="ringDisk">
+                <div class="ring-wrap">
+                    <svg class="ring-svg" viewBox="0 0 100 100">
+                        <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
+                        <circle class="ring-fg" cx="50" cy="50" r="42"></circle>
+                    </svg>
+                    <div class="ring-val" data-val>-</div>
+                </div>
+                <div class="ring-name">硬盘使用率</div>
+            </div>
+        </div>
+
+        <div class="srv-meta" id="srvMeta">
+            <span>运行时长 <b id="mUptime">-</b></span>
+            <span>服务器时间 <b id="mTime">-</b></span>
+            <span>PHP <b id="mPhp">-</b></span>
+            <span>磁盘剩余 <b id="mFree">-</b></span>
+        </div>
+
+        <div class="chart-box">
+            <div class="cb-head">
+                <span>实时趋势（最近 <span id="srvPoints">0</span> 次采样）</span>
+                <span class="cb-legend">
+                    <span><i style="background:#38bdf8"></i>CPU</span>
+                    <span><i style="background:#a78bfa"></i>内存</span>
+                </span>
+            </div>
+            <canvas id="srvChart" data-h="140"></canvas>
+        </div>
+    </div>
+
+    <!-- 运营概览 -->
+    <div class="sec-head">
+        <span class="sh-title">运营概览</span>
+        <span class="sh-more" id="ovCost">-</span>
+    </div>
+    <div class="card">
+        <div class="ov-grid" id="ovGrid">
+            <div class="ov-cell"><b>-</b><span>加载中</span></div>
+        </div>
+    </div>
+
+    <!-- 待办事项 -->
+    <div class="sec-head">
+        <span class="sh-title">待办事项</span>
+        <a class="sh-more" href="javascript:;" id="btnRefreshAll">刷新数据</a>
+    </div>
+    <div class="card" id="todoBox">
+        <div class="loading">加载中…</div>
+    </div>
+
+    <!-- 30 天趋势 -->
+    <div class="sec-head">
+        <span class="sh-title">近 30 天趋势</span>
+        <span class="cb-legend sh-more">
+            <span><i style="background:#22c55e"></i>打卡</span>
+            <span><i style="background:#38bdf8"></i>新增用户</span>
+            <span><i style="background:#fbbf24"></i>活动打卡</span>
+        </span>
+    </div>
+    <div class="card">
+        <canvas id="trendChart" data-h="160"></canvas>
+    </div>
+
+    <!-- 最新动态 -->
+    <div class="sec-head">
+        <span class="sh-title">最新动态</span>
+    </div>
+    <div class="card">
+        <div class="dyn-tabs" id="dynTabs">
+            <a href="javascript:;" data-tab="clock" class="active">打卡</a>
+            <a href="javascript:;" data-tab="sign">活动报名</a>
+            <a href="javascript:;" data-tab="order">商城订单</a>
+            <a href="javascript:;" data-tab="user">注册用户</a>
+        </div>
+        <div id="dynBox"><div class="loading">加载中…</div></div>
+    </div>
+
+    <!-- 快捷入口 -->
+    <div class="sec-head">
+        <span class="sh-title">快捷入口</span>
+        <span class="sh-more">点击跳转 PC 后台</span>
+    </div>
+    <div class="card">
+        <div class="qk-grid" id="qkGrid"><div class="loading">加载中…</div></div>
+    </div>
+
+    <div class="footer">
+        数据更新时间：<span id="fUpdate">-</span><br>
+        服务器指标每 5 秒自动刷新；运营数据缓存 60 秒，可点「刷新数据」强制重算<br>
+        <a href="javascript:;" id="btnTop">回到顶部</a>
+    </div>
+</div>
+
+<script>
+    var BOOT_SERVER = {:json_encode($server)};
+    var URL_DATA    = '{:url("dashboard_data")}';
+    var URL_SERVER  = '{:url("server_metrics")}';
+
+    /* ==================== 工具 ==================== */
+    function $(id) { return document.getElementById(id); }
+
+    function esc(s) {
+        return String(s === null || s === undefined ? '' : s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function fetchJson(url) {
+        return fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}, cache: 'no-store'})
+            .then(function (r) { return r.json(); });
+    }
+
+    function niceMax(v) {
+        if (!(v > 0)) return 10;
+        var exp = Math.pow(10, Math.floor(Math.log(v) / Math.LN10));
+        var n = v / exp;
+        var m = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+        return m * exp;
+    }
+
+    /* ==================== 折线图（原生 canvas，不依赖图表库） ==================== */
+    function drawLine(canvas, cfg) {
+        if (!canvas) return;
+        var dpr = window.devicePixelRatio || 1;
+        var w = canvas.clientWidth || canvas.parentNode.clientWidth || 300;
+        var h = parseInt(canvas.getAttribute('data-h') || '150', 10);
+
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.height = h + 'px';
+
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        var padL = 32, padR = 8, padT = 10, padB = 20;
+        var cw = w - padL - padR, ch = h - padT - padB;
+        var labels = cfg.labels || [];
+        var series = cfg.series || [];
+
+        if (!labels.length) {
+            ctx.fillStyle = 'rgba(255,255,255,.25)';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('暂无数据', w / 2, h / 2);
+            return;
+        }
+
+        var max = 0;
+        series.forEach(function (s) {
+            (s.data || []).forEach(function (v) {
+                if (v !== null && v !== undefined && v > max) max = v;
+            });
+        });
+        var yMax = cfg.yMax || niceMax(max * 1.15);
+
+        /* 网格 + Y 轴刻度 */
+        ctx.strokeStyle = 'rgba(255,255,255,.07)';
+        ctx.fillStyle = 'rgba(255,255,255,.32)';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.lineWidth = 1;
+        var steps = 4, i;
+        for (i = 0; i <= steps; i++) {
+            var gy = padT + ch - (ch * i / steps);
+            ctx.beginPath();
+            ctx.moveTo(padL, gy);
+            ctx.lineTo(padL + cw, gy);
+            ctx.stroke();
+            ctx.fillText(cfg.yUnit === '%' ? (yMax * i / steps) + '%' : Math.round(yMax * i / steps), padL - 6, gy + 3);
+        }
+
+        /* X 轴标签（抽稀，最多 6 个） */
+        var step = Math.max(1, Math.ceil(labels.length / 6));
+        ctx.textAlign = 'center';
+        for (i = 0; i < labels.length; i += step) {
+            var gx = labels.length === 1 ? padL + cw / 2 : padL + cw * i / (labels.length - 1);
+            ctx.fillText(labels[i], gx, h - 6);
+        }
+
+        /* 曲线 */
+        series.forEach(function (s) {
+            var pts = [];
+            (s.data || []).forEach(function (v, idx) {
+                if (v === null || v === undefined) return;
+                var x = labels.length === 1 ? padL + cw / 2 : padL + cw * idx / (labels.length - 1);
+                var y = padT + ch - ch * Math.min(v, yMax) / yMax;
+                pts.push([x, y]);
+            });
+            if (!pts.length) return;
+
+            if (s.area) {
+                var grd = ctx.createLinearGradient(0, padT, 0, padT + ch);
+                grd.addColorStop(0, s.area);
+                grd.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.beginPath();
+                ctx.moveTo(pts[0][0], padT + ch);
+                pts.forEach(function (p) { ctx.lineTo(p[0], p[1]); });
+                ctx.lineTo(pts[pts.length - 1][0], padT + ch);
+                ctx.closePath();
+                ctx.fillStyle = grd;
+                ctx.fill();
+            }
+
+            ctx.beginPath();
+            pts.forEach(function (p, idx) { idx ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            var last = pts[pts.length - 1];
+            ctx.beginPath();
+            ctx.arc(last[0], last[1], 3, 0, Math.PI * 2);
+            ctx.fillStyle = s.color;
+            ctx.fill();
+        });
+    }
+
+    /* ==================== 服务器监控 ==================== */
+    var CIRC = 2 * Math.PI * 42;
+    var srvAxis = [], srvCpu = [], srvMem = [];
+    var srvTimer = null;
+    var SRV_MAX_POINTS = 30;
+
+    function setRing(id, m) {
+        var box = $(id);
+        box.className = 'ring ' + (m.available ? m.level : 'unknown');
+        var val = box.querySelector('[data-val]');
+        if (!m.available || m.percent === null || m.percent === undefined) {
+            val.textContent = '不可用';
+        } else {
+            val.textContent = m.percent + '%';
+        }
+        var fg = box.querySelector('.ring-fg');
+        var pct = (m.percent === null || m.percent === undefined) ? 0 : Math.max(0, Math.min(100, m.percent));
+        fg.setAttribute('stroke-dasharray', (CIRC * pct / 100).toFixed(1) + ' ' + CIRC.toFixed(1));
+    }
+
+    function pushSrvPoint(m) {
+        srvAxis.push((m.time || '').substr(11, 8));
+        srvCpu.push(m.cpu.percent === null || m.cpu.percent === undefined ? null : m.cpu.percent);
+        srvMem.push(m.memory.percent === null || m.memory.percent === undefined ? null : m.memory.percent);
+        if (srvAxis.length > SRV_MAX_POINTS) {
+            srvAxis.shift(); srvCpu.shift(); srvMem.shift();
+        }
+        $('srvPoints').textContent = srvAxis.length;
+        drawLine($('srvChart'), {
+            labels: srvAxis,
+            yMax: 100,
+            yUnit: '%',
+            series: [
+                {color: '#38bdf8', data: srvCpu, area: 'rgba(56,189,248,.22)'},
+                {color: '#a78bfa', data: srvMem, area: 'rgba(167,139,250,.18)'}
+            ]
+        });
+    }
+
+    function applyServer(m) {
+        setRing('ringCpu', m.cpu);
+        setRing('ringMemory', m.memory);
+        setRing('ringDisk', m.disk);
+
+        $('mUptime').textContent = m.uptime_text;
+        $('mTime').textContent = (m.time || '').substr(11, 8);
+        $('mPhp').textContent = m.system.php;
+        $('mFree').textContent = m.disk.free_text;
+        $('fUpdate').textContent = m.time;
+
+        pushSrvPoint(m);
+    }
+
+    function pollServer() {
+        fetchJson(URL_SERVER).then(function (res) {
+            if (res && res.code == 1 && res.data) applyServer(res.data);
+        }).catch(function () {});
+    }
+
+    function startServerTimer() {
+        stopServerTimer();
+        srvTimer = window.setInterval(pollServer, 5000);
+    }
+
+    function stopServerTimer() {
+        if (srvTimer) { window.clearInterval(srvTimer); srvTimer = null; }
+    }
+
+    /* ==================== 运营数据 ==================== */
+    var overview = null;
+
+    function renderOverview(d) {
+        overview = d;
+
+        $('greet').textContent = d.greet;
+        $('heroDate').textContent = d.date_text + ' · 数据更新 ' + (d.update_time || '').substr(11, 5);
+
+        var st = d.stats || {};
+        $('hnClock').textContent = st.clock_today || 0;
+        $('hnUser').textContent = st.user_today || 0;
+        $('hnPoint').textContent = st.point_today || 0;
+        $('ovCost').textContent = (d.from_cache == 1 ? '缓存数据' : '实时计算') + ' · ' + d.cost_ms + 'ms';
+
+        /* 概览数字 */
+        var ov = [
+            ['累计用户', st.user_total], ['累计打卡', st.clock_total], ['进行中活动', st.active_ing], ['累计订单', st.order_total],
+            ['活动报名', st.sign_total], ['累计发放积分', st.point_total], ['入驻商家', st.merchant_total], ['督导员', st.supervisor_total]
+        ];
+        var html = '';
+        ov.forEach(function (item) {
+            html += '<div class="ov-cell"><b>' + (item[1] || 0) + '</b><span>' + item[0] + '</span></div>';
+        });
+        $('ovGrid').innerHTML = html;
+
+        renderTodo(d.todo || []);
+        renderTrend(d.trend || {});
+        renderDyn('clock');
+        renderQuick(d.quick || []);
+    }
+
+    function renderTodo(list) {
+        if (!list.length) { $('todoBox').innerHTML = '<div class="loading">暂无待办</div>'; return; }
+        var html = '';
+        list.forEach(function (it) {
+            var n = parseInt(it.count, 10) || 0;
+            html += '<a class="todo-item" href="' + esc(it.url) + '">'
+                + '<span class="todo-ic" style="background:' + esc(it.color) + '"></span>'
+                + '<span class="todo-txt"><b>' + esc(it.name) + '</b><span>' + esc(it.desc) + '</span></span>'
+                + '<span class="todo-num' + (n === 0 ? ' zero' : '') + '" style="' + (n > 0 ? 'color:' + esc(it.color) : '') + '">' + n + '</span>'
+                + '</a>';
+        });
+        $('todoBox').innerHTML = html;
+    }
+
+    function renderTrend(t) {
+        drawLine($('trendChart'), {
+            labels: t.labels || [],
+            series: [
+                {color: '#22c55e', data: t.clock || [], area: 'rgba(34,197,94,.22)'},
+                {color: '#38bdf8', data: t.user || []},
+                {color: '#fbbf24', data: t.aclock || []}
+            ]
+        });
+    }
+
+    var DYN_TABS = {
+        clock: function (i) {
+            return [i.nickname || '用户' + i.user_id, (i.type_name || '') + (i.cate_name ? ' · ' + i.cate_name : '') + ' · ' + (i.status_name || ''), i.time_text];
+        },
+        sign: function (i) { return [i.nickname || '用户' + i.user_id, '报名「' + (i.active_name || '-') + '」', i.time_text]; },
+        order: function (i) { return [i.nickname || '用户' + i.user_id, (i.order_num || '') + ' · ' + (i.status_name || '') + ' · ' + (i.pay_text || ''), i.time_text]; },
+        user: function (i) { return [i.nickname || ('用户' + i.id), (i.mobile || '未绑定手机') + ' · ' + (i.community_name || '未选择小区'), i.time_text]; }
+    };
+
+    function renderDyn(tab) {
+        if (!overview) return;
+        var map = {clock: 'latest_clock', sign: 'latest_sign', order: 'latest_order', user: 'latest_user'};
+        var list = overview[map[tab]] || [];
+        var fn = DYN_TABS[tab];
+        if (!list.length) { $('dynBox').innerHTML = '<div class="loading">暂无数据</div>'; return; }
+
+        var html = '';
+        list.forEach(function (i) {
+            var r = fn(i);
+            html += '<div class="dyn-item"><span class="dyn-txt"><b>' + esc(r[0]) + '</b><span>' + esc(r[1]) + '</span></span>'
+                + '<span class="dyn-time">' + esc(r[2]) + '</span></div>';
+        });
+        $('dynBox').innerHTML = html;
+
+        var links = $('dynTabs').getElementsByTagName('a');
+        for (var k = 0; k < links.length; k++) {
+            links[k].className = links[k].getAttribute('data-tab') === tab ? 'active' : '';
+        }
+    }
+
+    function renderQuick(list) {
+        if (!list.length) { $('qkGrid').innerHTML = '<div class="loading">暂无入口</div>'; return; }
+        var html = '';
+        list.forEach(function (q) {
+            html += '<a class="qk-cell" href="' + esc(q.url) + '">'
+                + '<span class="qk-ic" style="background:' + esc(q.color) + '22;color:' + esc(q.color) + '">'
+                + esc((q.name || '').substr(0, 1)) + '</span>'
+                + '<span>' + esc(q.name) + '</span></a>';
+        });
+        $('qkGrid').innerHTML = html;
+    }
+
+    function loadOverview(force) {
+        $('ovCost').textContent = '加载中…';
+        fetchJson(URL_DATA + (force ? '?refresh=1' : '')).then(function (res) {
+            if (res && res.code == 1 && res.data) {
+                renderOverview(res.data);
+            } else {
+                $('ovCost').textContent = '加载失败';
+            }
+        }).catch(function () { $('ovCost').textContent = '加载失败'; });
+    }
+
+    /* ==================== 事件 ==================== */
+    $('dynTabs').addEventListener('click', function (e) {
+        var a = e.target.closest ? e.target.closest('a') : null;
+        if (a && a.getAttribute('data-tab')) renderDyn(a.getAttribute('data-tab'));
+    });
+
+    $('autoRefresh').addEventListener('change', function () {
+        this.checked ? startServerTimer() : stopServerTimer();
+    });
+
+    $('btnRefreshServer').addEventListener('click', pollServer);
+    $('btnRefreshAll').addEventListener('click', function () { loadOverview(true); });
+    $('btnTop').addEventListener('click', function () {
+        try { window.scrollTo({top: 0, behavior: 'smooth'}); } catch (e) { window.scrollTo(0, 0); }
+    });
+
+    var rt = null;
+    window.addEventListener('resize', function () {
+        clearTimeout(rt);
+        rt = setTimeout(function () {
+            if (overview) renderTrend(overview.trend || {});
+            drawLine($('srvChart'), {
+                labels: srvAxis, yMax: 100, yUnit: '%',
+                series: [
+                    {color: '#38bdf8', data: srvCpu, area: 'rgba(56,189,248,.22)'},
+                    {color: '#a78bfa', data: srvMem, area: 'rgba(167,139,250,.18)'}
+                ]
+            });
+        }, 200);
+    });
+
+    /* ==================== 启动 ==================== */
+    applyServer(BOOT_SERVER);
+    startServerTimer();
+    loadOverview(false);
+</script>
+</body>
+</html>
