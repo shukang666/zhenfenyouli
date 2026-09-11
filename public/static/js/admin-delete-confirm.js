@@ -15,6 +15,14 @@
  * 补充说明：勾选「今日不再弹出」只跳过本校验，原有普通确认仍会保留，
  *           不会出现"点一下就静默删除"的情况。
  *
+ * ★ 服务端校验（必须与本文件配套，否则前端形同虚设）
+ *   本文件只是**前端**拦截——绕过页面直接 POST /admin/xxx/delete.html?id=2
+ *   照样能删。真正的关口在 app/middleware/AdminDeleteGuard.php：
+ *   它要求所有「删除类」请求带上参数 _dc_token，且值与 session 里的令牌一致。
+ *   本文件负责用 $.ajaxPrefilter 把该令牌自动补到删除类 ajax 请求上；
+ *   令牌存在 cookie cmf_dc_token 里，由那个中间件在页面响应时下发。
+ *   两边的参数名/令牌名必须一致：_dc_token / cmf_dc_token。
+ *
  * 修改本文件后，请同步把 header.html 里引入处的 ?v= 版本号 +1，
  * 否则浏览器会继续用缓存的旧文件。
  * ================================================================== */
@@ -34,6 +42,8 @@
     }
 
     try {
+        var TOKEN_COOKIE = 'cmf_dc_token'; // 服务端下发的删除校验令牌（见 app/middleware/AdminDeleteGuard.php）
+        var TOKEN_PARAM  = '_dc_token';    // 删除请求必须携带的参数名，必须与服务端一致
         var MUTE_KEY  = 'cmf_delete_confirm_mute'; // 存放免打扰日期，形如 2026-9-11
         var NEED_TEXT = '确认';
         var bypass    = false;  // 校验通过后重新派发点击时置 true，避免被再次拦截
@@ -68,6 +78,66 @@
             if (window.console && console.warn) {
                 console.warn('[删除校验] ' + msg, err || '');
             }
+        }
+
+        /* ---------------- 服务端校验令牌 ---------------- */
+
+        // 从 cookie 里读服务端下发的令牌；读不到返回空串（此时删除会被服务端拦下）
+        function readToken() {
+            try {
+                var m = document.cookie.match(new RegExp('(?:^|;\\s*)' + TOKEN_COOKIE + '=([^;]*)'));
+                return m ? decodeURIComponent(m[1]) : '';
+            } catch (e) {
+                return '';
+            }
+        }
+
+        // 是不是删除类请求地址。
+        // 判断口径比服务端 AdminDeleteGuard::isDeleteAction 更宽松（多带参数不影响），
+        // 这样不会出现「服务端要令牌、前端没带」的情况。
+        function isDeleteUrl(url) {
+            var path = String(url || '').split('#')[0].split('?')[0];
+            return /(^|\/|_|-)del/i.test(path);
+        }
+
+        /**
+         * 给所有删除类 ajax 请求自动补上服务端要求的令牌参数。
+         *
+         * 为什么用 $.ajaxPrefilter 而不是去改 admin.js：
+         * 后台删除有两个来源——
+         *   ① admin.js 的 .js-ajax-delete（$.ajax，type:post，不带任何 data）
+         *   ② 批量删除（form.js-ajax-form + button.js-ajax-submit）与页面自定义删除按钮
+         * 不管哪条通道最后都经过 $.ajax，所以在这里统一补参数最稳，也不用碰 admin.js。
+         */
+        if ($.ajaxPrefilter) {
+            $.ajaxPrefilter(function (options) {
+                if (!options || !options.url || !isDeleteUrl(options.url)) {
+                    return;
+                }
+
+                var token = readToken();
+
+                if (!token) {
+                    warn('页面未取到删除校验令牌（' + TOKEN_COOKIE + '），服务端会拒绝本次删除');
+                    return;
+                }
+
+                var data = options.data;
+
+                try {
+                    if (window.FormData && data instanceof window.FormData) {
+                        data.append(TOKEN_PARAM, token);
+                    } else if (typeof data === 'string') {
+                        options.data = data + (data ? '&' : '') + TOKEN_PARAM + '=' + encodeURIComponent(token);
+                    } else if (data && typeof data === 'object') {
+                        data[TOKEN_PARAM] = token;
+                    } else {
+                        options.data = TOKEN_PARAM + '=' + encodeURIComponent(token);
+                    }
+                } catch (e) {
+                    warn('追加删除校验令牌失败', e);
+                }
+            });
         }
 
         /* ---------------- 样式 ---------------- */
@@ -318,7 +388,7 @@
 
         // 暴露接口，供页面自定义的删除按钮主动接入
         window.CmfDeleteConfirm = {
-            version: '2026-09-11',
+            version: '2026-09-11b',
             require: function (callback) {
                 if (isMutedToday()) {
                     callback();
