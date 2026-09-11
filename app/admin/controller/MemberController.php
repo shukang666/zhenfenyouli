@@ -10,6 +10,7 @@ use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberModel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use think\App;
+use think\facade\Db;
 
 class MemberController extends ToolController
 {
@@ -143,13 +144,30 @@ class MemberController extends ToolController
         }
         $list_order = 'a.' . $sortField . ' ' . $sortOrder;
 
-        $Model = new MemberModel();
-        $list = $Model->getInfo($map, -1, 0, 'a.*', $list_order);
+        // ===== 性能优化（导出慢的根因） =====
+        // 原实现：先查出全部用户，再在 foreach 里对每一行分别查小区、社区名称，
+        // 每行 2 条 SQL，2.7 万用户 ≈ 5.4 万次查询，接口要等几十秒。
+        // 现改为一次 LEFT JOIN 取全量数据，并且只取导出用到的 7 个字段（原来 a.* 有 36 个）。
+        // 名称表在 ON 条件里带上 delete_time = 0，与 ToolModel 软删除的取数口径保持一致。
+        $list = Db::name('member')->alias('a')
+            ->leftJoin('member_community_parent cp', 'cp.id = a.community_parent_id AND cp.delete_time = 0')
+            ->leftJoin('member_community c', 'c.id = a.community_id AND c.delete_time = 0')
+            ->field('a.id,a.nickname,a.mobile,a.point,a.create_time,cp.name AS community_parent_name,c.name AS community_name')
+            ->where($map)
+            ->order($list_order)
+            ->select();
 
-        foreach($list as &$item){
-            $item['create_time'] = date('Y-m-d H:i:s',$item['create_time']);
-            $item['community_parent_name'] = CommunityParentModel::where('id',$item['community_parent_id'])->value('name','');
-            $item['community_name'] = CommunityModel::where('id',$item['community_id'])->value('name','');
+        $rows = [];
+        foreach ($list as $item) {
+            $rows[] = [
+                'id'                    => $item['id'],
+                'nickname'              => $item['nickname'],
+                'community_parent_name' => $item['community_parent_name'] ?? '',
+                'community_name'        => $item['community_name'] ?? '',
+                'mobile'                => $item['mobile'],
+                'point'                 => $item['point'],
+                'create_time'           => date('Y-m-d H:i:s', (int)$item['create_time']),
+            ];
         }
 
         $filename = '用户列表'.date('Y-m-d');
@@ -158,7 +176,7 @@ class MemberController extends ToolController
         // 注意：CommonModel::outData 是 static 静态方法，必须用 :: 调用。
         // 不可使用 $obj->outData() 这种实例调用方式，否则 ThinkPHP Model 的 __call 魔术方法
         // 会把 outData 转发到查询构造器 $this->db()->outData()，进而对 cmf_common_model 表发起查询导致报错。
-        CommonModel::outData($filename,$list,$head,$keys);
+        CommonModel::outData($filename,$rows,$head,$keys);
     }
 
 
