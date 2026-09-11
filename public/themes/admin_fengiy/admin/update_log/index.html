@@ -78,7 +78,11 @@
         </tr>
         </thead>
         <tbody>
-        <if condition="$list->isEmpty()">
+        <!-- 注意：condition 属性里【不能出现字面的 >】，否则模板引擎的
+             <(if)\b(?>[^>]*)> 正则会在 -> 的 > 处提前结束标签，编译出
+             if(condition="$list-) 这种非法 PHP（报 unexpected '='）。
+             所以这里用 count() 而不是 $list->isEmpty()；分页对象实现了 Countable。 -->
+        <if condition="count($list) eq 0">
             <tr>
                 <td colspan="5" class="upd-empty">暂无更新记录</td>
             </tr>
