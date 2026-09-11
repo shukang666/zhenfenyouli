@@ -686,20 +686,29 @@ class CommonModel extends Model
         $writer->setPreCalculateFormulas(false); // 关闭公式预计算，大幅省内存
         $writer->setIncludeCharts(false);
 
-        for ($i = 65; $i < $count + 65; $i++) {
-            //数字转字母从65开始，循环设置表头：
-            $sheet->setCellValue(strtoupper(chr($i)) . '1', $head[$i - 65]);
+        // 「列序号 -> 列名」和列宽提前算好，每列只算一次：
+        // 原实现把 chr() 和 getColumnDimension()->setWidth(20) 放在单元格循环里，
+        // 每写一个单元格就重复调用一次，2.7 万行 × 7 列 ≈ 19 万次无意义的重复对象调用，
+        // 是导出耗时的主要来源之一（列宽本来就每列固定 20，设置一次即可）。
+        $colLetters = [];
+        for ($i = 0; $i < $count; $i++) {
+            $colLetters[$i] = strtoupper(chr(65 + $i)); //数字转字母从65开始
+            $sheet->getColumnDimension($colLetters[$i])->setWidth(20); //固定列宽
+        }
+
+        for ($i = 0; $i < $count; $i++) {
+            //循环设置表头：
+            $sheet->setCellValue($colLetters[$i] . '1', $head[$i]);
         }
 
         /*--------------开始从数据库提取信息插入Excel表中------------------*/
         foreach ($data as $key => $item) {
             //循环设置单元格：
             //$key+2,因为第一行是表头，所以写到表格时   从第二行开始写
-            for ($i = 65; $i < $count + 65; $i++) {
-                //数字转字母从65开始：
-
-                $value = $item[$keys[$i - 65]];
-                if(!empty($types) && $types[$i - 65] == 2 && !empty($value)){
+            $row_no = $key + 2;
+            for ($i = 0; $i < $count; $i++) {
+                $value = $item[$keys[$i]];
+                if(!empty($types) && $types[$i] == 2 && !empty($value)){
 
                     $objDrawing = new Drawing();
                     $objDrawing->setPath($value);//这里拼接 . 是因为要在根目录下获取
@@ -707,17 +716,15 @@ class CommonModel extends Model
                     $objDrawing->setHeight(30);//照片高度
                     $objDrawing->setWidth(30); //照片宽度
                     /*设置图片要插入的单元格*/
-                    $objDrawing->setCoordinates(strtoupper(chr($i)) . ($key + 2));
+                    $objDrawing->setCoordinates($colLetters[$i] . $row_no);
                     // 图片偏移距离
                     $objDrawing->setOffsetX(0);
                     $objDrawing->setOffsetY(0);
-                    $objDrawing->setWorksheet($spreadsheet->getActiveSheet());
+                    $objDrawing->setWorksheet($sheet);
 
-                    $spreadsheet->getActiveSheet()->getColumnDimension(strtoupper(chr($i)))->setWidth(20); //固定列宽
-                    $spreadsheet->getActiveSheet()->getDefaultRowDimension()->setRowHeight(50);//列高
+                    $sheet->getDefaultRowDimension()->setRowHeight(50);//列高
                 }else{
-                    $sheet->setCellValue(strtoupper(chr($i)) . ($key + 2), $item[$keys[$i - 65]]);
-                    $spreadsheet->getActiveSheet()->getColumnDimension(strtoupper(chr($i)))->setWidth(20); //固定列宽
+                    $sheet->setCellValue($colLetters[$i] . $row_no, $value);
                 }
             }
         }

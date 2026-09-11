@@ -5,8 +5,6 @@ namespace app\admin\controller;
 use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\course\CourseUserModel;
-use app\admin\model\member\CommunityModel;
-use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberModel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use think\App;
@@ -59,14 +57,18 @@ class MemberController extends ToolController
         if (!in_array($sortField, ['id', 'point', 'create_time'])) {
             $sortField = 'id';
         }
+        // ===== 性能优化 =====
+        // 原实现：每页 10 行再各查一次社区、小区名称（每页 20 条 SQL），
+        // 现改成一次 LEFT JOIN 带出来；名称表在 ON 条件里限制 delete_time = 0，
+        // 与 ToolModel 软删除的取数口径保持一致。
+        // 仍走模型查询（$Model->alias），所以 avatar 等模型获取器照常生效。
+        // 注意：order 必须带 a. 前缀，否则 JOIN 后 id、create_time 会出现字段歧义。
         $Model = new MemberModel();
         $list = $Model->alias('a')
-                ->field('a.*')
-                ->where($map)->order($sortField, $sortOrder)->paginate(10);
-        foreach ($list as $item) {
-            $item['community_parent_name']=CommunityParentModel::where('id',$item['community_parent_id'])->value('name','');
-            $item['community_name']=CommunityModel::where('id',$item['community_id'])->value('name','');
-        }
+                ->leftJoin('member_community_parent cp', 'cp.id = a.community_parent_id AND cp.delete_time = 0')
+                ->leftJoin('member_community c', 'c.id = a.community_id AND c.delete_time = 0')
+                ->field('a.*,cp.name AS community_parent_name,c.name AS community_name')
+                ->where($map)->order('a.' . $sortField, $sortOrder)->paginate(10);
         $list->appends($params);
 
         $this->assign('list', $list);
