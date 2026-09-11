@@ -10,12 +10,12 @@ use think\facade\Db;
  *
  * 四个标签页（每个标签一个 action，模板里用 nav-tabs 链接切换，与「算法中心」一致）：
  *   index()          封锁IP    ：cmf_security_block_ip，后台维护封锁名单
- *   log_audit()      日志审计  ：cmf_security_audit_log，记录本页产生的安全事件
+ *   log_audit()      日志审计  ：直接回显服务器上的真实日志文件（宝塔站点日志 → ThinkCMF runtime 日志）
  *   attack_map()     攻击地图  ：按封锁名单聚合出的来源地域 / 趋势，坐标来自腾讯地图 IP 定位
  *   global_setting() 全局设置  ：存 cmf_option 的 security_global，仅保存开关与参数
  *
  * 说明：全局设置里保存的开关本身不做拦截，实际拦截需要服务器 / 网关层按这些配置执行；
- *      页面上的口径以「封锁名单 + 审计日志」为准，不虚构拦截数据。
+ *      封锁 / 解封等动作会留痕到 cmf_security_audit_log，但「日志审计」页读的是真实日志文件，两者不混用。
  */
 class SecurityController extends AdminBaseController
 {
@@ -25,24 +25,40 @@ class SecurityController extends AdminBaseController
     /** 腾讯地图 key（与 shop/edit.html、active/update.html 用的是同一把，GL JS 与 WebService 共用） */
     const TENCENT_MAP_KEY = 'XQABZ-Z6GWP-OWEDN-V3K2Y-W43D6-D4B5P';
 
-    /** 封锁来源（同时也是全局设置里各防御开关的含义） */
+    /**
+     * 封锁来源
+     * 手动封禁固定为 manual；其余留给服务器 / 网关层的拦截程序写入
+     * （CC防御 / 蜘蛛防御 / 扫描器过滤 是「全局设置」里的配置开关，不再作为封锁来源）
+     */
     const SOURCES = [
-        'manual'  => '手动封禁',
-        'cc'      => 'CC防御',
-        'spider'  => '蜘蛛防御',
-        'scanner' => '扫描器过滤',
-        'other'   => '其他',
+        'manual' => '手动封禁',
+        'auto'   => '自动拦截',
+        'server' => '服务器拦截',
+        'other'  => '其他',
     ];
 
-    /** 审计日志事件类型 */
+    /** 操作留痕事件类型（写入 cmf_security_audit_log，仅留痕，不在「日志审计」页展示） */
     const LOG_TYPES = [
         'block'   => '封锁IP',
         'release' => '解除封锁',
         'setting' => '设置变更',
     ];
 
-    /** 审计日志级别 */
+    /** 操作留痕级别 */
     const LOG_LEVELS = [1 => '提示', 2 => '警告', 3 => '危险'];
+
+    /** 日志审计：日志级别分组（筛选用） */
+    const LOG_LEVEL_GROUPS = [
+        'danger'  => '危险 / 错误',
+        'warning' => '警告',
+        'info'    => '普通 / 调试',
+    ];
+
+    /** 日志审计：单次从日志文件尾部最多读取的行数 */
+    const LOG_TAIL_LINES = 3000;
+
+    /** 日志审计：每页条数 */
+    const LOG_PAGE_SIZE = 50;
 
     /* ==================== 公共 ==================== */
 
@@ -64,21 +80,16 @@ class SecurityController extends AdminBaseController
         unset($tab);
         $this->assign('sec_tabs', $tabs);
 
-        // 下拉选项（搜索 / 表单共用，模板里不依赖 foreach 的 key 属性）
+        // 封锁来源下拉（「封锁IP」页搜索用）
         $sources = [];
         foreach (self::SOURCES as $value => $name) {
             $sources[] = ['value' => $value, 'name' => $name];
         }
         $this->assign('sec_source_options', $sources);
 
-        $types = [];
-        foreach (self::LOG_TYPES as $value => $name) {
-            $types[] = ['value' => $value, 'name' => $name];
-        }
-        $this->assign('sec_type_options', $types);
-
+        // 日志级别下拉（「日志审计」页筛选用）
         $levels = [];
-        foreach (self::LOG_LEVELS as $value => $name) {
+        foreach (self::LOG_LEVEL_GROUPS as $value => $name) {
             $levels[] = ['value' => $value, 'name' => $name];
         }
         $this->assign('sec_level_options', $levels);
@@ -254,7 +265,8 @@ class SecurityController extends AdminBaseController
     {
         $ip       = trim((string)$this->request->param('ip', ''));
         $reason   = trim((string)$this->request->param('reason', ''));
-        $source   = trim((string)$this->request->param('source', 'manual'));
+        // 手动封禁来源固定为 manual，其它来源留给服务器 / 网关层的拦截程序写入
+        $source   = 'manual';
         $remark   = trim((string)$this->request->param('remark', ''));
         $duration = (int)$this->request->param('duration', 0);
         $autoGeo  = (int)$this->request->param('auto_region', 1);
@@ -264,9 +276,6 @@ class SecurityController extends AdminBaseController
         }
         if (!$this->isValidIpRule($ip)) {
             $this->error('IP 格式不正确，支持单个 IP、网段（192.168.1.0/24）或通配（192.168.1.*）');
-        }
-        if (!isset(self::SOURCES[$source])) {
-            $source = 'manual';
         }
         if (Db::name('security_block_ip')->where('ip', $ip)->where('status', 1)->count() > 0) {
             $this->error('该 IP 已在封锁名单中');
@@ -387,66 +396,338 @@ class SecurityController extends AdminBaseController
 
     /* ==================== 2. 日志审计 ==================== */
 
+    /**
+     * 可扫描的日志目录
+     *   type=tp  ：ThinkCMF / ThinkPHP 运行日志，目录结构为 目录/YYYYMM/DD.log
+     *   type=web ：Web 服务器（宝塔站点日志、面板、Nginx / Apache）日志，目录下直接是 *.log
+     */
+    private function logSourceDirs()
+    {
+        $dataDir = defined('CMF_DATA')
+            ? rtrim(CMF_DATA, '/\\')
+            : dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'data';
+
+        return [
+            ['dir' => $dataDir . '/runtime/log',     'prefix' => '运行日志',   'type' => 'tp'],
+            ['dir' => $dataDir . '/runtime_cli/log', 'prefix' => '命令行日志', 'type' => 'tp'],
+            ['dir' => '/www/wwwlogs',                'prefix' => '站点日志',   'type' => 'web'],
+            ['dir' => '/www/server/panel/logs',      'prefix' => '面板日志',   'type' => 'web'],
+            ['dir' => '/www/server/nginx/logs',      'prefix' => 'Nginx日志',  'type' => 'web'],
+            ['dir' => '/www/server/apache/logs',     'prefix' => 'Apache日志', 'type' => 'web'],
+        ];
+    }
+
+    /**
+     * 收集所有可读的日志来源
+     * 排序：Web 服务器日志在前（更能反映外部攻击）→ 错误日志优先 → 最后修改时间倒序
+     */
+    private function logSources()
+    {
+        $sources = [];
+        foreach ($this->logSourceDirs() as $cfg) {
+            $dir = $cfg['dir'];
+            if (!is_dir($dir)) {
+                continue;
+            }
+
+            $files = [];
+            if ($cfg['type'] === 'tp') {
+                // data/runtime/log/202609/11.log，同时也兼容 data/runtime/log/11.log
+                foreach ((array)glob($dir . '/*/*.log') as $file) {
+                    $files[] = $file;
+                }
+                foreach ((array)glob($dir . '/*.log') as $file) {
+                    $files[] = $file;
+                }
+            } else {
+                foreach ((array)glob($dir . '/*.log') as $file) {
+                    $files[] = $file;
+                }
+            }
+
+            foreach ($files as $file) {
+                if (!is_file($file) || !is_readable($file)) {
+                    continue;
+                }
+                $sources[] = [
+                    'id'    => md5($file),
+                    'name'  => $cfg['prefix'] . ' · ' . $this->logFileName($file, $dir),
+                    'path'  => $file,
+                    'type'  => $cfg['type'],
+                    'mtime' => (int)@filemtime($file),
+                    'size'  => (int)@filesize($file),
+                ];
+            }
+        }
+
+        usort($sources, function ($a, $b) {
+            if ($a['type'] !== $b['type']) {
+                return $a['type'] === 'web' ? -1 : 1;
+            }
+            $aErr = stripos($a['name'], 'error') !== false ? 0 : 1;
+            $bErr = stripos($b['name'], 'error') !== false ? 0 : 1;
+            if ($aErr !== $bErr) {
+                return $aErr - $bErr;
+            }
+            if ($a['mtime'] === $b['mtime']) {
+                return 0;
+            }
+            return $a['mtime'] < $b['mtime'] ? 1 : -1;
+        });
+
+        return array_slice($sources, 0, 80);
+    }
+
+    /**
+     * 日志文件在来源目录下的相对名字
+     */
+    private function logFileName($file, $dir)
+    {
+        $file = str_replace('\\', '/', $file);
+        $base = str_replace('\\', '/', rtrim($dir, '/\\')) . '/';
+        if (strpos($file, $base) === 0) {
+            return substr($file, strlen($base));
+        }
+        return basename($file);
+    }
+
+    /**
+     * 读取文件尾部若干行
+     * 日志文件可能几十 MB，只从尾部往前读，不把整个文件读进内存
+     */
+    private function readLogTail($path, $maxLines)
+    {
+        $fp = @fopen($path, 'rb');
+        if (!$fp) {
+            return [];
+        }
+
+        fseek($fp, 0, SEEK_END);
+        $pos    = ftell($fp);
+        $buffer = '';
+        while ($pos > 0 && substr_count($buffer, "\n") <= $maxLines + 1) {
+            $readSize = (int)min(131072, $pos);
+            $pos -= $readSize;
+            fseek($fp, $pos);
+            $buffer = (string)fread($fp, $readSize) . $buffer;
+        }
+        fclose($fp);
+
+        $lines = preg_split("/\r\n|\n|\r/", $buffer);
+
+        return array_slice($lines, -$maxLines);
+    }
+
+    /**
+     * 解析一行日志，统一成 时间 / 级别 / 分组 / 内容
+     */
+    private function parseLogLine($line)
+    {
+        $line = trim($line);
+        if ($line === '') {
+            return null;
+        }
+
+        $time  = '';
+        $level = 'info';
+        $text  = $line;
+
+        // 1) ThinkCMF / ThinkPHP：[2026-09-11T08:55:51+08:00][sql] ...
+        if (preg_match('/^\[(\d{4}-\d{2}-\d{2}T[\d:]{8}[+\-]\d{2}:\d{2})\]\s*\[([a-zA-Z]+)\]\s*(.*)$/s', $line, $m)) {
+            $time  = date('Y-m-d H:i:s', (int)strtotime($m[1]));
+            $level = strtolower($m[2]);
+            $text  = $m[3];
+        }
+        // 2) Nginx error / PHP-FPM：2026/09/11 08:55:51 [error] ...
+        elseif (preg_match('/^(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2})\s*\[([a-zA-Z]+)\]\s*(.*)$/s', $line, $m)) {
+            $time  = str_replace('/', '-', $m[1]);
+            $level = strtolower($m[2]);
+            $text  = $m[3];
+        }
+        // 3) Apache error：[Thu Sep 11 08:55:51.123456 2026] [php7:error] ...
+        elseif (preg_match('/^\[([A-Za-z]{3} [A-Za-z]{3} \d{1,2} [\d:\.]+ \d{4})\]\s*\[([^\]]+)\]\s*(.*)$/s', $line, $m)) {
+            $level = strtolower($m[2]);
+            if (strpos($level, ':') !== false) {
+                $level = substr($level, strpos($level, ':') + 1);
+            }
+            $time = date('Y-m-d H:i:s', (int)strtotime($m[1]));
+            $text = $m[3];
+        }
+        // 4) Nginx / Apache access：1.2.3.4 - - [11/Sep/2026:08:55:51 +0800] "GET / HTTP/1.1" 200 123
+        elseif (preg_match('/\[(\d{2}\/[A-Za-z]{3}\/\d{4}:\d{2}:\d{2}:\d{2} [+\-]\d{4})\]\s*"([^"]*)"/', $line, $m)) {
+            $time  = date('Y-m-d H:i:s', (int)strtotime($m[1]));
+            $level = 'info';
+            if (preg_match('/"\s*(\d{3})\s+\d+/', $line, $mm)) {
+                $code = (int)$mm[1];
+                if ($code >= 500) {
+                    $level = 'error';
+                } elseif ($code >= 400) {
+                    $level = 'warning';
+                }
+            }
+            $text = $line;
+        }
+
+        return [
+            'time'  => $time,
+            'level' => $level,
+            'group' => $this->logLevelGroup($level),
+            'text'  => $text,
+        ];
+    }
+
+    /**
+     * 日志级别 -> 展示分组
+     */
+    private function logLevelGroup($level)
+    {
+        $level   = strtolower($level);
+        $danger  = ['emergency', 'alert', 'critical', 'error', 'fatal', 'parse', 'exception', 'core'];
+        $warning = ['warning', 'warn', 'notice', 'deprecated'];
+
+        if (in_array($level, $danger, true)) {
+            return 'danger';
+        }
+        if (in_array($level, $warning, true)) {
+            return 'warning';
+        }
+        return 'info';
+    }
+
+    /**
+     * 日志审计页：直接回显服务器 / 框架的真实日志文件
+     * 优先 Web 服务器日志（宝塔 /www/wwwlogs），没有则回落到 ThinkCMF runtime 日志
+     */
     public function log_audit()
     {
         $this->assignTabs('log_audit');
 
-        $keyword = trim((string)$this->request->param('keyword', ''));
-        $type    = trim((string)$this->request->param('type', ''));
-        $level   = (string)$this->request->param('level', '');
-        $start   = trim((string)$this->request->param('start_time', ''));
-        $end     = trim((string)$this->request->param('end_time', ''));
+        $sources  = $this->logSources();
+        $sourceId = trim((string)$this->request->param('source_id', ''));
+        $keyword  = trim((string)$this->request->param('keyword', ''));
+        $level    = trim((string)$this->request->param('level', ''));
 
-        $where = [];
-        if ($keyword !== '') {
-            $where[] = ['ip|region|target|detail|operator', 'like', '%' . $keyword . '%'];
+        // 选中的日志来源；没传或传了不存在的，默认取排在最前面的那个
+        $current = null;
+        foreach ($sources as $item) {
+            if ($item['id'] === $sourceId) {
+                $current = $item;
+                break;
+            }
         }
-        if ($type !== '' && isset(self::LOG_TYPES[$type])) {
-            $where[] = ['type', '=', $type];
-        }
-        if ($level !== '') {
-            $where[] = ['level', '=', (int)$level];
-        }
-        if ($start !== '') {
-            $where[] = ['create_time', '>=', strtotime($start . ' 00:00:00')];
-        }
-        if ($end !== '') {
-            $where[] = ['create_time', '<=', strtotime($end . ' 23:59:59')];
+        if ($current === null && !empty($sources)) {
+            $current = $sources[0];
         }
 
-        $list = Db::name('security_audit_log')->where($where)->order('id desc')->paginate(20);
-        $list->appends([
-            'keyword'    => $keyword,
-            'type'       => $type,
-            'level'      => $level,
-            'start_time' => $start,
-            'end_time'   => $end,
-        ]);
+        $rows    = [];
+        $danger  = 0;
+        $warning = 0;
+        $tailNum = 0;
 
-        $rows = [];
-        foreach ($list as $item) {
-            $item['type_name']  = isset(self::LOG_TYPES[$item['type']]) ? self::LOG_TYPES[$item['type']] : $item['type'];
-            $item['level_name'] = isset(self::LOG_LEVELS[$item['level']]) ? self::LOG_LEVELS[$item['level']] : '';
-            $item['time_text']  = $item['create_time'] > 0 ? date('Y-m-d H:i:s', $item['create_time']) : '-';
-            $rows[]             = $item;
+        if ($current !== null) {
+            $lines   = $this->readLogTail($current['path'], self::LOG_TAIL_LINES);
+            $tailNum = count($lines);
+            foreach ($lines as $line) {
+                $row = $this->parseLogLine($line);
+                if ($row === null) {
+                    continue;
+                }
+                $rows[] = $row;
+            }
+
+            // 顶部卡片统计的是「筛选前」的级别分布
+            foreach ($rows as $row) {
+                if ($row['group'] === 'danger') {
+                    $danger++;
+                } elseif ($row['group'] === 'warning') {
+                    $warning++;
+                }
+            }
+
+            if ($keyword !== '') {
+                $rows = array_values(array_filter($rows, function ($row) use ($keyword) {
+                    return stripos($row['text'], $keyword) !== false || stripos($row['time'], $keyword) !== false;
+                }));
+            }
+            if ($level !== '' && isset(self::LOG_LEVEL_GROUPS[$level])) {
+                $rows = array_values(array_filter($rows, function ($row) use ($level) {
+                    return $row['group'] === $level;
+                }));
+            }
+
+            // 最新的排在最上面
+            $rows = array_reverse($rows);
         }
 
-        $today = strtotime(date('Y-m-d'));
-        $this->assign('list', $rows);
-        $this->assign('page', $list->render());
+        // 内存内分页
+        $perPage = self::LOG_PAGE_SIZE;
+        $total   = count($rows);
+        $page    = max(1, (int)$this->request->param('page', 1));
+        $list    = array_slice($rows, ($page - 1) * $perPage, $perPage);
+        // 日志内容原样输出，这里统一转义，避免破坏页面结构
+        foreach ($list as &$row) {
+            $row['text'] = htmlspecialchars($row['text'], ENT_QUOTES, 'UTF-8');
+        }
+        unset($row);
+
+        $this->assign('sources', $sources);
+        $this->assign('current_source', $current);
+        $this->assign('source_id', $current !== null ? $current['id'] : '');
         $this->assign('keyword', $keyword);
-        $this->assign('type', $type);
         $this->assign('level', $level);
-        $this->assign('start_time', $start);
-        $this->assign('end_time', $end);
+        $this->assign('list', $list);
+        $this->assign('page', $this->buildPager($page, $total, $perPage, [
+            'source_id' => $current !== null ? $current['id'] : '',
+            'keyword'   => $keyword,
+            'level'     => $level,
+        ]));
         $this->assign('stat', [
-            'total'    => Db::name('security_audit_log')->count(),
-            'today'    => Db::name('security_audit_log')->where('create_time', '>=', $today)->count(),
-            'warning'  => Db::name('security_audit_log')->where('level', 2)->count(),
-            'danger'   => Db::name('security_audit_log')->where('level', 3)->count(),
+            'sources' => count($sources),
+            'lines'   => $tailNum,
+            'shown'   => $total,
+            'warning' => $warning,
+            'danger'  => $danger,
         ]);
 
         return $this->fetch('log_audit');
+    }
+
+    /**
+     * 生成 Bootstrap 风格分页（日志是在内存里分页的，不用框架 Paginator）
+     */
+    private function buildPager($page, $total, $perPage, $query)
+    {
+        $pages = (int)ceil($total / $perPage);
+        if ($pages <= 1) {
+            return '';
+        }
+
+        $base = (string)url('log_audit');
+        $link = function ($p) use ($base, $query) {
+            $query['page'] = $p;
+            return $base . '?' . http_build_query($query);
+        };
+
+        $html = '<ul class="pagination">';
+        $html .= $page > 1
+            ? '<li><a href="' . $link($page - 1) . '">«</a></li>'
+            : '<li class="disabled"><span>«</span></li>';
+
+        $start = max(1, $page - 3);
+        $end   = min($pages, $start + 6);
+        $start = max(1, $end - 6);
+        for ($i = $start; $i <= $end; $i++) {
+            $html .= $i === $page
+                ? '<li class="active"><span>' . $i . '</span></li>'
+                : '<li><a href="' . $link($i) . '">' . $i . '</a></li>';
+        }
+
+        $html .= $page < $pages
+            ? '<li><a href="' . $link($page + 1) . '">»</a></li>'
+            : '<li class="disabled"><span>»</span></li>';
+        $html .= '</ul>';
+
+        return $html;
     }
 
     /* ==================== 3. 攻击地图 ==================== */
@@ -619,8 +900,13 @@ class SecurityController extends AdminBaseController
         $schema = $this->settingSchema();
         foreach ($schema as &$group) {
             foreach ($group['items'] as &$item) {
-                $value          = $saved[$item['key']];
-                $item['value']  = $value;
+                // 补齐可选键，避免模板里直接取下标时报「未定义数组索引: unit」
+                $item['level']       = isset($item['level']) ? $item['level'] : '';
+                $item['unit']        = isset($item['unit']) ? $item['unit'] : '';
+                $item['placeholder'] = isset($item['placeholder']) ? $item['placeholder'] : '';
+
+                $value           = $saved[$item['key']];
+                $item['value']   = $value;
                 $item['checked'] = $item['type'] === 'switch' && (int)$value === 1;
             }
             unset($item);

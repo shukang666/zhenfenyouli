@@ -3,12 +3,14 @@
 <body>
 <style>
     .sec-stat { margin-top: 15px; }
-    .sec-stat .sec-card { display: inline-block; min-width: 140px; padding: 10px 16px; margin: 0 10px 10px 0; border-radius: 4px; background: #f7f9fb; border: 1px solid #e8eef5; }
+    .sec-stat .sec-card { display: inline-block; min-width: 130px; padding: 10px 16px; margin: 0 10px 10px 0; border-radius: 4px; background: #f7f9fb; border: 1px solid #e8eef5; }
     .sec-stat .sec-card b { display: block; font-size: 20px; line-height: 26px; color: #2b3a4a; }
     .sec-stat .sec-card span { color: #8a99a8; font-size: 12px; }
     .sec-muted { color: #9aa7b4; }
     .sec-table td { vertical-align: middle; word-wrap: break-word; white-space: normal; }
-    .sec-log-detail { color: #555; font-size: 12px; }
+    .sec-log-time { white-space: nowrap; color: #6b7a8a; font-size: 12px; }
+    .sec-log-text { font-family: Consolas, Menlo, monospace; font-size: 12px; color: #444; line-height: 20px; word-break: break-all; }
+    .sec-log-empty { color: #9aa7b4; text-align: center; padding: 30px 0; }
 </style>
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
@@ -18,80 +20,76 @@
     </ul>
 
     <div class="sec-stat">
-        <div class="sec-card"><b>{$stat.total}</b><span>事件总数</span></div>
-        <div class="sec-card"><b>{$stat.today}</b><span>今日事件</span></div>
+        <div class="sec-card"><b>{$stat.sources}</b><span>可读日志来源</span></div>
+        <div class="sec-card"><b>{$stat.lines}</b><span>本次读取行数</span></div>
+        <div class="sec-card"><b>{$stat.shown}</b><span>命中条数</span></div>
         <div class="sec-card"><b>{$stat.warning}</b><span>警告</span></div>
-        <div class="sec-card"><b>{$stat.danger}</b><span>危险</span></div>
+        <div class="sec-card"><b>{$stat.danger}</b><span>错误 / 危险</span></div>
     </div>
 
     <div class="alert alert-info" style="padding:8px 12px;font-size:12px;margin-top:14px;">
-        记录本模块产生的安全事件：<b>封锁IP / 解除封锁 / 设置变更</b>。
-        服务器 / 网关层的拦截事件如需一并审计，可把拦截记录写入 <code>cmf_security_audit_log</code> 表（字段见 data/sql/security_hardening.sql）。
+        本页<b>直接回显服务器上的真实日志文件</b>：优先读取宝塔 / Web 服务器日志（<code>/www/wwwlogs</code>、面板与 Nginx / Apache 日志），
+        找不到则回落到 ThinkCMF 自己的运行日志（<code>data/runtime/log</code>）。<br>
+        为控制大文件读取开销，每个来源只读取<b>文件末尾最新的一批日志</b>；要看更早的内容，用关键字（如 IP、<code>error</code>、<code>admin</code>）过滤。
     </div>
 
     <form class="well form-inline" method="get" action="{:url('log_audit')}" style="margin-top:16px;">
-        <input type="text" class="form-control" name="keyword" style="width: 180px;"
-               value="{$keyword}" placeholder="IP / 操作对象 / 详情">
-        <select name="type" class="form-control" style="width: 130px;margin-left:10px;">
-            <option value="">类型不限</option>
-            <foreach name="sec_type_options" item="t">
-                <option value="{$t.value}" <if condition="$type eq $t.value">selected</if>>{$t.name}</option>
+        <select name="source_id" class="form-control" style="width: 340px;">
+            <if condition="empty($sources)">
+                <option value="">未发现可读的日志文件</option>
+            </if>
+            <foreach name="sources" item="s">
+                <option value="{$s.id}" <if condition="$source_id eq $s.id">selected</if>>{$s.name}</option>
             </foreach>
         </select>
-        <select name="level" class="form-control" style="width: 120px;margin-left:10px;">
+        <input type="text" class="form-control" name="keyword" style="width: 220px;margin-left:10px;"
+               value="{$keyword}" placeholder="关键字，如某个 IP / error / admin">
+        <select name="level" class="form-control" style="width: 140px;margin-left:10px;">
             <option value="">级别不限</option>
             <foreach name="sec_level_options" item="l">
                 <option value="{$l.value}" <if condition="$level eq $l.value">selected</if>>{$l.name}</option>
             </foreach>
         </select>
-        <input type="date" class="form-control" name="start_time" style="width: 160px;margin-left:10px;" value="{$start_time}">
-        <span class="set_text"> 至 </span>
-        <input type="date" class="form-control" name="end_time" style="width: 160px;" value="{$end_time}">
-        <input type="submit" class="btn btn-primary" value="搜索" style="margin-left: 20px"/>
-        <a class="btn btn-danger" href="{:url('log_audit')}">清空</a>
+        <input type="submit" class="btn btn-primary" value="查看" style="margin-left: 20px"/>
+        <a class="btn btn-danger" href="{:url('log_audit')}">重置</a>
     </form>
 
     <table class="table table-hover table-bordered sec-table">
         <thead>
         <tr>
-            <th style="width: 150px;">时间</th>
-            <th style="width: 70px;">级别</th>
-            <th style="width: 100px;">类型</th>
-            <th style="width: 150px;">来源 IP</th>
-            <th style="width: 140px;">归属地</th>
-            <th style="width: 160px;">操作对象</th>
-            <th>详情</th>
-            <th style="width: 100px;">操作人</th>
+            <th style="width: 160px;">时间</th>
+            <th style="width: 100px;">级别</th>
+            <th>日志内容</th>
         </tr>
         </thead>
         <tbody>
         <if condition="empty($list)">
             <tr>
-                <td colspan="8" class="sec-muted" style="text-align:center;padding:30px 0;">
-                    暂无审计事件；在「封锁IP」里新增或解封一条记录就会产生日志
+                <td colspan="3" class="sec-log-empty">
+                    <if condition="empty($current_source)">
+                        没有找到可读取的日志文件：既没有 Web 服务器日志目录，也没有 <code>data/runtime/log</code> 下的运行日志。<br>
+                        请确认服务器上有日志输出（宝塔站点日志默认在 <code>/www/wwwlogs</code>）。
+                    <else/>
+                        没有命中任何日志行，换个关键字或级别再试。
+                    </if>
                 </td>
             </tr>
         </if>
         <foreach name="list" item="vo">
             <tr>
-                <td>{$vo.time_text}</td>
+                <td class="sec-log-time">
+                    <if condition="$vo.time neq ''">{$vo.time}<else/><span class="sec-muted">-</span></if>
+                </td>
                 <td>
-                    <if condition="$vo.level eq 3">
-                        <span class="label label-danger">{$vo.level_name}</span>
-                    <elseif condition="$vo.level eq 2"/>
-                        <span class="label label-warning">{$vo.level_name}</span>
+                    <if condition="$vo.group eq 'danger'">
+                        <span class="label label-danger">{$vo.level}</span>
+                    <elseif condition="$vo.group eq 'warning'"/>
+                        <span class="label label-warning">{$vo.level}</span>
                     <else/>
-                        <span class="label label-default">{$vo.level_name}</span>
+                        <span class="label label-default">{$vo.level}</span>
                     </if>
                 </td>
-                <td>{$vo.type_name}</td>
-                <td>{$vo.ip}</td>
-                <td>
-                    <if condition="$vo.region neq ''">{$vo.region}<else/><span class="sec-muted">-</span></if>
-                </td>
-                <td>{$vo.target}</td>
-                <td class="sec-log-detail">{$vo.detail}</td>
-                <td>{$vo.operator}</td>
+                <td class="sec-log-text">{$vo.text}</td>
             </tr>
         </foreach>
         </tbody>

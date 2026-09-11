@@ -40,17 +40,10 @@
                 <div class="col-md-3">
                     <input type="text" class="form-control" name="ip" placeholder="IP / 网段 / 通配，必填" data-rule="required">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <input type="text" class="form-control" name="reason" placeholder="封锁原因，如：暴力破解">
                 </div>
-                <div class="col-md-2">
-                    <select class="form-control" name="source">
-                        <foreach name="sec_source_options" item="s">
-                            <option value="{$s.value}">{$s.name}</option>
-                        </foreach>
-                    </select>
-                </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <select class="form-control" name="duration">
                         <option value="0">永久封锁</option>
                         <option value="30">30 分钟</option>
