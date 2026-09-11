@@ -194,9 +194,9 @@
 				<div id="nav-wrapper">
 					<ul class="nav nav-list">
 						<li class="layui-this">
-							<a href="__ROOT__/" title="{:lang('WEBSITE_HOME_PAGE')}">
+							<a href="__ROOT__/" title="仪表盘">
 								<i class="fa fa-home"></i>
-								<span class="menu-text"> 首页 </span>
+								<span class="menu-text"> 仪表盘 </span>
 							</a>
 						</li>
 					</ul>
@@ -262,8 +262,8 @@
 						<a id="task-pre" class="task-changebt" title="左移" data-toggle="tooltip"><i class="fa fa-chevron-left"></i></a>
 						<div id="task-content">
 							<ul class="cmf-component-tab" id="task-content-inner">
-								<li class="cmf-component-tabitem noclose" app-id="0" app-url="__ROOT__/" app-name="首页">
-									<a class="cmf-tabs-item-text">{:lang('HOME')}</a>
+								<li class="cmf-component-tabitem noclose" app-id="0" app-url="__ROOT__/" app-name="仪表盘">
+									<a class="cmf-tabs-item-text">仪表盘</a>
 								</li>
 							</ul>
 							<div style="clear:both;"></div>
@@ -365,7 +365,7 @@
 					var ptitle = $(item.parentNode.parentNode.parentNode).context.innerText;
 					var text = ptitle.split(/[(\r\n)\r\n]+/);
 					var title = text[0].replace(/\s+/g,"");
-					if(title != '首页') {
+					if(title != '仪表盘') {
 						$(".two-nav").html(title).removeClass('hidden');
 					}
 					$(".three-nav").html(breadcrumbTitle).removeClass('hidden');
