@@ -105,19 +105,28 @@
             }
 
             $(function () {
+                // 只处理「宽表格」（列数 >= 5）：仪表盘卡片内的窄表格（2~4 列）让它自然收缩，
+                // 否则强行加最小宽度会把卡片撑破
                 $('table.table').each(function () {
                     var $table = $(this);
+
+                    if ($table.hasClass('dash-table') || $table.hasClass('no-mobile-scroll')) {
+                        return;
+                    }
+                    if ($table.parent().hasClass('cmf-table-scroll') || $table.parent().hasClass('table-responsive')) {
+                        return;
+                    }
 
                     var cols = $table.children('thead').find('tr').first().find('th').length;
                     if (!cols) {
                         cols = $table.find('tr').first().children().length;
                     }
-                    // 每列按 88px 估算，保证单元格文字不折行
-                    $table.css('min-width', Math.max((cols || 1) * 88, 320) + 'px');
-
-                    if ($table.parent().hasClass('cmf-table-scroll') || $table.parent().hasClass('table-responsive')) {
+                    if (cols < 5) {
                         return;
                     }
+
+                    // 每列按 88px 估算，保证单元格文字不折行
+                    $table.css('min-width', cols * 88 + 'px');
                     $table.wrap('<div class="cmf-table-scroll"></div>');
                 });
 

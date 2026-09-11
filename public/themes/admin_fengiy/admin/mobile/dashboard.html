@@ -218,6 +218,7 @@
             color: var(--txt);
         }
         .qk-ic {
+            position: relative;
             width: 38px; height: 38px;
             margin: 0 auto 6px;
             border-radius: 12px;
@@ -226,6 +227,19 @@
             font-weight: 600;
         }
         .qk-cell span { font-size: 11px; color: #b8c8d6; }
+        /* PC 专用入口（手机端体验差）的角标 */
+        .qk-cell.qk-pc .qk-ic { opacity: .75; }
+        .qk-badge {
+            position: absolute; top: -5px; right: -7px;
+            padding: 1px 4px;
+            border-radius: 7px;
+            background: #ff7875;
+            color: #fff;
+            font-size: 9px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 1.4;
+        }
 
         /* ---------- 底部 ---------- */
         .footer {
@@ -375,7 +389,7 @@
     <!-- 快捷入口 -->
     <div class="sec-head">
         <span class="sh-title">快捷入口</span>
-        <span class="sh-more">点击跳转 PC 后台</span>
+        <span class="sh-more">点击跳转 PC 后台 · 带 PC 角标的建议用电脑端</span>
     </div>
     <div class="card">
         <div class="qk-grid" id="qkGrid"><div class="loading">加载中…</div></div>
@@ -398,7 +412,8 @@
 
     function esc(s) {
         return String(s === null || s === undefined ? '' : s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function fetchJson(url) {
@@ -672,13 +687,36 @@
         if (!list.length) { $('qkGrid').innerHTML = '<div class="loading">暂无入口</div>'; return; }
         var html = '';
         list.forEach(function (q) {
-            html += '<a class="qk-cell" href="' + esc(q.url) + '">'
+            // mobile = 0 表示重编辑/配置类页面，手机端操作不便，打上 PC 角标
+            var isPc = String(q.mobile) === '0';
+            html += '<a class="qk-cell' + (isPc ? ' qk-pc' : '') + '" href="' + esc(q.url) + '"'
+                + (isPc ? ' data-pc="1" data-tip="' + esc(q.tip || '') + '"' : '')
+                + '>'
                 + '<span class="qk-ic" style="background:' + esc(q.color) + '22;color:' + esc(q.color) + '">'
-                + esc((q.name || '').substr(0, 1)) + '</span>'
+                + esc((q.name || '').substr(0, 1))
+                + (isPc ? '<i class="qk-badge">PC</i>' : '')
+                + '</span>'
                 + '<span>' + esc(q.name) + '</span></a>';
         });
         $('qkGrid').innerHTML = html;
     }
+
+    /* 手机端点开「PC 角标」入口前先确认，避免进去才发现是重编辑页 */
+    document.addEventListener('click', function (e) {
+        var el = e.target;
+        while (el && el.nodeType === 1 && !el.classList.contains('qk-cell')) {
+            el = el.parentNode;
+        }
+        if (!el || el.nodeType !== 1 || el.getAttribute('data-pc') !== '1') return;
+        if (window.innerWidth > 767) return;
+
+        var tip = el.getAttribute('data-tip');
+        var msg = tip ? ('该功能' + tip + '，手机端操作不便。') : '该功能为复杂编辑页，手机端操作不便。';
+        if (!window.confirm(msg + '建议改用电脑端打开，仍要继续吗？')) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    }, true);
 
     function loadOverview(force) {
         $('ovCost').textContent = '加载中…';

@@ -71,12 +71,11 @@
         padding-bottom: 72px;
     }
 
-    /* ---------- 2. 数据表格：横向滚动，列不再被压扁 ---------- */
-    .table {
-        min-width: 560px; /* 兜底：JS 未执行时也不至于挤成一列一字 */
-    }
-
+    /* ---------- 2. 宽表格：由 JS 判定列数后套横向滚动容器 ---------- */
+    /* 这里刻意不设全局 min-width：仪表盘卡片内的窄表格（2~4 列）应自然收缩，
+       强行加最小宽度会把卡片撑破 */
     .cmf-table-scroll {
+        margin-bottom: 12px;
         border: 1px solid #e6ebf1;
         border-radius: 4px;
         background: #fff;
@@ -85,11 +84,11 @@
     .cmf-table-scroll > .table {
         margin-bottom: 0;
         border: 0;
-        min-width: 0; /* 实际最小宽度由 JS 按列数设置到行内样式上 */
     }
 
-    .table > thead > tr > th,
-    .table > tbody > tr > td {
+    /* 仅在滚动容器内禁止折行，配合 JS 写入行内的 min-width 生效 */
+    .cmf-table-scroll > .table > thead > tr > th,
+    .cmf-table-scroll > .table > tbody > tr > td {
         white-space: nowrap;
     }
 

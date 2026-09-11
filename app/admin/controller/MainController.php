@@ -313,34 +313,38 @@ class MainController extends AdminBaseController
 
     /**
      * 快捷入口（运营常用功能，按使用频率排）
+     *
+     * mobile: 1 = 以列表浏览/审核为主，手机端可正常操作
+     *         0 = 含重编辑/图片上传/资金操作，手机端体验差，驾驶舱会提示改用电脑端
+     * tip:    当 mobile = 0 时展示给管理员的原因说明
      */
     private static function quickLinks(): array
     {
         return [
-            ['name' => '用户列表', 'icon' => 'fa-users', 'color' => '#69c0ff', 'url' => self::link('Member/index')],
-            ['name' => '垃圾打卡', 'icon' => 'fa-recycle', 'color' => '#52c41a', 'url' => self::link('Forum/index2')],
-            ['name' => '打卡删除记录', 'icon' => 'fa-trash', 'color' => '#ff7875', 'url' => self::link('Forum/delete_log_index')],
-            ['name' => '点位巡检', 'icon' => 'fa-map-marker', 'color' => '#40a9ff', 'url' => self::link('Forum/index3')],
-            ['name' => '桶边督导', 'icon' => 'fa-hand-o-right', 'color' => '#b37feb', 'url' => self::link('Forum/index4')],
-            ['name' => '活动列表', 'icon' => 'fa-calendar', 'color' => '#ffc069', 'url' => self::link('Active/index1')],
-            ['name' => '活动报名', 'icon' => 'fa-user-plus', 'color' => '#5cdbd3', 'url' => self::link('ActiveSign/index')],
-            ['name' => '活动打卡', 'icon' => 'fa-check-square-o', 'color' => '#95de64', 'url' => self::link('ActiveClock/index')],
-            ['name' => '商品列表', 'icon' => 'fa-cubes', 'color' => '#ff9c6e', 'url' => self::link('Goods/index')],
-            ['name' => '订单列表', 'icon' => 'fa-list-alt', 'color' => '#ffa940', 'url' => self::link('Order/index')],
-            ['name' => '提现管理', 'icon' => 'fa-money', 'color' => '#73d13d', 'url' => self::link('Account/withdraw')],
-            ['name' => '积分记录', 'icon' => 'fa-diamond', 'color' => '#9254de', 'url' => self::link('Account/userPointLog')],
-            ['name' => '商家列表', 'icon' => 'fa-shopping-bag', 'color' => '#4096ff', 'url' => self::link('Shop/index')],
-            ['name' => '商户申请', 'icon' => 'fa-user-plus', 'color' => '#f759ab', 'url' => self::link('MemberShop/index')],
-            ['name' => '督导员申请', 'icon' => 'fa-shield', 'color' => '#36cfc9', 'url' => self::link('Check/index')],
-            ['name' => '小区列表', 'icon' => 'fa-building-o', 'color' => '#597ef7', 'url' => self::link('Community/index')],
-            ['name' => '社区管理', 'icon' => 'fa-sitemap', 'color' => '#ff7a45', 'url' => self::link('CommunityParent/index')],
-            ['name' => '问卷列表', 'icon' => 'fa-question-circle', 'color' => '#ffc53d', 'url' => self::link('exam/index')],
-            ['name' => '问卷记录', 'icon' => 'fa-file-text', 'color' => '#85a5ff', 'url' => self::link('exam/gift_list')],
-            ['name' => '优惠券', 'icon' => 'fa-ticket', 'color' => '#d3adf7', 'url' => self::link('Coupon/index')],
-            ['name' => '轮播图', 'icon' => 'fa-image', 'color' => '#87e8de', 'url' => self::link('Slide/index')],
-            ['name' => '首页入口配置', 'icon' => 'fa-th-large', 'color' => '#ffadd2', 'url' => self::link('homeEntries/index')],
-            ['name' => '系统消息', 'icon' => 'fa-bell', 'color' => '#ffd666', 'url' => self::link('SystemMessage/index')],
-            ['name' => '意见反馈', 'icon' => 'fa-commenting', 'color' => '#b7eb8f', 'url' => self::link('advice/index')],
+            ['name' => '用户列表', 'icon' => 'fa-users', 'color' => '#69c0ff', 'url' => self::link('Member/index'), 'mobile' => 1],
+            ['name' => '垃圾打卡', 'icon' => 'fa-recycle', 'color' => '#52c41a', 'url' => self::link('Forum/index2'), 'mobile' => 1],
+            ['name' => '打卡删除记录', 'icon' => 'fa-trash', 'color' => '#ff7875', 'url' => self::link('Forum/delete_log_index'), 'mobile' => 1],
+            ['name' => '点位巡检', 'icon' => 'fa-map-marker', 'color' => '#40a9ff', 'url' => self::link('Forum/index3'), 'mobile' => 1],
+            ['name' => '桶边督导', 'icon' => 'fa-hand-o-right', 'color' => '#b37feb', 'url' => self::link('Forum/index4'), 'mobile' => 1],
+            ['name' => '活动列表', 'icon' => 'fa-calendar', 'color' => '#ffc069', 'url' => self::link('Active/index1'), 'mobile' => 1],
+            ['name' => '活动报名', 'icon' => 'fa-user-plus', 'color' => '#5cdbd3', 'url' => self::link('ActiveSign/index'), 'mobile' => 1],
+            ['name' => '活动打卡', 'icon' => 'fa-check-square-o', 'color' => '#95de64', 'url' => self::link('ActiveClock/index'), 'mobile' => 1],
+            ['name' => '商品列表', 'icon' => 'fa-cubes', 'color' => '#ff9c6e', 'url' => self::link('Goods/index'), 'mobile' => 0, 'tip' => '包含多图上传与规格编辑'],
+            ['name' => '订单列表', 'icon' => 'fa-list-alt', 'color' => '#ffa940', 'url' => self::link('Order/index'), 'mobile' => 1],
+            ['name' => '提现管理', 'icon' => 'fa-money', 'color' => '#73d13d', 'url' => self::link('Account/withdraw'), 'mobile' => 0, 'tip' => '涉及资金审核与打款'],
+            ['name' => '积分记录', 'icon' => 'fa-diamond', 'color' => '#9254de', 'url' => self::link('Account/userPointLog'), 'mobile' => 1],
+            ['name' => '商家列表', 'icon' => 'fa-shopping-bag', 'color' => '#4096ff', 'url' => self::link('Shop/index'), 'mobile' => 1],
+            ['name' => '商户申请', 'icon' => 'fa-user-plus', 'color' => '#f759ab', 'url' => self::link('MemberShop/index'), 'mobile' => 1],
+            ['name' => '督导员申请', 'icon' => 'fa-shield', 'color' => '#36cfc9', 'url' => self::link('Check/index'), 'mobile' => 1],
+            ['name' => '小区列表', 'icon' => 'fa-building-o', 'color' => '#597ef7', 'url' => self::link('Community/index'), 'mobile' => 1],
+            ['name' => '社区管理', 'icon' => 'fa-sitemap', 'color' => '#ff7a45', 'url' => self::link('CommunityParent/index'), 'mobile' => 1],
+            ['name' => '问卷列表', 'icon' => 'fa-question-circle', 'color' => '#ffc53d', 'url' => self::link('exam/index'), 'mobile' => 0, 'tip' => '包含题目与选项编辑'],
+            ['name' => '问卷记录', 'icon' => 'fa-file-text', 'color' => '#85a5ff', 'url' => self::link('exam/gift_list'), 'mobile' => 1],
+            ['name' => '优惠券', 'icon' => 'fa-ticket', 'color' => '#d3adf7', 'url' => self::link('Coupon/index'), 'mobile' => 1],
+            ['name' => '轮播图', 'icon' => 'fa-image', 'color' => '#87e8de', 'url' => self::link('Slide/index'), 'mobile' => 0, 'tip' => '包含图片上传与排序'],
+            ['name' => '首页入口配置', 'icon' => 'fa-th-large', 'color' => '#ffadd2', 'url' => self::link('homeEntries/index'), 'mobile' => 0, 'tip' => '为可视化配置页面'],
+            ['name' => '系统消息', 'icon' => 'fa-bell', 'color' => '#ffd666', 'url' => self::link('SystemMessage/index'), 'mobile' => 1],
+            ['name' => '意见反馈', 'icon' => 'fa-commenting', 'color' => '#b7eb8f', 'url' => self::link('advice/index'), 'mobile' => 1],
         ];
     }
 
