@@ -13,7 +13,13 @@
     .sec-col-r { flex: 0 0 38%; max-width: 38%; }
     .sec-box { border: 1px solid #e8eef5; border-radius: 4px; background: #fff; }
     .sec-box-head { padding: 8px 12px; border-bottom: 1px solid #eef2f7; background: #f8fafc; font-size: 13px; color: #2b3a4a; }
-    #sec-map { width: 100%; height: 430px; }
+    .sec-map-wrap { position: relative; width: 100%; height: 430px; overflow: hidden; cursor: grab; background: #f4f9fd; }
+    .sec-map-wrap.grabbing { cursor: grabbing; }
+    .sec-map-wrap canvas { display: block; width: 100%; height: 100%; }
+    .sec-map-tip { position: absolute; z-index: 9; display: none; padding: 5px 9px; border-radius: 4px; background: rgba(30, 41, 59, .92); color: #fff; font-size: 12px; line-height: 18px; white-space: nowrap; pointer-events: none; }
+    .sec-map-empty { position: absolute; z-index: 8; left: 0; right: 0; top: 0; bottom: 0; display: none; align-items: center; justify-content: center; padding: 0 30px; color: #9aa7b4; font-size: 13px; text-align: center; }
+    .sec-map-tools { float: right; font-size: 12px; color: #8a99a8; font-weight: normal; }
+    .sec-map-tools a { margin-left: 10px; color: #3c9ede; text-decoration: none; }
     .sec-chart { width: 100%; height: 290px; }
     #sec-map-detail { padding: 12px; min-height: 160px; font-size: 13px; color: #555; line-height: 24px; }
 </style>
@@ -32,15 +38,23 @@
     </div>
 
     <div class="alert alert-info" style="padding:8px 12px;font-size:12px;margin-top:14px;">
-        地图上的点来自封锁名单里已解析出坐标的记录（最多 200 个），归属地 / 坐标通过腾讯地图 IP 定位获取；
-        未解析的记录可在「封锁IP」里点「解析归属地」。
+        地图由 Canvas 自绘（世界底图本地存放，不依赖任何外部地图 SDK / key）；圆点来自封锁名单里已解析出坐标的记录（最多 200 个），
+        归属地 / 经纬度由免费公开的 IP 接口解析；未解析的记录可在「封锁IP」里点「解析归属地」。
     </div>
 
     <div class="sec-flex">
         <div class="sec-col-l">
             <div class="sec-box">
-                <div class="sec-box-head"><i class="fa fa-map-marker"></i> 攻击来源分布（点击地图上的点查看该 IP）</div>
-                <div id="sec-map"></div>
+                <div class="sec-box-head sec-map-head">
+                    <span class="sec-map-tools"><a href="javascript:;" id="sec-map-reset">复位视图</a></span>
+                    <i class="fa fa-map-marker"></i> 攻击来源分布
+                    <span class="sec-muted" style="font-size:12px;margin-left:8px;">滚轮缩放 · 拖拽平移 · 点击圆点查看</span>
+                </div>
+                <div class="sec-map-wrap" id="sec-map-wrap">
+                    <canvas id="sec-map"></canvas>
+                    <div class="sec-map-tip" id="sec-map-tip"></div>
+                    <div class="sec-map-empty" id="sec-map-empty"></div>
+                </div>
             </div>
         </div>
         <div class="sec-col-r">
@@ -98,47 +112,362 @@
 </div>
 <script src="__STATIC__/js/admin.js"></script>
 <script src="__TMPL__/public/assets/js/echarts/echarts.min.js"></script>
-<script src="https://map.qq.com/api/gljs?v=1.exp&key={$map_key}"></script>
 <script type="text/javascript">
     $(function () {
         var markers = {:json_encode($markers)};
         var regions = {:json_encode($regions)};
 
-        /* ---------- 1. 腾讯地图：攻击来源打点 ---------- */
-        var mapEl = document.getElementById('sec-map');
-        if (mapEl && typeof TMap === 'undefined') {
-            mapEl.innerHTML = '<div class="sec-muted" style="padding:60px 20px;text-align:center;">' +
-                '地图脚本未加载（需要能访问 map.qq.com），下方统计与图表不受影响</div>';
-        } else if (mapEl) {
-            var map = new TMap.Map(mapEl, {
-                center: new TMap.LatLng(34.5, 108.9),
-                zoom: 4,
-                viewMode: '2D'
+        /* ---------- 1. Canvas 自绘世界地图：攻击来源打点 ---------- */
+        (function () {
+            var wrap = document.getElementById('sec-map-wrap');
+            var canvas = document.getElementById('sec-map');
+            if (!wrap || !canvas) {
+                return;
+            }
+            var ctx = canvas.getContext('2d');
+            var tipEl = document.getElementById('sec-map-tip');
+            var emptyEl = document.getElementById('sec-map-empty');
+            var landCanvas = document.createElement('canvas');   // 静态底图缓存，避免每帧重画陆地轮廓
+
+            var dpr = window.devicePixelRatio || 1;
+            var W = 0, H = 0;                                   // 画布 CSS 像素尺寸
+            var S = 0, SH = 0, OX = 0, OY = 0;                  // 世界底图铺开后的像素宽高与居中偏移
+            var rings = [];                                     // 解码后的陆地轮廓 [[lng, lat], ...]
+            var view = {scale: 1, tx: 0, ty: 0};
+            var hoverIdx = -1, drag = null, suppressClick = false;
+            var rafId = 0, lastFrame = 0;
+
+            // Miller 投影：Y_MAX 是 ±90° 纬度对应的 y 值；世界宽高比 = 2π / (2 * Y_MAX) ≈ 1.364
+            var Y_MAX = 1.25 * Math.log(Math.tan(Math.PI / 4 + 0.4 * (Math.PI / 2)));
+            var ASPECT = (2 * Math.PI) / (2 * Y_MAX);
+
+            // 经纬度 -> 归一化世界坐标（0~1）
+            function nx(lng) { return (lng + 180) / 360; }
+            function ny(lat) {
+                var y = 1.25 * Math.log(Math.tan(Math.PI / 4 + 0.4 * lat * Math.PI / 180));
+                return (Y_MAX - y) / (2 * Y_MAX);
+            }
+
+            // 归一化世界坐标 -> 画布像素（叠加缩放 / 平移）
+            function toScreen(x, y) {
+                var bx = OX + x * S;
+                var by = OY + y * SH;
+                return [
+                    (bx - W / 2) * view.scale + W / 2 + view.tx,
+                    (by - H / 2) * view.scale + H / 2 + view.ty
+                ];
+            }
+
+            function esc(s) {
+                return String(s === null || s === undefined ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            function layout() {
+                var rect = wrap.getBoundingClientRect();
+                W = Math.max(1, Math.round(rect.width));
+                H = Math.max(1, Math.round(rect.height));
+                canvas.width = Math.round(W * dpr);
+                canvas.height = Math.round(H * dpr);
+                canvas.style.width = W + 'px';
+                canvas.style.height = H + 'px';
+
+                // 按 contain 铺满并居中，保持 Miller 投影的真实宽高比
+                S = Math.min(W, H * ASPECT);
+                SH = S / ASPECT;
+                OX = (W - S) / 2;
+                OY = (H - SH) / 2;
+            }
+
+            function clampView() {
+                var lx = (W / 2) * (view.scale - 1) + W * 0.15;
+                var ly = (H / 2) * (view.scale - 1) + H * 0.15;
+                view.tx = Math.max(-lx, Math.min(lx, view.tx));
+                view.ty = Math.max(-ly, Math.min(ly, view.ty));
+            }
+
+            // 静态底图：海洋 + 经纬网 + 陆地轮廓
+            function renderLand() {
+                landCanvas.width = canvas.width;
+                landCanvas.height = canvas.height;
+                var c = landCanvas.getContext('2d');
+                c.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                var g = c.createLinearGradient(0, 0, 0, H);
+                g.addColorStop(0, '#f9fcff');
+                g.addColorStop(1, '#e7f1fa');
+                c.fillStyle = g;
+                c.fillRect(0, 0, W, H);
+
+                var i, a, b;
+                c.strokeStyle = 'rgba(120, 158, 190, .16)';
+                c.lineWidth = 0.5;
+                for (i = -150; i < 180; i += 30) {
+                    a = toScreen(nx(i), ny(84));
+                    b = toScreen(nx(i), ny(-84));
+                    c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+                }
+                for (i = -60; i <= 60; i += 30) {
+                    a = toScreen(nx(-180), ny(i));
+                    b = toScreen(nx(180), ny(i));
+                    c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+                }
+                c.strokeStyle = 'rgba(120, 158, 190, .3)';
+                a = toScreen(nx(-180), ny(0));
+                b = toScreen(nx(180), ny(0));
+                c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+
+                c.fillStyle = '#dae5f0';
+                c.strokeStyle = '#b4c7da';
+                c.lineWidth = 0.7;
+                c.beginPath();
+                for (var r = 0; r < rings.length; r++) {
+                    var ring = rings[r], prevX = null;
+                    for (var k = 0; k < ring.length; k++) {
+                        var px = nx(ring[k][0]);
+                        var p = toScreen(px, ny(ring[k][1]));
+                        // 跨越 180° 经线的相邻点要断开，否则会拉出一条横贯地图的直线
+                        if (k === 0 || (prevX !== null && Math.abs(px - prevX) > 0.5)) {
+                            c.moveTo(p[0], p[1]);
+                        } else {
+                            c.lineTo(p[0], p[1]);
+                        }
+                        prevX = px;
+                    }
+                    c.closePath();
+                }
+                c.fill();
+                c.stroke();
+            }
+
+            function drawMarkers(ts) {
+                for (var i = 0; i < markers.length; i++) {
+                    var m = markers[i];
+                    var p = toScreen(nx(m.lng), ny(m.lat));
+                    if (p[0] < -40 || p[0] > W + 40 || p[1] < -40 || p[1] > H + 40) {
+                        continue;
+                    }
+                    var isHover = (i === hoverIdx);
+                    var phase = (ts / 1800 + i * 0.137) % 1;
+                    var base = isHover ? [255, 152, 0] : [231, 76, 60];
+
+                    // 脉冲圈
+                    ctx.beginPath();
+                    ctx.arc(p[0], p[1], 3 + phase * 15, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(' + base[0] + ',' + base[1] + ',' + base[2] + ',' + (0.3 * (1 - phase)).toFixed(3) + ')';
+                    ctx.fill();
+
+                    // 实心点
+                    ctx.beginPath();
+                    ctx.arc(p[0], p[1], isHover ? 4.2 : 2.8, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgb(' + base[0] + ',' + base[1] + ',' + base[2] + ')';
+                    ctx.fill();
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#fff';
+                    ctx.stroke();
+                }
+            }
+
+            function frame(ts) {
+                rafId = window.requestAnimationFrame(frame);
+                if (!lastFrame) {
+                    lastFrame = ts - 1000;
+                }
+                if (document.hidden || ts - lastFrame < 33) {
+                    return;
+                }
+                lastFrame = ts;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                ctx.drawImage(landCanvas, 0, 0, W, H);
+                drawMarkers(ts);
+            }
+
+            function localXY(e) {
+                var rect = wrap.getBoundingClientRect();
+                return [e.clientX - rect.left, e.clientY - rect.top];
+            }
+
+            function pick(sx, sy) {
+                var best = -1, bestD = 12 * 12;
+                for (var i = 0; i < markers.length; i++) {
+                    var p = toScreen(nx(markers[i].lng), ny(markers[i].lat));
+                    var dx = p[0] - sx, dy = p[1] - sy;
+                    var d = dx * dx + dy * dy;
+                    if (d < bestD) {
+                        bestD = d;
+                        best = i;
+                    }
+                }
+                return best;
+            }
+
+            function showDetail(m) {
+                $('#sec-map-detail').html(
+                    '<div><b>' + esc(m.ip) + '</b></div>' +
+                    '<div>归属地：' + esc(m.region || '未解析') + '</div>' +
+                    '<div>封锁原因：' + esc(m.reason || '-') + '</div>' +
+                    '<div>拦截次数：' + (m.hits || 0) + '</div>'
+                );
+            }
+
+            function showEmpty(msg) {
+                emptyEl.style.display = 'flex';
+                emptyEl.innerHTML = msg;
+            }
+
+            // TopoJSON 解码：量化坐标需要按 delta 累加还原
+            function decodeRings(topo) {
+                var t = topo.transform;
+                var sx = t.scale[0], sy = t.scale[1], tx = t.translate[0], ty = t.translate[1];
+                var arcs = [];
+                for (var i = 0; i < topo.arcs.length; i++) {
+                    var raw = topo.arcs[i], pts = [], x = 0, y = 0;
+                    for (var j = 0; j < raw.length; j++) {
+                        x += raw[j][0];
+                        y += raw[j][1];
+                        pts.push([x * sx + tx, y * sy + ty]);
+                    }
+                    arcs.push(pts);
+                }
+
+                function ringPts(ring) {
+                    var out = [];
+                    for (var i = 0; i < ring.length; i++) {
+                        var idx = ring[i];
+                        // 负数索引表示反向引用，~idx 即 -idx-1
+                        var seg = idx >= 0 ? arcs[idx] : arcs[~idx].slice().reverse();
+                        for (var j = (i === 0 ? 0 : 1); j < seg.length; j++) {
+                            out.push(seg[j]);
+                        }
+                    }
+                    return out;
+                }
+
+                var out = [];
+                var geoms = (topo.objects.land && topo.objects.land.geometries) || [];
+                for (var g = 0; g < geoms.length; g++) {
+                    var polys = geoms[g].type === 'Polygon' ? [geoms[g].arcs] : geoms[g].arcs;
+                    for (var p = 0; p < polys.length; p++) {
+                        for (var r = 0; r < polys[p].length; r++) {
+                            out.push(ringPts(polys[p][r]));
+                        }
+                    }
+                }
+                return out;
+            }
+
+            /* ----- 交互 ----- */
+            wrap.addEventListener('mousedown', function (e) {
+                if (e.button !== 0) {
+                    return;
+                }
+                drag = {cx: e.clientX, cy: e.clientY, tx: view.tx, ty: view.ty, moved: false};
+                wrap.className += ' grabbing';
+                e.preventDefault();
             });
 
-            if (markers.length > 0) {
-                var geometries = [];
-                for (var i = 0; i < markers.length; i++) {
-                    geometries.push({id: String(i), position: new TMap.LatLng(markers[i].lat, markers[i].lng)});
+            $(window).on('mouseup.secmap', function () {
+                if (drag) {
+                    suppressClick = drag.moved;
+                    drag = null;
+                    wrap.className = wrap.className.replace(/\s*grabbing/g, '');
                 }
-                var markerLayer = new TMap.MultiMarker({
-                    id: 'sec-marker-layer',
-                    map: map,
-                    geometries: geometries
-                });
-                markerLayer.on('click', function (evt) {
-                    var m = markers[parseInt(evt.geometry.id, 10)] || {};
-                    $('#sec-map-detail').html(
-                        '<div><b>' + (m.ip || '') + '</b></div>' +
-                        '<div>归属地：' + (m.region ? m.region : '未解析') + '</div>' +
-                        '<div>封锁原因：' + (m.reason ? m.reason : '-') + '</div>' +
-                        '<div>拦截次数：' + (m.hits || 0) + '</div>'
-                    );
-                });
-            } else {
-                $('#sec-map-detail').html('<span class="sec-muted">暂无已解析坐标的封锁 IP。</span>');
+            });
+
+            wrap.addEventListener('mousemove', function (e) {
+                var xy = localXY(e);
+                if (drag) {
+                    view.tx = drag.tx + (e.clientX - drag.cx);
+                    view.ty = drag.ty + (e.clientY - drag.cy);
+                    if (Math.abs(e.clientX - drag.cx) + Math.abs(e.clientY - drag.cy) > 3) {
+                        drag.moved = true;
+                    }
+                    clampView();
+                    hoverIdx = -1;
+                    tipEl.style.display = 'none';
+                    return;
+                }
+
+                hoverIdx = pick(xy[0], xy[1]);
+                if (hoverIdx >= 0) {
+                    var m = markers[hoverIdx];
+                    tipEl.innerHTML = esc(m.ip) + ' · ' + esc(m.region || '未解析') + ' · 拦截 ' + (m.hits || 0) + ' 次';
+                    tipEl.style.display = 'block';
+                    tipEl.style.left = Math.max(4, Math.min(xy[0] + 12, W - tipEl.offsetWidth - 4)) + 'px';
+                    tipEl.style.top = Math.max(4, xy[1] - 30) + 'px';
+                    wrap.style.cursor = 'pointer';
+                } else {
+                    tipEl.style.display = 'none';
+                    wrap.style.cursor = '';
+                }
+            });
+
+            wrap.addEventListener('mouseleave', function () {
+                hoverIdx = -1;
+                tipEl.style.display = 'none';
+            });
+
+            wrap.addEventListener('click', function (e) {
+                if (suppressClick) {
+                    suppressClick = false;
+                    return;
+                }
+                var xy = localXY(e);
+                var idx = pick(xy[0], xy[1]);
+                if (idx >= 0) {
+                    showDetail(markers[idx]);
+                }
+            });
+
+            // 滚轮缩放：以鼠标位置为中心，保证指针下的地图点不动
+            wrap.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                var xy = localXY(e);
+                var old = view.scale;
+                var ns = Math.max(1, Math.min(14, old * (e.deltaY < 0 ? 1.2 : 1 / 1.2)));
+                if (Math.abs(ns - old) < 1e-6) {
+                    return;
+                }
+                var wx = (xy[0] - W / 2 - view.tx) / old + W / 2;
+                var wy = (xy[1] - H / 2 - view.ty) / old + H / 2;
+                view.scale = ns;
+                view.tx = xy[0] - W / 2 - (wx - W / 2) * ns;
+                view.ty = xy[1] - H / 2 - (wy - H / 2) * ns;
+                clampView();
+                renderLand();
+            }, {passive: false});
+
+            $('#sec-map-reset').on('click', function () {
+                view = {scale: 1, tx: 0, ty: 0};
+                renderLand();
+            });
+
+            var rt = 0;
+            $(window).on('resize', function () {
+                clearTimeout(rt);
+                rt = setTimeout(function () {
+                    layout();
+                    renderLand();
+                }, 150);
+            });
+
+            /* ----- 启动 ----- */
+            layout();
+            rafId = window.requestAnimationFrame(frame);
+            if (!markers.length) {
+                showEmpty('暂无已解析坐标的封锁 IP，可到「封锁IP」页点「解析归属地」');
             }
-        }
+
+            $.getJSON('__TMPL__/public/assets/js/map/land-110m.json')
+                .done(function (topo) {
+                    rings = decodeRings(topo);
+                    renderLand();
+                })
+                .fail(function () {
+                    showEmpty('世界底图 land-110m.json 加载失败（应位于主题 assets/js/map/ 目录下），统计与图表不受影响');
+                });
+        })();
 
         if (typeof echarts === 'undefined') {
             return;

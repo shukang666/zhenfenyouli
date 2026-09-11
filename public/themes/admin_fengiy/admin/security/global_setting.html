@@ -18,10 +18,6 @@
         </foreach>
     </ul>
 
-    <div class="alert alert-info" style="padding:8px 12px;font-size:12px;margin-top:16px;">
-        每个开关 / 参数占一行，保存后写入 <code>cmf_option</code> 的 <code>security_global</code>，同时往 <code>cmf_security_audit_log</code> 留一条设置变更留痕。<br>
-        <b>这里只负责保存配置，实际拦截动作需要服务器 / 网关层读取该配置后执行</b>；改动前建议先确认对应规则已经在服务器上生效，避免误封正常用户。
-    </div>
 
     <form class="js-ajax-form" method="post" action="{:url('global_setting')}">
         <foreach name="schema" item="group">

@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\library\IpLocation;
 use cmf\controller\AdminBaseController;
 use think\facade\Db;
 
@@ -11,19 +12,17 @@ use think\facade\Db;
  * 四个标签页（每个标签一个 action，模板里用 nav-tabs 链接切换，与「算法中心」一致）：
  *   index()          封锁IP    ：cmf_security_block_ip，后台维护封锁名单
  *   log_audit()      日志审计  ：直接回显服务器上的真实日志文件（宝塔站点日志 → ThinkCMF runtime 日志）
- *   attack_map()     攻击地图  ：按封锁名单聚合出的来源地域 / 趋势，坐标来自腾讯地图 IP 定位
+ *   attack_map()     攻击地图  ：按封锁名单聚合出的来源地域 / 趋势，世界地图由 Canvas 自绘，不依赖任何外部地图 SDK
  *   global_setting() 全局设置  ：存 cmf_option 的 security_global，仅保存开关与参数
  *
  * 说明：全局设置里保存的开关本身不做拦截，实际拦截需要服务器 / 网关层按这些配置执行；
- *      封锁 / 解封等动作会留痕到 cmf_security_audit_log，但「日志审计」页读的是真实日志文件，两者不混用。
+ *      封锁 / 解封等动作会留痕到 cmf_security_audit_log，但「日志审计」页读的是真实日志文件，两者不混用；
+ *      IP 归属地 / 经纬度由 app\admin\library\IpLocation 用免费公开接口解析，不需要任何地图 key。
  */
 class SecurityController extends AdminBaseController
 {
     /** 全局设置存放的 cmf_option 键名 */
     const OPTION_NAME = 'security_global';
-
-    /** 腾讯地图 key（与 shop/edit.html、active/update.html 用的是同一把，GL JS 与 WebService 共用） */
-    const TENCENT_MAP_KEY = 'XQABZ-Z6GWP-OWEDN-V3K2Y-W43D6-D4B5P';
 
     /**
      * 封锁来源
@@ -145,40 +144,12 @@ class SecurityController extends AdminBaseController
     }
 
     /**
-     * 查 IP 归属地（腾讯地图 WebService IP 定位）
-     * 失败（key 无权限、网络不通、IP 是网段等）返回 null，不影响封锁本身
+     * 查 IP 归属地（免费公开接口多级回落，见 app\admin\library\IpLocation）
+     * 失败（网络不通、IP 是网段 / 通配等）返回 null，不影响封锁本身
      */
     private function lookupIp($ip)
     {
-        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-            return null;
-        }
-        $url = 'https://apis.map.qq.com/ws/location/v1/ip?ip=' . urlencode($ip) . '&key=' . self::TENCENT_MAP_KEY;
-        $ctx = stream_context_create(['http' => ['timeout' => 3, 'method' => 'GET']]);
-        $json = @file_get_contents($url, false, $ctx);
-        if (empty($json)) {
-            return null;
-        }
-        $res = json_decode($json, true);
-        if (!is_array($res) || (int)(isset($res['status']) ? $res['status'] : -1) !== 0 || empty($res['result'])) {
-            return null;
-        }
-        $ad  = isset($res['result']['ad_info']) ? $res['result']['ad_info'] : [];
-        $loc = isset($res['result']['location']) ? $res['result']['location'] : [];
-        $region = trim(
-            (isset($ad['nation']) ? $ad['nation'] : '') .
-            (isset($ad['province']) ? $ad['province'] : '') .
-            (isset($ad['city']) ? $ad['city'] : '') .
-            (isset($ad['district']) ? $ad['district'] : '')
-        );
-        if ($region === '' && empty($loc)) {
-            return null;
-        }
-        return [
-            'region' => $region !== '' ? $region : '未知',
-            'lng'    => (float)(isset($loc['lng']) ? $loc['lng'] : 0),
-            'lat'    => (float)(isset($loc['lat']) ? $loc['lat'] : 0),
-        ];
+        return IpLocation::lookup($ip);
     }
 
     /**
@@ -381,7 +352,7 @@ class SecurityController extends AdminBaseController
 
         $geo = $this->lookupIp($row['ip']);
         if (empty($geo)) {
-            $this->error('解析失败：该 IP 可能不是单个 IP，或地图 key 未开通 IP 定位权限');
+            $this->error('解析失败：该 IP 可能不是单个 IP，或服务器访问不了 IP 归属地接口');
         }
 
         Db::name('security_block_ip')->where('id', $id)->update([
@@ -810,7 +781,6 @@ class SecurityController extends AdminBaseController
         $this->assign('trend_values', $trend);
         $this->assign('regions', $regions);
         $this->assign('markers', $markers);
-        $this->assign('map_key', self::TENCENT_MAP_KEY);
         $this->assign('stat', [
             'blocking'   => Db::name('security_block_ip')->where('status', 1)->count(),
             'week'       => Db::name('security_block_ip')->where('create_time', '>=', $weekStart)->count(),
