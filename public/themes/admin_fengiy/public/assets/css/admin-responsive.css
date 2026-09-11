@@ -1,0 +1,208 @@
+@charset "utf-8";
+/* ==========================================================================
+   移动端响应式适配（PC 后台内容页）
+   --------------------------------------------------------------------------
+   作用范围：所有 include public@header 的后台页面（约 281 个模板）
+   生效条件：仅当视口宽度 <= 767px（对齐 Bootstrap 3 的 xs 断点）
+   PC 端：完全不受影响 —— 所有规则都写在媒体查询内
+   --------------------------------------------------------------------------
+   设计原则：
+   1. 不隐藏业务信息，只做「竖排 + 可横向滚动 + 加大点击区域」
+   2. 表格横向滚动由 public/header.html 注入的小段 JS 自动套容器实现
+   3. 编辑/新增表单依赖 Bootstrap 3 自身的 col-sm-* 退化，这里只做兜底
+   ========================================================================== */
+
+/* ---------- 浮动返回按钮：仅窄屏由 JS 插入并显示 ---------- */
+.cmf-m-back {
+    position: fixed;
+    left: 12px;
+    bottom: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 99999;
+    display: none;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 18px;
+    border-radius: 20px;
+    background: rgba(29, 154, 108, .95);
+    color: #fff;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+}
+
+.cmf-m-back:link,
+.cmf-m-back:visited,
+.cmf-m-back:hover,
+.cmf-m-back:active {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* ---------- 表格横向滚动容器（由 JS 自动包裹 table.table） ---------- */
+.cmf-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+
+    /* ---------- 0. 浮动返回按钮 ---------- */
+    .cmf-m-back {
+        display: block;
+    }
+
+    /* ---------- 1. 页面留白与字号 ---------- */
+    /* 个别页面在 body 上写死了 min-width（如 rbac/member.html 的 600px），窄屏统一放开 */
+    body {
+        min-width: 0 !important;
+        font-size: 14px;
+    }
+
+    .wrap,
+    .js-check-wrap {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /* 底部留白，避免浮动按钮压住最后一行 */
+    .wrap {
+        padding-bottom: 72px;
+    }
+
+    /* ---------- 2. 数据表格：横向滚动，列不再被压扁 ---------- */
+    .table {
+        min-width: 560px; /* 兜底：JS 未执行时也不至于挤成一列一字 */
+    }
+
+    .cmf-table-scroll {
+        border: 1px solid #e6ebf1;
+        border-radius: 4px;
+        background: #fff;
+    }
+
+    .cmf-table-scroll > .table {
+        margin-bottom: 0;
+        border: 0;
+        min-width: 0; /* 实际最小宽度由 JS 按列数设置到行内样式上 */
+    }
+
+    .table > thead > tr > th,
+    .table > tbody > tr > td {
+        white-space: nowrap;
+    }
+
+    /* ---------- 3. 列表页搜索/筛选表单：竖排全宽 ---------- */
+    form.well {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    form.well .layui-inline,
+    form.well .form-group,
+    form.well .input-group,
+    form.well .layui-input-inline {
+        display: block !important;
+        float: none !important;
+        width: 100% !important;
+        margin: 0 0 8px 0 !important;
+    }
+
+    form.well select,
+    form.well input[type="text"],
+    form.well input[type="number"],
+    form.well .form-control,
+    form.well .layui-input {
+        width: 100% !important;
+        max-width: 100%;
+    }
+
+    form.well .btn {
+        display: inline-block;
+        min-width: 84px;
+        height: 38px;
+        margin: 0 8px 8px 0 !important;
+    }
+
+    /* ---------- 4. 顶部标签页：横向滚动不折行 ---------- */
+    .nav-tabs {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+
+    .nav-tabs > li {
+        float: none;
+        flex: 0 0 auto;
+    }
+
+    .nav-tabs > li > a {
+        margin-right: 0;
+    }
+
+    /* ---------- 5. 行内操作按钮：放大到手指可点 ---------- */
+    .btn-xs {
+        padding: 5px 10px;
+        font-size: 13px;
+        line-height: 1.5;
+        border-radius: 4px;
+    }
+
+    td > .btn,
+    .table-actions > .btn {
+        margin: 2px 4px 2px 0;
+    }
+
+    /* ---------- 6. 编辑/新增表单页兜底 ---------- */
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-horizontal .control-label {
+        text-align: left;
+        padding-top: 0;
+        margin-bottom: 4px;
+    }
+
+    .form-horizontal .form-control {
+        width: 100% !important;
+    }
+
+    .form-horizontal .col-sm-offset-2 {
+        margin-left: 0 !important;
+    }
+
+    /* ---------- 7. 分页 ---------- */
+    .pagination {
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+
+    .pagination > li > a,
+    .pagination > li > span {
+        padding: 6px 10px;
+    }
+
+    .pagination-jump {
+        margin-left: 0 !important;
+    }
+
+    /* ---------- 8. 弹层自适应 ---------- */
+    .layui-layer {
+        max-width: 94vw;
+    }
+
+    .layui-layer-page .layui-layer-content {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ---------- 9. 内容区大图不溢出 ---------- */
+    .wrap img {
+        max-width: 100%;
+        height: auto;
+    }
+}

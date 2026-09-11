@@ -54,6 +54,27 @@
 
 			/*----------------导航hack--------------------*/
 		</style>
+		<style>
+			/* 移动端：去掉强制最小宽度、压缩留白，PC 端不受影响 */
+			@media (max-width: 767px) {
+				body {
+					min-width: 0 !important;
+				}
+
+				.main-container.container-fluid {
+					padding: 0;
+				}
+
+				/* 标签页在手机上无意义且占用高度，隐藏后导航仍由侧栏 hamburger 承担 */
+				.tags-view {
+					display: none !important;
+				}
+
+				.page-content {
+					padding: 8px 10px 20px;
+				}
+			}
+		</style>
 
 		<script>
 			//全局变量

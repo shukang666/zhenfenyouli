@@ -18,6 +18,8 @@
     <link href="__TMPL__/public/assets/themes/{:cmf_get_admin_style()}/bootstrap.min.css" rel="stylesheet">
     <link href="__TMPL__/public/assets/simpleboot3/css/simplebootadmin.css" rel="stylesheet">
     <link href="__STATIC__/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- 移动端响应式适配（规则全部限定在 <=767px 媒体查询内，PC 端不受影响） -->
+    <link href="__TMPL__/public/assets/css/admin-responsive.css" rel="stylesheet" type="text/css">
 
     <!--[if lt IE 9]>
     <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
@@ -90,3 +92,39 @@
             }
         </style>
     </if>
+    <script type="text/javascript">
+        /**
+         * 移动端适配：仅为窄屏做两件事
+         * 1. 给所有数据表格套横向滚动容器，并按列数设置最小宽度，避免表格被压成一列一个字
+         * 2. 页面被独立打开（不在后台 iframe 壳内）时补一个返回按钮
+         * PC 端直接 return，不做任何 DOM 改动
+         */
+        (function () {
+            if (window.innerWidth > 767) {
+                return;
+            }
+
+            $(function () {
+                $('table.table').each(function () {
+                    var $table = $(this);
+
+                    var cols = $table.children('thead').find('tr').first().find('th').length;
+                    if (!cols) {
+                        cols = $table.find('tr').first().children().length;
+                    }
+                    // 每列按 88px 估算，保证单元格文字不折行
+                    $table.css('min-width', Math.max((cols || 1) * 88, 320) + 'px');
+
+                    if ($table.parent().hasClass('cmf-table-scroll') || $table.parent().hasClass('table-responsive')) {
+                        return;
+                    }
+                    $table.wrap('<div class="cmf-table-scroll"></div>');
+                });
+
+                // 独立打开（非 iframe 壳内）时补返回按钮：移动端没有后台导航栏
+                if (window.self === window.top) {
+                    $('<a href="javascript:history.back();" class="cmf-m-back">返回</a>').appendTo('body');
+                }
+            });
+        })();
+    </script>
