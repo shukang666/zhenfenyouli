@@ -1,130 +1,801 @@
-<include file="public@header" />
+<include file="public@header"/>
 
 </head>
 <body>
-	<div class="wrap">
-		<div class="layui-row">
-			<div class="layui-col-xs12">
-				<div class="panel panel-default" style="margin-bottom: 10px;">
-					<div class="panel-body">
-						{:lang('WELCOME_USER',array('user_nickname' => empty($admin['user_nickname'])?$admin['user_login'] : $admin['user_nickname']))}登陆后台管理中心
-					</div>
-				</div>
-			</div>
-		</div>
-		<!--<div class="layui-row layui-col-space15">
-			<div class="layui-col-xs4">
-				<div class="layui-row layui-col-space15">
-					<div class="layui-col-xs6">
-						<a href="javascript:parent.openapp('/admin/member/index.html?type=1','用户管理','会员管理');">
-							<div class="panel panel-default" style="margin-bottom: 0;">
-								<div class="panel-body text-center">
-									<i class="fa fa-users" style="font-size: 24px; color: #69C0FF;"></i>
-									<div class="margin-top-10">会员管理</div>
-								</div>
-							</div>
-						</a>
-					</div>
-					<div class="layui-col-xs6">
-						<a href="javascript:parent.openapp('/admin/shop_info/index.html','门店设置','门店信息');">
-							<div class="panel panel-default" style="margin-bottom: 0;">
-								<div class="panel-body text-center" style="margin-bottom: 0;">
-									<i class="fa fa-cube" style="font-size: 24px; color: #5CDBD3;"></i>
-									<div class="margin-top-10">门店设置</div>
-								</div>
-							</div>
-						</a>
-					</div>
-				</div>
-			</div>
-			<div class="layui-col-xs4">
-				<div class="layui-row layui-col-space15">
-					<div class="layui-col-xs6">
-						<a href="javascript:parent.openapp('/admin/position/index.html','职位管理','职位信息');">
-							<div class="panel panel-default" style="margin-bottom: 0;">
-								<div class="panel-body text-center">
-									<i class="fa fa-id-card" style="font-size: 24px; color: #B37FEB;"></i>
-									<div class="margin-top-10">职位管理</div>
-								</div>
-							</div>
-						</a>
-					</div>
-					<div class="layui-col-xs6">
-						<a href="javascript:parent.openapp('/admin/goods/index.html','积分商城','商品管理');">
-							<div class="panel panel-default" style="margin-bottom: 0;">
-								<div class="panel-body text-center">
-									<i class="fa fa-shopping-cart" style="font-size: 24px; color: #FF9C6E;"></i>
-									<div class="margin-top-10">积分商城</div>
-								</div>
-							</div>
-						</a>
-					</div>
-				</div>
-			</div>
-			<div class="layui-col-xs4">
-				<div class="layui-row layui-col-space15">
-					<div class="layui-col-xs6">
-						<a href="javascript:parent.openapp('/admin/app_info/index.html','应用设置','应用设置');">
-							<div class="panel panel-default" style="margin-bottom: 0;">
-								<div class="panel-body text-center">
-									<i class="fa fa-cog" style="font-size: 24px; color: #95DE64;"></i>
-									<div class="margin-top-10">应用设置</div>
-								</div>
-							</div>
-						</a>
-					</div>
-					<div class="layui-col-xs6">
-						<a href="javascript:parent.openapp('/admin/rbac/index.html','门店管理','门店管理');">
-							<div class="panel panel-default" style="margin-bottom: 0;">
-								<div class="panel-body text-center">
-									<i class="fa fa-cogs" style="font-size: 24px; color: #FFC069;"></i>
-									<div class="margin-top-10">门店管理</div>
-								</div>
-							</div>
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="layui-row layui-col-space15">
-			<div class="layui-col-xs12">
-				&lt;!&ndash; layui-col-sm6 layui-col-md6 &ndash;&gt;
-				<div class="panel panel-default" style="margin-bottom: 10px;">
-					&lt;!&ndash; <div class="panel-heading">
-						<i class="fa fa-pie-chart" style="font-size: 16px; color: #1890FF;"></i>
-						<span>订单</span>
-					</div> &ndash;&gt;
-					<div class="panel-body">
-						<div id="order" style="width: 100%;height:280px;"></div>
-					</div>
-				</div>
-			</div>
-			<div class="layui-col-xs12">
-				<div class="panel panel-default" style="margin-bottom: 0;">
-					&lt;!&ndash; <div class="panel-heading">
-						<i class="fa fa-user-circle" style="font-size: 16px; color: #1890FF;"></i>
-						<span>用户</span>
-					</div> &ndash;&gt;
-					<div class="panel-body">
-						<div id="member" style="width: 100%;height:280px;"></div>
-					</div>
-				</div>
-			</div>
-		</div>-->
-	</div>
-	<script src="__STATIC__/js/admin.js"></script>
-	<script src="__TMPL__/public/assets/simpleboot3/js/adminindex.js"></script>
-	<script src="__TMPL__/public/assets/js/echarts.js"></script>
-	<script src="__TMPL__/public/assets/simpleboot3/js/indexnum.js"></script>
-	<hook name="admin_before_body_end" />
-	<script type="text/javascript">
-		/*//图表
-		$(function () {
-			//订单数据量趋势
-			orderChart([10, 11, 13, 11, 12, 12, 9], [1, 2, 2, 5, 3, 2, 0]);
-			//用户数据量趋势
-			userChart([820, 932, 901, 934, 1290, 1330, 1320]);
-		})*/
-	</script>
+<style>
+    /* ===== 后台首页数据看板（仅作用于本页，class 前缀 dash-） ===== */
+    body {
+        background: #f0f2f5;
+    }
+
+    .dash-wrap {
+        padding: 15px 15px 30px;
+    }
+
+    .dash-wrap .panel {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
+        margin-bottom: 15px;
+    }
+
+    .dash-wrap .panel-heading {
+        border-radius: 8px 8px 0 0;
+        background: #fff;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #262626;
+        padding: 12px 15px;
+    }
+
+    .dash-wrap .panel-heading .pull-right {
+        font-weight: 400;
+        font-size: 12px;
+    }
+
+    .dash-wrap .panel-heading i {
+        margin-right: 6px;
+    }
+
+    /* 欢迎条 */
+    .dash-hello {
+        background: linear-gradient(135deg, #1890ff 0%, #13c2c2 100%);
+        border-radius: 8px;
+        padding: 18px 22px;
+        color: #fff;
+        margin-bottom: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dash-hello:after {
+        content: "\f0c2";
+        font-family: FontAwesome;
+        position: absolute;
+        right: 20px;
+        top: -18px;
+        font-size: 120px;
+        opacity: .12;
+    }
+
+    .dash-hello h3 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .dash-hello .dash-hello-sub {
+        font-size: 13px;
+        opacity: .95;
+    }
+
+    .dash-hello .dash-hello-sub b {
+        font-size: 16px;
+        padding: 0 2px;
+    }
+
+    .dash-hello .dash-hello-right {
+        text-align: right;
+        font-size: 12px;
+        padding-top: 6px;
+    }
+
+    .dash-hello .dash-hello-right .btn {
+        margin-top: 8px;
+    }
+
+    /* 数字卡 */
+    .dash-card {
+        display: block;
+        background: #fff;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
+        color: #262626;
+        transition: all .2s;
+        height: 96px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dash-card:hover {
+        box-shadow: 0 4px 14px rgba(0, 21, 41, .16);
+        transform: translateY(-2px);
+        text-decoration: none;
+        color: #262626;
+    }
+
+    .dash-card .dash-card-icon {
+        position: absolute;
+        right: 12px;
+        bottom: 6px;
+        font-size: 46px;
+        opacity: .12;
+    }
+
+    .dash-card .dash-card-title {
+        font-size: 13px;
+        color: #8c8c8c;
+        margin-bottom: 8px;
+    }
+
+    .dash-card .dash-card-num {
+        font-size: 26px;
+        line-height: 1.1;
+        font-weight: 600;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .dash-card .dash-card-num small {
+        font-size: 12px;
+        font-weight: 400;
+        color: #8c8c8c;
+        margin-left: 4px;
+    }
+
+    .dash-card .dash-card-sub {
+        font-size: 12px;
+        color: #bfbfbf;
+        margin-top: 6px;
+    }
+
+    /* 待办 */
+    .dash-todo-item {
+        display: block;
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 15px;
+        color: #595959;
+        transition: all .2s;
+        position: relative;
+    }
+
+    .dash-todo-item:hover {
+        border-color: #1890ff;
+        box-shadow: 0 2px 10px rgba(24, 144, 255, .16);
+        text-decoration: none;
+        color: #262626;
+    }
+
+    .dash-todo-item .dash-todo-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #262626;
+    }
+
+    .dash-todo-item .dash-todo-desc {
+        font-size: 12px;
+        color: #bfbfbf;
+        margin-top: 4px;
+        height: 17px;
+        overflow: hidden;
+    }
+
+    .dash-todo-item .dash-todo-icon {
+        width: 38px;
+        height: 38px;
+        line-height: 38px;
+        text-align: center;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 17px;
+        float: left;
+        margin-right: 12px;
+    }
+
+    .dash-todo-item .dash-todo-count {
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        font-size: 22px;
+        font-weight: 600;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #ff4d4f;
+    }
+
+    .dash-todo-item.is-zero .dash-todo-count {
+        color: #d9d9d9;
+        font-size: 18px;
+    }
+
+    .dash-todo-item.is-zero {
+        background: #fafafa;
+    }
+
+    /* 表格 */
+    .dash-table {
+        margin-bottom: 0;
+        font-size: 12px;
+    }
+
+    .dash-table > thead > tr > th {
+        border-bottom: 1px solid #f0f0f0;
+        color: #8c8c8c;
+        font-weight: 400;
+        padding: 6px 8px;
+        white-space: nowrap;
+    }
+
+    .dash-table > tbody > tr > td {
+        border-top: 1px solid #f5f5f5;
+        padding: 7px 8px;
+        color: #595959;
+        vertical-align: middle;
+    }
+
+    .dash-table > tbody > tr:hover > td {
+        background: #fafafa;
+    }
+
+    .dash-table .dash-td-main {
+        color: #262626;
+        font-weight: 600;
+    }
+
+    .dash-tag {
+        display: inline-block;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        line-height: 16px;
+        background: #f5f5f5;
+        color: #8c8c8c;
+        white-space: nowrap;
+    }
+
+    .dash-tag-blue {
+        background: #e6f7ff;
+        color: #1890ff;
+    }
+
+    .dash-tag-green {
+        background: #f6ffed;
+        color: #52c41a;
+    }
+
+    .dash-tag-orange {
+        background: #fff7e6;
+        color: #fa8c16;
+    }
+
+    .dash-tag-red {
+        background: #fff1f0;
+        color: #ff4d4f;
+    }
+
+    .dash-empty {
+        color: #bfbfbf;
+        text-align: center;
+        padding: 30px 0;
+        font-size: 13px;
+    }
+
+    /* 快捷入口 */
+    .dash-quick {
+        display: block;
+        text-align: center;
+        padding: 12px 4px;
+        border-radius: 8px;
+        color: #595959;
+        transition: all .2s;
+    }
+
+    .dash-quick:hover {
+        background: #f5f9ff;
+        text-decoration: none;
+        color: #1890ff;
+    }
+
+    .dash-quick i {
+        font-size: 20px;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .dash-quick span {
+        font-size: 12px;
+    }
+
+    .dash-chart {
+        width: 100%;
+        height: 300px;
+    }
+
+    .dash-foot {
+        color: #bfbfbf;
+        font-size: 12px;
+        line-height: 22px;
+        padding: 0 4px;
+    }
+
+    @media (max-width: 992px) {
+        .dash-hello .dash-hello-right {
+            text-align: left;
+        }
+    }
+</style>
+<div class="dash-wrap">
+
+    <!-- ================= 1. 欢迎条 ================= -->
+    <div class="dash-hello">
+        <div class="layui-row">
+            <div class="layui-col-md8 layui-col-xs12">
+                <h3>{$greet}，{:empty($admin['user_nickname']) ? $admin['user_login'] : $admin['user_nickname']}！</h3>
+                <div class="dash-hello-sub">
+                    {$date_text} ・ 今日已产生 <b>{$stats.clock_today}</b> 条打卡（<b>{$stats.clock_user_today}</b> 人参与）、
+                    <b>{$stats.user_today}</b> 位新用户注册、<b>{$stats.aclock_today}</b> 次活动签到，
+                    各项待办 <b>{$todo_total}</b> 件。
+                </div>
+            </div>
+            <div class="layui-col-md4 layui-col-xs12">
+                <div class="dash-hello-right">
+                    数据时间：{$update_time}
+                    <if condition="$from_cache eq 1">
+                        （缓存 60 秒）
+                    <else />
+                        （实时统计）
+                    </if>
+                    <br/>
+                    <a href="{:url('main/index',['refresh'=>1])}" class="btn btn-default btn-sm">
+                        <i class="fa fa-refresh"></i> 刷新数据
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 2. 核心指标卡 ================= -->
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md3 layui-col-sm6">
+            <a class="dash-card" href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">
+                <i class="fa fa-recycle dash-card-icon" style="color:#52c41a;"></i>
+                <div class="dash-card-title">今日打卡</div>
+                <div class="dash-card-num" style="color:#52c41a;">{$stats.clock_today}
+                    <small>条 / {$stats.clock_user_today} 人</small>
+                </div>
+                <div class="dash-card-sub">近 7 天 {$stats.clock_7d} 条</div>
+            </a>
+        </div>
+        <div class="layui-col-md3 layui-col-sm6">
+            <a class="dash-card" href="javascript:parent.openapp('{:url('Member/index')}','member','用户列表');">
+                <i class="fa fa-users dash-card-icon" style="color:#1890ff;"></i>
+                <div class="dash-card-title">今日新增用户</div>
+                <div class="dash-card-num" style="color:#1890ff;">{$stats.user_today}
+                    <small>人</small>
+                </div>
+                <div class="dash-card-sub">近 7 天 {$stats.user_7d} 人 / 近 30 天 {$stats.user_30d} 人</div>
+            </a>
+        </div>
+        <div class="layui-col-md3 layui-col-sm6">
+            <a class="dash-card" href="javascript:parent.openapp('{:url('ActiveClock/index')}','aclock','活动打卡');">
+                <i class="fa fa-check-square-o dash-card-icon" style="color:#13c2c2;"></i>
+                <div class="dash-card-title">今日活动签到</div>
+                <div class="dash-card-num" style="color:#13c2c2;">{$stats.aclock_today}
+                    <small>次 / 报名 {$stats.sign_today}</small>
+                </div>
+                <div class="dash-card-sub">累计签到 {$stats.aclock_total} 次</div>
+            </a>
+        </div>
+        <div class="layui-col-md3 layui-col-sm6">
+            <a class="dash-card" href="javascript:parent.openapp('{:url('Account/userPointLog')}','point','积分记录');">
+                <i class="fa fa-diamond dash-card-icon" style="color:#722ed1;"></i>
+                <div class="dash-card-title">今日发放积分</div>
+                <div class="dash-card-num" style="color:#722ed1;">{$stats.point_today}
+                    <small>分</small>
+                </div>
+                <div class="dash-card-sub">近 7 天 {$stats.point_7d} 分 / 累计 {$stats.point_total} 分</div>
+            </a>
+        </div>
+    </div>
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md3 layui-col-sm6">
+            <a class="dash-card" href="javascript:parent.openapp('{:url('Order/index')}','order','订单列表');">
+                <i class="fa fa-list-alt dash-card-icon" style="color:#fa8c16;"></i>
+                <div class="dash-card-title">今日商城订单</div>
+                <div class="dash-card-num" style="color:#fa8c16;">{$stats.order_today}
+                    <small>单</small>
+                </div>
+                <div class="dash-card-sub">累计有效订单 {$stats.order_total} 单</div>
+            </a>
+        </div>
+        <div class="layui-col-md3 layui-col-sm6">
+            <a class="dash-card" href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">
+                <i class="fa fa-thumbs-up dash-card-icon" style="color:#2f54eb;"></i>
+                <div class="dash-card-title">累计有效打卡</div>
+                <div class="dash-card-num" style="color:#2f54eb;">{$stats.clock_total}
+                    <small>条</small>
+                </div>
+                <div class="dash-card-sub">今日删除 {$stats.del_today} 条（含违规清理）</div>
+            </a>
+        </div>
+        <div class="layui-col-md3 layui-col-sm6">
+            <a class="dash-card" href="javascript:parent.openapp('{:url('Active/index1')}','active','活动列表');">
+                <i class="fa fa-calendar dash-card-icon" style="color:#ff4d4f;"></i>
+                <div class="dash-card-title">社区活动</div>
+                <div class="dash-card-num" style="color:#ff4d4f;">{$stats.active_ing}
+                    <small>个进行中 / 共 {$stats.active_total} 个</small>
+                </div>
+                <div class="dash-card-sub">累计报名 {$stats.sign_total} 人次</div>
+            </a>
+        </div>
+        <div class="layui-col-md3 layui-col-sm6">
+            <a class="dash-card" href="javascript:parent.openapp('{:url('Community/index')}','community','小区列表');">
+                <i class="fa fa-building-o dash-card-icon" style="color:#597ef7;"></i>
+                <div class="dash-card-title">覆盖小区</div>
+                <div class="dash-card-num" style="color:#597ef7;">{$stats.community_total}
+                    <small>个 / {$stats.parent_total} 个社区</small>
+                </div>
+                <div class="dash-card-sub">商家 {$stats.merchant_total} 家 / 督导员 {$stats.supervisor_total} 人</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- ================= 3. 待办中心 ================= -->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-bell-o" style="color:#fa8c16;"></i>待办中心
+            <span class="pull-right">
+                <if condition="$todo_total gt 0">
+                    共 <b style="color:#ff4d4f;">{$todo_total}</b> 件待处理
+                <else />
+                    暂无待处理事项，辛苦了！
+                </if>
+            </span>
+        </div>
+        <div class="panel-body" style="padding-bottom:0;">
+            <div class="layui-row layui-col-space15">
+                <volist name="todo" id="vo"}
+                <div class="layui-col-md3 layui-col-sm6">
+                    <a class="dash-todo-item <if condition="$vo['count'] eq 0">is-zero</if>" href="javascript:parent.openapp('{$vo.url}','todo{$key}','{$vo.name}');">
+                        <div class="dash-todo-icon" style="background:{$vo.color};">
+                            <i class="fa {$vo.icon}"></i>
+                        </div>
+                        <div class="dash-todo-name">{$vo.name}</div>
+                        <div class="dash-todo-desc">{$vo.desc}</div>
+                        <div class="dash-todo-count">{$vo.count}</div>
+                    </a>
+                </div>
+                </volist>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 4. 近 30 天趋势 ================= -->
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-line-chart" style="color:#1890ff;"></i>近 30 天运营趋势
+            <span class="pull-right">打卡量 / 新增用户 / 活动签到 / 活动报名</span>
+        </div>
+        <div class="panel-body">
+            <div id="dash-trend" class="dash-chart" style="height:320px;"></div>
+        </div>
+    </div>
+
+    <!-- ================= 5. 打卡分布 ================= -->
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-pie-chart" style="color:#52c41a;"></i>近 30 天垃圾分类占比
+                    <span class="pull-right">数据来源：垃圾打卡</span>
+                </div>
+                <div class="panel-body">
+                    <div id="dash-cate" class="dash-chart" style="height:300px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md7">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart" style="color:#13c2c2;"></i>近 30 天各类打卡量
+                    <span class="pull-right">点位巡检 / 垃圾打卡 / 桶边督导等</span>
+                </div>
+                <div class="panel-body">
+                    <div id="dash-type" class="dash-chart" style="height:300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 6. 最新动态 ================= -->
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-recycle" style="color:#52c41a;"></i>最新打卡
+                    <span class="pull-right"><a href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">查看全部</a></span>
+                </div>
+                <div class="panel-body" style="padding:0 15px;">
+                    <table class="table dash-table">
+                        <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>类型</th>
+                            <th>积分</th>
+                            <th>时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="latest_clock" id="vo"}
+                        <tr>
+                            <td class="dash-td-main">{$vo.nickname|mb_substr=0,6,'utf-8'}</td>
+                            <td>
+                                <span class="dash-tag dash-tag-blue">{$vo.type_name}</span>
+                                <if condition="$vo['cate_name'] neq ''">{$vo.cate_name}</if>
+                            </td>
+                            <td>{$vo.point}</td>
+                            <td>{$vo.time_text}</td>
+                        </tr>
+                        </volist>
+                        <empty name="latest_clock"}
+                        <tr>
+                            <td colspan="4" class="dash-empty">暂无数据</td>
+                        </tr>
+                        </empty>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-user-plus" style="color:#1890ff;"></i>最新活动报名
+                    <span class="pull-right"><a href="javascript:parent.openapp('{:url('ActiveSign/index')}','asign','活动报名');">查看全部</a></span>
+                </div>
+                <div class="panel-body" style="padding:0 15px;">
+                    <table class="table dash-table">
+                        <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>活动</th>
+                            <th>时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="latest_sign" id="vo"}
+                        <tr>
+                            <td class="dash-td-main">{$vo.nickname|mb_substr=0,6,'utf-8'}</td>
+                            <td>{$vo.active_name|mb_substr=0,10,'utf-8'}</td>
+                            <td>{$vo.time_text}</td>
+                        </tr>
+                        </volist>
+                        <empty name="latest_sign"}
+                        <tr>
+                            <td colspan="3" class="dash-empty">暂无数据</td>
+                        </tr>
+                        </empty>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-list-alt" style="color:#fa8c16;"></i>最新商城订单
+                    <span class="pull-right"><a href="javascript:parent.openapp('{:url('Order/index')}','order','订单列表');">查看全部</a></span>
+                </div>
+                <div class="panel-body" style="padding:0 15px;">
+                    <table class="table dash-table">
+                        <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>状态</th>
+                            <th>时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="latest_order" id="vo"}
+                        <tr>
+                            <td class="dash-td-main">{$vo.nickname|mb_substr=0,6,'utf-8'}</td>
+                            <td>
+                                <if condition="$vo['status'] eq 2 or $vo['status'] eq 14">
+                                    <span class="dash-tag dash-tag-orange">{$vo.status_name}</span>
+                                <elseif condition="$vo['status'] eq 4" />
+                                    <span class="dash-tag dash-tag-blue">{$vo.status_name}</span>
+                                <elseif condition="$vo['status'] eq 8" />
+                                    <span class="dash-tag dash-tag-green">{$vo.status_name}</span>
+                                <else />
+                                    <span class="dash-tag">{$vo.status_name}</span>
+                                </if>
+                            </td>
+                            <td>{$vo.time_text}</td>
+                        </tr>
+                        </volist>
+                        <empty name="latest_order"}
+                        <tr>
+                            <td colspan="3" class="dash-empty">暂无数据</td>
+                        </tr>
+                        </empty>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 7. 最新用户 + 快捷入口 ================= -->
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-user-circle-o" style="color:#722ed1;"></i>最新注册用户
+                    <span class="pull-right"><a href="javascript:parent.openapp('{:url('Member/index')}','member','用户列表');">查看全部</a></span>
+                </div>
+                <div class="panel-body" style="padding:0 15px;">
+                    <table class="table dash-table">
+                        <thead>
+                        <tr>
+                            <th>昵称</th>
+                            <th>手机号</th>
+                            <th>小区</th>
+                            <th>积分</th>
+                            <th>时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <volist name="latest_user" id="vo"}
+                        <tr>
+                            <td class="dash-td-main">{$vo.nickname|mb_substr=0,6,'utf-8'}</td>
+                            <td>{$vo.mobile}</td>
+                            <td>{$vo.community_name|mb_substr=0,8,'utf-8'}</td>
+                            <td>{$vo.point}</td>
+                            <td>{$vo.time_text}</td>
+                        </tr>
+                        </volist>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md7">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-th-large" style="color:#13c2c2;"></i>常用功能快捷入口
+                </div>
+                <div class="panel-body">
+                    <volist name="quick" id="vo"}
+                    <div class="layui-col-md2 layui-col-xs3">
+                        <a class="dash-quick" href="javascript:parent.openapp('{$vo.url}','quick{$key}','{$vo.name}');">
+                            <i class="fa {$vo.icon}" style="color:{$vo.color};"></i>
+                            <span>{$vo.name}</span>
+                        </a>
+                    </div>
+                    </volist>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 8. 口径说明 ================= -->
+    <div class="panel panel-default">
+        <div class="panel-body dash-foot">
+            <b>统计口径：</b>
+            ① 打卡、用户、订单、商品、店铺等都已剔除回收站（软删除）数据，与各列表页口径一致；
+            ② 打卡量按有效用户计算，用户已删除的打卡不计入；
+            ③ 积分发放 = 积分账户正向变动，不含扣减；
+            ④ 待发货订单含"待发货 + 待发货（退款被拒）"，退款售后含"退款申请 / 退货申请 / 待退货 / 退款中"（与订单列表状态分组一致）。
+            <br/>
+            <b>性能说明：</b>看板数据默认缓存 60 秒，避免运营反复刷新时重复扫表；需要最新数据时点右上角"刷新数据"。
+            本次统计耗时 <b>{$cost_ms}</b> 毫秒（命中缓存时为 0，不访问数据库）。若感觉看板变慢，可让技术同学为 cmf_forum(delete_time, create_time)、cmf_user_account_log(delete_time, account_type, create_time)、cmf_member(create_time) 增加索引。
+        </div>
+    </div>
+
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script src="__TMPL__/public/assets/js/echarts/echarts.min.js"></script>
+<hook name="admin_before_body_end" />
+<script type="text/javascript">
+    $(function () {
+        if (typeof echarts === 'undefined') {
+            return;
+        }
+        var trend = {
+            labels: {:json_encode($trend['labels'])},
+            clock: {:json_encode($trend['clock'])},
+            user: {:json_encode($trend['user'])},
+            aclock: {:json_encode($trend['aclock'])},
+            sign: {:json_encode($trend['sign'])}
+        };
+
+        /* ---- 近 30 天趋势 ---- */
+        var trendChart = echarts.init(document.getElementById('dash-trend'));
+        trendChart.setOption({
+            tooltip: {trigger: 'axis'},
+            legend: {data: ['打卡量', '新增用户', '活动签到', '活动报名'], top: 0},
+            grid: {left: 40, right: 45, top: 40, bottom: 30},
+            xAxis: [{
+                type: 'category',
+                data: trend.labels,
+                axisTick: {show: false},
+                axisLabel: {color: '#8c8c8c'}
+            }],
+            yAxis: [
+                {type: 'value', name: '打卡量', minInterval: 1, axisLabel: {color: '#8c8c8c'}, splitLine: {lineStyle: {color: '#f5f5f5'}}},
+                {type: 'value', name: '人数/次数', minInterval: 1, axisLabel: {color: '#8c8c8c'}, splitLine: {show: false}}
+            ],
+            series: [
+                {
+                    name: '打卡量', type: 'bar', data: trend.clock, barMaxWidth: 16,
+                    itemStyle: {color: '#91d5ff'}
+                },
+                {
+                    name: '新增用户', type: 'line', yAxisIndex: 1, data: trend.user, smooth: true,
+                    symbolSize: 4, itemStyle: {color: '#1890ff'}, lineStyle: {width: 2}
+                },
+                {
+                    name: '活动签到', type: 'line', yAxisIndex: 1, data: trend.aclock, smooth: true,
+                    symbolSize: 4, itemStyle: {color: '#52c41a'}, lineStyle: {width: 2}
+                },
+                {
+                    name: '活动报名', type: 'line', yAxisIndex: 1, data: trend.sign, smooth: true,
+                    symbolSize: 4, itemStyle: {color: '#fa8c16'}, lineStyle: {width: 2}
+                }
+            ]
+        });
+
+        /* ---- 垃圾分类占比 ---- */
+        var cateData = {:json_encode($cate_pie)};
+        var cateChart = echarts.init(document.getElementById('dash-cate'));
+        if (cateData.length > 0) {
+            cateChart.setOption({
+                tooltip: {trigger: 'item', formatter: '{b}: {c} 条 ({d}%)'},
+                legend: {bottom: 0, icon: 'circle'},
+                color: ['#52c41a', '#13c2c2', '#faad14', '#ff4d4f', '#722ed1', '#597ef7'],
+                series: [{
+                    type: 'pie',
+                    radius: ['42%', '62%'],
+                    center: ['50%', '46%'],
+                    avoidLabelOverlap: true,
+                    label: {formatter: '{b}\n{d}%', color: '#595959', fontSize: 12},
+                    labelLine: {length: 8, length2: 8},
+                    data: cateData
+                }]
+            });
+        } else {
+            cateChart.setOption({
+                title: {text: '暂无打卡数据', left: 'center', top: 'middle', textStyle: {color: '#bfbfbf', fontSize: 13, fontWeight: 'normal'}}
+            });
+        }
+
+        /* ---- 各类打卡量 ---- */
+        var typeData = {:json_encode($type_bar)};
+        var typeChart = echarts.init(document.getElementById('dash-type'));
+        if (typeData.length > 0) {
+            var names = [], values = [];
+            for (var i = typeData.length - 1; i >= 0; i--) {
+                names.push(typeData[i].name);
+                values.push(typeData[i].value);
+            }
+            typeChart.setOption({
+                tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'}},
+                grid: {left: 80, right: 40, top: 20, bottom: 20},
+                xAxis: {type: 'value', minInterval: 1, axisLabel: {color: '#8c8c8c'}, splitLine: {lineStyle: {color: '#f5f5f5'}}},
+                yAxis: {type: 'category', data: names, axisTick: {show: false}, axisLabel: {color: '#595959'}},
+                series: [{
+                    type: 'bar',
+                    data: values,
+                    barMaxWidth: 18,
+                    itemStyle: {color: '#5cdbd3'},
+                    label: {show: true, position: 'right', color: '#8c8c8c', fontSize: 12}
+                }]
+            });
+        } else {
+            typeChart.setOption({
+                title: {text: '暂无打卡数据', left: 'center', top: 'middle', textStyle: {color: '#bfbfbf', fontSize: 13, fontWeight: 'normal'}}
+            });
+        }
+
+        /* ---- 自适应 ---- */
+        window.onresize = function () {
+            trendChart.resize();
+            cateChart.resize();
+            typeChart.resize();
+        };
+    });
+</script>
 </body>
 </html>
