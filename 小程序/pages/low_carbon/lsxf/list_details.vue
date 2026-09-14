@@ -17,7 +17,7 @@
 				</cl-upload>
 			</view>
 			<view class="u-m-t-20 u-font-26">
-				<text style="color: #18AF38;">作品介绍：</text> {{info.content}}
+				<text style="color: #1877F2;">作品介绍：</text> {{info.content}}
 			</view>
 			<view class="u-m-t-20 u-flex u-row-between">
 				<view class="u-font-24 u-type-info">

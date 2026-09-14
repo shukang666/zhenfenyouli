@@ -2,15 +2,15 @@
 	<view class="search-page">
 		<!-- 顶部自定义导航：返回箭头 + 搜索框 -->
 		<u-navbar :is-back="true" title="" title-color="rgba(0,0,0,0)"
-			:background="{ background: '#ffffff' }" :border-bottom="false">
-			<view class="search-navbar">
-				<u-search v-model="keyword" placeholder="搜索活动名称 / 地点" bg-color="#f5f5f5" height="66"
-					:show-action="false" @search="doSearch" @clear="handleClear"
-					@change="onKeywordChange"></u-search>
-				<!-- 原生搜索按钮：u-search 内置 show-action 按钮点击在部分环境(如 H5)不触发，改用自定义原生 view 点击 -->
-				<view class="navbar-search-btn" hover-class="navbar-search-btn-hover" @click="doSearch">搜索</view>
-			</view>
-		</u-navbar>
+				:background="{ background: '#ffffff' }" :border-bottom="false">
+				<view class="search-navbar">
+					<u-search v-model="keyword" placeholder="搜索活动名称 / 地点" bg-color="#F0F2F5" height="66"
+						:show-action="false" @search="doSearch" @clear="handleClear"
+						@change="onKeywordChange"></u-search>
+					<!-- 原生搜索按钮：u-search 内置 show-action 按钮点击在部分环境(如 H5)不触发，改用自定义原生 view 点击 -->
+					<view class="navbar-search-btn" hover-class="navbar-search-btn-hover" @click="doSearch">搜索</view>
+				</view>
+			</u-navbar>
 
 		<!-- 默认态（未发起搜索）：历史搜索 + 热门活动推荐 -->
 		<view v-if="!searched" class="search-home">
@@ -19,7 +19,7 @@
 				<view class="section-head">
 					<text class="section-title">历史搜索</text>
 					<view class="clear-btn" @click="clearHistories">
-						<u-icon name="trash" size="26" color="#999999"></u-icon>
+						<u-icon name="trash" size="26" color="#65676B"></u-icon>
 						<text class="clear-txt">清空</text>
 					</view>
 				</view>
@@ -93,7 +93,7 @@
 
 			<!-- 首次搜索请求中 -->
 			<view v-if="loading && !resultList.length" class="loading-first">
-				<u-loading mode="circle" color="#18AF38"></u-loading>
+				<u-loading mode="circle" color="#1877F2"></u-loading>
 				<view class="loading-txt">正在搜索中...</view>
 			</view>
 
@@ -244,7 +244,7 @@
 <style lang="scss" scoped>
 	.search-page {
 		min-height: 100vh;
-		background: #F5F5F5;
+		background: #F0F2F5;
 		box-sizing: border-box;
 	}
 
@@ -264,7 +264,7 @@
 		height: 66rpx;
 		padding: 0 30rpx;
 		margin-left: 16rpx;
-		background: #18AF38;
+		background: #1877F2;
 		border-radius: 33rpx;
 		font-size: 26rpx;
 		color: #ffffff;
@@ -293,12 +293,12 @@
 	.section-title {
 		font-size: 28rpx;
 		font-weight: 600;
-		color: #1c1c1e;
+		color: #050505;
 	}
 
 	.section-sub {
 		font-size: 22rpx;
-		color: #b0b3bb;
+		color: #65676B;
 	}
 
 	/* 历史搜索 */
@@ -310,7 +310,7 @@
 	.clear-txt {
 		margin-left: 4rpx;
 		font-size: 24rpx;
-		color: #999999;
+		color: #65676B;
 	}
 
 	.history-list {
@@ -334,7 +334,7 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		font-size: 26rpx;
-		color: #333333;
+		color: #050505;
 	}
 
 	.history-del {
@@ -374,7 +374,7 @@
 		position: relative;
 		width: 100%;
 		height: 190rpx;
-		background: #e5e5ea;
+		background: #F0F2F5;
 	}
 
 	.hot-img ::v-deep .u-image {
@@ -400,7 +400,7 @@
 	.hot-name {
 		font-size: 26rpx;
 		font-weight: 600;
-		color: #1c1c1e;
+		color: #050505;
 	}
 
 	.hot-meta {
@@ -410,7 +410,7 @@
 	.hot-addr {
 		display: inline-block;
 		font-size: 22rpx;
-		color: #8e8e93;
+		color: #65676B;
 	}
 
 	/* 默认态引导 */
@@ -423,13 +423,13 @@
 		margin-top: 24rpx;
 		font-size: 30rpx;
 		font-weight: 600;
-		color: #4a4a4a;
+		color: #050505;
 	}
 
 	.tip-sub {
 		margin-top: 10rpx;
 		font-size: 24rpx;
-		color: #b0b3bb;
+		color: #65676B;
 	}
 
 	/* ===== 结果卡片（与活动页中间标签卡片保持一致） ===== */
@@ -440,17 +440,18 @@
 	.result-count {
 		padding: 20rpx 24rpx 4rpx;
 		font-size: 24rpx;
-		color: #8e8e93;
+		color: #65676B;
 	}
 
 	.act-card {
-		position: relative;
-		background: #fff;
-		border-radius: 24rpx;
-		margin: 20rpx 24rpx 0;
-		overflow: hidden;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06), 0 1rpx 3rpx rgba(0, 0, 0, 0.04);
-	}
+			position: relative;
+			background: #fff;
+			border-radius: 16rpx;
+			margin: 20rpx 24rpx 0;
+			overflow: hidden;
+			box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.08);
+			border: 1rpx solid #E4E6EB;
+		}
 
 	.act-card:active {
 		opacity: 0.85;
@@ -485,7 +486,7 @@
 		border-radius: 50%;
 		margin-left: -8rpx;
 		border: 2rpx solid #fff;
-		background: #e5e5ea;
+		background: #F0F2F5;
 	}
 
 	.card-participate .avatar-img:first-child {
@@ -505,7 +506,7 @@
 	.act-card-info .act-title {
 		font-size: 30rpx;
 		font-weight: 600;
-		color: #1c1c1e;
+		color: #050505;
 		letter-spacing: -0.3rpx;
 	}
 
@@ -514,7 +515,7 @@
 		align-items: center;
 		margin-top: 12rpx;
 		font-size: 22rpx;
-		color: #8e8e93;
+		color: #65676B;
 	}
 
 	.act-card-info .act-meta .u-icon {
@@ -537,13 +538,13 @@
 		margin-top: 24rpx;
 		font-size: 30rpx;
 		font-weight: 600;
-		color: #4a4a4a;
+		color: #050505;
 	}
 
 	.empty-sub {
 		margin-top: 10rpx;
 		font-size: 24rpx;
-		color: #b0b3bb;
+		color: #65676B;
 	}
 
 	.empty-btn {
@@ -554,7 +555,7 @@
 		line-height: 68rpx;
 		font-size: 26rpx;
 		color: #ffffff;
-		background: #18AF38;
+		background: #1877F2;
 		border-radius: 34rpx;
 	}
 
@@ -567,7 +568,7 @@
 	.loading-first .loading-txt {
 		margin-top: 20rpx;
 		font-size: 26rpx;
-		color: #8e8e93;
+		color: #65676B;
 	}
 
 	/* 底部加载提示 */
@@ -575,6 +576,6 @@
 		padding: 30rpx 0 40rpx;
 		text-align: center;
 		font-size: 24rpx;
-		color: #b0b3bb;
+		color: #65676B;
 	}
 </style>

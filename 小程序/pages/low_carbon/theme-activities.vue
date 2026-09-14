@@ -2,7 +2,7 @@
 	<view class="container">
 		<z-paging ref="paging" v-model="dataList" @query="queryList" :fixed="true">
 			<template slot="top">
-				<u-navbar :is-back="true" :title="theme_name || '主题活动'" title-color="#333"
+				<u-navbar :is-back="true" :title="theme_name || '主题活动'" title-color="#050505"
 					:background="{background:'#ffffff'}" :border-bottom="false"></u-navbar>
 			</template>
 			<!-- 主题封面 banner -->
@@ -75,21 +75,24 @@
 <style lang="scss" scoped>
 	.container {
 		min-height: 100vh;
-		background: #f5f7f5;
+		background: #F0F2F5;
 	}
 	.theme-banner {
-		margin: 20rpx 24rpx 0;
-		border-radius: 20rpx;
+		margin: 16rpx 16rpx 0;
+		border-radius: 16rpx;
 		overflow: hidden;
+		box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.08);
+		border: 1rpx solid #E4E6EB;
 	}
 	.act-card {
 		display: flex;
 		align-items: center;
 		background: #fff;
-		border-radius: 24rpx;
-		margin: 20rpx 24rpx 0;
-		padding: 20rpx;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+		border-radius: 16rpx;
+		margin: 16rpx 16rpx 0;
+		padding: 16rpx;
+		box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.08);
+		border: 1rpx solid #E4E6EB;
 	}
 	.act-card:active { opacity: 0.85; }
 	.act-card-thumb {
@@ -97,10 +100,10 @@
 		width: 220rpx;
 		height: 165rpx;
 		flex-shrink: 0;
-		margin-right: 20rpx;
-		border-radius: 16rpx;
+		margin-right: 16rpx;
+		border-radius: 12rpx;
 		overflow: hidden;
-		background: #e5e5ea;
+		background: #F0F2F5;
 	}
 	.act-card-thumb ::v-deep .u-image {
 		width: 100% !important;
@@ -133,11 +136,11 @@
 	.act-card-title {
 		font-size: 30rpx;
 		font-weight: 600;
-		color: #1c1c1e;
+		color: #050505;
 	}
 	.act-card-desc {
 		font-size: 24rpx;
-		color: #8e8e93;
+		color: #65676B;
 		line-height: 1.5;
 		margin-top: 6rpx;
 	}
@@ -146,7 +149,7 @@
 		align-items: center;
 		margin-top: 12rpx;
 		font-size: 22rpx;
-		color: #8e8e93;
+		color: #65676B;
 	}
 	.meta-item {
 		display: flex;

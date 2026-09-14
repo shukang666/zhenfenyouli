@@ -1,6 +1,6 @@
 <template>
     <view>
-        <u-tabs :list="list" :is-scroll="false" :current="current" @change="change" active-color="#18AF38"></u-tabs>
+        <u-tabs :list="list" :is-scroll="false" :current="current" @change="change" active-color="#1877F2"></u-tabs>
         <view class="" v-if="!setting.app_test">
             <view class="u-type-white-bg u-p-30 u-m-b-30" v-for="(item,index) in forum_list" :key="index"
                 @click="$u.route('/pages/low_carbon/lsxf/list_details?id='+item.id+'&index='+index)">
@@ -20,7 +20,7 @@
                     </cl-upload>
                 </view>
                 <view class="u-m-t-20 u-font-26">
-                    <text style="color: #18AF38;">作品介绍：</text> {{item.content}}
+                    <text style="color: #1877F2;">作品介绍：</text> {{item.content}}
                 </view>
                 <view class="u-m-t-20 u-flex u-row-between">
                     <view class="u-font-24 u-type-info">

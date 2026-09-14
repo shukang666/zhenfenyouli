@@ -120,222 +120,202 @@
 				<view v-if="!active_loading && active_list.length > 0 && active_list.length >= active_total" class="loading-tip">没有更多了</view>
 			</view>
 			<!-- 自治活动标签 -->
-			<view v-else-if="is_zzhd_tab">
-				<view class="u-rela">
+			<view v-else-if="is_zzhd_tab" class="pane">
+				<view class="u-rela fb-banner-wrap">
 					<u-image width="100%" height="260"
 						src="https://oss.ausite.cn/xcxkf052/admin/20260617/08e04d3c0f112405a9b9c2d40c82862a.png?watermark"></u-image>
-					<view class="u-p-20 white u-radius-10 u-abso u-abso-b-30 u-abso-l-30 u-abso-r-30"
-						style="background: rgba(255,255,255,0.38);">
+					<view class="u-p-20 white u-radius-12 u-abso u-abso-b-20 u-abso-l-20 u-abso-r-20 fb-banner-notice"
+						style="background: rgba(0,0,0,0.45); backdrop-filter: blur(10rpx);">
 						{{setting.civilization_notice}}
 					</view>
 				</view>
-				<view class="u-p-30">
-					<view class="">
-						<view class="u-flex u-row-center">
-							<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">督导员</u-divider>
+				<view class="u-p-20">
+					<view class="fb-section-title">督导员</view>
+					<view class="u-m-t-20 u-flex" style="gap:14rpx;">
+						<view class="fb-entry-card" style="flex:1;"
+							@click="zzhd_navigator('/pages/zzhd/wmbb',1)">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80"
+									src="https://oss.ausite.cn/xcxkf052/admin/20250512/e48645c17b800739e2f492b8f95c4ba6.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-20 u-font-bold fb-entry-label">督导员申请</view>
 						</view>
-						<view class="u-m-t-30 u-flex" style="gap:15rpx;">
-							<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;"
-								@click="zzhd_navigator('/pages/zzhd/wmbb',1)">
-								<view class="u-flex u-row-center">
-									<u-image width="80" height="80"
-										src="https://oss.ausite.cn/xcxkf052/admin/20250512/e48645c17b800739e2f492b8f95c4ba6.png?watermark"></u-image>
-								</view>
-								<view class="u-m-t-30 u-font-bold">督导员申请</view>
+						<view class="fb-entry-card" style="flex:1;"
+							@click="zzhd_navigator('/pages/zzhd/ranking')">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80"
+									src="https://oss.ausite.cn/xcxkf052/admin/20250512/6f8d9cc52ce9afca23824a19564aed64.png?watermark"></u-image>
 							</view>
-							<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;"
-								@click="zzhd_navigator('/pages/zzhd/ranking')">
-								<view class="u-flex u-row-center">
-									<u-image width="80" height="80"
-										src="https://oss.ausite.cn/xcxkf052/admin/20250512/6f8d9cc52ce9afca23824a19564aed64.png?watermark"></u-image>
-								</view>
-								<view class="u-m-t-30 u-font-bold">督导员排行</view>
-							</view>
+							<view class="u-m-t-20 u-font-bold fb-entry-label">督导员排行</view>
 						</view>
 					</view>
-					<view class="u-m-t-30" v-if="!setting.app_test">
-						<view class="u-flex u-row-center">
-							<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">点位管理</u-divider>
+				</view>
+				<view class="u-p-20 u-p-t-0" v-if="!setting.app_test">
+					<view class="fb-section-title">点位管理</view>
+					<view class="u-m-t-20 u-flex" style="gap:14rpx;">
+						<view class="fb-entry-card" style="flex:1;"
+							@click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=3')">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80"
+									src="https://oss.ausite.cn/xcxkf052/admin/20250512/51956890c56bc0241bad6c6eacf709dc.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-20 u-font-bold fb-entry-label">督导巡查</view>
 						</view>
-						<view class="u-m-t-30 u-flex" style="gap:15rpx;">
-							<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;"
-								@click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=3')">
-								<view class="u-flex u-row-center">
-									<u-image width="80" height="80"
-										src="https://oss.ausite.cn/xcxkf052/admin/20250512/51956890c56bc0241bad6c6eacf709dc.png?watermark"></u-image>
-								</view>
-								<view class="u-m-t-30 u-font-bold">督导巡查</view>
+						<view class="fb-entry-card" style="flex:1;"
+							@click="zzhd_navigator('/pages/zzhd/yxsj/yxsj?type=6')" v-if="setting.is_deed">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80"
+									src="https://oss.ausite.cn/xcxkf052/admin/20250512/18e7281ba65d9a3afb6bc9902b0e9139.png?watermark"></u-image>
 							</view>
-							<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;"
-								@click="zzhd_navigator('/pages/zzhd/yxsj/yxsj?type=6')" v-if="setting.is_deed">
-								<view class="u-flex u-row-center">
-									<u-image width="80" height="80"
-										src="https://oss.ausite.cn/xcxkf052/admin/20250512/18e7281ba65d9a3afb6bc9902b0e9139.png?watermark"></u-image>
-								</view>
-								<view class="u-m-t-30 u-font-bold">优秀事迹</view>
+							<view class="u-m-t-20 u-font-bold fb-entry-label">优秀事迹</view>
+						</view>
+						<view class="fb-entry-card" style="flex:1;"
+							@click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=4')">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80"
+									src="https://oss.ausite.cn/xcxkf052/admin/20250512/ae1cb9fd359b5fe3d106e4293a174f57.png?watermark"></u-image>
 							</view>
-							<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;"
-								@click="zzhd_navigator('/pages/zzhd/dwxj/dwxj?type=4')">
-								<view class="u-flex u-row-center">
-									<u-image width="80" height="80"
-										src="https://oss.ausite.cn/xcxkf052/admin/20250512/ae1cb9fd359b5fe3d106e4293a174f57.png?watermark"></u-image>
-								</view>
-								<view class="u-m-t-30 u-font-bold">其他督导</view>
-							</view>
+							<view class="u-m-t-20 u-font-bold fb-entry-label">其他督导</view>
 						</view>
 					</view>
-					<view class="u-m-t-30" v-if="!setting.app_test">
-						<view class="u-flex u-row-center">
-							<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">商家自治</u-divider>
+				</view>
+				<view class="u-p-20 u-p-t-0" v-if="!setting.app_test">
+					<view class="fb-section-title">商家自治</view>
+					<view class="u-m-t-20 u-flex" style="gap:14rpx;">
+						<view class="fb-entry-card" style="flex:1;"
+							@click="goApplyShop">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80"
+									src="https://oss.ausite.cn/xcxkf052/admin/20260611/8c95821e23155697d1e0a2fd8e8439c8.png?watermark"></u-image>
+							</view>
+							<view class="u-m-t-20 u-font-bold fb-entry-label">商家申请</view>
 						</view>
-						<view class="u-m-t-30 u-flex" style="gap:15rpx;">
-							<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;"
-								@click="goApplyShop">
-								<view class="u-flex u-row-center">
-									<u-image width="80" height="80"
-										src="https://oss.ausite.cn/xcxkf052/admin/20260611/8c95821e23155697d1e0a2fd8e8439c8.png?watermark"></u-image>
-								</view>
-								<view class="u-m-t-30 u-font-bold">商家申请</view>
+						<view class="fb-entry-card" style="flex:1;"
+							@click="goShopSign">
+							<view class="u-flex u-row-center">
+								<u-image width="80" height="80"
+									src="https://oss.ausite.cn/xcxkf052/admin/20260611/1b473a1a2a5fde71f6d0aa98459bab92.png?watermark"></u-image>
 							</view>
-							<view class="u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" style="flex:1;"
-								@click="goShopSign">
-								<view class="u-flex u-row-center">
-									<u-image width="80" height="80"
-										src="https://oss.ausite.cn/xcxkf052/admin/20260611/1b473a1a2a5fde71f6d0aa98459bab92.png?watermark"></u-image>
-								</view>
-								<view class="u-m-t-30 u-font-bold">商家打卡</view>
-							</view>
+							<view class="u-m-t-20 u-font-bold fb-entry-label">商家打卡</view>
 						</view>
 					</view>
 				</view>
 			</view>
 			<!-- 社交活动标签 -->
-			<view v-else-if="is_sjhd_tab">
+			<view v-else-if="is_sjhd_tab" class="pane">
 				<view class="">
 					<u-image width="100%" height="260"
 						src="https://oss.ausite.cn/xcxkf052/admin/20250512/5d288456e544b333329d345733847049.png?watermark"></u-image>
 				</view>
-				<view class="u-p-30">
-					<view class="">
-						<view class="u-flex u-row-center">
-							<u-image width="447" height="28"
-								src="https://oss.ausite.cn/xcxkf052/admin/20250512/ef3263d29adf8ccfcce54e46827409ea.png?watermark"
-								style="max-width:100%;width:auto;"></u-image>
-						</view>
-						<view class="u-m-t-30">
-							<u-row gutter="15">
-								<u-col span="4">
-									<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center"
-										@click="sjhd_navigator('/pages/sjhd/list?type=2')" v-if="setting.is_course">
-										<view class="u-flex u-row-center">
-											<u-image width="80" height="80"
-												src="https://oss.ausite.cn/xcxkf052/admin/20250512/6dd071cac6cdfc81e7297998c0a011ee.png?watermark"></u-image>
-										</view>
-										<view class="u-m-t-30 u-font-bold">课程培训</view>
+				<view class="u-p-20">
+					<view class="fb-section-title">社区共建</view>
+					<view class="u-m-t-20">
+						<u-row gutter="14">
+							<u-col span="4">
+								<view class="fb-entry-card"
+									@click="sjhd_navigator('/pages/sjhd/list?type=2')" v-if="setting.is_course">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80"
+											src="https://oss.ausite.cn/xcxkf052/admin/20250512/6dd071cac6cdfc81e7297998c0a011ee.png?watermark"></u-image>
 									</view>
-								</u-col>
-								<u-col span="4">
-									<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center"
-										@click="sjhd_navigator('/pages/low_carbon/lsxf/lsxf?name=社区活动&type=3')"
-										v-if="setting.is_active">
-										<view class="u-flex u-row-center">
-											<u-image width="80" height="80"
-												src="https://oss.ausite.cn/xcxkf052/admin/20250512/8f9e9a13bb18f32ed74e6e7a43f4b081.png?watermark"></u-image>
-										</view>
-										<view class="u-m-t-30 u-font-bold">社区活动</view>
+									<view class="u-m-t-20 u-font-bold fb-entry-label">课程培训</view>
+								</view>
+							</u-col>
+							<u-col span="4">
+								<view class="fb-entry-card"
+									@click="sjhd_navigator('/pages/low_carbon/lsxf/lsxf?name=社区活动&type=3')"
+									v-if="setting.is_active">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80"
+											src="https://oss.ausite.cn/xcxkf052/admin/20250512/8f9e9a13bb18f32ed74e6e7a43f4b081.png?watermark"></u-image>
 									</view>
-								</u-col>
-								<u-col span="4">
-									<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center"
-										@click="sjhd_navigator('/pages/sjhd/list?type=3')" v-if="setting.is_match">
-										<view class="u-flex u-row-center">
-											<u-image width="80" height="80"
-												src="https://oss.ausite.cn/xcxkf052/admin/20250512/956ddc6fd692c9cf48c6b2dd2ef6f5d2.png?watermark"></u-image>
-										</view>
-										<view class="u-m-t-30 u-font-bold">社区知识竞赛</view>
+									<view class="u-m-t-20 u-font-bold fb-entry-label">社区活动</view>
+								</view>
+							</u-col>
+							<u-col span="4">
+								<view class="fb-entry-card"
+									@click="sjhd_navigator('/pages/sjhd/list?type=3')" v-if="setting.is_match">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80"
+											src="https://oss.ausite.cn/xcxkf052/admin/20250512/956ddc6fd692c9cf48c6b2dd2ef6f5d2.png?watermark"></u-image>
 									</view>
-								</u-col>
-							</u-row>
-						</view>
+									<view class="u-m-t-20 u-font-bold fb-entry-label">社区知识竞赛</view>
+								</view>
+							</u-col>
+						</u-row>
 					</view>
-					<view class="u-m-t-30">
-						<view class="u-flex u-row-center">
-							<u-image width="447" height="28"
-								src="https://oss.ausite.cn/xcxkf052/admin/20250512/cd4026f1bc19470be6bbf9efb0a9b38a.png?watermark"
-								style="max-width:100%;width:auto;"></u-image>
-						</view>
-						<view class="u-m-t-30">
-							<u-row gutter="15">
-								<u-col span="4">
-									<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center"
-										@click="sjhd_navigator('/pages/article/article?type=1')">
-										<view class="u-flex u-row-center">
-											<u-image width="80" height="80"
-												src="https://oss.ausite.cn/xcxkf052/admin/20250512/6dd071cac6cdfc81e7297998c0a011ee.png?watermark"></u-image>
-										</view>
-										<view class="u-m-t-30 u-font-bold">宣传手册</view>
+				</view>
+				<view class="u-p-20 u-p-t-0">
+					<view class="fb-section-title">宣传互动</view>
+					<view class="u-m-t-20">
+						<u-row gutter="14">
+							<u-col span="4">
+								<view class="fb-entry-card"
+									@click="sjhd_navigator('/pages/article/article?type=1')">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80"
+											src="https://oss.ausite.cn/xcxkf052/admin/20250512/6dd071cac6cdfc81e7297998c0a011ee.png?watermark"></u-image>
 									</view>
-								</u-col>
-								<u-col span="4">
-									<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center"
-										@click="sjhd_navigator('/pages/article/article?type=2')">
-										<view class="u-flex u-row-center">
-											<u-image width="80" height="80"
-												src="https://oss.ausite.cn/xcxkf052/admin/20250512/8f9e9a13bb18f32ed74e6e7a43f4b081.png?watermark"></u-image>
-										</view>
-										<view class="u-m-t-30 u-font-bold">入户宣传</view>
+									<view class="u-m-t-20 u-font-bold fb-entry-label">宣传手册</view>
+								</view>
+							</u-col>
+							<u-col span="4">
+								<view class="fb-entry-card"
+									@click="sjhd_navigator('/pages/article/article?type=2')">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80"
+											src="https://oss.ausite.cn/xcxkf052/admin/20250512/8f9e9a13bb18f32ed74e6e7a43f4b081.png?watermark"></u-image>
 									</view>
-								</u-col>
-								<u-col span="4">
-									<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center"
-										@click="sjhd_navigator('/pages/zzhd/yxsj/yxsj?type=7')"
-										v-if="!setting.is_environmental">
-										<view class="u-flex u-row-center">
-											<u-image width="80" height="80"
-												src="https://oss.ausite.cn/xcxkf052/admin/20250512/f02ace719b53730c610058eda02a8006.png?watermark"></u-image>
-										</view>
-										<view class="u-m-t-30 u-font-bold">环保论坛</view>
+									<view class="u-m-t-20 u-font-bold fb-entry-label">入户宣传</view>
+								</view>
+							</u-col>
+							<u-col span="4">
+								<view class="fb-entry-card"
+									@click="sjhd_navigator('/pages/zzhd/yxsj/yxsj?type=7')"
+									v-if="!setting.is_environmental">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80"
+											src="https://oss.ausite.cn/xcxkf052/admin/20250512/f02ace719b53730c610058eda02a8006.png?watermark"></u-image>
 									</view>
-								</u-col>
-							</u-row>
-							<u-row gutter="15">
-								<u-col span="4">
-									<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-t-30"
-										@click="sjhd_navigator('/pages/low_carbon/lsxf/lsxf?name=环保活动&type=2')"
-										v-if="!setting.app_test">
-										<view class="u-flex u-row-center">
-											<u-image width="80" height="80"
-												src="https://oss.ausite.cn/xcxkf052/admin/20250512/b2bc3031e9b1fcb65fb59b52c2be27f5.png?watermark"></u-image>
-										</view>
-										<view class="u-m-t-30 u-font-bold">环保活动</view>
+									<view class="u-m-t-20 u-font-bold fb-entry-label">环保论坛</view>
+								</view>
+							</u-col>
+						</u-row>
+						<u-row gutter="14">
+							<u-col span="4">
+								<view class="fb-entry-card u-m-t-14"
+									@click="sjhd_navigator('/pages/low_carbon/lsxf/lsxf?name=环保活动&type=2')"
+									v-if="!setting.app_test">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80"
+											src="https://oss.ausite.cn/xcxkf052/admin/20250512/b2bc3031e9b1fcb65fb59b52c2be27f5.png?watermark"></u-image>
 									</view>
-								</u-col>
-								<u-col span="4" v-if="!setting.is_mutual">
-									<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-t-30"
-										@click="sjhd_navigator('/pages/zzhd/yxsj/yxsj?type=5')">
-										<view class="u-flex u-row-center">
-											<u-image width="80" height="80"
-												src="https://oss.ausite.cn/xcxkf052/admin/20250512/6e77a6e3afc5faefab1d80db1fb13e4c.png?watermark"></u-image>
-										</view>
-										<view class="u-m-t-30 u-font-bold">互助平台</view>
+									<view class="u-m-t-20 u-font-bold fb-entry-label">环保活动</view>
+								</view>
+							</u-col>
+							<u-col span="4" v-if="!setting.is_mutual">
+								<view class="fb-entry-card u-m-t-14"
+									@click="sjhd_navigator('/pages/zzhd/yxsj/yxsj?type=5')">
+									<view class="u-flex u-row-center">
+										<u-image width="80" height="80"
+											src="https://oss.ausite.cn/xcxkf052/admin/20250512/6e77a6e3afc5faefab1d80db1fb13e4c.png?watermark"></u-image>
 									</view>
-								</u-col>
-							</u-row>
-						</view>
+									<view class="u-m-t-20 u-font-bold fb-entry-label">互助平台</view>
+								</view>
+							</u-col>
+						</u-row>
 					</view>
-					<view class="u-m-t-30">
-						<view class="u-flex u-row-center">
-							<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">问卷调查</u-divider>
+				</view>
+				<view class="u-p-20 u-p-t-0">
+					<view class="fb-section-title">问卷调查</view>
+					<view class="fb-list-item u-m-t-20 u-flex u-row-between"
+						style="align-items:center;"
+						@click="sjhd_navigator('/pages/low_carbon/research')">
+						<view class="">
+							<view class="u-font-bold fb-list-title">问卷调查</view>
+							<view class="u-m-t-10 fb-list-sub">点击查看所有问卷，参与即可获得积分</view>
 						</view>
-						<view class="u-type-white-bg u-radius-10 u-p-30 u-m-t-30 u-flex u-row-between"
-							style="align-items:center;"
-							@click="sjhd_navigator('/pages/low_carbon/research')">
-							<view class="">
-								<view class="u-font-bold u-font-30">问卷调查</view>
-								<view class="u-m-t-10 u-font-22 u-type-info">点击查看所有问卷，参与即可获得积分</view>
-							</view>
-							<u-icon name="arrow-right" color="#999" size="28"></u-icon>
-						</view>
+						<u-icon name="arrow-right" color="#65676B" size="32"></u-icon>
 					</view>
 				</view>
 			</view>
@@ -697,31 +677,31 @@
 <style lang="scss" scoped>
 .container {
 	min-height: 100vh;
-	background: #f5f7f5;
+	background: #F0F2F5;
 }
 
 /* ===== 顶部 Banner ===== */
 .top-banner {
 	width: 100%;
-	background: #e8f5e9;
+	background: #fff;
 }
 
-/* ===== 固定分类标签栏：横向可滑动 ===== */
+/* ===== 顶部标签栏：Facebook 风格横向滑动 ===== */
 .cate-tab-bar-wrap {
 	position: sticky;
 	top: 0;
 	z-index: 20;
 	background: #fff;
-	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+	border-bottom: 1rpx solid #E4E6EB;
 }
 .cate-tab-bar {
 	white-space: nowrap;
-	height: 88rpx;
+	height: 96rpx;
 }
 .cate-tab-list {
 	display: inline-flex;
 	align-items: center;
-	padding: 0 20rpx;
+	padding: 0 16rpx;
 	height: 100%;
 }
 .cate-tab-item {
@@ -729,52 +709,55 @@
 	align-items: center;
 	justify-content: center;
 	padding: 0 28rpx;
-	height: 56rpx;
-	margin: 0 8rpx;
-	font-size: 26rpx;
-	color: #666;
-	background: #f5f5f5;
-	border-radius: 28rpx;
+	height: 64rpx;
+	margin: 0 6rpx;
+	font-size: 28rpx;
+	color: #65676B;
+	background: #F0F2F5;
+	border-radius: 32rpx;
 	flex-shrink: 0;
-	transition: all 0.25s ease;
+	transition: all 0.2s ease;
 	white-space: nowrap;
+	font-weight: 500;
 }
+.cate-tab-item:active { opacity: 0.85; }
 .cate-tab-active {
 	color: #fff;
-	background: linear-gradient(135deg, #43c66d 0%, #18AF38 100%);
+	background: #1877F2;
 	font-weight: 600;
-	box-shadow: 0 4rpx 12rpx rgba(24, 175, 56, 0.3);
+	box-shadow: 0 2rpx 8rpx rgba(24, 119, 242, 0.3);
 }
 .cate-tab-theme {
-	color: #18AF38;
-	background: rgba(24, 175, 56, 0.08);
-	border: 1rpx solid rgba(24, 175, 56, 0.25);
+	color: #1877F2;
+	background: #E7F0FE;
+	font-weight: 600;
 }
 
 /* ===== 主题下拉筛选弹窗 ===== */
 .theme-dropdown-mask {
 	position: fixed;
 	top: 0; left: 0; right: 0; bottom: 0;
-	background: rgba(0, 0, 0, 0.3);
+	background: rgba(0, 0, 0, 0.4);
 	z-index: 18;
 }
 .theme-dropdown-panel {
 	position: absolute;
-	top: 88rpx;
+	top: 96rpx;
 	left: 0; right: 0;
 	background: #fff;
 	z-index: 19;
-	padding: 20rpx 30rpx;
-	box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+	padding: 24rpx 30rpx;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
 	border-radius: 0 0 24rpx 24rpx;
 	max-height: 60vh;
 	overflow-y: auto;
 }
 .theme-dropdown-title {
 	font-size: 24rpx;
-	color: #999;
-	margin-bottom: 16rpx;
+	color: #65676B;
+	margin-bottom: 20rpx;
 	padding-left: 4rpx;
+	font-weight: 600;
 }
 .theme-dropdown-list {
 	display: flex;
@@ -782,18 +765,19 @@
 	gap: 16rpx;
 }
 .theme-dropdown-item {
-	padding: 14rpx 28rpx;
+	padding: 16rpx 32rpx;
 	font-size: 26rpx;
-	color: #333;
-	background: #f5f7f5;
-	border-radius: 24rpx;
-	border: 1rpx solid #e8e8e8;
+	color: #050505;
+	background: #F0F2F5;
+	border-radius: 32rpx;
+	border: 2rpx solid transparent;
 	transition: all 0.2s;
+	font-weight: 500;
 }
 .theme-dropdown-active {
-	color: #18AF38;
-	background: rgba(24, 175, 56, 0.08);
-	border-color: #18AF38;
+	color: #1877F2;
+	background: #E7F0FE;
+	border-color: #1877F2;
 	font-weight: 600;
 }
 
@@ -802,38 +786,39 @@
 	padding-bottom: calc(88rpx + env(safe-area-inset-bottom));
 }
 .pane {
-	padding: 20rpx 0;
+	padding: 16rpx 0;
 }
 
 /* ===== 本月推荐 ===== */
 .monthly-rec-pane {
-	padding: 20rpx 24rpx;
+	padding: 16rpx 16rpx;
 }
 
 .empty-tip {
 	text-align: center;
-	padding: 80rpx 0;
-	color: #8e8e93;
+	padding: 100rpx 0;
+	color: #65676B;
 	font-size: 28rpx;
 }
 .loading-tip {
 	text-align: center;
 	padding: 30rpx 0;
-	color: #8e8e93;
+	color: #65676B;
 	font-size: 24rpx;
 }
 
-/* ===== 活动卡片（通用） ===== */
+/* ===== 活动卡片：Facebook 风格 ===== */
 .act-card {
 	position: relative;
 	display: flex;
 	align-items: center;
 	background: #fff;
-	border-radius: 24rpx;
-	margin: 0 24rpx 24rpx;
-	padding: 20rpx;
+	border-radius: 16rpx;
+	margin: 0 16rpx 16rpx;
+	padding: 16rpx;
 	overflow: hidden;
-	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06), 0 1rpx 3rpx rgba(0, 0, 0, 0.04);
+	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.08);
+	border: 1rpx solid #E4E6EB;
 }
 .act-card:active { opacity: 0.85; }
 
@@ -841,7 +826,9 @@
 .monthly-rec-pane > .act-card {
 	flex-direction: column;
 	align-items: stretch;
-	margin: 0 0 24rpx;
+	margin: 0 0 16rpx;
+	padding: 0;
+	overflow: hidden;
 }
 
 /* 卡片缩略图 */
@@ -851,17 +838,17 @@
 	width: 220rpx;
 	height: 165rpx;
 	flex-shrink: 0;
-	margin-right: 20rpx;
-	border-radius: 16rpx;
+	margin-right: 16rpx;
+	border-radius: 12rpx;
 	overflow: hidden;
-	background: #e5e5ea;
+	background: #F0F2F5;
 }
 .monthly-rec-pane > .act-card > .act-card-img {
 	width: 100%;
-	height: 340rpx;
+	height: 360rpx;
 	margin-right: 0;
-	margin-bottom: 16rpx;
-	border-radius: 16rpx 16rpx 0 0;
+	margin-bottom: 0;
+	border-radius: 0;
 }
 .act-card-thumb ::v-deep .u-image,
 .act-card-img ::v-deep .u-image {
@@ -872,26 +859,26 @@
 /* 参与人数 badge */
 .card-participate {
 	position: absolute;
-	left: 10rpx; bottom: 10rpx;
+	left: 12rpx; bottom: 12rpx;
 	z-index: 2;
 	display: inline-flex;
 	align-items: center;
-	height: 34rpx;
-	padding: 0 10rpx;
-	background: rgba(0, 0, 0, 0.5);
-	border-radius: 17rpx;
+	height: 36rpx;
+	padding: 0 12rpx;
+	background: rgba(0, 0, 0, 0.55);
+	border-radius: 18rpx;
 }
 .card-participate .avatar-list { display: flex; }
 .card-participate .avatar-img {
-	width: 22rpx; height: 22rpx;
+	width: 24rpx; height: 24rpx;
 	border-radius: 50%;
 	margin-left: -6rpx;
 	border: 2rpx solid #fff;
-	background: #e5e5ea;
+	background: #F0F2F5;
 }
 .card-participate .avatar-img:first-child { margin-left: 0; }
 .card-participate .count-text {
-	color: #fff; font-size: 18rpx; margin-left: 6rpx;
+	color: #fff; font-size: 20rpx; margin-left: 6rpx; font-weight: 500;
 }
 
 /* 本月推荐参与 badge */
@@ -901,47 +888,51 @@
 	z-index: 2;
 	display: inline-flex;
 	align-items: center;
-	height: 36rpx;
-	padding: 0 14rpx;
-	background: rgba(0, 0, 0, 0.5);
-	border-radius: 18rpx;
+	height: 40rpx;
+	padding: 0 16rpx;
+	background: rgba(0, 0, 0, 0.55);
+	border-radius: 20rpx;
 }
 .badge-text {
-	color: #fff; font-size: 20rpx; font-weight: 500;
+	color: #fff; font-size: 22rpx; font-weight: 500;
 }
 
 /* 卡片信息区 */
 .act-card-info {
 	flex: 1; min-width: 0; padding: 0;
 }
+.monthly-rec-pane > .act-card > .act-card-info {
+	padding: 20rpx 24rpx;
+}
 .act-card-title {
 	font-size: 30rpx;
 	font-weight: 600;
-	color: #1c1c1e;
+	color: #050505;
 	letter-spacing: -0.3rpx;
 	line-height: 1.4;
 }
 .monthly-rec-pane > .act-card > .act-card-info .act-card-title {
-	font-size: 32rpx;
+	font-size: 34rpx;
+	margin-bottom: 6rpx;
 }
 .act-card-desc {
 	font-size: 24rpx;
-	color: #8e8e93;
+	color: #65676B;
 	line-height: 1.5;
 	margin-top: 8rpx;
 }
 .act-card-sub {
-	color: #8e8e93;
-	font-size: 22rpx;
-	margin-top: 8rpx;
+	color: #65676B;
+	font-size: 24rpx;
+	margin-top: 6rpx;
 }
 .act-card-meta-row {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	margin-top: 12rpx;
+	margin-top: 10rpx;
 	font-size: 22rpx;
-	color: #8e8e93;
+	color: #65676B;
 }
 .meta-item {
 	display: flex;
@@ -962,13 +953,16 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-top: 14rpx;
+	margin-top: 12rpx;
 }
 .act-card-status {
 	display: inline-block;
-	font-size: 20rpx;
-	color: #34c759;
+	font-size: 22rpx;
+	color: #1877F2;
 	font-weight: 600;
+	padding: 4rpx 14rpx;
+	background: #E7F0FE;
+	border-radius: 8rpx;
 }
 .act-card-avatars { display: flex; }
 .avatar-img {
@@ -976,7 +970,7 @@
 	border-radius: 50%;
 	margin-left: -10rpx;
 	border: 2rpx solid #fff;
-	background: #e5e5ea;
+	background: #F0F2F5;
 }
 .avatar-img:first-child { margin-left: 0; }
 
@@ -990,9 +984,67 @@
 	font-size: 22rpx;
 	line-height: 1.4;
 	color: #fff;
-	background: linear-gradient(135deg, #ff6b35 0%, #ff3d00 100%);
+	background: #1877F2;
 	border-bottom-left-radius: 14rpx;
-	border-top-right-radius: 10rpx;
-	box-shadow: 0 2rpx 6rpx rgba(255, 61, 0, .35);
+	border-top-right-radius: 12rpx;
+	box-shadow: 0 2rpx 6rpx rgba(24, 119, 242, .35);
+	font-weight: 600;
+}
+
+/* ===== Facebook 风格功能区入口 ===== */
+.fb-section-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #050505;
+	padding-left: 8rpx;
+	margin-top: 8rpx;
+}
+.fb-entry-card {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 30rpx 0;
+	text-align: center;
+	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.08);
+	border: 1rpx solid #E4E6EB;
+	transition: all 0.2s;
+}
+.fb-entry-card:active {
+	background: #F0F2F5;
+	transform: scale(0.98);
+}
+.fb-entry-label {
+	font-size: 26rpx;
+	color: #050505;
+	font-weight: 600;
+}
+
+/* ===== Facebook 风格列表项 ===== */
+.fb-list-item {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 28rpx 30rpx;
+	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.08);
+	border: 1rpx solid #E4E6EB;
+}
+.fb-list-item:active { background: #F0F2F5; }
+.fb-list-title {
+	font-size: 30rpx;
+	color: #050505;
+	font-weight: 600;
+}
+.fb-list-sub {
+	font-size: 24rpx;
+	color: #65676B;
+}
+
+/* ===== Banner 通知 ===== */
+.fb-banner-wrap {
+	border-radius: 0;
+	overflow: hidden;
+}
+.fb-banner-notice {
+	color: #fff;
+	font-size: 26rpx;
+	line-height: 1.5;
 }
 </style>

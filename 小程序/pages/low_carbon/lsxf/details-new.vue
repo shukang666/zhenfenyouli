@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="container">
 		<!-- 沉浸式封面区域 -->
 		<view class="hero-section">
@@ -759,45 +759,45 @@
 	// 信息卡片
 	.info-card {
 		padding: 30rpx;
-		
+
 		.info-item {
 			display: flex;
 			align-items: center;
 			padding: 20rpx 0;
 			border-bottom: 1rpx solid rgba(0,0,0,0.05);
-			
+
 			&:last-child {
 				border-bottom: none;
 			}
-			
+
 			.info-icon-wrap {
 				width: 64rpx;
 				height: 64rpx;
 				border-radius: 16rpx;
-				background: rgba(52,199,89,0.1);
+				background: rgba(24,119,242,0.1);
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				margin-right: 20rpx;
-				
+
 				.info-icon {
 					font-size: 32rpx;
 				}
 			}
-			
+
 			.info-content {
 				flex: 1;
 				margin-right: 16rpx;
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				
+
 				.info-label {
 					font-size: 24rpx;
 					color: #86868B;
 					flex-shrink: 0;
 				}
-				
+
 				.info-value {
 					font-size: 28rpx;
 					color: #1D1D1F;
@@ -805,7 +805,7 @@
 					text-align: right;
 				}
 			}
-			
+
 			.info-arrow {
 				font-size: 32rpx;
 				color: #C7C7CC;
@@ -841,7 +841,7 @@
 					width: 48rpx;
 					height: 48rpx;
 					border-radius: 50%;
-					background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+					background: linear-gradient(135deg, #1877F2 0%, #0A66C2 100%);
 					color: #fff;
 					font-size: 24rpx;
 					font-weight: 600;
@@ -937,17 +937,17 @@
 			}
 			
 			.primary-btn {
-				background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+				background: linear-gradient(135deg, #1877F2 0%, #0A66C2 100%);
 				color: #fff;
 				border: none;
 			}
-			
+
 			.success-btn {
-				background: rgba(52,199,89,0.15);
-				color: #34C759;
+				background: rgba(24,119,242,0.15);
+				color: #1877F2;
 				border: none;
 			}
-			
+
 			.rank-btn {
 				background: rgba(255,149,0,0.1);
 				color: #FF9500;
@@ -956,7 +956,7 @@
 				align-items: center;
 				justify-content: center;
 				gap: 8rpx;
-				
+
 				.btn-icon {
 					font-size: 28rpx;
 				}
@@ -1034,13 +1034,13 @@
 			width: 100%;
 			height: 80rpx;
 			border-radius: 40rpx;
-			background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+			background: linear-gradient(135deg, #1877F2 0%, #0A66C2 100%);
 			color: #fff;
 			font-size: 28rpx;
 			font-weight: 600;
 		}
 	}
-	
+
 	// 打卡弹窗
 	.clock-popup {
 		padding: 40rpx 30rpx;
@@ -1074,13 +1074,13 @@
 			width: 100%;
 			height: 88rpx;
 			border-radius: 44rpx;
-			background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+			background: linear-gradient(135deg, #1877F2 0%, #0A66C2 100%);
 			color: #fff;
 			font-size: 28rpx;
 			font-weight: 600;
 		}
 	}
-	
+
 	// 动作表单弹窗
 	.action-form-popup {
 		padding: 40rpx 30rpx;
@@ -1144,9 +1144,9 @@
 						transition: all 0.2s;
 						
 						&.selected {
-							background: rgba(52,199,89,0.1);
-							color: #34C759;
-							border-color: #34C759;
+							background: rgba(24,119,242,0.1);
+							color: #1877F2;
+							border-color: #1877F2;
 						}
 					}
 				}
@@ -1157,7 +1157,7 @@
 			width: 100%;
 			height: 88rpx;
 			border-radius: 44rpx;
-			background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+			background: linear-gradient(135deg, #1877F2 0%, #0A66C2 100%);
 			color: #fff;
 			font-size: 28rpx;
 			font-weight: 600;

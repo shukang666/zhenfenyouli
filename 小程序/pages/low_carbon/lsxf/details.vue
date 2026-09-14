@@ -8,7 +8,7 @@
 		<view class="submit-btn u-p-30 u-flex" v-if="!setting.app_test">
 			<view class="u-shrink-no">
 				<button class="u-reset-button" open-type="share">
-					<u-icon name="zhuanfa" label="分享" label-pos="bottom" color="#18AF38" label-color="#18AF38" label-size="24"></u-icon>
+					<u-icon name="zhuanfa" label="分享" label-pos="bottom" color="#1877F2" label-color="#1877F2" label-size="24"></u-icon>
 				</button>
 			</view>
 			<view class="u-flex-1 u-m-lr-30">
@@ -16,8 +16,8 @@
 					@click="$u.route('/pages/low_carbon/lsxf/list?id='+active.id)">查看作品</u-button>
 			</view>
 			<view class="u-flex-1" v-if="!setting.app_test">
-				<u-button type="primary" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}" @click="btn">立即参与</u-button>
-			</view>
+					<u-button type="primary" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #4A9BFF 0%, #1877F2 100%)'}" @click="btn">立即参与</u-button>
+				</view>
 		</view>
 		<!--  -->
 		<u-popup v-model="popup_show" mode="bottom" closeable border-radius="20">
@@ -36,7 +36,7 @@
 					</view>
 				</view>
 				<view class="u-p-30">
-					<u-button type="primary" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}" @click="add_active_user">确认上传</u-button>
+					<u-button type="primary" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #4A9BFF 0%, #1877F2 100%)'}" @click="add_active_user">确认上传</u-button>
 				</view>
 			</view>
 		</u-popup>
