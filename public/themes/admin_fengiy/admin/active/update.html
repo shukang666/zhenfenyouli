@@ -117,10 +117,13 @@
         <if condition="$params.type == 1">
 
             <div class="form-group">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>报名日期:</label>
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>活动截止日期:</label>
                 <div class="col-md-2 col-sm-10">
                     <input type="date" class="form-control" name="date"
                            value="{$item.date|default=''}" required>
+                </div>
+                <div class="col-md-6 col-sm-10">
+                    <p class="help-block" style="margin-top:7px;">超过该日期后，小程序活动详情页显示「活动已结束」，不能再报名/打卡；该日期也会作为活动时间显示在活动列表上。</p>
                 </div>
             </div>
 
@@ -147,16 +150,18 @@
             </div>
 
             <div class="form-group clock show_hidden">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>活动开始时间:</label>
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>活动开始日期:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="date" class="form-control" name="clock_start_time" required <if condition="!empty($item.clock_start_time)"> value="{:date('Y-m-d',$item.clock_start_time)}" </if> >
+                    <p class="help-block">打卡活动从该日期开始可以打卡（即详情页「活动时间」的开始）。</p>
                 </div>
             </div>
 
             <div class="form-group clock show_hidden">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>活动结束时间:</label>
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>活动结束日期:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="date" class="form-control" name="clock_end_time" required <if condition="!empty($item.clock_end_time)"> value="{:date('Y-m-d',$item.clock_end_time)}" </if> >
+                    <p class="help-block">该日期之后不能再打卡（即详情页「活动时间」的结束）。注意：活动整体是否结束由上面的「活动截止日期」决定，建议两者填成同一天。</p>
                 </div>
             </div>
 
@@ -179,9 +184,10 @@
             </div>
 
             <div class="form-group clock show_hidden">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>签到天数:</label>
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>连续打卡天数:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="number" class="form-control" name="sign_day" value="{$item.sign_day|default=''}" required>
+                    <p class="help-block">连续打卡达到该天数时赠送徽章（仅在开启徽章时生效）。</p>
                 </div>
             </div>
 
@@ -268,7 +274,7 @@
             <else>
 
                 <div class="form-group">
-                    <label class="col-sm-2 control-label"><span class="form-required">*</span>日期:</label>
+                    <label class="col-sm-2 control-label"><span class="form-required">*</span>活动日期:</label>
                     <div class="col-md-2 col-sm-10">
                         <input type="date" class="form-control" name="date"
                                value="{$item.date|default=''}" required>
@@ -276,10 +282,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-2 control-label"><span class="form-required">*</span>时间类型:</label>
+                    <label class="col-sm-2 control-label"><span class="form-required">*</span>时间说明:</label>
                     <div class="col-md-6 col-sm-10">
                         <input type="text" class="form-control" name="day_type"
-                               value="{$item.day_type|default=''}" required>
+                               value="{$item.day_type|default=''}" required placeholder="如：全天 / 上午9:00-11:00">
+                        <p class="help-block">与「活动日期」拼在一起显示，如「2025-05-16 全天」。</p>
                     </div>
                 </div>
 
@@ -287,7 +294,7 @@
                     <label class="col-sm-2 control-label"><span class="form-required">*</span>地区范围:</label>
                     <div class="col-md-6 col-sm-10">
                         <input type="text" class="form-control" name="area_range"
-                               value="{$item.area_range|default=''}" required>
+                               value="{$item.area_range|default=''}" required placeholder="如：全市">
                     </div>
                 </div>
 
