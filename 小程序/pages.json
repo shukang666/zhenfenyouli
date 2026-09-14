@@ -107,6 +107,20 @@
 			}
 		},
 		{
+			"path": "pages/low_carbon/cate-list",
+			"style": {
+				"navigationBarTitleText": "活动分类",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/low_carbon/love-qixianling",
+			"style": {
+				"navigationBarTitleText": "爱护七贤岭",
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/low_carbon/my_activity",
 			"style": {
 				"navigationBarTitleText": "我的活动"

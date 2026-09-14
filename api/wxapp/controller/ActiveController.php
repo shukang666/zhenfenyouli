@@ -22,6 +22,7 @@ use app\admin\model\active\ActiveClockPushUserModel;
 use app\admin\model\forum\ForumCommentModel;
 use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\member\MemberModel;
+use think\facade\Db;
 
 class ActiveController extends AuthController
 {
@@ -302,7 +303,7 @@ class ActiveController extends AuthController
     }
 
     /**
-     * 活动分类列表
+     * 活动社区分类列表（新版9大标准分类）
      * @OA\Get (
      *tags={"新版活动"},
      *path="/wxapp/active/get_new_cate_active_list",
@@ -311,15 +312,35 @@ class ActiveController extends AuthController
      *@OA\Response(response="default", description="An example resource")
      * )
      */
-    public function get_new_cate_active_list(){
-        $where = [];
-        $where[] = ['status', '=', 1];
-        $list = ActiveCateModel::where($where)->order('list_order asc,id desc')->select()->each(function ($item){
-            $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
-            $item['image'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
+    public function get_new_cate_active_list(ActiveCommunityCateModel $cateModel){
+        $list = $cateModel->where('id', '>', 0)->order('list_order asc,id asc')->select()->each(function ($item){
+            $item['image'] = empty($item['image'])?'':cmf_get_asset_url($item['image']);
             return $item;
         });
         $this->success('请求成功', $list);
+    }
+
+    /**
+     * 获取活动所有标签（去重）
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_active_tags_list",
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_active_tags_list(){
+        $allTags = ActiveModel::where('type', 1)->where('status', 1)->where('delete_time', 0)->whereNotNull('tags')->where('tags', '<>', '')->column('tags');
+        $tagSet = [];
+        foreach ($allTags as $tagStr) {
+            $tags = array_filter(array_map('trim', explode(',', $tagStr)));
+            foreach ($tags as $t) {
+                $tagSet[$t] = true;
+            }
+        }
+        $tagList = array_keys($tagSet);
+        sort($tagList);
+        $this->success('请求成功', $tagList);
     }
 
     /**
@@ -360,17 +381,22 @@ class ActiveController extends AuthController
         $keyword = $this->request->param('keyword');
         $is_put = $this->request->param('is_put');
         $is_month_recommend = $this->request->param('is_month_recommend');
+        $tag = $this->request->param('tag');
         $where = [];
         $where[] = ['type', '=', 1];
         $where[] = ['status', '=', 1];
         $where[] = ['delete_time', '=', 0];
         // 扫码参加(join_type=2)的活动不在小程序列表/搜索/推荐中展示，仅扫码可进入
         $where[] = ['join_type', '=', 1];
-        if(!empty($community_cate_id)) $where[] = ['cate_id', '=', $community_cate_id];
+        if(!empty($community_cate_id)) $where[] = ['community_cate_id', '=', $community_cate_id];
         if(!empty($is_recommendation)) $where[] = ['is_recommendation', '=', 1];
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
         if(!empty($is_month_recommend)) $where[] = ['is_month_recommend', '=', 1];
         if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
+        // 活动标签过滤（FIND_IN_SET处理逗号分隔的tags字段）
+        if(!empty($tag)) {
+            $where[] = ['tags', 'exp', Db::raw('FIND_IN_SET("' . $tag . '", tags)')];
+        }
         $list = ActiveModel::where($where)->order('list_order asc, id desc')->paginate($page_size)->each(function ($item){
             $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
             $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
