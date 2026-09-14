@@ -23,15 +23,25 @@
 			</swiper>
 		</view>
 
-		<!-- 5 大活动分类 -->
-		<view class="fb-cate-grid">
-			<view class="fb-cate-item" v-for="(cate, idx) in main_categories" :key="cate.id"
-				@click="gotoCateList(cate)">
-				<view class="fb-cate-icon" :style="{background: cate.bgColor}">
-					<u-image width="48" height="48" :src="cate.icon" v-if="cate.icon"></u-image>
-					<text class="fb-cate-emoji" v-else>{{cate.emoji}}</text>
+		<!-- 5 大活动分类：左侧大卡 + 右侧2x2 -->
+		<view class="fb-cate-wrap">
+			<!-- 左侧大竖卡（第1个：健康生活） -->
+			<view class="fb-cate-big" :style="{background: main_categories[0].bgColor}"
+				@click="gotoCateList(main_categories[0])">
+				<text class="fb-cate-big-emoji">{{main_categories[0].emoji}}</text>
+				<text class="fb-cate-big-name">{{main_categories[0].name}}</text>
+				<text class="fb-cate-big-sub">Healthy Life</text>
+			</view>
+			<!-- 右侧 2x2（第2-5个） -->
+			<view class="fb-cate-right">
+				<view class="fb-cate-mini" v-for="(cate, idx) in main_categories.slice(1)" :key="cate.id"
+					:style="{background: cate.bgColor}" @click="gotoCateList(cate)">
+					<text class="fb-cate-mini-emoji">{{cate.emoji}}</text>
+					<view class="fb-cate-mini-text">
+						<text class="fb-cate-mini-name">{{cate.name}}</text>
+						<text class="fb-cate-mini-sub">{{cate.subtitle}}</text>
+					</view>
 				</view>
-				<text class="fb-cate-name">{{cate.name}}</text>
 			</view>
 		</view>
 
@@ -130,11 +140,11 @@
 				// 5 大活动分类（硬编码，后台新增不显示）
 				// community_cate_id 对应数据库 cmf_active_community_cate.id
 				main_categories: [
-					{ id: 1, name: '健康生活', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE, #D4E4FC)' },
-					{ id: 2, name: '成长探索', emoji: '🌟', bgColor: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' },
-					{ id: 3, name: '兴趣创造', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' },
-					{ id: 4, name: '社邻行动', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)' },
-					{ id: 5, name: '公益行动', emoji: '💚', bgColor: 'linear-gradient(135deg, #E8EAF6, #C5CAE9)' },
+					{ id: 1, name: '健康生活', subtitle: 'Healthy Life', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE 0%, #1877F2 100%)' },
+					{ id: 2, name: '成长探索', subtitle: 'Growing Up', emoji: '🌟', bgColor: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' },
+					{ id: 3, name: '兴趣创造', subtitle: 'Hobby Time', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' },
+					{ id: 4, name: '社邻行动', subtitle: 'Neighbors', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)' },
+					{ id: 5, name: '公益行动', subtitle: 'Volunteer', emoji: '💚', bgColor: 'linear-gradient(135deg, #E8EAF6, #C5CAE9)' },
 				],
 			};
 		},
@@ -356,36 +366,88 @@
 	height: 100%;
 }
 
-/* ===== 5 大活动分类 ===== */
-.fb-cate-grid {
+/* ===== 5 大活动分类：左大卡 + 右2x2 ===== */
+.fb-cate-wrap {
 	display: flex;
-	justify-content: space-between;
+	gap: 16rpx;
 	padding: 8rpx 24rpx 24rpx;
 }
-.fb-cate-item {
-	flex: 1;
+.fb-cate-big {
+	flex: 0 0 210rpx;
+	height: 260rpx;
+	border-radius: 20rpx;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	align-items: flex-start;
+	justify-content: flex-end;
+	padding: 24rpx;
+	box-shadow: 0 3rpx 10rpx rgba(0,0,0,0.12);
+	color: #fff;
+	position: relative;
+	overflow: hidden;
+}
+.fb-cate-big:active { opacity: 0.88; }
+.fb-cate-big-emoji {
+	position: absolute;
+	top: 20rpx;
+	right: 16rpx;
+	font-size: 80rpx;
+	opacity: 0.85;
+}
+.fb-cate-big-name {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #fff;
+	text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2);
+}
+.fb-cate-big-sub {
+	font-size: 20rpx;
+	color: rgba(255,255,255,0.85);
+	margin-top: 2rpx;
+	letter-spacing: 1rpx;
+}
+.fb-cate-right {
+	flex: 1;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr 1fr;
 	gap: 12rpx;
+	height: 260rpx;
 }
-.fb-cate-icon {
-	width: 96rpx;
-	height: 96rpx;
-	border-radius: 24rpx;
+.fb-cate-mini {
+	border-radius: 16rpx;
 	display: flex;
+	flex-direction: row;
 	align-items: center;
-	justify-content: center;
-	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+	padding: 14rpx 16rpx;
+	gap: 10rpx;
+	box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.08);
+	overflow: hidden;
 }
-.fb-cate-emoji {
-	font-size: 44rpx;
+.fb-cate-mini:active { opacity: 0.85; }
+.fb-cate-mini-emoji {
+	font-size: 40rpx;
+	flex-shrink: 0;
 }
-.fb-cate-name {
+.fb-cate-mini-text {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+}
+.fb-cate-mini-name {
 	font-size: 24rpx;
+	font-weight: 600;
 	color: #050505;
-	font-weight: 500;
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.fb-cate-mini-sub {
+	font-size: 18rpx;
+	color: #65676B;
+	margin-top: 2rpx;
+	letter-spacing: 0.5rpx;
 }
 
 /* ===== 2 个快捷入口 ===== */
