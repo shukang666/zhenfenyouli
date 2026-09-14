@@ -393,11 +393,12 @@ class ActiveController extends AuthController
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
         if(!empty($is_month_recommend)) $where[] = ['is_month_recommend', '=', 1];
         if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
+        $query = ActiveModel::where($where);
         // 活动标签过滤（FIND_IN_SET处理逗号分隔的tags字段）
         if(!empty($tag)) {
-            $where[] = ['tags', 'exp', Db::raw('FIND_IN_SET("' . $tag . '", tags)')];
+            $query = $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
         }
-        $list = ActiveModel::where($where)->order('list_order asc, id desc')->paginate($page_size)->each(function ($item){
+        $list = $query->order('list_order asc, id desc')->paginate($page_size)->each(function ($item){
             $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
             $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
             $item['content'] = htmlspecialchars_decode($item['content']);
