@@ -9,39 +9,61 @@
 			<view class="fb-nav-placeholder"></view>
 		</view>
 
-		<!-- 头部 Banner -->
+		<!-- 头部 Hero -->
 		<view class="qxl-hero">
-			<view class="qxl-hero-overlay"></view>
 			<view class="qxl-hero-content">
 				<text class="qxl-hero-title">爱护七贤岭</text>
 				<text class="qxl-hero-subtitle">一起守护这片绿水青山</text>
 			</view>
 		</view>
 
-		<!-- 4 个分类入口卡片 -->
-		<view class="qxl-cate-wrap">
-			<view class="qxl-cate-card" v-for="(cate, idx) in qxl_categories" :key="cate.id"
-				:style="{background: cate.bgColor}" @click="handleCateTap(cate)">
-				<view class="qxl-cate-left">
-					<view class="qxl-cate-emoji">{{cate.emoji}}</view>
-					<text class="qxl-cate-name">{{cate.name}}</text>
-					<text class="qxl-cate-sub">{{cate.subtitle}}</text>
-					<view class="qxl-cate-btn">
-						<text>查看活动</text>
-						<text class="qxl-cate-arrow">›</text>
+		<!-- 4 个分类 section，每个下面直接列活动卡片 -->
+		<view class="qxl-body">
+			<view class="qxl-section" v-for="cate in qxl_categories" :key="cate.id">
+				<!-- section 标题条 -->
+				<view class="qxl-section-head">
+					<view class="qxl-section-dot" :style="{background: cate.accent}"></view>
+					<text class="qxl-section-emoji">{{cate.emoji}}</text>
+					<text class="qxl-section-name">{{cate.name}}</text>
+					<text class="qxl-section-sub">{{cate.subtitle}}</text>
+				</view>
+
+				<!-- 活动卡片列表 -->
+				<view class="qxl-section-list" v-if="cate.activities && cate.activities.length">
+					<view class="qxl-act-card" v-for="act in cate.activities" :key="act.id"
+						@click="gotoDetail(act.id)">
+						<view class="qxl-act-cover">
+							<u-image width="100%" height="100%" :src="act.thumb" mode="aspectFill"></u-image>
+							<view class="qxl-act-badge" v-if="act.active_count > 0">
+								<text>{{act.active_count}}人参与</text>
+							</view>
+						</view>
+						<view class="qxl-act-body">
+							<view class="qxl-act-title u-line-1">{{act.name}}</view>
+							<view class="qxl-act-meta">
+								<view class="qxl-act-meta-item">
+									<u-icon name="clock" size="20" color="#8A8A8A"></u-icon>
+									<text>{{act.date | date('yy-mm-dd')}}</text>
+								</view>
+								<view class="qxl-act-meta-item" v-if="act.address && act.address.trim()">
+									<u-icon name="map" size="20" color="#8A8A8A"></u-icon>
+									<text class="u-line-1">{{act.address}}</text>
+								</view>
+							</view>
+						</view>
 					</view>
 				</view>
-				<view class="qxl-cate-right">
-					<view class="qxl-cate-img-wrap">
-						<image class="qxl-cate-img" :src="cate.thumb || cate.defaultThumb" mode="aspectFill"></image>
-					</view>
+
+				<!-- 暂无活动 -->
+				<view class="qxl-empty" v-else-if="!cate.loading">
+					<text class="qxl-empty-text">暂无活动，敬请期待</text>
+				</view>
+
+				<!-- 加载中 -->
+				<view class="qxl-empty" v-else>
+					<text class="qxl-empty-text">加载中...</text>
 				</view>
 			</view>
-		</view>
-
-		<!-- 提示 -->
-		<view class="qxl-footer">
-			<text class="qxl-footer-text">点击分类进入对应的主题活动</text>
 		</view>
 	</view>
 </template>
@@ -50,34 +72,43 @@
 	export default {
 		data() {
 			return {
-				// 4 个七贤岭子分类，community_cate_id = 6,7,8,9
 				qxl_categories: [
-					{ id: 6, name: '发现七贤岭', subtitle: '探索自然，发现美好', emoji: '🔍', bgColor: 'linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%)', thumb: '', defaultThumb: '' },
-					{ id: 7, name: '玩在七贤岭', subtitle: '亲子玩乐，互动体验', emoji: '🎮', bgColor: 'linear-gradient(135deg, #34C759 0%, #28A745 100%)', thumb: '', defaultThumb: '' },
-					{ id: 8, name: '记录七贤岭', subtitle: '用镜头记录每一刻', emoji: '📷', bgColor: 'linear-gradient(135deg, #FF9500 0%, #E68900 100%)', thumb: '', defaultThumb: '' },
-					{ id: 9, name: '守护七贤岭', subtitle: '守护绿水青山，从我做起', emoji: '🌱', bgColor: 'linear-gradient(135deg, #AF52DE 0%, #8B41C2 100%)', thumb: '', defaultThumb: '' },
+					{ id: 6, name: '发现七贤岭', subtitle: '探索自然，发现美好', emoji: '🔍', accent: '#1877F2', bgColor: 'linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%)', activities: [], loading: true },
+					{ id: 7, name: '玩在七贤岭', subtitle: '亲子玩乐，互动体验', emoji: '🎮', accent: '#34C759', bgColor: 'linear-gradient(135deg, #34C759 0%, #28A745 100%)', activities: [], loading: true },
+					{ id: 8, name: '记录七贤岭', subtitle: '用镜头记录每一刻', emoji: '📷', accent: '#FF9500', bgColor: 'linear-gradient(135deg, #FF9500 0%, #E68900 100%)', activities: [], loading: true },
+					{ id: 9, name: '守护七贤岭', subtitle: '守护绿水青山，从我做起', emoji: '🌱', accent: '#AF52DE', bgColor: 'linear-gradient(135deg, #AF52DE 0%, #8B41C2 100%)', activities: [], loading: true },
 				],
-				activeCache: {}, // 缓存每个分类下的第一个活动 ID
 			};
 		},
+		onLoad() {
+			this.loadAllSections()
+		},
 		methods: {
-			async handleCateTap(cate) {
-				try {
-					const res = await this.$u.api.get_new_active_list({
-						community_cate_id: cate.id,
-						page_size: 1,
+			// 并行加载 4 个分类的活动
+			async loadAllSections() {
+				const tasks = this.qxl_categories.map(cate =>
+					this.fetchCateActivities(cate.id).then(list => {
+						cate.activities = list
+						cate.loading = false
+					}).catch(() => {
+						cate.activities = []
+						cate.loading = false
 					})
-					const list = res.data?.data || []
-					if (!list.length) {
-						this.$u.toast('该分类下暂无活动')
-						return
-					}
-					const firstId = list[0].id
-					// 直接跳转活动详情，不再进入列表页
-					this.$u.route(`/pages/low_carbon/lsxf/details-new?id=${firstId}`)
-				} catch (e) {
-					this.$u.toast('加载失败，请重试')
-				}
+				)
+				await Promise.all(tasks)
+				// 触发 Vue 响应式更新
+				this.qxl_categories = [...this.qxl_categories]
+			},
+			fetchCateActivities(communityCateId) {
+				return this.$u.api.get_new_active_list({
+					community_cate_id: communityCateId,
+					page_size: 20,
+				}).then(res => {
+					return res.data?.data || []
+				})
+			},
+			gotoDetail(id) {
+				this.$u.route(`/pages/low_carbon/lsxf/details-new?id=${id}`)
 			},
 			navigateBack() {
 				uni.navigateBack()
@@ -104,145 +135,125 @@
 	padding: 0 16rpx;
 	height: 88rpx;
 	padding-top: env(safe-area-inset-top);
-	/* 背景渐变，从 hero 图过渡 */
 	background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
 }
-.fb-nav-back {
-	width: 80rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
+.fb-nav-back { width: 80rpx; display: flex; align-items: center; justify-content: center; }
 .fb-nav-title {
-	font-size: 34rpx;
-	font-weight: 700;
-	color: #fff;
-	flex: 1;
-	text-align: center;
-	text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.3);
+	font-size: 34rpx; font-weight: 700; color: #fff;
+	flex: 1; text-align: center; text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.3);
 }
 .fb-nav-placeholder { width: 80rpx; }
 
-/* ===== Hero Banner ===== */
+/* ===== Hero ===== */
 .qxl-hero {
 	position: relative;
-	height: 360rpx;
+	height: 320rpx;
 	background: linear-gradient(135deg, #1877F2 0%, #34C759 100%);
-	margin-top: -88rpx; /* 让 hero 延伸到导航栏后面 */
+	margin-top: -88rpx;
 	padding-top: 88rpx;
-}
-.qxl-hero-overlay {
-	position: absolute;
-	top: 0; left: 0; right: 0; bottom: 0;
-	background: url('') center/cover no-repeat;
-	opacity: 0.3;
-}
-.qxl-hero-content {
-	position: relative;
-	z-index: 2;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	height: 100%;
 	color: #fff;
 }
 .qxl-hero-title {
-	font-size: 48rpx;
-	font-weight: 800;
-	letter-spacing: 4rpx;
+	font-size: 44rpx; font-weight: 800; letter-spacing: 4rpx;
 	text-shadow: 0 4rpx 8rpx rgba(0,0,0,0.25);
 }
 .qxl-hero-subtitle {
-	font-size: 26rpx;
-	margin-top: 12rpx;
-	opacity: 0.9;
-	letter-spacing: 2rpx;
+	font-size: 26rpx; margin-top: 10rpx; opacity: 0.9; letter-spacing: 2rpx;
 }
 
-/* ===== 4 分类卡片 ===== */
-.qxl-cate-wrap {
-	padding: 24rpx 16rpx 16rpx;
-	margin-top: -40rpx; /* 向上叠一点 hero */
+/* ===== Body ===== */
+.qxl-body {
+	padding: 24rpx 16rpx 100rpx;
+	margin-top: -24rpx;
 	position: relative;
 	z-index: 10;
 }
-.qxl-cate-card {
-	display: flex;
-	align-items: stretch;
+
+/* ===== Section ===== */
+.qxl-section {
+	background: #fff;
 	border-radius: 20rpx;
-	overflow: hidden;
+	padding: 20rpx 20rpx 8rpx;
 	margin-bottom: 20rpx;
-	min-height: 200rpx;
-	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
+	box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
+	border: 1rpx solid #E4E6EB;
 }
-.qxl-cate-card:active { opacity: 0.9; }
-.qxl-cate-left {
-	flex: 1;
-	padding: 28rpx 28rpx 28rpx 28rpx;
+.qxl-section-head {
 	display: flex;
-	flex-direction: column;
-	color: #fff;
-}
-.qxl-cate-emoji {
-	font-size: 48rpx;
-	margin-bottom: 8rpx;
-}
-.qxl-cate-name {
-	font-size: 34rpx;
-	font-weight: 700;
-	letter-spacing: 2rpx;
-}
-.qxl-cate-sub {
-	font-size: 22rpx;
-	margin-top: 6rpx;
-	opacity: 0.85;
-	flex: 1;
-}
-.qxl-cate-btn {
-	display: inline-flex;
 	align-items: center;
-	align-self: flex-start;
-	height: 52rpx;
-	padding: 0 20rpx;
-	background: rgba(255,255,255,0.25);
-	border-radius: 26rpx;
-	font-size: 24rpx;
-	font-weight: 500;
-	margin-top: 12rpx;
+	gap: 8rpx;
+	padding: 4rpx 4rpx 16rpx;
+	border-bottom: 1rpx solid #F0F2F5;
+	margin-bottom: 16rpx;
 }
-.qxl-cate-arrow {
-	margin-left: 6rpx;
-	font-size: 28rpx;
-	font-weight: 300;
+.qxl-section-dot {
+	width: 8rpx; height: 28rpx; border-radius: 4rpx;
 }
-.qxl-cate-right {
-	width: 200rpx;
-	position: relative;
+.qxl-section-emoji {
+	font-size: 32rpx;
 }
-.qxl-cate-img-wrap {
-	position: absolute;
-	top: 20rpx;
-	right: -10rpx;
-	width: 180rpx;
-	height: 160rpx;
-	border-radius: 16rpx;
-	overflow: hidden;
-	box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.2);
-	background: rgba(255,255,255,0.2);
+.qxl-section-name {
+	font-size: 30rpx; font-weight: 700; color: #050505;
 }
-.qxl-cate-img {
-	width: 100%;
-	height: 100%;
+.qxl-section-sub {
+	font-size: 22rpx; color: #8A8A8A; margin-left: 4rpx;
 }
 
-/* ===== 底部提示 ===== */
-.qxl-footer {
-	text-align: center;
-	padding: 40rpx 0 100rpx;
+/* ===== 活动卡片（横向一行） ===== */
+.qxl-section-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
 }
-.qxl-footer-text {
-	font-size: 24rpx;
-	color: #8A8A8A;
+.qxl-act-card {
+	display: flex;
+	background: #FAFBFC;
+	border-radius: 16rpx;
+	overflow: hidden;
+	border: 1rpx solid #EDEEF0;
+}
+.qxl-act-card:active { opacity: 0.88; }
+.qxl-act-cover {
+	width: 200rpx; height: 160rpx;
+	position: relative; flex-shrink: 0; background: #F0F2F5;
+}
+.qxl-act-badge {
+	position: absolute; left: 8rpx; bottom: 8rpx;
+	height: 30rpx; padding: 0 12rpx;
+	background: rgba(0,0,0,0.55); border-radius: 15rpx;
+	font-size: 18rpx; color: #fff; line-height: 30rpx;
+}
+.qxl-act-body {
+	flex: 1; padding: 16rpx 18rpx;
+	display: flex; flex-direction: column; justify-content: space-between;
+	min-width: 0;
+}
+.qxl-act-title {
+	font-size: 28rpx; font-weight: 600; color: #050505;
+	line-height: 1.4;
+}
+.qxl-act-meta {
+	display: flex; flex-direction: column; gap: 6rpx;
+	margin-top: 8rpx;
+}
+.qxl-act-meta-item {
+	display: flex; align-items: center; gap: 4rpx;
+	font-size: 22rpx; color: #65676B;
+	min-width: 0;
+}
+.qxl-act-meta-item text {
+	flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+
+/* ===== 空态 ===== */
+.qxl-empty {
+	padding: 30rpx 0; text-align: center;
+}
+.qxl-empty-text {
+	font-size: 24rpx; color: #8A8A8A;
 }
 </style>
