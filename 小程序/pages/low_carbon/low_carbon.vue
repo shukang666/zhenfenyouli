@@ -127,17 +127,17 @@
 				active_page: 1,
 				active_total: 0,
 				active_loading: false,
+				// 5 大活动分类（硬编码，后台新增不显示）
+				// community_cate_id 对应数据库 cmf_active_community_cate.id
+				main_categories: [
+					{ id: 1, name: '健康生活', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE, #D4E4FC)' },
+					{ id: 2, name: '成长探索', emoji: '🌟', bgColor: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' },
+					{ id: 3, name: '兴趣创造', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' },
+					{ id: 4, name: '社邻行动', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)' },
+					{ id: 5, name: '公益行动', emoji: '💚', bgColor: 'linear-gradient(135deg, #E8EAF6, #C5CAE9)' },
+				],
 			};
 		},
-		// 5 大活动分类（硬编码，后台新增不显示）
-		// community_cate_id 对应数据库 cmf_active_community_cate.id
-		main_categories: [
-			{ id: 1, name: '健康生活', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE, #D4E4FC)' },
-			{ id: 2, name: '成长探索', emoji: '🌟', bgColor: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' },
-			{ id: 3, name: '兴趣创造', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' },
-			{ id: 4, name: '社邻行动', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)' },
-			{ id: 5, name: '公益行动', emoji: '💚', bgColor: 'linear-gradient(135deg, #E8EAF6, #C5CAE9)' },
-		],
 		onLoad(options) {
 			this.loadAllData()
 		},
