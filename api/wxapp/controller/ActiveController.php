@@ -388,12 +388,18 @@ class ActiveController extends AuthController
         $where[] = ['delete_time', '=', 0];
         // 扫码参加(join_type=2)的活动不在小程序列表/搜索/推荐中展示，仅扫码可进入
         $where[] = ['join_type', '=', 1];
-        if(!empty($community_cate_id)) $where[] = ['community_cate_id', '=', $community_cate_id];
         if(!empty($is_recommendation)) $where[] = ['is_recommendation', '=', 1];
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
         if(!empty($is_month_recommend)) $where[] = ['is_month_recommend', '=', 1];
         if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
         $query = ActiveModel::where($where);
+        // 分类过滤：兼容新旧字段（community_cate_id 为新分类系统，cate_id 为旧分类系统）
+        if(!empty($community_cate_id)) {
+            $query = $query->where(function($q) use ($community_cate_id) {
+                $q->where('community_cate_id', '=', $community_cate_id)
+                  ->whereOr('cate_id', '=', $community_cate_id);
+            });
+        }
         // 活动标签过滤（FIND_IN_SET处理逗号分隔的tags字段）
         if(!empty($tag)) {
             $query = $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
