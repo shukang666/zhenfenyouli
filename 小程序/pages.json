@@ -184,6 +184,13 @@
 				"navigationBarTitleText": "活动搜索",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/low_carbon/theme-activities",
+			"style": {
+				"navigationBarTitleText": "主题活动",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"subPackages": [{
