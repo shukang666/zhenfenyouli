@@ -1,0 +1,199 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    /* 各平台品牌色：模板里按 action 挂 .wx-bg-<action> 类（新增平台时这里补一行） */
+    .wx-bg-mini_program { background: #07C160; }
+    .wx-bg-pay { background: #1AAD19; }
+    .wx-bg-service_account { background: #576B95; }
+    .wx-bg-subscription_account { background: #576B95; }
+    .wx-bg-channels { background: #FA9D3B; }
+    .wx-bg-open_platform { background: #2D8CF0; }
+    .wx-bg-work { background: #3969D8; }
+
+    /* 微信生态总览：平台卡片网格 */
+    .wx-stat {
+        margin: 0 0 15px;
+        padding: 10px 14px;
+        background: #f7f9fc;
+        border: 1px solid #e6ebf2;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #555;
+    }
+
+    .wx-stat span {
+        margin-right: 14px;
+    }
+
+    .wx-card {
+        display: flex;
+        flex-direction: column;
+        min-height: 250px;
+        padding: 18px 18px 14px;
+        margin-bottom: 18px;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
+        transition: box-shadow .15s, transform .15s;
+    }
+
+    .wx-card:hover {
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .1);
+        transform: translateY(-2px);
+    }
+
+    .wx-card-head {
+        display: flex;
+        align-items: center;
+    }
+
+    .wx-logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        margin-right: 12px;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 20px;
+        flex: 0 0 auto;
+    }
+
+    .wx-head-text {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .wx-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .wx-group {
+        font-size: 12px;
+        color: #9aa4b2;
+        margin-top: 2px;
+    }
+
+    .wx-status {
+        flex: 0 0 auto;
+        margin-left: 8px;
+    }
+
+    .wx-tagline {
+        margin: 12px 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #2D8CF0;
+    }
+
+    .wx-summary {
+        flex: 1 1 auto;
+        font-size: 12px;
+        line-height: 22px;
+        color: #777;
+    }
+
+    .wx-actions {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed #eee;
+    }
+
+    .wx-actions .btn {
+        margin-right: 6px;
+    }
+
+    /* 移动端：卡片留白收紧（PC 端不受影响） */
+    @media (max-width: 767px) {
+        .wx-card {
+            min-height: 0;
+        }
+    }
+</style>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('index')}">微信生态总览</a></li>
+    </ul>
+
+    <div class="alert alert-info margin-top-20" style="line-height:22px;">
+        <i class="fa fa-info-circle"></i>
+        把项目会用到、将来可能用到的微信各平台开发者后台汇总在这个菜单下，需要去官方后台改东西时不用再翻收藏夹。
+        <br>
+        <b>当前是演示页面</b>：只有「小程序」「微信支付」是服务器上真实在跑的（下面显示了已配置的 AppID / 商户号），
+        其余平台还没有可用账号，配置项只作登记说明，<b>保存不会写入任何数据</b>。
+    </div>
+
+    <div class="wx-stat">
+        <span>共 <b>{$platformCount}</b> 个平台</span>
+        <span class="label label-success">已接入 {$activeCount}</span>
+        <span class="label label-default">待开通 {$pendingCount}</span>
+    </div>
+
+    <div class="row">
+        <volist name="platforms" id="p">
+            <div class="col-md-4 col-sm-6">
+                <div class="wx-card">
+                    <div class="wx-card-head">
+                        <span class="wx-logo wx-bg-{$p.action}"><i class="fa fa-{$p.icon}"></i></span>
+                        <div class="wx-head-text">
+                            <div class="wx-name">{$p.name}</div>
+                            <div class="wx-group">{$p.group}</div>
+                        </div>
+                        <div class="wx-status">
+                            <if condition="$p.status eq 'active'">
+                                <span class="label label-success">已接入</span>
+                                <else />
+                                <span class="label label-default">待开通</span>
+                            </if>
+                        </div>
+                    </div>
+                    <div class="wx-tagline">{$p.tagline}</div>
+                    <div class="wx-summary">{$p.summary}</div>
+                    <div class="wx-actions">
+                        <a href="{:url($p.action)}" class="btn btn-sm btn-primary">
+                            <i class="fa fa-wrench"></i> 查看配置
+                        </a>
+                        <volist name="p.consoles" id="c">
+                            <a href="{$c.url}" target="_blank" rel="noopener" class="btn btn-sm btn-default">
+                                <i class="fa fa-external-link"></i> {$c.name}
+                            </a>
+                        </volist>
+                    </div>
+                </div>
+            </div>
+        </volist>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-question-circle" style="color:#2D8CF0;"></i> 这个菜单怎么用
+        </div>
+        <div class="panel-body" style="font-size:13px;line-height:24px;color:#555;">
+            <ol style="padding-left:20px;margin:0;">
+                <li>
+                    <b>去官方后台办事</b>：卡片右下角的按钮直接跳到微信官方后台（公众平台、商户平台、视频号助手等），
+                    不用再靠搜索或收藏夹找入口。
+                </li>
+                <li>
+                    <b>看需要准备什么</b>：点「查看配置」，每个平台页都写清了它能做什么、接入要准备哪些字段
+                    （AppID、密钥、回调地址等），方便先备料，不用等开发的时候才发现缺东西。
+                </li>
+                <li>
+                    <b>密钥不会出现在这里</b>：出于安全考虑，AppSecret / API 密钥 / 证书这类内容只在服务器配置文件里，
+                    页面上只提示"不展示"。要看完整配置去服务器改 <code>data/config/wxapp.php</code>。
+                </li>
+                <li>
+                    <b>拿到账号之后</b>：告诉开发方该平台的账号信息，把这一页的演示配置换成真实表单 + 落库，
+                    页面结构不用改。
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+</body>
+</html>

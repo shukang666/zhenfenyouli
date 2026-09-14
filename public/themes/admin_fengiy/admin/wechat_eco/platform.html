@@ -1,0 +1,277 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    /* 各平台品牌色：模板里按 action 挂 .wx-bg-<action> / .wx-bd-<action> 类（新增平台时这里各补一行） */
+    .wx-bg-mini_program { background: #07C160; }
+    .wx-bg-pay { background: #1AAD19; }
+    .wx-bg-service_account { background: #576B95; }
+    .wx-bg-subscription_account { background: #576B95; }
+    .wx-bg-channels { background: #FA9D3B; }
+    .wx-bg-open_platform { background: #2D8CF0; }
+    .wx-bg-work { background: #3969D8; }
+
+    .wx-bd-mini_program { border-left-color: #07C160; }
+    .wx-bd-pay { border-left-color: #1AAD19; }
+    .wx-bd-service_account { border-left-color: #576B95; }
+    .wx-bd-subscription_account { border-left-color: #576B95; }
+    .wx-bd-channels { border-left-color: #FA9D3B; }
+    .wx-bd-open_platform { border-left-color: #2D8CF0; }
+    .wx-bd-work { border-left-color: #3969D8; }
+
+    /* 微信生态：单个平台页 */
+    .wx-hero {
+        display: flex;
+        align-items: center;
+        padding: 16px 18px;
+        margin: 15px 0 18px;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-left: 4px solid #07C160;
+        border-radius: 4px;
+    }
+
+    .wx-logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        margin-right: 14px;
+        border-radius: 12px;
+        color: #fff;
+        font-size: 24px;
+        flex: 0 0 auto;
+    }
+
+    .wx-hero-text {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .wx-hero-text h4 {
+        margin: 0 0 4px;
+        font-size: 17px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .wx-hero-text .wx-tagline {
+        font-size: 13px;
+        color: #777;
+    }
+
+    .wx-hero-actions {
+        flex: 0 0 auto;
+        margin-left: 10px;
+    }
+
+    .wx-intro {
+        font-size: 13px;
+        line-height: 24px;
+        color: #555;
+        margin-bottom: 14px;
+    }
+
+    .wx-ability {
+        padding: 8px 0;
+        border-bottom: 1px dashed #eee;
+        font-size: 13px;
+        line-height: 22px;
+    }
+
+    .wx-ability:last-child {
+        border-bottom: none;
+    }
+
+    .wx-ability b {
+        display: inline-block;
+        min-width: 108px;
+        color: #333;
+        vertical-align: top;
+    }
+
+    .wx-ability span {
+        color: #777;
+    }
+
+    .wx-config .form-group {
+        margin-bottom: 6px;
+    }
+
+    .wx-config .control-label {
+        padding-top: 7px;
+        font-weight: 500;
+        color: #555;
+        font-size: 13px;
+        text-align: left;
+    }
+
+    .wx-config .help-block {
+        margin-bottom: 0;
+        font-size: 12px;
+        line-height: 18px;
+        color: #9aa4b2;
+    }
+
+    .wx-save-bar {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .wx-save-bar .text-muted {
+        margin-left: 8px;
+        font-size: 12px;
+    }
+
+    .wx-links .btn {
+        margin: 0 8px 8px 0;
+    }
+
+    @media (max-width: 767px) {
+        .wx-hero {
+            flex-wrap: wrap;
+        }
+
+        .wx-hero-actions {
+            width: 100%;
+            margin: 12px 0 0;
+        }
+
+        .wx-ability b {
+            display: block;
+            min-width: 0;
+        }
+    }
+</style>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">微信生态总览</a></li>
+        <volist name="platforms" id="p">
+            <if condition="$p.action eq $currentKey">
+                <li class="active"><a href="{:url($p.action)}">{$p.name}</a></li>
+                <else />
+                <li><a href="{:url($p.action)}">{$p.name}</a></li>
+            </if>
+        </volist>
+    </ul>
+
+    <!-- 平台标题条 -->
+    <div class="wx-hero wx-bd-{$currentKey}">
+        <span class="wx-logo wx-bg-{$currentKey}"><i class="fa fa-{$platform.icon}"></i></span>
+        <div class="wx-hero-text">
+            <h4>
+                {$platform.name}
+                <if condition="$platform.status eq 'active'">
+                    <span class="label label-success">已接入</span>
+                    <else />
+                    <span class="label label-default">待开通</span>
+                </if>
+            </h4>
+            <div class="wx-tagline">{$platform.tagline}</div>
+        </div>
+        <div class="wx-hero-actions">
+            <volist name="consoles" id="c">
+                <a class="btn btn-sm btn-primary" href="{$c.url}" target="_blank" rel="noopener">
+                    <i class="fa fa-external-link"></i> {$c.name}
+                </a>
+            </volist>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 左：平台说明 + 能力清单 -->
+        <div class="col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-info-circle" style="color:#2D8CF0;"></i> 这个平台在本项目里做什么
+                </div>
+                <div class="panel-body">
+                    <p class="wx-intro">{$platform.summary}</p>
+                    <volist name="abilities" id="ab">
+                        <div class="wx-ability">
+                            <b>{$ab.name}</b>
+                            <span>{$ab.desc}</span>
+                        </div>
+                    </volist>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右：接入配置（演示，不保存） -->
+        <div class="col-md-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-cog" style="color:#07C160;"></i> 接入配置
+                </div>
+                <div class="panel-body wx-config">
+                    <if condition="$platform.status eq 'active'">
+                        <div class="alert alert-success" style="font-size:12px;line-height:20px;padding:8px 10px;">
+                            该平台已接入。下面回显的是服务器上当前生效的配置，<b>改这里不会生效</b>，
+                            需要修改请改配置文件或在官方后台操作。
+                        </div>
+                        <else />
+                        <div class="alert alert-warning" style="font-size:12px;line-height:20px;padding:8px 10px;">
+                            该平台还没有可用账号，下面是接入时需要准备的信息，可以先登记着。
+                        </div>
+                    </if>
+
+                    <form class="form-horizontal" onsubmit="return false;">
+                        <volist name="configItems" id="cfg">
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">{$cfg.label}：</label>
+                                <div class="col-sm-7">
+                                    <if condition="!empty($cfg.secret)">
+                                        <p class="form-control-static text-muted" style="font-size:12px;">不展示（存服务器）</p>
+                                        <else />
+                                        <input type="text" class="form-control" value="{$cfg.value}" placeholder="{$cfg.placeholder|default=''}">
+                                    </if>
+                                    <p class="help-block">{$cfg.hint|default=''}</p>
+                                </div>
+                            </div>
+                        </volist>
+                    </form>
+
+                    <div class="wx-save-bar">
+                        <button type="button" class="btn btn-primary" id="wx-save">
+                            <i class="fa fa-save"></i> 保存配置
+                        </button>
+                        <span class="text-muted">演示页面：暂不保存</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-link" style="color:#FA9D3B;"></i> 官方入口与文档
+        </div>
+        <div class="panel-body wx-links">
+            <volist name="consoles" id="c">
+                <a class="btn btn-sm btn-primary" href="{$c.url}" target="_blank" rel="noopener">
+                    <i class="fa fa-external-link"></i> {$c.name}
+                </a>
+            </volist>
+            <volist name="docs" id="d">
+                <a class="btn btn-sm btn-default" href="{$d.url}" target="_blank" rel="noopener">
+                    <i class="fa fa-file-text-o"></i> {$d.name}
+                </a>
+            </volist>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 演示模式：所有平台的保存按钮都只给提示，不提交、不落库
+    layui.use(['layer'], function () {
+        var layer = layui.layer;
+
+        $('#wx-save').on('click', function () {
+            layer.msg('这是演示页面：该平台暂未接入，配置不会被保存', {icon: 5, time: 2500});
+        });
+    });
+</script>
+</body>
+</html>
