@@ -47,89 +47,9 @@
 			}
 		},
 		{
-			"path": "pages/health/participate",
-			"style": {
-				"navigationBarTitleText": "参与问卷和预约"
-			}
-		},
-		{
-			"path": "pages/health/details",
-			"style": {
-				"navigationBarTitleText": "详情"
-			}
-		},
-		{
-			"path": "pages/health/add",
-			"style": {
-				"navigationBarTitleText": "立即预约"
-			}
-		},
-		{
 			"path": "pages/low_carbon/low_carbon",
 			"style": {
 				"navigationBarTitleText": "活动"
-			}
-		},
-		{
-			"path": "pages/low_carbon/lsxf/lsxf",
-			"style": {
-				"navigationBarTitleText": "绿色消费"
-			}
-		},
-		{
-			"path": "pages/low_carbon/lsxf/details",
-			"style": {
-				"navigationBarTitleText": "活动说明"
-			}
-		}, {
-			"path": "pages/low_carbon/lsxf/details-new",
-			"style": {
-				"navigationBarTitleText": "活动说明"
-			}
-		},
-		{
-			"path": "pages/low_carbon/lsxf/list",
-			"style": {
-				"navigationBarTitleText": "查看作品"
-			}
-		},
-		{
-			"path": "pages/low_carbon/lsxf/list_details",
-			"style": {
-				"navigationBarTitleText": "详情"
-			}
-		},
-		{
-			"path": "pages/low_carbon/active-list",
-			"style": {
-				"navigationBarTitleText": "活动列表",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/low_carbon/cate-list",
-			"style": {
-				"navigationBarTitleText": "活动分类",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/low_carbon/love-qixianling",
-			"style": {
-				"navigationBarTitleText": "爱护七贤岭",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/low_carbon/my_activity",
-			"style": {
-				"navigationBarTitleText": "我的活动"
-			}
-		},
-		{
-			"path": "pages/low_carbon/rank",
-			"style": {
-				"navigationBarTitleText": "签到排行榜"
 			}
 		},
 		{
@@ -140,74 +60,166 @@
 			}
 		},
 		{
-			"path": "pages/mall/ranking",
-			"style": {
-				"navigationBarTitleText": "商品排行榜"
-			}
-		},
-		{
-			"path": "pages/mall/details",
-			"style": {
-				"navigationBarTitleText": "商品详情"
-			}
-		},
-		{
-			"path": "pages/mall/merchant",
-			"style": {
-				"navigationBarTitleText": "商家详情"
-			}
-		},
-		{
-			"path": "pages/mall/add_order",
-			"style": {
-				"navigationBarTitleText": "确认订单"
-			}
-		},
-		{
-			"path": "pages/mall/cart",
-			"style": {
-				"navigationBarTitleText": "购物车"
-			}
-		},
-		{
-			"path": "pages/mall/add_yj",
-			"style": {
-				"navigationBarTitleText": "确认订单"
-			}
-		},
-		{
-			"path": "pages/mall/address",
-			"style": {
-				"navigationBarTitleText": "选择地提点"
-			}
-		},
-		{
 			"path": "pages/user/badge",
 			"style": {
 				"navigationBarTitleText": "我的徽章"
 			}
-		},
-		{
-			"path": "pages/low_carbon/research",
-			"style": {
-				"navigationBarTitleText": "社会参与"
-			}
-		}, {
-			"path": "pages/low_carbon/active-search",
-			"style": {
-				"navigationBarTitleText": "活动搜索",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/low_carbon/theme-activities",
-			"style": {
-				"navigationBarTitleText": "主题活动",
-				"navigationStyle": "custom"
-			}
 		}
 	],
 	"subPackages": [{
+			"root": "pages/health",
+			"pages": [{
+					"path": "participate",
+					"style": {
+						"navigationBarTitleText": "参与问卷和预约"
+					}
+				},
+				{
+					"path": "details",
+					"style": {
+						"navigationBarTitleText": "详情"
+					}
+				},
+				{
+					"path": "add",
+					"style": {
+						"navigationBarTitleText": "立即预约"
+					}
+				}
+			]
+		},
+		{
+			"root": "pages/mall",
+			"pages": [{
+					"path": "ranking",
+					"style": {
+						"navigationBarTitleText": "商品排行榜"
+					}
+				},
+				{
+					"path": "details",
+					"style": {
+						"navigationBarTitleText": "商品详情"
+					}
+				},
+				{
+					"path": "merchant",
+					"style": {
+						"navigationBarTitleText": "商家详情"
+					}
+				},
+				{
+					"path": "add_order",
+					"style": {
+						"navigationBarTitleText": "确认订单"
+					}
+				},
+				{
+					"path": "cart",
+					"style": {
+						"navigationBarTitleText": "购物车"
+					}
+				},
+				{
+					"path": "add_yj",
+					"style": {
+						"navigationBarTitleText": "确认订单"
+					}
+				},
+				{
+					"path": "address",
+					"style": {
+						"navigationBarTitleText": "选择地提点"
+					}
+				}
+			]
+		},
+		{
+			"root": "pages/low_carbon",
+			"pages": [{
+					"path": "lsxf/lsxf",
+					"style": {
+						"navigationBarTitleText": "绿色消费"
+					}
+				},
+				{
+					"path": "lsxf/details",
+					"style": {
+						"navigationBarTitleText": "活动说明"
+					}
+				}, {
+					"path": "lsxf/details-new",
+					"style": {
+						"navigationBarTitleText": "活动说明"
+					}
+				},
+				{
+					"path": "lsxf/list",
+					"style": {
+						"navigationBarTitleText": "查看作品"
+					}
+				},
+				{
+					"path": "lsxf/list_details",
+					"style": {
+						"navigationBarTitleText": "详情"
+					}
+				},
+				{
+					"path": "active-list",
+					"style": {
+						"navigationBarTitleText": "活动列表",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "cate-list",
+					"style": {
+						"navigationBarTitleText": "活动分类",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "love-qixianling",
+					"style": {
+						"navigationBarTitleText": "爱护七贤岭",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "my_activity",
+					"style": {
+						"navigationBarTitleText": "我的活动"
+					}
+				},
+				{
+					"path": "rank",
+					"style": {
+						"navigationBarTitleText": "签到排行榜"
+					}
+				},
+				{
+					"path": "research",
+					"style": {
+						"navigationBarTitleText": "社会参与"
+					}
+				}, {
+					"path": "active-search",
+					"style": {
+						"navigationBarTitleText": "活动搜索",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "theme-activities",
+					"style": {
+						"navigationBarTitleText": "主题活动",
+						"navigationStyle": "custom"
+					}
+				}
+			]
+		},
+		{
 			"root": "pages/zzhd",
 			"pages": [{
 					"path": "contract",
@@ -776,7 +788,6 @@
 		}
 	],
 	"preloadRule": {
-		// 仅预载高频分包，避免多包并发下载抢占带宽内存、加剧页面跳转卡顿
 		"pages/index/index": {
 			"network": "wifi",
 			"packages": ["pages/flhd"]
