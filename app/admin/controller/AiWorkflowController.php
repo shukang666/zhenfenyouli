@@ -627,6 +627,22 @@ class AiWorkflowController extends AdminBaseController
             $trendData[] = ['date' => $date, 'clock' => $clocks, 'user' => $users, 'sign' => $signs];
         }
 
+        // 行动建议
+        $actions = [];
+        if ($weekUserGrowth < -10) {
+            $actions[] = ['icon' => 'fa-bullhorn', 'color' => '#f56c6c', 'text' => '用户增长明显下滑，建议加强推送触达与外部引流'];
+        } elseif ($weekUserGrowth > 10) {
+            $actions[] = ['icon' => 'fa-fire', 'color' => '#67c23a', 'text' => '增长势头良好，可乘势上新活动扩大战果'];
+        } else {
+            $actions[] = ['icon' => 'fa-balance-scale', 'color' => '#2D8CF0', 'text' => '用户增长平稳，建议优化活动质量提升留存'];
+        }
+        $actions[] = ['icon' => 'fa-users', 'color' => '#faad14', 'text' => '关注沉默用户召回，推送个性化活动推荐'];
+        $actions[] = ['icon' => 'fa-gift', 'color' => '#4facfe', 'text' => '商城订单稳定，可考虑上架新品提升兑换率'];
+        if ($todaySign < 10) {
+            $actions[] = ['icon' => 'fa-calendar', 'color' => '#ff9c6e', 'text' => '今日活动签到较少，建议增加活动宣传'];
+        }
+        $actions[] = ['icon' => 'fa-recycle', 'color' => '#43e97b', 'text' => '持续关注垃圾分类打卡质量，引导更多居民参与'];
+
         return [
             'update_time' => date('Y-m-d H:i:s'),
             'period' => '截至 ' . date('Y年n月j日'),
@@ -643,6 +659,7 @@ class AiWorkflowController extends AdminBaseController
             'week_growth' => $weekUserGrowth,
             'insights' => $insights,
             'trend_data' => $trendData,
+            'actions' => $actions,
         ];
     }
 

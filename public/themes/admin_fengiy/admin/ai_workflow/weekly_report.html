@@ -244,23 +244,7 @@
     <div class="insight-card" style="margin-top:16px;">
         <h4><i class="fa fa-tasks" style="color:#f5576c;"></i> 建议行动项</h4>
         <div id="actionItems">
-            <php>
-                $actions = [];
-                if ($report['week_growth'] < -10) {
-                    $actions[] = ['icon' => 'fa-bullhorn', 'color' => '#f56c6c', 'text' => '用户增长明显下滑，建议加强推送触达与外部引流'];
-                } elseif ($report['week_growth'] > 10) {
-                    $actions[] = ['icon' => 'fire', 'color' => '#67c23a', 'text' => '增长势头良好，可乘势上新活动扩大战果'];
-                } else {
-                    $actions[] = ['icon' => 'fa-balance-scale', 'color' => '#2D8CF0', 'text' => '用户增长平稳，建议优化活动质量提升留存'];
-                }
-                $actions[] = ['icon' => 'fa-users', 'color' => '#faad14', 'text' => '关注沉默用户召回，推送个性化活动推荐'];
-                $actions[] = ['icon' => 'fa-gift', 'color' => '#4facfe', 'text' => '商城订单稳定，可考虑上架新品提升兑换率'];
-                if (!empty($report['stats'][4]['value']) && $report['stats'][4]['value'] < 10) {
-                    $actions[] = ['icon' => 'fa-calendar', 'color' => '#ff9c6e', 'text' => '今日活动签到较少，建议增加活动宣传'];
-                }
-                $actions[] = ['icon' => 'fa-recycle', 'color' => '#43e97b', 'text' => '持续关注垃圾分类打卡质量，引导更多居民参与'];
-            </php>
-            <volist name="actions" item="action">
+            <volist name="report.actions" item="action">
             <div class="insight-item normal">
                 <i class="fa {$action.icon}" style="color:{$action.color};margin-right:6px;"></i>
                 {$action.text}
@@ -321,6 +305,15 @@ function updateReportUI(data) {
             </tr>`;
         });
         document.getElementById('trendBody').innerHTML = html;
+    }
+
+    // 更新行动建议
+    if (data.actions) {
+        let html = '';
+        data.actions.forEach(function(action) {
+            html += `<div class="insight-item normal"><i class="fa ${action.icon}" style="color:${action.color};margin-right:6px;"></i> ${action.text}</div>`;
+        });
+        document.getElementById('actionItems').innerHTML = html;
     }
 }
 </script>
