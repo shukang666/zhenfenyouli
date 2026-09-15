@@ -29,20 +29,6 @@ export default {
 		}
 		console.log('[care-gesture] onLoad - onPageScroll 已挂载')
 	},
-	onReady() {
-		// 检测 z-paging 并监听其滚动事件（z-paging 不触发 onPageScroll）
-		this.$nextTick(() => {
-			if (this.$refs.paging) {
-				console.log('[care-gesture] 检测到 z-paging，监听滚动事件')
-				// z-paging 通过 @scroll 事件传出 { scrollTop, ... }
-				this.$watch('$refs.paging', (val) => {
-					if (val) {
-						// 已就绪，通过事件监听
-					}
-				})
-			}
-		})
-	},
 	onShow() {
 		// 每次页面显示时重置为顶部状态
 		this.careGesture.isInTop = true
@@ -56,16 +42,6 @@ export default {
 				console.log('[care-gesture] scroll - scrollTop:', e.scrollTop, 'isInTop:', this.careGesture.isInTop)
 			} else {
 				console.log('[care-gesture] scroll - 事件无 scrollTop:', JSON.stringify(e))
-			}
-		},
-
-		// z-paging 滚动事件处理（在页面中 @scroll="onZPagingScroll" 绑定）
-		onZPagingScroll(e) {
-			const scrollTop = e && e.detail ? e.detail.scrollTop : (e && e.scrollTop)
-			console.log('[care-gesture] z-paging scroll - scrollTop:', scrollTop)
-			if (typeof scrollTop !== 'undefined') {
-				this.careGesture.isInTop = scrollTop <= 5
-				console.log('[care-gesture] z-paging scroll - isInTop:', this.careGesture.isInTop)
 			}
 		},
 
