@@ -168,7 +168,7 @@
 
     <!-- 关键指标 -->
     <div class="stat-grid" id="statGrid">
-        <volist name="report.stats" item="stat">
+        <volist name="report.stats" id="stat">
         <div class="stat-cell">
             <div class="stat-icon"><i class="fa {$stat.icon}"></i></div>
             <div class="stat-value">{$stat.value}</div>
@@ -194,7 +194,7 @@
     <div class="insight-card">
         <h4><i class="fa fa-lightbulb-o" style="color:#ffc107;"></i> 智能洞察</h4>
         <div id="insightsList">
-            <volist name="report.insights" item="ins">
+            <volist name="report.insights" id="ins">
             <div class="insight-item {$ins.type}">
                 <if condition="$ins.type eq 'positive'">
                     <i class="fa fa-check-circle"></i>
@@ -224,7 +224,7 @@
                     </tr>
                 </thead>
                 <tbody id="trendBody">
-                    <volist name="report.trend_data" item="td">
+                    <volist name="report.trend_data" id="td">
                     <tr>
                         <td>{$td.date}</td>
                         <td>{$td.clock}</td>
@@ -244,7 +244,7 @@
     <div class="insight-card" style="margin-top:16px;">
         <h4><i class="fa fa-tasks" style="color:#f5576c;"></i> 建议行动项</h4>
         <div id="actionItems">
-            <volist name="report.actions" item="action">
+            <volist name="report.actions" id="action">
             <div class="insight-item normal">
                 <i class="fa {$action.icon}" style="color:{$action.color};margin-right:6px;"></i>
                 {$action.text}
