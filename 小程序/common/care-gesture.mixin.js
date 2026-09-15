@@ -27,24 +27,35 @@ export default {
 			}
 			this.checkScrollTop(e)
 		}
+		console.log('[care-gesture] onLoad - onPageScroll 已挂载')
 	},
 	onShow() {
 		// 每次页面显示时重置为顶部状态
 		this.careGesture.isInTop = true
+		console.log('[care-gesture] onShow - isInTop 重置为 true')
 	},
 	methods: {
 		// 检查是否在页面顶部
 		checkScrollTop(e) {
 			if (e && typeof e.scrollTop !== 'undefined') {
+				const wasInTop = this.careGesture.isInTop
 				this.careGesture.isInTop = e.scrollTop <= 5
+				console.log('[care-gesture] scroll - scrollTop:', e.scrollTop, 'isInTop:', this.careGesture.isInTop)
+			} else {
+				console.log('[care-gesture] scroll - 事件无 scrollTop:', JSON.stringify(e))
 			}
 		},
 
 		// 触摸开始
 		onCareTouchStart(e) {
-			if (!this.careGesture.isInTop) return
+			console.log('[care-gesture] touchstart - isInTop:', this.careGesture.isInTop)
+			if (!this.careGesture.isInTop) {
+				console.log('[care-gesture] touchstart - 不在顶部，忽略')
+				return
+			}
 			this.careGesture.startY = e.touches[0].clientY
 			this.careGesture.startTime = Date.now()
+			console.log('[care-gesture] touchstart - 记录起点Y:', this.careGesture.startY)
 		},
 
 		// 触摸移动
@@ -60,6 +71,7 @@ export default {
 				this.carePullHeight = Math.min(diff * 0.5, 200)
 				this.careHintOpacity = Math.min(this.carePullHeight / 100, 1)
 				this.showCareHint = true
+				console.log('[care-gesture] touchmove - 下拉距离:', diff.toFixed(0), 'carePullHeight:', this.carePullHeight.toFixed(0), 'opacity:', this.careHintOpacity.toFixed(2))
 			} else {
 				this.resetCarePull()
 			}
@@ -76,7 +88,10 @@ export default {
 			const isLongPull = this.careGesture.pullDistance > this.careGesture.triggerHeight ||
 							   this.carePullHeight > 100
 
+			console.log('[care-gesture] touchend - pullDistance:', this.careGesture.pullDistance.toFixed(0), 'duration:', duration, 'isQuickSwipe:', isQuickSwipe, 'isLongPull:', isLongPull)
+
 			if (isQuickSwipe || isLongPull) {
+				console.log('[care-gesture] touchend - 触发关怀版！')
 				this.goToCareMode()
 			}
 
@@ -95,6 +110,7 @@ export default {
 
 		// 进入关怀版
 		goToCareMode() {
+			console.log('[care-gesture] goToCareMode - 跳转关怀版')
 			uni.vibrateShort({ success: () => {} })
 			this.$u.route('/pages/care/care')
 		}
