@@ -18,43 +18,37 @@ export default {
 			carePullHeight: 0
 		}
 	},
-	onLoad() {
-		// 始终包装 onPageScroll 以确保检测页面滚动位置
-		const originalOnPageScroll = this.$options.onPageScroll
-		this.$options.onPageScroll = (e) => {
-			if (originalOnPageScroll) {
-				originalOnPageScroll.call(this, e)
-			}
-			this.checkScrollTop(e)
-		}
-		console.log('[care-gesture] onLoad - onPageScroll 已挂载')
+	// 页面原生滚动生命周期 - 自动被 uni-app 调用
+	onPageScroll(e) {
+		this._updateScrollTop(e)
 	},
 	onShow() {
 		// 每次页面显示时重置为顶部状态
 		this.careGesture.isInTop = true
-		console.log('[care-gesture] onShow - isInTop 重置为 true')
 	},
 	methods: {
-		// 检查是否在页面顶部（供 onPageScroll 调用）
-		checkScrollTop(e) {
+		// 供 z-paging @scroll 事件绑定使用
+		// 使用方式：<z-paging @scroll="onZPagingScroll" ...>
+		onZPagingScroll(e) {
+			// z-paging 的 scroll 事件参数可能是 { scrollTop, scrollHeight, ... } 或 { detail: { scrollTop } }
+			const scrollTop = (e && e.scrollTop !== undefined) 
+				? e.scrollTop 
+				: (e && e.detail && e.detail.scrollTop !== undefined ? e.detail.scrollTop : 0)
+			this._updateScrollTop({ scrollTop })
+		},
+
+		// 内部方法：根据 scrollTop 更新 isInTop
+		_updateScrollTop(e) {
 			if (e && typeof e.scrollTop !== 'undefined') {
 				this.careGesture.isInTop = e.scrollTop <= 5
-				console.log('[care-gesture] scroll - scrollTop:', e.scrollTop, 'isInTop:', this.careGesture.isInTop)
-			} else {
-				console.log('[care-gesture] scroll - 事件无 scrollTop:', JSON.stringify(e))
 			}
 		},
 
 		// 触摸开始
 		onCareTouchStart(e) {
-			console.log('[care-gesture] touchstart - isInTop:', this.careGesture.isInTop)
-			if (!this.careGesture.isInTop) {
-				console.log('[care-gesture] touchstart - 不在顶部，忽略')
-				return
-			}
+			if (!this.careGesture.isInTop) return
 			this.careGesture.startY = e.touches[0].clientY
 			this.careGesture.startTime = Date.now()
-			console.log('[care-gesture] touchstart - 记录起点Y:', this.careGesture.startY)
 		},
 
 		// 触摸移动
@@ -70,7 +64,6 @@ export default {
 				this.carePullHeight = Math.min(diff * 0.5, 200)
 				this.careHintOpacity = Math.min(this.carePullHeight / 100, 1)
 				this.showCareHint = true
-				console.log('[care-gesture] touchmove - 下拉距离:', diff.toFixed(0), 'carePullHeight:', this.carePullHeight.toFixed(0), 'opacity:', this.careHintOpacity.toFixed(2))
 			} else {
 				this.resetCarePull()
 			}
@@ -87,10 +80,7 @@ export default {
 			const isLongPull = this.careGesture.pullDistance > this.careGesture.triggerHeight ||
 							   this.carePullHeight > 100
 
-			console.log('[care-gesture] touchend - pullDistance:', this.careGesture.pullDistance.toFixed(0), 'duration:', duration, 'isQuickSwipe:', isQuickSwipe, 'isLongPull:', isLongPull)
-
 			if (isQuickSwipe || isLongPull) {
-				console.log('[care-gesture] touchend - 触发关怀版！')
 				this.goToCareMode()
 			}
 
@@ -109,7 +99,6 @@ export default {
 
 		// 进入关怀版
 		goToCareMode() {
-			console.log('[care-gesture] goToCareMode - 跳转关怀版')
 			uni.vibrateShort({ success: () => {} })
 			this.$u.route('/pages/care/care')
 		}
