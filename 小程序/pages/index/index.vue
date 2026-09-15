@@ -10,7 +10,7 @@
 				<u-icon :name="carePullHeight > 100 ? 'arrow-up' : 'arrow-down'" size="28" color="#18AF38"></u-icon>
 			</view>
 		</view>
-		<z-paging ref='paging' v-model='dataList' @query='queryList' :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="currentTab === 1" :loading-more-enabled="false">
+		<z-paging ref='paging' v-model='dataList' @query='queryList' @scroll="onZPagingScroll" :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="currentTab === 1" :loading-more-enabled="false">
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
 				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'#ffffff'}" :border-bottom="false">
