@@ -1,5 +1,5 @@
 // 关怀版下拉手势 Mixin
-// 在页面顶部下拉时触发进入关怀版，类似微信滑出小程序效果
+// 仅在页面处于顶部时，下拉才触发进入关怀版
 export default {
 	data() {
 		return {
@@ -19,19 +19,23 @@ export default {
 		}
 	},
 	onLoad() {
-		// 当前页面滚动状态
-		if (typeof this.$options.onPageScroll === 'function') {
-			const originalOnPageScroll = this.$options.onPageScroll
-			this.$options.onPageScroll = (e) => {
+		// 始终包装 onPageScroll 以确保检测页面滚动位置
+		const originalOnPageScroll = this.$options.onPageScroll
+		this.$options.onPageScroll = (e) => {
+			if (originalOnPageScroll) {
 				originalOnPageScroll.call(this, e)
-				this.checkScrollTop(e)
 			}
+			this.checkScrollTop(e)
 		}
+	},
+	onShow() {
+		// 每次页面显示时重置为顶部状态
+		this.careGesture.isInTop = true
 	},
 	methods: {
 		// 检查是否在页面顶部
 		checkScrollTop(e) {
-			if (e) {
+			if (e && typeof e.scrollTop !== 'undefined') {
 				this.careGesture.isInTop = e.scrollTop <= 5
 			}
 		},
@@ -69,7 +73,7 @@ export default {
 			const endTime = Date.now()
 			const duration = endTime - this.careGesture.startTime
 			const isQuickSwipe = duration < 300 && this.careGesture.pullDistance > 50
-			const isLongPull = this.careGesture.pullDistance > this.careGesture.triggerHeight || 
+			const isLongPull = this.careGesture.pullDistance > this.careGesture.triggerHeight ||
 							   this.carePullHeight > 100
 
 			if (isQuickSwipe || isLongPull) {
