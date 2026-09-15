@@ -31,10 +31,10 @@
 			</swiper>
 		</view>
 
-		<!-- 本周推荐：banner 图下方活动推荐模块 -->
-		<view class="fb-weekly-rec" v-if="weekly_list.length > 0">
-			<view class="fb-weekly-header">
-				<text class="fb-weekly-title">本周推荐</text>
+		<!-- 本周推荐 -->
+		<view class="fb-section fb-weekly-rec" v-if="weekly_list.length > 0">
+			<view class="fb-section-header">
+				<text class="fb-section-title">本周推荐</text>
 			</view>
 			<scroll-view scroll-x class="fb-weekly-scroll" :show-scrollbar="false">
 				<view class="fb-weekly-list">
@@ -54,10 +54,10 @@
 		</view>
 
 		<!-- 每日浏览轻活动 -->
-		<view class="fb-light-act" v-if="light_list.length > 0">
-			<view class="fb-light-header">
-				<text class="fb-light-title">每日浏览轻活动</text>
-				<view class="fb-light-more" @click="goMoreLight">
+		<view class="fb-section fb-light-act" v-if="light_list.length > 0">
+			<view class="fb-section-header">
+				<text class="fb-section-title">每日浏览轻活动</text>
+				<view class="fb-section-more" @click="goMoreLight">
 					<text>更多</text>
 					<u-icon name="arrow-right" size="22" color="#999"></u-icon>
 				</view>
@@ -77,6 +77,33 @@
 					</view>
 				</view>
 			</view>
+		</view>
+
+		<!-- 近期线下活动 -->
+		<view class="fb-section fb-offline-act" v-if="offline_list.length > 0">
+			<view class="fb-section-header">
+				<text class="fb-section-title">近期线下活动</text>
+				<view class="fb-section-more" @click="goMoreOffline">
+					<text>更多</text>
+					<u-icon name="arrow-right" size="22" color="#999"></u-icon>
+				</view>
+			</view>
+			<scroll-view scroll-x class="fb-weekly-scroll" :show-scrollbar="false">
+				<view class="fb-weekly-list">
+					<view class="fb-weekly-card" v-for="item in offline_list" :key="item.id"
+						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
+						<view class="fb-weekly-cover">
+							<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+							<view class="fb-weekly-badge" v-if="item.address && item.address.trim()">
+								<u-icon name="map" size="20" color="#fff"></u-icon>
+								<text class="fb-weekly-badge-text">{{item.address}}</text>
+							</view>
+						</view>
+						<view class="fb-weekly-name u-line-1">{{item.name}}</view>
+						<view class="fb-weekly-date">{{item.date | date('yy-mm-dd')}}结束</view>
+					</view>
+				</view>
+			</scroll-view>
 		</view>
 
 		<!-- 5 大活动分类：左侧大卡 + 右侧2x2 -->
@@ -197,6 +224,7 @@
 				active_loading: false,
 				weekly_list: [],
 				light_list: [],
+				offline_list: [],
 				// 5 大活动分类（硬编码，后台新增不显示）
 				// community_cate_id 对应数据库 cmf_active_community_cate.id
 				main_categories: [
@@ -224,6 +252,7 @@
 						this.loadBanners(),
 						this.loadWeeklyRec(),
 						this.loadLightAct(),
+						this.loadOfflineAct(),
 						this.loadTags(),
 						this.loadHotActivities(),
 					])
@@ -267,6 +296,24 @@
 
 		// 轻活动"更多"跳转 → 活动主页（热门活动列表）
 		goMoreLight() {
+			this.$u.route({ type: 'switchTab', url: '/pages/low_carbon/low_carbon' })
+		},
+
+		// 加载线下活动（tag=线下活动，最多取 10 条）
+		loadOfflineAct() {
+			return this.$u.api.get_new_active_list({
+				tag: '线下活动',
+				page_size: 10,
+				page: 1
+			}).then(res => {
+				this.offline_list = res.data?.data || []
+			}).catch(() => {
+				this.offline_list = []
+			})
+		},
+
+		// 线下活动"更多"跳转 → 活动主页
+		goMoreOffline() {
 			this.$u.route({ type: 'switchTab', url: '/pages/low_carbon/low_carbon' })
 		},
 
@@ -640,21 +687,33 @@
 	color: #65676B;
 }
 
-/* ===== 本周推荐 ===== */
-.fb-weekly-rec {
-	padding: 16rpx 0 8rpx;
+/* ===== 通用板块 ===== */
+.fb-section {
+	margin: 24rpx 0;
 }
-.fb-weekly-header {
+.fb-section:first-child {
+	margin-top: 16rpx;
+}
+.fb-section-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: 0 24rpx 16rpx;
 }
-.fb-weekly-title {
+.fb-section-title {
 	font-size: 34rpx;
 	font-weight: 700;
 	color: #050505;
 }
+.fb-section-more {
+	display: flex;
+	align-items: center;
+	gap: 4rpx;
+	font-size: 26rpx;
+	color: #999;
+}
+
+/* ===== 本周推荐 ===== */
 .fb-weekly-scroll {
 	white-space: nowrap;
 	padding-bottom: 8rpx;
