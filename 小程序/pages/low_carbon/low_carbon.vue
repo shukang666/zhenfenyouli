@@ -31,6 +31,51 @@
 			</swiper>
 		</view>
 
+		<!-- 主题活动：7 个板块（5 大分类 + 2 个快捷入口） -->
+		<view class="fb-section fb-theme-act">
+			<view class="fb-section-header">
+				<text class="fb-section-title">主题活动</text>
+			</view>
+			<view class="fb-cate-wrap">
+				<!-- 左侧大竖卡（第1个：健康生活） -->
+				<view class="fb-cate-big" :style="{background: main_categories[0].bgColor}"
+					@click="gotoCateList(main_categories[0])">
+					<text class="fb-cate-big-emoji">{{main_categories[0].emoji}}</text>
+					<text class="fb-cate-big-name">{{main_categories[0].name}}</text>
+					<text class="fb-cate-big-sub">Healthy Life</text>
+				</view>
+				<!-- 右侧 2x2（第2-5个） -->
+				<view class="fb-cate-right">
+					<view class="fb-cate-mini" v-for="(cate, idx) in main_categories.slice(1)" :key="cate.id"
+						:style="{background: cate.bgColor}" @click="gotoCateList(cate)">
+						<text class="fb-cate-mini-emoji">{{cate.emoji}}</text>
+						<view class="fb-cate-mini-text">
+							<text class="fb-cate-mini-name">{{cate.name}}</text>
+							<text class="fb-cate-mini-sub">{{cate.subtitle}}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<!-- 2 个快捷入口 -->
+			<view class="fb-entry-row">
+				<view class="fb-entry-card fb-entry-lgfl" @click="gotoFlhd">
+					<view class="fb-entry-text">
+						<text class="fb-entry-title">垃圾分类</text>
+						<text class="fb-entry-sub">学习分类 · 拍照打卡</text>
+					</view>
+					<text class="fb-entry-arrow">›</text>
+				</view>
+				<view class="fb-entry-card fb-entry-qxl" @click="gotoQxl">
+					<view class="fb-entry-text">
+						<text class="fb-entry-title">爱护七贤岭</text>
+						<text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
+					</view>
+					<text class="fb-entry-arrow">›</text>
+				</view>
+			</view>
+		</view>
+
 		<!-- 本周推荐 -->
 		<view class="fb-section fb-weekly-rec" v-if="weekly_list.length > 0">
 			<view class="fb-section-header">
@@ -98,51 +143,6 @@
 							<text class="fb-recent-date">{{item.date | date('yy-mm-dd')}}结束</text>
 						</text>
 					</view>
-				</view>
-			</view>
-		</view>
-
-		<!-- 主题活动：7 个板块（5 大分类 + 2 个快捷入口） -->
-		<view class="fb-section fb-theme-act">
-			<view class="fb-section-header">
-				<text class="fb-section-title">主题活动</text>
-			</view>
-			<view class="fb-cate-wrap">
-				<!-- 左侧大竖卡（第1个：健康生活） -->
-				<view class="fb-cate-big" :style="{background: main_categories[0].bgColor}"
-					@click="gotoCateList(main_categories[0])">
-					<text class="fb-cate-big-emoji">{{main_categories[0].emoji}}</text>
-					<text class="fb-cate-big-name">{{main_categories[0].name}}</text>
-					<text class="fb-cate-big-sub">Healthy Life</text>
-				</view>
-				<!-- 右侧 2x2（第2-5个） -->
-				<view class="fb-cate-right">
-					<view class="fb-cate-mini" v-for="(cate, idx) in main_categories.slice(1)" :key="cate.id"
-						:style="{background: cate.bgColor}" @click="gotoCateList(cate)">
-						<text class="fb-cate-mini-emoji">{{cate.emoji}}</text>
-						<view class="fb-cate-mini-text">
-							<text class="fb-cate-mini-name">{{cate.name}}</text>
-							<text class="fb-cate-mini-sub">{{cate.subtitle}}</text>
-						</view>
-					</view>
-				</view>
-			</view>
-
-			<!-- 2 个快捷入口 -->
-			<view class="fb-entry-row">
-				<view class="fb-entry-card fb-entry-lgfl" @click="gotoFlhd">
-					<view class="fb-entry-text">
-						<text class="fb-entry-title">垃圾分类</text>
-						<text class="fb-entry-sub">学习分类 · 拍照打卡</text>
-					</view>
-					<text class="fb-entry-arrow">›</text>
-				</view>
-				<view class="fb-entry-card fb-entry-qxl" @click="gotoQxl">
-					<view class="fb-entry-text">
-						<text class="fb-entry-title">爱护七贤岭</text>
-						<text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
-					</view>
-					<text class="fb-entry-arrow">›</text>
 				</view>
 			</view>
 		</view>
