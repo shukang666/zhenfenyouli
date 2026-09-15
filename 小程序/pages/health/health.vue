@@ -1,5 +1,13 @@
 <template>
-	<view class="u-p-30">
+	<view class="u-p-30" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
+		
+		<!-- 关怀版下拉提示 -->
+		<view class="care-pull-layer" :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }" v-if="showCareHint">
+			<view class="care-pull-content">
+				<text class="care-pull-text">{{ carePullHeight > 100 ? '松开进入关怀版' : '下拉进入关怀版' }}</text>
+				<u-icon :name="carePullHeight > 100 ? 'arrow-up' : 'arrow-down'" size="28" color="#18AF38"></u-icon>
+			</view>
+		</view>
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="health"></skeleton-screen>
 		<u-navbar title-color="#fff" is-fixed :is-back="false" background="transparent" :borderBottom="false">
@@ -98,10 +106,12 @@
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
+	import careGesture from '@/common/care-gesture.mixin.js'
 	export default {
 		components: {
 			SkeletonScreen
 		},
+		mixins: [careGesture],
 		data() {
 			return {
 				isLoading: true,
@@ -204,5 +214,33 @@
 .content-text {
     white-space: pre-line;
     word-break: break-all;
+}
+
+/* 关怀版下拉提示层 */
+.care-pull-layer {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	background: linear-gradient(180deg, #E8F5EE 0%, rgba(232, 245, 238, 0.9) 100%);
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	padding-bottom: 16rpx;
+	z-index: 9998;
+	pointer-events: none;
+	
+	.care-pull-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8rpx;
+		
+		.care-pull-text {
+			font-size: 28rpx;
+			color: #18AF38;
+			font-weight: 500;
+		}
+	}
 }
 </style>

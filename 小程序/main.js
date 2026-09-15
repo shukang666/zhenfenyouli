@@ -33,7 +33,6 @@ Vue.use(httpApi, app)
 // 公共函数
 import globalFunc from '@/utils/common.js'
 Vue.use(globalFunc, app)
-
 // 腾讯位置信息
 // import qqmap from '@/utils/qqmap/index.js'
 // Vue.use(qqmap, app)

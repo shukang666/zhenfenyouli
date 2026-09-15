@@ -1,7 +1,15 @@
 <template>
-	<view class="container">
+	<view class="container" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="index"></skeleton-screen>
+		
+		<!-- 关怀版下拉提示 -->
+		<view class="care-pull-layer" :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }" v-if="showCareHint">
+			<view class="care-pull-content">
+				<text class="care-pull-text">{{ carePullHeight > 100 ? '松开进入关怀版' : '下拉进入关怀版' }}</text>
+				<u-icon :name="carePullHeight > 100 ? 'arrow-up' : 'arrow-down'" size="28" color="#18AF38"></u-icon>
+			</view>
+		</view>
 		<z-paging ref='paging' v-model='dataList' @query='queryList' :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="currentTab === 1" :loading-more-enabled="false">
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
@@ -138,10 +146,12 @@
 
 <script>
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
+	import careGesture from '@/common/care-gesture.mixin.js'
 	export default {
 		components: {
 			SkeletonScreen
 		},
+		mixins: [careGesture],
 		data() {
 			return {
 				isLoading: true,
@@ -544,6 +554,34 @@
 	.container {
 		min-height: 100vh;
 		background: #F5F6F8;
+	}
+
+	/* 关怀版下拉提示层 */
+	.care-pull-layer {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		background: linear-gradient(180deg, #E8F5EE 0%, rgba(232, 245, 238, 0.9) 100%);
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+		padding-bottom: 16rpx;
+		z-index: 9998;
+		pointer-events: none;
+		
+		.care-pull-content {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 8rpx;
+			
+			.care-pull-text {
+				font-size: 28rpx;
+				color: #18AF38;
+				font-weight: 500;
+			}
+		}
 	}
 
 	/* 活动搜索 + 扫码入口：与下方 Banner 同宽（左右 30rpx 留白）、同圆角(24rpx) */

@@ -23,6 +23,12 @@
 				"navigationStyle": "custom"
 			}
 		}, {
+			"path": "pages/care/care",
+			"style": {
+				"navigationBarTitleText": "关怀版",
+				"navigationStyle": "custom"
+			}
+		}, {
 			"path": "pages/user/info",
 			"style": {
 				"navigationBarTitleText": "完善信息"
