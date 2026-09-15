@@ -1,13 +1,12 @@
 <template>
 	<view class="care-page">
-		<!-- 顶部区域：绿色大背景 -->
+		<!-- 顶部导航：uView 标准 navbar -->
+		<u-navbar :is-back="true" back-text="返回" title="关怀版" title-color="#fff"
+			:background="{ background: '#18AF38' }" :border-bottom="false"
+			@back="goBack"></u-navbar>
+
+		<!-- 问候信息区 -->
 		<view class="care-header">
-			<!-- 返回按钮：左上角醒目 -->
-			<view class="care-back" @click="goBack">
-				<u-icon name="arrow-left" size="40" color="#fff"></u-icon>
-				<text>返回</text>
-			</view>
-			<!-- 问候信息 -->
 			<view class="care-greeting">
 				<text class="care-greeting-text">{{ greeting }}</text>
 				<text class="care-greeting-name">，{{ nickname }}</text>
@@ -40,8 +39,6 @@
 				<u-icon name="photo-fill" size="40" color="#18AF38"></u-icon>
 				<text>垃圾分类打卡</text>
 			</view>
-			<view class="card-tip">拍照上传您的垃圾分类成果</view>
-			<view class="card-count">今日已打卡 <text class="count-num">{{ clockTodayCount }}</text> 次</view>
 			<view class="care-btn" @click="goClock">
 				<text class="care-btn-text">去打卡</text>
 			</view>
@@ -77,7 +74,7 @@
 					<u-icon name="arrow-right" size="28" color="#ccc"></u-icon>
 				</view>
 				<view class="quick-row" @click="goRank">
-					<u-icon name="level-fill" size="36" color="#18AF38"></u-icon>
+					<u-icon name="list-dot" size="36" color="#18AF38"></u-icon>
 					<text class="quick-name">排行榜</text>
 					<u-icon name="arrow-right" size="28" color="#ccc"></u-icon>
 				</view>
@@ -237,29 +234,12 @@
 	padding: 0 24rpx 40rpx;
 }
 
-/* 顶部区域：绿色大背景 */
+/* 问候信息区（绿色卡片） */
 .care-header {
-	background: linear-gradient(135deg, #18AF38 0%, #128a2e 100%);
-	border-radius: 0 0 32rpx 32rpx;
-	padding: 24rpx 28rpx 36rpx;
-	margin: 0 -24rpx 24rpx;
-	
-	/* 返回按钮 */
-	.care-back {
-		display: inline-flex;
-		align-items: center;
-		gap: 8rpx;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 32rpx;
-		padding: 12rpx 28rpx 12rpx 20rpx;
-		margin-bottom: 24rpx;
-		
-		text {
-			font-size: 32rpx;
-			color: #fff;
-			font-weight: 500;
-		}
-	}
+	background: #18AF38;
+	border-radius: 24rpx;
+	padding: 32rpx 28rpx 36rpx;
+	margin-bottom: 24rpx;
 	
 	/* 问候信息 */
 	.care-greeting {
@@ -301,24 +281,6 @@
 		margin-bottom: 20rpx;
 	}
 	
-	.card-tip {
-		font-size: 28rpx;
-		color: #666;
-		margin-bottom: 12rpx;
-	}
-	
-	.card-count {
-		font-size: 26rpx;
-		color: #999;
-		margin-bottom: 24rpx;
-		
-		.count-num {
-			font-size: 32rpx;
-			font-weight: 600;
-			color: #18AF38;
-			margin: 0 4rpx;
-		}
-	}
 }
 
 /* 签到 */
