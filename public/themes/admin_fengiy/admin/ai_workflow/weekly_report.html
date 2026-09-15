@@ -182,9 +182,9 @@
         <h4><i class="fa fa-user-plus" style="color:#2D8CF0;"></i> 本周用户增长</h4>
         <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px;">
             <span style="font-size:32px;font-weight:700;color:#333;">{$report.stats.1.value}</span>
-            <span class="growth-badge {$report.week_growth >= 0?'up':'down'}" id="growthBadge">
-                <i class="fa {$report.week_growth >= 0?'fa-arrow-up':'fa-arrow-down'}"></i>
-                {abs($report.week_growth)}%
+            <span class="growth-badge {if $report.week_growth >= 0}up{else/}down{/if}" id="growthBadge">
+                <i class="fa {if $report.week_growth >= 0}fa-arrow-up{else/}fa-arrow-down{/if}"></i>
+                {:abs($report.week_growth)}%
             </span>
             <span style="color:#999;font-size:13px;">环比上周</span>
         </div>
