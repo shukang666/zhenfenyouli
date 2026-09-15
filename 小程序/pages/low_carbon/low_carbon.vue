@@ -62,16 +62,17 @@
 					<u-icon name="arrow-right" size="22" color="#999"></u-icon>
 				</view>
 			</view>
-			<view class="fb-light-list">
-				<view class="fb-light-item" v-for="item in light_list" :key="item.id">
-					<view class="fb-light-icon">
+			<view class="fb-light-grid">
+				<view class="fb-light-card" v-for="item in light_list" :key="item.id"
+					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
+					<view class="fb-light-cover">
 						<u-image width="100%" height="100%" :src="item.thumb || '/static/images/default-avatar.png'" mode="aspectFill"></u-image>
 					</view>
 					<view class="fb-light-info">
 						<text class="fb-light-name u-line-1">{{item.name}}</text>
-						<text class="fb-light-sub u-line-1">现在就能参与</text>
+						<text class="fb-light-sub">现在就能参与</text>
 					</view>
-					<view class="fb-light-btn" @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
+					<view class="fb-light-btn">
 						<text class="fb-light-btn-text">立即参与</text>
 					</view>
 				</view>
@@ -726,63 +727,55 @@
 	font-size: 26rpx;
 	color: #999;
 }
-.fb-light-list {
+.fb-light-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: 16rpx;
+}
+.fb-light-card {
 	display: flex;
 	flex-direction: column;
-	gap: 16rpx;
-}
-.fb-light-item {
-	display: flex;
-	align-items: center;
 	background: #fff;
 	border-radius: 16rpx;
-	padding: 16rpx;
+	overflow: hidden;
 	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.06);
 	border: 1rpx solid #E4E6EB;
-	gap: 16rpx;
 }
-.fb-light-item:active {
+.fb-light-card:active {
 	opacity: 0.92;
 }
-.fb-light-icon {
-	flex-shrink: 0;
-	width: 100rpx;
-	height: 100rpx;
-	border-radius: 12rpx;
-	overflow: hidden;
+.fb-light-cover {
+	width: 100%;
+	height: 200rpx;
 	background: #F0F2F5;
 }
 .fb-light-info {
-	flex: 1;
-	min-width: 0;
+	padding: 12rpx 16rpx 8rpx;
 	display: flex;
 	flex-direction: column;
-	gap: 6rpx;
+	gap: 4rpx;
 }
 .fb-light-name {
-	font-size: 28rpx;
+	font-size: 26rpx;
 	font-weight: 600;
 	color: #050505;
 	line-height: 1.4;
 }
 .fb-light-sub {
-	font-size: 24rpx;
+	font-size: 22rpx;
 	color: #65676B;
 }
 .fb-light-btn {
-	flex-shrink: 0;
-	padding: 10rpx 24rpx;
+	margin: 0 16rpx 16rpx;
+	padding: 10rpx 0;
+	text-align: center;
 	background: linear-gradient(135deg, #34C759 0%, #28A745 100%);
 	border-radius: 20rpx;
-}
-.fb-light-btn:active {
-	opacity: 0.8;
 }
 .fb-light-btn-text {
 	font-size: 24rpx;
 	color: #fff;
 	font-weight: 600;
-	white-space: nowrap;
 }
 
 /* ===== 活动列表 ===== */
