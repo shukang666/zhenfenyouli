@@ -98,19 +98,18 @@
 
 <script>
 	export default {
-		data() {
-			return {
-				signStatus: {
-					today_signed: false,
-					continue_days: 0
-				},
-				clockTodayCount: 0,
-				userInfo: {},
-				nickname: '',
-				greeting: '',
-				dateText: ''
-			}
-		},
+	data() {
+		return {
+			signStatus: {
+				today_signed: false,
+				continue_days: 0
+			},
+			clockTodayCount: 0,
+			nickname: '',
+			greeting: '',
+			dateText: ''
+		}
+	},
 		onLoad() {
 			this.setGreeting()
 			this.getUserInfo()
@@ -136,7 +135,6 @@
 
 			getUserInfo() {
 				this.$u.api.getUserInfo().then(res => {
-					this.userInfo = res.data
 					this.nickname = res.data.nickname || res.data.user_nickname || '环保达人'
 				}).catch(() => {
 					this.nickname = '环保达人'
