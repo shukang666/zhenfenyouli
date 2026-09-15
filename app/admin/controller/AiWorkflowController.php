@@ -507,7 +507,7 @@ class AiWorkflowController extends AdminBaseController
         $activeCount = count($activeUserIds);
 
         // 检查是否有积分记录来判断是否完成过任务
-        $pointUserIds = Db::name('user_account_log')->where('account_time', '>=', $ago30)->where('change_amount', '>', 0)->group('user_id')->column('user_id');
+        $pointUserIds = Db::name('user_account_log')->where('create_time', '>=', $ago30)->where('change_amount', '>', 0)->group('user_id')->column('user_id');
         $pointCount = count($pointUserIds);
 
         // 新用户（7天内注册）
