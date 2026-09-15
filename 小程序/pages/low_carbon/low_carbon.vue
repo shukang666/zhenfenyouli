@@ -289,10 +289,10 @@
 				this.$u.route(`/pages/activity/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name)}`)
 			},
 
-			// 垃圾分类入口
-			gotoFlhd() {
-				this.$u.route('/pages/flhd/ljfldk')
-			},
+		// 垃圾分类入口 → 低碳生活二级页面（含垃圾分类、自治活动、社交活动）
+		gotoFlhd() {
+			this.$u.route('/pages/dtsh/dtsh')
+		},
 
 			// 爱护七贤岭入口
 			gotoQxl() {
