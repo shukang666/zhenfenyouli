@@ -1,0 +1,309 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .copywriting-page .form-section {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .copywriting-page .result-section {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 20px;
+    }
+    .copywriting-page .copy-item {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 16px;
+        margin-bottom: 12px;
+        position: relative;
+    }
+    .copywriting-page .copy-item .copy-label {
+        font-size: 12px;
+        color: #2D8CF0;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .copywriting-page .copy-item .copy-text {
+        font-size: 14px;
+        line-height: 1.8;
+        color: #333;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+    .copywriting-page .copy-item .copy-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 12px;
+        padding: 4px 10px;
+    }
+    .copywriting-page .style-label {
+        display: inline-block;
+        background: #e1f5fe;
+        color: #0277bd;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        margin-right: 6px;
+    }
+    .copywriting-page .tips-box {
+        background: #fff8e1;
+        border-left: 3px solid #ffc107;
+        padding: 10px 14px;
+        border-radius: 0 4px 4px 0;
+        margin-top: 12px;
+        font-size: 13px;
+        color: #856404;
+    }
+    .copywriting-page .tab-buttons {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .copywriting-page .tab-buttons button {
+        padding: 8px 20px;
+        border: 1px solid #d9d9d9;
+        background: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .copywriting-page .tab-buttons button:hover {
+        border-color: #2D8CF0;
+        color: #2D8CF0;
+    }
+    .copywriting-page .tab-buttons button.active {
+        background: #2D8CF0;
+        color: #fff;
+        border-color: #2D8CF0;
+    }
+    .copywriting-page .loading-spinner {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+    .copywriting-page .loading-spinner i {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+</style>
+
+<div class="wrap copywriting-page">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">AI 工作流</a></li>
+        <li class="active"><a href="{:url('copywriting')}">AI 文案工坊</a></li>
+        <li><a href="{:url('dataChat')}">数据问答</a></li>
+        <li><a href="{:url('contentAudit')}">内容审核</a></li>
+        <li><a href="{:url('userSegment')}">用户分群</a></li>
+        <li><a href="{:url('weeklyReport')}">运营简报</a></li>
+    </ul>
+
+    <div class="row" style="margin-top: 20px;">
+        <!-- 左侧表单 -->
+        <div class="col-md-5">
+            <div class="form-section">
+                <h4 style="margin: 0 0 16px 0; font-size: 15px; color: #333;">
+                    <i class="fa fa-sliders" style="color:#2D8CF0;"></i> 文案参数配置
+                </h4>
+
+                <div class="form-group">
+                    <label>文案类型</label>
+                    <div class="tab-buttons">
+                        <button type="button" class="active" data-type="title">活动标题</button>
+                        <button type="button" data-type="detail">活动详情</button>
+                        <button type="button" data-type="notice">首页通知</button>
+                        <button type="button" data-type="push">推送消息</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>活动类型</label>
+                    <select class="form-control" id="activity_type">
+                        <option value="garbage">垃圾分类</option>
+                        <option value="health">健康知识</option>
+                        <option value="environment">环保公益</option>
+                        <option value="volunteer">志愿服务</option>
+                        <option value="learning">学习答题</option>
+                        <option value="lottery">抽奖活动</option>
+                        <option value="survey">问卷调查</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>活动主题 <span style="color:#f56c6c">*</span></label>
+                    <input type="text" class="form-control" id="theme" placeholder="如：变废为宝、绿色生活30天等">
+                </div>
+
+                <div class="form-group">
+                    <label>目标人群</label>
+                    <input type="text" class="form-control" id="target_audience" value="全体居民" placeholder="如：青少年、老年人、家庭主妇等">
+                </div>
+
+                <div class="form-group" id="tone_group">
+                    <label>语气风格</label>
+                    <div class="tab-buttons">
+                        <button type="button" class="active" data-tone="warm">温暖亲切</button>
+                        <button type="button" data-tone="formal">正式严谨</button>
+                        <button type="button" data-tone="fun">活泼有趣</button>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-block" id="generateBtn" onclick="generateCopy()">
+                    <i class="fa fa-magic"></i> 一键生成文案
+                </button>
+            </div>
+        </div>
+
+        <!-- 右侧结果 -->
+        <div class="col-md-7">
+            <div class="result-section">
+                <h4 style="margin: 0 0 16px 0; font-size: 15px; color: #333;">
+                    <i class="fa fa-file-text-o" style="color:#19be6b;"></i> 生成结果
+                </h4>
+
+                <div id="resultArea">
+                    <div style="text-align: center; padding: 60px 20px; color: #bbb;">
+                        <i class="fa fa-magic" style="font-size: 40px; display: block; margin-bottom: 16px;"></i>
+                        <p>配置参数后点击「一键生成文案」</p>
+                        <p style="font-size: 12px;">基于智能模板引擎，一键生成多种风格文案</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+let currentType = 'title';
+let currentTone = 'warm';
+
+// 文案类型切换
+document.querySelectorAll('[data-type]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-type]').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentType = this.dataset.type;
+        // 通知类型和推送消息不需要语气选择
+        const toneGroup = document.getElementById('tone_group');
+        if (currentType === 'notice' || currentType === 'push') {
+            toneGroup.style.opacity = '0.5';
+        } else {
+            toneGroup.style.opacity = '1';
+        }
+    });
+});
+
+// 语气风格切换
+document.querySelectorAll('[data-tone]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-tone]').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentTone = this.dataset.tone;
+    });
+});
+
+function generateCopy() {
+    const theme = document.getElementById('theme').value.trim();
+    if (!theme) {
+        layer.msg('请输入活动主题', {icon: 2});
+        return;
+    }
+
+    const activityType = document.getElementById('activity_type').value;
+    const targetAudience = document.getElementById('target_audience').value.trim() || '全体居民';
+
+    const resultArea = document.getElementById('resultArea');
+    resultArea.innerHTML = `
+        <div class="loading-spinner">
+            <i class="fa fa-spinner fa-spin"></i>
+            <p>AI 正在生成文案...</p>
+        </div>
+    `;
+
+    $.ajax({
+        url: "{:url('generateCopy')}",
+        type: 'POST',
+        data: {
+            type: currentType,
+            activity_type: activityType,
+            theme: theme,
+            target_audience: targetAudience,
+            tone: currentTone,
+        },
+        dataType: 'json',
+        success: function(res) {
+            if (res.code === 1) {
+                renderResult(res.data);
+            } else {
+                resultArea.innerHTML = `<p style="color:#f56c6c;text-align:center;">${res.msg}</p>`;
+            }
+        },
+        error: function() {
+            resultArea.innerHTML = `<p style="color:#f56c6c;text-align:center;">请求失败，请重试</p>`;
+        }
+    });
+}
+
+function renderResult(data) {
+    const resultArea = document.getElementById('resultArea');
+    let html = '';
+
+    if (data.items && data.items.length > 0) {
+        data.items.forEach(function(item, idx) {
+            const label = item.label || item.style || '版本 ' + (idx + 1);
+            const styleLabel = item.style ? `<span class="style-label">${item.style}</span>` : '';
+            html += `
+                <div class="copy-item">
+                    <div class="copy-label">${styleLabel}${label}</div>
+                    <div class="copy-text">${escapeHtml(item.text)}</div>
+                    <button class="btn btn-xs btn-info copy-btn" data-text="${escapeHtml(item.text).replace(/"/g, '&quot;')}">
+                        <i class="fa fa-copy"></i> 复制
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    if (data.tips) {
+        html += `<div class="tips-box"><i class="fa fa-lightbulb-o"></i> ${data.tips}</div>`;
+    }
+
+    resultArea.innerHTML = html;
+
+    // 绑定复制事件
+    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const text = this.dataset.text.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+            navigator.clipboard.writeText(text).then(function() {
+                layer.msg('已复制到剪贴板', {icon: 1});
+            }).catch(function() {
+                // 降级方案
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                layer.msg('已复制到剪贴板', {icon: 1});
+            });
+        });
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+</body>
+</html>

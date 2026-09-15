@@ -2,193 +2,180 @@
 </head>
 <body>
 <style>
-    .ai-doc .panel-heading {
+    .ai-workflow .tool-card {
+        display: block;
+        padding: 24px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: inherit;
+        margin-bottom: 16px;
+        height: 100%;
+    }
+    .ai-workflow .tool-card:hover {
+        border-color: #2D8CF0;
+        box-shadow: 0 4px 12px rgba(45, 140, 240, 0.15);
+        transform: translateY(-2px);
+        text-decoration: none;
+        color: inherit;
+    }
+    .ai-workflow .tool-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        margin-bottom: 12px;
+        color: #fff;
+    }
+    .ai-workflow .tool-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    .ai-workflow .tool-desc {
+        font-size: 13px;
+        color: #888;
+        line-height: 1.6;
+    }
+    .ai-workflow .tool-tag {
+        display: inline-block;
+        font-size: 12px;
+        color: #2D8CF0;
+        background: #e6f7ff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-top: 8px;
+    }
+    .ai-workflow .welcome-section {
+        background: linear-gradient(135deg, #2D8CF0 0%, #19be6b 100%);
+        color: #fff;
+        padding: 32px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+    .ai-workflow .welcome-section h2 {
+        margin: 0 0 8px 0;
+        font-size: 22px;
+    }
+    .ai-workflow .welcome-section p {
+        margin: 0;
+        opacity: 0.9;
         font-size: 14px;
     }
-
-    .ai-doc .panel-heading i {
-        margin-right: 5px;
-    }
-
-    .ai-doc p {
-        line-height: 24px;
-        color: #555;
-        margin-bottom: 10px;
-    }
-
-    .ai-doc .ai-scene {
-        line-height: 24px;
-        color: #555;
-        padding: 8px 0 8px 0;
-        border-bottom: 1px dashed #eee;
-    }
-
-    .ai-doc .ai-scene:last-child {
-        border-bottom: none;
-    }
-
-    .ai-doc .ai-scene b {
-        color: #333;
-    }
-
-    .ai-doc .ai-tag {
-        margin-left: 6px;
-    }
-
-    .ai-doc .ai-note {
-        font-size: 12px;
-        line-height: 22px;
-        color: #999;
-    }
-
-    .ai-doc ol,
-    .ai-doc ul {
-        padding-left: 22px;
-    }
-
-    .ai-doc ol li,
-    .ai-doc ul li {
-        line-height: 24px;
-        color: #555;
-        margin-bottom: 4px;
-    }
 </style>
-<div class="wrap ai-doc">
+
+<div class="wrap ai-workflow">
     <ul class="nav nav-tabs">
         <li class="active"><a href="{:url('index')}">AI 工作流</a></li>
+        <li><a href="{:url('copywriting')}">AI 文案工坊</a></li>
+        <li><a href="{:url('dataChat')}">数据问答</a></li>
+        <li><a href="{:url('contentAudit')}">内容审核</a></li>
+        <li><a href="{:url('userSegment')}">用户分群</a></li>
+        <li><a href="{:url('weeklyReport')}">运营简报</a></li>
     </ul>
 
-    <!-- ================= 1. 页面说明 ================= -->
+    <!-- 欢迎区域 -->
+    <div class="welcome-section">
+        <h2><i class="fa fa-magic"></i> AI 智能工作台</h2>
+        <p>基于系统数据与 AI 能力，为您提供智能化的运营辅助工具，让日常工作更高效</p>
+    </div>
+
+    <!-- 工具卡片网格 -->
+    <div class="row">
+        <div class="col-md-4">
+            <a href="{:url('copywriting')}" class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fa fa-pencil-square-o"></i>
+                </div>
+                <div class="tool-title">AI 文案工坊</div>
+                <div class="tool-desc">输入活动主题，智能生成活动标题、详情文案、首页通知、推送消息等多种运营文案</div>
+                <span class="tool-tag">立即使用 →</span>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{:url('dataChat')}" class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <i class="fa fa-comments-o"></i>
+                </div>
+                <div class="tool-title">数据问答</div>
+                <div class="tool-desc">用自然语言提问，快速获取系统统计数据，无需手动查询数据库</div>
+                <span class="tool-tag">立即使用 →</span>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{:url('contentAudit')}" class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <i class="fa fa-shield"></i>
+                </div>
+                <div class="tool-title">内容审核助手</div>
+                <div class="tool-desc">智能检测文本中的广告引流、敏感词、联系方式等内容风险</div>
+                <span class="tool-tag">立即使用 →</span>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{:url('userSegment')}" class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <i class="fa fa-users"></i>
+                </div>
+                <div class="tool-title">用户分群分析</div>
+                <div class="tool-desc">根据用户行为自动分群，给出触达建议和运营策略</div>
+                <span class="tool-tag">立即使用 →</span>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{:url('weeklyReport')}" class="tool-card">
+                <div class="tool-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <i class="fa fa-line-chart"></i>
+                </div>
+                <div class="tool-title">运营简报</div>
+                <div class="tool-desc">自动生成数据概览、趋势解读与洞察建议，辅助运营决策</div>
+                <span class="tool-tag">立即使用 →</span>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="javascript:void(0)" class="tool-card" onclick="layer.alert('即将上线：垃圾照片智能分类<br>基于图像识别技术自动分类居民上传的垃圾照片', {title:'敬请期待'})">
+                <div class="tool-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #888;">
+                    <i class="fa fa-camera"></i>
+                </div>
+                <div class="tool-title">垃圾照片识别 <span class="label label-default">即将上线</span></div>
+                <div class="tool-desc">基于图像识别技术，自动判断垃圾照片是否规范</div>
+                <span class="tool-tag" style="background:#f5f5f5;color:#999;">敬请期待</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 使用说明 -->
     <div class="panel panel-default margin-top-20">
         <div class="panel-heading">
-            <i class="fa fa-magic" style="color:#2D8CF0;"></i>这个页面现在是什么
+            <i class="fa fa-info-circle" style="color:#2D8CF0;"></i>使用说明
         </div>
-        <div class="panel-body">
-            <p>
-                这是一个<b>预留的空白页</b>：还没有接入任何 AI 能力，也没有读写后台的业务数据。
-                放在这里的目的，是先把"AI 到底能帮这套系统做哪些事"写清楚，等具体场景定下来，
-                再一个模块一个模块地在这里落地，避免上来就接模型、结果做出一堆用不上的功能。
-            </p>
-            <p>
-                下面列的场景，全部基于系统里已有的数据来设想 —— 垃圾分类打卡的照片与积分、
-                社区活动和报名记录、积分商城的商品与订单、用户与小区信息、论坛帖子和评论、
-                以及后台首页那块数据看板。凡是需要"人反复看、反复判断"的地方，都是 AI 可以用得上的地方。
-            </p>
-            <div class="ai-note">
-                说明：本页只是规划记录，不产生任何实际操作。想看代码里已经在跑的算法（比如打卡照片查重），
-                去左侧菜单的「算法中心」。
+        <div class="panel-body" style="line-height: 24px; color: #555;">
+            <p><b>💡 关于 AI 工作流</b></p>
+            <ul style="padding-left: 22px;">
+                <li><b>AI 文案工坊</b>：基于模板引擎，结合活动类型与主题自动生成多风格文案，人工确认后使用</li>
+                <li><b>数据问答</b>：基于自然语言识别查询意图，从数据库实时获取统计结果</li>
+                <li><b>内容审核</b>：基于规则引擎检测文本违规内容，作为初筛参考</li>
+                <li><b>用户分群</b>：根据用户行为数据统计分群，提供运营建议</li>
+                <li><b>运营简报</b>：汇总关键指标，自动解读变化趋势，辅助运营决策</li>
+            </ul>
+            <div style="background: #f0f9eb; border-left: 3px solid #67c23a; padding: 10px 16px; margin-top: 10px; border-radius: 0 4px 4px 0;">
+                <i class="fa fa-lightbulb-o" style="color:#67c23a;"></i> 
+                <b style="color:#67c23a;">提示：</b>所有 AI 功能均为辅助工具，最终决策与发布前请人工确认。
             </div>
         </div>
     </div>
-
-    <!-- ================= 2. 可以做什么 ================= -->
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <i class="fa fa-list-ul" style="color:#95DE64;"></i>可以做哪些事
-        </div>
-        <div class="panel-body">
-
-            <div class="ai-scene">
-                <b>1. 垃圾打卡的自动审核</b>
-                <span class="label label-success ai-tag">优先</span>
-                <div>
-                    打卡照片现在是人工一张张看，量一大就容易漏、也没法保证口径一致。可以让模型帮忙先过一遍：
-                    照片里是不是真的有垃圾桶或垃圾、有没有明显不是投放场景的图、标了"可回收物"但画面明显对不上、
-                    以及和该用户近期照片是不是高度相似。判定可疑的先打上标记进待审队列，
-                    督导员只处理这些可疑的和边界情况，剩下的直接放过。
-                </div>
-            </div>
-
-            <div class="ai-scene">
-                <b>2. 拍照识别垃圾属于哪一类</b>
-                <span class="label label-success ai-tag">优先</span>
-                <div>
-                    居民在学习和打卡时，拍一张照片就知道这是什么垃圾、该投哪个桶，顺带回答
-                    "这个要不要洗干净再扔""大骨头算不算厨余"这类高频疑问。
-                    可以减少居民因为分不清类型而放弃参与，也能减轻后台答疑的压力。
-                </div>
-            </div>
-
-            <div class="ai-scene">
-                <b>3. 内容审核（帖子、评论、反馈、入驻资料）</b>
-                <div>
-                    论坛帖子、评论、活动反馈、商家入驻提交的资料，先让 AI 过滤一遍：
-                    广告引流、辱骂攻击、与业务无关的灌水、明显不合规的内容，直接拦下来进待审列表，
-                    人工只看判不准的部分。现在这些内容完全靠人巡检，漏审和延迟都比较常见。
-                </div>
-            </div>
-
-            <div class="ai-scene">
-                <b>4. 运营文案与素材的初稿</b>
-                <div>
-                    活动标题和活动详情、首页通知走马灯、推送给居民的消息、问卷的题目和选项、
-                    活动海报上的文案 —— 这些都可以先出一版草稿，运营在上面改，
-                    比从空白开始写快得多。注意只能是草稿，最终发布前必须人工确认。
-                </div>
-            </div>
-
-            <div class="ai-scene">
-                <b>5. 数据解读和异常预警</b>
-                <div>
-                    首页看板现在只给数字，不给解释。可以让它每周自动出一段运营简报：
-                    本周打卡量比上周变化多少、哪几个小区活跃度在掉、哪个活动报名多但签到少。
-                    同时盯异常：短时间内大量刷分、积分变动异常、某个小区打卡量突然断崖式下跌，
-                    这种先推给管理员看，而不是等月底对账才发现。
-                </div>
-            </div>
-
-            <div class="ai-scene">
-                <b>6. 用户运营</b>
-                <div>
-                    按行为把用户分群（长期活跃、注册了但不打卡、只领券不参与活动、临近流失），
-                    针对每类人给出触达建议；也可以给居民推荐他更可能参加的活动、更可能兑换的商品。
-                </div>
-            </div>
-
-            <div class="ai-scene">
-                <b>7. 后台自己的效率工具</b>
-                <div>
-                    用一句自然语言问数据，不用再找人写 SQL（比如"上个月某个小区的打卡人数和活跃人数"）；
-                    把后台里固定的几步重复操作串成一次性完成的工作流。这类功能受益的是我们自己，见效最直接。
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ================= 3. 动手之前要先定的事 ================= -->
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <i class="fa fa-exclamation-circle" style="color:#FF9900;"></i>动手之前要先想清楚的事
-        </div>
-        <div class="panel-body">
-            <ol>
-                <li>
-                    <b>模型和成本</b>：调用大模型是按量计费的，先估清楚每天大概多少次调用、一个月多少钱，
-                    再决定哪些环节值得用。像图片查重、图片分类这类任务，能用小模型或传统算法解决的，
-                    就不必送给大模型。
-                </li>
-                <li>
-                    <b>数据合规</b>：打卡照片、手机号、小区住址都属于个人信息。送外部接口之前要确认是否脱敏、
-                    是否允许出服务器，最好在用户协议和隐私说明里写清楚用途。这一条不是技术问题，
-                    但决定了哪些功能能不能做。
-                </li>
-                <li>
-                    <b>必须留人工兜底</b>：AI 只做"建议"和"初筛"。删除打卡、扣除积分、封禁用户、
-                    审核通过这类会产生实际后果的动作，一律要人工确认。现有规则也是这个思路 ——
-                    删除打卡强制填原因、同时扣回积分，责任链路是清楚的。
-                </li>
-                <li>
-                    <b>先做看得见效果的</b>：建议的顺序是「打卡照片自动审核 → 拍照识别垃圾 →
-                    内容审核 → 运营文案 → 数据简报」，前面两项能直接减少人工投入，也最容易和居民解释。
-                </li>
-            </ol>
-            <div class="ai-note margin-top-10">
-                想到新的场景、或者哪一条要调整优先级，直接补充到这份清单里再动手。
-            </div>
-        </div>
-    </div>
-
 </div>
+<script src="__STATIC__/js/admin.js"></script>
 </body>
 </html>

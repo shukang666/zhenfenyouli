@@ -1,0 +1,328 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .report-page .report-header {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+    }
+    .report-page .report-header h2 {
+        margin: 0 0 8px 0;
+        font-size: 20px;
+        color: #333;
+    }
+    .report-page .report-header .period {
+        font-size: 13px;
+        color: #999;
+    }
+    .report-page .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .report-page .stat-cell {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+    }
+    .report-page .stat-cell .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #f0f7ff;
+        color: #2D8CF0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    .report-page .stat-cell .stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #333;
+    }
+    .report-page .stat-cell .stat-label {
+        font-size: 12px;
+        color: #888;
+        margin-top: 4px;
+    }
+    .report-page .insight-card {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    .report-page .insight-card h4 {
+        margin: 0 0 12px 0;
+        font-size: 15px;
+        color: #333;
+    }
+    .report-page .insight-item {
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    .report-page .insight-item.positive {
+        background: #f0f9eb;
+        border-left: 3px solid #67c23a;
+        color: #4a7a2e;
+    }
+    .report-page .insight-item.negative {
+        background: #fef0f0;
+        border-left: 3px solid #f56c6c;
+        color: #a13a3a;
+    }
+    .report-page .insight-item.normal {
+        background: #f5f7fa;
+        border-left: 3px solid #2D8CF0;
+        color: #333;
+    }
+    .report-page .trend-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .report-page .trend-table th,
+    .report-page .trend-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        text-align: center;
+    }
+    .report-page .trend-table th {
+        background: #f5f7fa;
+        font-weight: 600;
+        color: #666;
+    }
+    .report-page .trend-table tr:hover td {
+        background: #fafbfc;
+    }
+    .report-page .trend-bar {
+        display: inline-block;
+        height: 6px;
+        border-radius: 3px;
+        background: #2D8CF0;
+        vertical-align: middle;
+    }
+    .report-page .growth-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .report-page .growth-badge.up {
+        background: #f0f9eb;
+        color: #67c23a;
+    }
+    .report-page .growth-badge.down {
+        background: #fef0f0;
+        color: #f56c6c;
+    }
+    .report-page .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .report-page .action-buttons button {
+        min-width: 100px;
+    }
+</style>
+
+<div class="wrap report-page">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">AI 工作流</a></li>
+        <li><a href="{:url('copywriting')}">AI 文案工坊</a></li>
+        <li><a href="{:url('dataChat')}">数据问答</a></li>
+        <li><a href="{:url('contentAudit')}">内容审核</a></li>
+        <li><a href="{:url('userSegment')}">用户分群</a></li>
+        <li class="active"><a href="{:url('weeklyReport')}">运营简报</a></li>
+    </ul>
+
+    <!-- 报告头部 -->
+    <div class="report-header">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+                <h2><i class="fa fa-line-chart" style="color:#2D8CF0;"></i> 运营简报</h2>
+                <div class="period">{$report.period} | 生成时间：{$report.update_time}</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-default" onclick="refreshReport()">
+                    <i class="fa fa-refresh"></i> 刷新数据
+                </button>
+                <button class="btn btn-primary" onclick="window.print()">
+                    <i class="fa fa-print"></i> 打印
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关键指标 -->
+    <div class="stat-grid" id="statGrid">
+        <volist name="report.stats" item="stat">
+        <div class="stat-cell">
+            <div class="stat-icon"><i class="fa {$stat.icon}"></i></div>
+            <div class="stat-value">{$stat.value}</div>
+            <div class="stat-label">{$stat.label}</div>
+        </div>
+        </volist>
+    </div>
+
+    <!-- 用户增长概览 -->
+    <div class="insight-card" style="margin-bottom:16px;">
+        <h4><i class="fa fa-user-plus" style="color:#2D8CF0;"></i> 本周用户增长</h4>
+        <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px;">
+            <span style="font-size:32px;font-weight:700;color:#333;">{$report.stats.1.value}</span>
+            <span class="growth-badge {$report.week_growth >= 0?'up':'down'}" id="growthBadge">
+                <i class="fa {$report.week_growth >= 0?'fa-arrow-up':'fa-arrow-down'}"></i>
+                {abs($report.week_growth)}%
+            </span>
+            <span style="color:#999;font-size:13px;">环比上周</span>
+        </div>
+    </div>
+
+    <!-- 智能洞察 -->
+    <div class="insight-card">
+        <h4><i class="fa fa-lightbulb-o" style="color:#ffc107;"></i> 智能洞察</h4>
+        <div id="insightsList">
+            <volist name="report.insights" item="ins">
+            <div class="insight-item {$ins.type}">
+                <if condition="$ins.type eq 'positive'">
+                    <i class="fa fa-check-circle"></i>
+                <elseif condition="$ins.type eq 'negative'" />
+                    <i class="fa fa-exclamation-triangle"></i>
+                <else />
+                    <i class="fa fa-info-circle"></i>
+                </if>
+                {$ins.text}
+            </div>
+            </volist>
+        </div>
+    </div>
+
+    <!-- 7天趋势明细 -->
+    <div class="insight-card" style="margin-top:16px;">
+        <h4><i class="fa fa-calendar-check-o" style="color:#19be6b;"></i> 近7天趋势</h4>
+        <div style="overflow-x:auto;">
+            <table class="trend-table" id="trendTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>打卡</th>
+                        <th>趋势</th>
+                        <th>新增用户</th>
+                        <th>活动签到</th>
+                    </tr>
+                </thead>
+                <tbody id="trendBody">
+                    <volist name="report.trend_data" item="td">
+                    <tr>
+                        <td>{$td.date}</td>
+                        <td>{$td.clock}</td>
+                        <td>
+                            <span class="trend-bar" style="width:{$td.clock > 0 ? min($td.clock * 2, 80) : 2}px"></span>
+                        </td>
+                        <td>{$td.user}</td>
+                        <td>{$td.sign}</td>
+                    </tr>
+                    </volist>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 行动建议 -->
+    <div class="insight-card" style="margin-top:16px;">
+        <h4><i class="fa fa-tasks" style="color:#f5576c;"></i> 建议行动项</h4>
+        <div id="actionItems">
+            <php>
+                $actions = [];
+                if ($report['week_growth'] < -10) {
+                    $actions[] = ['icon' => 'fa-bullhorn', 'color' => '#f56c6c', 'text' => '用户增长明显下滑，建议加强推送触达与外部引流'];
+                } elseif ($report['week_growth'] > 10) {
+                    $actions[] = ['icon' => 'fire', 'color' => '#67c23a', 'text' => '增长势头良好，可乘势上新活动扩大战果'];
+                } else {
+                    $actions[] = ['icon' => 'fa-balance-scale', 'color' => '#2D8CF0', 'text' => '用户增长平稳，建议优化活动质量提升留存'];
+                }
+                $actions[] = ['icon' => 'fa-users', 'color' => '#faad14', 'text' => '关注沉默用户召回，推送个性化活动推荐'];
+                $actions[] = ['icon' => 'fa-gift', 'color' => '#4facfe', 'text' => '商城订单稳定，可考虑上架新品提升兑换率'];
+                if (!empty($report['stats'][4]['value']) && $report['stats'][4]['value'] < 10) {
+                    $actions[] = ['icon' => 'fa-calendar', 'color' => '#ff9c6e', 'text' => '今日活动签到较少，建议增加活动宣传'];
+                }
+                $actions[] = ['icon' => 'fa-recycle', 'color' => '#43e97b', 'text' => '持续关注垃圾分类打卡质量，引导更多居民参与'];
+            </php>
+            <volist name="actions" item="action">
+            <div class="insight-item normal">
+                <i class="fa {$action.icon}" style="color:{$action.color};margin-right:6px;"></i>
+                {$action.text}
+            </div>
+            </volist>
+        </div>
+    </div>
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+function refreshReport() {
+    layer.load(1);
+    $.ajax({
+        url: "{:url('refreshReport')}",
+        type: 'POST',
+        dataType: 'json',
+        success: function(res) {
+            layer.closeAll();
+            if (res.code === 1) {
+                updateReportUI(res.data);
+                layer.msg('数据已更新', {icon: 1, time: 1000});
+            } else {
+                layer.msg(res.msg || '刷新失败', {icon: 2});
+            }
+        },
+        error: function() {
+            layer.closeAll();
+            layer.msg('请求失败', {icon: 2});
+        }
+    });
+}
+
+function updateReportUI(data) {
+    // 更新洞察
+    if (data.insights) {
+        let html = '';
+        data.insights.forEach(function(ins) {
+            let icon = 'info-circle';
+            if (ins.type === 'positive') icon = 'check-circle';
+            if (ins.type === 'negative') icon = 'exclamation-triangle';
+            html += `<div class="insight-item ${ins.type}"><i class="fa fa-${icon}"></i> ${ins.text}</div>`;
+        });
+        document.getElementById('insightsList').innerHTML = html;
+    }
+
+    // 更新7天趋势
+    if (data.trend_data) {
+        let html = '';
+        data.trend_data.forEach(function(td) {
+            const barWidth = Math.min(td.clock * 2, 80) || 2;
+            html += `<tr>
+                <td>${td.date}</td>
+                <td>${td.clock}</td>
+                <td><span class="trend-bar" style="width:${barWidth}px"></span></td>
+                <td>${td.user}</td>
+                <td>${td.sign}</td>
+            </tr>`;
+        });
+        document.getElementById('trendBody').innerHTML = html;
+    }
+}
+</script>
+</body>
+</html>

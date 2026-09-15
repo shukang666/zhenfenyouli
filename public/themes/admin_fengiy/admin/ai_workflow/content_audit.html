@@ -1,0 +1,297 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .audit-page .audit-container {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 20px;
+    }
+    .audit-page .input-section textarea {
+        width: 100%;
+        min-height: 150px;
+        border: 1px solid #d9d9d9;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 14px;
+        line-height: 1.6;
+        resize: vertical;
+    }
+    .audit-page .input-section textarea:focus {
+        outline: none;
+        border-color: #2D8CF0;
+    }
+    .audit-page .result-panel {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 16px;
+    }
+    .audit-page .risk-badge {
+        display: inline-block;
+        padding: 4px 16px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .audit-page .risk-badge.low {
+        background: #f0f9eb;
+        color: #67c23a;
+        border: 1px solid #c2e7b0;
+    }
+    .audit-page .risk-badge.medium {
+        background: #fdf6ec;
+        color: #e6a23c;
+        border: #f5dab1 1px solid;
+    }
+    .audit-page .risk-badge.high {
+        background: #fef0f0;
+        color: #f56c6c;
+        border: 1px solid #fbc4c4;
+    }
+    .audit-page .issue-list {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0 0 0;
+    }
+    .audit-page .issue-list li {
+        padding: 8px 12px;
+        margin-bottom: 6px;
+        border-radius: 4px;
+        font-size: 13px;
+    }
+    .audit-page .issue-list li.ad {
+        background: #fff3e0;
+        border-left: 3px solid #ff9800;
+    }
+    .audit-page .issue-list li.sensitive {
+        background: #fce4ec;
+        border-left: 3px solid #e91e63;
+    }
+    .audit-page .issue-list li.contact {
+        background: #e3f2fd;
+        border-left: 3px solid #2196f3;
+    }
+    .audit-page .issue-list li.length {
+        background: #f5f5f5;
+        border-left: 3px solid #9e9e9e;
+    }
+    .audit-page .suggestion-box {
+        margin-top: 16px;
+        padding: 12px 16px;
+        border-radius: 6px;
+        background: #f0f9eb;
+        border-left: 3px solid #67c23a;
+        font-size: 13px;
+        color: #5c8a3c;
+    }
+    .audit-page .tools-bar {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .audit-page .history-panel {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 16px;
+    }
+    .audit-page .history-item {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .audit-page .history-item:hover {
+        background: #f5f7fa;
+    }
+    .audit-page .history-item:last-child {
+        border-bottom: none;
+    }
+    .audit-page .empty-result {
+        text-align: center;
+        padding: 40px 20px;
+        color: #bbb;
+    }
+</style>
+
+<div class="wrap audit-page">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">AI 工作流</a></li>
+        <li><a href="{:url('copywriting')}">AI 文案工坊</a></li>
+        <li><a href="{:url('dataChat')}">数据问答</a></li>
+        <li class="active"><a href="{:url('contentAudit')}">内容审核</a></li>
+        <li><a href="{:url('userSegment')}">用户分群</a></li>
+        <li><a href="{:url('weeklyReport')}">运营简报</a></li>
+    </ul>
+
+    <div class="audit-container" style="margin-top: 20px;">
+        <h4 style="margin: 0 0 16px 0; font-size: 15px; color: #333;">
+            <i class="fa fa-shield" style="color:#2D8CF0;"></i> 内容合规检测
+        </h4>
+        <p style="color:#999;font-size:13px;margin-bottom:12px;">
+            输入需要审核的文本内容，系统将自动检测广告引流、敏感词、联系方式等风险项
+        </p>
+
+        <div class="input-section">
+            <textarea id="auditContent" placeholder="在此粘贴需要审核的文本内容..."></textarea>
+            <div class="tools-bar">
+                <div>
+                    <span style="font-size:12px;color:#999;">支持检测：广告引流 / 敏感词 / 联系方式 / 内容长度</span>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-default btn-sm" onclick="document.getElementById('auditContent').value=''">清空</button>
+                    <button class="btn btn-default btn-sm" onclick="insertSample()">示例</button>
+                    <button class="btn btn-primary" id="auditBtn" onclick="doAudit()">
+                        <i class="fa fa-search"></i> 开始检测
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 检测结果 -->
+    <div class="result-panel" id="resultPanel" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h4 style="margin:0;font-size:15px;color:#333;">
+                <i class="fa fa-clipboard" style="color:#19be6b;"></i> 检测结果
+            </h4>
+            <span id="riskBadge" class="risk-badge">低风险</span>
+        </div>
+
+        <div id="issuesList"></div>
+        <div id="suggestionBox" class="suggestion-box"></div>
+    </div>
+
+    <!-- 空结果占位 -->
+    <div class="result-panel" id="emptyResult">
+        <div class="empty-result">
+            <i class="fa fa-shield" style="font-size: 40px; display: block; margin-bottom: 16px;"></i>
+            <p>输入内容后点击「开始检测」</p>
+            <p style="font-size:12px;">自动识别文本中的违规风险项</p>
+        </div>
+    </div>
+
+    <!-- 使用提示 -->
+    <div class="panel panel-default" style="margin-top:16px;">
+        <div class="panel-heading" style="font-size:14px;">
+            <i class="fa fa-info-circle" style="color:#2D8CF0;"></i> 检测能力说明
+        </div>
+        <div class="panel-body" style="font-size:13px;color:#666;line-height:2;">
+            <b>当前检测项：</b><br>
+            • <b style="color:#ff9800;">广告引流</b>：加微信、关注公众号、领取红包、点击链接等<br>
+            • <b style="color:#e91e63;">敏感词</b>：辱骂性词汇、不文明用语<br>
+            • <b style="color:#2196f3;">联系方式</b>：手机号码、电子邮箱地址<br>
+            • <b style="color:#9e9e9e;">内容长度</b>：超长内容提示<br>
+            <div style="margin-top:10px;padding:8px 12px;background:#fff8e1;border-radius:4px;color:#856404;">
+                <i class="fa fa-warning"></i> <b>注意：</b>检测结果作为初筛参考，最终判断请以人工复核为准。
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+let auditHistory = [];
+
+function insertSample() {
+    document.getElementById('auditContent').value = '加我微信xxx获取红包，今天绿色生活活动开始啦，大家快来参加哦！联系手机：13800138000';
+}
+
+function doAudit() {
+    const content = document.getElementById('auditContent').value.trim();
+    if (!content) {
+        layer.msg('请输入需要审核的内容', {icon: 2});
+        return;
+    }
+
+    const btn = document.getElementById('auditBtn');
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 检测中...';
+    btn.disabled = true;
+
+    $.ajax({
+        url: "{:url('auditContent')}",
+        type: 'POST',
+        data: {content: content},
+        dataType: 'json',
+        success: function(res) {
+            btn.innerHTML = '<i class="fa fa-search"></i> 开始检测';
+            btn.disabled = false;
+
+            if (res.code === 1) {
+                renderAuditResult(res.data);
+            } else {
+                layer.msg(res.msg, {icon: 2});
+            }
+        },
+        error: function() {
+            btn.innerHTML = '<i class="fa fa-search"></i> 开始检测';
+            btn.disabled = false;
+            layer.msg('检测失败，请重试', {icon: 2});
+        }
+    });
+}
+
+function renderAuditResult(data) {
+    document.getElementById('emptyResult').style.display = 'none';
+    document.getElementById('resultPanel').style.display = 'block';
+
+    // 风险等级
+    const badge = document.getElementById('riskBadge');
+    badge.className = 'risk-badge ' + data.risk_level;
+    badge.textContent = data.risk_label;
+
+    // 问题列表
+    const issuesList = document.getElementById('issuesList');
+    if (data.issues && data.issues.length > 0) {
+        let html = '<b style="font-size:13px;color:#333;">发现问题（' + data.issues.length + '项）：</b>';
+        html += '<ul class="issue-list">';
+        data.issues.forEach(function(issue) {
+            html += `<li class="${issue.type}"><i class="fa fa-exclamation-circle"></i> ${escapeHtml(issue.desc)}</li>`;
+        });
+        html += '</ul>';
+        issuesList.innerHTML = html;
+    } else {
+        issuesList.innerHTML = '<p style="color:#67c23a;font-size:13px;margin:0;"><i class="fa fa-check-circle"></i> 未检测到明显问题</p>';
+    }
+
+    // 建议
+    const suggestionBox = document.getElementById('suggestionBox');
+    if (data.suggestions && data.suggestions.length > 0) {
+        suggestionBox.innerHTML = '<i class="fa fa-lightbulb-o"></i> ' + data.suggestions.join('<br><i class="fa fa-lightbulb-o"></i> ');
+        suggestionBox.style.display = 'block';
+    } else {
+        suggestionBox.style.display = 'none';
+    }
+
+    // 添加历史记录
+    auditHistory.unshift({
+        content: data.content.length > 50 ? data.content.substring(0, 50) + '...' : data.content,
+        risk: data.risk_label,
+        risk_level: data.risk_level,
+        time: new Date().toLocaleTimeString()
+    });
+    if (auditHistory.length > 10) auditHistory.pop();
+    renderHistory();
+}
+
+function renderHistory() {
+    if (auditHistory.length > 0) {
+        // 可以在这里展示历史记录
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+</body>
+</html>

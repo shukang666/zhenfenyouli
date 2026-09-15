@@ -1,0 +1,280 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .segment-page .summary-card {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+    }
+    .segment-page .summary-card .num {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .segment-page .summary-card .label {
+        font-size: 13px;
+        color: #888;
+    }
+    .segment-page .segment-bar {
+        background: #fff;
+        border-radius: 8px;
+        border: 1px solid #e8e8e8;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        transition: box-shadow 0.2s;
+    }
+    .segment-page .segment-bar:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .segment-page .segment-bar .segment-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .segment-page .segment-bar .segment-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        margin-right: 12px;
+        font-size: 16px;
+    }
+    .segment-page .segment-bar .segment-info {
+        flex: 1;
+    }
+    .segment-page .segment-bar .segment-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #333;
+    }
+    .segment-page .segment-bar .segment-desc {
+        font-size: 12px;
+        color: #999;
+    }
+    .segment-page .segment-bar .progress-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .segment-page .segment-bar .progress {
+        flex: 1;
+        height: 8px;
+        margin-bottom: 0;
+        background: #f5f5f5;
+        border-radius: 4px;
+    }
+    .segment-page .segment-bar .progress-bar {
+        border-radius: 4px;
+        transition: width 1s ease;
+    }
+    .segment-page .segment-bar .percent-text {
+        font-size: 14px;
+        font-weight: 600;
+        min-width: 50px;
+        text-align: right;
+    }
+    .segment-page .segment-count {
+        font-size: 13px;
+        color: #666;
+        margin-left: 12px;
+        min-width: 80px;
+    }
+    .segment-page .suggestion-text {
+        margin-top: 10px;
+        padding: 8px 12px;
+        background: #f9fafb;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #666;
+    }
+    .segment-page .loading-overlay {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+    .segment-page .pie-chart-wrap {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+    .segment-page .pie-canvas {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .segment-page .pie-legend {
+        flex: 1;
+    }
+    .segment-page .pie-legend .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 13px;
+    }
+    .segment-page .pie-legend .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+</style>
+
+<div class="wrap segment-page">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">AI 工作流</a></li>
+        <li><a href="{:url('copywriting')}">AI 文案工坊</a></li>
+        <li><a href="{:url('dataChat')}">数据问答</a></li>
+        <li><a href="{:url('contentAudit')}">内容审核</a></li>
+        <li class="active"><a href="{:url('userSegment')}">用户分群</a></li>
+        <li><a href="{:url('weeklyReport')}">运营简报</a></li>
+    </ul>
+
+    <!-- 总览 -->
+    <div class="summary-card" style="margin: 20px 0;">
+        <div style="display: flex; justify-content: center; align-items: baseline; gap: 12px;">
+            <div class="num" style="color:#2D8CF0;">{$segments.total|default='-'}</div>
+            <div class="label">注册用户总数</div>
+        </div>
+        <div style="font-size:12px;color:#999;margin-top:8px;">
+            数据更新于：{$segments.update_time|default='点击刷新获取'}
+        </div>
+        <button class="btn btn-sm btn-default" style="margin-top:10px;" onclick="refreshSegments()">
+            <i class="fa fa-refresh"></i> 刷新数据
+        </button>
+    </div>
+
+    <!-- 分群图表 -->
+    <div class="row style="margin-bottom:20px;">
+        <div class="col-md-5">
+            <div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:20px;">
+                <h4 style="margin:0 0 16px 0;font-size:14px;color:#333;">用户分布</h4>
+                <div class="pie-chart-wrap">
+                    <div class="pie-canvas" id="pieCanvas"></div>
+                    <div class="pie-legend" id="pieLegend"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div id="segmentBars">
+                <!-- 动态生成分群条 -->
+                <volist name="segments.segments" id="seg">
+                <div class="segment-bar">
+                    <div class="segment-header">
+                        <div class="segment-icon" style="background:{$seg.color};">
+                            <i class="fa {$seg.icon}"></i>
+                        </div>
+                        <div class="segment-info">
+                            <div class="segment-name">{$seg.name}</div>
+                            <div class="segment-desc">{$seg.desc}</div>
+                        </div>
+                        <div class="segment-count">{$seg.count} 人</div>
+                    </div>
+                    <div class="progress-wrap">
+                        <div class="progress">
+                            <div class="progress-bar" style="width:{$seg.percent}%;background:{$seg.color};" data-width="{$seg.percent}"></div>
+                        </div>
+                        <div class="percent-text" style="color:{$seg.color};">{$seg.percent}%</div>
+                    </div>
+                    <div class="suggestion-text">
+                        <i class="fa fa-lightbulb-o"></i> {$seg.suggestion}
+                    </div>
+                </div>
+                </volist>
+            </div>
+        </div>
+    </div>
+
+    <!-- 运营建议总结 -->
+    <div class="panel panel-default">
+        <div class="panel-heading" style="font-size:14px;">
+            <i class="fa fa-bullhorn" style="color:#2D8CF0;"></i> 运营建议
+        </div>
+        <div class="panel-body" style="font-size:13px;color:#555;line-height:2;">
+            <p><b>💡 基于用户分群的运营策略：</b></p>
+            <ul style="padding-left:22px;">
+                <li><b>活跃用户</b>：核心群体，优先推送高价值活动与积分奖励，可发展为社区骨干</li>
+                <li><b>新用户</b>：推送新手任务与入门活动，帮助快速熟悉系统</li>
+                <li><b>沉默用户</b>：发送个性化召回消息，配合限时优惠券激活</li>
+                <li><b>未参与用户</b>：降低参与门槛，推送拍照答题等简单任务</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+// 饼图颜色
+const segmentColors = ['#52c41a', '#1890ff', '#faad14', '#bfbfbf'];
+
+// 生成饼图（CSS conic-gradient）
+function renderPieChart(segments) {
+    const canvas = document.getElementById('pieCanvas');
+    const legend = document.getElementById('pieLegend');
+    const total = segments.reduce((s, seg) => s + seg.count, 0);
+    if (total === 0) return;
+
+    let gradientParts = [];
+    let currentAngle = 0;
+    let legendHtml = '';
+
+    segments.forEach((seg, idx) => {
+        const angle = (seg.count / total) * 360;
+        const color = seg.color;
+        gradientParts.push(`${color} ${currentAngle}deg ${currentAngle + angle}deg`);
+        currentAngle += angle;
+
+        legendHtml += `
+            <div class="legend-item">
+                <span class="legend-dot" style="background:${color}"></span>
+                <span>${seg.name} (${seg.percent}%)</span>
+            </div>
+        `;
+    });
+
+    canvas.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+    // 中心挖空做成甜甜圈
+    canvas.style.webkitMask = 'radial-gradient(farthest-side, transparent 55%, #fff 56%)';
+    canvas.style.mask = 'radial-gradient(farthest-side, transparent 55%, #fff 56%)';
+    legend.innerHTML = legendHtml;
+}
+
+// 页面加载完成后初始化饼图
+$(document).ready(function() {
+    const segments = <php>echo isset($segments['segments']) ? json_encode($segments['segments'], JSON_UNESCAPED_UNICODE) : '[]';</php>;
+    if (segments.length > 0) {
+        renderPieChart(segments);
+    }
+});
+
+function refreshSegments() {
+    layer.load(1);
+    $.ajax({
+        url: "{:url('refreshSegments')}",
+        type: 'POST',
+        dataType: 'json',
+        success: function(res) {
+            layer.closeAll();
+            if (res.code === 1) {
+                // 刷新页面以显示最新数据
+                location.reload();
+            } else {
+                layer.msg(res.msg || '刷新失败', {icon: 2});
+            }
+        },
+        error: function() {
+            layer.closeAll();
+            layer.msg('请求失败', {icon: 2});
+        }
+    });
+}
+</script>
+</body>
+</html>

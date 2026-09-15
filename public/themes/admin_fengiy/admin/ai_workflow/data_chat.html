@@ -1,0 +1,311 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .data-chat-page .chat-container {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .data-chat-page .chat-messages {
+        height: 420px;
+        overflow-y: auto;
+        padding: 20px;
+        background: #fafbfc;
+    }
+    .data-chat-page .chat-message {
+        margin-bottom: 16px;
+    }
+    .data-chat-page .chat-message.user {
+        text-align: right;
+    }
+    .data-chat-page .chat-message.user .message-content {
+        background: #2D8CF0;
+        color: #fff;
+        display: inline-block;
+        max-width: 80%;
+        padding: 10px 14px;
+        border-radius: 8px 8px 0 8px;
+        text-align: left;
+        line-height: 1.6;
+    }
+    .data-chat-page .chat-message.bot .message-content {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        display: inline-block;
+        max-width: 80%;
+        padding: 10px 14px;
+        border-radius: 8px 8px 8px 0;
+        line-height: 1.6;
+    }
+    .data-chat-page .chat-input-area {
+        border-top: 1px solid #e8e8e8;
+        padding: 12px 16px;
+        display: flex;
+        gap: 10px;
+    }
+    .data-chat-page .chat-input-area input {
+        flex: 1;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    .data-chat-page .chat-input-area input:focus {
+        outline: none;
+        border-color: #2D8CF0;
+    }
+    .data-chat-page .chat-input-area button {
+        min-width: 80px;
+    }
+    .data-chat-page .quick-questions {
+        padding: 12px 20px;
+        border-top: 1px solid #f0f0f0;
+        background: #fff;
+    }
+    .data-chat-page .quick-questions .qq-label {
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 8px;
+    }
+    .data-chat-page .quick-questions .qq-item {
+        display: inline-block;
+        padding: 4px 10px;
+        margin: 0 6px 6px 0;
+        background: #f0f7ff;
+        color: #2D8CF0;
+        font-size: 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .data-chat-page .quick-questions .qq-item:hover {
+        background: #2D8CF0;
+        color: #fff;
+    }
+    .data-chat-page .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .data-chat-page .stats-card {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 6px;
+        padding: 14px;
+        text-align: center;
+    }
+    .data-chat-page .stats-card .stats-num {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2D8CF0;
+    }
+    .data-chat-page .stats-card .stats-label {
+        font-size: 12px;
+        color: #999;
+        margin-top: 4px;
+    }
+    .data-chat-page .data-table-mini {
+        margin-top: 10px;
+        font-size: 13px;
+    }
+    .data-chat-page .data-table-mini table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .data-chat-page .data-table-mini th,
+    .data-chat-page .data-table-mini td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #f0f0f0;
+        text-align: left;
+    }
+    .data-chat-page .data-table-mini th {
+        background: #f5f7fa;
+        font-weight: 600;
+        color: #666;
+    }
+</style>
+
+<div class="wrap data-chat-page">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index')}">AI 工作流</a></li>
+        <li><a href="{:url('copywriting')}">AI 文案工坊</a></li>
+        <li class="active"><a href="{:url('dataChat')}">数据问答</a></li>
+        <li><a href="{:url('contentAudit')}">内容审核</a></li>
+        <li><a href="{:url('userSegment')}">用户分群</a></li>
+        <li><a href="{:url('weeklyReport')}">运营简报</a></li>
+    </ul>
+
+    <!-- 数据卡片概览 -->
+    <div class="stats-cards" style="margin-top: 20px;">
+        <div class="stats-card">
+            <div class="stats-num">{$stats.today_clock}</div>
+            <div class="stats-label">今日打卡</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-num">{$stats.today_users}</div>
+            <div class="stats-label">今日新增用户</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-num">{$stats.today_sign}</div>
+            <div class="stats-label">今日签到</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-num">{$stats.today_orders}</div>
+            <div class="stats-label">今日订单</div>
+        </div>
+    </div>
+
+    <!-- 聊天区域 -->
+    <div class="chat-container" style="margin-top: 16px;">
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message bot">
+                <div class="message-content">
+                    👋 您好！我是数据问答助手，可以帮您快速查询系统统计数据。<br><br>
+                    您可以这样提问：<br>
+                    • "今日打卡多少次"<br>
+                    • "近7天打卡趋势"<br>
+                    • "垃圾分类分布"<br>
+                    • "用户总数"<br>
+                    • "今日签到人数"<br>
+                    • "积分发放情况"<br>
+                    • "订单数据"
+                </div>
+            </div>
+        </div>
+
+        <!-- 快捷提问 -->
+        <div class="quick-questions">
+            <div class="qq-label">💡 快捷提问：</div>
+            <span class="qq-item" onclick="quickAsk('今日打卡多少次')">今日打卡次数</span>
+            <span class="qq-item" onclick="quickAsk('近7天打卡趋势')">近7天打卡趋势</span>
+            <span class="qq-item" onclick="quickAsk('垃圾分类打卡分布')">垃圾分类分布</span>
+            <span class="qq-item" onclick="quickAsk('注册用户总数')">用户总数</span>
+            <span class="qq-item" onclick="quickAsk('今日活动签到人数')">活动签到</span>
+            <span class="qq-item" onclick="quickAsk('今日积分发放')">积分发放</span>
+            <span class="qq-item" onclick="quickAsk('今日订单数据')">订单数据</span>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="chat-input-area">
+            <input type="text" id="questionInput" placeholder="输入您的问题，按回车键提交..." onkeypress="if(event.key==='Enter')askQuestion()">
+            <button class="btn btn-primary" onclick="askQuestion()">发送</button>
+        </div>
+    </div>
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+function quickAsk(question) {
+    document.getElementById('questionInput').value = question;
+    askQuestion();
+}
+
+function askQuestion() {
+    const input = document.getElementById('questionInput');
+    const question = input.value.trim();
+    if (!question) {
+        layer.msg('请输入问题', {icon: 2});
+        return;
+    }
+
+    const messages = document.getElementById('chatMessages');
+
+    // 添加用户消息
+    messages.innerHTML += `
+        <div class="chat-message user">
+            <div class="message-content">${escapeHtml(question)}</div>
+        </div>
+    `;
+
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+
+    // 添加loading
+    const loadingId = 'loading_' + Date.now();
+    messages.innerHTML += `
+        <div class="chat-message bot" id="${loadingId}">
+            <div class="message-content"><i class="fa fa-spinner fa-spin"></i> 正在查询数据...</div>
+        </div>
+    `;
+    messages.scrollTop = messages.scrollHeight;
+
+    $.ajax({
+        url: "{:url('answerData')}",
+        type: 'POST',
+        data: {question: question},
+        dataType: 'json',
+        success: function(res) {
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
+
+            if (res.code === 1) {
+                renderAnswer(res.data, messages);
+            } else {
+                messages.innerHTML += `
+                    <div class="chat-message bot">
+                        <div class="message-content" style="color:#f56c6c;">${escapeHtml(res.msg || '查询失败')}</div>
+                    </div>
+                `;
+            }
+        },
+        error: function() {
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
+            messages.innerHTML += `
+                <div class="chat-message bot">
+                    <div class="message-content" style="color:#f56c6c;">请求失败，请重试</div>
+                </div>
+            `;
+        }
+    });
+}
+
+function renderAnswer(data, messages) {
+    let contentHtml = `<p style="margin:0;font-weight:600;color:#333;">${escapeHtml(data.answer)}</p>`;
+
+    if (data.data && data.data.length > 0 && data.chart_type) {
+        if (data.chart_type === 'line') {
+            // 近7天趋势表格
+            contentHtml += '<div class="data-table-mini"><table><thead><tr><th>日期</th><th>打卡次数</th></tr></thead><tbody>';
+            data.data.forEach(function(item) {
+                contentHtml += `<tr><td>${escapeHtml(item.d)}</td><td>${item.c}</td></tr>`;
+            });
+            contentHtml += '</tbody></table></div>';
+        } else if (data.chart_type === 'pie' || data.chart_type === 'bar') {
+            // 分类分布
+            contentHtml += '<div class="data-table-mini"><table><thead><tr><th>分类</th><th>次数</th></tr></thead><tbody>';
+            data.data.forEach(function(item) {
+                contentHtml += `<tr><td>${escapeHtml(item.name)}</td><td>${item.c}</td></tr>`;
+            });
+            contentHtml += '</tbody></table></div>';
+        } else {
+            // 通用数据展示
+            contentHtml += '<div class="data-table-mini"><table><tbody>';
+            Object.keys(data.data[0]).forEach(function(key) {
+                if (key !== 'd' && key !== 'c') {
+                    contentHtml += `<tr><td>${escapeHtml(key)}</td><td>${escapeHtml(String(data.data[0][key]))}</td></tr>`;
+                }
+            });
+            contentHtml += '</tbody></table></div>';
+        }
+    }
+
+    messages.innerHTML += `
+        <div class="chat-message bot">
+            <div class="message-content">${contentHtml}</div>
+        </div>
+    `;
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+</body>
+</html>
