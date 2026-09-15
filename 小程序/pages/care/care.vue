@@ -77,7 +77,7 @@
 					<u-icon name="arrow-right" size="28" color="#ccc"></u-icon>
 				</view>
 				<view class="quick-row" @click="goRank">
-					<u-icon name="trophy-fill" size="36" color="#18AF38"></u-icon>
+					<u-icon name="level-fill" size="36" color="#18AF38"></u-icon>
 					<text class="quick-name">排行榜</text>
 					<u-icon name="arrow-right" size="28" color="#ccc"></u-icon>
 				</view>
