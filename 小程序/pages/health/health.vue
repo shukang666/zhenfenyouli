@@ -4,8 +4,8 @@
 		<!-- 关怀版下拉提示 -->
 		<view class="care-pull-layer" :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }" v-if="showCareHint">
 			<view class="care-pull-content">
-				<text class="care-pull-text">{{ carePullHeight > 100 ? '松开进入关怀版' : '下拉进入关怀版' }}</text>
-				<u-icon :name="carePullHeight > 100 ? 'arrow-up' : 'arrow-down'" size="28" color="#18AF38"></u-icon>
+<text class="care-pull-text">{{ carePullHeight >= 90 ? '松开进入关怀版' : '下拉进入关怀版' }}</text>
+			<u-icon :name="carePullHeight >= 90 ? 'arrow-up' : 'arrow-down'" size="28" color="#18AF38"></u-icon>
 			</view>
 		</view>
 		<!-- 骨架屏 -->

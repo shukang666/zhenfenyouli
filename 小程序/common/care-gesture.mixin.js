@@ -9,7 +9,9 @@ export default {
 				startTime: 0,
 				pullDistance: 0,
 				isInTop: true,
-				triggerHeight: 120, // 触发距离(px)
+				// 触发/提示切换阈值（视觉高度 carePullHeight）
+				// 90rpx 视觉下拉，对应手指滑动约 180px
+				triggerHeight: 90,
 				currentPage: null
 			},
 			// 下拉提示显示状态
@@ -69,18 +71,12 @@ export default {
 			}
 		},
 
-		// 触摸结束
+		// 触摸结束 - 只在抬手时根据最终位置判断是否触发
 		onCareTouchEnd(e) {
 			if (!this.showCareHint) return
 			
-			// 快速滑动或下拉超过阈值
-			const endTime = Date.now()
-			const duration = endTime - this.careGesture.startTime
-			const isQuickSwipe = duration < 300 && this.careGesture.pullDistance > 50
-			const isLongPull = this.careGesture.pullDistance > this.careGesture.triggerHeight ||
-							   this.carePullHeight > 100
-
-			if (isQuickSwipe || isLongPull) {
+			// 只看抬手时的最终视觉高度，不看速度（用户可能划过又划回来）
+			if (this.carePullHeight >= this.careGesture.triggerHeight) {
 				this.goToCareMode()
 			}
 
