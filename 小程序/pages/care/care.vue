@@ -1,11 +1,11 @@
 <template>
 	<view class="care-page">
-		<!-- 顶部导航：uView 标准 navbar -->
+		<!-- 顶部导航 -->
 		<u-navbar :is-back="true" back-text="返回" title="关怀版" title-color="#fff"
 			:background="{ background: '#18AF38' }" :border-bottom="false"
 			@back="goBack"></u-navbar>
 
-		<!-- 问候信息区 -->
+		<!-- 问候卡片 -->
 		<view class="care-header">
 			<view class="care-greeting">
 				<text class="care-greeting-text">{{ greeting }}</text>
@@ -51,7 +51,7 @@
 				<text>我的积分</text>
 			</view>
 			<view class="point-row">
-				<text class="point-num">{{ userInfo.points || 0 }}</text>
+				<text class="point-num">{{ userPoint }}</text>
 				<text class="point-unit">积分</text>
 			</view>
 			<view class="point-links">
@@ -101,166 +101,169 @@
 				today_signed: false,
 				continue_days: 0
 			},
-			clockTodayCount: 0,
 			nickname: '',
 			greeting: '',
-			dateText: ''
+			dateText: '',
+			userPoint: 0
 		}
 	},
-		onLoad() {
-			this.setGreeting()
-			this.getUserInfo()
-			this.getSignStatus()
+	onLoad() {
+		this.setGreeting()
+		this.getUserInfo()
+		this.getSignStatus()
+	},
+	onShow() {
+		this.getUserInfo()
+	},
+	methods: {
+		setGreeting() {
+			const hour = new Date().getHours()
+			if (hour < 6) this.greeting = '凌晨好'
+			else if (hour < 9) this.greeting = '早上好'
+			else if (hour < 12) this.greeting = '上午好'
+			else if (hour < 14) this.greeting = '中午好'
+			else if (hour < 18) this.greeting = '下午好'
+			else this.greeting = '晚上好'
+
+			const week = ['日', '一', '二', '三', '四', '五', '六']
+			const now = new Date()
+			this.dateText = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${week[now.getDay()]}`
 		},
-		onShow() {
-			this.getUserInfo()
+
+		getUserInfo() {
+			this.$u.api.getUserInfo().then(res => {
+				const data = res.data || {}
+				this.nickname = data.nickname || data.user_nickname || '环保达人'
+				this.userPoint = data.point || 0
+			}).catch(() => {
+				this.nickname = '环保达人'
+				this.userPoint = 0
+			})
 		},
-		methods: {
-			setGreeting() {
-				const hour = new Date().getHours()
-				if (hour < 6) this.greeting = '凌晨好'
-				else if (hour < 9) this.greeting = '早上好'
-				else if (hour < 12) this.greeting = '上午好'
-				else if (hour < 14) this.greeting = '中午好'
-				else if (hour < 18) this.greeting = '下午好'
-				else this.greeting = '晚上好'
 
-				const week = ['日', '一', '二', '三', '四', '五', '六']
-				const now = new Date()
-				this.dateText = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 星期${week[now.getDay()]}`
-			},
+		getSignStatus() {
+			if (!this.isLogin) return
+			this.$u.api.getSignStatus().then(res => {
+				this.signStatus = res.data || { today_signed: false, continue_days: 0 }
+			}).catch(() => {})
+		},
 
-			getUserInfo() {
-				this.$u.api.getUserInfo().then(res => {
-					this.nickname = res.data.nickname || res.data.user_nickname || '环保达人'
-				}).catch(() => {
-					this.nickname = '环保达人'
-				})
-			},
-
-			getSignStatus() {
-				if (!this.isLogin) return
-				this.$u.api.getSignStatus().then(res => {
-					this.signStatus = res.data || { today_signed: false, continue_days: 0 }
-				}).catch(() => {})
-			},
-
-			handleSign() {
-				if (!this.isLogin) {
-					this.$u.route('/pages/public/login')
-					return
-				}
-				if (this.signStatus.today_signed) {
-					this.$u.toast('今日已签到啦，明天继续哦~')
-					return
-				}
-				this.$u.api.dailySign().then(res => {
-					this.signStatus.today_signed = true
-					this.signStatus.continue_days = (this.signStatus.continue_days || 0) + 1
-					this.$u.toast(`签到成功！获得 ${res.data.point || 0} 积分`)
-					this.getUserInfo()
-				}).catch(err => {
-					this.$u.toast(err.msg || '签到失败，请稍后再试')
-				})
-			},
-
-			goClock() {
-				if (!this.isLogin) {
-					this.$u.route('/pages/public/login')
-					return
-				}
-				this.$u.route('/pages/flhd/ljfldk')
-			},
-
-			goPointDetail() {
-				if (!this.isLogin) {
-					this.$u.route('/pages/public/login')
-					return
-				}
-				this.$u.route('/pages/points/points')
-			},
-
-			goMall() {
-				this.$u.route({ type: 'switchTab', url: '/pages/mall/mall' })
-			},
-
-			goRank() {
-				if (!this.isLogin) {
-					this.$u.route('/pages/public/login')
-					return
-				}
-				this.$u.route('/pages/activity/rank')
-			},
-
-			goOrder() {
-				if (!this.isLogin) {
-					this.$u.route('/pages/public/login')
-					return
-				}
-				this.$u.route('/pages/order_list/order_list')
-			},
-
-			goCheck() {
-				if (!this.isLogin) {
-					this.$u.route('/pages/public/login')
-					return
-				}
-				uni.pageScrollTo({
-					scrollTop: 0,
-					duration: 300
-				})
-			},
-
-			goHelp() {
-				uni.showModal({
-					title: '使用帮助',
-					content: '● 每日签到：每天签到可获得积分\n● 垃圾分类：拍照上传分类成果赚积分\n● 积分使用：积分可在商城兑换礼品',
-					showCancel: false,
-					confirmText: '我知道了'
-				})
-			},
-
-			goBack() {
-				uni.navigateBack({ delta: 1 })
+		handleSign() {
+			if (!this.isLogin) {
+				this.$u.route('/pages/public/login')
+				return
 			}
+			if (this.signStatus.today_signed) {
+				this.$u.toast('今日已签到啦，明天继续哦~')
+				return
+			}
+			this.$u.api.dailySign().then(res => {
+				this.signStatus.today_signed = true
+				this.signStatus.continue_days = (this.signStatus.continue_days || 0) + 1
+				this.$u.toast(`签到成功！获得 ${res.data.point || 0} 积分`)
+				this.getUserInfo()
+			}).catch(err => {
+				this.$u.toast(err.msg || '签到失败，请稍后再试')
+			})
+		},
+
+		goClock() {
+			if (!this.isLogin) {
+				this.$u.route('/pages/public/login')
+				return
+			}
+			this.$u.route('/pages/flhd/ljfldk')
+		},
+
+		goPointDetail() {
+			if (!this.isLogin) {
+				this.$u.route('/pages/public/login')
+				return
+			}
+			this.$u.route('/pages/points/points')
+		},
+
+		goMall() {
+			this.$u.route({ type: 'switchTab', url: '/pages/mall/mall' })
+		},
+
+		goRank() {
+			if (!this.isLogin) {
+				this.$u.route('/pages/public/login')
+				return
+			}
+			this.$u.route('/pages/activity/rank')
+		},
+
+		goOrder() {
+			if (!this.isLogin) {
+				this.$u.route('/pages/public/login')
+				return
+			}
+			this.$u.route('/pages/order_list/order_list')
+		},
+
+		goCheck() {
+			if (!this.isLogin) {
+				this.$u.route('/pages/public/login')
+				return
+			}
+			uni.pageScrollTo({
+				scrollTop: 0,
+				duration: 300
+			})
+		},
+
+		goHelp() {
+			uni.showModal({
+				title: '使用帮助',
+				content: '● 每日签到：每天签到可获得积分\n● 垃圾分类：拍照上传分类成果赚积分\n● 积分使用：积分可在商城兑换礼品',
+				showCancel: false,
+				confirmText: '我知道了'
+			})
+		},
+
+		goBack() {
+			uni.navigateBack({ delta: 1 })
 		}
 	}
+}
 </script>
 
 <style lang="scss" scoped>
 .care-page {
 	min-height: 100vh;
 	background: #f5f7f5;
-	padding: 0 24rpx 40rpx;
+	padding: 24rpx 24rpx 40rpx;
 }
 
-/* 问候信息区（绿色卡片） */
+/* 问候卡片：白色背景 带阴影 */
 .care-header {
-	background: #18AF38;
+	background: #fff;
 	border-radius: 24rpx;
-	padding: 32rpx 28rpx 36rpx;
+	padding: 40rpx 32rpx;
 	margin-bottom: 24rpx;
-	
-	/* 问候信息 */
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+
 	.care-greeting {
 		.care-greeting-text {
 			font-size: 44rpx;
-			color: #fff;
+			color: #333;
 			font-weight: 600;
 		}
-		
+
 		.care-greeting-name {
 			font-size: 44rpx;
-			color: #fff;
-			font-weight: 600;
+			color: #18AF38;
+			font-weight: 700;
 		}
 	}
-	
+
 	.care-date {
 		display: block;
 		font-size: 26rpx;
-		color: rgba(255, 255, 255, 0.8);
-		margin-top: 10rpx;
+		color: #999;
+		margin-top: 12rpx;
 	}
 }
 
@@ -270,7 +273,8 @@
 	border-radius: 24rpx;
 	padding: 36rpx 32rpx;
 	margin-bottom: 24rpx;
-	
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+
 	.care-card-title {
 		display: flex;
 		align-items: center;
@@ -280,39 +284,38 @@
 		color: #333;
 		margin-bottom: 20rpx;
 	}
-	
 }
 
 /* 签到 */
 .sign-info {
 	margin-bottom: 24rpx;
-	
+
 	.sign-days {
-		font-size: 72rpx;
+		font-size: 80rpx;
 		font-weight: 700;
 		color: #18AF38;
 		line-height: 1;
 	}
-	
+
 	.sign-label {
 		display: block;
 		font-size: 26rpx;
 		color: #888;
-		margin-top: 6rpx;
+		margin-top: 8rpx;
 	}
 }
 
 /* 积分 */
 .point-row {
 	margin-bottom: 16rpx;
-	
+
 	.point-num {
-		font-size: 72rpx;
+		font-size: 80rpx;
 		font-weight: 700;
 		color: #18AF38;
 		line-height: 1;
 	}
-	
+
 	.point-unit {
 		font-size: 26rpx;
 		color: #888;
@@ -324,12 +327,12 @@
 	display: flex;
 	align-items: center;
 	gap: 16rpx;
-	
+
 	.point-link {
 		font-size: 28rpx;
 		color: #18AF38;
 	}
-	
+
 	.point-link-line {
 		color: #ddd;
 	}
@@ -342,11 +345,11 @@
 		align-items: center;
 		padding: 24rpx 0;
 		border-bottom: 1rpx solid #f0f0f0;
-		
+
 		&:last-child {
 			border-bottom: none;
 		}
-		
+
 		.quick-name {
 			flex: 1;
 			font-size: 32rpx;
@@ -361,16 +364,16 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: linear-gradient(135deg, #18AF38 0%, #128a2e 100%);
+	background: linear-gradient(135deg, #18AF38 0%, #14a032 100%);
 	border-radius: 50rpx;
 	padding: 28rpx;
-	
+
 	.care-btn-text {
 		font-size: 36rpx;
 		font-weight: 600;
 		color: #fff;
 	}
-	
+
 	&--gray {
 		background: linear-gradient(135deg, #b0b0b0 0%, #888 100%);
 	}
