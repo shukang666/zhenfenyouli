@@ -13,7 +13,7 @@
 			</view>
 			<view class="u-flex-1 u-m-lr-30">
 				<u-button type="primary" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #F0DF73 0%, #FFA320 100%)'}"
-					@click="$u.route('/pages/low_carbon/lsxf/list?id='+active.id)">查看作品</u-button>
+					@click="$u.route('/pages/activity/lsxf/list?id='+active.id)">查看作品</u-button>
 			</view>
 			<view class="u-flex-1" v-if="!setting.app_test">
 					<u-button type="primary" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #4A9BFF 0%, #1877F2 100%)'}" @click="btn">立即参与</u-button>
@@ -100,14 +100,14 @@
 		onShareAppMessage(res) {
 			return {
 				title: this.active.name,
-				path: '/pages/low_carbon/lsxf/details?id=' + this.active.id,
+				path: '/pages/activity/lsxf/details?id=' + this.active.id,
 				imageUrl: this.active.thumb
 			}
 		},
 		onShareTimeline() {
 			return {
 				title: this.active.name,
-				path: '/pages/low_carbon/lsxf/details?id=' + this.active.id,
+				path: '/pages/activity/lsxf/details?id=' + this.active.id,
 				imageUrl: this.active.thumb
 			}
 		}

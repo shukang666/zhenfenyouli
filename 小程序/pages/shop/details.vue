@@ -30,7 +30,7 @@
             </view>
             <view class="">
                 <u-button type="primary" size="mini" hover-class="none" :customStyle="{background: '#18AF38'}"
-                    @click="$u.route('/pages/mall/merchant?id='+goods.shop_info.id+'&goods_id='+goods.id)">进店逛逛</u-button>
+                    @click="$u.route('/pages/shop/merchant?id='+goods.shop_info.id+'&goods_id='+goods.id)">进店逛逛</u-button>
             </view>
         </view>
         <view class="u-p-30 u-type-white-bg u-m-t-30" v-if="comment_list.length">
@@ -140,7 +140,7 @@
                     })
                 } else {
                     uni.setStorageSync('goods', [data])
-                    this.$u.route('/pages/mall/add_order', {
+                    this.$u.route('/pages/shop/add_order', {
                         type: 'buy'
                     })
                 }
@@ -190,14 +190,14 @@
             return {
                 title: this.goods.goods_name,
                 imageUrl: this.goods.photos[0],
-                path: '/pages/mall/details?id=' + this.goods.id
+                path: '/pages/shop/details?id=' + this.goods.id
             }
         },
         onShareTimeline() {
             return {
                 title: this.goods.goods_name,
                 imageUrl: this.goods.photos[0],
-                path: '/pages/mall/details?id=' + this.goods.id
+                path: '/pages/shop/details?id=' + this.goods.id
             }
         }
     }

@@ -20,7 +20,7 @@
 
 			<!-- 活动搜索 + 扫码入口（点击进活动搜索页，右侧扫码直达活动详情） -->
 			<view class="home-search-wrap">
-				<view class="home-search-box" @click="$u.route('/pages/low_carbon/active-search')">
+				<view class="home-search-box" @click="$u.route('/pages/activity/active-search')">
 					<u-icon name="search" size="28" color="#b0b3bb"></u-icon>
 					<text class="home-search-text">搜索活动名称 / 地点</text>
 					<view class="home-search-scan" @click.stop="onScanQrcode">
@@ -98,7 +98,7 @@
 			<scroll-view scroll-x class="active-scroll" :show-scrollbar="false" v-if="currentTab === 0">
 				<view class="u-flex">
 					<view class="active-card" v-for="item in active_list" :key="item.id"
-						@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 						<u-image width="540" height="270" :src="item.thumb" border-radius="20rpx 20rpx 0 0"></u-image>
 						<view class="active-card-body">
 							<view class="active-card-title">{{item.name}}</view>
@@ -122,7 +122,7 @@
 			<scroll-view scroll-x class="goods-scroll" :show-scrollbar="false" v-if="currentTab === 1">
 				<view class="goods-cols">
 					<view class="goods-col" v-for="(col, colIndex) in goodsColumns" :key="colIndex">
-						<view class="goods-card" v-for="item in col" :key="item.id" @click="$u.route('/pages/mall/details?id='+item.id)">
+						<view class="goods-card" v-for="item in col" :key="item.id" @click="$u.route('/pages/shop/details?id='+item.id)">
 							<u-image width="100%" height="220" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
 							<view class="goods-card-body">
 								<view class="goods-card-title">{{item.goods_name}}</view>
@@ -174,7 +174,7 @@
 				// 内容区 tab 导航：活动 / 积分商品
 				currentTab: 0,
 				tabList: [
-					{ name: '热门活动', moreUrl: '/pages/low_carbon/active-list', moreType: 'navigateTo' },
+					{ name: '热门活动', moreUrl: '/pages/activity/active-list', moreType: 'navigateTo' },
 					{ name: '积分商品', moreUrl: '/pages/mall/mall', moreType: 'switchTab' }
 				],
 				// 首页核心入口：一行四个SVG图标
@@ -245,7 +245,7 @@
 			this.$nextTick(() => {
 				if (this.isLogin && !this.userInfo.community_id) {
 					uni.navigateTo({
-						url: '/pages/user/info',
+						url: '/pages/member/info',
 						fail: () => {}
 					})
 				}
@@ -431,9 +431,9 @@
 						const raw = (res && res.result != null) ? String(res.result).trim() : ''
 						console.log('scanCode =>', { scanType: scanType, path: qPath, result: raw })
 
-						// 1) 小程序码：path 形如 pages/low_carbon/lsxf/details-new?scene=活动id
+						// 1) 小程序码：path 形如 pages/activity/lsxf/details-new?scene=活动id
 						//    只接受本项目活动详情页路径，防止误扫到其它页面/其它小程序的码
-						if (/^pages\/low_carbon\/lsxf\/details-new/.test(qPath)) {
+						if (/^pages\/activity\/lsxf\/details-new/.test(qPath)) {
 							const full = qPath.indexOf('/') === 0 ? qPath : '/' + qPath
 							this.$u.route(full)
 							return
@@ -442,7 +442,7 @@
 						const m = raw.match(/(?:scene|id)=(\d+)/)
 						const activeId = /^\d+$/.test(raw) ? raw : (m ? m[1] : '')
 						if (activeId) {
-							this.$u.route('/pages/low_carbon/lsxf/details-new?id=' + activeId)
+							this.$u.route('/pages/activity/lsxf/details-new?id=' + activeId)
 							return
 						}
 						this.$u.toast('未识别到活动二维码')

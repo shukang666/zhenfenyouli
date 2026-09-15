@@ -22,7 +22,7 @@
 							</view>
 						</u-col>
 						<u-col span="4">
-							<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="navigator('/pages/low_carbon/lsxf/lsxf?name=社区活动&type=3')" v-if="setting.is_active">
+							<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="navigator('/pages/activity/lsxf/lsxf?name=社区活动&type=3')" v-if="setting.is_active">
 								<view class="u-flex u-row-center">
 									<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/8f9e9a13bb18f32ed74e6e7a43f4b081.png?watermark"></u-image>
 								</view>
@@ -85,7 +85,7 @@
 
 					<u-row gutter="30">
 						<u-col span="4">
-							<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-t-30" @click="navigator('/pages/low_carbon/lsxf/lsxf?name=环保活动&type=2')"
+							<view class="u-width-100 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-t-30" @click="navigator('/pages/activity/lsxf/lsxf?name=环保活动&type=2')"
 								v-if="!setting.app_test">
 								<view class="u-flex u-row-center">
 									<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/b2bc3031e9b1fcb65fb59b52c2be27f5.png?watermark"></u-image>

@@ -108,7 +108,7 @@
 				})
 			},
 			gotoDetail(id) {
-				this.$u.route(`/pages/low_carbon/lsxf/details-new?id=${id}`)
+				this.$u.route(`/pages/activity/lsxf/details-new?id=${id}`)
 			},
 			navigateBack() {
 				uni.navigateBack()

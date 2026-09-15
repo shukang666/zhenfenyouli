@@ -27,7 +27,7 @@
             </view>
             <block v-if="type==2">
                 <view class="u-p-10 u-font-24 u-flex u-row-between u-m-lr-30" style="background-color: #EFF9F1;"
-                    v-if="item.shop_id==0" @click="$u.route('/pages/mall/address')">
+                    v-if="item.shop_id==0" @click="$u.route('/pages/shop/address')">
                     <view class="">
                         {{position_name||'请选择自提点'}}
                     </view>

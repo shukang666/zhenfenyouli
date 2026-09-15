@@ -26,7 +26,7 @@
 		<!-- 活动列表 -->
 		<view class="fb-act-list">
 			<view class="fb-act-card" v-for="item in active_list" :key="item.id"
-				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+				@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 				<view class="fb-act-cover">
 					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
 					<view class="fb-act-badge" v-if="item.active_count > 0">
@@ -110,7 +110,7 @@
 				this.$u.route('/pages/flhd/ljfldk')
 			},
 			gotoQxl() {
-				this.$u.route('/pages/low_carbon/love-qixianling')
+				this.$u.route('/pages/activity/love-qixianling')
 			},
 			navigateBack() {
 				uni.navigateBack()

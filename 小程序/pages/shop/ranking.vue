@@ -21,7 +21,7 @@
                 </view> -->
             </view>
             <view class="u-type-info-light-bg u-p-20 u-flex u-m-t-30 u-radius-10 u-rela"
-                v-for="(item,index) in goods_list" :key="index" @click="$u.route('/pages/mall/details?id='+item.id)">
+                v-for="(item,index) in goods_list" :key="index" @click="$u.route('/pages/shop/details?id='+item.id)">
                 <view class="u-abso" style="top: 0;left: 0;z-index: 9;">
                     <u-image width="40" height="40"
                         src="https://oss.ausite.cn/xcxkf052/admin/20250521/6d343cc15dfcd9365578b3138a41cb30.png?watermark"

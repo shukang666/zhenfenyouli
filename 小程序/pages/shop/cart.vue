@@ -268,7 +268,7 @@
                 });
                 if (!uniqueShopData.length) return this.$u.toast('请选择要结算的商品');
                 uni.setStorageSync('goods', uniqueShopData)
-                this.$u.route('/pages/mall/add_yj', {
+                this.$u.route('/pages/shop/add_yj', {
                     type: this.current + 1,
                 });
             },

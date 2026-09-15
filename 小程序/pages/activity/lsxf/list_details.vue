@@ -271,7 +271,7 @@
 			return {
 				title: this.info.title,
 				imageUrl: this.info.image[0] || '',
-				path: '/pages/low_carbon/lsxf/list_details?id=' + this.info.id
+				path: '/pages/activity/lsxf/list_details?id=' + this.info.id
 			}
 		}
 	}

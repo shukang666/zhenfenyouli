@@ -8,7 +8,7 @@ export function checkCommunity(vm) {
 	if (!vm.isLogin || !vm.userInfo || vm.userInfo.community_id) return false
 	isRedirecting = true
 	uni.navigateTo({
-		url: '/pages/user/info',
+		url: '/pages/member/info',
 		complete: () => {
 			isRedirecting = false
 		}

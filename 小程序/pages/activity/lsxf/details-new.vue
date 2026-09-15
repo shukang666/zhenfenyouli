@@ -320,14 +320,14 @@
 			return {
 				imageUrl: this.info.thumb,
 				title: this.info.name,
-				path: `/pages/low_carbon/lsxf/details-new?id=${this.id}&scene=${this.userInfo.id}`
+				path: `/pages/activity/lsxf/details-new?id=${this.id}&scene=${this.userInfo.id}`
 			}
 		},
 		onShareAppMessage() {
 			return {
 				imageUrl: this.info.thumb,
 				title: this.info.name,
-				path: `/pages/low_carbon/lsxf/details-new?id=${this.id}&scene=${this.userInfo.id}`
+				path: `/pages/activity/lsxf/details-new?id=${this.id}&scene=${this.userInfo.id}`
 			}
 		},
 		methods: {
@@ -371,7 +371,7 @@
 			},
 			// 跳转排行�?
 			goToRank() {
-				this.$u.route(`/pages/low_carbon/rank?id=${this.info.id}`);
+				this.$u.route(`/pages/activity/rank?id=${this.info.id}`);
 			},
 		// 上传组件状态变化回�?
 		handleUploadChange() {},

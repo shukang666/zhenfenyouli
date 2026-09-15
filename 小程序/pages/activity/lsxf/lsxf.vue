@@ -2,9 +2,9 @@
     <view class="container">
         <view class="fb-list">
             <view class="fb-card" v-for="(item,index) in cate_list" :key="index"
-                @click="$u.route('/pages/low_carbon/lsxf/details?id='+item.id)">
+                @click="$u.route('/pages/activity/lsxf/details?id='+item.id)">
                 <view class="fb-card-cover">
-                    <u-image width="100%" height="320" :src="item.thumb" mode="aspectFill"></u-image>
+                    <u-image width="100%" height="326" :src="item.thumb" mode="aspectFill"></u-image>
                 </view>
                 <view class="fb-card-body">
                     <view class="fb-card-title u-line-1">{{item.name}}</view>
@@ -23,7 +23,6 @@
                     </view>
                 </view>
             </view>
-            <u-empty margin-top="400" mode="list" v-if="!cate_list.length"></u-empty>
         </view>
     </view>
 </template>
@@ -35,9 +34,16 @@
                 cate_list: [],
                 page: 1,
                 total: 0,
+                cate_id: 0,
+                type: 1
             };
         },
-        onLoad() {
+        onLoad(option) {
+            this.type = option.type
+            uni.setNavigationBarTitle({
+                title: option.name
+            })
+            this.cate_id = option.id || 0
             this.get_active_list()
         },
         methods: {
@@ -45,7 +51,7 @@
             get_active_list() {
                 this.$u.api.get_active_list({
                     page: this.page,
-                    is_my:1
+                    type: this.type
                 }).then(res => {
                     this.cate_list.push(...res.data.data)
                     this.total = res.data.total
@@ -82,7 +88,7 @@
 .fb-card:active { opacity: 0.92; }
 .fb-card-cover {
     width: 100%;
-    height: 320rpx;
+    height: 326rpx;
     background: #F0F2F5;
 }
 .fb-card-body {

@@ -17,7 +17,7 @@
 			</template>
 			<view class="fb-list">
 				<view class="fb-card" v-for="item in dataList" :key="item.id"
-					@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 					<!-- 卡片封面图 -->
 					<view class="fb-card-cover">
 						<u-image width="100%" height="360" :src="item.thumb" mode="aspectFill"></u-image>
@@ -44,7 +44,7 @@
 							</view>
 						</view>
 						<view class="fb-card-footer">
-							<view class="fb-join-btn" @tap.stop="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+							<view class="fb-join-btn" @tap.stop="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 								立即参与
 							</view>
 						</view>

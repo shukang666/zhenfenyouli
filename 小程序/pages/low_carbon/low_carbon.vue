@@ -92,7 +92,7 @@
 		<!-- 活动列表 -->
 		<view class="fb-act-list">
 			<view class="fb-act-card" v-for="item in active_list" :key="item.id"
-				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+				@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 				<view class="fb-act-cover">
 					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
 					<view class="fb-act-badge" v-if="item.active_count > 0">
@@ -272,21 +272,21 @@
 
 				// 如果是数字，当作活动 ID
 				if (/^\d+$/.test(url)) {
-					this.$u.route(`/pages/low_carbon/lsxf/details-new?id=${url}`)
+					this.$u.route(`/pages/activity/lsxf/details-new?id=${url}`)
 					return
 				}
 
 				// 如果是 active?id=xxx 格式
 				const match = url.match(/id=(\d+)/)
 				if (match) {
-					this.$u.route(`/pages/low_carbon/lsxf/details-new?id=${match[1]}`)
+					this.$u.route(`/pages/activity/lsxf/details-new?id=${match[1]}`)
 					return
 				}
 			},
 
 			// 点击分类 → 进入分类列表页
 			gotoCateList(cate) {
-				this.$u.route(`/pages/low_carbon/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name)}`)
+				this.$u.route(`/pages/activity/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name)}`)
 			},
 
 			// 垃圾分类入口
@@ -296,12 +296,12 @@
 
 			// 爱护七贤岭入口
 			gotoQxl() {
-				this.$u.route('/pages/low_carbon/love-qixianling')
+				this.$u.route('/pages/activity/love-qixianling')
 			},
 
 			// 搜索
 			gotoSearch() {
-				this.$u.route('/pages/low_carbon/active-search')
+				this.$u.route('/pages/activity/active-search')
 			},
 
 			// tabbar

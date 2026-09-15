@@ -12,7 +12,7 @@
             <view class="u-type-white-bg">
                 <u-grid :col="4" :border="false">
                     <u-grid-item v-for="(item,index) in home_list" :key="index"
-                        @click="navigator('/pages/health/details?type=1&id='+item.id)">
+                        @click="navigator('/pages/healthcare/details?type=1&id='+item.id)">
                         <u-icon :name="item.thumb" :size="60"></u-icon>
                         <view class="u-font-24 u-w-120 u-text-center u-m-t-10">{{item.name}}</view>
                     </u-grid-item>
@@ -52,7 +52,7 @@
                     <view class="u-flex u-row-right u-m-t-20">
                         <view class="">
                             <u-button type="warning" plain size="mini"
-                                @click.shop="navigator('/pages/health/details?id='+item.id)">查看详情</u-button>
+                                @click.shop="navigator('/pages/healthcare/details?id='+item.id)">查看详情</u-button>
                         </view>
                         <!-- <view class="u-m-l-30">
                             <u-button type="primary" size="mini" hover-class="none"
@@ -73,11 +73,11 @@
                     <view class="u-flex u-row-right u-m-t-20">
                         <view class="">
                             <u-button type="warning" plain size="mini"
-                                @click="navigator('/pages/health/details?id='+item.id)">查看详情</u-button>
+                                @click="navigator('/pages/healthcare/details?id='+item.id)">查看详情</u-button>
                         </view>
                         <view class="u-m-l-30">
                             <u-button type="primary" size="mini" hover-class="none"
-                                @click="navigator('/pages/health/add?id='+item.id)">立即预约</u-button>
+                                @click="navigator('/pages/healthcare/add?id='+item.id)">立即预约</u-button>
                         </view>
                     </view>
                 </block>

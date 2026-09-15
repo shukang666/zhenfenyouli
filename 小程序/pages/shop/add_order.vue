@@ -44,7 +44,7 @@
 				</view>
 			</view>
 			<view class="u-p-30 u-type-white-bg u-flex u-row-between u-radius-0" v-else
-				@click="$u.route('/pages/mall/address?type=1')">
+				@click="$u.route('/pages/shop/address?type=1')">
 				<view class="u-flex u-width-100" v-if="Object.keys(position).length">
 					<u-image width="100" height="100" borderRadius="10" :src="position.thumb"></u-image>
 					<view class="u-m-l-20 u-width-100">

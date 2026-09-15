@@ -8,7 +8,7 @@
             <u-button type="primary" hover-class="none"
                 @click="navigateTo('/pages/answer/list?id='+ (health.cate_id ? health.id:health.exam_id))"
                 v-if="health.is_exam==1&&!health.is_answer">填写问卷</u-button>
-            <u-button type="primary" hover-class="none" @click="navigateTo('/pages/health/add?id='+health.id)"
+            <u-button type="primary" hover-class="none" @click="navigateTo('/pages/healthcare/add?id='+health.id)"
                 v-if="health.is_exam==2">立即预约</u-button>
         </view>
     </view>

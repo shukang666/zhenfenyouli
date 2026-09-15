@@ -77,7 +77,7 @@
 					<u-icon name="/static/user-1.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">积分明细</view>
 				</u-grid-item>
-				<u-grid-item @click="navigator('/pages/low_carbon/my_activity')">
+				<u-grid-item @click="navigator('/pages/activity/my_activity')">
 					<u-icon name="/static/user-2.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">我的活动</view>
 				</u-grid-item>
@@ -136,7 +136,7 @@
 				<u-icon name="https://oss.ausite.cn/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png?watermark" :size="50"></u-icon>
 				<view class="u-font-24 u-m-t-10">答题考试</view>
 			</u-grid-item>
-			<u-grid-item @click="navigator('/pages/user/badge')">
+			<u-grid-item @click="navigator('/pages/member/badge')">
 				<u-icon name="/static/user-9.png" :size="50"></u-icon>
 				<view class="u-font-24 u-m-t-10">我的徽章</view>
 			</u-grid-item>
@@ -159,7 +159,7 @@
 					<u-icon name="/static/user-13.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">联系客服</view>
 				</u-grid-item>
-				<u-grid-item @click="navigator('/pages/user/info')">
+				<u-grid-item @click="navigator('/pages/member/info')">
 					<u-icon name="/static/user-14.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">个人信息</view>
 				</u-grid-item>

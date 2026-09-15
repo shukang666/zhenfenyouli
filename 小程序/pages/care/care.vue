@@ -192,7 +192,7 @@
 					this.$u.route('/pages/public/login')
 					return
 				}
-				this.$u.route('/pages/low_carbon/rank')
+				this.$u.route('/pages/activity/rank')
 			},
 
 			goOrder() {

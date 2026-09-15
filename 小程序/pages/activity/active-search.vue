@@ -235,7 +235,7 @@
 			},
 			// 跳转活动详情
 			gotoDetail(item) {
-				this.$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)
+				this.$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)
 			},
 		}
 	}

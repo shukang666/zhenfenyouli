@@ -3,7 +3,7 @@
         <u-tabs :list="list" :is-scroll="false" :current="current" @change="change" active-color="#1877F2"></u-tabs>
         <view class="" v-if="!setting.app_test">
             <view class="u-type-white-bg u-p-30 u-m-b-30" v-for="(item,index) in forum_list" :key="index"
-                @click="$u.route('/pages/low_carbon/lsxf/list_details?id='+item.id+'&index='+index)">
+                @click="$u.route('/pages/activity/lsxf/list_details?id='+item.id+'&index='+index)">
                 <view class="u-flex">
                     <u-avatar :src="item.avatar" size="94"></u-avatar>
                     <view class="u-m-l-10">
@@ -106,13 +106,13 @@
             return {
                 title: this.info.title,
                 imageUrl: this.info.image[0] || '',
-                path: '/pages/low_carbon/lsxf/list_details?id=' + this.info.id
+                path: '/pages/activity/lsxf/list_details?id=' + this.info.id
             }
         },
         onShareTimeline() {
             return {
                 title: this.info.name,
-                path: '/pages/low_carbon/lsxf/details?id=' + this.info.id,
+                path: '/pages/activity/lsxf/details?id=' + this.info.id,
                 imageUrl: this.info.thumb
             }
         }

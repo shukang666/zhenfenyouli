@@ -71,7 +71,7 @@
 			</scroll-view>
 		</view>
 		<view class="u-m-t-30 u-flex u-row-between u-flex-wrap">
-			<view class="u-type-white-bg u-radius-10 u-w-334 u-m-b-30" v-for="(item,index) in goods_list" :key="index" @click="$u.route('/pages/mall/details?id='+item.id)">
+			<view class="u-type-white-bg u-radius-10 u-w-334 u-m-b-30" v-for="(item,index) in goods_list" :key="index" @click="$u.route('/pages/shop/details?id='+item.id)">
 				<u-image width="334" height="334" :src="item.thumb"></u-image>
 				<view class="u-p-10">
 					<view class="u-font-bold u-line-1">
@@ -87,10 +87,10 @@
 			</view>
 		</view>
 
-		<view class="" style="position: fixed;right: 30rpx;bottom: 180rpx;z-index: 9;" @click="$u.route('/pages/mall/cart')">
+		<view class="" style="position: fixed;right: 30rpx;bottom: 180rpx;z-index: 9;" @click="$u.route('/pages/shop/cart')">
 			<u-image width="100" height="100" src="https://oss.ausite.cn/xcxkf052/admin/20250521/0ee9d98c2273efcb512c5ea5abc876f1.png?watermark"></u-image>
 		</view>
-		<view class="" style="position: fixed;right: 30rpx;bottom: 280rpx;z-index: 9;" @click="$u.route('/pages/mall/ranking')">
+		<view class="" style="position: fixed;right: 30rpx;bottom: 280rpx;z-index: 9;" @click="$u.route('/pages/shop/ranking')">
 			<u-image width="100" height="100" src="https://oss.ausite.cn/xcxkf052/admin/20250521/4c26a124df730861668dd53ab9842f27.png?watermark"></u-image>
 		</view>
 		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->

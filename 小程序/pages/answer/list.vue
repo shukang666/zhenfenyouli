@@ -176,7 +176,7 @@
 			// 预约
 			add() {
 				// uni.redirectTo({
-				//     url: '/pages/health/add?id=' + this.health.id
+				//     url: '/pages/healthcare/add?id=' + this.health.id
 				// })
 				uni.navigateBack({
 					delta: 3

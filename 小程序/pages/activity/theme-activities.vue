@@ -11,7 +11,7 @@
 			</view>
 			<!-- 活动卡片列表 -->
 			<view class="act-card" v-for="item in dataList" :key="item.id"
-				@click="$u.route(`/pages/low_carbon/lsxf/details-new?id=${item.id}`)">
+				@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 				<view class="act-card-thumb">
 					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
 					<view class="card-participate" v-if="item.active_count > 0">

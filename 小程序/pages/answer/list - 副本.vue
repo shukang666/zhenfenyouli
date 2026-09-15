@@ -117,7 +117,7 @@
                     this.$u.func.showToast({
                         title: res.msg,
                         icon: 'success',
-                        url: '/pages/health/add?id=' + this.health_id,
+                        url: '/pages/healthcare/add?id=' + this.health_id,
                         type: 'redirectTo'
                     })
                     this.$u.toast(res.msg)

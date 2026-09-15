@@ -35,7 +35,7 @@
 			// 问卷调研按钮
 			wj_btn(item) {
 			    // if (item.is_exam == 1) return this.$u.toast('您已经参加过问卷')
-			    this.$u.route('/pages/health/participate?id=' + item.id)
+			    this.$u.route('/pages/healthcare/participate?id=' + item.id)
 			},
 			//
 			get_health_home_list(type) {

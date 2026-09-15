@@ -38,7 +38,7 @@
                 </view> -->
             </view>
             <view class="u-m-t-30 u-type-white-bg u-radius-10" v-for="(item,index) in cate_list" :key="index"
-                @click="$u.route('/pages/low_carbon/lsxf/details?id='+item.id)">
+                @click="$u.route('/pages/activity/lsxf/details?id='+item.id)">
                 <u-image width="100%" height="326" :src="item.thumb"></u-image>
                 <view class="u-p-20 u-flex u-row-between">
                     <view class="">
@@ -58,7 +58,7 @@
                     <view class="">
                         <u-button type="primary" size="mini" hover-class="none"
                             :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
-                            @click="$u.route('/pages/low_carbon/lsxf/details?id='+item.id)">立即参与</u-button>
+                            @click="$u.route('/pages/activity/lsxf/details?id='+item.id)">立即参与</u-button>
                     </view>
                 </view>
             </view>
@@ -96,7 +96,7 @@
             </view>
             <view class="u-m-t-30 u-flex u-row-between u-flex-wrap">
                 <view class="u-type-white-bg u-radius-10 u-w-334 u-m-b-30" v-for="(item,index) in goods_list"
-                    :key="index" @click="$u.route('/pages/mall/details?id='+item.id)">
+                    :key="index" @click="$u.route('/pages/shop/details?id='+item.id)">
                     <u-image width="334" height="334" :src="item.thumb"></u-image>
                     <view class="u-p-10">
                         <view class="u-font-bold">
@@ -182,7 +182,7 @@
             // 问卷调研按钮
             wj_btn(item) {
                 // if (item.is_exam == 1) return this.$u.toast('您已经参加过问卷')
-                this.$u.route('/pages/health/participate?id=' + item.id)
+                this.$u.route('/pages/healthcare/participate?id=' + item.id)
             },
             // 
             switchTab(url) {

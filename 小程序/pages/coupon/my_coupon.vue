@@ -27,7 +27,7 @@
                 </view>
             </view>
             <u-button type="error" :custom-style="{'width':'130rpx','height':'55rpx','font-size':'26rpx'}"
-                @click="$u.route('/pages/mall/merchant?id='+item.shop_id)" shape="circle">使用</u-button>
+                @click="$u.route('/pages/shop/merchant?id='+item.shop_id)" shape="circle">使用</u-button>
         </view>
         <!--  -->
         <u-empty mode="coupon" marginTop="450" v-if="!coupon_list.length"></u-empty>

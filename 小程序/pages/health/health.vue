@@ -38,7 +38,7 @@
 				</view>
 				<view class="u-flex u-row-between u-m-t-20">
 					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/32c529525baa3d53fcc4b12f5a289299.png?watermark"
-						@click="$u.route('/pages/health/add?id=0')"></u-image>
+						@click="$u.route('/pages/healthcare/add?id=0')"></u-image>
 					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/f4babaa3267896ff8e4737c9ffa4ce3c.png?watermark" @click="openChannelsLive(setting.video_id)"
 						v-if="setting.app_test != 1"></u-image>
 				</view>

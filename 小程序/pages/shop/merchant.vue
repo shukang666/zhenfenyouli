@@ -25,7 +25,7 @@
 
             <view class="u-m-t-30 u-flex u-row-between u-flex-wrap">
                 <view class="u-type-white-bg u-radius-10 u-w-334 u-m-b-30" v-for="(item,index) in goods_list"
-                    :key="index" @click="$u.route('/pages/mall/details?id='+item.id)">
+                    :key="index" @click="$u.route('/pages/shop/details?id='+item.id)">
                     <u-image width="334" height="334" :src="item.thumb"></u-image>
                     <view class="u-p-10">
                         <view class="u-font-bold">

@@ -37,7 +37,7 @@
             //
             navigator(url) {
                 if (!this.isLogin) return this.$u.route('/pages/public/login')
-                if (!this.userInfo.community_id) return this.$u.route('/pages/user/info')
+                if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
                 this.$u.route(url)
             },
             //获取数据
