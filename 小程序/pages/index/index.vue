@@ -337,7 +337,7 @@
 					this.$u.toast('该功能开发中')
 					return
 				}
-				// 社区活动：跳转活动页"本月推荐"标签（同 banner 跳转逻辑）
+				// 社区活动：跳转活动页（同 banner 跳转逻辑）
 				if (item.key === 'active' && item.url.indexOf('low_carbon') !== -1) {
 					uni.setStorageSync('jump_monthly_rec', 1)
 					uni.switchTab({ url: item.url.split('?')[0] })
@@ -396,7 +396,7 @@
 				let data = this.bannerList[e];
 				if (!data.url) return
 				let url = data.url
-				// 只要是跳转到活动页（low_carbon），就设置标记，让活动页切到"本月推荐"标签
+				// 只要是跳转到活动页（low_carbon），就设置标记
 				// switchTab 不支持 query 参数，所以用 storage 传标记
 				if (url.indexOf('low_carbon') !== -1) {
 					let tabUrl = url.split('?')[0]

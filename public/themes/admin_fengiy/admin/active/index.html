@@ -32,7 +32,7 @@
                     <th>推荐</th>
                 </if>
                 <if condition="$params.type == 1">
-                    <th>本月推荐</th>
+                    <th>本周推荐</th>
                     <th>首页展示</th>
                 </if>
                 <th>添加时间</th>
@@ -134,7 +134,7 @@
         form.on('switch(is_put)', function (data) {
             setStatus(data.value, 'is_put', this.checked ? 1 : 0)
         });
-        //本月推荐
+        //本周推荐
         form.on('switch(is_month_recommend)', function (data) {
             setStatus(data.value, 'is_month_recommend', this.checked ? 1 : 0)
         });

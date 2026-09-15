@@ -31,6 +31,28 @@
 			</swiper>
 		</view>
 
+		<!-- 本周推荐：banner 图下方活动推荐模块 -->
+		<view class="fb-weekly-rec" v-if="weekly_list.length > 0">
+			<view class="fb-weekly-header">
+				<text class="fb-weekly-title">本周推荐</text>
+			</view>
+			<scroll-view scroll-x class="fb-weekly-scroll" :show-scrollbar="false">
+				<view class="fb-weekly-list">
+					<view class="fb-weekly-card" v-for="item in weekly_list" :key="item.id"
+						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
+						<view class="fb-weekly-cover">
+							<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+							<view class="fb-weekly-badge" v-if="item.active_count > 0">
+								<text class="fb-weekly-badge-text">{{item.active_count}}人参与</text>
+							</view>
+						</view>
+						<view class="fb-weekly-name u-line-1">{{item.name}}</view>
+						<view class="fb-weekly-date">{{item.date | date('yy-mm-dd')}}结束</view>
+					</view>
+				</view>
+			</scroll-view>
+		</view>
+
 		<!-- 5 大活动分类：左侧大卡 + 右侧2x2 -->
 		<view class="fb-cate-wrap">
 			<!-- 左侧大竖卡（第1个：健康生活） -->
@@ -147,13 +169,14 @@
 				active_page: 1,
 				active_total: 0,
 				active_loading: false,
+				weekly_list: [],
 				// 5 大活动分类（硬编码，后台新增不显示）
 				// community_cate_id 对应数据库 cmf_active_community_cate.id
 				main_categories: [
-					{ id: 1, name: '健康生活', subtitle: 'Healthy Life', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE 0%, #1877F2 100%)' },
-					{ id: 2, name: '成长探索', subtitle: 'Growing Up', emoji: '🌟', bgColor: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' },
-					{ id: 3, name: '兴趣创造', subtitle: 'Hobby Time', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' },
-					{ id: 4, name: '社邻行动', subtitle: 'Neighbors', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)' },
+					{ id: 1, name: '健康运动', subtitle: 'Healthy Life', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE 0%, #1877F2 100%)' },
+					{ id: 2, name: '学习成长', subtitle: 'Growing Up', emoji: '🌟', bgColor: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' },
+					{ id: 3, name: '兴趣体验', subtitle: 'Hobby Time', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' },
+					{ id: 4, name: '交流互动', subtitle: 'Neighbors', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)' },
 					{ id: 5, name: '公益行动', subtitle: 'Volunteer', emoji: '💚', bgColor: 'linear-gradient(135deg, #E8EAF6, #C5CAE9)' },
 				],
 			};
@@ -170,11 +193,12 @@
 			async loadAllData() {
 				const startTime = Date.now()
 				try {
-					await Promise.all([
-						this.loadBanners(),
-						this.loadTags(),
-						this.loadHotActivities(),
-					])
+			await Promise.all([
+					this.loadBanners(),
+					this.loadWeeklyRec(),
+					this.loadTags(),
+					this.loadHotActivities(),
+				])
 				} catch (e) {
 					console.log('数据加载失败:', e)
 				} finally {
@@ -187,8 +211,21 @@
 				}
 			},
 
-			// 加载 Banner（slide group id=9 活动页Banner）
-			loadBanners() {
+		// 加载本周推荐活动（is_month_recommend=1，最多取 10 条）
+		loadWeeklyRec() {
+			return this.$u.api.get_new_active_list({
+				is_month_recommend: 1,
+				page_size: 10,
+				page: 1
+			}).then(res => {
+				this.weekly_list = res.data?.data || []
+			}).catch(() => {
+				this.weekly_list = []
+			})
+		},
+
+		// 加载 Banner（slide group id=9 活动页Banner）
+		loadBanners() {
 				return this.$u.api.find_slide({ id: 9 }).then(res => {
 					this.banner_list = res.data || []
 				}).catch(() => {
@@ -374,6 +411,71 @@
 .fb-banner-item {
 	width: 100%;
 	height: 100%;
+}
+
+/* ===== 本周推荐 ===== */
+.fb-weekly-rec {
+	padding: 16rpx 0 8rpx;
+}
+.fb-weekly-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 24rpx 16rpx;
+}
+.fb-weekly-title {
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #050505;
+}
+.fb-weekly-scroll {
+	white-space: nowrap;
+	padding-bottom: 8rpx;
+}
+.fb-weekly-list {
+	display: inline-flex;
+	padding: 0 24rpx;
+	gap: 20rpx;
+}
+.fb-weekly-card {
+	display: inline-flex;
+	flex-direction: column;
+	width: 260rpx;
+	flex-shrink: 0;
+}
+.fb-weekly-cover {
+	position: relative;
+	width: 260rpx;
+	height: 180rpx;
+	border-radius: 16rpx;
+	overflow: hidden;
+	background: #F0F2F5;
+}
+.fb-weekly-badge {
+	position: absolute;
+	left: 8rpx;
+	bottom: 8rpx;
+	z-index: 2;
+	padding: 4rpx 12rpx;
+	background: rgba(0, 0, 0, 0.55);
+	border-radius: 18rpx;
+}
+.fb-weekly-badge-text {
+	color: #fff;
+	font-size: 20rpx;
+	font-weight: 500;
+}
+.fb-weekly-name {
+	margin-top: 12rpx;
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #050505;
+	line-height: 1.4;
+}
+.fb-weekly-date {
+	margin-top: 4rpx;
+	font-size: 22rpx;
+	color: #65676B;
 }
 
 /* ===== 5 大活动分类：左大卡 + 右2x2 ===== */
