@@ -53,6 +53,31 @@
 			</scroll-view>
 		</view>
 
+		<!-- 每日浏览轻活动 -->
+		<view class="fb-light-act" v-if="light_list.length > 0">
+			<view class="fb-light-header">
+				<text class="fb-light-title">每日浏览轻活动</text>
+				<view class="fb-light-more" @click="goMoreLight">
+					<text>更多</text>
+					<u-icon name="arrow-right" size="22" color="#999"></u-icon>
+				</view>
+			</view>
+			<view class="fb-light-list">
+				<view class="fb-light-item" v-for="item in light_list" :key="item.id">
+					<view class="fb-light-icon">
+						<u-image width="100%" height="100%" :src="item.thumb || '/static/images/default-avatar.png'" mode="aspectFill"></u-image>
+					</view>
+					<view class="fb-light-info">
+						<text class="fb-light-name u-line-1">{{item.name}}</text>
+						<text class="fb-light-sub u-line-1">现在就能参与</text>
+					</view>
+					<view class="fb-light-btn" @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
+						<text class="fb-light-btn-text">立即参与</text>
+					</view>
+				</view>
+			</view>
+		</view>
+
 		<!-- 5 大活动分类：左侧大卡 + 右侧2x2 -->
 		<view class="fb-cate-wrap">
 			<!-- 左侧大竖卡（第1个：健康生活） -->
@@ -170,6 +195,7 @@
 				active_total: 0,
 				active_loading: false,
 				weekly_list: [],
+				light_list: [],
 				// 5 大活动分类（硬编码，后台新增不显示）
 				// community_cate_id 对应数据库 cmf_active_community_cate.id
 				main_categories: [
@@ -193,12 +219,13 @@
 			async loadAllData() {
 				const startTime = Date.now()
 				try {
-			await Promise.all([
-					this.loadBanners(),
-					this.loadWeeklyRec(),
-					this.loadTags(),
-					this.loadHotActivities(),
-				])
+				await Promise.all([
+						this.loadBanners(),
+						this.loadWeeklyRec(),
+						this.loadLightAct(),
+						this.loadTags(),
+						this.loadHotActivities(),
+					])
 				} catch (e) {
 					console.log('数据加载失败:', e)
 				} finally {
@@ -222,6 +249,24 @@
 			}).catch(() => {
 				this.weekly_list = []
 			})
+		},
+
+		// 加载轻活动（tag=轻活动，取最新 3 条）
+		loadLightAct() {
+			return this.$u.api.get_new_active_list({
+				tag: '轻活动',
+				page_size: 3,
+				page: 1
+			}).then(res => {
+				this.light_list = res.data?.data || []
+			}).catch(() => {
+				this.light_list = []
+			})
+		},
+
+		// 轻活动"更多"跳转 → 活动主页（热门活动列表）
+		goMoreLight() {
+			this.$u.route({ type: 'switchTab', url: '/pages/low_carbon/low_carbon' })
 		},
 
 		// 加载 Banner（slide group id=9 活动页Banner）
@@ -413,71 +458,6 @@
 	height: 100%;
 }
 
-/* ===== 本周推荐 ===== */
-.fb-weekly-rec {
-	padding: 16rpx 0 8rpx;
-}
-.fb-weekly-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0 24rpx 16rpx;
-}
-.fb-weekly-title {
-	font-size: 34rpx;
-	font-weight: 700;
-	color: #050505;
-}
-.fb-weekly-scroll {
-	white-space: nowrap;
-	padding-bottom: 8rpx;
-}
-.fb-weekly-list {
-	display: inline-flex;
-	padding: 0 24rpx;
-	gap: 20rpx;
-}
-.fb-weekly-card {
-	display: inline-flex;
-	flex-direction: column;
-	width: 260rpx;
-	flex-shrink: 0;
-}
-.fb-weekly-cover {
-	position: relative;
-	width: 260rpx;
-	height: 180rpx;
-	border-radius: 16rpx;
-	overflow: hidden;
-	background: #F0F2F5;
-}
-.fb-weekly-badge {
-	position: absolute;
-	left: 8rpx;
-	bottom: 8rpx;
-	z-index: 2;
-	padding: 4rpx 12rpx;
-	background: rgba(0, 0, 0, 0.55);
-	border-radius: 18rpx;
-}
-.fb-weekly-badge-text {
-	color: #fff;
-	font-size: 20rpx;
-	font-weight: 500;
-}
-.fb-weekly-name {
-	margin-top: 12rpx;
-	font-size: 26rpx;
-	font-weight: 600;
-	color: #050505;
-	line-height: 1.4;
-}
-.fb-weekly-date {
-	margin-top: 4rpx;
-	font-size: 22rpx;
-	color: #65676B;
-}
-
 /* ===== 5 大活动分类：左大卡 + 右2x2 ===== */
 .fb-cate-wrap {
 	display: flex;
@@ -657,6 +637,152 @@
 .fb-tab-text {
 	font-size: 26rpx;
 	color: #65676B;
+}
+
+/* ===== 本周推荐 ===== */
+.fb-weekly-rec {
+	padding: 16rpx 0 8rpx;
+}
+.fb-weekly-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 24rpx 16rpx;
+}
+.fb-weekly-title {
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #050505;
+}
+.fb-weekly-scroll {
+	white-space: nowrap;
+	padding-bottom: 8rpx;
+}
+.fb-weekly-list {
+	display: inline-flex;
+	padding: 0 24rpx;
+	gap: 20rpx;
+}
+.fb-weekly-card {
+	display: inline-flex;
+	flex-direction: column;
+	width: 260rpx;
+	flex-shrink: 0;
+}
+.fb-weekly-cover {
+	position: relative;
+	width: 260rpx;
+	height: 180rpx;
+	border-radius: 16rpx;
+	overflow: hidden;
+	background: #F0F2F5;
+}
+.fb-weekly-badge {
+	position: absolute;
+	left: 8rpx;
+	bottom: 8rpx;
+	z-index: 2;
+	padding: 4rpx 12rpx;
+	background: rgba(0, 0, 0, 0.55);
+	border-radius: 18rpx;
+}
+.fb-weekly-badge-text {
+	color: #fff;
+	font-size: 20rpx;
+	font-weight: 500;
+}
+.fb-weekly-name {
+	margin-top: 12rpx;
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #050505;
+	line-height: 1.4;
+}
+.fb-weekly-date {
+	margin-top: 4rpx;
+	font-size: 22rpx;
+	color: #65676B;
+}
+
+/* ===== 每日浏览轻活动 ===== */
+.fb-light-act {
+	padding: 8rpx 24rpx 24rpx;
+}
+.fb-light-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16rpx;
+}
+.fb-light-title {
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #050505;
+}
+.fb-light-more {
+	display: flex;
+	align-items: center;
+	gap: 4rpx;
+	font-size: 26rpx;
+	color: #999;
+}
+.fb-light-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+}
+.fb-light-item {
+	display: flex;
+	align-items: center;
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 16rpx;
+	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.06);
+	border: 1rpx solid #E4E6EB;
+	gap: 16rpx;
+}
+.fb-light-item:active {
+	opacity: 0.92;
+}
+.fb-light-icon {
+	flex-shrink: 0;
+	width: 100rpx;
+	height: 100rpx;
+	border-radius: 12rpx;
+	overflow: hidden;
+	background: #F0F2F5;
+}
+.fb-light-info {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6rpx;
+}
+.fb-light-name {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #050505;
+	line-height: 1.4;
+}
+.fb-light-sub {
+	font-size: 24rpx;
+	color: #65676B;
+}
+.fb-light-btn {
+	flex-shrink: 0;
+	padding: 10rpx 24rpx;
+	background: linear-gradient(135deg, #34C759 0%, #28A745 100%);
+	border-radius: 20rpx;
+}
+.fb-light-btn:active {
+	opacity: 0.8;
+}
+.fb-light-btn-text {
+	font-size: 24rpx;
+	color: #fff;
+	font-weight: 600;
+	white-space: nowrap;
 }
 
 /* ===== 活动列表 ===== */
