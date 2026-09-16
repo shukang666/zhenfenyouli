@@ -18,7 +18,7 @@ class ShotReportController extends AuthController
     /**
      * 提交随手拍问题
      * POST /wxapp/shot_report/post
-     * 参数：image, remark, location_type(1=小区内, 2=沿街商铺, 默认1)
+     * 参数：image, remark, location_type(1=小区内, 2=非小区, 默认1)
      */
     public function post()
     {
@@ -69,7 +69,7 @@ class ShotReportController extends AuthController
                 if (!empty($item['image'])) {
                     $item['image'] = cmf_get_asset_url($item['image']);
                 }
-                $item['location_type_name'] = $item['location_type'] == 2 ? '沿街商铺' : '小区内';
+                $item['location_type_name'] = $item['location_type'] == 2 ? '非小区' : '小区内';
                 return $item;
             });
         $this->success('获取成功', $list);

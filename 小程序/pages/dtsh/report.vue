@@ -7,7 +7,7 @@
 		<view class="u-p-40 u-type-white-bg u-radius-6 u-m-t-30">
 			<view class="u-text-center u-font-32 u-font-bold u-m-b-30">随手发现问题</view>
 			<view class="u-font-28 u-type-info u-text-center">
-				拍照记录小区、沿街商铺存在的问题
+				拍照记录小区、非小区（例如沿街商铺）存在的问题
 			</view>
 
 			<!-- 问题类型 -->
@@ -18,7 +18,7 @@
 						<u-tag text="小区内" :mode="form.location_type==1?'dark':'plain'" :type="form.location_type==1?'success':'info'" />
 					</view>
 					<view @click="form.location_type = 2">
-						<u-tag text="沿街商铺" :mode="form.location_type==2?'dark':'plain'" :type="form.location_type==2?'success':'info'" />
+						<u-tag text="非小区" :mode="form.location_type==2?'dark':'plain'" :type="form.location_type==2?'success':'info'" />
 					</view>
 				</view>
 			</view>
