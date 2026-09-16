@@ -83,7 +83,7 @@
 		</view> -->
 
 		<!-- 志愿督导工作台（督导员/指导员 入口） -->
-		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30" v-if="isVolunteer">
+		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30">
 			<view class="u-font-32 u-font-bold u-m-b-24">志愿督导工作台</view>
 			<view class="vol-grid u-flex u-row-between">
 				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome(1)">

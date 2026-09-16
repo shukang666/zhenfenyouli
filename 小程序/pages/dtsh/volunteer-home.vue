@@ -9,6 +9,12 @@
 		<view class="u-p-40 u-type-white-bg u-radius-6 u-m-t-30 u-text-center">
 			<view class="u-font-36 u-font-bold" style="color:#18AF38;">{{pageTitle}}</view>
 			<view class="u-font-24 u-type-info u-m-t-10">{{roleName}}工作平台</view>
+			<!-- 未通过审核：显示申请按钮 -->
+			<view class="u-m-t-20" v-if="!isApproved">
+				<u-button type="primary" size="mini" hover-class="none"
+					:customStyle="{background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)'}"
+					@click="goApply">申请{{roleName}}</u-button>
+			</view>
 		</view>
 
 		<!-- 功能入口 4 宫格 -->
@@ -91,6 +97,7 @@
 				roleType: 1,          // 1=督导员 2=指导员
 				checkInfo: null,
 				checkStatus: 0,        // 1=待审核 2=通过 3=拒绝
+				isApproved: false,     // 是否已审核通过
 				supervision: {
 					total: 0,
 					last_date: '',
@@ -124,19 +131,21 @@
 					}
 				})
 			},
-			loadData() {
+		loadData() {
 				// 查审核状态
 				if (this.$u.func.checkLogin()) {
 					this.$u.api.getCheckRole().then(res => {
 						this.checkInfo = res.data;
 						this.checkStatus = res.data.status || 0;
 						this.roleType = res.data.role_type == 2 ? 2 : 1;
+						this.isApproved = !!res.data.is_approved;
 					}).catch(err => {
-						// 暂无申请记录：普通用户提示去申请
+						// 暂无申请记录：视为未通过
+						this.isApproved = false;
 					});
-					// 查我的志愿督导
-					if (this.roleType == 1) {
-						this.$u.api.getVolunteerMyList({ page: 1, page_size: 1 }).then(res => {
+					// 查我的志愿督导（仅已批准用户）
+					if (this.roleType == 1 && this.isApproved) {
+						this.$u.api.getVolunteerMyList({page: 1, page_size: 1}).then(res => {
 							this.supervision.total = res.data.total || 0;
 							if (res.data.data && res.data.data.length > 0) {
 								this.supervision.last_date = res.data.data[0].supervision_date;
@@ -147,11 +156,24 @@
 			},
 			goToPage(url) {
 				if (!this.$u.func.checkLogin()) return;
+				// 未批准也能进入页面看效果，但传参控制提交权限
 				this.$u.route(url);
 			},
 			goToReport(locationType) {
 				if (!this.$u.func.checkLogin()) return;
-				this.$u.route(`/pages/dtsh/report?location_type=${locationType}`);
+				// 未批准也能进入页面看效果，但传参控制提交权限
+				this.$u.route(`/pages/dtsh/report?location_type=${locationType}&can_submit=${this.isApproved ? 1 : 0}`);
+			},
+			goApply() {
+				// 申请引导：根据当前申请状态给出提示
+				if (!this.checkInfo) {
+					// 未申请：提示用户去申请
+					this.$u.toast(`请先填写申请成为${this.roleName}`);
+				} else if (this.checkStatus == 1) {
+					this.$u.toast('您的申请正在审核中，请耐心等待');
+				} else if (this.checkStatus == 3) {
+					this.$u.toast('您的申请已被拒绝，可重新申请');
+				}
 			},
 		}
 	}
