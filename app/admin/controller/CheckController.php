@@ -44,7 +44,7 @@ class CheckController extends AdminBaseController
 
         $list = $this->model->alias('c')
             ->join('cmf_member m', 'm.id = c.user_id', 'LEFT')
-            ->join('cmf_community_parent cp', 'cp.id = c.community_id', 'LEFT')
+            ->join('cmf_member_community_parent cp', 'cp.id = c.community_id', 'LEFT')
             ->field('c.*, m.nickname, m.mobile as user_mobile, cp.name as community_name')
             ->where($where)
             ->order('c.id desc')
