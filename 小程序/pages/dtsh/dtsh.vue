@@ -33,7 +33,7 @@
 			</view>
 		</view>
 
-		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
+		<!-- <view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
 			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/11f9c0ccaefaeb375e7cea7000914a8b.png?watermark"></u-image>
 			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
 				<view class="u-font-bold">
@@ -80,7 +80,7 @@
 						@click="$u.route('/pages/sjhd/sjhd')">立即参与</u-button>
 				</view>
 			</view>
-		</view>
+		</view> -->
 
 		<!-- 志愿督导工作台（督导员/指导员 入口） -->
 		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30" v-if="isVolunteer">
