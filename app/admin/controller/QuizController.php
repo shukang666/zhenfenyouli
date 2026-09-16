@@ -66,6 +66,15 @@ class QuizController extends AdminBaseController
                 $this->error('添加失败');
             }
         }
+        $this->assign('data', [
+            'title' => '',
+            'option_a' => '',
+            'option_b' => '',
+            'option_c' => '',
+            'option_d' => '',
+            'correct_option' => '',
+            'list_order' => 0,
+        ]);
         return $this->fetch();
     }
 
