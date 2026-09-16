@@ -524,7 +524,25 @@
 			"pages": [{
 				"path": "dtsh",
 				"style": {
-					"navigationBarTitleText": "低碳生活",
+					"navigationBarTitleText": "垃圾分类打卡",
+					"navigationStyle": "custom"
+				}
+			}, {
+				"path": "report",
+				"style": {
+					"navigationBarTitleText": "随手发现问题",
+					"navigationStyle": "custom"
+				}
+			}, {
+				"path": "quiz",
+				"style": {
+					"navigationBarTitleText": "分类知识挑战",
+					"navigationStyle": "custom"
+				}
+			}, {
+				"path": "knowledge",
+				"style": {
+					"navigationBarTitleText": "分类知识",
 					"navigationStyle": "custom"
 				}
 			}]
