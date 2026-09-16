@@ -25,5 +25,12 @@ const wxapp = {
 	// 随手拍提交
 	postShotReport: (params = {}) => uni.$u.post('/wxapp/shot_report/post', params),
 
+	// 分类知识挑战 - 获取题目（随机组卷）
+	getQuiz: (params = {}) => uni.$u.get('/wxapp/quiz/get_quiz', params),
+	// 分类知识挑战 - 提交答案
+	submitQuiz: (params = {}) => uni.$u.post('/wxapp/quiz/submit_quiz', params),
+	// 分类知识挑战 - 检查今日是否已答
+	checkTodayQuiz: (params = {}) => uni.$u.get('/wxapp/quiz/check_today', params),
+
 }
 export default wxapp

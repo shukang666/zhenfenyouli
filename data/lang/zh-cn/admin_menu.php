@@ -29,6 +29,8 @@ return array (
   'ADMIN_BASIC_RICHTEXTOPTION' => '文本配置',
   'ADMIN_CARBON_DEFAULT' => '垃圾分类活动',
   'ADMIN_CARBON_LIFE_CATE_INDEX' => '自治活动',
+  'ADMIN_QUIZ_INDEX' => '分类知识挑战',
+  'ADMIN_QUIZ_RECORD' => '答题记录',
   'ADMIN_CATE_INDEX' => '分类配置',
   'ADMIN_CHECK_INDEX' => '督导员申请',
   'ADMIN_COMMUNITY_DEFAULT' => '社区管理',
