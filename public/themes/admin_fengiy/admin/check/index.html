@@ -54,7 +54,7 @@
                 <td>{$vo.name|default='--'}</td>
                 <td>{$vo.mobile|default=$vo.user_mobile|default='--'}</td>
                 <td><if condition="$vo.role_type == 2">指导员<else/>督导员</if></td>
-                <td>{$vo.community_name|default=$vo.community|default='--'}</td>
+                <td>{$vo.community_name|default='--'}</td>
                 <td style="max-width:200px;word-break:break-all;">{$vo.reason|default='--'}</td>
                 <td>
                     <if condition="$vo.status == 1">
