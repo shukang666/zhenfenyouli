@@ -489,7 +489,8 @@
 /* ===== Banner 轮播 ===== */
 .fb-banner-wrap {
 	width: 100%;
-	padding: 16rpx;
+	padding: 16rpx 16rpx 0;
+	margin-bottom: 24rpx;
 	box-sizing: border-box;
 }
 .fb-banner-swiper {
@@ -652,7 +653,7 @@
 .fb-entry-row {
 	display: flex;
 	gap: 20rpx;
-	padding: 0 24rpx 24rpx;
+	padding: 24rpx 24rpx 8rpx;
 }
 .fb-entry-card {
 	flex: 1;
@@ -796,7 +797,8 @@
 
 /* ===== 通用板块 ===== */
 .fb-section {
-	margin: 24rpx 0;
+	margin: 32rpx 0;
+	padding: 0 8rpx;
 }
 .fb-section:first-child {
 	margin-top: 16rpx;
