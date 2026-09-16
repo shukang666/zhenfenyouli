@@ -81,18 +81,14 @@
 				heroBgImage: '',
 			};
 		},
-		computed: {
-			heroBgStyle() {
-				if (this.heroBgImage) {
-					return {
-						backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage})`,
-						backgroundSize: 'cover',
-						background·Position: 'center',
-					}
-				}
-				return {}
+	computed: {
+		heroBgStyle() {
+			if (this.heroBgImage) {
+				return `background-image: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center;`
 			}
-		},
+			return ''
+		}
+	},
 		onLoad() {
 			this.loadHeroBg()
 			this.loadAllSections()
