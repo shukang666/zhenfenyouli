@@ -598,7 +598,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 24rpx;
+	padding: 32rpx 24rpx;
+	min-height: 120rpx;
 	border-radius: 16rpx;
 	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
 }

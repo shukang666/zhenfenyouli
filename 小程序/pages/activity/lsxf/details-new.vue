@@ -329,7 +329,7 @@
 				if (startTime && endTime) {
 					return startTime + ' ~ ' + endTime;
 				} else if (startTime) {
-					return startTime + ' ~ 不限';
+					return '截止至' + startTime;
 				}
 				return '不限';
 			} else {
