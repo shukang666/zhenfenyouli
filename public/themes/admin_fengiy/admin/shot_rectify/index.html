@@ -9,8 +9,8 @@
         状态：
         <select name="status" class="form-control" style="width: 120px;">
             <option value="">全部</option>
-            <option value="0" <if condition="$status === '0'">selected</if>>待整改</option>
-            <option value="1" <if condition="$status === '1'">selected</if>>已整改</option>
+            <option value="0" <if condition="$status eq '0'">selected</if>>待整改</option>
+            <option value="1" <if condition="$status eq '1'">selected</if>>已整改</option>
         </select>
         &nbsp;&nbsp;
         备注：
