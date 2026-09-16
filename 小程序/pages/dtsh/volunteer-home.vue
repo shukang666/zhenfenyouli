@@ -137,13 +137,15 @@
 					this.$u.api.getCheckRole().then(res => {
 						this.checkInfo = res.data;
 						this.checkStatus = res.data.status || 0;
-						this.roleType = res.data.role_type == 2 ? 2 : 1;
-						this.isApproved = !!res.data.is_approved;
+						// ⚠️ 不覆盖 this.roleType！保持从入口参数确定的角色
+						// 判断角色是否匹配：用户审核通过的角色必须和当前页面角色一致
+						const approvedRoleType = res.data.role_type == 2 ? 2 : 1;
+						this.isApproved = !!res.data.is_approved && (approvedRoleType === this.roleType);
 					}).catch(err => {
 						// 暂无申请记录：视为未通过
 						this.isApproved = false;
 					});
-					// 查我的志愿督导（仅已批准用户）
+					// 查我的志愿督导（仅当前页面是督导员 且 确实是督导员身份）
 					if (this.roleType == 1 && this.isApproved) {
 						this.$u.api.getVolunteerMyList({page: 1, page_size: 1}).then(res => {
 							this.supervision.total = res.data.total || 0;
@@ -167,10 +169,13 @@
 			goApply() {
 				// 申请引导：根据当前申请状态给出提示
 				if (!this.checkInfo) {
-					// 未申请：提示用户去申请
+					// 从未申请过
 					this.$u.toast(`请先填写申请成为${this.roleName}`);
 				} else if (this.checkStatus == 1) {
 					this.$u.toast('您的申请正在审核中，请耐心等待');
+				} else if (this.checkStatus == 2) {
+					// 已通过其他角色身份 → 当前角色尚未申请，允许申请新角色
+					this.$u.toast(`您已具备其他角色身份，可继续申请${this.roleName}`);
 				} else if (this.checkStatus == 3) {
 					this.$u.toast('您的申请已被拒绝，可重新申请');
 				}
