@@ -34,15 +34,15 @@
 				></textarea>
 			</view>
 
-			<!-- 提交按钮 -->
+		<!-- 提交按钮 -->
 			<view class="u-m-t-40 u-m-b-40">
 				<u-button
 					type="primary"
 					shape="circle"
-					size="large"
+					hover-class="none"
 					:disabled="!form.image || !form.remark"
 					@click="submit"
-					height="90"
+					:customStyle="{ background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)', height: '90rpx', fontSize: '32rpx' }"
 				>提交</u-button>
 			</view>
 		</view>
@@ -132,7 +132,7 @@
 					uni.hideLoading();
 					uni.showToast({
 						title: res.msg || '已提交，项目正在处理',
-						icon: 'success',
+						icon: 'none',
 						duration: 2000
 					});
 					setTimeout(() => {
