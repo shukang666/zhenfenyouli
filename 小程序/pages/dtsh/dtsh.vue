@@ -1,6 +1,6 @@
 <template>
 	<view class="u-p-30">
-		<u-navbar title-color="#fff" title="低碳生活" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false">
+		<u-navbar title-color="#fff" title="垃圾分类打卡" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false" :custom-back="customBack">
 			<!-- <view class="u-m-l-30">
                 <u-image width="231" height="64" :src="setting.min_logo"></u-image>
             </view> -->
@@ -110,10 +110,20 @@
 					// 配置加载失败不影响页面
 				}
 			},
-			// 点击 Banner 进入打卡界面
-			goToClock() {
-				this.$u.route('/pages/flhd/ljfldk')
-			},
+		// 点击 Banner 进入打卡界面
+		goToClock() {
+			this.$u.route('/pages/flhd/ljfldk')
+		},
+		// 自定义返回逻辑
+		customBack() {
+			uni.navigateBack({
+				fail() {
+					uni.switchTab({
+						url: '/pages/index/index'
+					})
+				}
+			})
+		},
 		}
 	}
 </script>
