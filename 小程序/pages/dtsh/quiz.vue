@@ -214,48 +214,48 @@
 					this.currentIndex++;
 				}
 			},
-			submitQuiz() {
-				// 检查是否所有题目都已作答
-				for (let i = 0; i < this.questions.length; i++) {
-					if (!this.answers[i]) {
-						uni.showToast({ title: '请完成第' + (i + 1) + '题', icon: 'none' });
-						this.currentIndex = i;
-						return;
-					}
+		submitQuiz() {
+			// 检查是否所有题目都已作答
+			for (let i = 0; i < this.questions.length; i++) {
+				if (!this.answers[i]) {
+					uni.showToast({ title: '请完成第' + (i + 1) + '题', icon: 'none' });
+					this.currentIndex = i;
+					return;
 				}
-
-				uni.showLoading({ title: '提交中...' });
-
-				// 构造答案数组
-				const answersArr = this.questions.map((q, idx) => ({
-					qid: q.id,
-					answer: this.answers[idx]
-				}));
-
-				this.$u.api.submitQuiz({
-					answers: JSON.stringify(answersArr)
-				}).then(res => {
-					uni.hideLoading();
-					if (res.code == 1) {
-						this.answered = true;
-						this.correctCount = res.data.correct_count || 0;
-						this.totalCount = res.data.total_count || 5;
-						this.earnedPoint = res.data.point || 0;
-						this.answersDetail = res.data.answers_detail || [];
-
-						if (this.earnedPoint > 0) {
-							uni.showToast({ title: '恭喜获得' + this.earnedPoint + '积分', icon: 'success' });
-						}
-					} else {
-						uni.showToast({ title: res.msg || '提交失败', icon: 'none' });
-					}
-				}).catch(() => {
-					uni.hideLoading();
-					uni.showToast({ title: '网络错误，请重试', icon: 'none' });
-				});
 			}
-		}
+
+			uni.showLoading({ title: '提交中...' });
+
+			// 构造答案数组
+			const answersArr = this.questions.map((q, idx) => ({
+				qid: q.id,
+				answer: this.answers[idx]
+			}));
+
+			this.$u.api.submitQuiz({
+				answers: answersArr
+			}).then(res => {
+				uni.hideLoading();
+				if (res.code == 1) {
+					this.answered = true;
+					this.correctCount = res.data.correct_count || 0;
+					this.totalCount = res.data.total_count || 5;
+					this.earnedPoint = res.data.point || 0;
+					this.answersDetail = res.data.answers_detail || [];
+
+					if (this.earnedPoint > 0) {
+						uni.showToast({ title: '恭喜获得' + this.earnedPoint + '积分', icon: 'success' });
+					}
+				} else {
+					uni.showToast({ title: res.msg || '提交失败', icon: 'none' });
+				}
+			}).catch(() => {
+				uni.hideLoading();
+				uni.showToast({ title: '网络错误，请重试', icon: 'none' });
+			});
+		},
 	}
+}
 </script>
 
 <style lang="scss" scoped>

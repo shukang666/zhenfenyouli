@@ -5,14 +5,14 @@
 			<view class="fb-nav-back" @click="navigateBack">
 				<u-icon name="arrow-left" size="44" color="#fff"></u-icon>
 			</view>
-			<text class="fb-nav-title">爱护七贤岭</text>
+			<text class="fb-nav-title">我和七贤岭</text>
 			<view class="fb-nav-placeholder"></view>
 		</view>
 
 			<!-- 头部 Hero -->
 		<view class="qxl-hero" :style="heroBgStyle">
 			<view class="qxl-hero-content">
-				<text class="qxl-hero-title">爱护七贤岭</text>
+				<text class="qxl-hero-title">我和七贤岭</text>
 				<text class="qxl-hero-subtitle">一起守护这片绿水青山</text>
 			</view>
 		</view>
