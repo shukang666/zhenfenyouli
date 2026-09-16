@@ -147,8 +147,8 @@
 			</view>
 		</view>
 
-		<!-- 标签栏：热门活动 + 动态标签 -->
-		<view class="fb-tab-bar">
+		<!-- 标签栏：热门活动 + 动态标签（已隐藏，保留代码备用） -->
+		<view class="fb-tab-bar" v-if="false">
 			<scroll-view scroll-x class="fb-tab-scroll" :show-scrollbar="false" :scroll-into-view="'tab-' + current_tab" scroll-with-animation>
 				<view class="fb-tab-list">
 					<view class="fb-tab-item" :class="{'fb-tab-active': current_tab === 0}" id="tab-0"
