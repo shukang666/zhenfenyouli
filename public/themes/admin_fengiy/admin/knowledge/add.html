@@ -1,5 +1,4 @@
 <include file="public@header"/>
-<script src="__STATIC__/js/plupload/plupload.full.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -35,15 +34,13 @@
             <div class="col-md-6 col-sm-10">
                 <div class="input-group">
                     <input type="text" class="form-control" id="knowledge-image" name="image" value="{$data.image|default=''}" placeholder="图片URL或上传">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id="upload-image">上传图片</button>
-                    </span>
                 </div>
                 <if condition="$data.image">
-                    <img src="{$data.image}" id="knowledge-image-preview" style="max-height:100px;margin-top:10px;border-radius:4px;">
+                    <img src="{$data.image}" id="knowledge-image-preview" style="height:80px;margin-top:10px;border-radius:4px;vertical-align:top;" onclick="parent.imagePreviewDialog(this.src);">
                 <else/>
-                    <img src="" id="knowledge-image-preview" style="max-height:100px;margin-top:10px;border-radius:4px;display:none;">
+                    <img src="" id="knowledge-image-preview" style="height:80px;margin-top:10px;border-radius:4px;vertical-align:top;display:none;" onclick="parent.imagePreviewDialog(this.src);">
                 </if>
+                <a class="btn btn-default" href="javascript:uploadOneImage('图片上传','#knowledge-image');" style="margin-top:10px;margin-left:4px;"><i class="fa fa-upload fa-fw"></i></a>
             </div>
         </div>
         <div class="form-group">
@@ -77,45 +74,21 @@
 </div>
 <script src="__STATIC__/js/admin.js"></script>
 <script>
-// 简单图片上传（使用 plupload + 项目已有的上传端点）
 $(function(){
-    if(typeof plupload !== 'undefined'){
-        var uploader = new plupload.Uploader({
-            browse_button: 'upload-image',
-            url: '{:url("admin/Upload/upload")}',
-            filters: { mime_types: [{ title: "Image files", extensions: "jpg,jpeg,png,gif" }] },
-            multipart_params: { app: 'admin' }
-        });
-        uploader.init();
-        uploader.bind('FilesAdded', function(up, files){
-            uploader.start();
-            $('#upload-image').text('上传中...');
-        });
-        uploader.bind('FileUploaded', function(up, file, resp){
-            var r = resp.response;
-            try { r = JSON.parse(r); } catch(e){}
-            if(r && r.code == 1){
-                $('#knowledge-image').val(r.data.url || r.url);
-                $('#knowledge-image-preview').attr('src', r.data.url || r.url).show();
-            } else {
-                alert(r.msg || '上传失败');
+    // uploadOneImage 回调后自动显示预览
+    var _origChange = $('#knowledge-image').data('onchange');
+    $('#knowledge-image').on('change', function(){
+        var v = $(this).val();
+        if(v){
+            // filepath 是相对路径，需要加上 root 才能预览
+            if(!/^https?:\/\//.test(v)){
+                v = GV.WEB_ROOT + v;
             }
-            $('#upload-image').text('上传图片');
-        });
-        uploader.bind('Error', function(up, err){
-            alert('上传错误: ' + err.message);
-            $('#upload-image').text('上传图片');
-        });
-    } else {
-        // fallback：提示手动填URL
-        $('#upload-image').click(function(){
-            var url = prompt('请输入图片URL');
-            if(url){
-                $('#knowledge-image').val(url);
-                $('#knowledge-image-preview').attr('src', url).show();
-            }
-        });
-    }
+            $('#knowledge-image-preview').attr('src', v).show();
+        } else {
+            $('#knowledge-image-preview').hide();
+        }
+    });
 });
 </script>
 </body>
