@@ -7,6 +7,7 @@ use app\admin\model\member\CheckModel;
 use app\admin\model\member\CommunityCateModel;
 use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberModel;
+use app\admin\model\member\MemberMerchantInspectModel;
 use app\admin\model\member\MemberShopHandleModel;
 use app\admin\model\member\MemberShopModel;
 use app\admin\model\shop\ShopModel;
@@ -269,6 +270,57 @@ class CheckController extends AuthController
             return $item;
         });
         $this->success('请求成功',$list);
+    }
+
+    /**
+     * 商户共治 - 提交（指导员）
+     * POST /wxapp/check/merchant_inspect
+     */
+    public function merchant_inspect()
+    {
+        $this->checkUser();
+        $params = $this->request->param();
+
+        if (empty($params['company'])) {
+            $this->error('请输入公司名称');
+        }
+
+        $data = [
+            'user_id'     => $this->user_id,
+            'company'     => trim($params['company']),
+            'image_one'   => trim($params['image_one'] ?? ''),
+            'image_two'   => trim($params['image_two'] ?? ''),
+            'image_three' => trim($params['image_three'] ?? ''),
+            'image_four'  => trim($params['image_four'] ?? ''),
+            'image_five'  => trim($params['image_five'] ?? ''),
+            'status'      => 0,
+            'create_time' => time(),
+        ];
+
+        MemberMerchantInspectModel::create($data);
+        $this->success('提交成功');
+    }
+
+    /**
+     * 商户共治 - 我的提交记录
+     * GET /wxapp/check/merchant_inspect_list
+     */
+    public function merchant_inspect_list()
+    {
+        $this->checkUser();
+        $page_size = $this->request->param('page_size', 10);
+        $list = MemberMerchantInspectModel::where('user_id', $this->user_id)
+            ->order('id', 'desc')
+            ->paginate($page_size)
+            ->each(function ($item) {
+                $item['image_one']   = empty($item['image_one']) ? '' : cmf_get_asset_url($item['image_one']);
+                $item['image_two']   = empty($item['image_two']) ? '' : cmf_get_asset_url($item['image_two']);
+                $item['image_three'] = empty($item['image_three']) ? '' : cmf_get_asset_url($item['image_three']);
+                $item['image_four']  = empty($item['image_four']) ? '' : cmf_get_asset_url($item['image_four']);
+                $item['image_five']  = empty($item['image_five']) ? '' : cmf_get_asset_url($item['image_five']);
+                return $item;
+            });
+        $this->success('请求成功', $list);
     }
 
 }
