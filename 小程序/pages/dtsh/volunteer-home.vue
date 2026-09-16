@@ -17,60 +17,45 @@
 			</view>
 		</view>
 
-		<!-- 功能入口 4 宫格 -->
+		<!-- 功能入口 1行3列 -->
 		<view class="u-type-white-bg u-radius-6 u-m-t-30 u-p-30">
 			<view class="u-font-30 u-font-bold u-m-b-20">快捷功能</view>
-			<view class="grid-2">
-				<!-- 志愿督导 -->
-				<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==1" @click="goToPage('/pages/dtsh/volunteer-sign')">
-					<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);">
-						<u-icon name="clock" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="u-font-26 u-m-t-10">志愿督导</text>
+			<view class="grid-3">
+			<!-- 第1个：志愿督导/督导监测 -->
+			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==1" @click="goToPage('/pages/dtsh/volunteer-sign')">
+				<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);">
+					<u-icon name="clock" size="48" color="#fff"></u-icon>
 				</view>
-				<!-- 督导巡查 -->
-				<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==1" @click="goToPage('/pages/zzhd/dwxj/dwxj?type=3')">
-					<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">
-						<u-icon name="eye" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="u-font-26 u-m-t-10">督导巡查</text>
-				</view>
-				<!-- 问题反馈（督导员） -->
-				<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==1" @click="goToReport(1)">
-					<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
-						<u-icon name="warning" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="u-font-26 u-m-t-10">问题反馈</text>
-				</view>
-				<!-- 督导监测（指导员） -->
-				<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==2" @click="$u.toast('开发中，敬请期待')">
-					<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
-						<u-icon name="eye" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="u-font-26 u-m-t-10">督导监测</text>
-				</view>
-				<!-- 随手发现问题（指导员） -->
-				<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==2" @click="goToReport(2)">
-					<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">
-						<u-icon name="camera" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="u-font-26 u-m-t-10">随手发现问题</text>
-				</view>
-				<!-- 整改任务（通用） -->
-				<view class="grid-item u-flex u-col-center u-row-center u-flex-col" @click="goToPage('/pages/dtsh/task-list')">
-					<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #f48fb1 0%, #d81b60 100%);">
-						<u-icon name="file-text" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="u-font-26 u-m-t-10">整改任务</text>
-				</view>
-				<!-- 商户共治（指导员预留） -->
-				<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==2" @click="$u.toast('开发中，敬请期待')">
-					<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ce93d8 0%, #6a1b9a 100%);">
-						<u-icon name="shopping-cart" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="u-font-26 u-m-t-10">商户共治</text>
-				</view>
+				<text class="u-font-26 u-m-t-10">志愿督导</text>
 			</view>
+			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==2" @click="$u.toast('开发中，敬请期待')">
+				<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
+					<u-icon name="eye" size="48" color="#fff"></u-icon>
+				</view>
+				<text class="u-font-26 u-m-t-10">督导监测</text>
+			</view>
+			<!-- 第2个：督导巡查/随手发现问题 -->
+			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==1" @click="goToPage('/pages/zzhd/dwxj/dwxj?type=3')">
+				<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">
+					<u-icon name="eye" size="48" color="#fff"></u-icon>
+				</view>
+				<text class="u-font-26 u-m-t-10">督导巡查</text>
+			</view>
+			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==2" @click="goToReport(2)">
+				<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">
+					<u-icon name="camera" size="48" color="#fff"></u-icon>
+				</view>
+				<text class="u-font-26 u-m-t-10">随手发现问题</text>
+			</view>
+			<!-- 第3个：问题反馈（通用） -->
+			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" @click="goToReport(roleType)">
+				<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
+					<u-icon name="warning" size="48" color="#fff"></u-icon>
+				</view>
+				<text class="u-font-26 u-m-t-10" v-if="roleType==1">问题反馈</text>
+				<text class="u-font-26 u-m-t-10" v-if="roleType==2">问题反馈</text>
+			</view>
+		</view>
 		</view>
 
 		<!-- 我的志愿督导记录 -->
@@ -178,12 +163,12 @@
 </script>
 
 <style lang="scss">
-.grid-2 {
+.grid-3 {
 	display: flex;
 	flex-wrap: wrap;
 }
 .grid-item {
-	width: 50%;
+	width: 33.33%;
 	padding: 24rpx 0;
 }
 .grid-icon {

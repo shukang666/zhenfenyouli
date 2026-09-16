@@ -102,6 +102,43 @@
 				</view>
 			</view>
 		</view>
+
+		<!-- 整改任务 -->
+		<view class="task-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30">
+			<view class="u-font-32 u-font-bold u-m-b-20">整改任务</view>
+			<!-- Tab 切换 -->
+			<view class="u-p-lr-10 u-m-b-20">
+				<u-tabs :list="taskTabs" :is-scroll="false" :current="currentTab" @change="changeTab" active-color="#18AF38"></u-tabs>
+			</view>
+			<!-- 可领取列表 -->
+			<view v-if="currentTab == 0">
+				<view v-if="taskList.length == 0"><u-empty text="暂无可领取任务" mode="list"></u-empty></view>
+				<view v-for="(item, idx) in taskList" :key="idx" class="task-card u-m-b-20">
+					<view class="u-font-30 u-font-bold">{{item.title}}</view>
+					<view class="u-font-26 u-type-info u-m-t-10">{{item.content}}</view>
+					<view class="u-flex u-row-between u-m-t-20">
+						<view class="u-font-26" style="color:#18AF38;">奖励积分 +{{item.point}}</view>
+						<u-button v-if="!item.accepted" type="success" size="mini" shape="circle" @click="acceptTask(item)">领取任务</u-button>
+						<u-button v-else type="info" size="mini" shape="circle" disabled>已领取</u-button>
+					</view>
+				</view>
+			</view>
+			<!-- 我的任务列表 -->
+			<view v-if="currentTab == 1">
+				<view v-if="myTasks.length == 0"><u-empty text="无我的任务" mode="list"></u-empty></view>
+				<view v-for="(item, idx) in myTasks" :key="idx" class="task-card u-m-b-20" @click="goSubmit(item)">
+					<view class="u-font-30 u-font-bold">{{item.task_title}}</view>
+					<view class="u-font-26 u-type-info u-m-t-10">{{item.task_content}}</view>
+					<view class="u-flex u-row-between u-m-t-20">
+						<view class="u-font-26" style="color:#18AF38;">奖励积分 +{{item.task_point}}</view>
+						<u-tag :text="item.status_name" :type="taskStatusType(item.status)" mode="dark" />
+					</view>
+					<view v-if="item.status == 2 && item.reason" class="u-font-24 u-type-error u-m-t-10">拒绝原因：{{item.reason}}</view>
+				</view>
+			</view>
+		</view>
+
+		<u-gap height="40"></u-gap>
 	</view>
 </template>
 
@@ -112,6 +149,13 @@
 				swiper_list: [],
 				dtshBanner: '',
 				checkRole: null, // { is_approved, role_type, role_name }
+				taskTabs: [
+					{ name: '可领取' },
+					{ name: '我的任务' },
+				],
+				currentTab: 0,
+				taskList: [],
+				myTasks: [],
 			};
 		},
 		computed: {
@@ -123,6 +167,12 @@
 			this.find_slide()
 			this.loadBanner()
 			this.loadCheckRole()
+			this.loadTaskList()
+			this.loadMyTasks()
+		},
+		onShow() {
+			this.loadTaskList()
+			this.loadMyTasks()
 		},
 		methods: {
 			// 加载用户角色
@@ -183,6 +233,58 @@
 				params: { role_type: roleType }
 			});
 		},
+		// === 整改任务相关 ===
+		changeTab(idx) {
+			this.currentTab = idx;
+		},
+		loadTaskList() {
+			if (!this.$u.func.checkLogin()) return;
+			this.$u.api.getVolunteerTaskList().then(res => {
+				this.taskList = res.data || [];
+			}).catch(() => {});
+		},
+		loadMyTasks() {
+			if (!this.$u.func.checkLogin()) return;
+			this.$u.api.getMyVolunteerTasks({ page: 1, page_size: 20 }).then(res => {
+				this.myTasks = res.data.data || [];
+			}).catch(() => {});
+		},
+		acceptTask(item) {
+			uni.showModal({
+				title: '确认领取',
+				content: `确定领取整改任务「${item.title}」吗？`,
+				success: (r) => {
+					if (!r.confirm) return;
+					this.$u.api.acceptVolunteerTask({ task_id: item.id }).then(res => {
+						uni.showToast({ title: res.msg || '领取成功', icon: 'none' });
+						this.loadTaskList();
+					}).catch(err => {
+						uni.showToast({ title: (err && err.msg) || '领取失败', icon: 'none' });
+					});
+				}
+			});
+		},
+		goSubmit(item) {
+			if (item.status == 3) {
+				uni.showToast({ title: '任务已完成', icon: 'none' });
+				return;
+			}
+			this.$u.route({
+				url: '/pages/dtsh/task-submit',
+				params: {
+					log_id: item.id,
+					title: item.task_title,
+					content: item.task_content,
+					point: item.task_point,
+					status: item.status,
+					images: (item.images_arr && item.images_arr.length > 0) ? JSON.stringify(item.images_arr) : '',
+				}
+			});
+		},
+		taskStatusType(status) {
+			const map = { 0: 'info', 1: 'warning', 2: 'error', 3: 'success' };
+			return map[status] || 'info';
+		},
 		// 自定义返回逻辑
 		customBack() {
 			uni.navigateBack({
@@ -207,6 +309,11 @@
 .task-text {
 	color: #333;
 }
+.task-card {
+	padding: 24rpx;
+	background: #f9f9f9;
+	border-radius: 12rpx;
+}
 .vol-grid {
 	gap: 20rpx;
 }
@@ -224,5 +331,8 @@
 }
 .vol-icon-blue {
 	background: linear-gradient(141deg, #64B5F6 0%, #1976D2 100%);
+}
+.task-section {
+	margin-bottom: 30rpx;
 }
 </style>
