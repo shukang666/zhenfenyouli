@@ -30,32 +30,31 @@
 			<view class="fb-list">
 				<view class="fb-card" v-for="item in dataList" :key="item.id"
 					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
-					<!-- 卡片封面图 -->
+					<!-- 左侧封面图 -->
 					<view class="fb-card-cover">
-						<u-image width="100%" height="360" :src="item.thumb" mode="aspectFill"></u-image>
-						<!-- 参与人数 badge -->
-						<view class="fb-card-badge" v-if="item.active_count">
-							<view class="fb-avatar-group">
-								<image :src="img" class="fb-avatar" mode="aspectFill"
-									v-for="img,i in item.avatar_array" :key="i" v-if="i<3"></image>
-							</view>
+						<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+						<view class="fb-card-badge" v-if="item.active_count > 0">
 							<text class="fb-badge-text">{{item.active_count}}人参与</text>
 						</view>
 					</view>
-					<!-- 卡片正文 -->
+					<!-- 右侧正文 -->
 					<view class="fb-card-body">
 						<view class="fb-card-title u-line-1">{{item.name}}</view>
 						<view class="fb-card-meta">
 							<view class="fb-meta-item">
-								<u-icon name="clock" size="26" color="#65676B"></u-icon>
+								<u-icon name="clock" size="22" color="#65676B"></u-icon>
 								<text class="fb-meta-text">{{item.date | date('yy-mm-dd')}}</text>
 							</view>
 							<view class="fb-meta-item" v-if="item.address && item.address.trim()">
-								<u-icon name="map" size="26" color="#65676B"></u-icon>
+								<u-icon name="map" size="22" color="#65676B"></u-icon>
 								<text class="fb-meta-text u-line-1">{{item.address}}</text>
 							</view>
 						</view>
 						<view class="fb-card-footer">
+							<view class="fb-card-point" v-if="item.send_point > 0">
+								<u-icon name="integral" size="22" color="#34C759"></u-icon>
+								<text class="fb-point-text">+{{item.send_point}}积分</text>
+							</view>
 							<view class="fb-join-btn" @tap.stop="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 								立即参与
 							</view>
@@ -192,11 +191,12 @@
 	padding: 4rpx;
 }
 
-/* ===== Facebook 风格卡片列表 ===== */
+/* ===== 活动卡片列表（横向：左图右文） ===== */
 .fb-list {
 	padding: 16rpx 16rpx 32rpx;
 }
 .fb-card {
+	display: flex;
 	background: #fff;
 	border-radius: 16rpx;
 	margin-bottom: 16rpx;
@@ -204,12 +204,13 @@
 	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.08);
 	border: 1rpx solid #E4E6EB;
 }
-.fb-card:active { opacity: 0.92; }
+.fb-card:active { opacity: 0.88; }
 
 .fb-card-cover {
+	width: 220rpx;
+	height: 220rpx;
+	flex-shrink: 0;
 	position: relative;
-	width: 100%;
-	height: 360rpx;
 	background: #F0F2F5;
 }
 .fb-card-cover ::v-deep .u-image {
@@ -220,60 +221,51 @@
 /* 参与人数 badge */
 .fb-card-badge {
 	position: absolute;
-	left: 20rpx; bottom: 20rpx;
+	left: 8rpx;
+	bottom: 8rpx;
 	z-index: 2;
 	display: inline-flex;
 	align-items: center;
-	height: 44rpx;
-	padding: 0 16rpx 0 8rpx;
+	height: 32rpx;
+	padding: 0 12rpx;
 	background: rgba(0, 0, 0, 0.55);
-	border-radius: 22rpx;
+	border-radius: 16rpx;
 }
-.fb-avatar-group {
-	display: flex;
-	align-items: center;
-}
-.fb-avatar {
-	width: 28rpx; height: 28rpx;
-	border-radius: 50%;
-	margin-left: -8rpx;
-	border: 2rpx solid #fff;
-	background: #F0F2F5;
-}
-.fb-avatar:first-child { margin-left: 0; }
 .fb-badge-text {
 	color: #fff;
-	font-size: 22rpx;
+	font-size: 18rpx;
 	font-weight: 500;
-	margin-left: 8rpx;
 }
 
 /* 卡片正文 */
 .fb-card-body {
-	padding: 24rpx 24rpx 20rpx;
+	flex: 1;
+	padding: 20rpx 20rpx 18rpx;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
 }
 .fb-card-title {
-	font-size: 32rpx;
+	font-size: 28rpx;
 	font-weight: 600;
 	color: #050505;
 	line-height: 1.4;
-	margin-bottom: 14rpx;
+	margin-bottom: 10rpx;
 }
 .fb-card-meta {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 16rpx;
-	margin-bottom: 16rpx;
+	gap: 12rpx;
+	flex: 1;
 }
 .fb-meta-item {
 	display: flex;
 	align-items: center;
 	min-width: 0;
-	flex: 1;
 }
-.fb-meta-item .u-icon { margin-right: 6rpx; }
+.fb-meta-item .u-icon { margin-right: 4rpx; }
 .fb-meta-text {
-	font-size: 24rpx;
+	font-size: 22rpx;
 	color: #65676B;
 	flex: 1;
 	overflow: hidden;
@@ -281,29 +273,39 @@
 	text-overflow: ellipsis;
 }
 
-/* 底部操作区 */
+/* 底部积分 + 按钮 */
 .fb-card-footer {
 	display: flex;
-	justify-content: flex-end;
-	padding-top: 8rpx;
-	border-top: 1rpx solid #E4E6EB;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 12rpx;
+	padding-top: 12rpx;
+	border-top: 1rpx solid #F0F2F5;
+}
+.fb-card-point {
+	display: flex;
+	align-items: center;
+	gap: 6rpx;
+}
+.fb-point-text {
+	font-size: 22rpx;
+	color: #34C759;
+	font-weight: 600;
 }
 .fb-join-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	height: 64rpx;
-	padding: 0 36rpx;
-	background: #E7F0FE;
-	color: #1877F2;
-	font-size: 26rpx;
+	height: 52rpx;
+	padding: 0 28rpx;
+	background: #E8F8EC;
+	color: #34C759;
+	font-size: 24rpx;
 	font-weight: 600;
-	border-radius: 32rpx;
-	margin-top: 16rpx;
-	transition: all 0.2s;
+	border-radius: 26rpx;
 }
 .fb-join-btn:active {
-	background: #1877F2;
+	background: #34C759;
 	color: #fff;
 }
 
@@ -337,10 +339,10 @@
 	background: #E4E6EB;
 }
 .fb-filter-active {
-	background: #1877F2;
+	background: #34C759;
 	color: #fff;
 }
 .fb-filter-active:active {
-	background: #166FE5;
+	background: #28A745;
 }
 </style>

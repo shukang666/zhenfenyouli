@@ -408,6 +408,7 @@ class ActiveController extends AuthController
             $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
             $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
             $item['content'] = htmlspecialchars_decode($item['content']);
+            $item['send_point'] = $item['send_point'] ?? 0;
 
             //参与人数
             $active_count = ActiveSIgnModel::where('active_id', $item['id'])->count();
