@@ -19,7 +19,11 @@ const wxapp = {
 	dailySign: (params = {}) => uni.$u.post('/wxapp/user/daily_sign', params),
 	// 签到状态
 	getSignStatus: (params = {}) => uni.$u.post('/wxapp/user/sign_status', params),
-	// 更新用户信息
+		// 更新用户信息
 	updateMember: (params = {}) => uni.$u.post('/wxapp/user/update_user', params),
+
+	// 随手拍提交
+	postShotReport: (params = {}) => uni.$u.post('/wxapp/shot_report/post', params),
+
 }
 export default wxapp
