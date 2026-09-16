@@ -7,13 +7,25 @@
 						<view class="fb-search-box">
 							<u-icon name="search" size="32" color="#65676B"></u-icon>
 							<input class="fb-search-input" v-model="keyword" placeholder="搜索活动" placeholder-class="fb-search-ph"
-								confirm-type="search" @confirm="$refs.paging.reload()" />
+								confirm-type="search" @confirm="onSearchConfirm" />
 							<view class="fb-search-clear" v-if="keyword" @click="clearKeyword">
 								<u-icon name="close-circle-fill" size="28" color="#BCC0C4"></u-icon>
 							</view>
 						</view>
 					</view>
 				</u-navbar>
+				<!-- 快捷筛选栏 -->
+				<view class="fb-filter-bar" v-if="showFilter">
+					<scroll-view scroll-x class="fb-filter-scroll" :show-scrollbar="false">
+						<view class="fb-filter-list">
+							<view class="fb-filter-item" :class="{ 'fb-filter-active': filterType === 'all' }" @click="switchFilter('all')">全部</view>
+							<view class="fb-filter-item" :class="{ 'fb-filter-active': filterType === 'recommend' }" @click="switchFilter('recommend')">推荐</view>
+							<view class="fb-filter-item" :class="{ 'fb-filter-active': filterType === 'light' }" @click="switchFilter('light')">轻活动</view>
+							<view class="fb-filter-item" :class="{ 'fb-filter-active': filterType === 'offline' }" @click="switchFilter('offline')">线下活动</view>
+							<view class="fb-filter-item" v-for="tag in tagOptions" :key="tag" :class="{ 'fb-filter-active': filterType === 'tag' && filterTag === tag }" @click="switchFilter('tag', tag)">{{tag}}</view>
+						</view>
+					</scroll-view>
+				</view>
 			</template>
 			<view class="fb-list">
 				<view class="fb-card" v-for="item in dataList" :key="item.id"
@@ -62,18 +74,71 @@
 				dataList: [],
 				cate_id: '',
 				keyword: '',
+				// 筛选相关
+				showFilter: false,
+				filterType: 'all',
+				filterTag: '',
+				tagOptions: [],
 			};
 		},
 		onLoad(op) {
 			this.cate_id = op.cate_id
+			// 根据入口参数决定初始筛选
+			if (op.filter) {
+				this.showFilter = true
+				if (['recommend', 'light', 'offline'].includes(op.filter)) {
+					this.filterType = op.filter
+				} else if (op.filter.startsWith('tag:')) {
+					this.filterType = 'tag'
+					this.filterTag = op.filter.slice(4)
+				}
+			} else if (op.cate_id) {
+				// 分类入口 → 显示筛选栏但只留"全部" + "推荐"
+				this.showFilter = true
+				this.filterType = 'all'
+			} else {
+				this.showFilter = true
+				this.filterType = 'all'
+			}
+			this.loadFilterTags()
 		},
 		methods: {
+			// 加载可选标签（用于动态筛选项，可隐藏不需要的动态标签）
+			async loadFilterTags() {
+				try {
+					let res = await this.$u.api.get_active_tags_list({})
+					let tags = res.data || []
+					// 只保留轻活动、线下活动已单独做按钮；这里放剩余的标签
+					this.tagOptions = tags.filter(t => !['轻活动', '线下活动'].includes(t))
+				} catch (e) {
+					this.tagOptions = []
+				}
+			},
+			// 切换筛选条件
+			switchFilter(type, tag) {
+				this.filterType = type
+				this.filterTag = tag || ''
+				this.$refs.paging.reload()
+			},
+			// 搜索
+			onSearchConfirm() {
+				this.$refs.paging.reload()
+			},
 			async queryList(page) {
 				try {
 					let params = {
 						page,
 						keyword: this.keyword,
 						community_cate_id: this.cate_id
+					}
+					if (this.filterType === 'recommend') {
+						params.is_recommendation = 1
+					} else if (this.filterType === 'light') {
+						params.tag = '轻活动'
+					} else if (this.filterType === 'offline') {
+						params.tag = '线下活动'
+					} else if (this.filterType === 'tag' && this.filterTag) {
+						params.tag = this.filterTag
 					}
 					let res = await this.$u.api.get_new_active_list(params)
 					this.$refs.paging.complete(res.data.data);
@@ -240,5 +305,42 @@
 .fb-join-btn:active {
 	background: #1877F2;
 	color: #fff;
+}
+
+/* ===== 快捷筛选栏 ===== */
+.fb-filter-bar {
+	background: #fff;
+	border-bottom: 1rpx solid #E4E6EB;
+}
+.fb-filter-scroll {
+	white-space: nowrap;
+	padding: 0 24rpx 16rpx;
+}
+.fb-filter-list {
+	display: inline-flex;
+	gap: 16rpx;
+}
+.fb-filter-item {
+	display: inline-flex;
+	align-items: center;
+	height: 64rpx;
+	padding: 0 28rpx;
+	border-radius: 32rpx;
+	background: #F0F2F5;
+	font-size: 26rpx;
+	color: #050505;
+	font-weight: 500;
+	white-space: nowrap;
+	transition: all 0.15s;
+}
+.fb-filter-item:active {
+	background: #E4E6EB;
+}
+.fb-filter-active {
+	background: #1877F2;
+	color: #fff;
+}
+.fb-filter-active:active {
+	background: #166FE5;
 }
 </style>

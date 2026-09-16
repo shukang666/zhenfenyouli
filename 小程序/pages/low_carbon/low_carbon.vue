@@ -295,9 +295,9 @@
 			})
 		},
 
-		// 轻活动"更多"跳转 → 活动主页（热门活动列表）
+		// 轻活动"更多" → 全部活动列表（选中"轻活动"筛选）
 		goMoreLight() {
-			this.$u.route({ type: 'switchTab', url: '/pages/low_carbon/low_carbon' })
+			this.$u.route({ url: '/pages/activity/active-list', params: { filter: 'light' } })
 		},
 
 		// 加载近期活动（非轻活动，按时间倒序取最新2条）
@@ -315,9 +315,9 @@
 			})
 		},
 
-		// 近期活动"更多"跳转 → 活动主页
+		// 近期活动"更多" → 全部活动列表（选中"线下活动"筛选）
 		goMoreRecent() {
-			this.$u.route({ type: 'switchTab', url: '/pages/low_carbon/low_carbon' })
+			this.$u.route({ url: '/pages/activity/active-list', params: { filter: 'offline' } })
 		},
 
 		// 加载 Banner（slide group id=9 活动页Banner）
