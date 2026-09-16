@@ -30,12 +30,12 @@
 					</view>
 					<view class="u-flex u-m-t-20 u-font-24">
 						<view class="u-flex">
-							<image src="/static/images/zhanghujifen.png" class="u-w-28 u-h-28" mode="aspectFill"></image>
+							<image src="https://admin.circular-economy.cn/static/images/zhanghujifen.png" class="u-w-28 u-h-28" mode="aspectFill"></image>
 							<view class="u-m-lr-5">账户积分</view>
 							<view class="u-font-32 u-main-c u-font-bold">{{userInfo.point}}</view>
 						</view>
 						<!-- 						<view class="u-flex u-m-l-30 u-font-24">
-							<image src="/static/images/lianxudaka.png" class="u-w-28 u-h-28" mode="aspectFill"></image>
+							<image src="https://admin.circular-economy.cn/static/images/lianxudaka.png" class="u-w-28 u-h-28" mode="aspectFill"></image>
 							<view class="u-m-lr-5">连续打卡</view>
 							<view class="u-font-32 u-main-c u-font-bold">2580</view>
 							<view>天</view>
@@ -52,7 +52,7 @@
 		<view class="u-rela u-w-690 u-m-t-30" v-if="!userInfo.is_environmental && isLogin">
 			<image v-if="imgUrl" :src="`${imgUrl}jiankangdaren-bg.png`" class="u-w-690 u-h-200" mode="aspectFill"></image>
 			<view class="u-w-690 u-h-200 u-abso u-abso-l-0 u-abso-t-0 u-flex u-p-30">
-				<image src="/static/images/jiankangdaren.png" mode="aspectFill" class="u-w-130 u-h-130"></image>
+				<image src="https://admin.circular-economy.cn/static/images/jiankangdaren.png" mode="aspectFill" class="u-w-130 u-h-130"></image>
 				<view class="u-m-l-15 u-hui">
 					<view class="u-flex u-row-between u-w-450 u-m-b-15">
 						<view class="u-font-30 u-main-c u-font-bold u-w-300">环保达人</view>
@@ -74,19 +74,19 @@
 			</view>
 			<u-grid :col="4" :border="false">
 				<u-grid-item @click="navigator('/pages/points/points')">
-					<u-icon name="/static/user-1.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-1.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">积分明细</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('/pages/activity/my_activity')">
-					<u-icon name="/static/user-2.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-2.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">我的活动</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('/pages/order_list/order_list')">
-					<u-icon name="/static/user-3.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-3.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">兑换订单</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('/pages/msg_list/msg_list')">
-					<u-icon name="/static/user-4.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-4.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">消息通知</view>
 				</u-grid-item>
 			</u-grid>
@@ -105,27 +105,27 @@
 			</view>
 			<u-grid :col="4" :border="false">
 				<u-grid-item @click="navigator('pages/my_comment/my_comment')" v-if="!setting.app_test">
-					<u-icon name="/static/user-5.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-5.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">我的评论</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('pages/my_evaluation/my_evaluation')">
-					<u-icon name="/static/user-6.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-6.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">我的测评记录</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('pages/my_questionnaire/my_questionnaire')">
-					<u-icon name="/static/user-7.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-7.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">我的问卷</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('pages/my_reservation/my_reservation')">
-					<u-icon name="/static/user-8.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-8.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">我的预约</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('pages/community/record')">
-					<u-icon name="/static/user-9.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-9.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">健康生活社区</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('/pages/flhd/record')">
-				<u-icon name="/static/user-10.png" :size="50"></u-icon>
+				<u-icon name="https://admin.circular-economy.cn/static/user-10.png" :size="50"></u-icon>
 				<view class="u-font-24 u-m-t-10">垃圾分类打卡</view>
 			</u-grid-item>
 			<u-grid-item @click="navigator('/pages/flhd/list')">
@@ -137,7 +137,7 @@
 				<view class="u-font-24 u-m-t-10">答题考试</view>
 			</u-grid-item>
 			<u-grid-item @click="navigator('/pages/member/badge')">
-				<u-icon name="/static/user-9.png" :size="50"></u-icon>
+				<u-icon name="https://admin.circular-economy.cn/static/user-9.png" :size="50"></u-icon>
 				<view class="u-font-24 u-m-t-10">我的徽章</view>
 			</u-grid-item>
 			</u-grid>
@@ -148,27 +148,27 @@
 			</view>
 			<u-grid :col="4" :border="false">
 				<u-grid-item @click="navigator('/pages/coupon/my_coupon')">
-					<u-icon name="/static/user-11.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-11.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">优惠券</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('/pages/address/index')">
-					<u-icon name="/static/user-12.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-12.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">地址管理</view>
 				</u-grid-item>
 				<u-grid-item @click="mask_show = true">
-					<u-icon name="/static/user-13.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-13.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">联系客服</view>
 				</u-grid-item>
 				<u-grid-item @click="navigator('/pages/member/info')">
-					<u-icon name="/static/user-14.png" :size="50"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/user-14.png" :size="50"></u-icon>
 					<view class="u-font-24 u-m-t-10">个人信息</view>
 				</u-grid-item>
 				<!-- <u-grid-item>
-                    <u-icon name="/static/user-15.png" :size="50"></u-icon>
+                    <u-icon name="https://admin.circular-economy.cn/static/user-15.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">扫码核销</view>
                 </u-grid-item>
                 <u-grid-item>
-                    <u-icon name="/static/user-16.png" :size="50"></u-icon>
+                    <u-icon name="https://admin.circular-economy.cn/static/user-16.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">核销记录</view>
                 </u-grid-item> -->
 			</u-grid>

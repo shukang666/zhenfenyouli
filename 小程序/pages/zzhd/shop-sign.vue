@@ -7,7 +7,7 @@
 					@on-remove="removeImages($event,'image_one',true)" max-count="1">
 
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -20,7 +20,7 @@
 					@on-remove="removeImages($event,'image_two',true)" max-count="1">
 
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -33,7 +33,7 @@
 					@on-remove="removeImages($event,'image_three',true)" max-count="1">
 
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -46,7 +46,7 @@
 					@on-remove="removeImages($event,'image_four',true)" max-count="1">
 
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -59,7 +59,7 @@
 					@on-remove="removeImages($event,'image_five',true)" max-count="1">
 
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>

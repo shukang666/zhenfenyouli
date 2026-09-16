@@ -15,7 +15,7 @@
 					<view class="u-p-tb-30">
 						<cl-upload v-model="form.image" :action="uploadUrl" @onSuccess="onSuccess" fileType="image">
 							<template v-slot:addImg>
-								<u-image width="138" height="138" src="/static/upload.png"></u-image>
+								<u-image width="138" height="138" src="https://admin.circular-economy.cn/static/upload.png"></u-image>
 							</template>
 						</cl-upload>
 					</view>
@@ -29,7 +29,7 @@
 					@on-remove="removeImages($event,'image_one',true)" max-count="1">
 
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -42,7 +42,7 @@
 					@on-remove="removeImages($event,'image_two',true)" max-count="1">
 
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -54,7 +54,7 @@
 				<u-upload :custom-btn="true" width="690" height="372" :action="uploadUrl" @on-success="uploadImages($event,'image_three',true)" :fileList="image_three"
 					@on-remove="removeImages($event,'image_three',true)" max-count="1">
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -66,7 +66,7 @@
 		<u-mask :show="tipShow">
 			<view class="u-w-560 u-radius-10 u-type-white-bg u-abso-center u-p-30" v-if="showType == 1">
 				<view class="u-text-center">
-					<image src="/static/images/dakachenggong.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
+					<image src="https://admin.circular-economy.cn/static/images/dakachenggong.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
 					<view class="u-font-32 u-m-t-30">恭喜您获得 <text class="u-font-40 u-main-c u-font-bold">{{point}}</text> 积分</view>
 				</view>
 				<view class="u-m-t-30 u-flex u-row-center">
@@ -75,7 +75,7 @@
 			</view>
 			<view class="u-w-560 u-radius-10 u-type-white-bg u-abso-center u-p-30" v-if="showType == 2">
 				<view class="u-text-center">
-					<image src="/static/images/wenxintishi.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
+					<image src="https://admin.circular-economy.cn/static/images/wenxintishi.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
 					<view class="u-m-t-30">
 						<view class="u-m-b-30">请在倒计时结束后打卡</view>
 						<u-count-down :timestamp="remaining_seconds" :show-border="true" font-size="48" height="80" color="#ffffff" border-color="#FF843D" bg-color="#FF843D"

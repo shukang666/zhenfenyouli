@@ -6,7 +6,7 @@
 		<u-cell-group v-if="current==0&&(goods[0]?goods[0].is_express==1:'')">
 			<u-cell-item :label="address.phone?'':'您还没有添加地址'" @click="$u.route('/pages/address/index?source=1&type=1')">
 				<view class="u-m-r-10" slot="icon">
-					<u-icon name="/static/map.png" size="48"></u-icon>
+					<u-icon name="https://admin.circular-economy.cn/static/map.png" size="48"></u-icon>
 				</view>
 				<view class="" slot="title">
 					<view class="" v-if="!Object.keys(address).length">
@@ -106,7 +106,7 @@
 		<!-- 备注 -->
 		<!-- <view class="u-p-30 u-type-white-bg u-radius-10 u-m-t-30 u-flex u-row-between">
 			<view class="u-flex u-col-top">
-				<u-icon name="/static/jifen.png" size="46"></u-icon>
+				<u-icon name="https://admin.circular-economy.cn/static/jifen.png" size="46"></u-icon>
 				<view class="u-m-l-10">
 					<view class="u-font-bold">
 						积分抵扣 <text style="color: #18AF38;">({{userInfo.point}})</text>

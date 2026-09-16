@@ -43,7 +43,7 @@
 			<view class="hello-card" v-if="isLogin && todayTask.show">
 				<view class="hello-card__main" @click="$u.route({type:'switchTab', url:'/pages/user/index'})">
 					<view class="hello-card__avatar">
-						<u-image :src="userInfo.avatar || '/static/images/default-avatar.png'" width="80" height="80" shape="circle" mode="aspectFill"></u-image>
+						<u-image :src="userInfo.avatar || 'https://admin.circular-economy.cn/static/images/default-avatar.png'" width="80" height="80" shape="circle" mode="aspectFill"></u-image>
 					</view>
 					<view class="hello-card__text">
 						<view class="hello-card__greet-row">

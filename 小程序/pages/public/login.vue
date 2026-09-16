@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<view class="content">
-			<u-avatar size="260" mode="square" :src="setting.app_logo || '/static/logo.png'"></u-avatar>
+			<u-avatar size="260" mode="square" :src="setting.app_logo || 'https://admin.circular-economy.cn/static/logo.png'"></u-avatar>
 			<view class="u-font-32 u-font-bold u-type-warning u-m-t-30">{{ setting.app_name}}</view>
 		</view>
 

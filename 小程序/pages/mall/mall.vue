@@ -17,7 +17,7 @@
 			</view>
 		</u-navbar>
 		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(to bottom,#2fb74c,#EFF9F1);">
-			<!-- <u-image width="100%" height="527" src="/static/index-bg.png"></u-image> -->
+			<!-- <u-image width="100%" height="527" src="https://admin.circular-economy.cn/static/index-bg.png"></u-image> -->
 		</view>
 		<view class="u-p-b-30">
 			<u-search placeholder="搜索商品名称" v-model="keyword" border-color="#18AF38" search-icon-color="#18AF38"></u-search>

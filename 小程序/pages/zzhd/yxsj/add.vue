@@ -16,7 +16,7 @@
                     <view class="u-p-tb-30">
                         <cl-upload v-model="form.image" :action="uploadUrl" @onSuccess="onSuccess" fileType="image">
                             <template v-slot:addImg>
-                                <u-image width="138" height="138" src="/static/upload.png"></u-image>
+                                <u-image width="138" height="138" src="https://admin.circular-economy.cn/static/upload.png"></u-image>
                             </template>
                         </cl-upload>
                     </view>

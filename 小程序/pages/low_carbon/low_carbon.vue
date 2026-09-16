@@ -111,7 +111,7 @@
 				<view class="fb-light-card" v-for="item in light_list" :key="item.id"
 					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 					<view class="fb-light-cover">
-						<u-image width="100%" height="100%" :src="item.thumb || '/static/images/default-avatar.png'" mode="aspectFill"></u-image>
+						<u-image width="100%" height="100%" :src="item.thumb || 'https://admin.circular-economy.cn/static/images/default-avatar.png'" mode="aspectFill"></u-image>
 					</view>
 					<view class="fb-light-info">
 						<text class="fb-light-name u-line-1">{{item.name}}</text>
