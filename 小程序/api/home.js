@@ -1,8 +1,10 @@
 const home = {
-	// 获取我的徽章列表 
+	// 获取我的徽章列表
 	get_new_badge_list: (params = {}) => uni.$u.post('/wxapp/active/get_new_badge_list', params),
 	// 活动分类
 	get_new_cate_active_list: (params = {}) => uni.$u.post('/wxapp/active/get_new_cate_active_list', params),
+	// 社区活动分类列表（七贤岭 4 个 + 常规 5 个）
+	get_community_cate_list: (params = {}) => uni.$u.get('/wxapp/active/get_community_cate_list', params),
 	// 活动页标签列表
 	get_active_tab_list: (params = {}) => uni.$u.post('/wxapp/active/get_active_tab_list', params),
 	// 活动所有标签（去重，用于底部标签栏）

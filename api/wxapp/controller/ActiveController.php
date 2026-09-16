@@ -361,6 +361,25 @@ class ActiveController extends AuthController
     }
 
     /**
+     * 社区活动分类列表（七贤岭 4 个分类 + 普通 5 个分类）
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_community_cate_list",
+     *@OA\Response(response="200", description="社区活动分类列表"),
+     *@OA\Response(response="default", description="error")
+     * )
+     */
+    public function get_community_cate_list(){
+        $id = $this->request->param('id');
+        $list = ActiveCommunityCateModel::order('list_order asc, id asc')->select();
+        if ($id) {
+            $item = ActiveCommunityCateModel::where('id', $id)->find();
+            $this->success('请求成功', $item);
+        }
+        $this->success('请求成功', $list);
+    }
+
+    /**
      * 活动列表
      * @OA\Get (
      *tags={"新版活动"},

@@ -93,15 +93,20 @@
 </template>
 
 <script>
+	// 七贤岭本地装饰贴条（emoji / 副标题 / 渐变配色不存 DB，便于前端微调）
+	const QXL_CATE_DECOR = {
+		6: { subtitle: '探索自然，发现美好', emoji: '🔍', accent: '#1877F2', bgColor: 'linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%)' },
+		7: { subtitle: '亲子玩乐，互动体验', emoji: '🎮', accent: '#34C759', bgColor: 'linear-gradient(135deg, #34C759 0%, #28A745 100%)' },
+		8: { subtitle: '用镜头记录每一刻', emoji: '📷', accent: '#FF9500', bgColor: 'linear-gradient(135deg, #FF9500 0%, #E68900 100%)' },
+		9: { subtitle: '守护绿水青山，从我做起', emoji: '🌱', accent: '#AF52DE', bgColor: 'linear-gradient(135deg, #AF52DE 0%, #8B41C2 100%)' },
+	}
+
 	export default {
 		data() {
 			return {
-				qxl_categories: [
-					{ id: 6, name: '发现七贤岭', subtitle: '探索自然，发现美好', emoji: '🔍', accent: '#1877F2', bgColor: 'linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%)', activities: [], loading: true },
-					{ id: 7, name: '玩在七贤岭', subtitle: '亲子玩乐，互动体验', emoji: '🎮', accent: '#34C759', bgColor: 'linear-gradient(135deg, #34C759 0%, #28A745 100%)', activities: [], loading: true },
-					{ id: 8, name: '记录七贤岭', subtitle: '用镜头记录每一刻', emoji: '📷', accent: '#FF9500', bgColor: 'linear-gradient(135deg, #FF9500 0%, #E68900 100%)', activities: [], loading: true },
-					{ id: 9, name: '守护七贤岭', subtitle: '守护绿水青山，从我做起', emoji: '🌱', accent: '#AF52DE', bgColor: 'linear-gradient(135deg, #AF52DE 0%, #8B41C2 100%)', activities: [], loading: true },
-				],
+				// 4 个七贤岭分类：基础字段从后端 cmf_active_community_cate 拉取，
+				// 装饰字段（emoji / accent / bgColor）从前端装饰贴条 QXL_CATE_DECOR 合并
+				qxl_categories: [],
 				heroBgImage: '',
 			};
 		},
@@ -115,7 +120,7 @@
 	},
 		onLoad() {
 			this.loadHeroBg()
-			this.loadAllSections()
+			this.loadQxlCategories()
 		},
 		methods: {
 			// 加载七贤岭 Hero 背景图配置
@@ -130,20 +135,52 @@
 					// 配置获取失败时使用默认渐变背景
 				}
 			},
+			// 加载七贤岭 4 个活动分类（id 6..9）；从后端取名称，合并本地装饰贴条
+			async loadQxlCategories() {
+				try {
+					const res = await this.$u.api.get_community_cate_list()
+					const all = res.data || []
+					const qxlIds = [6, 7, 8, 9]
+					const list = []
+					qxlIds.forEach(id => {
+						const found = all.find(c => Number(c.id) === id)
+						if (found) {
+							const decor = QXL_CATE_DECOR[id] || {}
+							list.push({
+								id: found.id,
+								name: found.name,
+								subtitle: decor.subtitle || found.name,
+								emoji: decor.emoji || '📌',
+								accent: decor.accent || '#34C759',
+								bgColor: decor.bgColor || 'linear-gradient(135deg, #34C759 0%, #28A745 100%)',
+								activities: [],
+								loading: true,
+							})
+						}
+					})
+					this.qxl_categories = list
+				} catch (e) {
+					// API 失败时回退到纯本地装饰版，保证页面仍可用
+					this.qxl_categories = [6, 7, 8, 9].map(id => {
+						const decor = QXL_CATE_DECOR[id]
+						return { id, name: decor ? id === 6 ? '发现七贤岭' : id === 7 ? '玩在七贤岭' : id === 8 ? '记录七贤岭' : '守护七贤岭' : '七贤岭', ...decor, activities: [], loading: true }
+					})
+				} finally {
+					this.loadAllSections()
+				}
+			},
 			// 并行加载 4 个分类的活动
 			async loadAllSections() {
 				const tasks = this.qxl_categories.map(cate =>
 					this.fetchCateActivities(cate.id).then(list => {
-						cate.activities = list
-						cate.loading = false
+						this.$set(cate, 'activities', list)
+						this.$set(cate, 'loading', false)
 					}).catch(() => {
-						cate.activities = []
-						cate.loading = false
+						this.$set(cate, 'activities', [])
+						this.$set(cate, 'loading', false)
 					})
 				)
 				await Promise.all(tasks)
-				// 触发 Vue 响应式更新
-				this.qxl_categories = [...this.qxl_categories]
 			},
 			fetchCateActivities(communityCateId) {
 				return this.$u.api.get_new_active_list({
