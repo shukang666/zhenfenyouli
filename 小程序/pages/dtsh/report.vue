@@ -23,6 +23,51 @@
 				</view>
 			</view>
 
+			<!-- 小区内：选小区 + 点位 -->
+			<view class="u-m-t-40" v-if="form.location_type == 1">
+				<view class="u-font-28 u-m-b-16">小区与点位</view>
+				<view class="u-m-b-20">
+					<view class="u-font-24 u-type-info u-m-b-8">所属小区</view>
+					<view class="location-display">
+						<u-icon name="home" size="28" color="#18AF38"></u-icon>
+						<text class="location-text">{{ communityName || '未绑定小区' }}</text>
+					</view>
+				</view>
+				<view>
+					<view class="u-font-24 u-type-info u-m-b-8">问题点位</view>
+					<view class="location-picker" @click="showPointPicker = true">
+						<text v-if="form.point_name" class="location-text">{{ form.point_name }}</text>
+						<text v-else class="location-placeholder">请选择点位</text>
+						<u-icon name="arrow-right" size="24" color="#999"></u-icon>
+					</view>
+				</view>
+			</view>
+
+			<!-- 非小区：商户名称 + 地址 -->
+			<view class="u-m-t-40" v-if="form.location_type == 2">
+				<view class="u-font-28 u-m-b-16">商户信息</view>
+				<view class="u-m-b-20">
+					<view class="u-font-24 u-type-info u-m-b-8">商户名称</view>
+					<input
+						class="merchant-input"
+						v-model="form.merchant_name"
+						placeholder="请输入商户名称"
+						placeholder-style="color:#ccc;font-size:26rpx;"
+						maxlength="50"
+					/>
+				</view>
+				<view>
+					<view class="u-font-24 u-type-info u-m-b-8">详细地址</view>
+					<input
+						class="merchant-input"
+						v-model="form.address"
+						placeholder="请输入详细地址"
+						placeholder-style="color:#ccc;font-size:26rpx;"
+						maxlength="100"
+					/>
+				</view>
+			</view>
+
 			<!-- 拍照上传 -->
 			<view class="u-m-t-40">
 				<view class="u-font-28 u-m-b-16">问题照片</view>
@@ -53,12 +98,21 @@
 					type="primary"
 					shape="circle"
 					hover-class="none"
-					:disabled="!form.image || !form.remark"
+					:disabled="!canSubmit"
 					@click="submit"
 					:customStyle="{ background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)', height: '90rpx', fontSize: '32rpx' }"
 				>提交</u-button>
 			</view>
 		</view>
+
+		<!-- 点位选择器 -->
+		<u-select
+			v-model="showPointPicker"
+			label-name="name"
+			value-name="id"
+			:list="pointList"
+			@confirm="onPointConfirm"
+		></u-select>
 	</view>
 </template>
 
@@ -73,15 +127,40 @@
 					image: '',
 					remark: '',
 					location_type: 1,   // 默认小区内
+					// 小区内
+					community_id: 0,
+					community_name: '',
+					point_id: 0,
+					point_name: '',
+					// 非小区
+					merchant_name: '',
+					address: '',
 				},
+				communityName: '',   // 用户绑定的小区名称
+				communityId: 0,     // 用户绑定的小区ID
+				pointList: [],      // 点位列表
+				showPointPicker: false,
 				uploadUrl,
 			};
+		},
+		computed: {
+			canSubmit() {
+				if (!this.form.image || !this.form.remark) return false;
+				if (this.form.location_type == 1) {
+					// 小区内：需要小区+点位
+					return this.communityId > 0 && this.form.point_id > 0;
+				} else {
+					// 非小区：需要商户名称+地址
+					return this.form.merchant_name.trim() && this.form.address.trim();
+				}
+			}
 		},
 		onLoad(option) {
 			if (option.location_type) {
 				const lt = parseInt(option.location_type);
 				if ([1, 2].includes(lt)) this.form.location_type = lt;
 			}
+			this.loadUserCommunity();
 		},
 		methods: {
 			customBack() {
@@ -92,6 +171,39 @@
 						})
 					}
 				})
+			},
+
+			// 加载用户绑定的小区信息
+			loadUserCommunity() {
+				this.$u.api.getUserInfo().then(res => {
+					if (res.data) {
+						this.communityName = res.data.community || '';
+						this.communityId = res.data.community_id || 0;
+						this.form.community_id = this.communityId;
+						this.form.community_name = this.communityName;
+						// 加载点位列表
+						if (this.communityId > 0) {
+							this.loadPointList();
+						}
+					}
+				}).catch(() => {});
+			},
+
+			// 加载点位列表
+			loadPointList() {
+				this.$u.api.get_community_cate_list().then(res => {
+					this.pointList = res.data || [];
+				}).catch(() => {
+					this.pointList = [];
+				});
+			},
+
+			// 点位选择确认
+			onPointConfirm(e) {
+				if (e && e.length) {
+					this.form.point_id = e[0].value;
+					this.form.point_name = e[0].label;
+				}
 			},
 
 			// 选择图片并上传
@@ -148,11 +260,38 @@
 					return;
 				}
 
+				// 根据位置类型校验
+				if (this.form.location_type == 1) {
+					if (this.communityId <= 0) {
+						uni.showToast({ title: '请先绑定小区', icon: 'none' });
+						return;
+					}
+					if (!this.form.point_id) {
+						uni.showToast({ title: '请选择问题点位', icon: 'none' });
+						return;
+					}
+				} else {
+					if (!this.form.merchant_name.trim()) {
+						uni.showToast({ title: '请填写商户名称', icon: 'none' });
+						return;
+					}
+					if (!this.form.address.trim()) {
+						uni.showToast({ title: '请填写详细地址', icon: 'none' });
+						return;
+					}
+				}
+
 				uni.showLoading({ title: '提交中...' });
 				this.$u.api.postShotReport({
 					image: this.form.image,
 					remark: this.form.remark,
 					location_type: this.form.location_type || 1,
+					community_id: this.form.community_id,
+					community_name: this.form.community_name,
+					point_id: this.form.point_id,
+					point_name: this.form.point_name,
+					merchant_name: this.form.merchant_name,
+					address: this.form.address,
 				}).then(res => {
 					uni.hideLoading();
 					uni.showToast({
@@ -173,6 +312,50 @@
 </script>
 
 <style lang="scss">
+	/* ===== 小区内位置展示 ===== */
+	.location-display {
+		display: flex;
+		align-items: center;
+		gap: 10rpx;
+		padding: 20rpx 24rpx;
+		background: #F0F2F5;
+		border-radius: 12rpx;
+	}
+
+	.location-picker {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 20rpx 24rpx;
+		background: #F5F5F5;
+		border-radius: 12rpx;
+		border: 2rpx solid #eee;
+	}
+
+	.location-text {
+		font-size: 28rpx;
+		color: #333;
+		flex: 1;
+	}
+
+	.location-placeholder {
+		font-size: 28rpx;
+		color: #ccc;
+		flex: 1;
+	}
+
+	/* ===== 非小区商户输入 ===== */
+	.merchant-input {
+		width: 100%;
+		padding: 20rpx 24rpx;
+		background: #F5F5F5;
+		border-radius: 12rpx;
+		font-size: 28rpx;
+		color: #333;
+		border: 2rpx solid #eee;
+		box-sizing: border-box;
+	}
+
 	.upload-area {
 		width: 100%;
 		height: 360rpx;

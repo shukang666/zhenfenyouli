@@ -222,13 +222,13 @@
 				recent_list: [],
 				// 5 大活动分类（硬编码，后台新增不显示）
 				// community_cate_id 对应数据库 cmf_active_community_cate.id
-				main_categories: [
-					{ id: 1, name: '健康运动', subtitle: 'Healthy Life', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE 0%, #1877F2 100%)' },
-					{ id: 2, name: '学习成长', subtitle: 'Growing Up', emoji: '🌟', bgColor: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)' },
-					{ id: 3, name: '兴趣体验', subtitle: 'Hobby Time', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFF3E0, #FFE0B2)' },
-					{ id: 4, name: '交流互动', subtitle: 'Neighbors', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)' },
-					{ id: 5, name: '公益行动', subtitle: 'Volunteer', emoji: '💚', bgColor: 'linear-gradient(135deg, #E8EAF6, #C5CAE9)' },
-				],
+			main_categories: [
+				{ id: 1, name: '健康运动', subtitle: 'Healthy Life', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE 0%, #1877F2 100%)' },
+				{ id: 2, name: '学习成长', subtitle: 'Growing Up', emoji: '🌟', bgColor: 'linear-gradient(135deg, #D4FC79 0%, #96E6A1 100%)' },
+				{ id: 3, name: '兴趣体验', subtitle: 'Hobby Time', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFD194 0%, #FF9A56 100%)' },
+				{ id: 4, name: '交流互动', subtitle: 'Neighbors', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)' },
+				{ id: 5, name: '公益行动', subtitle: 'Volunteer', emoji: '💚', bgColor: 'linear-gradient(135deg, #A18CD1 0%, #D8B4FE 100%)' },
+			],
 			};
 		},
 		onLoad(options) {
@@ -518,30 +518,60 @@
 	align-items: flex-start;
 	justify-content: flex-end;
 	padding: 24rpx;
-	box-shadow: 0 3rpx 10rpx rgba(0,0,0,0.12);
+	box-shadow: 0 6rpx 20rpx rgba(24, 119, 242, 0.15);
 	color: #fff;
 	position: relative;
 	overflow: hidden;
+	transition: transform 0.2s;
 }
-.fb-cate-big:active { opacity: 0.88; }
+.fb-cate-big:active { 
+	transform: scale(0.96); 
+	opacity: 0.9;
+}
 .fb-cate-big-emoji {
 	position: absolute;
 	top: 20rpx;
 	right: 16rpx;
-	font-size: 80rpx;
-	opacity: 0.85;
+	font-size: 88rpx;
+	opacity: 0.9;
+	filter: drop-shadow(0 4rpx 8rpx rgba(0,0,0,0.2));
+}
+/* 左侧大卡装饰圆 */
+.fb-cate-big::before {
+	content: '';
+	position: absolute;
+	top: -40rpx;
+	left: -40rpx;
+	width: 140rpx;
+	height: 140rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.12);
+}
+.fb-cate-big::after {
+	content: '';
+	position: absolute;
+	bottom: -30rpx;
+	right: 20rpx;
+	width: 100rpx;
+	height: 100rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.08);
 }
 .fb-cate-big-name {
-	font-size: 32rpx;
+	font-size: 34rpx;
 	font-weight: 700;
 	color: #fff;
-	text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2);
+	text-shadow: 0 2rpx 6rpx rgba(0,0,0,0.2);
+	position: relative;
+	z-index: 1;
 }
 .fb-cate-big-sub {
 	font-size: 20rpx;
 	color: rgba(255,255,255,0.85);
 	margin-top: 2rpx;
 	letter-spacing: 1rpx;
+	position: relative;
+	z-index: 1;
 }
 .fb-cate-right {
 	flex: 1;
@@ -558,19 +588,50 @@
 	align-items: center;
 	padding: 14rpx 16rpx;
 	gap: 10rpx;
-	box-shadow: 0 2rpx 6rpx rgba(0,0,0,0.08);
+	box-shadow: 0 3rpx 10rpx rgba(0,0,0,0.06);
 	overflow: hidden;
+	position: relative;
+	transition: transform 0.2s;
 }
-.fb-cate-mini:active { opacity: 0.85; }
+.fb-cate-mini:active { 
+	transform: scale(0.95); 
+	opacity: 0.9;
+}
+/* 小卡装饰圆 */
+.fb-cate-mini::before {
+	content: '';
+	position: absolute;
+	top: -20rpx;
+	right: -20rpx;
+	width: 70rpx;
+	height: 70rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.25);
+}
+.fb-cate-mini::after {
+	content: '';
+	position: absolute;
+	bottom: -15rpx;
+	right: 25rpx;
+	width: 40rpx;
+	height: 40rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.15);
+}
 .fb-cate-mini-emoji {
-	font-size: 40rpx;
+	font-size: 44rpx;
 	flex-shrink: 0;
+	position: relative;
+	z-index: 1;
+	filter: drop-shadow(0 2rpx 4rpx rgba(0,0,0,0.1));
 }
 .fb-cate-mini-text {
 	display: flex;
 	flex-direction: column;
 	flex: 1;
 	min-width: 0;
+	position: relative;
+	z-index: 1;
 }
 .fb-cate-mini-name {
 	font-size: 24rpx;

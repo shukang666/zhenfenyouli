@@ -39,6 +39,7 @@
             <th>手机号</th>
             <th>问题图片</th>
             <th>问题类型</th>
+            <th>位置信息</th>
             <th>备注</th>
             <th>状态</th>
             <th>提交时间</th>
@@ -59,6 +60,15 @@
                     </notempty>
                 </td>
                 <td><if condition="$vo.location_type == 2">非小区<else/>小区内</if></td>
+                <td style="max-width:200px;word-break:break-all;">
+                    <if condition="$vo.location_type == 2">
+                        <span style="color:#666;">{$vo.merchant_name}</span><br>
+                        <small style="color:#999;">{$vo.address}</small>
+                    <else/>
+                        <span style="color:#666;">{$vo.community_name}</span><br>
+                        <small style="color:#999;">{$vo.point_name}</small>
+                    </if>
+                </td>
                 <td style="max-width:200px;word-break:break-all;">{$vo.remark}</td>
                 <td>
                     <if condition="$vo.status == 0">
