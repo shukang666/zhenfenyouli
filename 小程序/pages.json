@@ -545,6 +545,12 @@
 					"navigationBarTitleText": "分类知识",
 					"navigationStyle": "custom"
 				}
+			}, {
+				"path": "knowledge-detail",
+				"style": {
+					"navigationBarTitleText": "知识详情",
+					"navigationStyle": "custom"
+				}
 			}]
 		},
 		{

@@ -32,5 +32,10 @@ const wxapp = {
 	// 分类知识挑战 - 检查今日是否已答
 	checkTodayQuiz: (params = {}) => uni.$u.get('/wxapp/quiz/check_today', params),
 
+	// 分类知识 - 列表
+	getKnowledgeList: (params = {}) => uni.$u.get('/wxapp/knowledge/get_list', params),
+	// 分类知识 - 详情
+	getKnowledgeDetail: (params = {}) => uni.$u.get('/wxapp/knowledge/get_detail', params),
+
 }
 export default wxapp
