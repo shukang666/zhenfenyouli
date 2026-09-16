@@ -9,6 +9,9 @@ class CheckModel extends ToolModel
 {
     protected $name = 'check';
 
+    // cmf_check 表无 delete_time 字段，禁用从 ToolModel 继承的软删除
+    protected $deleteTime = false;
+
     public function get_status()
     {
         return [
