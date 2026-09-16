@@ -1,0 +1,58 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('admin/QxlQuiz/index')}">七贤岭考试</a></li>
+        <li class="active"><a href="javascript:;">答题记录</a></li>
+    </ul>
+    <div class="well form-inline margin-top-20">
+        <form method="get" action="{:url('admin/QxlQuiz/record')}">
+            <div class="form-group">
+                <label>用户：</label>
+                <input type="text" class="form-control" name="keyword" style="width: 160px;"
+                       value="{$keyword}" placeholder="昵称/手机号">
+            </div>
+            <div class="form-group">
+                <label>日期：</label>
+                <input type="date" class="form-control" name="date" style="width: 140px;"
+                       value="{$date}">
+            </div>
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <a class="btn btn-danger" href="{:url('admin/QxlQuiz/record')}">清空</a>
+            <a class="btn btn-success" href="{:url('admin/QxlQuiz/export_record', $_GET)}">导出Excel</a>
+        </form>
+    </div>
+    <table class="table table-hover table-bordered table-list margin-top-20">
+        <thead>
+        <tr>
+            <th width="60">ID</th>
+            <th>昵称</th>
+            <th>手机号</th>
+            <th width="120">答题日期</th>
+            <th width="80">总题数</th>
+            <th width="80">答对数</th>
+            <th width="100">获得积分</th>
+            <th width="150">提交时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.nickname|default='-'}</td>
+                <td>{$vo.mobile|default='-'}</td>
+                <td>{$vo.quiz_date}</td>
+                <td>{$vo.total_count}</td>
+                <td><span class="label label-success">{$vo.correct_count}</span></td>
+                <td><span>{$vo.point} 积分</span></td>
+                <td>{$vo.create_time|date="Y-m-d H:i"}</td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

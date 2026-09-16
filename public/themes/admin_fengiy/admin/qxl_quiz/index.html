@@ -1,0 +1,86 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">七贤岭考试</a></li>
+        <li><a href="{:url('admin/QxlQuiz/record')}">答题记录</a></li>
+    </ul>
+    <div class="well form-inline margin-top-20">
+        <form method="get" action="{:url('admin/QxlQuiz/index')}">
+            <div class="form-group">
+                <label>状态：</label>
+                <select name="status" class="form-control" style="width: 120px;">
+                    <option value="">全部</option>
+                    <option value="1" <if condition="$status eq '1'">selected="selected"</if>>启用</option>
+                    <option value="0" <if condition="$status eq '0'">selected="selected"</if>>禁用</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>题目：</label>
+                <input type="text" class="form-control" name="keyword" style="width: 200px;"
+                       value="{$keyword}" placeholder="题目关键词">
+            </div>
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <a class="btn btn-danger" href="{:url('admin/QxlQuiz/index')}">清空</a>
+        </form>
+    </div>
+    <div class="table-actions row" style="margin: 10px 0;">
+        <div class="col-md-12">
+            <a class="btn btn-primary btn-sm" href="{:url('admin/QxlQuiz/add')}">添加题目</a>
+            <button class="btn btn-danger btn-sm js-ajax-submit" type="button"
+                    data-action="{:url('admin/QxlQuiz/delete_all')}" data-subcheck="true">批量删除</button>
+        </div>
+    </div>
+    <form class="js-ajax-form" method="post" action="{:url('admin/QxlQuiz/listOrder')}">
+        <table class="table table-hover table-bordered table-list">
+            <thead>
+            <tr>
+                <th width="40"><input type="checkbox" class="js-check-all" data-toggle="js-check"></th>
+                <th width="50">排序</th>
+                <th width="50">ID</th>
+                <th>题目内容</th>
+                <th width="80">正确答案</th>
+                <th width="80">状态</th>
+                <th width="150">创建时间</th>
+                <th width="150">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <foreach name="list" item="vo">
+                <tr id="row_{$vo.id}">
+                    <td><input type="checkbox" class="js-check" name="ids[]" value="{$vo.id}"></td>
+                    <td>
+                        <input type="text" name="list_orders[{$vo.id}]" class="input-order"
+                               value="{$vo.list_order}" style="width:40px;text-align:center;">
+                    </td>
+                    <td>{$vo.id}</td>
+                    <td style="max-width:300px;word-break:break-all;">{$vo.title}</td>
+                    <td><span class="label label-success">{$vo.correct_option}</span></td>
+                    <td>
+                        <if condition="$vo.status == 1">
+                            <span class="label label-success">启用</span>
+                        <else/>
+                            <span class="label label-default">禁用</span>
+                        </if>
+                    </td>
+                    <td>{$vo.create_time|date="Y-m-d H:i"}</td>
+                    <td>
+                        <a class="btn btn-xs btn-primary" href="{:url('admin/QxlQuiz/edit', ['id'=>$vo.id])}">编辑</a>
+                        <a class="btn btn-xs btn-danger js-ajax-delete" href="{:url('admin/QxlQuiz/delete', ['id'=>$vo.id])}">删除</a>
+                    </td>
+                </tr>
+            </foreach>
+            </tbody>
+        </table>
+        <div class="row" style="margin: 10px 0;">
+            <div class="col-md-12">
+                <button class="btn btn-primary btn-sm js-ajax-submit" type="submit">排序</button>
+            </div>
+        </div>
+    </form>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

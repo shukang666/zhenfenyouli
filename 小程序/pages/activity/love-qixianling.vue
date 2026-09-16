@@ -17,6 +17,30 @@
 			</view>
 		</view>
 
+		<!-- 学习和考试入口 -->
+		<view class="qxl-entry-section">
+			<view class="qxl-entry-header">
+				<text class="qxl-entry-title">学与考</text>
+				<text class="qxl-entry-sub">学习知识，检验成果</text>
+			</view>
+			<view class="qxl-entry-grid">
+				<view class="qxl-entry-card qxl-entry-learn" @click="goLearn">
+					<view class="qxl-entry-icon">
+						<u-icon name="book" size="48" color="#fff"></u-icon>
+					</view>
+					<text class="qxl-entry-name">七贤岭学习</text>
+					<text class="qxl-entry-desc">了解七贤岭故事</text>
+				</view>
+				<view class="qxl-entry-card qxl-entry-quiz" @click="goQuiz">
+					<view class="qxl-entry-icon">
+						<u-icon name="edit-pen" size="48" color="#fff"></u-icon>
+					</view>
+					<text class="qxl-entry-name">七贤岭考试</text>
+					<text class="qxl-entry-desc">每日答题赢积分</text>
+				</view>
+			</view>
+		</view>
+
 		<!-- 4 个分类 section，每个下面直接列活动卡片 -->
 		<view class="qxl-body">
 			<view class="qxl-section" v-for="cate in qxl_categories" :key="cate.id">
@@ -129,12 +153,18 @@
 					return res.data?.data || []
 				})
 			},
-			gotoDetail(id) {
-				this.$u.route(`/pages/activity/lsxf/details-new?id=${id}`)
-			},
-			navigateBack() {
-				uni.navigateBack()
-			},
+		gotoDetail(id) {
+			this.$u.route(`/pages/activity/lsxf/details-new?id=${id}`)
+		},
+		goLearn() {
+			this.$u.route('/pages/activity/qxl-knowledge')
+		},
+		goQuiz() {
+			this.$u.route('/pages/activity/qxl-quiz')
+		},
+		navigateBack() {
+			uni.navigateBack()
+		},
 		}
 	}
 </script>
@@ -279,6 +309,66 @@
 }
 .qxl-act-meta-item text {
 	flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+
+/* ===== 学习和考试入口 ===== */
+.qxl-entry-section {
+	padding: 24rpx 30rpx 0;
+	position: relative;
+	z-index: 11;
+	margin-top: -20rpx;
+}
+.qxl-entry-header {
+	display: flex;
+	align-items: baseline;
+	gap: 12rpx;
+	margin-bottom: 16rpx;
+}
+.qxl-entry-title {
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #050505;
+}
+.qxl-entry-sub {
+	font-size: 22rpx;
+	color: #8A8A8A;
+}
+.qxl-entry-grid {
+	display: flex;
+	gap: 16rpx;
+}
+.qxl-entry-card {
+	flex: 1;
+	border-radius: 20rpx;
+	padding: 24rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12rpx;
+}
+.qxl-entry-card:active { transform: scale(0.97); }
+.qxl-entry-learn {
+	background: linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%);
+}
+.qxl-entry-quiz {
+	background: linear-gradient(135deg, #34C759 0%, #28A745 100%);
+}
+.qxl-entry-icon {
+	width: 88rpx; height: 88rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.25);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.qxl-entry-name {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #fff;
+}
+.qxl-entry-desc {
+	font-size: 22rpx;
+	color: rgba(255,255,255,0.8);
 }
 
 /* ===== 空态 ===== */

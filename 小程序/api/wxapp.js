@@ -37,6 +37,18 @@ const wxapp = {
 	// 分类知识 - 详情
 	getKnowledgeDetail: (params = {}) => uni.$u.get('/wxapp/knowledge/get_detail', params),
 
+	// 七贤岭学习 - 列表
+	getQxlKnowledgeList: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_list', params),
+	// 七贤岭学习 - 详情
+	getQxlKnowledgeDetail: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_detail', params),
+
+	// 七贤岭考试 - 获取题目
+	getQxlQuiz: (params = {}) => uni.$u.get('/wxapp/qxl_quiz/get_quiz', params),
+	// 七贤岭考试 - 提交答案
+	submitQxlQuiz: (params = {}) => uni.$u.post('/wxapp/qxl_quiz/submit_quiz', params),
+	// 七贤岭考试 - 检查今日是否已答
+	checkTodayQxlQuiz: (params = {}) => uni.$u.get('/wxapp/qxl_quiz/check_today', params),
+
 	// 志愿者申请 - 角色类型申请状态
 	getCheckRole: (params = {}) => uni.$u.post('/wxapp/check/get_check', params),
 	// 志愿者申请 - 提交申请（含 role_type）

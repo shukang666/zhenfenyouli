@@ -215,6 +215,27 @@
 					}
 				},
 				{
+					"path": "qxl-knowledge",
+					"style": {
+						"navigationBarTitleText": "七贤岭学习",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "qxl-knowledge-detail",
+					"style": {
+						"navigationBarTitleText": "学习详情",
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "qxl-quiz",
+					"style": {
+						"navigationBarTitleText": "七贤岭考试",
+						"navigationStyle": "custom"
+					}
+				},
+				{
 					"path": "my_activity",
 					"style": {
 						"navigationBarTitleText": "我的活动"

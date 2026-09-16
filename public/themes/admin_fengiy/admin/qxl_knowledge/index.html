@@ -1,0 +1,92 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">七贤岭学习</a></li>
+        <li><a href="{:url('admin/QxlKnowledge/add')}" class="js-ajax-submit" data-_action="">+ 添加内容</a></li>
+    </ul>
+    <form method="get" class="search-form" style="padding:15px 0;">
+        <div class="row">
+            <div class="col-md-2">
+                <input type="text" name="keyword" class="form-control" value="{$keyword|default=''}" placeholder="搜索标题">
+            </div>
+            <div class="col-md-2">
+                <select name="category" class="form-control">
+                    <option value="">全部分类</option>
+                    <volist name="categories" id="cat">
+                        <option value="{$cat}" <if condition="$category eq $cat">selected="selected"</if>>{$cat}</option>
+                    </volist>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-control">
+                    <option value="">全部状态</option>
+                    <option value="1" <if condition="$status eq '1'">selected="selected"</if>>启用</option>
+                    <option value="0" <if condition="$status eq '0'">selected="selected"</if>>禁用</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i> 搜索</button>
+                <a href="{:url('admin/QxlKnowledge/index')}" class="btn btn-default">重置</a>
+            </div>
+        </div>
+    </form>
+    <form method="post" action="{:url('admin/QxlKnowledge/delete_all')}" class="js-ajax-form">
+        <table class="table table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th width="30"><input type="checkbox" class="js-check-all"></th>
+                    <th width="60">ID</th>
+                    <th width="80">封面</th>
+                    <th>标题</th>
+                    <th width="120">分类</th>
+                    <th width="80">浏览</th>
+                    <th width="60">状态</th>
+                    <th width="60">排序</th>
+                    <th width="160">创建时间</th>
+                    <th width="180">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <volist name="list" id="vo">
+                <tr>
+                    <td><input type="checkbox" name="ids[]" class="js-check" value="{$vo.id}"></td>
+                    <td>{$vo.id}</td>
+                    <td>
+                        <php>$voImageUrl = cmf_get_image_preview_url($vo['image'] ?? '');</php>
+                        <if condition="$voImageUrl">
+                            <img src="{$voImageUrl}" width="60" height="60" style="object-fit:cover;border-radius:4px;">
+                        <else/>
+                            <span class="text-muted">无图</span>
+                        </if>
+                    </td>
+                    <td>{$vo.title}</td>
+                    <td>{$vo.category|default='-'}</td>
+                    <td>{$vo.view_count}</td>
+                    <td>
+                        <if condition="$vo.status eq 1">
+                            <span class="label label-success">启用</span>
+                        <else/>
+                            <span class="label label-default">禁用</span>
+                        </if>
+                    </td>
+                    <td>{$vo.list_order}</td>
+                    <td>{:date('Y-m-d H:i', $vo.create_time)}</td>
+                    <td>
+                        <a href="{:url('admin/QxlKnowledge/add', ['id'=>$vo.id])}" class="btn btn-xs btn-primary">编辑</a>
+                        <a href="javascript:;" class="btn btn-xs btn-danger js-ajax-delete" data-action="{:url('admin/QxlKnowledge/delete', ['id'=>$vo.id])}">删除</a>
+                    </td>
+                </tr>
+                </volist>
+            </tbody>
+        </table>
+        <div class="table-actions">
+            <button class="btn btn-danger js-ajax-submit" type="button" data-action="{:url('admin/QxlKnowledge/delete_all')}" data-subcheck="true">批量删除</button>
+        </div>
+    </form>
+    <div class="pager">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
