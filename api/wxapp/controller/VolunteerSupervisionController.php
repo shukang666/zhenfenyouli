@@ -2,7 +2,6 @@
 
 namespace api\wxapp\controller;
 
-use api\wxapp\model\AccountLogModel;
 use think\facade\Db;
 
 /**
@@ -99,7 +98,6 @@ class VolunteerSupervisionController extends AuthController
         $config = cmf_get_option('set_config');
         $point  = max(0, intval($config['supervision_point'] ?? 100));
 
-        Db::startTrans();
         try {
             $id = Db::name('volunteer_supervision')->insertGetId([
                 'user_id'          => $this->user_id,
@@ -111,23 +109,14 @@ class VolunteerSupervisionController extends AuthController
                 'content'          => $content,
                 'supervision_date' => $today,
                 'point'            => $point,
-                'status'           => 1,    // 志愿督导默认已通过
+                'status'           => 0,    // 待审核，审核通过后由后台发放积分
                 'create_time'      => time(),
             ]);
-
-            if ($point > 0) {
-                AccountLogModel::add_account_log(
-                    $this->user_id, 2, 226, $point,
-                    ['supervision_id' => $id, 'remark' => '志愿督导签到']
-                );
-            }
-            Db::commit();
         } catch (\Exception $e) {
-            Db::rollback();
             $this->error('提交失败：' . $e->getMessage());
         }
 
-        $this->success('督导签到成功', ['point' => $point, 'id' => intval($id)]);
+        $this->success('督导签到已提交，请等待审核', ['point' => $point, 'id' => intval($id)]);
     }
 
     /**

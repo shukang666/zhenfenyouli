@@ -32,6 +32,7 @@
             <th>督导点位</th>
             <th>督导照片</th>
             <th>督导内容</th>
+            <th>状态</th>
             <th>获得积分</th>
             <th>督导日期</th>
             <th>操作</th>
@@ -44,7 +45,7 @@
                 <td>{$vo.nickname|default='--'}</td>
                 <td>{$vo.mobile|default='--'}</td>
                 <td>{$vo.community_real_name|default=$vo.community_name|default='--'}</td>
-                <td>{$vo.point_name|default='--'}</td>
+                <td>{$vo.point_real_name|default=$vo.point_name|default='--'}</td>
                 <td>
                     <notempty name="$vo.image">
                         <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image)}');">
@@ -53,9 +54,22 @@
                     </notempty>
                 </td>
                 <td style="max-width:200px;word-break:break-all;">{$vo.content|default='--'}</td>
+                <td>
+                    <if condition="$vo.status == 0">
+                        <span class="label label-warning">待审核</span>
+                    <elseif condition="$vo.status == 1" />
+                        <span class="label label-success">已通过</span>
+                    <else/>
+                        <span class="label label-default">已拒绝</span>
+                    </if>
+                </td>
                 <td>{$vo.point|default=0}</td>
                 <td>{$vo.supervision_date}</td>
                 <td>
+                    <if condition="$vo.status == 0">
+                        <a class="btn btn-xs btn-success btn-approve" href="javascript:;" data-id="{$vo.id}">通过</a>
+                        <a class="btn btn-xs btn-danger btn-deny" href="javascript:;" data-id="{$vo.id}">拒绝</a>
+                    </if>
                     <a class="btn btn-xs btn-default btn-delete" href="javascript:;" data-id="{$vo.id}">删除</a>
                 </td>
             </tr>
@@ -67,6 +81,26 @@
 <script src="__STATIC__/js/admin.js"></script>
 <script>
     $(function () {
+        $('.btn-approve').on('click', function () {
+            var id = $(this).data('id');
+            layer.confirm('确认审核通过并发放积分？', {btn: ['确认', '取消']}, function (index) {
+                $.post("{:url('admin/VolunteerSupervision/approve')}", {id: id}, function (res) {
+                    layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+                    if (res.code == 1) setTimeout(function () { location.reload(); }, 1000);
+                });
+                layer.close(index);
+            });
+        });
+        $('.btn-deny').on('click', function () {
+            var id = $(this).data('id');
+            layer.prompt({title: '请填写拒绝原因（可选）', formType: 2}, function(reason, index){
+                $.post("{:url('admin/VolunteerSupervision/deny')}", {id: id, reason: reason}, function (res) {
+                    layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+                    if (res.code == 1) setTimeout(function () { location.reload(); }, 1000);
+                });
+                layer.close(index);
+            });
+        });
         $('.btn-delete').on('click', function () {
             var id = $(this).data('id');
             layer.confirm('确认删除？', {btn: ['确认', '取消']}, function (index) {

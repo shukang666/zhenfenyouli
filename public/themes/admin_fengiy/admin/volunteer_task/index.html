@@ -4,8 +4,8 @@
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
         <li <if condition="!$status or $status==''">class="active"</if>><a href="{:url('VolunteerTask/index')}">任务列表</a></li>
-        <li <if condition="$status==='1'">class="active"</if>><a href="{:url('VolunteerTask/index','status=1')}">启用中</a></li>
-        <li <if condition="$status==='0'">class="active"</if>><a href="{:url('VolunteerTask/index','status=0')}">已停用</a></li>
+        <li <if condition="$status==='1'">class="active"</if>><a href="{:url('VolunteerTask/index',['status'=>1])}">启用中</a></li>
+        <li <if condition="$status==='0'">class="active"</if>><a href="{:url('VolunteerTask/index',['status'=>0])}">已停用</a></li>
         <li><a href="{:url('VolunteerTask/records')}">提交记录</a></li>
     </ul>
     <div class="margin-top-20">
