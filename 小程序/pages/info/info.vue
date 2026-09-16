@@ -16,10 +16,11 @@
                 </view>
             </u-form>
         </view>
-        <!--  -->
-        <view class="u-p-60">
-            <u-button type="success" @click="submit">确认提交</u-button>
-        </view>
+		<!--  -->
+		<view class="u-p-60 u-flex u-row-between">
+			<u-button type="success" @click="submit" customStyle="flex:1;margin-right:20rpx">确认提交</u-button>
+			<u-button type="primary" @click="goBack" customStyle="flex:1;margin-left:20rpx">确认</u-button>
+		</view>
         <!-- 选择类型 -->
         <u-select v-model="cate_show" label-name="name" value-name="id" :list="cate_list" @confirm="confirm"></u-select>
     </view>
@@ -70,25 +71,29 @@
                 this.form.community_id = e[0].value
                 this.form.community_name = e[0].label
             },
-            // 提交
-            submit() {
-                this.$refs.uForm.validate(valid => {
-                    if (valid) {
-                        this.$u.api.updateMember(this.form).then(res => {
-                            this.$u.func.showToast({
-                                title: res.msg,
-                                icon: 'success',
-                                back: true
-                            })
-                            this.getUserInfo()
-                        }).catch(res => {
-                            this.$u.toast(res.msg);
-                        })
-                    } else {
-                        console.log('验证失败');
-                    }
-                });
-            },
+			// 提交
+			submit() {
+				this.$refs.uForm.validate(valid => {
+					if (valid) {
+						this.$u.api.updateMember(this.form).then(res => {
+							this.$u.func.showToast({
+								title: res.msg,
+								icon: 'success',
+								back: true
+							})
+							this.getUserInfo()
+						}).catch(res => {
+							this.$u.toast(res.msg);
+						})
+					} else {
+						console.log('验证失败');
+					}
+				});
+			},
+			// 直接返回（等同返回键）
+			goBack() {
+				uni.navigateBack()
+			},
             // 获取用户信息
             getUserInfo() {
                 this.$u.api.getUserInfo().then(res => {

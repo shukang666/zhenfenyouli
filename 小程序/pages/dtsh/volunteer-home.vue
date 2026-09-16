@@ -7,8 +7,12 @@
 
 		<!-- 标题卡片 -->
 		<view class="u-p-40 u-type-white-bg u-radius-6 u-m-t-30 u-text-center">
-			<view class="u-font-36 u-font-bold" style="color:#18AF38;">{{pageTitle}}</view>
-			<view class="u-font-24 u-type-info u-m-t-10">{{roleName}}工作平台</view>
+			<view class="u-font-40 u-font-bold" style="color:#18AF38;">{{pageTitle}}</view>
+			<view class="u-font-28 u-type-info u-m-t-10">{{roleName}}工作平台</view>
+			<view class="u-font-24 u-type-info u-m-t-16 u-line-2" style="line-height: 1.8;">
+				<template v-if="roleType==1">履行督导职责，参与桶边督导与巡检巡查，共建绿色社区</template>
+				<template v-else>监测督导动态，协调问题反馈，推动商户共治与分类治理</template>
+			</view>
 			<!-- 未通过审核：显示申请按钮 -->
 			<view class="u-m-t-20" v-if="!isApproved">
 				<u-button type="primary" size="mini" hover-class="none"
@@ -19,7 +23,7 @@
 
 		<!-- 功能入口 1行3列 -->
 		<view class="u-type-white-bg u-radius-6 u-m-t-30 u-p-30">
-			<view class="u-font-30 u-font-bold u-m-b-20">快捷功能</view>
+			<view class="u-font-32 u-font-bold u-m-b-20">快捷功能</view>
 			<view class="grid-3">
 			<!-- 第1个：志愿督导/督导监测 -->
 			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==1" @click="goToPage('/pages/dtsh/volunteer-sign')">
@@ -47,13 +51,18 @@
 				</view>
 				<text class="u-font-26 u-m-t-10">随手发现问题</text>
 			</view>
-			<!-- 第3个：问题反馈（通用） -->
-			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" @click="goToReport(roleType)">
+			<!-- 第3个：仅督导员=问题反馈；指导员=商户共治 -->
+			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==1" @click="goToReport(roleType)">
 				<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
 					<u-icon name="warning" size="48" color="#fff"></u-icon>
 				</view>
-				<text class="u-font-26 u-m-t-10" v-if="roleType==1">问题反馈</text>
-				<text class="u-font-26 u-m-t-10" v-if="roleType==2">问题反馈</text>
+				<text class="u-font-26 u-m-t-10">问题反馈</text>
+			</view>
+			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==2" @click="goToMerchantInspect">
+				<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #42a5f5 0%, #1565c0 100%);">
+					<u-icon name="home" size="48" color="#fff"></u-icon>
+				</view>
+				<text class="u-font-26 u-m-t-10">商户共治</text>
 			</view>
 		</view>
 		</view>
@@ -150,6 +159,10 @@
 				if (!this.$u.func.checkLogin()) return;
 				// 未批准也能进入页面看效果，但传参控制提交权限
 				this.$u.route(`/pages/dtsh/report?location_type=${locationType}&can_submit=${this.isApproved ? 1 : 0}`);
+			},
+			goToMerchantInspect() {
+				if (!this.$u.func.checkLogin()) return;
+				this.$u.route('/pages/dtsh/merchant-inspect');
 			},
 			goApply() {
 				// 跳转申请表单，传入 role_type 锁定角色

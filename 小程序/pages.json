@@ -590,10 +590,22 @@
 				"navigationBarTitleText": "整改任务",
 				"navigationStyle": "custom"
 			}
-		}, {
+		{
 			"path": "task-submit",
 			"style": {
 				"navigationBarTitleText": "提交整改",
+				"navigationStyle": "custom"
+			}
+		}, {
+			"path": "merchant-inspect",
+			"style": {
+				"navigationBarTitleText": "商户共治",
+				"navigationStyle": "custom"
+			}
+		}, {
+			"path": "merchant-inspect-history",
+			"style": {
+				"navigationBarTitleText": "商户共治记录",
 				"navigationStyle": "custom"
 			}
 		}]

@@ -33,5 +33,9 @@ const home = {
 	post_clock_action_form: (params = {}) => uni.$u.post('/wxapp/active/post_clock_action_form', params),
 	// 记录打卡动作订阅授权状态（滞后推送用）
 	post_clock_action_subscribe: (params = {}) => uni.$u.post('/wxapp/active/post_clock_action_subscribe', params),
+	// 商户共治 - 提交
+	postMerchantInspect: (params = {}) => uni.$u.post('/wxapp/check/merchant_inspect', params),
+	// 商户共治 - 我的提交记录
+	getMerchantInspectList: (params = {}) => uni.$u.get('/wxapp/check/merchant_inspect_list', params),
 }
 export default home
