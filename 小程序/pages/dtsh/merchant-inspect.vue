@@ -1,5 +1,13 @@
 <template>
-	<view class="container">
+	<view class="container" style="padding-top: calc(var(--status-bar-height) + env(safe-area-inset-top));">
+		<!-- 商户共治导航栏 -->
+		<view class="mi-navbar">
+			<view class="mi-nav-back" @click="navigateBack">
+				<u-icon name="arrow-left" size="44" color="#050505"></u-icon>
+			</view>
+			<text class="mi-nav-title">商户共治</text>
+			<view class="mi-nav-placeholder"></view>
+		</view>
 		<view class="u-p-30">
 			<view class="u-m-t-20 u-type-white-bg u-radius-10 u-p-lr-30">
 				<u-form :model="form" ref="uForm" :error-type="['toast']">
@@ -102,8 +110,11 @@
 				image_five: [],
 			};
 		},
-		methods: {
-			// 商户共治提交
+	methods: {
+		navigateBack() {
+			uni.navigateBack();
+		},
+		// 商户共治提交
 			async submit() {
 				if (!this.form.company) {
 					this.$u.toast('请输入公司名称');
@@ -139,6 +150,41 @@
 		}
 	}
 </script>
+
+<style lang="scss" scoped>
+	.container {
+		padding-bottom: 250rpx;
+	}
+
+	.mi-navbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		position: sticky;
+		top: 0;
+		z-index: 30;
+		background: #fff;
+		border-bottom: 1rpx solid #E4E6EB;
+		padding: 0 16rpx;
+		height: 88rpx;
+	}
+	.mi-nav-back {
+		width: 80rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.mi-nav-title {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #050505;
+		flex: 1;
+		text-align: center;
+	}
+	.mi-nav-placeholder {
+		width: 80rpx;
+	}
+</style>
 
 <style lang="scss" scoped>
 	.container {

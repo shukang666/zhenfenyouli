@@ -1,5 +1,13 @@
 <template>
 	<view class="container">
+		<!-- 商户共治记录导航栏 -->
+		<view class="mih-navbar">
+			<view class="mih-nav-back" @click="navigateBack">
+				<u-icon name="arrow-left" size="44" color="#050505"></u-icon>
+			</view>
+			<text class="mih-nav-title">提交记录</text>
+			<view class="mih-nav-placeholder"></view>
+		</view>
 		<z-paging ref='paging' v-model='dataList' @query='queryList' :fixed='true'>
 			<view class="card-all" v-for="item in dataList" :key="item.id">
 				<view class="u-font-26 grey">{{item.create_time|date('yy年mm月dd日 hh时MM分')}}</view>
@@ -44,6 +52,9 @@
 			};
 		},
 		methods: {
+			navigateBack() {
+				uni.navigateBack();
+			},
 			previewImage(urls, current = 0) {
 				uni.previewImage({
 					urls,
@@ -67,5 +78,47 @@
 </script>
 
 <style lang="scss" scoped>
-
+	.container {
+		padding-top: calc(var(--status-bar-height) + env(safe-area-inset-top));
+	}
+	.mih-navbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		position: sticky;
+		top: 0;
+		z-index: 30;
+		background: #fff;
+		border-bottom: 1rpx solid #E4E6EB;
+		padding: 0 16rpx;
+		height: 88rpx;
+	}
+	.mih-nav-back {
+		width: 80rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.mih-nav-title {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #050505;
+		flex: 1;
+		text-align: center;
+	}
+	.mih-nav-placeholder {
+		width: 80rpx;
+	}
+	.card-all {
+		background: #fff;
+		border-radius: 12rpx;
+		padding: 24rpx;
+		margin: 0 30rpx 20rpx;
+	}
+	.grey {
+		color: #999;
+	}
+	.white {
+		color: #fff;
+	}
 </style>

@@ -1,15 +1,17 @@
 <template>
 	<view class="container">
-		<!-- 自定义导航栏 -->
-		<view class="fb-navbar">
-			<view class="fb-nav-back" @click="navigateBack">
-				<u-icon name="arrow-left" size="44" color="#fff"></u-icon>
+		<!-- 自定义导航栏（sticky，覆盖在 Hero 上方） -->
+		<view class="fb-navbar" :style="{paddingTop: statusBarHeight + 'px'}">
+			<view class="fb-nav-content" :style="{height: navBarHeight + 'rpx'}">
+				<view class="fb-nav-back" @click="navigateBack">
+					<u-icon name="arrow-left" size="44" color="#fff"></u-icon>
+				</view>
+				<text class="fb-nav-title">我和七贤岭</text>
+				<view class="fb-nav-placeholder"></view>
 			</view>
-			<text class="fb-nav-title">我和七贤岭</text>
-			<view class="fb-nav-placeholder"></view>
 		</view>
 
-			<!-- 头部 Hero -->
+		<!-- 头部 Hero -->
 		<view class="qxl-hero" :style="heroBgStyle">
 			<view class="qxl-hero-content">
 				<text class="qxl-hero-title">我和七贤岭</text>
@@ -17,31 +19,7 @@
 			</view>
 		</view>
 
-		<!-- 学习和考试入口 -->
-		<view class="qxl-entry-section">
-			<view class="qxl-entry-header">
-				<text class="qxl-entry-title">学与考</text>
-				<text class="qxl-entry-sub">学习知识，检验成果</text>
-			</view>
-			<view class="qxl-entry-grid">
-				<view class="qxl-entry-card qxl-entry-learn" @click="goLearn">
-					<view class="qxl-entry-icon">
-						<u-icon name="book" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="qxl-entry-name">七贤岭学习</text>
-					<text class="qxl-entry-desc">了解七贤岭故事</text>
-				</view>
-				<view class="qxl-entry-card qxl-entry-quiz" @click="goQuiz">
-					<view class="qxl-entry-icon">
-						<u-icon name="edit-pen" size="48" color="#fff"></u-icon>
-					</view>
-					<text class="qxl-entry-name">七贤岭考试</text>
-					<text class="qxl-entry-desc">每日答题赢积分</text>
-				</view>
-			</view>
-		</view>
-
-		<!-- 4 个分类 section，每个下面直接列活动卡片 -->
+		<!-- 4 个分类 section；发现七贤岭(6) 内嵌学习与考试入口，其余仅活动卡片 -->
 		<view class="qxl-body">
 			<view class="qxl-section" v-for="cate in qxl_categories" :key="cate.id">
 				<!-- section 标题条 -->
@@ -52,7 +30,21 @@
 					<text class="qxl-section-sub">{{cate.subtitle}}</text>
 				</view>
 
-				<!-- 活动卡片列表 -->
+				<!-- 发现七贤岭：学与考入口 -->
+				<view class="qxl-learn-grid" v-if="cate.id === 6">
+					<view class="qxl-learn-card qxl-learn-card--learn" @click="goLearn">
+						<u-icon name="book" size="40" color="#fff"></u-icon>
+						<text class="qxl-learn-name">七贤岭学习</text>
+						<text class="qxl-learn-desc">了解七贤岭故事</text>
+					</view>
+					<view class="qxl-learn-card qxl-learn-card--quiz" @click="goQuiz">
+						<u-icon name="edit-pen" size="40" color="#fff"></u-icon>
+						<text class="qxl-learn-name">七贤岭考试</text>
+						<text class="qxl-learn-desc">每日答题赢积分</text>
+					</view>
+				</view>
+
+				<!-- 活动卡片列表（发现七贤岭在学与考下方，其他分类直接接标题） -->
 				<view class="qxl-section-list" v-if="cate.activities && cate.activities.length">
 					<view class="qxl-act-card" v-for="act in cate.activities" :key="act.id"
 						@click="gotoDetail(act.id)">
@@ -108,17 +100,22 @@
 				// 装饰字段（emoji / accent / bgColor）从前端装饰贴条 QXL_CATE_DECOR 合并
 				qxl_categories: [],
 				heroBgImage: '',
+				statusBarHeight: 20,
+				navBarHeight: 88,
 			};
 		},
 	computed: {
 		heroBgStyle() {
+			const safe = this.statusBarHeight
 			if (this.heroBgImage) {
-				return `background-image: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center;`
+				return `background-image: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center; margin-top: calc(-${safe}px - 88rpx); padding-top: calc(${safe}px + 88rpx);`
 			}
-			return ''
+			return `margin-top: calc(-${safe}px - 88rpx); padding-top: calc(${safe}px + 88rpx);`
 		}
 	},
 		onLoad() {
+			const sys = uni.getSystemInfoSync()
+			this.statusBarHeight = sys.statusBarHeight || 20
 			this.loadHeroBg()
 			this.loadQxlCategories()
 		},
@@ -217,14 +214,13 @@
 	position: sticky;
 	top: 0;
 	z-index: 30;
+	background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 100%);
+	padding: 0 16rpx;
+}
+.fb-nav-content {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background: transparent;
-	padding: 0 16rpx;
-	height: 88rpx;
-	padding-top: env(safe-area-inset-top);
-	background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
 }
 .fb-nav-back { width: 80rpx; display: flex; align-items: center; justify-content: center; }
 .fb-nav-title {
@@ -238,13 +234,12 @@
 	position: relative;
 	height: 320rpx;
 	background: linear-gradient(135deg, #1877F2 0%, #34C759 100%);
-	margin-top: -88rpx;
-	padding-top: 88rpx;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	color: #fff;
+	/* margin-top / padding-top 由 heroBgStyle 计算属性动态写入（含安全区补偿） */
 }
 .qxl-hero-content{
 	display: flex;
@@ -348,62 +343,34 @@
 	flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 
-/* ===== 学习和考试入口 ===== */
-.qxl-entry-section {
-	padding: 24rpx 30rpx 0;
-	position: relative;
-	z-index: 11;
-	margin-top: -20rpx;
-}
-.qxl-entry-header {
-	display: flex;
-	align-items: baseline;
-	gap: 12rpx;
-	margin-bottom: 16rpx;
-}
-.qxl-entry-title {
-	font-size: 30rpx;
-	font-weight: 700;
-	color: #050505;
-}
-.qxl-entry-sub {
-	font-size: 22rpx;
-	color: #8A8A8A;
-}
-.qxl-entry-grid {
+/* ===== 发现七贤岭 内嵌学与考入口 ===== */
+.qxl-learn-grid {
 	display: flex;
 	gap: 16rpx;
+	margin-bottom: 16rpx;
 }
-.qxl-entry-card {
+.qxl-learn-card {
 	flex: 1;
-	border-radius: 20rpx;
-	padding: 24rpx;
+	border-radius: 16rpx;
+	padding: 20rpx;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 12rpx;
+	gap: 8rpx;
 }
-.qxl-entry-card:active { transform: scale(0.97); }
-.qxl-entry-learn {
+.qxl-learn-card:active { transform: scale(0.97); }
+.qxl-learn-card--learn {
 	background: linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%);
 }
-.qxl-entry-quiz {
+.qxl-learn-card--quiz {
 	background: linear-gradient(135deg, #34C759 0%, #28A745 100%);
 }
-.qxl-entry-icon {
-	width: 88rpx; height: 88rpx;
-	border-radius: 50%;
-	background: rgba(255,255,255,0.25);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-.qxl-entry-name {
+.qxl-learn-name {
 	font-size: 28rpx;
 	font-weight: 700;
 	color: #fff;
 }
-.qxl-entry-desc {
+.qxl-learn-desc {
 	font-size: 22rpx;
 	color: rgba(255,255,255,0.8);
 }
