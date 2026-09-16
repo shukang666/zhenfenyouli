@@ -40,7 +40,7 @@ class ShotReportController extends AuthController
             'create_time' => time(),
         ];
 
-        $this->model->insert($data);
+        $this->model->save($data);
 
         $this->success('已提交，项目正在处理');
     }

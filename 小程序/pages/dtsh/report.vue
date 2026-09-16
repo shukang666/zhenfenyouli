@@ -35,13 +35,14 @@
 			</view>
 
 			<!-- 提交按钮 -->
-			<view class="u-m-t-40">
+			<view class="u-m-t-40 u-m-b-40">
 				<u-button
 					type="primary"
 					shape="circle"
 					size="large"
 					:disabled="!form.image || !form.remark"
 					@click="submit"
+					height="90"
 				>提交</u-button>
 			</view>
 		</view>
