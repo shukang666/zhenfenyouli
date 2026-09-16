@@ -590,7 +590,7 @@
 /* ===== 2 个快捷入口 ===== */
 .fb-entry-row {
 	display: flex;
-	gap: 16rpx;
+	gap: 20rpx;
 	padding: 0 24rpx 24rpx;
 }
 .fb-entry-card {
@@ -598,17 +598,40 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 32rpx 24rpx;
-	min-height: 120rpx;
-	border-radius: 16rpx;
-	box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+	padding: 40rpx 28rpx;
+	min-height: 160rpx;
+	border-radius: 20rpx;
+	box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+	position: relative;
+	overflow: hidden;
 }
 .fb-entry-card:active {
 	opacity: 0.85;
+	transform: scale(0.98);
 }
 .fb-entry-lgfl {
 	background: linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%);
 	color: #fff;
+}
+.fb-entry-lgfl::before {
+	content: '';
+	position: absolute;
+	top: -30rpx;
+	right: -30rpx;
+	width: 120rpx;
+	height: 120rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.15);
+}
+.fb-entry-lgfl::after {
+	content: '';
+	position: absolute;
+	bottom: -20rpx;
+	right: 40rpx;
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.1);
 }
 .fb-entry-lgfl .fb-entry-title,
 .fb-entry-lgfl .fb-entry-sub,
@@ -619,6 +642,26 @@
 	background: linear-gradient(135deg, #34C759 0%, #28A745 100%);
 	color: #fff;
 }
+.fb-entry-qxl::before {
+	content: '';
+	position: absolute;
+	top: -30rpx;
+	right: -30rpx;
+	width: 120rpx;
+	height: 120rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.15);
+}
+.fb-entry-qxl::after {
+	content: '';
+	position: absolute;
+	bottom: -20rpx;
+	right: 40rpx;
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.1);
+}
 .fb-entry-qxl .fb-entry-title,
 .fb-entry-qxl .fb-entry-sub,
 .fb-entry-qxl .fb-entry-arrow {
@@ -627,10 +670,12 @@
 .fb-entry-text {
 	display: flex;
 	flex-direction: column;
-	gap: 4rpx;
+	gap: 8rpx;
+	position: relative;
+	z-index: 1;
 }
 .fb-entry-title {
-	font-size: 30rpx;
+	font-size: 32rpx;
 	font-weight: 700;
 }
 .fb-entry-sub {
@@ -638,8 +683,11 @@
 	opacity: 0.9;
 }
 .fb-entry-arrow {
-	font-size: 40rpx;
+	font-size: 44rpx;
 	font-weight: 300;
+	opacity: 0.85;
+	position: relative;
+	z-index: 1;
 }
 
 /* ===== 标签栏 ===== */

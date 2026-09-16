@@ -329,14 +329,14 @@
 				if (startTime && endTime) {
 					return startTime + ' ~ ' + endTime;
 				} else if (startTime) {
-					return '截止至' + startTime;
+					return startTime + ' ~ 不限';
 				}
 				return '不限';
 			} else {
 				// 非打卡活动：使用 date 字段
 				if (this.info.date) {
 					let dateStr = this.formatDate(this.info.date);
-					return dateStr + ' ~ 不限';
+					return '截止至' +dateStr;
 				}
 				return '不限';
 			}

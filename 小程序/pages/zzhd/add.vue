@@ -117,6 +117,9 @@
 				this.fixedRole = parseInt(op.role_type) == 2 ? 2 : 1;
 				this.form.role_type = this.fixedRole;
 			}
+			// 动态设置导航栏标题
+			const title = this.fixedRole == 2 ? '指导员申请' : '督导员申请';
+			uni.setNavigationBarTitle({ title });
 			this.form.mobile = this.userInfo.mobile
 			this.form.name = this.userInfo.true_name
 			this.form.community = this.userInfo.community
