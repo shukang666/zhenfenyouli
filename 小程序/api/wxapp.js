@@ -9,6 +9,8 @@ const wxapp = {
 	
 	// 配置信息
 	findSetting: (params = {}) => uni.$u.post('/wxapp/basic/find_setting', params),
+	// 获取页面图片配置（七贤岭背景图等）
+	getPageConfig: () => uni.$u.post('/wxapp/basic/find_setting', {}),
 
 	// 获取用户信息
 	getUserInfo: (params = {}) => uni.$u.post('/wxapp/user/get_user_info', params),

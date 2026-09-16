@@ -1,0 +1,47 @@
+<include file="public@header"/>
+<style type="text/css">
+    .form-required { color: red; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <h4 class="page-header">页面图片配置（小程序各页面头部背景图等可配置图片资源）</h4>
+
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('PageConfig/index')}">
+        <fieldset>
+            <div class="tabbable">
+                <div class="tab-content">
+                    <div class="tab-pane active">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">爱护七贤岭 Hero 背景图</label>
+                            <div class="col-md-6 col-sm-10">
+                                <input type="hidden" name="qxl_hero_bg" id="qxl_hero_bg" value="{$qxl_hero_bg}">
+                                <a href="javascript:uploadOneImage('选择背景图','#qxl_hero_bg');">
+                                    <notempty name="qxl_hero_bg">
+                                        <img src="{:cmf_get_image_preview_url($qxl_hero_bg)}" id="qxl_hero_bg-preview" width="270" style="cursor: hand; border-radius: 4px; border: 1px solid #ddd;"/>
+                                        <else />
+                                        <img src="__TMPL__/public/assets/images/default-image.png" id="qxl_hero_bg-preview" width="270" style="cursor: hand; border-radius: 4px; border: 1px solid #ddd;"/>
+                                    </notempty>
+                                </a>
+                                <input type="button" class="btn btn-sm" onclick="$('#qxl_hero_bg-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#qxl_hero_bg').val('');return false;" value="取消图片">
+                                <p class="help-block" style="margin-top:8px;">
+                                    建议尺寸 750×640 像素（宽×高），JPG 或 PNG 格式，大小不超过 2MB<br>
+                                    上传后，小程序「爱护七贤岭」页面顶部将显示此背景图；不设置则使用默认蓝绿渐变背景
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-primary js-ajax-submit">保存配置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

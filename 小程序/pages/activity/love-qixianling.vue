@@ -9,8 +9,8 @@
 			<view class="fb-nav-placeholder"></view>
 		</view>
 
-		<!-- 头部 Hero -->
-		<view class="qxl-hero">
+			<!-- 头部 Hero -->
+		<view class="qxl-hero" :style="heroBgStyle">
 			<view class="qxl-hero-content">
 				<text class="qxl-hero-title">爱护七贤岭</text>
 				<text class="qxl-hero-subtitle">一起守护这片绿水青山</text>
@@ -78,12 +78,38 @@
 					{ id: 8, name: '记录七贤岭', subtitle: '用镜头记录每一刻', emoji: '📷', accent: '#FF9500', bgColor: 'linear-gradient(135deg, #FF9500 0%, #E68900 100%)', activities: [], loading: true },
 					{ id: 9, name: '守护七贤岭', subtitle: '守护绿水青山，从我做起', emoji: '🌱', accent: '#AF52DE', bgColor: 'linear-gradient(135deg, #AF52DE 0%, #8B41C2 100%)', activities: [], loading: true },
 				],
+				heroBgImage: '',
 			};
 		},
+		computed: {
+			heroBgStyle() {
+				if (this.heroBgImage) {
+					return {
+						backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage})`,
+						backgroundSize: 'cover',
+						background·Position: 'center',
+					}
+				}
+				return {}
+			}
+		},
 		onLoad() {
+			this.loadHeroBg()
 			this.loadAllSections()
 		},
 		methods: {
+			// 加载七贤岭 Hero 背景图配置
+			async loadHeroBg() {
+				try {
+					const res = await this.$u.api.getPageConfig()
+					const qxlHeroBg = res.data?.qxl_hero_bg || ''
+					if (qxlHeroBg) {
+						this.heroBgImage = qxlHeroBg
+					}
+				} catch (e) {
+					// 配置获取失败时使用默认渐变背景
+				}
+			},
 			// 并行加载 4 个分类的活动
 			async loadAllSections() {
 				const tasks = this.qxl_categories.map(cate =>
