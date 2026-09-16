@@ -30,6 +30,13 @@
 			</view>
 		</view>
 
+		<!-- 底部确认按钮 -->
+		<view class="u-p-60">
+			<u-button type="primary" shape="circle" hover-class="none"
+				:customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
+				@click="goBack">确认</u-button>
+		</view>
+
         <!-- 修改头像弹窗 -->
         <u-popup mode="bottom" border-radius="20" closeable v-model="showAvatarPop">
             <view class="u-p-30">
@@ -228,6 +235,10 @@
             // 获取用户昵称
             nameChange(value) {
                 this.form.nickname = value;
+            },
+            // 直接返回（等同返回键）
+            goBack() {
+                uni.navigateBack()
             }
         }
     }
