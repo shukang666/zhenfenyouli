@@ -423,29 +423,39 @@
 				uni.scanCode({
 					onlyFromCamera: false,
 					success: (res) => {
-						// 扫码成功。后台生成的活动码是"小程序码"(getwxacodeunlimit)，
-						// 扫它时活动id不在 res.result，而在 res.path(页面路径?scene=活动id)；
-						// 普通二维码(内容为活动id/含scene或id参数)则在 res.result。
-						const scanType = (res && res.scanType) ? String(res.scanType) : ''
-						const qPath = (res && res.path) ? String(res.path).trim() : ''
-						const raw = (res && res.result != null) ? String(res.result).trim() : ''
-						console.log('scanCode =>', { scanType: scanType, path: qPath, result: raw })
+					// 扫码成功。后台生成的活动码是"小程序码"(getwxacodeunlimit)，
+					// 扫它时活动id不在 res.result，而在 res.path(页面路径?scene=活动id)；
+					// 普通二维码(内容为活动id/含scene或id参数)则在 res.result。
+					const scanType = (res && res.scanType) ? String(res.scanType) : ''
+					const qPath = (res && res.path) ? String(res.path).trim() : ''
+					const raw = (res && res.result != null) ? String(res.result).trim() : ''
+					console.log('scanCode =>', { scanType: scanType, path: qPath, result: raw })
 
-						// 1) 小程序码：path 形如 pages/activity/lsxf/details-new?scene=活动id
-						//    只接受本项目活动详情页路径，防止误扫到其它页面/其它小程序的码
-						if (/^pages\/activity\/lsxf\/details-new/.test(qPath)) {
-							const full = qPath.indexOf('/') === 0 ? qPath : '/' + qPath
-							this.$u.route(full)
+					// 1) 小程序码：兼容新旧两种路径
+					//    新路径 pages/activity/lsxf/details-new?scene=活动id（当前 pages.json 注册路径）
+					//    旧路径 pages/low_carbon/lsxf/details-new?scene=活动id（历史生成的活动码）
+					//    只接受本项目活动详情页路径，防止误扫到其它页面/其它小程序的码
+					const pathMatch = qPath.match(/^pages\/(?:activity|low_carbon)\/lsxf\/details-new/)
+					if (pathMatch) {
+						// 优先从 path 里解析 scene 参数，统一跳转到新路径
+						const sceneMatch = qPath.match(/[?&]scene=(\d+)/)
+						if (sceneMatch) {
+							this.$u.route('/pages/activity/lsxf/details-new?id=' + sceneMatch[1])
 							return
 						}
-						// 2) 兜底解析二维码内容里的活动id：纯数字 / scene=xx / id=xx
-						const m = raw.match(/(?:scene|id)=(\d+)/)
-						const activeId = /^\d+$/.test(raw) ? raw : (m ? m[1] : '')
-						if (activeId) {
-							this.$u.route('/pages/activity/lsxf/details-new?id=' + activeId)
-							return
-						}
-						this.$u.toast('未识别到活动二维码')
+						// 没有 scene 参数则直接跳转（兜底，理论上不会到这里）
+						const full = qPath.indexOf('/') === 0 ? qPath : '/' + qPath
+						this.$u.route(full)
+						return
+					}
+					// 2) 兜底解析二维码内容里的活动id：纯数字 / scene=xx / id=xx
+					const m = raw.match(/(?:scene|id)=(\d+)/)
+					const activeId = /^\d+$/.test(raw) ? raw : (m ? m[1] : '')
+					if (activeId) {
+						this.$u.route('/pages/activity/lsxf/details-new?id=' + activeId)
+						return
+					}
+					this.$u.toast('未识别到活动二维码')
 					},
 					fail: (err) => {
 						// 用户手动取消扫码时静默处理，其它异常打印便于排查
