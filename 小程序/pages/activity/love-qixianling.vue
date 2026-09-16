@@ -105,12 +105,14 @@
 			};
 		},
 	computed: {
+		// 导航栏绝对定位在 Hero 顶部，Hero 只需 padding-top 留出安全区+导航栏高度
 		heroBgStyle() {
-			const safe = this.statusBarHeight
+			// 导航栏占据的像素 = statusBarHeight(px) + 88(rpx/2=px)
+			const padTopPx = this.statusBarHeight + 44
 			if (this.heroBgImage) {
-				return `background-image: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center; margin-top: calc(-${safe}px - 88rpx); padding-top: calc(${safe}px + 88rpx);`
+				return `background-image: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center; padding-top: ${padTopPx}px;`
 			}
-			return `margin-top: calc(-${safe}px - 88rpx); padding-top: calc(${safe}px + 88rpx);`
+			return `padding-top: ${padTopPx}px;`
 		}
 	},
 		onLoad() {
@@ -132,40 +134,34 @@
 					// 配置获取失败时使用默认渐变背景
 				}
 			},
-			// 加载七贤岭 4 个活动分类（id 6..9）；从后端取名称，合并本地装饰贴条
-			async loadQxlCategories() {
-				try {
-					const res = await this.$u.api.get_community_cate_list()
-					const all = res.data || []
-					const qxlIds = [6, 7, 8, 9]
-					const list = []
-					qxlIds.forEach(id => {
-						const found = all.find(c => Number(c.id) === id)
-						if (found) {
-							const decor = QXL_CATE_DECOR[id] || {}
-							list.push({
-								id: found.id,
-								name: found.name,
-								subtitle: decor.subtitle || found.name,
-								emoji: decor.emoji || '📌',
-								accent: decor.accent || '#34C759',
-								bgColor: decor.bgColor || 'linear-gradient(135deg, #34C759 0%, #28A745 100%)',
-								activities: [],
-								loading: true,
-							})
-						}
-					})
-					this.qxl_categories = list
-				} catch (e) {
-					// API 失败时回退到纯本地装饰版，保证页面仍可用
-					this.qxl_categories = [6, 7, 8, 9].map(id => {
-						const decor = QXL_CATE_DECOR[id]
-						return { id, name: decor ? id === 6 ? '发现七贤岭' : id === 7 ? '玩在七贤岭' : id === 8 ? '记录七贤岭' : '守护七贤岭' : '七贤岭', ...decor, activities: [], loading: true }
-					})
-				} finally {
-					this.loadAllSections()
-				}
-			},
+		// 加载七贤岭 4 个板块：id=6 是固定栏目（学与考），id=7/8/9 是分类（绑活动）
+		// 无论如何都要渲染 4 个板块，API 失败时走本地硬编码兜底
+		async loadQxlCategories() {
+			const buildList = (source) => {
+				const defaultNames = { 6: '发现七贤岭', 7: '玩在七贤岭', 8: '记录七贤岭', 9: '守护七贤岭' }
+				return [6, 7, 8, 9].map(id => {
+					const found = source ? source.find(c => Number(c.id) === id) : null
+					const decor = QXL_CATE_DECOR[id] || {}
+					return {
+						id,
+						name: (found && found.name) || defaultNames[id] || '七贤岭',
+						subtitle: decor.subtitle || '',
+						emoji: decor.emoji || '📌',
+						accent: decor.accent || '#34C759',
+						bgColor: decor.bgColor || 'linear-gradient(135deg, #34C759 0%, #28A745 100%)',
+						activities: [],
+						loading: true,
+					}
+				})
+			}
+			try {
+				const res = await this.$u.api.get_community_cate_list()
+				this.qxl_categories = buildList(res.data || [])
+			} catch (e) {
+				this.qxl_categories = buildList(null)
+			}
+			this.loadAllSections()
+		},
 			// 并行加载 4 个分类的活动
 			async loadAllSections() {
 				const tasks = this.qxl_categories.map(cate =>
