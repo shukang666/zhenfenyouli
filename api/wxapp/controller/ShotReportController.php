@@ -9,8 +9,9 @@ class ShotReportController extends AuthController
 {
     protected $model;
 
-    protected function initialize()
+    public function initialize()
     {
+        parent::initialize();
         $this->model = new ShotReportModel();
     }
 
