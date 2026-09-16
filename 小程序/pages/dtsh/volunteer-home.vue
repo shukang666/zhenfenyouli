@@ -167,18 +167,11 @@
 				this.$u.route(`/pages/dtsh/report?location_type=${locationType}&can_submit=${this.isApproved ? 1 : 0}`);
 			},
 			goApply() {
-				// 申请引导：根据当前申请状态给出提示
-				if (!this.checkInfo) {
-					// 从未申请过
-					this.$u.toast(`请先填写申请成为${this.roleName}`);
-				} else if (this.checkStatus == 1) {
-					this.$u.toast('您的申请正在审核中，请耐心等待');
-				} else if (this.checkStatus == 2) {
-					// 已通过其他角色身份 → 当前角色尚未申请，允许申请新角色
-					this.$u.toast(`您已具备其他角色身份，可继续申请${this.roleName}`);
-				} else if (this.checkStatus == 3) {
-					this.$u.toast('您的申请已被拒绝，可重新申请');
-				}
+				// 跳转申请表单，传入 role_type 锁定角色
+				this.$u.route({
+					url: '/pages/zzhd/add',
+					params: { role_type: this.roleType }
+				});
 			},
 		}
 	}

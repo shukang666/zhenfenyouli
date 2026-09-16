@@ -18,7 +18,11 @@
 					<u-input v-model="form.reason" placeholder="请输入" />
 				</u-form-item>
 			<u-form-item label="申请角色" labelWidth="150" label-position="bottom">
-				<view class="u-flex">
+				<!-- 从入口锁定角色时，显示角色名称；否则可手动选择 -->
+				<view class="u-flex" v-if="fixedRole > 0">
+					<u-tag :text="fixedRole == 2 ? '指导员' : '督导员'" mode="dark" type="success" />
+				</view>
+				<view class="u-flex" v-else>
 					<view class="u-m-r-20" @click="form.role_type = 1">
 						<u-tag text="督导员" :mode="form.role_type==1?'dark':'plain'" :type="form.role_type==1?'success':'info'" />
 					</view>
@@ -58,6 +62,7 @@
 	export default {
 		data() {
 			return {
+				fixedRole: 0,        // 从外部传入锁定的角色（1=督导员 2=指导员），0=不锁定
 				form: {
 					name: '',
 					mobile: '',
@@ -106,7 +111,12 @@
 
 			};
 		},
-		onLoad() {
+		onLoad(op) {
+			// 接收外部传入的角色参数，锁定申请角色
+			if (op.role_type) {
+				this.fixedRole = parseInt(op.role_type) == 2 ? 2 : 1;
+				this.form.role_type = this.fixedRole;
+			}
 			this.form.mobile = this.userInfo.mobile
 			this.form.name = this.userInfo.true_name
 			this.form.community = this.userInfo.community
@@ -151,7 +161,10 @@
 				this.$u.api.get_check().then(res => {
 					this.form.mobile = res.data.mobile
 					this.form.name = res.data.name
-					this.form.active_type = res.data.active_type
+					// 如果有锁定角色，不覆盖 active_type 和 role_type（避免旧记录影响新角色申请）
+					if (!this.fixedRole) {
+						this.form.active_type = res.data.active_type
+					}
 					this.form.reason = res.data.reason
 					this.form.community = res.data.community
 					this.form.community_id = res.data.community_id
