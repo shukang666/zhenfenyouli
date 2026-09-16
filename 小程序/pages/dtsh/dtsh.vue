@@ -27,7 +27,7 @@
 			</view>
 			<view class="task-item u-flex u-col-center u-flex-col" @click="goToPage('/pages/dtsh/knowledge')">
 				<view class="task-icon u-flex u-col-center u-row-center">
-					<u-icon name="book" size="48" color="#18AF38"></u-icon>
+					<u-icon name="file-text" size="48" color="#18AF38"></u-icon>
 				</view>
 				<text class="task-text u-font-24 u-m-t-12">学会分类知识</text>
 			</view>
