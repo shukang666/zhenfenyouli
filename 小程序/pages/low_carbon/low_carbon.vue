@@ -68,7 +68,7 @@
 				</view>
 				<view class="fb-entry-card fb-entry-qxl" @click="gotoQxl">
 					<view class="fb-entry-text">
-						<text class="fb-entry-title">爱护七贤岭</text>
+						<text class="fb-entry-title">我和七贤岭</text>
 						<text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
 					</view>
 					<text class="fb-entry-arrow">›</text>
@@ -421,7 +421,7 @@
 			this.$u.route('/pages/dtsh/dtsh')
 		},
 
-			// 爱护七贤岭入口
+			// 我和七贤岭入口
 			gotoQxl() {
 				this.$u.route('/pages/activity/love-qixianling')
 			},

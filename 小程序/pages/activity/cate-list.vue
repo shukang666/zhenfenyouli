@@ -9,7 +9,7 @@
 			<view class="fb-nav-placeholder"></view>
 		</view>
 
-		<!-- 公益行动特殊：显示垃圾分类 + 爱护七贤岭 入口 -->
+		<!-- 公益行动特殊：显示垃圾分类 + 我和七贤岭 入口 -->
 		<view class="fb-special-entries" v-if="cate_id === 5">
 			<view class="fb-special-entry fb-s-lgfl" @click="gotoFlhd">
 				<text class="fb-s-entry-title">垃圾分类</text>
@@ -17,7 +17,7 @@
 				<text class="fb-s-entry-arrow">›</text>
 			</view>
 			<view class="fb-special-entry fb-s-qxl" @click="gotoQxl">
-				<text class="fb-s-entry-title">爱护七贤岭</text>
+				<text class="fb-s-entry-title">我和七贤岭</text>
 				<text class="fb-s-entry-sub">发现 · 玩 · 记录 · 守护</text>
 				<text class="fb-s-entry-arrow">›</text>
 			</view>
