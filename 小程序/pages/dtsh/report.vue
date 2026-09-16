@@ -183,5 +183,6 @@
 		font-size: 26rpx;
 		color: #333;
 		border: 2rpx solid #eee;
+		box-sizing: border-box;
 	}
 </style>
