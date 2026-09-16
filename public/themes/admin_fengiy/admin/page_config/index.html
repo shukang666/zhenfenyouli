@@ -32,6 +32,25 @@
                         </div>
 
                         <div class="form-group">
+                            <label class="col-sm-2 control-label">低碳生活主 Banner 图</label>
+                            <div class="col-md-6 col-sm-10">
+                                <input type="hidden" name="dtsh_banner" id="dtsh_banner" value="{$dtsh_banner}">
+                                <a href="javascript:uploadOneImage('选择 Banner 图','#dtsh_banner');">
+                                    <notempty name="dtsh_banner">
+                                        <img src="{:cmf_get_image_preview_url($dtsh_banner)}" id="dtsh_banner-preview" width="270" style="cursor: hand; border-radius: 4px; border: 1px solid #ddd;"/>
+                                        <else />
+                                        <img src="__TMPL__/public/assets/images/default-image.png" id="dtsh_banner-preview" width="270" style="cursor: hand; border-radius: 4px; border: 1px solid #ddd;"/>
+                                    </notempty>
+                                </a>
+                                <input type="button" class="btn btn-sm" onclick="$('#dtsh_banner-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#dtsh_banner').val('');return false;" value="取消图片">
+                                <p class="help-block" style="margin-top:8px;">
+                                    建议尺寸 750×400 像素（宽×高），JPG 或 PNG 格式，大小不超过 2MB<br>
+                                    上传后，小程序「低碳生活」页面顶部将显示此 Banner 图；点击可进入垃圾分类打卡界面
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
                                 <button type="submit" class="btn btn-primary js-ajax-submit">保存配置</button>
                             </div>

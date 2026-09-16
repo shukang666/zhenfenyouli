@@ -7,6 +7,10 @@
 		</u-navbar>
 		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(to bottom,#2fb74c,#EFF9F1);">
 		</view>
+		<!-- 主 Banner 图 -->
+		<view class="dtsh-banner u-m-b-20" @click="goToClock" v-if="dtshBanner">
+			<u-image width="100%" height="360" :src="dtshBanner" mode="aspectFill" border-radius="16"></u-image>
+		</view>
 		<u-swiper :list="swiper_list" height="290" mode="none" @click="adLink($event,swiper_list)"></u-swiper>
 		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
 			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/11f9c0ccaefaeb375e7cea7000914a8b.png?watermark"></u-image>
@@ -64,10 +68,12 @@
 		data() {
 			return {
 				swiper_list: [],
+				dtshBanner: '',
 			};
 		},
 		onLoad() {
 			this.find_slide()
+			this.loadBanner()
 		},
 		methods: {
 			// 跳转页面
@@ -92,6 +98,22 @@
 				}).then(res => {
 					this.swiper_list = res.data
 				})
+			},
+			// 加载 Banner 配置
+			async loadBanner() {
+				try {
+					const res = await this.$u.api.getPageConfig()
+					const banner = res.data?.dtsh_banner || ''
+					if (banner) {
+						this.dtshBanner = banner
+					}
+				} catch (e) {
+					// 配置加载失败不影响页面
+				}
+			},
+			// 点击 Banner 进入打卡界面
+			goToClock() {
+				this.$u.route('/pages/flhd/ljfldk')
 			},
 		}
 	}
