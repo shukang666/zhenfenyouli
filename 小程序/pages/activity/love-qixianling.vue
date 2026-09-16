@@ -157,12 +157,22 @@
 	justify-content: center;
 	color: #fff;
 }
+.qxl-hero-content{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12rpx;
+}
 .qxl-hero-title {
 	font-size: 44rpx; font-weight: 800; letter-spacing: 4rpx;
 	text-shadow: 0 4rpx 8rpx rgba(0,0,0,0.25);
 }
 .qxl-hero-subtitle {
-	font-size: 26rpx; margin-top: 10rpx; opacity: 0.9; letter-spacing: 2rpx;
+	font-size: 26rpx; 
+	margin-top: 10rpx; 
+	opacity: 0.9;
+	 letter-spacing: 2rpx;
 }
 
 /* ===== Body ===== */

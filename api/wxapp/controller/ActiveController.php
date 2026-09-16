@@ -466,6 +466,11 @@ class ActiveController extends AuthController
         $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
         $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
         $item['content'] = htmlspecialchars_decode($item['content']);
+        // 新字段：适合人群 / 活动时长 / 活动流程（反义） / 你将获得（反义）
+        $item['suit_people'] = strval($item['suit_people'] ?? '');
+        $item['duration']    = strval($item['duration'] ?? '');
+        $item['flow']        = htmlspecialchars_decode($item['flow'] ?? '');
+        $item['gain']        = htmlspecialchars_decode($item['gain'] ?? '');
 
         //是否报名
         $where = [];

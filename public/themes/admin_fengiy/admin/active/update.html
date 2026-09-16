@@ -234,6 +234,34 @@
             </div>
 
             <div class="form-group">
+                <label class="col-sm-2 control-label">适合人群:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control" name="suit_people" value="{$item.suit_people|default=''}" placeholder="如：青少年 / 全年龄段 / 亲子家庭">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">活动时长:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control" name="duration" value="{$item.duration|default=''}" placeholder="如：2小时 / 半天 / 上午9:00-11:30">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">活动流程:</label>
+                <div class="col-md-6 col-sm-10">
+                    <script type="text/plain" id="flow" name="flow">{$item.flow|default=''}</script>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">你将获得:</label>
+                <div class="col-md-6 col-sm-10">
+                    <script type="text/plain" id="gain" name="gain">{$item.gain|default=''}</script>
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>联系方式:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="number" class="form-control" name="phone" value="{$item.phone|default=''}" required>
@@ -486,6 +514,17 @@
         } catch (err) {
         }
 
+        // 活动流程 / 你将获得 富文本
+        if (document.getElementById('flow')) {
+            var editorFlow = new baidu.editor.ui.Editor();
+            editorFlow.render('flow');
+            try { editorFlow.sync(); } catch (err) {}
+        }
+        if (document.getElementById('gain')) {
+            var editorGain = new baidu.editor.ui.Editor();
+            editorGain.render('gain');
+            try { editorGain.sync(); } catch (err) {}
+        }
     });
 </script>
 <script>

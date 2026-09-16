@@ -57,18 +57,55 @@
 					</view>
 					<text class="info-arrow">›</text>
 				</view>
-				<view class="info-item" @click="makePhoneCall(info.phone)" v-if="info.phone">
-					<view class="info-icon-wrap">
-						<text class="info-icon">📞</text>
-					</view>
-					<view class="info-content">
-						<text class="info-label">咨询电话</text>
-						<text class="info-value">{{info.phone}}</text>
-					</view>
-					<text class="info-arrow">›</text>
+			<view class="info-item" @click="makePhoneCall(info.phone)" v-if="info.phone">
+				<view class="info-icon-wrap">
+					<text class="info-icon">📞</text>
+				</view>
+				<view class="info-content">
+					<text class="info-label">咨询电话</text>
+					<text class="info-value">{{info.phone}}</text>
+				</view>
+				<text class="info-arrow">›</text>
+			</view>
+		</view>
+
+		<!-- 活动概览（适合人群 + 活动时长） -->
+		<view class="overview-card glass-card" v-if="info.suit_people || info.duration">
+			<view class="section-header">
+				<text class="section-title">活动概览</text>
+			</view>
+			<view class="overview-list">
+				<view class="overview-item" v-if="info.suit_people">
+					<text class="overview-label">适合人群</text>
+					<text class="overview-value">{{info.suit_people}}</text>
+				</view>
+				<view class="overview-item" v-if="info.duration">
+					<text class="overview-label">活动时长</text>
+					<text class="overview-value">{{info.duration}}</text>
 				</view>
 			</view>
-			
+		</view>
+
+		<!-- 活动流程（后台富文本配置） -->
+		<view class="desc-card glass-card" v-if="info.flow">
+			<view class="section-header">
+				<text class="section-title">活动流程</text>
+			</view>
+			<view class="desc-content">
+				<u-parse :html="info.flow"></u-parse>
+			</view>
+		</view>
+
+		<!-- 你将获得（后台富文本配置） -->
+		<view class="desc-card glass-card gain-card" v-if="info.gain">
+			<view class="section-header">
+				<text class="section-title">你将获得</text>
+			</view>
+			<view class="desc-content">
+				<u-parse :html="info.gain"></u-parse>
+			</view>
+		</view>
+
 		<!-- 活动流程 -->
 		<view class="flow-card glass-card">
 			<view class="section-header">
@@ -813,9 +850,48 @@
 		}
 	}
 	
-	// 活动流程
-	.flow-card {
-		padding: 30rpx;
+// 活动概览（适合人群 + 活动时长）
+.overview-card {
+	padding: 30rpx;
+
+	.overview-list {
+		.overview-item {
+			display: flex;
+			align-items: center;
+			padding: 16rpx 0;
+			border-bottom: 1rpx solid rgba(0,0,0,0.05);
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			.overview-label {
+				font-size: 24rpx;
+				color: #86868B;
+				flex-shrink: 0;
+				width: 160rpx;
+			}
+
+			.overview-value {
+				font-size: 28rpx;
+				color: #1D1D1F;
+				font-weight: 500;
+				flex: 1;
+			}
+		}
+	}
+}
+
+// 你将获得卡片：轻微绿色以区分
+.gain-card {
+	.section-title {
+		color: #34C759;
+	}
+}
+
+// 活动流程
+.flow-card {
+	padding: 30rpx;
 		
 		.section-header {
 			margin-bottom: 24rpx;
