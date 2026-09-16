@@ -194,13 +194,7 @@
 				</view>
 			</view>
 
-			<!-- 空态 -->
-			<view class="fb-empty" v-if="active_list.length === 0 && !active_loading">
-				<text class="fb-empty-text">暂无活动</text>
-			</view>
-
-			<!-- 加载提示 -->
-			<view class="fb-load-tip" v-if="active_loading">加载中...</view>
+			<!-- 空态/加载中：均不显示 -->
 			<view class="fb-load-tip"
 				v-if="!active_loading && active_list.length > 0 && active_list.length >= active_total">没有更多了</view>
 		</view>
