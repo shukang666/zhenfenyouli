@@ -590,7 +590,7 @@
 				"navigationBarTitleText": "整改任务",
 				"navigationStyle": "custom"
 			}
-		{
+		}, {
 			"path": "task-submit",
 			"style": {
 				"navigationBarTitleText": "提交整改",
