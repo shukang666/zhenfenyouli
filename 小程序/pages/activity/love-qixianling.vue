@@ -70,8 +70,8 @@
 					</view>
 				</view>
 
-				<!-- 暂无活动 -->
-				<view class="qxl-empty" v-else-if="!cate.loading">
+				<!-- 暂无活动（发现七贤岭 id=6 是固定栏目，不显示空态） -->
+				<view class="qxl-empty" v-else-if="!cate.loading && cate.id !== 6">
 					<text class="qxl-empty-text">暂无活动，敬请期待</text>
 				</view>
 
