@@ -32,6 +32,7 @@
 				<text class="task-text u-font-24 u-m-t-12">学会分类知识</text>
 			</view>
 		</view>
+
 		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
 			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/11f9c0ccaefaeb375e7cea7000914a8b.png?watermark"></u-image>
 			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
@@ -49,7 +50,7 @@
 			</view>
 		</view>
 		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
-			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/91648750a6ffb2b270ebb5e6cfbd4c8c.png?watermark"></u-image>
+			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/91648750a6ffb2b270e7bb5e6cfbd4c8c.png?watermark"></u-image>
 			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
 				<view class="u-font-bold">
 					自治活动
@@ -80,6 +81,27 @@
 				</view>
 			</view>
 		</view>
+
+		<!-- 志愿督导工作台（督导员/指导员 入口） -->
+		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30" v-if="isVolunteer">
+			<view class="u-font-32 u-font-bold u-m-b-24">志愿督导工作台</view>
+			<view class="vol-grid u-flex u-row-between">
+				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome(1)">
+					<view class="vol-icon u-flex u-col-center u-row-center">
+						<u-icon name="edit-pen-fill" size="56" color="#fff"></u-icon>
+					</view>
+					<text class="u-font-28 u-font-bold u-m-t-14" style="color:#333;">我是督导员</text>
+					<text class="u-font-22 u-type-info u-m-t-6">志愿督导/巡查</text>
+				</view>
+				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome(2)">
+					<view class="vol-icon vol-icon-blue u-flex u-col-center u-row-center">
+						<u-icon name="eye-fill" size="56" color="#fff"></u-icon>
+					</view>
+					<text class="u-font-28 u-font-bold u-m-t-14" style="color:#333;">我是指导员</text>
+					<text class="u-font-22 u-type-info u-m-t-6">督导监测/治理</text>
+				</view>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -89,13 +111,27 @@
 			return {
 				swiper_list: [],
 				dtshBanner: '',
+				checkRole: null, // { is_approved, role_type, role_name }
 			};
+		},
+		computed: {
+			isVolunteer() {
+				return this.checkRole && this.checkRole.is_approved;
+			}
 		},
 		onLoad() {
 			this.find_slide()
 			this.loadBanner()
+			this.loadCheckRole()
 		},
 		methods: {
+			// 加载用户角色
+			loadCheckRole() {
+				if (!this.$u.func.checkLogin()) return;
+				this.$u.api.getCheckRole().then(res => {
+					this.checkRole = res.data || null;
+				}).catch(() => {});
+			},
 			// 跳转页面
 			navigator(url) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -139,6 +175,14 @@
 		goToPage(url) {
 			this.$u.route(url)
 		},
+		// 跳转督导员/指导员门户
+		goVolunteerHome(roleType) {
+			if (!this.$u.func.checkLogin()) return;
+			this.$u.route({
+				url: '/pages/dtsh/volunteer-home',
+				params: { role_type: roleType }
+			});
+		},
 		// 自定义返回逻辑
 		customBack() {
 			uni.navigateBack({
@@ -162,5 +206,23 @@
 }
 .task-text {
 	color: #333;
+}
+.vol-grid {
+	gap: 20rpx;
+}
+.vol-card {
+	flex: 1;
+	padding: 30rpx 0;
+	background: #fff;
+	border-radius: 12rpx;
+}
+.vol-icon {
+	width: 110rpx;
+	height: 110rpx;
+	border-radius: 28rpx;
+	background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
+}
+.vol-icon-blue {
+	background: linear-gradient(141deg, #64B5F6 0%, #1976D2 100%);
 }
 </style>

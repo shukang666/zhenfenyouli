@@ -1,0 +1,84 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li <if condition="!$status or $status==''">class="active"</if>><a href="{:url('VolunteerTask/index')}">任务列表</a></li>
+        <li <if condition="$status==='1'">class="active"</if>><a href="{:url('VolunteerTask/index','status=1')}">启用中</a></li>
+        <li <if condition="$status==='0'">class="active"</if>><a href="{:url('VolunteerTask/index','status=0')}">已停用</a></li>
+        <li><a href="{:url('VolunteerTask/records')}">提交记录</a></li>
+    </ul>
+    <div class="margin-top-20">
+        <a class="btn btn-primary" href="{:url('VolunteerTask/add')}">+ 发布新任务</a>
+    </div>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>任务项</th>
+            <th>任务要求</th>
+            <th>任务积分</th>
+            <th>状态</th>
+            <th>发布时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr id="row_{$vo.id}">
+                <td>{$vo.id}</td>
+                <td style="max-width:200px;word-break:break-all;">{$vo.title|default='--'}</td>
+                <td style="max-width:300px;word-break:break-all;">{$vo.content|default='--'}</td>
+                <td>{$vo.point|default=0}</td>
+                <td>
+                    <if condition="$vo.status == 1">
+                        <span class="label label-success">启用中</span>
+                    <else/>
+                        <span class="label label-default">已停用</span>
+                    </if>
+                </td>
+                <td>{$vo.create_time|date="Y-m-d H:i:s"}</td>
+                <td>
+                    <a class="btn btn-xs btn-info" href="{:url('VolunteerTask/add',['id'=>$vo.id])}">编辑</a>
+                    <if condition="$vo.status == 1">
+                        <a class="btn btn-xs btn-warning btn-toggle" href="javascript:;" data-id="{$vo.id}" data-status="0">停用</a>
+                    <else/>
+                        <a class="btn btn-xs btn-success btn-toggle" href="javascript:;" data-id="{$vo.id}" data-status="1">启用</a>
+                    </if>
+                    <a class="btn btn-xs btn-danger btn-delete" href="javascript:;" data-id="{$vo.id}">删除</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    $(function () {
+        $('.btn-toggle').on('click', function () {
+            var id = $(this).data('id');
+            var status = $(this).data('status');
+            var tip = status == 1 ? '确认启用？' : '确认停用？';
+            layer.confirm(tip, {btn: ['确认', '取消']}, function (index) {
+                $.post("{:url('VolunteerTask/toggle')}", {id: id, status: status}, function (res) {
+                    layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+                    if (res.code == 1) setTimeout(function () { location.reload(); }, 1000);
+                });
+                layer.close(index);
+            });
+        });
+        $('.btn-delete').on('click', function () {
+            var id = $(this).data('id');
+            layer.confirm('确认删除？', {btn: ['确认', '取消']}, function (index) {
+                $.post("{:url('VolunteerTask/delete')}", {id: id}, function (res) {
+                    layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+                    if (res.code == 1) setTimeout(function () { location.reload(); }, 1000);
+                });
+                layer.close(index);
+            });
+        });
+    });
+</script>
+</body>
+</html>

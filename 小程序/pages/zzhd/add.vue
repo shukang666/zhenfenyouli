@@ -17,13 +17,23 @@
 				<u-form-item label="申请理由" prop="reason" labelWidth="150" label-position="bottom">
 					<u-input v-model="form.reason" placeholder="请输入" />
 				</u-form-item>
-				<u-form-item label="期望参加活动" labelWidth="150" label-position="bottom">
-					<view class="u-flex">
-						<view class="u-m-r-20" v-for="(item,index) in type_list" :key="index" @click="form.active_type = item.type">
-							<u-tag :text="item.name" :mode="form.active_type==item.type?'dark':'plain'" :type="form.active_type==item.type?'success':'info'" />
-						</view>
+			<u-form-item label="申请角色" labelWidth="150" label-position="bottom">
+				<view class="u-flex">
+					<view class="u-m-r-20" @click="form.role_type = 1">
+						<u-tag text="督导员" :mode="form.role_type==1?'dark':'plain'" :type="form.role_type==1?'success':'info'" />
 					</view>
-				</u-form-item>
+					<view @click="form.role_type = 2">
+						<u-tag text="指导员" :mode="form.role_type==2?'dark':'plain'" :type="form.role_type==2?'success':'info'" />
+					</view>
+				</view>
+			</u-form-item>
+			<u-form-item label="期望参加活动" labelWidth="150" label-position="bottom">
+				<view class="u-flex">
+					<view class="u-m-r-20" v-for="(item,index) in type_list" :key="index" @click="form.active_type = item.type">
+						<u-tag :text="item.name" :mode="form.active_type==item.type?'dark':'plain'" :type="form.active_type==item.type?'success':'info'" />
+					</view>
+				</view>
+			</u-form-item>
 				<!-- 				<u-form-item label="签名" prop="reason" labelWidth="150">
 					<view class="u-flex u-row-right u-text-right u-font-24 u-hui" @click="$u.route(`/pages/zzhd/sign-name`)">
 						<image :src="form.sign_image" class="u-w-150 " mode="widthFix" v-if="form.sign_image"></image>
@@ -54,6 +64,7 @@
 					community: '',
 					reason: '',
 					active_type: 1,
+					role_type: 1,
 					community_id: 0,
 					sign_image: '',
 				},

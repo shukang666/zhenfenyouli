@@ -10,6 +10,19 @@
 				拍照记录小区、沿街商铺存在的问题
 			</view>
 
+			<!-- 问题类型 -->
+			<view class="u-m-t-40">
+				<view class="u-font-28 u-m-b-16">问题类型</view>
+				<view class="u-flex">
+					<view class="u-m-r-20" @click="form.location_type = 1">
+						<u-tag text="小区内" :mode="form.location_type==1?'dark':'plain'" :type="form.location_type==1?'success':'info'" />
+					</view>
+					<view @click="form.location_type = 2">
+						<u-tag text="沿街商铺" :mode="form.location_type==2?'dark':'plain'" :type="form.location_type==2?'success':'info'" />
+					</view>
+				</view>
+			</view>
+
 			<!-- 拍照上传 -->
 			<view class="u-m-t-40">
 				<view class="u-font-28 u-m-b-16">问题照片</view>
@@ -50,14 +63,25 @@
 </template>
 
 <script>
+	import {
+		uploadUrl
+	} from '@/common/settings'
 	export default {
 		data() {
 			return {
 				form: {
 					image: '',
-					remark: ''
-				}
+					remark: '',
+					location_type: 1,   // 默认小区内
+				},
+				uploadUrl,
 			};
+		},
+		onLoad(option) {
+			if (option.location_type) {
+				const lt = parseInt(option.location_type);
+				if ([1, 2].includes(lt)) this.form.location_type = lt;
+			}
 		},
 		methods: {
 			customBack() {
@@ -86,7 +110,7 @@
 			uploadImage(filePath) {
 				uni.showLoading({ title: '上传中...' });
 				uni.uploadFile({
-					url: this.$u.http.config.baseUrl + '/wxapp/public/upload_asset',
+					url: this.uploadUrl + '/wxapp/public/upload_asset',
 					filePath: filePath,
 					name: 'file',
 					formData: {
@@ -127,11 +151,12 @@
 				uni.showLoading({ title: '提交中...' });
 				this.$u.api.postShotReport({
 					image: this.form.image,
-					remark: this.form.remark
+					remark: this.form.remark,
+					location_type: this.form.location_type || 1,
 				}).then(res => {
 					uni.hideLoading();
 					uni.showToast({
-						title: res.msg || '已提交，项目正在处理',
+						title: res.msg || '已提交',
 						icon: 'none',
 						duration: 2000
 					});

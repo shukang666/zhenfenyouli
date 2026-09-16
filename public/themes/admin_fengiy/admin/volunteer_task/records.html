@@ -1,0 +1,116 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">提交记录</a></li>
+        <li><a href="{:url('VolunteerTask/index')}">返回任务列表</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('VolunteerTask/records')}">
+        <div class="form-group">
+            <label>任务：</label>
+            <select name="task_id" class="form-control" style="width: 200px;">
+                <option value="">全部</option>
+                <foreach name="task_list" item="vo" key="k">
+                    <option value="{$k}" <if condition="$task_id eq $k">selected="selected"</if>>{$vo}</option>
+                </foreach>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>状态：</label>
+            <select name="status" class="form-control" style="width: 120px;">
+                <option value="">全部</option>
+                <option value="0" <if condition="$status eq '0'">selected="selected"</if>>待审核</option>
+                <option value="1" <if condition="$status eq '1'">selected="selected"</if>>已通过</option>
+                <option value="2" <if condition="$status eq '2'">selected="selected"</if>>已拒绝</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>关键字：</label>
+            <input type="text" class="form-control" name="keyword" style="width: 160px;"
+                   value="{$keyword}" placeholder="昵称/手机号">
+        </div>
+        <button type="submit" class="btn btn-primary">搜索</button>
+        <a class="btn btn-danger" href="{:url('VolunteerTask/records')}">清空</a>
+    </form>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>昵称/手机</th>
+            <th>任务</th>
+            <th>说明</th>
+            <th>整改照片</th>
+            <th>状态</th>
+            <th>获得积分</th>
+            <th>提交时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr id="row_{$vo.id}">
+                <td>{$vo.id}</td>
+                <td>{$vo.nickname|default='--'}<br><small>{$vo.mobile|default=''}</small></td>
+                <td>{$vo.task_title|default='--'}</td>
+                <td style="max-width:200px;word-break:break-all;">{$vo.content|default='--'}</td>
+                <td>
+                    <notempty name="$vo.images">
+                        <php>$imgs = array_filter(explode(',', $vo['images']));</php>
+                        <foreach name="imgs" item="img">
+                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url(trim($img))}');">
+                                <img src="{:cmf_get_image_preview_url(trim($img))}" style="width:60px;height:60px;border-radius:4px;margin-right:4px;">
+                            </a>
+                        </foreach>
+                    </notempty>
+                </td>
+                <td>
+                    <if condition="$vo.status == 0">
+                        <span class="label label-warning">待审核</span>
+                    <elseif condition="$vo.status == 1"/>
+                        <span class="label label-success">已通过</span>
+                    <else/>
+                        <span class="label label-danger">已拒绝（{$vo.reason}）</span>
+                    </if>
+                </td>
+                <td>{$vo.point|default=0}</td>
+                <td>{$vo.create_time|date="Y-m-d H:i:s"}</td>
+                <td>
+                    <if condition="$vo.status == 0">
+                        <a class="btn btn-xs btn-success btn-approve" href="javascript:;" data-id="{$vo.id}">通过</a>
+                        <a class="btn btn-xs btn-danger btn-deny" href="javascript:;" data-id="{$vo.id}">拒绝</a>
+                    </if>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    $(function () {
+        $('.btn-approve').on('click', function () {
+            var id = $(this).data('id');
+            layer.confirm('确认通过？后将下发任务积分。', {btn: ['确认', '取消']}, function (index) {
+                $.post("{:url('VolunteerTask/approve')}", {id: id}, function (res) {
+                    layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+                    if (res.code == 1) setTimeout(function () { location.reload(); }, 1000);
+                });
+                layer.close(index);
+            });
+        });
+        $('.btn-deny').on('click', function () {
+            var id = $(this).data('id');
+            layer.prompt({title: '请输入拒绝原因（可选）', formType: 2}, function (value, index) {
+                $.post("{:url('VolunteerTask/deny')}", {id: id, reason: value}, function (res) {
+                    layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+                    if (res.code == 1) setTimeout(function () { location.reload(); }, 1000);
+                });
+                layer.close(index);
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -38,6 +38,12 @@ class ShotReportController extends AdminBaseController
             $where[] = ['r.remark', 'like', '%' . trim($keyword) . '%'];
         }
 
+        // 问题类型
+        $locationType = $this->request->param('location_type', '');
+        if ($locationType !== '') {
+            $where[] = ['r.location_type', '=', intval($locationType)];
+        }
+
         $list = $this->model->alias('r')
             ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
             ->field('r.*, m.nickname, m.mobile')
@@ -51,6 +57,7 @@ class ShotReportController extends AdminBaseController
         $this->assign('params', $params);
         $this->assign('status', $status);
         $this->assign('keyword', $keyword);
+        $this->assign('location_type', $locationType);
         return $this->fetch();
     }
 

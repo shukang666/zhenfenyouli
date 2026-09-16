@@ -37,5 +37,26 @@ const wxapp = {
 	// 分类知识 - 详情
 	getKnowledgeDetail: (params = {}) => uni.$u.get('/wxapp/knowledge/get_detail', params),
 
+	// 志愿者申请 - 角色类型申请状态
+	getCheckRole: (params = {}) => uni.$u.post('/wxapp/check/get_check', params),
+	// 志愿者申请 - 提交申请（含 role_type）
+	addCheckRole: (params = {}) => uni.$u.post('/wxapp/check/add_check', params),
+
+	// 志愿督导 - 今日签到状态
+	getVolunteerToday: (params = {}) => uni.$u.get('/wxapp/volunteer_supervision/today', params),
+	// 志愿督导 - 提交签到
+	postVolunteerSignIn: (params = {}) => uni.$u.post('/wxapp/volunteer_supervision/sign_in', params),
+	// 志愿督导 - 我的历史记录
+	getVolunteerMyList: (params = {}) => uni.$u.get('/wxapp/volunteer_supervision/my_list', params),
+
+	// 整改任务 - 可领取列表
+	getVolunteerTaskList: (params = {}) => uni.$u.get('/wxapp/volunteer_task/task_list', params),
+	// 整改任务 - 领取
+	acceptVolunteerTask: (params = {}) => uni.$u.post('/wxapp/volunteer_task/accept', params),
+	// 整改任务 - 我的任务列表
+	getMyVolunteerTasks: (params = {}) => uni.$u.get('/wxapp/volunteer_task/my_tasks', params),
+	// 整改任务 - 提交
+	submitVolunteerTask: (params = {}) => uni.$u.post('/wxapp/volunteer_task/submit', params),
+
 }
 export default wxapp

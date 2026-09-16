@@ -7,7 +7,7 @@ use app\admin\model\ToolModel;
 
 class CheckModel extends ToolModel
 {
-    protected $name = 'member_check';
+    protected $name = 'check';
 
     public function get_status()
     {

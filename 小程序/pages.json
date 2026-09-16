@@ -545,16 +545,40 @@
 					"navigationBarTitleText": "分类知识",
 					"navigationStyle": "custom"
 				}
-			}, {
-				"path": "knowledge-detail",
-				"style": {
-					"navigationBarTitleText": "知识详情",
-					"navigationStyle": "custom"
-				}
-			}]
-		},
-		{
-			"root": "pages/sjhd",
+		}, {
+			"path": "knowledge-detail",
+			"style": {
+				"navigationBarTitleText": "知识详情",
+				"navigationStyle": "custom"
+			}
+		}, {
+			"path": "volunteer-home",
+			"style": {
+				"navigationBarTitleText": "志愿督导工作台",
+				"navigationStyle": "custom"
+			}
+		}, {
+			"path": "volunteer-sign",
+			"style": {
+				"navigationBarTitleText": "志愿督导签到",
+				"navigationStyle": "custom"
+			}
+		}, {
+			"path": "task-list",
+			"style": {
+				"navigationBarTitleText": "整改任务",
+				"navigationStyle": "custom"
+			}
+		}, {
+			"path": "task-submit",
+			"style": {
+				"navigationBarTitleText": "提交整改",
+				"navigationStyle": "custom"
+			}
+		}]
+	},
+	{
+		"root": "pages/sjhd",
 			"pages": [{
 					"path": "sjhd",
 					"style": {

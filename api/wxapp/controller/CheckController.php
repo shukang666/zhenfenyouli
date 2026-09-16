@@ -55,6 +55,7 @@ class CheckController extends AuthController
         $this->checkUser();
         $params = $this->request->param();
 
+        // role_type: 1=督导员, 2=指导员（默认1）
         if (empty($params['id'])) {
             if(!empty($params['sign_image'])){
                 $public = new PublicController();
@@ -63,6 +64,9 @@ class CheckController extends AuthController
             }
 
             $params['user_id'] = $this->user_id;
+            if (empty($params['role_type'])) {
+                $params['role_type'] = 1;
+            }
             $checkModel->save($params);
         } else {
             $item = $checkModel->find($params['id']);
@@ -86,10 +90,15 @@ class CheckController extends AuthController
     public function get_check(CheckModel $checkModel)
     {
         $this->checkUser();
-        $item = $checkModel->where('user_id', $this->user_id)->find();
+        $item = $checkModel->where('user_id', $this->user_id)->order('id desc')->find();
         if (empty($item)) $this->error('暂无数据');
         $item['status_name'] = $checkModel->get_status()[$item['status']]??'';
-        $item['active_name'] = $checkModel->get_type()[$item['active_type']]??'';
+        $getType = $checkModel->get_type();
+        $item['active_name'] = $getType[$item['active_type']]??'';
+        $item['role_type'] = intval($item['role_type'] ?? 1);
+        // 申请通过后，role_type(1/2) 表示角色身份
+        $item['is_approved'] = ($item['status'] == 2);
+        $item['role_name'] = $item['role_type'] == 2 ? '指导员' : '督导员';
 
         $item['sign_image'] = empty($item['sign_image'])?'':cmf_get_asset_url($item['sign_image']);
         $item['pdf_file'] = empty($item['pdf_file'])?'':cmf_get_asset_url($item['pdf_file']);

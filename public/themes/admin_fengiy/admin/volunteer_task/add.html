@@ -1,0 +1,60 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;"><notempty name="vo">编辑任务<else/>新增任务</notempty></a></li>
+        <li><a href="{:url('VolunteerTask/index')}">返回列表</a></li>
+    </ul>
+    <form method="post" class="form-post" action="{:url('VolunteerTask/add')}">
+        <notempty name="vo">
+            <input type="hidden" name="id" value="{$vo.id}">
+        </notempty>
+        <div class="margin-top-20">
+            <div class="form-group">
+                <label>任务项 <span class="form-required">*</span></label>
+                <input type="text" class="form-control" name="title" style="max-width:400px;" required
+                       value="{$vo.title|default=''}" placeholder="请输入任务项标题">
+            </div>
+            <div class="form-group">
+                <label>任务要求 <span class="form-required">*</span></label>
+                <textarea class="form-control" name="content" rows="5" style="max-width:600px;" required
+                          placeholder="请输入任务要求，用户可以看见">{$vo.content|default=''}</textarea>
+            </div>
+            <div class="form-group">
+                <label>任务积分</label>
+                <input type="number" class="form-control" name="point" style="max-width:150px;"
+                       value="{$vo.point|default=0}" placeholder="0">
+            </div>
+            <notempty name="vo">
+                <div class="form-group">
+                    <label>状态</label>
+                    <select name="status" class="form-control" style="width: 150px;">
+                        <option value="1" <if condition="$vo.status == 1">selected</if>>启用</option>
+                        <option value="0" <if condition="$vo.status == 0">selected</if>>停用</option>
+                    </select>
+                </div>
+            </notempty>
+        </div>
+        <div class="margin-top-20">
+            <button type="submit" class="btn btn-primary">保存</button>
+            <a class="btn btn-default" href="{:url('VolunteerTask/index')}">取消</a>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    $(function () {
+        $('.form-post').on('submit', function (e) {
+            e.preventDefault();
+            var form = $(this);
+            $.post(form.attr('action'), form.serialize(), function (res) {
+                layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+                if (res.code == 1) setTimeout(function () { location.href = res.url || "{:url('VolunteerTask/index')}"; }, 1000);
+            }, 'json');
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">志愿督导记录</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('admin/VolunteerSupervision/index')}">
+        <div class="form-group">
+            <label>关键字：</label>
+            <input type="text" class="form-control" name="keyword" style="width: 180px;"
+                   value="{$keyword}" placeholder="昵称/手机号/小区/点位">
+        </div>
+        <div class="form-group">
+            <label>督导日期：</label>
+            <input type="text" class="form-control" name="date_start" style="width: 120px;"
+                   value="{$date_start}" placeholder="开始" onclick="laydate({istime:false, format:'YYYY-MM-DD'})">
+            ~
+            <input type="text" class="form-control" name="date_end" style="width: 120px;"
+                   value="{$date_end}" placeholder="结束" onclick="laydate({istime:false, format:'YYYY-MM-DD'})">
+        </div>
+        <button type="submit" class="btn btn-primary">搜索</button>
+        <a class="btn btn-danger" href="{:url('admin/VolunteerSupervision/index')}">清空</a>
+    </form>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>昵称</th>
+            <th>手机号</th>
+            <th>督导小区</th>
+            <th>督导点位</th>
+            <th>督导照片</th>
+            <th>督导内容</th>
+            <th>获得积分</th>
+            <th>督导日期</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr id="row_{$vo.id}">
+                <td>{$vo.id}</td>
+                <td>{$vo.nickname|default='--'}</td>
+                <td>{$vo.mobile|default='--'}</td>
+                <td>{$vo.community_real_name|default=$vo.community_name|default='--'}</td>
+                <td>{$vo.point_name|default='--'}</td>
+                <td>
+                    <notempty name="$vo.image">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image)}');">
+                            <img src="{:cmf_get_image_preview_url($vo.image)}" style="width:60px;height:60px;border-radius:4px;">
+                        </a>
+                    </notempty>
+                </td>
+                <td style="max-width:200px;word-break:break-all;">{$vo.content|default='--'}</td>
+                <td>{$vo.point|default=0}</td>
+                <td>{$vo.supervision_date}</td>
+                <td>
+                    <a class="btn btn-xs btn-default btn-delete" href="javascript:;" data-id="{$vo.id}">删除</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    $(function () {
+        $('.btn-delete').on('click', function () {
+            var id = $(this).data('id');
+            layer.confirm('确认删除？', {btn: ['确认', '取消']}, function (index) {
+                $.post("{:url('admin/VolunteerSupervision/delete')}", {id: id}, function (res) {
+                    layer.msg(res.msg, {icon: res.code == 1 ? 1 : 2});
+                    if (res.code == 1) setTimeout(function () { location.reload(); }, 1000);
+                });
+                layer.close(index);
+            });
+        });
+    });
+</script>
+</body>
+</html>
