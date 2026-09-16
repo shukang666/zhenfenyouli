@@ -54,15 +54,8 @@
 					</view>
 				</view>
 
-				<!-- 暂无活动 -->
-				<view class="qxl-empty" v-else-if="!cate.loading">
-					<text class="qxl-empty-text">暂无活动，敬请期待</text>
-				</view>
-
-				<!-- 加载中 -->
-				<view class="qxl-empty" v-else>
-					<text class="qxl-empty-text">加载中...</text>
-				</view>
+				<!-- 暂无活动 / 加载中：均不显示 -->
+			
 			</view>
 		</view>
 	</view>
