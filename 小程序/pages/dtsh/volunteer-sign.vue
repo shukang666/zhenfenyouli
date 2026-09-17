@@ -139,7 +139,8 @@
 				})
 			},
 			loadToday() {
-				if (!this.$u.func.checkLogin()) return;
+				// 使用 isLogin 状态判断（不自动跳转登录页），让用户可以看到页面内容，提交签到时才检查登录
+				if (!this.isLogin) return;
 				this.$u.api.getVolunteerToday().then(res => {
 					this.todaySigned = res.data.today_signed;
 					this.todayRecord = res.data.record;
@@ -170,8 +171,9 @@
 					}));
 				}).catch(() => {});
 			},
-			loadHistory() {
-				if (!this.$u.func.checkLogin()) return;
+		loadHistory() {
+				// 使用 isLogin 状态判断（不自动跳转登录页）
+				if (!this.isLogin) return;
 				this.$u.api.getVolunteerMyList({ page: 1, page_size: 10 }).then(res => {
 					this.historyList = res.data.data || [];
 				}).catch(() => {});
@@ -227,6 +229,8 @@
 				});
 			},
 			submit() {
+				// 点击提交签到时才检查登录
+				if (!this.$u.func.checkLogin()) return;
 				if (!this.form.community_id) {
 					uni.showToast({ title: '请选择督导小区', icon: 'none' });
 					return;

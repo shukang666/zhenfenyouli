@@ -93,18 +93,21 @@
 				this.currentTab = idx;
 			},
 			loadTaskList() {
-				if (!this.$u.func.checkLogin()) return;
+				// 使用 isLogin 状态判断（不自动跳转登录页），让用户可以看到页面内容，点击领取任务时才检查登录
+				if (!this.isLogin) return;
 				this.$u.api.getVolunteerTaskList().then(res => {
 					this.taskList = res.data || [];
 				}).catch(() => {});
 			},
 			loadMyTasks() {
-				if (!this.$u.func.checkLogin()) return;
+				if (!this.isLogin) return;
 				this.$u.api.getMyVolunteerTasks({ page: 1, page_size: 20 }).then(res => {
 					this.myTasks = res.data.data || [];
 				}).catch(() => {});
 			},
 			acceptTask(item) {
+				// 点击领取任务时才检查登录
+				if (!this.$u.func.checkLogin()) return;
 				uni.showModal({
 					title: '确认领取',
 					content: `确定领取整改任务「${item.title}」吗？`,
@@ -120,6 +123,8 @@
 				});
 			},
 			goSubmit(item) {
+				// 点击任务卡片进入提交页时才检查登录
+				if (!this.$u.func.checkLogin()) return;
 				if (item.status != 0) {
 					// 待提交(status=0) 才进入提交页；待审核、审核失败也允许重新提交
 					if (item.status == 3) {
