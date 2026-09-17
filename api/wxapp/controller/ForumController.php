@@ -896,6 +896,49 @@ class ForumController extends AuthController
 
 
     /**
+     * 精选打卡列表
+     * @OA\Post(
+     * tags={"帖子"},
+     * path="/wxapp/forum/get_choice_list",
+     *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="keyword",description="关键字",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Parameter(name="page",description="页码",in="query",required=false, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_choice_list(ForumModel $forumModel, ForumCateModel $forumCateModel, SelectModel $selectModel, CommunityModel $communityModel)
+    {
+        $keyword = $this->request->param('keyword');
+        $where = [];
+        $where[] = ['a.is_choice', '=', 1];
+        $where[] = ['a.delete_time', '=', 0];
+        $where[] = ['a.type', '=', 2];
+
+        if (!empty($keyword)) {
+            $where[] = ['a.content|a.title', 'like', "%$keyword%"];
+        }
+
+        $list = $forumModel
+            ->alias('a')
+            ->join('member b', 'a.user_id=b.id')
+            ->where($where)
+            ->order('a.id desc')
+            ->field('a.id,title,a.type,image,a.status,a.create_time,user_id,nickname,
+            avatar,view_num,cate_id,content,like_total,a.point,b.community_id')
+            ->paginate($this->page_size)->each(function ($item) use ($communityModel) {
+                $item['is_like'] = ForumLikeModel::where('rid', $item['id'])
+                    ->where('user_id', $this->user_id)->where('type', 1)->count();
+                $item['comment_total'] = ForumCommentModel::where('info_id', $item['id'])->count();
+                $item['community_name'] = $communityModel->where('id', $item['community_id'])->value('name');
+                $item['cate_name'] = SelectModel::where('id', $item['cate_id'])->value('name');
+                return CommonModel::getOne($item, ['thumb', 'avatar', 'image_one', 'image_two', 'image_three'], ['image']);
+            });
+
+        $this->success('请求成功', $list);
+    }
+
+    /**
      * 获取一组打卡时间戳中 最长连续打卡天数
      * @param array $timeStampArr 打卡时间戳数组
      * @return int 最长连续天数

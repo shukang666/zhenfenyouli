@@ -396,20 +396,26 @@
 						"navigationBarTitleText": "详情"
 					}
 				},
-				{
-					"path": "ljfldk",
-					"style": {
-						"navigationBarTitleText": "垃圾分类打卡"
-					}
-				},
-				{
-					"path": "add",
-					"style": {
-						"navigationBarTitleText": "拍照打卡"
-					}
-				},
-				{
-					"path": "record",
+			{
+				"path": "ljfldk",
+				"style": {
+					"navigationBarTitleText": "垃圾分类打卡"
+				}
+			},
+			{
+				"path": "choice",
+				"style": {
+					"navigationBarTitleText": "精选打卡"
+				}
+			},
+			{
+				"path": "add",
+				"style": {
+					"navigationBarTitleText": "拍照打卡"
+				}
+			},
+			{
+				"path": "record",
 					"style": {
 						"navigationBarTitleText": "拍照记录"
 					}

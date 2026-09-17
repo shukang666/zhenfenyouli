@@ -325,6 +325,17 @@
                         <a class="btn btn-xs btn-primary"
                           href="javascript:parent.openIframeLayer('{:url('forum_comment/index',array('info_id'=>$vo['id']))}','评论',{area:['60%','80%']});">评论</a>
 
+                        <if condition="$vo['is_choice'] == 1">
+                            <a class="btn btn-xs btn-success btn-set-choice"
+                               href="javascript:;"
+                               data-id="{$vo['id']}"
+                               data-is-choice="1">取消精选</a>
+                            <else/>
+                            <a class="btn btn-xs btn-primary btn-set-choice"
+                               href="javascript:;"
+                               data-id="{$vo['id']}"
+                               data-is-choice="0">精选</a>
+                        </if>
                         <a class="btn btn-xs btn-danger btn-delete-with-reason"
                            href="javascript:;"
                            data-id="{$vo['id']}">删除</a>
@@ -440,6 +451,40 @@
                 });
                 layer.close(indexPost);
             });
+        });
+    });
+
+    // ========== 精选/取消精选打卡 ==========
+    $(document).on('click', '.btn-set-choice', function () {
+        var id = $(this).data('id');
+        var isChoice = $(this).data('is-choice');
+        var url = "{:url('setChoice')}";
+        var actionText = isChoice == 1 ? '取消精选' : '设为精选';
+
+        layer.confirm('确定要' + actionText + '该打卡记录？', {
+            btn: ['确认', '取消'],
+            title: '确认操作'
+        }, function (indexConfirm) {
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'json',
+                data: {id: id, is_choice: isChoice},
+                success: function (res) {
+                    if (res.code == 1) {
+                        layer.msg(res.msg, {icon: 1});
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg(res.msg, {icon: 2});
+                    }
+                },
+                error: function () {
+                    layer.msg('请求失败', {icon: 2});
+                }
+            });
+            layer.close(indexConfirm);
         });
     });
 

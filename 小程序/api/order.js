@@ -18,6 +18,8 @@ const order = {
     add_comment: (params = {}) => uni.$u.post('/wxapp/forum/add_comment', params),
     // 点赞
     add_like: (params = {}) => uni.$u.post('/wxapp/forum/add_like', params),
+    // 精选打卡列表
+    get_choice_list: (params = {}) => uni.$u.post('/wxapp/forum/get_choice_list', params),
 	
     // 健康管理
     get_health_home_list: (params = {}) => uni.$u.post('/wxapp/health/get_health_home_list', params),

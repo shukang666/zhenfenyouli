@@ -368,6 +368,111 @@ class ForumController extends ToolController
     }
 
     /**
+     * 设置/取消精选打卡
+     */
+    public function setChoice()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        $is_choice = $this->request->param('is_choice', 0, 'intval');
+
+        if (empty($id)) {
+            $this->error('参数错误');
+        }
+
+        $forum = $this->model->where('id', $id)->find();
+        if (empty($forum)) {
+            $this->error('打卡记录不存在');
+        }
+
+        // 切换精选状态
+        $new_status = $forum['is_choice'] == 1 ? 0 : 1;
+        $this->model->where('id', $id)->update(['is_choice' => $new_status]);
+
+        $msg = $new_status == 1 ? '已设为精选打卡' : '已取消精选';
+        $this->success($msg);
+    }
+
+    /**
+     * 精选打卡列表页面
+     */
+    public function choiceList()
+    {
+        $export = $this->request->param('export', 0);
+        $keyword = $this->request->param('keyword', '', 'trim');
+        $name = $this->request->param('name', '', 'trim');
+        $start_time = $this->request->param('start_time', '', 'trim');
+        $end_time = $this->request->param('end_time', '', 'trim');
+
+        $where = [];
+        $where[] = ['a.is_choice', '=', 1];
+        $where[] = ['a.delete_time', '=', 0];
+
+        if ($keyword) {
+            $where[] = ['a.content', 'like', '%' . trim($keyword) . '%'];
+        }
+        if ($name) {
+            $where[] = ['b.nickname|b.mobile|a.user_id', 'like', '%' . trim($name) . '%'];
+        }
+        if ($start_time) {
+            $where[] = ['a.create_time', '>=', strtotime($start_time)];
+        }
+        if ($end_time) {
+            $where[] = ['a.create_time', '<=', strtotime($end_time) + 86399];
+        }
+
+        $sql = $this->model
+            ->alias('a')
+            ->join('member b', 'a.user_id=b.id')
+            ->leftjoin('select c', 'a.cate_id=c.id')
+            ->field('a.*,b.nickname,b.mobile user_mobile,b.id uid,b.avatar,c.name cate_name,b.community_id')
+            ->where($where)
+            ->order('a.id desc');
+
+        if ($export) {
+            $list = $sql->select();
+        } else {
+            $list = $sql->paginate(15);
+        }
+
+        $list->each(function ($item) {
+            $item['user_info'] = !empty($item['nickname']) ? "({$item['user_id']}){$item['nickname']}" : '被删除';
+            $item['community_name'] = \app\admin\model\member\CommunityModel::where('id', $item['community_id'])->value('name');
+            $item['cate_name'] = \app\admin\model\basic\SelectModel::where('id', $item['cate_id'])->value('name');
+            return CommonModel::getOne($item, ['thumb', 'file', 'pay_proof'], ['image']);
+        });
+
+        if ($export) {
+            $this->outChoiceData($list);
+        }
+
+        $this->assign('list', $list);
+        $list->appends($this->request->param());
+        $this->assign('page', $list->render());
+        return $this->fetch('choice_list');
+    }
+
+    /**
+     * 精选打卡列表导出
+     */
+    protected function outChoiceData($list)
+    {
+        foreach ($list as &$item) {
+            if ($item['nickname']) {
+                $item['nickname'] = "({$item['user_id']}){$item['nickname']}";
+            } else {
+                $item['nickname'] = $item['user_id'];
+            }
+            $item['create_time'] = date('Y-m-d H:i:s', $item['create_time']);
+        }
+
+        $filename = '精选打卡_' . date('Y-m-d');
+        $head = ['ID', '用户信息', '小区', '分类', '内容', '积分', '点赞数', '精选时间', '创建时间'];
+        $keys = ['id', 'nickname', 'community_name', 'cate_name', 'content', 'point', 'like_total', 'create_time', 'create_time'];
+        CommonModel::outData($filename, $list, $head, $keys);
+        exit;
+    }
+
+    /**
      * 删除记录入口 - 重定向到实际列表方法
      * 后台菜单点的就是这个 action，让它跳到 delete_log_index
      */

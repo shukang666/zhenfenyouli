@@ -85,7 +85,7 @@
                     name: '我的打卡',
                     type: 1
                 }, {
-                    name: '全部打卡',
+                    name: '精选打卡',
                     type: 0
                 }],
                 current: 0
@@ -117,17 +117,30 @@
             },
             // 列表
             get_forum_list() {
-                this.$u.api.get_forum_list({
-                    keyword: this.keyword,
-                    page: this.page,
-                    type: 2,
-                    is_my: this.list[this.current].type
-                }).then(res => {
-                    this.forum_list.push(...res.data.data)
-                    this.total = res.data.total
-                }).catch(err => {
-                    this.$u.toast(err.msg)
-                })
+                // 精选打卡类型
+                if (this.current === 1 && this.list[this.current].name === '精选打卡') {
+                    this.$u.api.get_choice_list({
+                        keyword: this.keyword,
+                        page: this.page
+                    }).then(res => {
+                        this.forum_list.push(...res.data.data)
+                        this.total = res.data.total
+                    }).catch(err => {
+                        this.$u.toast(err.msg)
+                    })
+                } else {
+                    this.$u.api.get_forum_list({
+                        keyword: this.keyword,
+                        page: this.page,
+                        type: 2,
+                        is_my: this.list[this.current].type
+                    }).then(res => {
+                        this.forum_list.push(...res.data.data)
+                        this.total = res.data.total
+                    }).catch(err => {
+                        this.$u.toast(err.msg)
+                    })
+                }
             },
         },
         onReachBottom() {
