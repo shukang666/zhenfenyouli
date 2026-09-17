@@ -5,8 +5,8 @@ namespace app\admin\controller;
 use api\wxapp\model\CommonModel;
 use app\admin\model\active\ActiveCateModel;
 use app\admin\model\active\ActiveCommunityCateModel;
+use app\admin\model\active\ActiveClockModel;
 use app\admin\model\active\ActiveModel;
-use app\admin\model\active\ActiveSIgnModel;
 use app\admin\model\member\CommunityCateModel;
 use think\App;
 use think\db\exception\DbException;
@@ -116,7 +116,7 @@ class ActiveController extends ToolController
 
         $list = $this->setIndex()->each(function ($item) {
             $item = $this->getList($item);
-            $item['sign_count'] = ActiveSIgnModel::where('active_id', $item['id'])->count();
+            $item['sign_count'] = ActiveClockModel::where('active_id', $item['id'])->count();
             return $item;
         });
         $this->assign('params', $params);
