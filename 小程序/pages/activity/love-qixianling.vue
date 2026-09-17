@@ -1,16 +1,5 @@
 <template>
 	<view class="container">
-		<!-- 自定义导航栏（sticky，覆盖在 Hero 上方） -->
-		<view class="fb-navbar" :style="{paddingTop: statusBarHeight + 'px'}">
-			<view class="fb-nav-content" :style="{height: navBarHeight + 'rpx'}">
-				<view class="fb-nav-back" @click="navigateBack">
-					<u-icon name="arrow-left" size="44" color="#fff"></u-icon>
-				</view>
-				<text class="fb-nav-title">我和七贤岭</text>
-				<view class="fb-nav-placeholder"></view>
-			</view>
-		</view>
-
 		<!-- 头部 Hero -->
 		<view class="qxl-hero" :style="heroBgStyle">
 			<view class="qxl-hero-content">
