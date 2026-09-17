@@ -302,7 +302,7 @@
 
 			<!-- 未审核通过提示 -->
 			<view class="u-m-t-30" v-if="!can_submit">
-				<view class="u-font-24" style="color:#ff9900;text-align:center;">您的指导员身份尚未审核通过，暂不能提交</view>
+				<view class="u-font-24" style="color:#ff9900;text-align:center;">您的文明标兵身份尚未审核通过，暂不能提交</view>
 			</view>
 
 			<!-- 提交按钮 -->
@@ -336,7 +336,7 @@
 	export default {
 		data() {
 			return {
-				can_submit: true,       // 权限：审核通过的指导员才能提交
+				can_submit: true,       // 权限：审核通过的文明标兵才能提交
 				unitTypes: [
 					{ value: 1, label: '公共机构' },
 					{ value: 2, label: '经营场所' },
@@ -391,6 +391,7 @@
 			}
 		},
 		onLoad(option) {
+			// 如果传入了 can_submit 参数，使用该参数；否则默认允许提交（由后端统一验证权限）
 			if (option.can_submit !== undefined) {
 				this.can_submit = option.can_submit == 1;
 			}

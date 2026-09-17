@@ -7,19 +7,18 @@
 			</view>
 		</view>
 		<view class="u-p-30">
-			<!-- 文明标兵 -->
+			<!-- 文明标兵（督导员+指导员合并） -->
 			<view class="">
 				<view class="u-flex u-row-center">
-					<!-- <u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/6af41de801b843f100d53e71d646cb1c.png?watermark"></u-image> -->
-					<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">督导员</u-divider>
+					<u-divider color="#f9a04c" bg-color="rgba(0,0,0,0)" font-size="30">文明标兵</u-divider>
 				</view>
 				<view class="u-m-t-30 u-flex">
-					<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="navigator('/pages/zzhd/wmbb',1)">
+					<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="navigator('/pages/dtsh/volunteer-home')">
 						<view class="u-flex u-row-center">
 							<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/e48645c17b800739e2f492b8f95c4ba6.png?watermark"></u-image>
 						</view>
 						<view class="u-m-t-30 u-font-bold">
-							督导员申请
+							文明标兵
 						</view>
 					</view>
 					<view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="navigator('/pages/zzhd/ranking')">
@@ -27,17 +26,9 @@
 							<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/6f8d9cc52ce9afca23824a19564aed64.png?watermark"></u-image>
 						</view>
 						<view class="u-m-t-30 u-font-bold">
-							督导员排行
+							文明标兵排行
 						</view>
 					</view>
-					<!-- <view class="u-w-212 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center u-m-l-30" @click="navigateToMiniProgram(setting.min_app_id)">
-						<view class="u-flex u-row-center">
-							<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/fc105dcf27e3d1fc7ec44c975168b758.png?watermark"></u-image>
-						</view>
-						<view class="u-m-t-30 u-font-bold">
-							找工作
-						</view>
-					</view> -->
 				</view>
 			</view>
 			<!-- 点位管理 -->
@@ -155,12 +146,13 @@
 					this.$u.vuex('isLogin', false)
 				})
 			},
-			// 跳转页面
-			navigator(url, type) {
-				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				if (this.userInfo.check_status != 2 && !type) return this.$u.toast('无权限，请先申请督导员')
-				this.$u.route(url)
-			},
+		// 跳转页面（文明标兵统一权限：任一角色通过即可访问全部功能）
+		navigator(url, type) {
+			if (!this.isLogin) return this.$u.route('/pages/public/login')
+			// type=1 时跳过权限检查（用于文明标兵入口直接跳转）
+			if (this.userInfo.check_status != 2 && !type) return this.$u.toast('无权限，请先申请文明标兵')
+			this.$u.route(url)
+		},
 			// 跳转其他小程序
 			navigateToMiniProgram(appId) {
 				uni.navigateToMiniProgram({

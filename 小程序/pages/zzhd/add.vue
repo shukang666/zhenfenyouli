@@ -17,20 +17,12 @@
 				<u-form-item label="申请理由" prop="reason" labelWidth="150" label-position="bottom">
 					<u-input v-model="form.reason" placeholder="请输入" />
 				</u-form-item>
-			<u-form-item label="申请角色" labelWidth="150" label-position="bottom">
-				<!-- 从入口锁定角色时，显示角色名称；否则可手动选择 -->
-				<view class="u-flex" v-if="fixedRole > 0">
-					<u-tag :text="fixedRole == 2 ? '指导员' : '督导员'" mode="dark" type="success" />
-				</view>
-				<view class="u-flex" v-else>
-					<view class="u-m-r-20" @click="form.role_type = 1">
-						<u-tag text="督导员" :mode="form.role_type==1?'dark':'plain'" :type="form.role_type==1?'success':'info'" />
-					</view>
-					<view @click="form.role_type = 2">
-						<u-tag text="指导员" :mode="form.role_type==2?'dark':'plain'" :type="form.role_type==2?'success':'info'" />
-					</view>
-				</view>
-			</u-form-item>
+					<u-form-item label="申请身份" labelWidth="150" label-position="bottom">
+						<view class="u-flex">
+							<u-tag text="文明标兵" mode="dark" type="success" />
+							<text class="u-font-24 u-type-info u-m-l-20">申请后同时拥有督导员和指导员的全部权限</text>
+						</view>
+					</u-form-item>
 			<u-form-item label="期望参加活动" labelWidth="150" label-position="bottom">
 				<view class="u-flex">
 					<view class="u-m-r-20" v-for="(item,index) in type_list" :key="index" @click="form.active_type = item.type">
@@ -59,20 +51,19 @@
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				fixedRole: 0,        // 从外部传入锁定的角色（1=督导员 2=指导员），0=不锁定
-				form: {
-					name: '',
-					mobile: '',
-					community: '',
-					reason: '',
-					active_type: 1,
-					role_type: 1,
-					community_id: 0,
-					sign_image: '',
-				},
+export default {
+	data() {
+		return {
+			form: {
+				name: '',
+				mobile: '',
+				community: '',
+				reason: '',
+				active_type: 1,
+				role_type: 1,        // 固定为1，后端统一处理为文明标兵
+				community_id: 0,
+				sign_image: '',
+			},
 				rules: {
 					reason: [{
 						required: true,
@@ -112,14 +103,8 @@
 			};
 		},
 		onLoad(op) {
-			// 接收外部传入的角色参数，锁定申请角色
-			if (op.role_type) {
-				this.fixedRole = parseInt(op.role_type) == 2 ? 2 : 1;
-				this.form.role_type = this.fixedRole;
-			}
-			// 动态设置导航栏标题
-			const title = this.fixedRole == 2 ? '指导员申请' : '督导员申请';
-			uni.setNavigationBarTitle({ title });
+			// 统一为文明标兵申请，不再区分角色
+			uni.setNavigationBarTitle({ title: '文明标兵申请' });
 			this.form.mobile = this.userInfo.mobile
 			this.form.name = this.userInfo.true_name
 			this.form.community = this.userInfo.community
@@ -159,22 +144,20 @@
 					this.cate_list = res.data
 				})
 			},
-			// 审核详情
-			get_check() {
-				this.$u.api.get_check().then(res => {
-					this.form.mobile = res.data.mobile
-					this.form.name = res.data.name
-					// 如果有锁定角色，不覆盖 active_type 和 role_type（避免旧记录影响新角色申请）
-					if (!this.fixedRole) {
-						this.form.active_type = res.data.active_type
-					}
-					this.form.reason = res.data.reason
-					this.form.community = res.data.community
-					this.form.community_id = res.data.community_id
-					this.form.id = res.data.id
-					this.reason_msg = res.data
-				})
-			},
+		// 审核详情
+		get_check() {
+			this.$u.api.get_check().then(res => {
+				this.form.mobile = res.data.mobile
+				this.form.name = res.data.name
+				// 不再区分角色，统一使用文明标兵身份
+				this.form.active_type = res.data.active_type
+				this.form.reason = res.data.reason
+				this.form.community = res.data.community
+				this.form.community_id = res.data.community_id
+				this.form.id = res.data.id
+				this.reason_msg = res.data
+			})
+		},
 			// 提交
 			submit() {
 				if (!this.$u.func.checkLogin()) return

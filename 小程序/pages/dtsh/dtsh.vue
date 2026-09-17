@@ -82,23 +82,16 @@
 			</view>
 		</view> -->
 
-		<!-- 志愿督导工作台（督导员/指导员 入口） -->
+		<!-- 文明标兵工作台（督导员+指导员功能合并） -->
 		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30">
-			<view class="u-font-32 u-font-bold u-m-b-24">志愿督导工作台</view>
-			<view class="vol-grid u-flex u-row-between">
-				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome(1)">
-					<view class="vol-icon u-flex u-col-center u-row-center">
+			<view class="u-font-32 u-font-bold u-m-b-24">文明标兵工作台</view>
+			<view class="vol-grid vol-grid-single u-flex u-row-center">
+				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome()">
+					<view class="vol-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);">
 						<u-icon name="edit-pen-fill" size="56" color="#fff"></u-icon>
 					</view>
-					<text class="u-font-28 u-font-bold u-m-t-14" style="color:#333;">我是督导员</text>
-					<text class="u-font-22 u-type-info u-m-t-6">志愿督导/巡查</text>
-				</view>
-				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome(2)">
-					<view class="vol-icon vol-icon-blue u-flex u-col-center u-row-center">
-						<u-icon name="eye-fill" size="56" color="#fff"></u-icon>
-					</view>
-					<text class="u-font-28 u-font-bold u-m-t-14" style="color:#333;">我是指导员</text>
-					<text class="u-font-22 u-type-info u-m-t-6">督导监测/治理</text>
+					<text class="u-font-28 u-font-bold u-m-t-14" style="color:#333;">文明标兵</text>
+					<text class="u-font-22 u-type-info u-m-t-6">督导监测/巡查/治理</text>
 				</view>
 			</view>
 		</view>
@@ -225,12 +218,9 @@
 		goToPage(url) {
 			this.$u.route(url)
 		},
-		// 跳转督导员/指导员门户（不强制登录，让用户先看到页面，功能入口点击时再检查登录）
-		goVolunteerHome(roleType) {
-			this.$u.route({
-				url: '/pages/dtsh/volunteer-home',
-				params: { role_type: roleType }
-			});
+		// 跳转文明标兵门户（不强制登录，让用户先看到页面，功能入口点击时再检查登录）
+		goVolunteerHome() {
+			this.$u.route('/pages/dtsh/volunteer-home');
 		},
 		// === 整改任务相关 ===
 		changeTab(idx) {

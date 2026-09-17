@@ -56,7 +56,7 @@ class CheckController extends AuthController
         $this->checkUser();
         $params = $this->request->param();
 
-        // role_type: 1=督导员, 2=指导员（默认1）
+        // 文明标兵统一申请，不再区分督导员/指导员
         if (empty($params['id'])) {
             if(!empty($params['sign_image'])){
                 $public = new PublicController();
@@ -65,13 +65,13 @@ class CheckController extends AuthController
             }
 
             $params['user_id'] = $this->user_id;
-            if (empty($params['role_type'])) {
-                $params['role_type'] = 1;
-            }
+            // 统一设置为文明标兵类型
+            $params['role_type'] = 1;
             $checkModel->save($params);
         } else {
             $item = $checkModel->find($params['id']);
             if ($item['status'] == 3) $params['status'] = 1;
+            $params['role_type'] = 1;  // 编辑时也统一
             $checkModel->update($params, ['id' => $params['id']]);
         }
         $this->success('提交成功');
@@ -97,9 +97,10 @@ class CheckController extends AuthController
         $getType = $checkModel->get_type();
         $item['active_name'] = $getType[$item['active_type']]??'';
         $item['role_type'] = intval($item['role_type'] ?? 1);
-        // 申请通过后，role_type(1/2) 表示角色身份
+        // 文明标兵统一权限：任一角色（督导员role_type=1 或 指导员role_type=2）通过审核即算通过
         $item['is_approved'] = ($item['status'] == 2);
-        $item['role_name'] = $item['role_type'] == 2 ? '指导员' : '督导员';
+        $item['role_name'] = '文明标兵';
+        $item['role_type'] = 1;  // 统一为文明标兵类型
 
         $item['sign_image'] = empty($item['sign_image'])?'':cmf_get_asset_url($item['sign_image']);
         $item['pdf_file'] = empty($item['pdf_file'])?'':cmf_get_asset_url($item['pdf_file']);
