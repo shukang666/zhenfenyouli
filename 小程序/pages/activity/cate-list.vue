@@ -71,6 +71,8 @@
 		onLoad(options) {
 			this.cate_id = parseInt(options.cate_id || 0)
 			this.cate_name = decodeURIComponent(options.name || '活动')
+			// 动态设置导航栏标题为当前分类名
+			uni.setNavigationBarTitle({ title: this.cate_name })
 			this.loadActiveList()
 		},
 		methods: {
