@@ -25,6 +25,9 @@ const wxapp = {
 	// 随手拍提交
 	postShotReport: (params = {}) => uni.$u.post('/wxapp/shot_report/post', params),
 
+	// 督导监测提交
+	postSupervisionMonitor: (params = {}) => uni.$u.post('/wxapp/supervision_monitor/post', params),
+
 	// 分类知识挑战 - 获取题目（随机组卷）
 	getQuiz: (params = {}) => uni.$u.get('/wxapp/quiz/get_quiz', params),
 	// 分类知识挑战 - 提交答案
