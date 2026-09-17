@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use api\wxapp\model\AccountLogModel;
 use cmf\controller\AdminBaseController;
 use think\facade\Db;
 
