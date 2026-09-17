@@ -116,7 +116,7 @@ class ActiveController extends ToolController
 
         $list = $this->setIndex()->each(function ($item) {
             $item = $this->getList($item);
-            $item['sign_count'] = ActiveSIgnModel::where('active_id', $item['id'])->where('delete_time', 0)->count();
+            $item['sign_count'] = ActiveSIgnModel::where('active_id', $item['id'])->count();
             return $item;
         });
         $this->assign('params', $params);
