@@ -1,0 +1,146 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">督导监测</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20 layui-form" method="get" action="{:url('admin/SupervisionMonitor/index')}"
+          style="display: flex; flex-wrap: wrap; row-gap: 6px;">
+
+        <div>
+            <span>关键字：</span>
+            <div class="layui-inline">
+                <input type="text" class="form-control" name="keyword" value="{:input('request.keyword/s','')}"
+                       placeholder="单位/联系人/电话/用户" style="width: 180px;">
+            </div>
+        </div>
+
+        <div style="margin-left: 10px">
+            <span>单位类型：</span>
+            <div class="layui-inline">
+                <select name="unit_type" class="form-control" style="width: 120px;">
+                    <option value="">全部</option>
+                    <foreach name="unit_type_list" item="item" key="key">
+                        <option value="{$key}" <if condition="$key == input('request.unit_type')">selected</if>>{$item}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-left: 10px">
+            <span>时间：</span>
+            <div class="layui-inline" id="create-time">
+                <div class="layui-input-inline" style="width: 140px;">
+                    <input type="text" autocomplete="off" id="create-startDate" class="layui-input" name="start_time"
+                           value="{$start_time}" placeholder="开始日期">
+                </div>
+                -
+                <div class="layui-input-inline" style="width: 140px;">
+                    <input type="text" autocomplete="off" id="create-endDate" class="layui-input" name="end_time"
+                           value="{$end_time}" placeholder="结束日期">
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-left: 10px">
+            <input type="submit" class="btn btn-primary" value="搜索"/>
+            <a class="btn btn-danger" href="{:url('admin/SupervisionMonitor/index')}">清空</a>
+            <a class="btn btn-success" href="{:url('admin/SupervisionMonitor/outData',input('get.'))}">导出</a>
+        </div>
+    </form>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>提交人</th>
+            <th>所属社区</th>
+            <th>单位名称</th>
+            <th>单位类型</th>
+            <th>检查日期</th>
+            <th>联系人</th>
+            <th>联系电话</th>
+            <th>产生厨余垃圾</th>
+            <th>正确分出</th>
+            <th>需整改</th>
+            <th>总体评价</th>
+            <th>提交时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>
+                    <notempty name="vo.nickname">
+                        {$vo.nickname}<small style="color:#999;">({$vo.mobile})</small>
+                        <else/>
+                        已删除
+                    </notempty>
+                </td>
+                <td>{$vo.community_name}</td>
+                <td style="max-width:160px;word-break:break-all;">{$vo.unit_name}</td>
+                <td>{$vo.unit_type_name}</td>
+                <td>{$vo.check_date}</td>
+                <td>{$vo.contact}</td>
+                <td>{$vo.contact_phone}</td>
+                <td>{$vo.yes_no_has_waste}</td>
+                <td>{$vo.yes_no_waste_correct}</td>
+                <td>{$vo.yes_no_need_rectify}</td>
+                <td style="max-width:180px;word-break:break-all;">{$vo.overall_evaluation|mb_substr=0,20,'utf-8'}</td>
+                <td>{$vo.create_time|date="Y-m-d H:i"}</td>
+                <td>
+                    <a class="btn btn-xs btn-info" href="{:url('admin/SupervisionMonitor/detail',['id'=>$vo.id])}">详情</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+
+    <div class="pagination" style="display:flex; align-items:center; flex-wrap:wrap; row-gap:6px;">
+        {$page}
+        <div class="pagination-jump" style="display:inline-flex; align-items:center; margin-left:10px;">
+            <span>第</span>
+            <input type="text" id="jump_page_input" class="form-control"
+                   style="width:50px; height:34px; text-align:center; padding:6px; margin:0 4px;"
+                   value="{:input('page/d',1)}">
+            <span>页</span>
+            <button type="button" class="btn btn-default" id="jump_page_btn"
+                    style="height:34px; padding:6px 12px;">跳转</button>
+        </div>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+    layui.use(['layer', 'form'], function () {
+        var laydate = layui.laydate;
+        // 日期时间范围
+        laydate.render({
+            elem: '#create-time',
+            range: ['#create-startDate', '#create-endDate']
+        });
+    });
+</script>
+<script>
+(function(){
+    var input = document.getElementById('jump_page_input');
+    var btn = document.getElementById('jump_page_btn');
+    if (!input || !btn) return;
+    function jump(){
+        var p = parseInt(input.value, 10);
+        if (isNaN(p) || p < 1) p = 1;
+        // 解析当前 query string，剔除旧 page，保留所有其它筛选/排序参数
+        var qs = location.search ? location.search.substring(1) : '';
+        var params = qs.split('&').filter(function(x){ return x && x.indexOf('page=') !== 0; });
+        params.push('page=' + p);
+        location.href = location.pathname + '?' + params.join('&') + location.hash;
+    }
+    btn.addEventListener('click', jump);
+    input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); jump(); }
+    });
+})();
+</script>
+</body>
+</html>

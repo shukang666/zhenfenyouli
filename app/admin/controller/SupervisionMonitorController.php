@@ -1,0 +1,175 @@
+<?php
+
+namespace app\admin\controller;
+
+use api\wxapp\model\CommonModel;
+use cmf\controller\AdminBaseController;
+use think\facade\Db;
+
+/**
+ * 督导监测
+ * 在垃圾分类活动菜单下
+ * 数据来源：小程序"志愿督导工作台-指导员-督导监测"表单（cmf_supervision_monitor）
+ */
+class SupervisionMonitorController extends AdminBaseController
+{
+    /**
+     * 列表
+     */
+    public function index()
+    {
+        $params = $this->request->param();
+        $where = $this->buildWhere();
+
+        $list = Db::name('supervision_monitor')->alias('r')
+            ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
+            ->field('r.*, m.nickname, m.mobile')
+            ->where($where)
+            ->order('r.id desc')
+            ->paginate(15);
+
+        $unit_type_list = [1 => '公共机构', 2 => '经营场所', 3 => '沿街商铺', 4 => '经营区域'];
+
+        $list->each(function ($item) use ($unit_type_list) {
+            $item['unit_type_name'] = isset($unit_type_list[$item['unit_type']]) ? $unit_type_list[$item['unit_type']] : '';
+            $item['yes_no_has_waste'] = $item['has_waste'] == 1 ? '是' : '否';
+            $item['yes_no_waste_correct'] = $item['waste_correct'] == 1 ? '是' : '否';
+            $item['yes_no_need_rectify'] = $item['need_rectify'] == 1 ? '是' : '否';
+            return $item;
+        });
+
+        $this->assign('list', $list);
+        $list->appends($params);
+        $this->assign('page', $list->render());
+        $this->assign('params', $params);
+        $this->assign('keyword', $this->request->param('keyword', ''));
+        $this->assign('unit_type', $this->request->param('unit_type', ''));
+        $this->assign('unit_type_list', $unit_type_list);
+        $this->assign('start_time', $this->request->param('start_time', ''));
+        $this->assign('end_time', $this->request->param('end_time', ''));
+        return $this->fetch();
+    }
+
+    /**
+     * 详情
+     */
+    public function detail()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        if (empty($id)) {
+            $this->error('参数错误');
+        }
+
+        $item = Db::name('supervision_monitor')->alias('r')
+            ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
+            ->field('r.*, m.nickname, m.mobile')
+            ->where('r.id', $id)
+            ->find();
+        if (empty($item)) {
+            $this->error('记录不存在');
+        }
+
+        $unit_type_list = [1 => '公共机构', 2 => '经营场所', 3 => '沿街商铺', 4 => '经营区域'];
+        $item['unit_type_name'] = isset($unit_type_list[$item['unit_type']]) ? $unit_type_list[$item['unit_type']] : '';
+
+        // 照片字段统一补全 URL 供模板展示
+        $photo_fields = [
+            'door_photo'           => '门头照片',
+            'inner_photo'          => '内部环境照片',
+            'publicity_photo'      => '宣传品照片',
+            'inner_rectify_photo'  => '内部环境整改后照片',
+            'point_photo'          => '投放点照片',
+            'point_rectify_photo'  => '投放点整改后照片',
+            'manage_photo'         => '点位管理照片',
+            'manage_rectify_photo' => '点位管理整改后照片',
+            'transport_photo'      => '收运链条照片',
+            'catering_photo'       => '餐饮企业相关宣传',
+            'accuracy_photo'       => '准确率照片',
+        ];
+        $photos = [];
+        foreach ($photo_fields as $field => $name) {
+            if (!empty($item[$field])) {
+                $photos[] = [
+                    'name' => $name,
+                    'url'  => cmf_get_image_preview_url($item[$field]),
+                ];
+            }
+        }
+        $this->assign('photos', $photos);
+        $this->assign('item', $item);
+        return $this->fetch();
+    }
+
+    /**
+     * 导出（与 index 筛选条件一致）
+     */
+    public function outData()
+    {
+        @ini_set('memory_limit', '-1');
+        @set_time_limit(0);
+
+        $where = $this->buildWhere();
+
+        $list = Db::name('supervision_monitor')->alias('r')
+            ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
+            ->field('r.*, m.nickname, m.mobile')
+            ->where($where)
+            ->order('r.id desc')
+            ->select()->toArray();
+
+        $unit_type_list = [1 => '公共机构', 2 => '经营场所', 3 => '沿街商铺', 4 => '经营区域'];
+        foreach ($list as &$item) {
+            $item['unit_type_name'] = isset($unit_type_list[$item['unit_type']]) ? $unit_type_list[$item['unit_type']] : '';
+            $item['yes_no_has_waste'] = $item['has_waste'] == 1 ? '是' : '否';
+            $item['yes_no_waste_correct'] = $item['waste_correct'] == 1 ? '是' : '否';
+            $item['yes_no_inner_qualified'] = $item['inner_qualified'] == 1 ? '是' : '否';
+            $item['yes_no_need_rectify'] = $item['need_rectify'] == 1 ? '是' : '否';
+            $item['yes_no_point_qualified'] = $item['point_qualified'] == 1 ? '是' : '否';
+            $item['yes_no_manage_qualified'] = $item['manage_qualified'] == 1 ? '是' : '否';
+            $item['create_time'] = $item['create_time'] ? date('Y-m-d H:i:s', $item['create_time']) : '';
+        }
+        unset($item);
+
+        $filename = '督导监测' . date('Y-m-d');
+        $head = ['ID', '提交人', '手机号', '所属社区', '单位名称', '单位类型', '检查日期', '地址', '联系人', '联系电话',
+            '是否产生厨余垃圾', '厨余垃圾是否正确分出', '厨余垃圾流向', '内部环境是否合格', '是否需要整改',
+            '投放点是否合格', '点位管理是否合格', '总体评价', '提交时间'];
+        $keys = ['id', 'nickname', 'mobile', 'community_name', 'unit_name', 'unit_type_name', 'check_date', 'address', 'contact', 'contact_phone',
+            'yes_no_has_waste', 'yes_no_waste_correct', 'waste_flow', 'yes_no_inner_qualified', 'yes_no_need_rectify',
+            'yes_no_point_qualified', 'yes_no_manage_qualified', 'overall_evaluation', 'create_time'];
+        // 必须静态调用，否则 ThinkPHP Model __call 会转发到查询构造器导致 cmf_common_model 表报错
+        CommonModel::outData($filename, $list, $head, $keys);
+    }
+
+    /**
+     * 构建搜索条件（index 与 outData 共用，保证数据一致）
+     */
+    private function buildWhere()
+    {
+        $where = [];
+
+        // 关键词：单位名称/联系人/联系电话/昵称/手机号
+        $keyword = trim($this->request->param('keyword', ''));
+        if (!empty($keyword)) {
+            $where[] = ['r.unit_name|r.contact|r.contact_phone|m.nickname|m.mobile', 'like', '%' . $keyword . '%'];
+        }
+
+        // 单位类型
+        $unit_type = $this->request->param('unit_type', '');
+        if ($unit_type !== '') {
+            $where[] = ['r.unit_type', '=', intval($unit_type)];
+        }
+
+        // 提交时间范围（含当天全量）
+        $start_time = $this->request->param('start_time', '');
+        $end_time = $this->request->param('end_time', '');
+        if ($start_time) {
+            $where[] = ['r.create_time', '>=', strtotime($start_time)];
+        }
+        if ($end_time) {
+            $where[] = ['r.create_time', '<=', strtotime($end_time) + 86399];
+        }
+
+        return $where;
+    }
+}

@@ -311,7 +311,7 @@
 
 		// 近期活动"更多" → 全部活动列表（选中"线下活动"筛选）
 		goMoreRecent() {
-			this.$u.route({ url: '/pages/activity/active-list', params: { filter: 'offline' } })
+			this.$u.route({ url: '/pages/activity/active-list', params: { filter: 'all' } })
 		},
 
 		// 加载 Banner（slide group id=9 活动页Banner）

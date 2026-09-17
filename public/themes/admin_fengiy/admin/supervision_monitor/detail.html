@@ -1,0 +1,107 @@
+<include file="public@header"/>
+<style>
+    .detail-table td:first-child { width: 160px; background: #f9f9f9; font-weight: bold; }
+    .detail-photo { width: 120px; height: 120px; object-fit: cover; border-radius: 4px; border: 1px solid #e3e3e3; margin: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('admin/SupervisionMonitor/index')}">督导监测</a></li>
+        <li class="active"><a href="javascript:;">详情 #{$item.id}</a></li>
+    </ul>
+
+    <h4 class="margin-top-20">督导监测记录详情</h4>
+    <table class="table table-bordered detail-table margin-top-10">
+        <tr>
+            <td>ID</td>
+            <td>{$item.id}</td>
+            <td>提交人</td>
+            <td>
+                <notempty name="item.nickname">
+                    {$item.nickname} ({$item.mobile})
+                    <else/>
+                    已删除
+                </notempty>
+            </td>
+        </tr>
+        <tr>
+            <td>所属社区</td>
+            <td>{$item.community_name}</td>
+            <td>单位名称</td>
+            <td>{$item.unit_name}</td>
+        </tr>
+        <tr>
+            <td>单位类型</td>
+            <td>{$item.unit_type_name}</td>
+            <td>检查日期</td>
+            <td>{$item.check_date}</td>
+        </tr>
+        <tr>
+            <td>地址</td>
+            <td>{$item.address}</td>
+            <td>联系人 / 联系电话</td>
+            <td>{$item.contact} / {$item.contact_phone}</td>
+        </tr>
+        <tr>
+            <td>是否产生厨余垃圾</td>
+            <td>{$item.has_waste == 1 ? '是' : '否'}</td>
+            <td>厨余垃圾是否正确分出</td>
+            <td>{$item.waste_correct == 1 ? '是' : '否'}</td>
+        </tr>
+        <tr>
+            <td>厨余垃圾流向</td>
+            <td>{$item.waste_flow}</td>
+            <td>是否需要整改</td>
+            <td>{$item.need_rectify == 1 ? '是' : '否'}</td>
+        </tr>
+        <tr>
+            <td>内部环境是否合格</td>
+            <td>{$item.inner_qualified == 1 ? '是' : '否'}</td>
+            <td>投放点是否合格</td>
+            <td>{$item.point_qualified == 1 ? '是' : '否'}</td>
+        </tr>
+        <tr>
+            <td>点位管理是否合格</td>
+            <td>{$item.manage_qualified == 1 ? '是' : '否'}</td>
+            <td>提交时间</td>
+            <td>{$item.create_time|date="Y-m-d H:i:s"}</td>
+        </tr>
+        <tr>
+            <td>总体评价</td>
+            <td colspan="3" style="word-break:break-all;">{$item.overall_evaluation}</td>
+        </tr>
+    </table>
+
+    <h4>照片凭证</h4>
+    <table class="table table-bordered margin-top-10">
+        <thead>
+        <tr>
+            <th>照片类型</th>
+            <th>照片</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="photos" item="vo">
+            <tr>
+                <td>{$vo.name}</td>
+                <td>
+                    <a href="javascript:imagePreviewDialog('{$vo.url}');">
+                        <img src="{$vo.url}" class="detail-photo">
+                    </a>
+                </td>
+            </tr>
+        </foreach>
+        <if condition="empty($photos)">
+            <tr>
+                <td colspan="2" style="text-align:center;color:#999;">暂无照片</td>
+            </tr>
+        </if>
+        </tbody>
+    </table>
+
+    <a class="btn btn-default margin-top-20" href="{:url('admin/SupervisionMonitor/index')}">返回列表</a>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

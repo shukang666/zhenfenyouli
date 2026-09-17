@@ -32,7 +32,7 @@
 				</view>
 				<text class="u-font-26 u-m-t-10">志愿督导</text>
 			</view>
-			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==2" @click="$u.toast('开发中，敬请期待')">
+			<view class="grid-item u-flex u-col-center u-row-center u-flex-col" v-if="roleType==2" @click="goToMonitor">
 				<view class="grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
 					<u-icon name="eye" size="48" color="#fff"></u-icon>
 				</view>
@@ -159,6 +159,11 @@
 				if (!this.$u.func.checkLogin()) return;
 				// 未批准也能进入页面看效果，但传参控制提交权限
 				this.$u.route(`/pages/dtsh/report?location_type=${locationType}&can_submit=${this.isApproved ? 1 : 0}`);
+			},
+			// 督导监测：复用指导员权限模式，未批准可看但禁提交
+			goToMonitor() {
+				if (!this.$u.func.checkLogin()) return;
+				this.$u.route(`/pages/dtsh/supervision-monitor?can_submit=${this.isApproved ? 1 : 0}`);
 			},
 			goToMerchantInspect() {
 				if (!this.$u.func.checkLogin()) return;
