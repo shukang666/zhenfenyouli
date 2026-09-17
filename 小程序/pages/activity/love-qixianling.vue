@@ -22,7 +22,7 @@
 				<!-- 发现七贤岭：学与考入口 -->
 				<view class="qxl-learn-grid" v-if="cate.id === 6">
 					<view class="qxl-learn-card qxl-learn-card--learn" @click="goLearn">
-						<u-icon name="book" size="40" color="#fff"></u-icon>
+						<u-icon name="bookmark" size="40" color="#fff"></u-icon>
 						<text class="qxl-learn-name">七贤岭学习</text>
 						<text class="qxl-learn-desc">了解七贤岭故事</text>
 					</view>
