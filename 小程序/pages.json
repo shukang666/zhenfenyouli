@@ -580,6 +580,12 @@
 				"navigationStyle": "custom"
 			}
 		}, {
+			"path": "supervision-monitor",
+			"style": {
+				"navigationBarTitleText": "督导监测",
+				"navigationStyle": "custom"
+			}
+		}, {
 			"path": "task-list",
 			"style": {
 				"navigationBarTitleText": "整改任务",
