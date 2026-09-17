@@ -19,7 +19,7 @@
 				</u-form-item>
 					<u-form-item label="申请身份" labelWidth="150" label-position="bottom">
 						<view class="u-flex">
-							<u-tag text="文明标兵" mode="dark" type="success" />
+							<u-tag text="督导员" mode="dark" type="success" />
 							<text class="u-font-24 u-type-info u-m-l-20">申请后同时拥有督导员和指导员的全部权限</text>
 						</view>
 					</u-form-item>
@@ -60,7 +60,7 @@ export default {
 				community: '',
 				reason: '',
 				active_type: 1,
-				role_type: 1,        // 固定为1，后端统一处理为文明标兵
+				role_type: 1,        // 固定为1，后端统一处理为督导员
 				community_id: 0,
 				sign_image: '',
 			},
@@ -103,8 +103,8 @@ export default {
 			};
 		},
 		onLoad(op) {
-			// 统一为文明标兵申请，不再区分角色
-			uni.setNavigationBarTitle({ title: '文明标兵申请' });
+			// 统一为督导员申请，不再区分角色
+			uni.setNavigationBarTitle({ title: '督导员申请' });
 			this.form.mobile = this.userInfo.mobile
 			this.form.name = this.userInfo.true_name
 			this.form.community = this.userInfo.community
@@ -149,7 +149,7 @@ export default {
 			this.$u.api.get_check().then(res => {
 				this.form.mobile = res.data.mobile
 				this.form.name = res.data.name
-				// 不再区分角色，统一使用文明标兵身份
+				// 不再区分角色，统一使用督导员身份
 				this.form.active_type = res.data.active_type
 				this.form.reason = res.data.reason
 				this.form.community = res.data.community

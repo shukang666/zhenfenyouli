@@ -5,7 +5,7 @@
         <view class="submit-btn u-p-30">
             <u-button type="primary" hover-class="none"
                 :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
-                @click="navigator('/pages/zzhd/add')" v-if="!Object.keys(check).length">申请文明标兵</u-button>
+                @click="navigator('/pages/zzhd/add')" v-if="!Object.keys(check).length">申请督导员</u-button>
             <u-button type="primary" hover-class="none"
                 :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
                 v-if="check.status==1">申请已提交，请等待审核</u-button>

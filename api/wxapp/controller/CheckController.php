@@ -15,9 +15,9 @@ use app\admin\model\shop\ShopModel;
 class CheckController extends AuthController
 {
     /**
-     * 小区文明标兵申请文档内容
+     * 小区督导员申请文档内容
      * @OA\Post(
-     *tags={"小区文明标兵"},
+     *tags={"小区督导员"},
      *path="/wxapp/check/add_check_html",
      *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Parameter(name="sign_image",description="签名图",in="query",required=false, @OA\Schema(type="string",)),
@@ -33,9 +33,9 @@ class CheckController extends AuthController
     }
 
     /**
-     * 小区文明标兵申请
+     * 小区督导员申请
      * @OA\Post(
-     *tags={"小区文明标兵"},
+     *tags={"小区督导员"},
      *path="/wxapp/check/add_check",
      *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Parameter(name="id",description="编辑",in="query",required=false, @OA\Schema(type="string",)),
@@ -56,7 +56,7 @@ class CheckController extends AuthController
         $this->checkUser();
         $params = $this->request->param();
 
-        // 文明标兵统一申请，不再区分督导员/指导员
+        // 督导员统一申请，不再区分督导员/指导员
         if (empty($params['id'])) {
             if(!empty($params['sign_image'])){
                 $public = new PublicController();
@@ -65,7 +65,7 @@ class CheckController extends AuthController
             }
 
             $params['user_id'] = $this->user_id;
-            // 统一设置为文明标兵类型
+            // 统一设置为督导员类型
             $params['role_type'] = 1;
             $checkModel->save($params);
         } else {
@@ -79,9 +79,9 @@ class CheckController extends AuthController
 
 
     /**
-     * 小区文明标兵申请详情
+     * 小区督导员申请详情
      * @OA\Post(
-     *tags={"小区文明标兵"},
+     *tags={"小区督导员"},
      *path="/wxapp/check/get_check",
      *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
      *@OA\Response(response="200", description="An example resource"),
@@ -97,10 +97,10 @@ class CheckController extends AuthController
         $getType = $checkModel->get_type();
         $item['active_name'] = $getType[$item['active_type']]??'';
         $item['role_type'] = intval($item['role_type'] ?? 1);
-        // 文明标兵统一权限：任一角色（督导员role_type=1 或 指导员role_type=2）通过审核即算通过
+        // 督导员统一权限：任一角色（督导员role_type=1 或 指导员role_type=2）通过审核即算通过
         $item['is_approved'] = ($item['status'] == 2);
-        $item['role_name'] = '文明标兵';
-        $item['role_type'] = 1;  // 统一为文明标兵类型
+        $item['role_name'] = '督导员';
+        $item['role_type'] = 1;  // 统一为督导员类型
 
         $item['sign_image'] = empty($item['sign_image'])?'':cmf_get_asset_url($item['sign_image']);
         $item['pdf_file'] = empty($item['pdf_file'])?'':cmf_get_asset_url($item['pdf_file']);
@@ -110,9 +110,9 @@ class CheckController extends AuthController
 
     /**
      *
-     * 文明标兵排行榜
+     * 督导员排行榜
      * @OA\Get(
-     *      tags={"小区文明标兵"},
+     *      tags={"小区督导员"},
      *     path="/wxapp/check/get_ranking",
      *      *@OA\Parameter(name="openid",description="openid",in="query",required=false, @OA\Schema(type="string",)),
      *     @OA\Response(response="200", description="An example resource"),

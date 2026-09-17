@@ -7,8 +7,8 @@
 
 		<!-- 标题卡片 -->
 		<view class="u-p-40 u-type-white-bg u-radius-6 u-m-t-30 u-text-center">
-			<view class="u-font-40 u-font-bold" style="color:#18AF38;">文明标兵</view>
-			<view class="u-font-28 u-type-info u-m-t-10">文明标兵工作平台</view>
+			<view class="u-font-40 u-font-bold" style="color:#18AF38;">督导员</view>
+			<view class="u-font-28 u-type-info u-m-t-10">督导员工作平台</view>
 			<view class="u-font-24 u-type-info u-m-t-16 u-line-2" style="line-height: 1.8;">
 				履行督导职责，参与桶边督导与巡检巡查，监测督导动态，推动商户共治与分类治理
 			</view>
@@ -16,11 +16,11 @@
 			<view class="u-m-t-20" v-if="!isApproved">
 				<u-button type="primary" size="mini" hover-class="none"
 					:customStyle="{background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)'}"
-					@click="goApply">申请文明标兵</u-button>
+					@click="goApply">申请督导员</u-button>
 			</view>
 		</view>
 
-		<!-- 功能入口：文明标兵全部权限（督导员+指导员功能合并） -->
+		<!-- 功能入口：督导员全部权限（督导员+指导员功能合并） -->
 		<view class="u-type-white-bg u-radius-6 u-m-t-30 u-p-30">
 			<view class="u-font-32 u-font-bold u-m-b-20">快捷功能</view>
 			<view class="grid-3">
@@ -100,14 +100,14 @@
 		},
 		computed: {
 			pageTitle() {
-				return '文明标兵';
+				return '督导员';
 			},
 			roleName() {
-				return '文明标兵';
+				return '督导员';
 			},
 		},
 		onLoad(option) {
-			// 不再区分角色，统一为文明标兵
+			// 不再区分角色，统一为督导员
 				this.loadData();
 		},
 		onShow() {
@@ -166,7 +166,7 @@
 				this.$u.route('/pages/dtsh/merchant-inspect');
 			},
 			goApply() {
-				// 跳转申请表单（不再区分角色，统一申请文明标兵）
+				// 跳转申请表单（不再区分角色，统一申请督导员）
 				this.$u.route('/pages/zzhd/add');
 			},
 		}

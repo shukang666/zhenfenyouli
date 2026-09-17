@@ -82,15 +82,15 @@
 			</view>
 		</view> -->
 
-		<!-- 文明标兵工作台（督导员+指导员功能合并） -->
+		<!--督导员工作台（督导员+指导员功能合并） -->
 		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30">
-			<view class="u-font-32 u-font-bold u-m-b-24">文明标兵工作台</view>
+			<view class="u-font-32 u-font-bold u-m-b-24">督导员工作台</view>
 			<view class="vol-grid vol-grid-single u-flex u-row-center">
 				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome()">
 					<view class="vol-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);">
 						<u-icon name="edit-pen-fill" size="56" color="#fff"></u-icon>
 					</view>
-					<text class="u-font-28 u-font-bold u-m-t-14" style="color:#333;">文明标兵</text>
+					<text class="u-font-28 u-font-bold u-m-t-14" style="color:#333;">督导员</text>
 					<text class="u-font-22 u-type-info u-m-t-6">督导监测/巡查/治理</text>
 				</view>
 			</view>
@@ -218,7 +218,7 @@
 		goToPage(url) {
 			this.$u.route(url)
 		},
-		// 跳转文明标兵门户（不强制登录，让用户先看到页面，功能入口点击时再检查登录）
+		// 跳转督导员门户（不强制登录，让用户先看到页面，功能入口点击时再检查登录）
 		goVolunteerHome() {
 			this.$u.route('/pages/dtsh/volunteer-home');
 		},

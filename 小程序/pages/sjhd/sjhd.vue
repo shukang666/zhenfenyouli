@@ -4,7 +4,7 @@
 			<u-image width="100%" height="340" src="https://oss.ausite.cn/xcxkf052/admin/20250512/5d288456e544b333329d345733847049.png?watermark"></u-image>
 		</view>
 		<view class="u-p-30">
-			<!-- 文明标兵 -->
+			<!-- 督导员 -->
 			<view class="">
 				<view class="u-flex u-row-center">
 					<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/ef3263d29adf8ccfcce54e46827409ea.png?watermark"></u-image>

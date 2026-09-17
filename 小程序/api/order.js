@@ -41,9 +41,9 @@ const order = {
     get_coupon_list: (params = {}) => uni.$u.post('/wxapp/coupon/get_coupon_list', params),
     // 领取优惠券
     select_coupon: (params = {}) => uni.$u.post('/wxapp/coupon/select_coupon', params),
-    // 文明标兵详情
+    // 督导员详情
     get_check: (params = {}) => uni.$u.post('/wxapp/check/get_check', params),
-    // 申请文明标兵
+    // 申请督导员
     add_check: (params = {}) => uni.$u.post('/wxapp/check/add_check', params),
     // 文章列表
     get_news: (params = {}) => uni.$u.post('/wxapp/news/get_news', params),
@@ -67,7 +67,7 @@ const order = {
 	
     // 点位巡检处理
     add_handle: (params = {}) => uni.$u.post('/wxapp/forum/add_handle', params),
-    // 文明标兵排行
+    // 督导员排行
     get_ranking: (params = {}) => uni.$u.post('/wxapp/check/get_ranking', params),
     // 垃圾分类指导
     get_waste_list: (params = {}) => uni.$u.post('/wxapp/active/get_waste_list', params),
