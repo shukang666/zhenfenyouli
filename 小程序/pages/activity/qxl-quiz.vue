@@ -1,14 +1,5 @@
 <template>
 	<view class="qxl-quiz-page">
-		<!-- 自定义导航栏 -->
-		<view class="qq-navbar">
-			<view class="qq-nav-back" @click="navigateBack">
-				<u-icon name="arrow-left" size="44" color="#fff"></u-icon>
-			</view>
-			<text class="qq-nav-title">七贤岭考试</text>
-			<view class="qq-nav-placeholder"></view>
-		</view>
-
 		<view class="qq-header-bg"></view>
 
 		<view class="qq-content">

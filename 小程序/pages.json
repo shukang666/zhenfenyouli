@@ -215,22 +215,19 @@
 				{
 					"path": "qxl-knowledge",
 					"style": {
-						"navigationBarTitleText": "七贤岭学习",
-						"navigationStyle": "custom"
+						"navigationBarTitleText": "七贤岭学习"
 					}
 				},
 				{
 					"path": "qxl-knowledge-detail",
 					"style": {
-						"navigationBarTitleText": "学习详情",
-						"navigationStyle": "custom"
+						"navigationBarTitleText": "学习详情"
 					}
 				},
 				{
 					"path": "qxl-quiz",
 					"style": {
-						"navigationBarTitleText": "七贤岭考试",
-						"navigationStyle": "custom"
+						"navigationBarTitleText": "七贤岭考试"
 					}
 				},
 				{
@@ -553,12 +550,6 @@
 					"navigationStyle": "custom"
 				}
 			}, {
-				"path": "supervision-monitor",
-				"style": {
-					"navigationBarTitleText": "督导监测",
-					"navigationStyle": "custom"
-				}
-			}, {
 				"path": "quiz",
 				"style": {
 					"navigationBarTitleText": "分类知识挑战",
@@ -603,8 +594,7 @@
 		}, {
 			"path": "merchant-inspect",
 			"style": {
-				"navigationBarTitleText": "商户共治",
-				"navigationStyle": "custom"
+				"navigationBarTitleText": "商户共治"
 			}
 		}, {
 			"path": "merchant-inspect-history",

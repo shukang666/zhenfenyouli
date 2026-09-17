@@ -1,13 +1,5 @@
 <template>
 	<view class="qxl-knowledge-page">
-		<!-- 自定义导航栏 -->
-		<view class="kb-navbar">
-			<view class="kb-nav-back" @click="navigateBack">
-				<u-icon name="arrow-left" size="44" color="#fff"></u-icon>
-			</view>
-			<text class="kb-nav-title">七贤岭学习</text>
-			<view class="kb-nav-placeholder"></view>
-		</view>
 
 		<!-- 顶部 Hero -->
 		<view class="kb-hero">

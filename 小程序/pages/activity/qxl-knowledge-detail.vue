@@ -1,13 +1,5 @@
 <template>
 	<view class="qxl-kd-page">
-		<!-- 自定义导航栏 -->
-		<view class="kd-navbar">
-			<view class="kd-nav-back" @click="navigateBack">
-				<u-icon name="arrow-left" size="44" color="#fff"></u-icon>
-			</view>
-			<text class="kd-nav-title">学习详情</text>
-			<view class="kd-nav-placeholder"></view>
-		</view>
 
 		<!-- 加载中 -->
 		<view class="kd-loading" v-if="loading">
