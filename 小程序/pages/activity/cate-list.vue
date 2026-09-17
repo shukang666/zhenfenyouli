@@ -1,14 +1,5 @@
 <template>
 	<view class="container">
-		<!-- 自定义导航栏 -->
-		<view class="fb-navbar">
-			<view class="fb-nav-back" @click="navigateBack">
-				<u-icon name="arrow-left" size="44" color="#050505"></u-icon>
-			</view>
-			<text class="fb-nav-title">{{cate_name}}</text>
-			<view class="fb-nav-placeholder"></view>
-		</view>
-
 		<!-- 公益行动特殊：显示垃圾分类 + 我和七贤岭 入口 -->
 		<view class="fb-special-entries" v-if="cate_id === 5">
 			<view class="fb-special-entry fb-s-lgfl" @click="gotoFlhd">

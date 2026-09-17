@@ -203,8 +203,7 @@
 				{
 					"path": "cate-list",
 					"style": {
-						"navigationBarTitleText": "活动分类",
-						"navigationStyle": "custom"
+						"navigationBarTitleText": "活动分类"
 					}
 				},
 				{

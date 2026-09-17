@@ -59,9 +59,14 @@
 					</view>
 				</view>
 
-				<!-- 暂无活动（发现七贤岭 id=6 是固定栏目，不显示空态；加载中不显示任何字样） -->
+				<!-- 暂无活动（发现七贤岭 id=6 是固定栏目非活动分类，不显示空态/加载中字样） -->
 				<view class="qxl-empty" v-else-if="!cate.loading && cate.id !== 6">
 					<text class="qxl-empty-text">暂无活动，敬请期待</text>
+				</view>
+
+				<!-- 加载中（仅其他三个活动分类显示） -->
+				<view class="qxl-empty" v-else-if="cate.id !== 6">
+					<text class="qxl-empty-text">加载中...</text>
 				</view>
 			</view>
 		</view>
