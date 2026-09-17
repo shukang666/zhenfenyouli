@@ -126,8 +126,8 @@
 				})
 			},
 		loadData() {
-				// 查审核状态
-				if (this.$u.func.checkLogin()) {
+				// 查审核状态：使用 isLogin 状态判断（不自动跳转登录页），让用户可以看到页面内容
+				if (this.isLogin) {
 					this.$u.api.getCheckRole().then(res => {
 						this.checkInfo = res.data;
 						this.checkStatus = res.data.status || 0;

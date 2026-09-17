@@ -225,9 +225,8 @@
 		goToPage(url) {
 			this.$u.route(url)
 		},
-		// 跳转督导员/指导员门户
+		// 跳转督导员/指导员门户（不强制登录，让用户先看到页面，功能入口点击时再检查登录）
 		goVolunteerHome(roleType) {
-			if (!this.$u.func.checkLogin()) return;
 			this.$u.route({
 				url: '/pages/dtsh/volunteer-home',
 				params: { role_type: roleType }
