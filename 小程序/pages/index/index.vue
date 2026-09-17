@@ -14,7 +14,7 @@
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
 				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'#ffffff'}" :border-bottom="false">
-					<image src="/static/images/logo.png" class="u-w-320 u-h-88 u-m-l-30" mode="aspectFill"></image>
+					<image src="https://admin.circular-economy.cn/static/images/logo.png" class="u-w-320 u-h-88 u-m-l-30" mode="aspectFill"></image>
 				</u-navbar>
 			</template>
 
@@ -70,7 +70,7 @@
 			</view>
 
 			<!-- 核心功能入口：一行四个图标（iOS毛玻璃风格） -->
-			<view class="entry-grid">
+			<!-- <view class="entry-grid">
 				<view class="entry-item" v-for="item in entry_list" :key="item.key"
 					hover-class="entry-item--hover" :hover-stay-time="80" @click="goEntry(item)">
 					<view class="entry-icon">
@@ -78,7 +78,7 @@
 					</view>
 					<view class="entry-name">{{ item.name }}</view>
 				</view>
-			</view>
+			</view> -->
 
 			<!-- 内容区标签导航：把活动与积分商品合并到同一区块，通过 tab 切换 -->
 			<view class="content-tabs">
