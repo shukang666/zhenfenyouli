@@ -175,13 +175,13 @@
 			this.loadMyTasks()
 		},
 		methods: {
-			// 加载用户角色
-			loadCheckRole() {
-				if (!this.$u.func.checkLogin()) return;
-				this.$u.api.getCheckRole().then(res => {
-					this.checkRole = res.data || null;
-				}).catch(() => {});
-			},
+		// 加载用户角色（允许未登录进入，不强制跳转登录）
+		loadCheckRole() {
+			if (!this.isLogin) return;
+			this.$u.api.getCheckRole().then(res => {
+				this.checkRole = res.data || null;
+			}).catch(() => {});
+		},
 			// 跳转页面
 			navigator(url) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -237,18 +237,21 @@
 			this.currentTab = idx;
 		},
 		loadTaskList() {
-			if (!this.$u.func.checkLogin()) return;
+			// 使用 isLogin 状态判断，允许未登录进入页面
+			if (!this.isLogin) return;
 			this.$u.api.getVolunteerTaskList().then(res => {
 				this.taskList = res.data || [];
 			}).catch(() => {});
 		},
 		loadMyTasks() {
-			if (!this.$u.func.checkLogin()) return;
+			if (!this.isLogin) return;
 			this.$u.api.getMyVolunteerTasks({ page: 1, page_size: 20 }).then(res => {
 				this.myTasks = res.data.data || [];
 			}).catch(() => {});
 		},
 		acceptTask(item) {
+			// 点击领取任务时才检查登录
+			if (!this.$u.func.checkLogin()) return;
 			uni.showModal({
 				title: '确认领取',
 				content: `确定领取整改任务「${item.title}」吗？`,
@@ -264,6 +267,8 @@
 			});
 		},
 		goSubmit(item) {
+			// 点击任务卡片进入提交页时才检查登录
+			if (!this.$u.func.checkLogin()) return;
 			if (item.status == 3) {
 				uni.showToast({ title: '任务已完成', icon: 'none' });
 				return;
