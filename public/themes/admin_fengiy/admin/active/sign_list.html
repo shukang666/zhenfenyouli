@@ -24,6 +24,7 @@
                 <th width="50">排序</th>
                 <th>名称</th>
                 <th>赠送积分</th>
+                <th>已签到数量</th>
                 <th>启用</th>
                 <th>添加时间</th>
                 <th>小程序码</th>
@@ -43,6 +44,7 @@
                             {$vo.send_point}
                         </if>
                     </td>
+                    <td>{$vo.sign_count}</td>
                     <td>
                         <div class="layui-form">
                             <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="status" name="status"
