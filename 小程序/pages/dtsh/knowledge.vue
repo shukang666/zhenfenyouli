@@ -25,7 +25,7 @@
 		<!-- 知识列表 -->
 		<view class="u-p-30 list-container">
 			<view class="knowledge-card" v-for="item in list" :key="item.id" @click="goDetail(item.id)">
-				<u-image width="160" height="160" :src="item.image || '/static/images/wenxintishi.png'" mode="aspectFill" border-radius="12"></u-image>
+				<u-image width="160" height="160" :src="'https://admin.circular-economy.cn'+item.image || '/static/images/wenxintishi.png'" mode="aspectFill" border-radius="12"></u-image>
 				<view class="card-info u-flex-1 u-m-l-20">
 					<view class="card-title u-font-bold u-line-2">{{item.title}}</view>
 					<view class="card-meta u-font-24 u-type-info u-m-t-12">

@@ -23,7 +23,7 @@
 		<view class="kb-body">
 			<view class="kb-card" v-for="item in list" :key="item.id" @click="goDetail(item.id)">
 				<view class="kb-card-cover" v-if="item.image">
-					<u-image width="100%" height="100%" :src="item.image" mode="aspectFill"></u-image>
+					<u-image width="100%" height="100%" :src="'https://admin.circular-economy.cn'+item.image" mode="aspectFill"></u-image>
 				</view>
 				<view class="kb-card-cover kb-card-cover-empty" v-else>
 					<u-icon name="file-text" size="40" color="#ccc"></u-icon>

@@ -80,10 +80,16 @@
 					</view>
 					<view v-if="showReview" class="qq-review-list">
 						<view v-for="(item, idx) in answersDetail" :key="idx" class="qq-review-item">
-							<view class="qq-review-q">第{{ idx + 1 }}题</view>
-							<view class="qq-review-a" :class="item.is_correct ? 'correct' : 'wrong'">
-								<text v-if="item.is_correct">回答正确</text>
-								<text v-else>你的答案：{{ item.answer || '未选' }}，正确答案：{{ item.correct }}</text>
+							<view class="qq-review-q">{{ idx + 1 }}. {{ getQuestionTitle(item.qid) }}</view>
+							<view class="qq-review-options">
+								<view class="qq-review-opt" v-for="opt in getQuestionOptions(item.qid)" :key="opt.key">
+									<text class="qq-review-opt-label" :class="getOptClass(opt.key, item)">{{ opt.key }}</text>
+									<text class="qq-review-opt-text" :class="getOptClass(opt.key, item)">{{ opt.text }}</text>
+								</view>
+							</view>
+							<view class="qq-review-result">
+								<text v-if="item.is_correct" class="qq-review-correct">✓ 回答正确</text>
+								<text v-else class="qq-review-wrong">✗ 你的答案：{{ item.answer || '未选' }}，正确答案：{{ item.correct }}</text>
 							</view>
 						</view>
 					</view>
@@ -99,6 +105,7 @@
 			return {
 				loading: false,
 				questions: [],
+				questionCache: {},
 				answers: {},
 				currentIndex: 0,
 				answered: false,
@@ -140,6 +147,25 @@
 			navigateBack() {
 				uni.navigateBack();
 			},
+			getQuestionTitle(qid) {
+				return this.questionCache[qid] ? this.questionCache[qid].title : '';
+			},
+			getQuestionOptions(qid) {
+				const q = this.questionCache[qid];
+				if (!q) return [];
+				const opts = [];
+				if (q.option_a) opts.push({key:'A', text:q.option_a});
+				if (q.option_b) opts.push({key:'B', text:q.option_b});
+				if (q.option_c) opts.push({key:'C', text:q.option_c});
+				if (q.option_d) opts.push({key:'D', text:q.option_d});
+				return opts;
+			},
+			getOptClass(optKey, item) {
+				if (!item) return '';
+				if (optKey === item.correct) return 'opt-correct';
+				if (optKey === item.answer && !item.is_correct) return 'opt-wrong';
+				return '';
+			},
 			checkStatus() {
 				this.loading = true;
 				this.$u.api.checkTodayQxlQuiz().then(res => {
@@ -166,6 +192,10 @@
 							this.earnedPoint = res.data.point || 0;
 						} else {
 							this.questions = res.data.questions || [];
+							this.questionCache = {};
+							(res.data.questions || []).forEach(q => {
+								this.questionCache[q.id] = q;
+							});
 							this.answers = {};
 							this.currentIndex = 0;
 						}
@@ -175,8 +205,7 @@
 				});
 			},
 			selectAnswer(key) {
-				this.answers[this.currentIndex] = key;
-				this.$forceUpdate();
+				this.$set(this.answers, this.currentIndex, key);
 			},
 			prevQuestion() {
 				if (this.currentIndex > 0) this.currentIndex--;
@@ -205,6 +234,9 @@
 						this.totalCount = res.data.total_count || 5;
 						this.earnedPoint = res.data.point || 0;
 						this.answersDetail = res.data.answers_detail || [];
+						this.questions.forEach(q => {
+							this.questionCache[q.id] = q;
+						});
 						if (this.earnedPoint > 0) {
 							uni.showToast({ title: '恭喜获得' + this.earnedPoint + '积分', icon: 'success' });
 						}
@@ -314,9 +346,93 @@
 	display: flex; align-items: center; justify-content: center;
 	gap: 8rpx; font-size: 26rpx; color: #666; margin-bottom: 20rpx;
 }
-.qq-review-item { padding: 16rpx 0; border-bottom: 2rpx solid #f5f5f5; }
-.qq-review-q { font-size: 24rpx; color: #999; margin-bottom: 6rpx; }
-.qq-review-a { font-size: 26rpx; }
-.qq-review-a.correct { color: #18AF38; }
-.qq-review-a.wrong { color: #FF4D4F; }
+.qq-review-item {
+	padding: 24rpx 0;
+	border-bottom: 2rpx solid #f5f5f5;
+}
+.qq-review-q {
+	font-size: 28rpx;
+	color: #333;
+	font-weight: bold;
+	margin-bottom: 16rpx;
+	line-height: 1.6;
+}
+.qq-review-options {
+	margin-bottom: 16rpx;
+}
+.qq-review-opt {
+	display: flex;
+	align-items: flex-start;
+	padding: 8rpx 0;
+	gap: 12rpx;
+}
+.qq-review-opt-label {
+	flex-shrink: 0;
+	width: 36rpx;
+	height: 36rpx;
+	border-radius: 50%;
+	line-height: 36rpx;
+	text-align: center;
+	font-size: 24rpx;
+	font-weight: bold;
+}
+.qq-review-opt-text {
+	flex: 1;
+	font-size: 26rpx;
+	line-height: 36rpx;
+}
+/* 正确答案 - 绿色 */
+.qq-review-opt-label.opt-correct {
+	background: #18AF38;
+	color: #fff;
+}
+.qq-review-opt-text.opt-correct {
+	color: #18AF38;
+	font-weight: bold;
+}
+/* 选错答案 - 红色 */
+.qq-review-opt-label.opt-wrong {
+	background: #FF4D4F;
+	color: #fff;
+}
+.qq-review-opt-text.opt-wrong {
+	color: #FF4D4F;
+	font-weight: bold;
+}
+/* 默认态 */
+.qq-review-opt-label:not(.opt-correct):not(.opt-wrong) {
+	background: #f5f5f5;
+	color: #666;
+}
+.qq-review-opt-text:not(.opt-correct):not(.opt-wrong) {
+	color: #999;
+}
+/* 结果行 */
+.qq-review-result {
+	margin-top: 12rpx;
+	font-size: 26rpx;
+}
+.qq-review-correct {
+	color: #18AF38;
+	font-weight: bold;
+}
+.qq-review-wrong {
+	color: #FF4D4F;
+}
+.qq-review-correct-text {
+	color: #18AF38;
+}
+.qq-review-wrong-text {
+	color: #FF4D4F;
+}
+/* 已废弃的保留兼容 */
+.qq-review-a {
+	font-size: 26rpx;
+}
+.qq-review-a.correct {
+	color: #18AF38;
+}
+.qq-review-a.wrong {
+	color: #FF4D4F;
+}
 </style>
