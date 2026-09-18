@@ -16,7 +16,7 @@ class WorkPadController extends AdminBaseController
     public function index()
     {
         // 软件包存放目录（相对于 public/）
-        $softDir = CMF_ROOT . DS . 'public' . DS . 'workpad' . DS;
+        $softDir = CMF_ROOT . '/public/workpad/';
 
         $files = [];
         if (is_dir($softDir)) {
@@ -65,7 +65,7 @@ class WorkPadController extends AdminBaseController
             $this->error('文件参数错误');
         }
 
-        $filePath = CMF_ROOT . DS . 'public' . DS . 'workpad' . DS . $filename;
+        $filePath = CMF_ROOT . '/public/workpad/' . $filename;
 
         if (!file_exists($filePath) || !is_file($filePath)) {
             $this->error('文件不存在：' . htmlspecialchars($filename));
