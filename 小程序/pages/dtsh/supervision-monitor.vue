@@ -93,7 +93,7 @@
 
 			<!-- 是否产生厨余垃圾 -->
 			<view class="u-m-t-30">
-				<view class="u-font-28 u-m-b-16">是否产生厨余垃圾 <text class="form-required">*</text></view>
+				<view class="u-font-28 u-m-b-16">是否产生厨余垃圾</view>
 				<view class="u-flex">
 					<view class="u-m-r-20" @click="form.has_waste = 1">
 						<u-tag text="是" :mode="form.has_waste === 1 ? 'dark' : 'plain'" :type="form.has_waste === 1 ? 'success' : 'info'" />
@@ -106,7 +106,7 @@
 
 			<!-- 厨余垃圾是否正确分出 -->
 			<view class="u-m-t-30">
-				<view class="u-font-28 u-m-b-16">厨余垃圾是否正确分出 <text class="form-required">*</text></view>
+				<view class="u-font-28 u-m-b-16">厨余垃圾是否正确分出</view>
 				<view class="u-flex">
 					<view class="u-m-r-20" @click="form.waste_correct = 1">
 						<u-tag text="是" :mode="form.waste_correct === 1 ? 'dark' : 'plain'" :type="form.waste_correct === 1 ? 'success' : 'info'" />
@@ -383,10 +383,8 @@ canSubmit() {
 				&& this.form.unit_name.trim()
 				&& this.form.unit_type !== null
 				&& this.form.check_date
-				&& this.form.address.trim()
-				&& this.form.has_waste !== null
-				&& this.form.waste_correct !== null;
-		}
+				&& this.form.address.trim();
+			}
 		},
 		onLoad(option) {
 			// 如果传入了 can_submit 参数，使用该参数；否则默认允许提交（由后端统一验证权限）
@@ -493,16 +491,7 @@ canSubmit() {
 					uni.showToast({ title: '请填写地址', icon: 'none' });
 					return;
 				}
-				if (this.form.has_waste === null) {
-					uni.showToast({ title: '请选择是否产生厨余垃圾', icon: 'none' });
-					return;
-				}
-				if (this.form.waste_correct === null) {
-					uni.showToast({ title: '请选择厨余垃圾是否正确分出', icon: 'none' });
-					return;
-				}
-
-				uni.showLoading({ title: '提交中...' });
+uni.showLoading
 				this.$u.api.postSupervisionMonitor({
 					...this.form
 				}).then(res => {

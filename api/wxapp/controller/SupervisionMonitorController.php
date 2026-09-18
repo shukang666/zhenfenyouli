@@ -26,7 +26,7 @@ class SupervisionMonitorController extends AuthController
         $checkDate     = trim($this->request->param('check_date', ''));
         $address       = trim($this->request->param('address', ''));
         $contact       = trim($this->request->param('contact', ''));
-        $contactPhone  = trim($this->request->param('contact_phone', ''));
+        $contactPhone  = trim($this->request->param('contact_phone', '')); // 联系电话（选填）
 
         // 必填校验
         if (empty($communityName)) {
@@ -43,15 +43,6 @@ class SupervisionMonitorController extends AuthController
         }
         if (empty($address)) {
             $this->error('请填写地址');
-        }
-        if (empty($contact)) {
-            $this->error('请填写联系人');
-        }
-        if (empty($contactPhone)) {
-            $this->error('请填写联系电话');
-        }
-        if (!preg_match('/^1[3-9]\d{9}$/', $contactPhone)) {
-            $this->error('联系电话格式不正确');
         }
 
         // 是否类字段（1=是 0=否）
