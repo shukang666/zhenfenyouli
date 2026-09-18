@@ -68,7 +68,7 @@
 
 			<!-- 联系人 -->
 			<view class="u-m-t-30">
-				<view class="u-font-28 u-m-b-16">联系人 <text class="form-required">*</text></view>
+				<view class="u-font-28 u-m-b-16">联系人</view>
 				<input
 					class="merchant-input"
 					v-model="form.contact"
@@ -80,7 +80,7 @@
 
 			<!-- 联系电话 -->
 			<view class="u-m-t-30">
-				<view class="u-font-28 u-m-b-16">联系电话 <text class="form-required">*</text></view>
+				<view class="u-font-28 u-m-b-16">联系电话</view>
 				<input
 					class="merchant-input"
 					v-model="form.contact_phone"
@@ -378,17 +378,15 @@
 			};
 		},
 		computed: {
-			canSubmit() {
-				return this.form.community_id > 0
-					&& this.form.unit_name.trim()
-					&& this.form.unit_type !== null
-					&& this.form.check_date
-					&& this.form.address.trim()
-					&& this.form.contact.trim()
-					&& this.form.contact_phone.trim()
-					&& this.form.has_waste !== null
-					&& this.form.waste_correct !== null;
-			}
+canSubmit() {
+			return this.form.community_id > 0
+				&& this.form.unit_name.trim()
+				&& this.form.unit_type !== null
+				&& this.form.check_date
+				&& this.form.address.trim()
+				&& this.form.has_waste !== null
+				&& this.form.waste_correct !== null;
+		}
 		},
 		onLoad(option) {
 			// 如果传入了 can_submit 参数，使用该参数；否则默认允许提交（由后端统一验证权限）
@@ -495,14 +493,6 @@
 					uni.showToast({ title: '请填写地址', icon: 'none' });
 					return;
 				}
-				if (!this.form.contact.trim()) {
-					uni.showToast({ title: '请填写联系人', icon: 'none' });
-					return;
-				}
-				if (!this.form.contact_phone.trim()) {
-					uni.showToast({ title: '请填写联系电话', icon: 'none' });
-					return;
-				}
 				if (this.form.has_waste === null) {
 					uni.showToast({ title: '请选择是否产生厨余垃圾', icon: 'none' });
 					return;
@@ -559,16 +549,18 @@
 	}
 
 	/* ===== 输入框 ===== */
-	.merchant-input {
-		width: 100%;
-		padding: 20rpx 24rpx;
-		background: #F5F5F5;
-		border-radius: 12rpx;
-		font-size: 28rpx;
-		color: #333;
-		border: 2rpx solid #eee;
-		box-sizing: border-box;
-	}
+.merchant-input {
+	width: 100%;
+	padding: 20rpx 24rpx;
+	background: #F5F5F5;
+	border-radius: 12rpx;
+	font-size: 28rpx;
+	color: #333;
+	border: 2rpx solid #eee;
+	box-sizing: border-box;
+	min-height: 80rpx;
+	line-height: 40rpx;
+}
 
 	/* ===== 照片上传区 ===== */
 	.upload-area {
