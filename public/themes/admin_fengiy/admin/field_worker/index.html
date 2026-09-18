@@ -429,29 +429,18 @@
             <div class="card-title"><i class="fa fa-check-circle-o"></i> 点位巡查录入</div>
 
             <form id="inspectForm">
-                <!-- 所属社区（搜索选择，显示 小区名 + 社区名） -->
+                <!-- 所属社区（下拉选择，与小程序一致：数据源为社区列表 get_community_parent_list） -->
                 <div class="form-group">
                     <label>所属社区<span class="required">*</span></label>
-                    <div class="community-picker" id="communityPicker" onclick="toggleCommunityDropdown()">
-                        <span id="communityText" class="community-placeholder">请选择所属社区</span>
-                        <i class="fa fa-chevron-down"></i>
-                    </div>
-                    <input type="hidden" id="community_id" name="community_id">
-                    <input type="hidden" id="community_name" name="community_name">
-                    <input type="hidden" id="community_parent_id" name="community_parent_id">
-                    <input type="hidden" id="community_parent_name" name="community_parent_name">
+                    <select id="community_id" class="form-control">
+                        <option value="">加载中...</option>
+                    </select>
                 </div>
 
-                <!-- 社区选择下拉弹窗 -->
-                <div class="community-dropdown-mask" id="communityDropdownMask" style="display:none;" onclick="closeCommunityDropdown()">
-                    <div class="community-dropdown" onclick="event.stopPropagation()">
-                        <div class="community-search">
-                            <input type="text" id="communityKeyword" placeholder="输入小区名称搜索" oninput="onCommunitySearch(this.value)">
-                        </div>
-                        <div class="community-dropdown-list" id="communityList">
-                            <div class="community-empty">请输入小区名称搜索</div>
-                        </div>
-                    </div>
+                <!-- 单位名称/点位（手填，与小程序一致） -->
+                <div class="form-group">
+                    <label>单位名称（点位）<span class="required">*</span></label>
+                    <input type="text" id="unit_name" class="form-control" placeholder="请输入单位/点位名称" autocomplete="off">
                 </div>
 
                 <!-- 三张照片上传 -->
@@ -519,98 +508,26 @@
 var uploadFields = ['door_photo', 'inner_photo', 'publicity_photo'];
 var uploadedImages = { door_photo: '', inner_photo: '', publicity_photo: '' };
 
-// ===== 社区搜索选择（复用 search_community 逻辑） =====
-var communitySearchTimer = null;
-var communityPage = 1;
-var communityLastPage = 1;
-var communityLoading = false;
-
-function toggleCommunityDropdown() {
-    var $mask = $('#communityDropdownMask');
-    if ($mask.is(':visible')) {
-        closeCommunityDropdown();
-    } else {
-        $mask.show();
-        $('#communityKeyword').val('').focus();
-        loadCommunityList('', true);
-    }
-}
-
-function closeCommunityDropdown() {
-    $('#communityDropdownMask').hide();
-}
-
-function onCommunitySearch(value) {
-    if (communitySearchTimer) clearTimeout(communitySearchTimer);
-    var keyword = (value || '').trim();
-    communitySearchTimer = setTimeout(function() {
-        loadCommunityList(keyword, true);
-    }, 300);
-}
-
-function loadCommunityList(keyword, isReset) {
-    if (communityLoading) return;
-    communityLoading = true;
-    if (isReset) {
-        communityPage = 1;
-    }
-    $('#communityList').html('<div class="community-empty">加载中...</div>');
-
-    $.get('{:url("admin/FieldWorker/searchCommunity")}', {
-        keyword: keyword,
-        page: communityPage,
-        page_size: 20
-    }, function(res) {
-        communityLoading = false;
+// ===== 所属社区下拉（与小程序一致：数据源同 /wxapp/forum/get_community_parent_list） =====
+function loadCommunityParentList() {
+    $.get('{:url("admin/FieldWorker/communityParentList")}', function(res) {
         if (res.code == 1) {
-            var data = res.data || {};
-            var list = data.data || [];
-            communityLastPage = data.last_page || 1;
-            renderCommunityList(list);
+            var list = res.data || [];
+            var html = '<option value="">请选择所属社区</option>';
+            list.forEach(function(item) {
+                html += '<option value="' + item.id + '">' + item.name + '</option>';
+            });
+            $('#community_id').html(html);
         } else {
-            $('#communityList').html('<div class="community-empty">加载失败</div>');
+            $('#community_id').html('<option value="">加载失败，请刷新重试</option>');
         }
     }, 'json').fail(function() {
-        communityLoading = false;
-        $('#communityList').html('<div class="community-empty">加载失败</div>');
+        $('#community_id').html('<option value="">加载失败，请刷新重试</option>');
     });
 }
+loadCommunityParentList();
 
-function renderCommunityList(list) {
-    var html = '';
-    if (!list || list.length === 0) {
-        html = '<div class="community-empty">未找到相关小区</div>';
-    } else {
-        list.forEach(function(item) {
-            html += '<div class="community-dropdown-item" onclick="selectCommunity(' + item.id + ', \'' + item.name.replace(/'/g, "\\'") + '\', ' + item.pid + ', \'' + (item.parent_name || '').replace(/'/g, "\\'") + '\')">';
-            html += '<div class="item-name">' + item.name + '</div>';
-            if (item.parent_name) {
-                html += '<div class="item-parent">' + item.parent_name + '</div>';
-            }
-            html += '</div>';
-        });
-        if (communityPage < communityLastPage) {
-            html += '<div class="community-empty" id="loadMoreHint">上拉加载更多</div>';
-        }
-    }
-    $('#communityList').html(html);
-}
-
-function selectCommunity(id, name, pid, parentName) {
-    $('#community_id').val(id);
-    $('#community_name').val(name);
-    $('#community_parent_id').val(pid);
-    $('#community_parent_name').val(parentName);
-
-    var display = name;
-    if (parentName) {
-        display = '<div class="community-selected">' + name + '</div><div class="community-parent">' + parentName + '</div>';
-    } else {
-        display = '<div class="community-selected">' + name + '</div>';
-    }
-    $('#communityText').html(display).removeClass('community-placeholder');
-    closeCommunityDropdown();
-}
+// （旧的小区搜索弹窗逻辑已移除：所属社区改为社区下拉、点位改为手填）
 
 // Tab切换
 $('.tab').on('click', function() {
@@ -688,10 +605,11 @@ $('#inspectForm').on('submit', function(e) {
     e.preventDefault();
 
     var communityId = $('#community_id').val();
-    var communityName = $('#community_name').val();
-    var communityParentName = $('#community_parent_name').val();
+    var communityName = $('#community_id option:selected').text();
+    var unitName = $.trim($('#unit_name').val());
 
     if (!communityId) { showToast('请选择所属社区'); return; }
+    if (!unitName) { showToast('请填写单位名称'); return; }
     if (!uploadedImages.door_photo) { showToast('请上传门头照片'); return; }
     if (!uploadedImages.inner_photo) { showToast('请上传内部环境照片'); return; }
     if (!uploadedImages.publicity_photo) { showToast('请上传宣传品照片'); return; }
@@ -700,8 +618,8 @@ $('#inspectForm').on('submit', function(e) {
 
     var postData = {
         community_id: communityId,
-        community_name: communityParentName,
-        unit_name: communityName,
+        community_name: communityName,
+        unit_name: unitName,
         door_photo: uploadedImages.door_photo,
         inner_photo: uploadedImages.inner_photo,
         publicity_photo: uploadedImages.publicity_photo
@@ -718,10 +636,7 @@ $('#inspectForm').on('submit', function(e) {
                 // 重置表单
                 setTimeout(function() {
                     $('#community_id').val('');
-                    $('#community_name').val('');
-                    $('#community_parent_id').val('');
-                    $('#community_parent_name').val('');
-                    $('#communityText').html('请选择所属社区').addClass('community-placeholder');
+                    $('#unit_name').val('');
                     uploadFields.forEach(function(f) { removeImage(f); });
                     $('#btnSubmit').prop('disabled', false).text('提交巡查');
                 }, 1000);

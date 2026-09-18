@@ -221,6 +221,20 @@ class FieldWorkerController extends BaseController
     }
 
     /**
+     * 所属社区列表（与小程序 /wxapp/forum/get_community_parent_list 同源）
+     * 返回 member_community_parent 表的 id, name
+     */
+    public function communityParentList()
+    {
+        $list = Db::name('member_community_parent')
+            ->field('id,name')
+            ->order('id desc')
+            ->select();
+
+        $this->success('ok', '', $list);
+    }
+
+    /**
      * 搜索小区/点位（复用 search_community 逻辑，返回 name + parent_name）
      */
     public function searchCommunity()
@@ -317,6 +331,12 @@ class FieldWorkerController extends BaseController
 
         if ($communityId <= 0) {
             $this->error('请选择所属社区');
+        }
+        if (empty($communityName)) {
+            $this->error('请选择所属社区');
+        }
+        if (empty($unitName)) {
+            $this->error('请填写单位名称');
         }
         if (empty($doorPhoto) || empty($innerPhoto) || empty($publicityPhoto)) {
             $this->error('请上传全部三张照片');
