@@ -1,10 +1,16 @@
 <template>
-	<view class="guide-overlay" v-if="visible" @touchmove.stop.prevent="noop" @tap="onOverlayTap">
-		<!-- 遮罩 + 挖洞：box-shadow 9999px 向外发散，洞本身透明 -->
-		<view class="guide-mask" :style="maskStyle"></view>
+	<view class="guide-overlay" v-if="visible" catchtouchmove="noop" @tap="onOverlayTap">
+		<!-- 遮罩：4 块 view 拼出洞外区域（最稳方案，不依赖 clip-path/box-shadow） -->
+		<block v-if="targetRect">
+			<view class="guide-mask" :style="maskTopStyle"></view>
+			<view class="guide-mask" :style="maskBottomStyle"></view>
+			<view class="guide-mask" :style="maskLeftStyle"></view>
+			<view class="guide-mask" :style="maskRightStyle"></view>
+		</block>
+		<view v-else class="guide-mask guide-mask--full"></view>
 
 		<!-- 高亮边框（独立层，带脉冲动画） -->
-		<view class="guide-highlight" :style="highlightStyle" v-if="targetRect"></view>
+		<view v-if="targetRect" class="guide-highlight" :style="highlightStyle"></view>
 
 		<!-- 引导描述卡片 -->
 		<view class="guide-card" :style="cardStyle" catchtap="noop">
@@ -35,7 +41,7 @@
 				</view>
 			</view>
 			<!-- 指向高亮元素的箭头（朝上/朝下自适应） -->
-			<view v-if="targetRect && arrowStyle" class="guide-card__arrow"
+			<view v-if="targetRect" class="guide-card__arrow"
 				:class="{ 'guide-card__arrow--up': isArrowUp, 'guide-card__arrow--down': !isArrowUp }"
 				:style="arrowStyle"></view>
 		</view>
@@ -61,17 +67,17 @@
  *  - 高亮元素位于屏幕上半部分时，卡片显示在元素下方
  *  - 高亮元素位于屏幕下半部分时，卡片显示在元素上方
  *  - 无 selector 时，卡片居中显示
+ *
+ * 遮罩实现：4 块 view 拼出洞外矩形区域（不依赖 clip-path/box-shadow，兼容性最佳）
  */
 
 export default {
 	name: 'new-user-guide',
 	props: {
-		// 引导步骤配置
 		steps: {
 			type: Array,
 			default: () => []
 		},
-		// 是否显示引导
 		visible: {
 			type: Boolean,
 			default: false
@@ -92,10 +98,12 @@ export default {
 			stepIndex: 0,
 			targetRect: null,
 			retryCount: 0,
-			maxRetries: 15,
+			maxRetries: 30,
 			queryTimer: null,
-			// 卡片高度估算值（px），用于定位计算
-			cardHeightEst: 220
+			// 卡片高度估算值（px），用于定位计算；实际渲染后会通过测量更新
+			cardHeightEst: 220,
+			// 实测的卡片高度（拿到后用于精确定位）
+			cardRealHeight: 0
 		}
 	},
 	computed: {
@@ -105,52 +113,82 @@ export default {
 		sysInfo() {
 			return uni.getSystemInfoSync()
 		},
-		/**
-		 * 遮罩 + 挖洞样式
-		 * 原理：一个矩形 view 盖在洞位置，向外发散 9999px 的 box-shadow 形成全屏遮罩
-		 * 洞本身保持透明，露出底层内容
-		 */
-		maskStyle() {
-			if (!this.targetRect) {
-				// 无目标元素：纯全屏遮罩
-				return {
-					position: 'fixed',
-					top: 0,
-					left: 0,
-					width: '100%',
-					height: '100%',
-					background: 'rgba(0, 0, 0, 0.78)',
-					zIndex: 9998
-				}
-			}
+		// 高亮洞的几何信息（带 padding 外扩）
+		hole() {
+			if (!this.targetRect) return null
 			const { left, top, width, height } = this.targetRect
 			const pad = this.padding
 			return {
-				position: 'fixed',
-				left: (left - pad) + 'px',
-				top: (top - pad) + 'px',
-				width: (width + pad * 2) + 'px',
-				height: (height + pad * 2) + 'px',
-				background: 'transparent',
-				boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.78)',
-				borderRadius: '12px',
-				zIndex: 9998,
-				transition: 'all 0.3s ease'
+				left: left - pad,
+				top: top - pad,
+				right: left + width + pad,
+				bottom: top + height + pad,
+				width: width + pad * 2,
+				height: height + pad * 2,
+				centerX: left + width / 2,
+				centerY: top + height / 2
 			}
 		},
-		/**
-		 * 高亮边框样式：与洞精确对齐，带脉冲动画
-		 */
-		highlightStyle() {
-			if (!this.targetRect) return {}
-			const { left, top, width, height } = this.targetRect
-			const pad = this.padding
+		// 遮罩-上块
+		maskTopStyle() {
+			const h = this.hole
+			if (!h) return {}
 			return {
 				position: 'fixed',
-				left: (left - pad) + 'px',
-				top: (top - pad) + 'px',
-				width: (width + pad * 2) + 'px',
-				height: (height + pad * 2) + 'px',
+				left: '0',
+				top: '0',
+				width: '100%',
+				height: h.top + 'px'
+			}
+		},
+		// 遮罩-下块
+		maskBottomStyle() {
+			const h = this.hole
+			if (!h) return {}
+			const winH = this.sysInfo.windowHeight
+			return {
+				position: 'fixed',
+				left: '0',
+				top: h.bottom + 'px',
+				width: '100%',
+				height: Math.max(0, winH - h.bottom) + 'px'
+			}
+		},
+		// 遮罩-左块
+		maskLeftStyle() {
+			const h = this.hole
+			if (!h) return {}
+			return {
+				position: 'fixed',
+				left: '0',
+				top: h.top + 'px',
+				width: h.left + 'px',
+				height: h.height + 'px'
+			}
+		},
+		// 遮罩-右块
+		maskRightStyle() {
+			const h = this.hole
+			if (!h) return {}
+			const winW = this.sysInfo.windowWidth
+			return {
+				position: 'fixed',
+				left: h.right + 'px',
+				top: h.top + 'px',
+				width: Math.max(0, winW - h.right) + 'px',
+				height: h.height + 'px'
+			}
+		},
+		// 高亮边框样式：与洞精确对齐，带脉冲动画
+		highlightStyle() {
+			const h = this.hole
+			if (!h) return {}
+			return {
+				position: 'fixed',
+				left: h.left + 'px',
+				top: h.top + 'px',
+				width: h.width + 'px',
+				height: h.height + 'px',
 				border: '2px solid #18AF38',
 				borderRadius: '12px',
 				boxShadow: '0 0 16px rgba(24, 175, 56, 0.6), inset 0 0 8px rgba(24, 175, 56, 0.25)',
@@ -159,18 +197,23 @@ export default {
 				transition: 'all 0.3s ease'
 			}
 		},
-		/**
-		 * 卡片样式：位置自适应跟随高亮元素
-		 */
+		// 卡片是否位于高亮元素下方（箭头朝上指向元素）
+		isArrowUp() {
+			if (!this.hole) return true
+			return this.hole.centerY < this.sysInfo.windowHeight / 2
+		},
+		// 卡片定位：跟随高亮元素，自适应上/下，加边界保护
 		cardStyle() {
 			const winW = this.sysInfo.windowWidth
 			const winH = this.sysInfo.windowHeight
-			// 卡片宽度：屏幕宽 - 60rpx 边距，转 px 大约 winW - 32
 			const cardWidth = winW - 32
 			const left = 16
-			if (!this.targetRect) {
-				// 无目标：屏幕居中（略偏上 40%）
-				const top = Math.floor((winH - this.cardHeightEst) / 2 - winH * 0.05)
+			// 优先用实测高度，否则用估算值
+			const cardH = this.cardRealHeight || this.cardHeightEst
+
+			if (!this.hole) {
+				// 无目标：屏幕居中（略偏上）
+				const top = Math.floor((winH - cardH) / 2 - winH * 0.05)
 				return {
 					position: 'fixed',
 					left: left + 'px',
@@ -179,22 +222,17 @@ export default {
 					zIndex: 10000
 				}
 			}
-			const { top: rectTop, height: rectH } = this.targetRect
-			const pad = this.padding
-			// 高亮洞的上下沿
-			const holeTop = rectTop - pad
-			const holeBottom = rectTop + rectH + pad
-			// 高亮元素在屏幕上半部 → 卡片显示在下方；下半部 → 上方
+
+			const isUpperHalf = this.hole.centerY < winH / 2
 			let cardTop
-			if (rectTop + rectH / 2 < winH / 2) {
+			if (isUpperHalf) {
 				// 卡片在洞下方
-				cardTop = holeBottom + this.gap
-				// 防止溢出屏幕底部
-				const maxTop = winH - this.cardHeightEst - 20
+				cardTop = this.hole.bottom + this.gap
+				const maxTop = winH - cardH - 20
 				if (cardTop > maxTop) cardTop = maxTop
 			} else {
 				// 卡片在洞上方
-				cardTop = holeTop - this.gap - this.cardHeightEst
+				cardTop = this.hole.top - this.gap - cardH
 				if (cardTop < 40) cardTop = 40
 			}
 			return {
@@ -205,32 +243,15 @@ export default {
 				zIndex: 10000
 			}
 		},
-		/**
-		 * 卡片是否位于高亮元素下方（箭头朝上指向元素）
-		 */
-		isArrowUp() {
-			if (!this.targetRect) return true
-			const winH = this.sysInfo.windowHeight
-			const { top: rectTop, height: rectH } = this.targetRect
-			return rectTop + rectH / 2 < winH / 2
-		},
-		/**
-		 * 箭头样式：指向高亮元素
-		 * 卡片在洞下方时箭头朝上（在卡片顶部），反之朝下（在卡片底部）
-		 */
+		// 箭头样式：水平对齐高亮元素中心，不超出卡片范围
 		arrowStyle() {
-			if (!this.targetRect) return null
-			const { left: rectLeft, width: rectW } = this.targetRect
+			if (!this.hole) return {}
 			const cardLeft = parseFloat(this.cardStyle.left)
 			const cardW = parseFloat(this.cardStyle.width)
-			// 箭头水平位置：对齐高亮元素中心，但不超出卡片范围
 			const arrowHalf = 12
-			const holeCenterX = rectLeft + rectW / 2
-			let arrowLeft = holeCenterX - cardLeft - arrowHalf
+			let arrowLeft = this.hole.centerX - cardLeft - arrowHalf
 			arrowLeft = Math.max(20, Math.min(arrowLeft, cardW - 44))
-			return {
-				left: arrowLeft + 'px'
-			}
+			return { left: arrowLeft + 'px' }
 		}
 	},
 	watch: {
@@ -241,8 +262,10 @@ export default {
 					this.stepIndex = 0
 					this.targetRect = null
 					this.retryCount = 0
+					this.cardRealHeight = 0
 					this.$nextTick(() => {
 						this.queryTargetRect()
+						this.measureCardHeight()
 					})
 				} else {
 					if (this.queryTimer) clearTimeout(this.queryTimer)
@@ -257,10 +280,10 @@ export default {
 	},
 	methods: {
 		noop() {},
-		// 点击遮罩区域（洞外）→ 进入下一步；点击高亮洞内 → 不响应（由 overlay 统一处理）
 		onOverlayTap() {
 			this.next()
 		},
+		// 查询目标节点位置
 		queryTargetRect() {
 			const step = this.currentStep
 			if (!step.selector) {
@@ -286,6 +309,19 @@ export default {
 					this.targetRect = null
 				}
 			}).exec()
+		},
+		// 测量卡片实际高度，用于精确定位
+		measureCardHeight() {
+			this.$nextTick(() => {
+				setTimeout(() => {
+					const query = uni.createSelectorQuery().in(this)
+					query.select('.guide-card').boundingClientRect(rect => {
+						if (rect && rect.height > 0) {
+							this.cardRealHeight = rect.height
+						}
+					}).exec()
+				}, 100)
+			})
 		},
 		next() {
 			if (this.stepIndex < this.steps.length - 1) {
@@ -315,8 +351,21 @@ export default {
 	z-index: 9998;
 }
 
+/* 遮罩块通用样式 */
 .guide-mask {
-	/* 样式由 JS 内联控制 */
+	position: fixed;
+	background: rgba(0, 0, 0, 0.78);
+	z-index: 9998;
+	pointer-events: auto;
+	transition: all 0.3s ease;
+}
+
+/* 无目标时的全屏遮罩 */
+.guide-mask--full {
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
 }
 
 .guide-highlight {
@@ -341,6 +390,7 @@ export default {
 	box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.22), 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
 	overflow: visible;
 	position: relative;
+	transition: top 0.3s ease, left 0.3s ease;
 
 	/* 顶部装饰条 */
 	&__bar {

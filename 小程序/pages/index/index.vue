@@ -284,6 +284,10 @@ export default {
 			}
 			// 检测新手引导标记（登录后由 login 页 setStorageSync 设置），检测到后启动引导并清除标记
 			this.checkAndStartGuide()
+			// 保护：如果不在引导流程中，确保原生 tabbar 显示（防止引导异常中断后 tabbar 一直隐藏）
+			if (!this.showGuide && !this.guideLoading) {
+				uni.showTabBar && uni.showTabBar({ animation: false });
+			}
 			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
 			this.$nextTick(() => {
 				if (this.isLogin && !this.userInfo.community_id) {
@@ -303,6 +307,8 @@ export default {
 				uni.removeStorageSync('new_user_guide');
 				// 立即开启透明遮罩，防止等待渲染的 600ms 内用户切页/点击
 				this.guideLoading = true;
+				// 立即隐藏原生 tabbar，防止引导期间用户切到其他 tab
+				uni.hideTabBar && uni.hideTabBar({ animation: false });
 				// 延迟启动引导，等待页面数据渲染完成
 				this.$nextTick(() => {
 					setTimeout(() => {
@@ -313,9 +319,10 @@ export default {
 				});
 			}
 		},
-		// 引导关闭回调
+		// 引导关闭回调：恢复原生 tabbar，清除加载遮罩
 		onGuideClose() {
 			this.guideLoading = false;
+			uni.showTabBar && uni.showTabBar({ animation: false });
 		},
 		noop() {},
 		// 并行加载所有数据，全部完成后隐藏骨架屏（最少显示 400ms 防止闪烁）

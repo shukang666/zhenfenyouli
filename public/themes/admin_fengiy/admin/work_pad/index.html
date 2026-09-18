@@ -1,0 +1,66 @@
+<include file="public@header"/>
+</head>
+<body>
+<style>
+    .table { table-layout: fixed; }
+    .file-cell { word-wrap: break-word; white-space: normal; }
+    .empty-tip { padding: 40px 0; text-align: center; color: #999; }
+    .upload-hint { font-size: 12px; color: #999; margin-top: 6px; }
+    .upload-hint code { color: #c7254e; background: #f9f2f4; border-radius: 3px; padding: 1px 4px; }
+</style>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">软件下载</a></li>
+    </ul>
+
+    <div class="margin-top-20 alert alert-info" style="padding:8px 12px;font-size:12px;">
+        <i class="fa fa-info-circle"></i>&nbsp;
+        软件包由运维人员通过 FTP/SSH 直接上传到服务器目录 <code>public/workpad/</code>，后台仅提供下载能力。
+        <if condition="!$dir_exists">
+            <br><span class="text-danger"><i class="fa fa-exclamation-triangle"></i>&nbsp;目录 <code>public/workpad/</code> 不存在，请先创建该目录并确保 Web 进程有读取权限。</span>
+        </if>
+    </div>
+
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th style="width:50px;">#</th>
+            <th>文件名</th>
+            <th style="width:100px;">大小</th>
+            <th style="width:150px;">上传时间</th>
+            <th style="width:100px;">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <if condition="!empty($files)">
+            <foreach name="files" item="vo" index="i">
+                <tr>
+                    <td>{$i+1}</td>
+                    <td class="file-cell">
+                        <i class="fa fa-file-archive-o"></i>&nbsp;
+                        {$vo.name}
+                    </td>
+                    <td>{$vo.size}</td>
+                    <td>{$vo.time}</td>
+                    <td>
+                        <a href="{:url('WorkPad/download',['file'=>$vo.name])}" class="btn btn-success btn-xs">
+                            <i class="fa fa-download"></i>&nbsp;下载
+                        </a>
+                    </td>
+                </tr>
+            </foreach>
+        <else/>
+            <tr>
+                <td colspan="5" class="empty-tip">
+                    <i class="fa fa-inbox" style="font-size:32px;"></i>
+                    <div style="margin-top:8px;">暂无软件包</div>
+                    <div class="upload-hint">请将软件包上传至服务器 <code>public/workpad/</code> 目录</div>
+                </td>
+            </tr>
+        </if>
+        </tbody>
+    </table>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
