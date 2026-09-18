@@ -122,11 +122,10 @@ class FieldWorkerController extends BaseController
             return $check;
         }
 
-        // 加载社区列表（仅顶级 pid=0）
-        $communityList = Db::name('member_community')
+        // 加载社区列表（member_community_parent = 社区表）
+        $communityList = Db::name('member_community_parent')
             ->field('id, name')
-            ->where('pid', 0)
-            ->order('list_order asc')
+            ->order('list_order asc, id asc')
             ->select();
 
         $this->assign('communityList', $communityList);
@@ -146,7 +145,7 @@ class FieldWorkerController extends BaseController
         $list = Db::name('member_community')
             ->field('id, name')
             ->where('pid', $parentId)
-            ->order('list_order asc')
+            ->order('list_order asc, id asc')
             ->select();
         $this->success($list);
     }
