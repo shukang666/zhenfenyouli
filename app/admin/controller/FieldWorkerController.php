@@ -23,6 +23,48 @@ class FieldWorkerController extends BaseController
     }
 
     /**
+     * 初始化视图配置（关键！）
+     * 本控制器继承 BaseController 而非 AdminBaseController（避免后台登录拦截），
+     * 但 BaseController 不设置 view_base，模板会错误解析到站点根目录 view/admin/ 下。
+     * 这里手动复刻 AdminBaseController 的视图配置，让模板解析到后台主题目录。
+     */
+    protected function _initializeView()
+    {
+        $cmfAdminThemePath    = config('template.cmf_admin_theme_path');
+        $cmfAdminDefaultTheme = cmf_get_current_admin_theme();
+
+        $themePath = "{$cmfAdminThemePath}{$cmfAdminDefaultTheme}";
+
+        $root = cmf_get_root();
+
+        // 使 cdn 设置生效（与 AdminBaseController 行为保持一致）
+        $cdnSettings = cmf_get_option('cdn_settings');
+        if (empty($cdnSettings['cdn_static_root'])) {
+            $viewReplaceStr = [
+                '__ROOT__'     => $root,
+                '__TMPL__'     => "{$root}/{$themePath}",
+                '__STATIC__'   => "{$root}/static",
+                '__WEB_ROOT__' => $root
+            ];
+        } else {
+            $cdnStaticRoot  = rtrim($cdnSettings['cdn_static_root'], '/');
+            $viewReplaceStr = [
+                '__ROOT__'     => $root,
+                '__TMPL__'     => "{$cdnStaticRoot}/{$themePath}",
+                '__STATIC__'   => "{$cdnStaticRoot}/static",
+                '__WEB_ROOT__' => $cdnStaticRoot
+            ];
+        }
+
+        $viewBase = WEB_ROOT . $themePath . '/';
+
+        $this->view->engine()->config([
+            'view_base'          => $viewBase,
+            'tpl_replace_string' => $viewReplaceStr
+        ]);
+    }
+
+    /**
      * 是否已登录
      */
     protected function isLoggedIn()
