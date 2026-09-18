@@ -22,26 +22,30 @@
 			<!-- 活动搜索 + 扫码入口（点击进活动搜索页，右侧扫码直达活动详情） -->
 			<view id="guide-search" class="home-search-wrap">
 				<view class="home-search-box" @click="$u.route('/pages/activity/active-search')">
-					<u-icon name="search" size="28" color="#b0b3bb"></u-icon>
+					<view class="home-search-ico">
+						<u-icon name="search" size="28" color="#18AF38"></u-icon>
+					</view>
 					<text class="home-search-text">搜索活动名称 / 地点</text>
 					<view class="home-search-scan" @click.stop="onScanQrcode">
-						<u-icon name="scan" size="36" color="#8e8e93"></u-icon>
+						<u-icon name="scan" size="32" color="#ffffff"></u-icon>
 					</view>
 				</view>
 			</view>
 
 			<!-- Banner 轮播图 -->
 			<view class="banner-wrap">
-				<u-swiper :list="bannerList" height="340" border-radius="24" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
+				<u-swiper :list="bannerList" height="340" border-radius="28" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
 			</view>
 
 			<!-- 走马灯通知栏（后台 home_notice 配置，留空则不显示） -->
 			<view class="notice-bar-wrap" v-if="homeNotice">
-				<u-notice-bar :list="[homeNotice]" :volume-icon="true" :more-icon="false" :close-icon="false" :speed="100"></u-notice-bar>
+				<u-notice-bar :list="[homeNotice]" :volume-icon="true" :more-icon="false" :close-icon="false" :speed="100" type="none" bg-color="#FFF8E8" color="#9A6B12" :border-radius="20"></u-notice-bar>
 			</view>
 
 			<!-- 问候 + 快捷打卡（浅色卡片，入口指向垃圾分类打卡页） -->
 			<view id="guide-hello" class="hello-card" v-if="isLogin && todayTask.show">
+				<view class="hello-card__orb hello-card__orb--a"></view>
+				<view class="hello-card__orb hello-card__orb--b"></view>
 				<view class="hello-card__main" @click="$u.route({type:'switchTab', url:'/pages/user/index'})">
 					<view class="hello-card__avatar">
 						<u-image :src="userInfo.avatar || 'https://admin.circular-economy.cn/static/images/default-avatar.png'" width="80" height="80" shape="circle" mode="aspectFill"></u-image>
@@ -86,12 +90,11 @@
 				<view class="tab-list">
 					<view class="tab-item" :class="{'tab-item--active': currentTab === index}" v-for="(item, index) in tabList" :key="index" @click="switchContentTab(index)">
 						<text class="tab-item__text">{{ item.name }}</text>
-						<view class="tab-item__line" v-if="currentTab === index"></view>
 					</view>
 				</view>
 				<view class="tab-more" @click="goMore">
-					<text>更多</text>
-					<u-icon name="arrow-right" size="22" color="#999"></u-icon>
+					<text class="tab-more__text">更多</text>
+					<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
 				</view>
 			</view>
 
@@ -99,17 +102,20 @@
 			<scroll-view scroll-x class="active-scroll" :show-scrollbar="false" v-if="currentTab === 0">
 				<view class="u-flex">
 					<view class="active-card" v-for="item in active_list" :key="item.id"
+						hover-class="active-card--on" :hover-stay-time="80"
 						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
-						<u-image width="540" height="270" :src="item.thumb" border-radius="20rpx 20rpx 0 0"></u-image>
+						<view class="active-card-cover">
+							<u-image width="540" height="270" :src="item.thumb" border-radius="28rpx 28rpx 0 0"></u-image>
+						</view>
 						<view class="active-card-body">
 							<view class="active-card-title">{{item.name}}</view>
 							<view class="active-card-info">
-								<view class="u-flex u-flex-1">
-									<u-icon name="clock" size="24"></u-icon>
+								<view class="active-chip">
+									<u-icon name="clock" size="22" color="#18AF38"></u-icon>
 									<text class="active-card-text">{{item.date | date('mm月dd日')}}</text>
 								</view>
-								<view class="u-flex u-flex-1 u-m-l-20">
-									<u-icon name="map" size="24"></u-icon>
+								<view class="active-chip">
+									<u-icon name="map" size="22" color="#18AF38"></u-icon>
 									<text class="active-card-text u-line-1">{{item.address}}</text>
 								</view>
 							</view>
@@ -123,8 +129,8 @@
 			<scroll-view scroll-x class="goods-scroll" :show-scrollbar="false" v-if="currentTab === 1">
 				<view class="goods-cols">
 					<view class="goods-col" v-for="(col, colIndex) in goodsColumns" :key="colIndex">
-						<view class="goods-card" v-for="item in col" :key="item.id" @click="$u.route('/pages/shop/details?id='+item.id)">
-							<u-image width="100%" height="220" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
+						<view class="goods-card" v-for="item in col" :key="item.id" hover-class="goods-card--on" :hover-stay-time="80" @click="$u.route('/pages/shop/details?id='+item.id)">
+							<u-image width="100%" height="220" :src="item.thumb" :lazy-load="true" border-radius="24rpx 24rpx 0 0"></u-image>
 							<view class="goods-card-body">
 								<view class="goods-card-title">{{item.goods_name}}</view>
 								<view class="goods-card-sold">已兑换{{item.sell_count}}次</view>
@@ -787,7 +793,7 @@ export default {
 <style lang="scss" scoped>
 	.container {
 		min-height: 100vh;
-		background: #F5F6F8;
+		background: #eef4f0;
 	}
 
 	/* 关怀版下拉提示层 */
@@ -818,61 +824,93 @@ export default {
 		}
 	}
 
-	/* 活动搜索 + 扫码入口：与下方 Banner 同宽（左右 30rpx 留白）、同圆角(24rpx) */
 	.home-search-wrap {
-		padding: 24rpx 30rpx 0;
+		padding: 20rpx 30rpx 0;
 	}
 
 	.home-search-box {
 		display: flex;
 		align-items: center;
-		height: 72rpx;
-		padding: 0 24rpx;
+		height: 80rpx;
+		padding: 0 12rpx 0 16rpx;
 		background: #ffffff;
-		border-radius: 24rpx; /* 与 banner 圆角一致 */
-		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+		border-radius: 40rpx;
+		box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.08);
+	}
+
+	.home-search-ico {
+		width: 56rpx;
+		height: 56rpx;
+		border-radius: 50%;
+		background: #e8f8ec;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
 	}
 
 	.home-search-text {
 		flex: 1;
 		margin-left: 12rpx;
 		font-size: 26rpx;
-		color: #b0b3bb;
+		color: #9aa39c;
 	}
 
 	.home-search-scan {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 60rpx;
-		height: 60rpx;
+		width: 64rpx;
+		height: 64rpx;
 		margin-left: 8rpx;
-		padding-left: 20rpx;
-		border-left: 1rpx solid #eeeeee;
+		border-radius: 50%;
+		background: linear-gradient(145deg, #2bc24e 0%, #18af38 100%);
+		box-shadow: 0 6rpx 14rpx rgba(24, 175, 56, 0.28);
 	}
 
-	/* Banner 轮播图容器：左右留白，顶部间距 */
 	.banner-wrap {
-		padding: 30rpx 30rpx 0;
+		padding: 24rpx 30rpx 0;
+		box-shadow: none;
 	}
 
-	/* 走马灯通知栏：左右留白与上下区块对齐 */
 	.notice-bar-wrap {
 		padding: 20rpx 30rpx 0;
 	}
 
-	/* 问候 + 快捷打卡 */
 	.hello-card {
+		position: relative;
+		overflow: hidden;
 		display: flex;
 		align-items: center;
 		margin: 24rpx 30rpx 0;
-		padding: 22rpx 20rpx 22rpx 22rpx;
-		background: #ffffff;
-		border-radius: 24rpx;
-		box-shadow: 0 8rpx 28rpx rgba(24, 175, 56, 0.08);
+		padding: 24rpx 20rpx 24rpx 24rpx;
+		background: linear-gradient(135deg, #2bc24e 0%, #12962e 100%);
+		border-radius: 28rpx;
+		box-shadow: 0 16rpx 36rpx rgba(24, 175, 56, 0.22);
 		box-sizing: border-box;
 	}
+	.hello-card__orb {
+		position: absolute;
+		border-radius: 50%;
+		pointer-events: none;
+		background: rgba(255, 255, 255, 0.12);
+	}
+	.hello-card__orb--a {
+		width: 180rpx;
+		height: 180rpx;
+		top: -70rpx;
+		right: 120rpx;
+	}
+	.hello-card__orb--b {
+		width: 110rpx;
+		height: 110rpx;
+		bottom: -40rpx;
+		left: -20rpx;
+		background: rgba(255, 220, 80, 0.16);
+	}
 	.hello-card__main {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		align-items: center;
 		flex: 1;
@@ -883,7 +921,7 @@ export default {
 		margin-right: 18rpx;
 		border-radius: 50%;
 		overflow: hidden;
-		box-shadow: 0 0 0 3rpx rgba(24, 175, 56, 0.12);
+		box-shadow: 0 0 0 4rpx rgba(255, 255, 255, 0.35);
 	}
 	.hello-card__text {
 		flex: 1;
@@ -896,9 +934,9 @@ export default {
 	}
 	.hello-card__greet {
 		flex: 1;
-		font-size: 30rpx;
+		font-size: 32rpx;
 		font-weight: 700;
-		color: #1c1c1e;
+		color: #ffffff;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -909,13 +947,11 @@ export default {
 		display: flex;
 		align-items: center;
 		padding: 8rpx 18rpx;
-		background: linear-gradient(145deg, #18af38 0%, #2ec45a 100%);
+		background: rgba(255, 255, 255, 0.22);
 		border-radius: 32rpx;
-		box-shadow: 0 4rpx 12rpx rgba(24, 175, 56, 0.3);
 	}
 	.hello-card__sign--done {
-		background: linear-gradient(145deg, #b8b8b8 0%, #999999 100%);
-		box-shadow: 0 2rpx 8rpx rgba(153, 153, 153, 0.2);
+		background: rgba(0, 0, 0, 0.16);
 	}
 	.hello-card__sign--on {
 		transform: scale(0.92);
@@ -937,31 +973,33 @@ export default {
 	.hello-card__meta {
 		margin-top: 8rpx;
 		font-size: 22rpx;
-		color: #8e8e93;
+		color: rgba(255, 255, 255, 0.86);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 	.hello-card__level {
-		color: #18af38;
+		color: #fff4b8;
 		font-weight: 600;
 	}
 	.hello-card__dot {
 		margin: 0 6rpx;
-		color: #c7c7cc;
+		color: rgba(255, 255, 255, 0.45);
 	}
 	.hello-card__btn {
+		position: relative;
+		z-index: 1;
 		flex-shrink: 0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		margin-left: 16rpx;
-		padding: 14rpx 22rpx;
+		padding: 16rpx 22rpx;
 		min-width: 140rpx;
-		background: linear-gradient(145deg, #2ec45a 0%, #18af38 100%);
+		background: #ffffff;
 		border-radius: 20rpx;
-		box-shadow: 0 6rpx 16rpx rgba(24, 175, 56, 0.28);
+		box-shadow: 0 8rpx 18rpx rgba(0, 0, 0, 0.1);
 	}
 	.hello-card__btn--on {
 		opacity: 0.88;
@@ -970,17 +1008,16 @@ export default {
 	.hello-card__btn-title {
 		font-size: 24rpx;
 		font-weight: 700;
-		color: #ffffff;
+		color: #18af38;
 		line-height: 1.2;
 	}
 	.hello-card__btn-sub {
 		margin-top: 4rpx;
 		font-size: 18rpx;
-		color: rgba(255, 255, 255, 0.82);
+		color: #6a9a74;
 		line-height: 1.2;
 	}
 
-	/* 核心功能入口：一行四个图标（iOS毛玻璃风格） */
 	.entry-grid {
 		display: flex;
 		justify-content: space-between;
@@ -997,7 +1034,6 @@ export default {
 		margin: 0 8rpx;
 		background: rgba(255, 255, 255, 0.72);
 		border-radius: 28rpx;
-		/* iOS毛玻璃效果 */
 		backdrop-filter: blur(20rpx);
 		-webkit-backdrop-filter: blur(20rpx);
 		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06), inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
@@ -1034,7 +1070,6 @@ export default {
 		color: #1a1a1a;
 	}
 
-	/* 模块标题：图标 + 标题 + 分隔线 + 副标题 + 更多 */
 	.section-header {
 		display: flex;
 		align-items: center;
@@ -1062,12 +1097,15 @@ export default {
 		color: #999;
 	}
 
-	/* 内容区标签导航：活动 / 积分商品 */
 	.content-tabs {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 40rpx 30rpx 24rpx;
+		margin: 28rpx 30rpx 8rpx;
+		padding: 8rpx 12rpx 8rpx 8rpx;
+		background: #ffffff;
+		border-radius: 20rpx;
+		box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.05);
 	}
 	.tab-list {
 		display: flex;
@@ -1075,49 +1113,56 @@ export default {
 	}
 	.tab-item {
 		position: relative;
-		margin-right: 40rpx;
-		padding-bottom: 12rpx;
+		margin-right: 8rpx;
+		padding: 14rpx 24rpx;
+		border-radius: 14rpx;
 	}
 	.tab-item__text {
-		font-size: 30rpx;
-		color: #666;
+		font-size: 28rpx;
+		color: #7a8b7d;
 		font-weight: 500;
 	}
-	.tab-item--active .tab-item__text {
-		color: #1a1a1a;
-		font-weight: bold;
+	.tab-item--active {
+		background: #e8f8ec;
 	}
-	.tab-item__line {
-		position: absolute;
-		bottom: 0;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 40rpx;
-		height: 6rpx;
-		background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
-		border-radius: 3rpx;
+	.tab-item--active .tab-item__text {
+		color: #18af38;
+		font-weight: 700;
 	}
 	.tab-more {
 		display: flex;
 		align-items: center;
+		padding: 10rpx 12rpx;
+	}
+	.tab-more__text {
 		font-size: 24rpx;
-		color: #999;
+		color: #18af38;
+		font-weight: 600;
+		margin-right: 4rpx;
 	}
 
-	/* 热门活动横向滚动卡片 */
 	.active-scroll {
 		white-space: nowrap;
 		padding-left: 30rpx;
-		padding-bottom: 160rpx; /* 底部留白，避免被 tabbar 遮挡 */
+		padding-bottom: 160rpx;
 	}
 	.active-card {
 		flex-shrink: 0;
 		width: 540rpx;
 		margin-right: 24rpx;
 		background: #fff;
-		border-radius: 20rpx;
+		border-radius: 28rpx;
 		overflow: hidden;
-		box-shadow: 0 6rpx 28rpx rgba(0, 0, 0, 0.07);
+		box-shadow: 0 12rpx 32rpx rgba(16, 48, 24, 0.08);
+	}
+	.active-card--on {
+		opacity: 0.92;
+		transform: scale(0.98);
+	}
+	.active-card-cover {
+		width: 540rpx;
+		height: 270rpx;
+		overflow: hidden;
 	}
 	.active-card-body {
 		padding: 24rpx;
@@ -1125,7 +1170,7 @@ export default {
 	.active-card-title {
 		font-size: 30rpx;
 		font-weight: bold;
-		color: #1a1a1a;
+		color: #1c2b1e;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -1134,32 +1179,48 @@ export default {
 		display: flex;
 		align-items: center;
 		margin-top: 16rpx;
-		font-size: 24rpx;
-		color: #999;
+	}
+	.active-chip {
+		display: flex;
+		align-items: center;
+		flex: 1;
+		min-width: 0;
+		padding: 6rpx 12rpx;
+		margin-right: 12rpx;
+		background: #f3f8f4;
+		border-radius: 999rpx;
+	}
+	.active-chip:last-child {
+		margin-right: 0;
 	}
 	.active-card-text {
-		margin-left: 8rpx;
+		margin-left: 6rpx;
+		font-size: 22rpx;
+		color: #6a7b6e;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
-	/* 活动报名按钮：渐变绿色，呼应品牌色 */
 	.active-card-btn {
 		margin-top: 20rpx;
-		background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
+		background: linear-gradient(141deg, #2bc24e 0%, #18af38 100%);
 		color: #fff;
 		text-align: center;
 		padding: 18rpx 0;
-		border-radius: 12rpx;
+		border-radius: 999rpx;
 		font-size: 26rpx;
 		font-weight: bold;
+		box-shadow: 0 8rpx 18rpx rgba(24, 175, 56, 0.22);
 	}
 
-	/* 兑换商品列表：两行横向滚动（每列 2 个商品） */
 	.goods-scroll {
 		white-space: nowrap;
 		padding-left: 30rpx;
+		padding-bottom: 160rpx;
 	}
 	.goods-cols {
 		display: flex;
-		padding-right: 30rpx; /* 滚动到最右侧时留出与左侧一致的间隔 */
+		padding-right: 30rpx;
 	}
 	.goods-col {
 		flex-shrink: 0;
@@ -1175,29 +1236,37 @@ export default {
 		width: 100%;
 		margin-bottom: 20rpx;
 		background: #fff;
-		border-radius: 20rpx;
+		border-radius: 24rpx;
 		overflow: hidden;
-		white-space: normal; /* 重置 scroll-view 的 nowrap，保证标题正常换行 */
+		white-space: normal;
+		box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.06);
+	}
+	.goods-card--on {
+		opacity: 0.92;
+		transform: scale(0.98);
 	}
 	.goods-card-body {
 		padding: 20rpx 20rpx 24rpx;
 	}
-	/* 商品标题：固定两行高度，保证卡片底部对齐 */
 	.goods-card-title {
 		height: 76rpx;
 		font-size: 28rpx;
 		font-weight: 600;
 		line-height: 38rpx;
-		color: #1a1a1a;
+		color: #1c2b1e;
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
 		overflow: hidden;
 	}
 	.goods-card-sold {
+		display: inline-block;
 		margin-top: 10rpx;
-		font-size: 22rpx;
-		color: #b3b9c2;
+		padding: 4rpx 12rpx;
+		font-size: 20rpx;
+		color: #8a9b8d;
+		background: #f3f8f4;
+		border-radius: 999rpx;
 	}
 	.goods-card-footer {
 		display: flex;
@@ -1205,7 +1274,6 @@ export default {
 		justify-content: space-between;
 		margin-top: 16rpx;
 	}
-	/* 商品价格：积分为主、金额为辅，绿色突出 */
 	.goods-card-price {
 		display: flex;
 		align-items: baseline;
@@ -1229,22 +1297,18 @@ export default {
 		font-weight: bold;
 		color: #18AF38;
 	}
-	/* 去兑换按钮：渐变绿胶囊，呼应活动报名按钮 */
 	.goods-card-btn {
 		flex-shrink: 0;
 		height: 52rpx;
 		line-height: 52rpx;
 		padding: 0 22rpx;
 		margin-left: 12rpx;
-		background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
+		background: linear-gradient(141deg, #2bc24e 0%, #18af38 100%);
 		color: #fff;
 		font-size: 24rpx;
 		font-weight: 600;
 		text-align: center;
 		border-radius: 26rpx;
-	}
-	.goods-scroll {
-		padding-bottom: 160rpx;
 	}
 
 	/* 页面全屏引导层，蒙版用内联 backgroundColor，避免 class 不生效 */
