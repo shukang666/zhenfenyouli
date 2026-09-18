@@ -35,6 +35,11 @@
 				"navigationBarTitleText": "积分权益",
 				"navigationStyle": "custom"
 			}
+		}, {
+			"path": "pages/low_carbon/lsxf/details-new",
+			"style": {
+				"navigationBarTitleText": "活动说明"
+			}
 		}
 	],
 	"subPackages": [{
@@ -905,6 +910,10 @@
 		}
 	],
 	"preloadRule": {
+		"pages/low_carbon/lsxf/details-new": {
+			"network": "all",
+			"packages": ["pages/activity"]
+		},
 		"pages/index/index": {
 			"network": "wifi",
 			"packages": ["pages/flhd"]

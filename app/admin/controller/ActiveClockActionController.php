@@ -579,7 +579,7 @@ class ActiveClockActionController extends ToolController
         $messageData = [
             'touser' => $openid,
             'template_id' => $templateId,
-            'page' => 'pages/low_carbon/lsxf/details-new',
+            'page' => 'pages/activity/lsxf/details-new',
             'data' => [],
         ];
 

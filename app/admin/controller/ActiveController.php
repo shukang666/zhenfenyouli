@@ -182,7 +182,7 @@ class ActiveController extends ToolController
 
 
             $params = $this->setParamData($params);
-            $share_url = 'pages/low_carbon/lsxf/details-new';
+            $share_url = 'pages/activity/lsxf/details-new';
             if (empty($params['id'])) {
                 $result = ActiveModel::create($params);
                 //生成小程序码
