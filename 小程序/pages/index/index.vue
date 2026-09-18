@@ -304,9 +304,8 @@ export default {
 				// 立即清除标记，防止死循环
 				uni.removeStorageSync('new_user_guide');
 				// 立即开启透明遮罩，防止等待渲染的 600ms 内用户切页/点击
+				// 遮罩层级高于 custom-tab-bar，可直接盖住并拦截底部导航，无需 hideTabBar
 				this.guideLoading = true;
-				// 立即隐藏原生 tabbar，防止引导期间用户切到其他 tab
-				uni.hideTabBar && uni.hideTabBar({ animation: false });
 				// 延迟启动引导，等待页面数据渲染完成
 				this.$nextTick(() => {
 					setTimeout(() => {
@@ -317,10 +316,9 @@ export default {
 				});
 			}
 		},
-		// 引导关闭回调：恢复原生 tabbar，清除加载遮罩
+		// 引导关闭回调：清除加载遮罩（自定义 tabBar 始终由 custom-tab-bar 组件渲染，无需 showTabBar）
 		onGuideClose() {
 			this.guideLoading = false;
-			uni.showTabBar && uni.showTabBar({ animation: false });
 		},
 		noop() {},
 		// 并行加载所有数据，全部完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
@@ -1101,7 +1099,8 @@ export default {
 		left: 0;
 		right: 0;
 		bottom: 0;
-		z-index: 9997;
+		/* 需高于 custom-tab-bar 的 9999，引导等待期盖住并拦截底部导航 */
+		z-index: 100001;
 		background: rgba(0, 0, 0, 0);
 	}
 </style>
