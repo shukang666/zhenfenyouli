@@ -9,6 +9,7 @@
 			</view>
 		</view>
 		
+		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 		<image v-if="imgUrl" :src="`${imgUrl}user-bg.png`" class="u-abso u-abso-l-0 u-abso-t-0 u-w-750 u-h-448" mode="aspectFill"></image>
 		<view class="u-flex u-row-between u-rela" style="padding-top: 150rpx;">
 			<view class="u-flex u-col-top">

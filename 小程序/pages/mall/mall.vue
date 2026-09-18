@@ -16,6 +16,7 @@
 				<u-image width="231" height="64" :src="setting.min_logo"></u-image>
 			</view>
 		</u-navbar>
+		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(to bottom,#2fb74c,#EFF9F1);">
 			<!-- <u-image width="100%" height="527" src="https://admin.circular-economy.cn/static/index-bg.png"></u-image> -->
 		</view>

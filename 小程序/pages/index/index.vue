@@ -16,6 +16,7 @@
 				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'#ffffff'}" :border-bottom="false">
 					<image src="https://admin.circular-economy.cn/static/images/logo.png" class="u-w-320 u-h-88 u-m-l-30" mode="aspectFill"></image>
 				</u-navbar>
+				<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			</template>
 
 			<!-- 活动搜索 + 扫码入口（点击进活动搜索页，右侧扫码直达活动详情） -->

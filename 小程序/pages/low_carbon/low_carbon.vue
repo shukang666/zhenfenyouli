@@ -17,6 +17,7 @@
 				</view>
 			</view>
 		</view>
+		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 
 		<!-- 顶部 Banner 轮播 -->
 		<view class="fb-banner-wrap" v-if="banner_list && banner_list.length">
