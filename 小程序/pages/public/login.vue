@@ -74,6 +74,8 @@
 					this.$u.vuex('isLogin', true);
 					uni.removeStorageSync('vcode'); //从缓存移除vcode
 				uni.hideLoading();
+				// 每次登录后设置新手引导标记，首页 onShow 检测到后启动引导并清除标记，防止死循环
+				uni.setStorageSync('new_user_guide', '1');
 				// 注册成功后跳转首页（switchTab 清空非tabbar页面栈），
 				// 由首页 onShow 中的 community_id 检查统一引导未绑定小区用户去 info 页完善信息，
 				// 避免用户从非tabbar活动页直接登录后绕过小区绑定检查
