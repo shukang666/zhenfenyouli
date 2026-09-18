@@ -57,6 +57,9 @@ const wxapp = {
 	// 志愿者申请 - 提交申请（含 role_type）
 	addCheckRole: (params = {}) => uni.$u.post('/wxapp/check/add_check', params),
 
+	// 工作账号登录（APP端外勤人员）
+	workLogin: (params = {}) => uni.$u.post('/wxapp/public/work_login', params),
+
 	// 志愿督导 - 今日签到状态
 	getVolunteerToday: (params = {}) => uni.$u.get('/wxapp/volunteer_supervision/today', params),
 	// 志愿督导 - 提交签到

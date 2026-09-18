@@ -680,6 +680,75 @@ class PublicController extends AuthController
 
 
     /**
+     * 工作账号登录（APP端外勤人员使用）
+     * 复用后台管理员账密，自动创建小程序用户（随机openid/手机号/昵称）
+     * @OA\Post(
+     *     tags={"小程序-登录"},
+     *     summary="工作账号登录",
+     *     path="/wxapp/public/work_login",
+     *     @OA\Parameter(name="username",description="后台账号",in="query",required=true,@OA\Schema(type="string")),
+     *     @OA\Parameter(name="password",description="后台密码",in="query",required=true,@OA\Schema(type="string")),
+     *     @OA\Response(response="200", description="An example resource"),
+     *     @OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function work_login()
+    {
+        $username = $this->request->param('username', '');
+        $password = $this->request->param('password', '');
+
+        if (empty($username) || empty($password)) {
+            $this->error('账号和密码不能为空');
+        }
+
+        // 查询后台管理员账号
+        $admin = Db::name('user')
+            ->where('user_login', $username)
+            ->where('status', 1)
+            ->find();
+
+        if (empty($admin)) {
+            $this->error('账号不存在或已禁用');
+        }
+
+        // 验证密码（ThinkCMF 后台密码加密方式）
+        if (!cmf_compare_password($password, $admin['user_pass'])) {
+            $this->error('密码错误');
+        }
+
+        // 生成唯一标识
+        $workOpenid = 'work_' . md5($admin['id'] . '_' . $username);
+        $MemberModel = new MemberModel();
+
+        // 检查该工作账号是否已绑定过小程序用户
+        $existUser = $MemberModel->where('openid', $workOpenid)->find();
+        if (!empty($existUser)) {
+            $this->success('登录成功', $existUser);
+        }
+
+        // 首次登录：自动创建小程序用户
+        $vcode = CommonModel::get_vcode();
+        $mobile = '1' . rand(3, 9) . str_pad(rand(0, 999999999), 9, '0', STR_PAD_LEFT);
+        $nickname = '外勤_' . substr($admin['user_login'], 0, 4) . '_' . rand(100, 999);
+
+        $userId = $MemberModel->insertGetId([
+            'openid'      => $workOpenid,
+            'nickname'    => $nickname,
+            'true_name'   => $nickname,
+            'mobile'      => $mobile,
+            'avatar'      => cmf_get_asset_url(cmf_get_option('set_config')['app_logo'] ?? ''),
+            'create_time' => time(),
+            'status'      => 1,
+            'vcode'       => $vcode,
+        ]);
+
+        $user = $MemberModel->field('id,nickname,avatar,mobile,openid,true_name,community_id,point,level')
+            ->find($userId);
+
+        $this->success('登录成功', $user);
+    }
+
+    /**
      * 测试
      * @OA\Get (
      *     tags={"小程序公共模块接口"},
