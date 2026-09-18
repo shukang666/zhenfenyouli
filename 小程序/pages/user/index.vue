@@ -13,9 +13,13 @@
 		<view class="u-flex u-row-between u-rela" style="padding-top: 150rpx;">
 			<view class="u-flex u-col-top">
 				<u-avatar :src="userInfo.avatar" size="130"></u-avatar>
-				<view class="u-m-l-30 u-h-138" style="line-height: 138rpx;" @click="$u.route('/pages/public/login')" v-if="!isLogin">
-					点击登录
+			<view class="u-m-l-30 u-flex u-flex-col u-row-center u-h-138" v-if="!isLogin">
+				<view class="user-login-btn" @click="$u.route('/pages/public/login')">
+					<u-icon name="account" size="28" color="#ffffff" class="u-m-r-8"></u-icon>
+					<text>立即登录</text>
 				</view>
+				<view class="user-login-sub">登录后解锁更多功能</view>
+			</view>
 				<view class="u-m-l-30" v-else>
 					<view class="u-font-32 u-font-bold u-flex">
 						<text class="u-m-r-15">{{userInfo.nickname}}</text>
@@ -280,7 +284,33 @@
 		justify-content: center;
 		height: 100%;
 	}
-	
+
+	/* 未登录按钮 */
+	.user-login-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 18rpx 48rpx;
+		border-radius: 40rpx;
+		background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
+		color: #ffffff;
+		font-size: 30rpx;
+		font-weight: bold;
+		letter-spacing: 2rpx;
+		box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.35);
+		transition: all 0.15s ease;
+		&:active {
+			transform: scale(0.95);
+			box-shadow: 0 4rpx 12rpx rgba(24, 175, 56, 0.25);
+		}
+	}
+	.user-login-sub {
+		margin-top: 12rpx;
+		font-size: 22rpx;
+		color: #999;
+		text-align: center;
+	}
+
 	/* 关怀版下拉提示层 */
 	.care-pull-layer {
 		position: fixed;
