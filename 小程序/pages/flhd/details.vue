@@ -4,8 +4,8 @@
 	<view class="u-abso green-bg"></view>
 
 	<!-- 导航栏 -->
-	<u-navbar title-color="#fff" :title="title || '学习详情'" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false" :custom-back="customBack">
-	</u-navbar>
+	<!-- <u-navbar title-color="#fff" :title="title || '学习详情'" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false" :custom-back="customBack">
+	</u-navbar> -->
 
 	<!-- 学习进度卡片 -->
 	<view class="progress-card" v-if="totalCount > 0">
