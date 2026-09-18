@@ -23,7 +23,7 @@ class SupervisionMonitorController extends AdminBaseController
 
         $list = Db::name('supervision_monitor')->alias('r')
             ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
-            ->field('r.*, m.nickname, m.mobile')
+            ->field('r.*, m.nickname, m.mobile, r.submitter_name')
             ->where($where)
             ->order('r.id desc')
             ->paginate(15);
@@ -35,6 +35,7 @@ class SupervisionMonitorController extends AdminBaseController
             $item['yes_no_has_waste'] = $item['has_waste'] == 1 ? '是' : '否';
             $item['yes_no_waste_correct'] = $item['waste_correct'] == 1 ? '是' : '否';
             $item['yes_no_need_rectify'] = $item['need_rectify'] == 1 ? '是' : '否';
+            $item['display_submitter'] = !empty($item['submitter_name']) ? $item['submitter_name'] : (!empty($item['nickname']) ? $item['nickname'] . ' (' . $item['mobile'] . ')' : '已删除');
             return $item;
         });
 
@@ -62,9 +63,11 @@ class SupervisionMonitorController extends AdminBaseController
 
         $item = Db::name('supervision_monitor')->alias('r')
             ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
-            ->field('r.*, m.nickname, m.mobile')
+            ->field('r.*, m.nickname, m.mobile, r.submitter_name')
             ->where('r.id', $id)
             ->find();
+
+        $item['display_submitter'] = !empty($item['submitter_name']) ? $item['submitter_name'] : (!empty($item['nickname']) ? $item['nickname'] . ' (' . $item['mobile'] . ')' : '已删除');
         if (empty($item)) {
             $this->error('记录不存在');
         }
@@ -112,7 +115,7 @@ class SupervisionMonitorController extends AdminBaseController
 
         $list = Db::name('supervision_monitor')->alias('r')
             ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
-            ->field('r.*, m.nickname, m.mobile')
+            ->field('r.*, m.nickname, m.mobile, r.submitter_name')
             ->where($where)
             ->order('r.id desc')
             ->select()->toArray();
@@ -127,6 +130,7 @@ class SupervisionMonitorController extends AdminBaseController
             $item['yes_no_point_qualified'] = $item['point_qualified'] == 1 ? '是' : '否';
             $item['yes_no_manage_qualified'] = $item['manage_qualified'] == 1 ? '是' : '否';
             $item['create_time'] = $item['create_time'] ? date('Y-m-d H:i:s', $item['create_time']) : '';
+            $item['display_submitter'] = !empty($item['submitter_name']) ? $item['submitter_name'] : (!empty($item['nickname']) ? $item['nickname'] : '已删除');
         }
         unset($item);
 
@@ -134,7 +138,7 @@ class SupervisionMonitorController extends AdminBaseController
         $head = ['ID', '提交人', '手机号', '所属社区', '单位名称', '单位类型', '检查日期', '地址', '联系人', '联系电话',
             '是否产生厨余垃圾', '厨余垃圾是否正确分出', '厨余垃圾流向', '内部环境是否合格', '是否需要整改',
             '投放点是否合格', '点位管理是否合格', '总体评价', '提交时间'];
-        $keys = ['id', 'nickname', 'mobile', 'community_name', 'unit_name', 'unit_type_name', 'check_date', 'address', 'contact', 'contact_phone',
+        $keys = ['id', 'display_submitter', 'mobile', 'community_name', 'unit_name', 'unit_type_name', 'check_date', 'address', 'contact', 'contact_phone',
             'yes_no_has_waste', 'yes_no_waste_correct', 'waste_flow', 'yes_no_inner_qualified', 'yes_no_need_rectify',
             'yes_no_point_qualified', 'yes_no_manage_qualified', 'overall_evaluation', 'create_time'];
         // 必须静态调用，否则 ThinkPHP Model __call 会转发到查询构造器导致 cmf_common_model 表报错
@@ -151,7 +155,7 @@ class SupervisionMonitorController extends AdminBaseController
         // 关键词：单位名称/联系人/联系电话/昵称/手机号
         $keyword = trim($this->request->param('keyword', ''));
         if (!empty($keyword)) {
-            $where[] = ['r.unit_name|r.contact|r.contact_phone|m.nickname|m.mobile', 'like', '%' . $keyword . '%'];
+            $where[] = ['r.unit_name|r.contact|r.contact_phone|m.nickname|m.mobile|r.submitter_name', 'like', '%' . $keyword . '%'];
         }
 
         // 单位类型

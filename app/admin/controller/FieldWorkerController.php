@@ -387,6 +387,7 @@ class FieldWorkerController extends BaseController
             'catering_photo'       => trim($this->request->param('catering_photo', '')),
             'accuracy_photo'       => trim($this->request->param('accuracy_photo', '')),
             'overall_evaluation'   => trim($this->request->param('overall_evaluation', '')),
+            'submitter_name'       => session('FIELD_WORKER_NAME') . '（工作Pad）',
             'create_time'          => time(),
         ];
 

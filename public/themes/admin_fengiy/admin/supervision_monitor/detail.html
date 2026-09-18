@@ -18,10 +18,14 @@
             <td>{$item.id}</td>
             <td>提交人</td>
             <td>
-                <notempty name="item.nickname">
-                    {$item.nickname} ({$item.mobile})
+                <notempty name="item.submitter_name">
+                    {$item.submitter_name}
                     <else/>
-                    已删除
+                    <notempty name="item.nickname">
+                        {$item.nickname} ({$item.mobile})
+                        <else/>
+                        已删除
+                    </notempty>
                 </notempty>
             </td>
         </tr>

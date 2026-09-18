@@ -73,10 +73,14 @@
             <tr>
                 <td>{$vo.id}</td>
                 <td>
-                    <notempty name="vo.nickname">
-                        {$vo.nickname}<small style="color:#999;">({$vo.mobile})</small>
+                    <notempty name="vo.submitter_name">
+                        {$vo.submitter_name}
                         <else/>
-                        已删除
+                        <notempty name="vo.nickname">
+                            {$vo.nickname}<small style="color:#999;">({$vo.mobile})</small>
+                            <else/>
+                            已删除
+                        </notempty>
                     </notempty>
                 </td>
                 <td>{$vo.community_name}</td>
