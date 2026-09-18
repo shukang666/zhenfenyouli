@@ -393,6 +393,8 @@ export default {
 	box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.22), 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
 	overflow: visible;
 	position: relative;
+	/* 与高亮层同级，高于遮罩层，保证卡片可点可看 */
+	z-index: 100002;
 	transition: top 0.3s ease, left 0.3s ease;
 
 	/* 顶部装饰条 */
