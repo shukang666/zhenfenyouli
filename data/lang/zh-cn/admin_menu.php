@@ -49,6 +49,7 @@ return array (
   'ADMIN_FORUM_INDEX1' => '健康论坛',
   'ADMIN_FORUM_INDEX2' => '垃圾打卡',
   'ADMIN_FORUM_INDEX3' => '点位巡检 ',
+  'ADMIN_FIELDWORKER_INDEX' => '外勤工作台',
   'ADMIN_FORUM_INDEX4' => '桶边督导',
   'ADMIN_FORUM_INDEX5' => '互助平台',
   'ADMIN_FORUM_INDEX6' => '优秀事迹',

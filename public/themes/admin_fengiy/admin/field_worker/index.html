@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>外勤工作台 - 点位巡查</title>
+    <link rel="stylesheet" href="__STATIC__/css/bootstrap.min.css">
+    <link rel="stylesheet" href="__STATIC__/css/font-awesome.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            color: #333;
+        }
+        /* 顶部栏 */
+        .header {
+            background: linear-gradient(135deg, #2fb74c 0%, #1a8a32 100%);
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+        .header .user-info a {
+            color: #fff;
+            text-decoration: none;
+            padding: 4px 10px;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        /* 内容区 */
+        .main {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        /* Tab导航 */
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .tabs .tab {
+            flex: 1;
+            text-align: center;
+            padding: 14px 0;
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tabs .tab.active {
+            color: #2fb74c;
+            border-bottom-color: #2fb74c;
+            font-weight: 600;
+        }
+        /* 表单卡片 */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 16px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title i {
+            color: #2fb74c;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-group label .required {
+            color: #f56c6c;
+            margin-left: 4px;
+        }
+        .form-control {
+            width: 100%;
+            height: 46px;
+            padding: 0 14px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #333;
+            background: #fafafa;
+            transition: border-color 0.2s;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .form-control:focus {
+            border-color: #2fb74c;
+            background: #fff;
+        }
+        select.form-control {
+            background: #fafafa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 14px center;
+        }
+        /* 图片上传区 */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .upload-item {
+            aspect-ratio: 1;
+            background: #f7f8fa;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            position: relative;
+        }
+        .upload-item:hover {
+            border-color: #2fb74c;
+            background: #f0faf2;
+        }
+        .upload-item.has-image {
+            border-style: solid;
+            border-color: #e8e8e8;
+        }
+        .upload-item .upload-icon {
+            font-size: 28px;
+            color: #ccc;
+            margin-bottom: 6px;
+        }
+        .upload-item .upload-text {
+            font-size: 12px;
+            color: #999;
+        }
+        .upload-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .upload-item .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .upload-item.uploading::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-item.uploading::before {
+            content: '\f110';
+            font-family: 'FontAwesome';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #2fb74c;
+            z-index: 2;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        /* 提交按钮 */
+        .btn-submit {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(135deg, #2fb74c, #1a8a32);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin-top: 10px;
+        }
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        /* 记录列表 */
+        .record-item {
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        .record-item .record-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .record-item .record-community {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+        .record-item .record-date {
+            font-size: 13px;
+            color: #999;
+        }
+        .record-item .record-photos {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .record-item .record-photos img {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #bbb;
+            font-size: 15px;
+        }
+        .empty-state i {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+            color: #ddd;
+        }
+        /* Toast提示 */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 9999;
+            display: none;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 0;
+        }
+        .pagination a, .pagination span {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            background: #fff;
+            text-decoration: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .pagination .current {
+            background: #2fb74c;
+            color: #fff;
+        }
+        /* 隐藏文件input */
+        .hidden-file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 顶部栏 -->
+<div class="header">
+    <h1><i class="fa fa-map-marker"></i> 外勤工作台</h1>
+    <div class="user-info">
+        <span>{$workerName}</span>
+        <a href="{:url('admin/FieldWorker/logout')}"><i class="fa fa-sign-out"></i> 退出</a>
+    </div>
+</div>
+
+<!-- Tab导航 -->
+<div class="main">
+    <div class="tabs">
+        <div class="tab active" data-tab="clock"><i class="fa fa-camera"></i> 点位巡查</div>
+        <div class="tab" data-tab="records"><i class="fa fa-list"></i> 巡查记录</div>
+    </div>
+
+    <!-- 点位巡查表单 -->
+    <div id="tab-clock" class="tab-content">
+        <div class="card">
+            <div class="card-title"><i class="fa fa-check-circle-o"></i> 点位巡查录入</div>
+
+            <form id="inspectForm">
+                <!-- 所属社区 -->
+                <div class="form-group">
+                    <label>所属社区<span class="required">*</span></label>
+                    <select class="form-control" id="community_id" name="community_id">
+                        <option value="">请选择所属社区</option>
+                        {volist name="communityList" id="vo"}
+                        <option value="{$vo.id}" data-name="{$vo.name}">{$vo.name}</option>
+                        {/volist}
+                    </select>
+                </div>
+
+                <!-- 点位名称 -->
+                <div class="form-group">
+                    <label>点位名称<span class="required">*</span></label>
+                    <input type="text" class="form-control" id="point_name" name="point_name" placeholder="请输入巡查点位名称">
+                </div>
+
+                <!-- 三张照片上传 -->
+                <div class="form-group">
+                    <label>门头照片<span class="required">*</span></label>
+                    <div class="upload-grid">
+                        <div class="upload-item" data-field="door_photo" onclick="document.getElementById('file_door').click()">
+                            <i class="upload-icon fa fa-camera"></i>
+                            <span class="upload-text">点击上传</span>
+                            <img style="display:none;" />
+                        </div>
+                    </div>
+                    <input type="file" id="file_door" class="hidden-file-input" accept="image/*" data-field="door_photo">
+                </div>
+
+                <div class="form-group">
+                    <label>内部环境照片<span class="required">*</span></label>
+                    <div class="upload-grid">
+                        <div class="upload-item" data-field="inner_photo" onclick="document.getElementById('file_inner').click()">
+                            <i class="upload-icon fa fa-camera"></i>
+                            <span class="upload-text">点击上传</span>
+                            <img style="display:none;" />
+                        </div>
+                    </div>
+                    <input type="file" id="file_inner" class="hidden-file-input" accept="image/*" data-field="inner_photo">
+                </div>
+
+                <div class="form-group">
+                    <label>宣传品照片<span class="required">*</span></label>
+                    <div class="upload-grid">
+                        <div class="upload-item" data-field="publicity_photo" onclick="document.getElementById('file_publicity').click()">
+                            <i class="upload-icon fa fa-camera"></i>
+                            <span class="upload-text">点击上传</span>
+                            <img style="display:none;" />
+                        </div>
+                    </div>
+                    <input type="file" id="file_publicity" class="hidden-file-input" accept="image/*" data-field="publicity_photo">
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnSubmit">提交巡查</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 巡查记录列表 -->
+    <div id="tab-records" class="tab-content" style="display:none;">
+        <div class="card">
+            <div class="card-title"><i class="fa fa-history"></i> 我的巡查记录</div>
+            <div id="recordsList">
+                <div class="empty-state">
+                    <i class="fa fa-spinner fa-spin"></i>
+                    <span>加载中...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="__STATIC__/js/jquery.min.js"></script>
+<script>
+// 图片字段映射
+var uploadFields = ['door_photo', 'inner_photo', 'publicity_photo'];
+var uploadedImages = { door_photo: '', inner_photo: '', publicity_photo: '' };
+
+// Tab切换
+$('.tab').on('click', function() {
+    $('.tab').removeClass('active');
+    $(this).addClass('active');
+    var tab = $(this).data('tab');
+    $('.tab-content').hide();
+    $('#tab-' + tab).show();
+    if (tab === 'records') {
+        loadRecords();
+    }
+});
+
+// 图片上传绑定
+$('.hidden-file-input').on('change', function() {
+    var field = $(this).data('field');
+    var file = this.files[0];
+    if (!file) return;
+    uploadImage(field, file);
+    this.value = '';
+});
+
+// 上传图片
+function uploadImage(field, file) {
+    var formData = new FormData();
+    formData.append('file', file);
+
+    // 显示上传状态
+    var $item = $('.upload-item[data-field="' + field + '"]');
+    $item.addClass('uploading');
+
+    $.ajax({
+        url: '{:url("admin/FieldWorker/upload")}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(res) {
+            $item.removeClass('uploading');
+            if (res.code == 1) {
+                var url = res.data.url;
+                uploadedImages[field] = url;
+                $item.addClass('has-image');
+                $item.find('.upload-icon, .upload-text').hide();
+                var $img = $item.find('img');
+                $img.attr('src', url).show();
+                // 添加删除按钮
+                if (!$item.find('.delete-btn').length) {
+                    $item.append('<span class="delete-btn" onclick="event.stopPropagation(); removeImage(\'' + field + '\')"><i class="fa fa-times"></i></span>');
+                }
+            } else {
+                showToast(res.msg || '上传失败');
+            }
+        },
+        error: function() {
+            $item.removeClass('uploading');
+            showToast('上传失败，请重试');
+        }
+    });
+}
+
+// 删除图片
+function removeImage(field) {
+    uploadedImages[field] = '';
+    var $item = $('.upload-item[data-field="' + field + '"]');
+    $item.removeClass('has-image');
+    $item.find('.upload-icon, .upload-text').show();
+    $item.find('img').hide().attr('src', '');
+    $item.find('.delete-btn').remove();
+}
+
+// 表单提交
+$('#inspectForm').on('submit', function(e) {
+    e.preventDefault();
+
+    var communityId = $('#community_id').val();
+    var communityName = $('#community_id option:selected').data('name') || '';
+    var pointName = $.trim($('#point_name').val());
+
+    if (!communityId) { showToast('请选择所属社区'); return; }
+    if (!pointName) { showToast('请填写点位名称'); return; }
+    if (!uploadedImages.door_photo) { showToast('请上传门头照片'); return; }
+    if (!uploadedImages.inner_photo) { showToast('请上传内部环境照片'); return; }
+    if (!uploadedImages.publicity_photo) { showToast('请上传宣传品照片'); return; }
+
+    $('#btnSubmit').prop('disabled', true).text('提交中...');
+
+    var postData = {
+        community_id: communityId,
+        community_name: communityName,
+        point_name: pointName,
+        door_photo: uploadedImages.door_photo,
+        inner_photo: uploadedImages.inner_photo,
+        publicity_photo: uploadedImages.publicity_photo
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: '{:url("admin/FieldWorker/submit")}',
+        data: postData,
+        dataType: 'json',
+        success: function(res) {
+            if (res.code == 1) {
+                showToast('提交成功');
+                // 重置表单
+                setTimeout(function() {
+                    $('#point_name').val('');
+                    uploadFields.forEach(function(f) { removeImage(f); });
+                    $('#community_id').val('');
+                    $('#btnSubmit').prop('disabled', false).text('提交巡查');
+                }, 1000);
+            } else {
+                showToast(res.msg || '提交失败');
+                $('#btnSubmit').prop('disabled', false).text('提交巡查');
+            }
+        },
+        error: function() {
+            showToast('网络错误，请重试');
+            $('#btnSubmit').prop('disabled', false).text('提交巡查');
+        }
+    });
+});
+
+// 加载记录
+function loadRecords(page) {
+    page = page || 1;
+    $.get('{:url("admin/FieldWorker/records")}', { page: page }, function(res) {
+        if (res.code == 1) {
+            renderRecords(res.data);
+        } else {
+            $('#recordsList').html('<div class="empty-state"><i class="fa fa-exclamation-circle"></i><span>加载失败</span></div>');
+        }
+    }, 'json');
+}
+
+function renderRecords(data) {
+    var html = '';
+    if (!data.list || data.list.length === 0) {
+        html = '<div class="empty-state"><i class="fa fa-inbox"></i><span>暂无巡查记录</span></div>';
+    } else {
+        data.list.forEach(function(item) {
+            html += '<div class="record-item">';
+            html += '<div class="record-info"><span class="record-community">' + (item.community_name || '') + ' · ' + (item.unit_name || '') + '</span><span class="record-date">' + (item.check_date || '') + '</span></div>';
+            if (item.door_photo || item.inner_photo || item.publicity_photo) {
+                html += '<div class="record-photos">';
+                if (item.door_photo) html += '<img src="' + item.door_photo + '" alt="门头">';
+                if (item.inner_photo) html += '<img src="' + item.inner_photo + '" alt="内部">';
+                if (item.publicity_photo) html += '<img src="' + item.publicity_photo + '" alt="宣传品">';
+                html += '</div>';
+            }
+            html += '</div>';
+        });
+        // 分页
+        if (data.totalPage > 1) {
+            html += '<div class="pagination">';
+            for (var i = 1; i <= data.totalPage; i++) {
+                if (i == data.page) {
+                    html += '<span class="current">' + i + '</span>';
+                } else {
+                    html += '<a href="javascript:loadRecords(' + i + ')">' + i + '</a>';
+                }
+            }
+            html += '</div>';
+        }
+    }
+    $('#recordsList').html(html);
+}
+
+// Toast提示
+function showToast(msg) {
+    var $toast = $('#toast');
+    $toast.text(msg).fadeIn(200);
+    setTimeout(function() { $toast.fadeOut(300); }, 2000);
+}
+</script>
+</body>
+</html>
