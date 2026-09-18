@@ -8,7 +8,7 @@
 			</view>
 		</view>
 
-		<!-- 4 个分类 section；发现七贤岭(6) 内嵌学习与考试入口，其余仅活动卡片 -->
+		<!-- 4 个分类 section；认识七贤岭(6) 内嵌学习与考试入口，其余仅活动卡片 -->
 		<view class="qxl-body">
 			<view class="qxl-section" v-for="cate in qxl_categories" :key="cate.id">
 				<!-- section 标题条 -->
@@ -19,7 +19,7 @@
 					<text class="qxl-section-sub">{{cate.subtitle}}</text>
 				</view>
 
-				<!-- 发现七贤岭：学与考入口 -->
+				<!-- 认识七贤岭：学与考入口 -->
 				<view class="qxl-learn-grid" v-if="cate.id === 6">
 					<view class="qxl-learn-card qxl-learn-card--learn" @click="goLearn">
 						<u-icon name="bookmark" size="40" color="#fff"></u-icon>
@@ -33,7 +33,7 @@
 					</view>
 				</view>
 
-				<!-- 活动卡片列表（发现七贤岭在学与考下方，其他分类直接接标题） -->
+				<!-- 活动卡片列表（认识七贤岭在学与考下方，其他分类直接接标题） -->
 				<view class="qxl-section-list" v-if="cate.activities && cate.activities.length">
 					<view class="qxl-act-card" v-for="act in cate.activities" :key="act.id"
 						@click="gotoDetail(act.id)">
@@ -59,7 +59,7 @@
 					</view>
 				</view>
 
-				<!-- 暂无活动（发现七贤岭 id=6 是固定栏目非活动分类，不显示空态/加载中字样） -->
+				<!-- 暂无活动（认识七贤岭 id=6 是固定栏目非活动分类，不显示空态/加载中字样） -->
 				<view class="qxl-empty" v-else-if="!cate.loading && cate.id !== 6">
 					<text class="qxl-empty-text">暂无活动，敬请期待</text>
 				</view>
@@ -127,7 +127,7 @@
 		// 无论如何都要渲染 4 个板块，API 失败时走本地硬编码兜底
 		async loadQxlCategories() {
 			const buildList = (source) => {
-				const defaultNames = { 6: '发现七贤岭', 7: '玩在七贤岭', 8: '记录七贤岭', 9: '守护七贤岭' }
+				const defaultNames = { 6: '认识七贤岭', 7: '探索七贤岭', 8: '记录七贤岭', 9: '守护七贤岭' }
 				return [6, 7, 8, 9].map(id => {
 					const found = source ? source.find(c => Number(c.id) === id) : null
 					const decor = QXL_CATE_DECOR[id] || {}
@@ -328,7 +328,7 @@
 	flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 
-/* ===== 发现七贤岭 内嵌学与考入口 ===== */
+/* ===== 认识七贤岭 内嵌学与考入口 ===== */
 .qxl-learn-grid {
 	display: flex;
 	gap: 16rpx;
