@@ -1,7 +1,7 @@
 <template>
 	<view class="ai-root" v-show="visible">
 		<view class="ai-mask" v-if="open" @click="closePanel"></view>
-		<view class="ai-dock">
+		<view class="ai-dock" :class="{ 'ai-dock--open': open }">
 			<view class="ai-panel" v-if="open">
 				<text class="ai-panel__title">猜你想问</text>
 				<view class="ai-panel__item" hover-class="ai-panel__item--on" :hover-stay-time="80" @click="askGuide">
@@ -10,7 +10,7 @@
 					<u-icon name="arrow-right" size="22" color="#8a9b8d"></u-icon>
 				</view>
 			</view>
-			<view class="ai-bot" hover-class="ai-bot--on" :hover-stay-time="80" @click="togglePanel">
+			<view class="ai-bot" @click="togglePanel">
 				<view class="ai-bot__leaf"></view>
 				<view class="ai-bot__face">
 					<view class="ai-bot__eye"></view>
@@ -18,7 +18,7 @@
 					<view class="ai-bot__mouth"></view>
 				</view>
 			</view>
-			<text class="ai-bot__label">问问</text>
+			<text class="ai-bot__label" v-if="open">问问</text>
 		</view>
 	</view>
 </template>
@@ -80,19 +80,24 @@ export default {
 	right: 0;
 	bottom: 0;
 	z-index: 9970;
-	background: rgba(0, 0, 0, 0.18);
+	background: rgba(0, 0, 0, 0.12);
 	pointer-events: auto;
 }
 .ai-dock {
 	position: fixed;
-	left: 20rpx;
-	bottom: calc(132rpx + constant(safe-area-inset-bottom));
-	bottom: calc(132rpx + env(safe-area-inset-bottom));
+	left: 0;
+	bottom: calc(148rpx + constant(safe-area-inset-bottom));
+	bottom: calc(148rpx + env(safe-area-inset-bottom));
 	z-index: 9971;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	pointer-events: auto;
+	transform: translateX(-40rpx);
+	transition: transform 0.28s ease;
+}
+.ai-dock--open {
+	transform: translateX(20rpx);
 }
 .ai-panel {
 	width: 320rpx;
@@ -135,53 +140,70 @@ export default {
 	color: #1c2b1e;
 }
 .ai-bot {
-	width: 96rpx;
-	height: 96rpx;
+	width: 72rpx;
+	height: 72rpx;
 	border-radius: 50%;
 	background: linear-gradient(160deg, #3dd45f 0%, #18af38 100%);
-	box-shadow: 0 10rpx 22rpx rgba(24, 175, 56, 0.32);
+	box-shadow: 4rpx 6rpx 16rpx rgba(24, 175, 56, 0.28);
 	position: relative;
-	animation: ai-bob 2s ease-in-out infinite;
+	overflow: hidden;
 }
-.ai-bot--on {
-	transform: scale(0.94);
-	opacity: 0.9;
+.ai-dock--open .ai-bot {
+	width: 88rpx;
+	height: 88rpx;
+	overflow: visible;
+	box-shadow: 0 10rpx 22rpx rgba(24, 175, 56, 0.32);
 }
 .ai-bot__leaf {
 	position: absolute;
-	top: -10rpx;
-	left: 36rpx;
-	width: 22rpx;
-	height: 30rpx;
+	top: -8rpx;
+	left: 28rpx;
+	width: 16rpx;
+	height: 22rpx;
 	background: #0e7f26;
-	border-radius: 0 20rpx 4rpx 20rpx;
+	border-radius: 0 16rpx 4rpx 16rpx;
 	transform: rotate(-18deg);
+	opacity: 0;
+}
+.ai-dock--open .ai-bot__leaf {
+	opacity: 1;
+	left: 34rpx;
 }
 .ai-bot__face {
 	position: absolute;
-	left: 0;
+	left: 18rpx;
 	right: 0;
-	top: 28rpx;
+	top: 20rpx;
 	display: flex;
 	flex-direction: row;
+	justify-content: flex-start;
+}
+.ai-dock--open .ai-bot__face {
+	left: 0;
 	justify-content: center;
+	top: 24rpx;
 }
 .ai-bot__eye {
-	width: 12rpx;
-	height: 16rpx;
+	width: 10rpx;
+	height: 13rpx;
 	border-radius: 50%;
 	background: #fff;
-	margin: 0 8rpx;
+	margin: 0 6rpx;
 }
 .ai-bot__mouth {
 	position: absolute;
-	top: 28rpx;
+	top: 22rpx;
+	left: 22rpx;
+	width: 14rpx;
+	height: 8rpx;
+	border-bottom: 3rpx solid rgba(255, 255, 255, 0.9);
+	border-radius: 0 0 10rpx 10rpx;
+}
+.ai-dock--open .ai-bot__mouth {
 	left: 50%;
 	margin-left: -10rpx;
 	width: 20rpx;
-	height: 10rpx;
-	border-bottom: 4rpx solid rgba(255, 255, 255, 0.9);
-	border-radius: 0 0 12rpx 12rpx;
+	top: 26rpx;
 }
 .ai-bot__label {
 	margin-top: 6rpx;
@@ -191,14 +213,5 @@ export default {
 	padding: 2rpx 10rpx;
 	background: rgba(255, 255, 255, 0.92);
 	border-radius: 999rpx;
-}
-@keyframes ai-bob {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-8rpx);
-	}
 }
 </style>
