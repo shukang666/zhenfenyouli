@@ -12,8 +12,10 @@
 		<view class="fb-navbar">
 			<view class="fb-navbar-inner">
 				<view class="fb-search-box" @click="gotoSearch">
-					<u-icon name="search" size="32" color="#65676B"></u-icon>
-					<text class="fb-search-ph">搜索活动，福利名称</text>
+					<view class="fb-search-ico">
+						<u-icon name="search" size="28" color="#18AF38"></u-icon>
+					</view>
+					<text class="fb-search-ph">搜索活动名称 / 地点</text>
 				</view>
 			</view>
 		</view>
@@ -77,73 +79,96 @@
 			</view>
 		</view>
 
-		<!-- 本周推荐 -->
+		<!-- 本周推荐：大图海报横滑，和下面两块刻意做成不同版式 -->
 		<view class="fb-section fb-weekly-rec" v-if="weekly_list.length > 0">
 			<view class="fb-section-header">
-				<text class="fb-section-title">本周推荐</text>
+				<view class="fb-hd">
+					<view class="fb-hd-bar fb-hd-bar--gold"></view>
+					<text class="fb-section-title">本周推荐</text>
+					<view class="fb-hd-chip fb-hd-chip--gold">
+						<text class="fb-hd-chip-text">精选海报</text>
+					</view>
+				</view>
 			</view>
 			<scroll-view scroll-x class="fb-weekly-scroll" :show-scrollbar="false">
 				<view class="fb-weekly-list">
 					<view class="fb-weekly-card" v-for="item in weekly_list" :key="item.id"
+						hover-class="fb-press" :hover-stay-time="80"
 						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
-						<view class="fb-weekly-cover">
-							<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
-							<view class="fb-weekly-badge" v-if="item.active_count > 0">
-								<text class="fb-weekly-badge-text">{{item.active_count}}人参与</text>
-							</view>
+						<u-image width="520" height="320" :src="item.thumb" mode="aspectFill"></u-image>
+						<view class="fb-weekly-mask"></view>
+						<view class="fb-weekly-tag">
+							<text class="fb-weekly-tag-text">本周精选</text>
 						</view>
-						<view class="fb-weekly-name u-line-1">{{item.name}}</view>
-						<view class="fb-weekly-date">{{item.date | date('yy-mm-dd')}}结束</view>
+						<view class="fb-weekly-badge" v-if="item.active_count > 0">
+							<text class="fb-weekly-badge-text">{{item.active_count}}人参与</text>
+						</view>
+						<view class="fb-weekly-foot">
+							<text class="fb-weekly-name u-line-2">{{item.name}}</text>
+							<text class="fb-weekly-date">{{item.date | date('yy-mm-dd')}} 结束</text>
+						</view>
 					</view>
 				</view>
 			</scroll-view>
 		</view>
 
-		<!-- 现在就能参加（轻活动） -->
+		<!-- 现在就能参加：绿色行动块，强调立刻点 -->
 		<view class="fb-section fb-light-act" v-if="light_list.length > 0">
 			<view class="fb-section-header">
-				<text class="fb-section-title">现在就能参加</text>
+				<view class="fb-hd">
+					<view class="fb-live-dot"></view>
+					<text class="fb-section-title">现在就能参加</text>
+				</view>
 				<view class="fb-section-more" @click="goMoreLight">
-					<text>更多</text>
-					<u-icon name="arrow-right" size="22" color="#999"></u-icon>
+					<text class="fb-more-text">更多</text>
+					<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
 				</view>
 			</view>
 			<view class="fb-light-grid">
 				<view class="fb-light-card" v-for="item in light_list" :key="item.id"
+					hover-class="fb-press" :hover-stay-time="80"
 					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 					<view class="fb-light-cover">
 						<u-image width="100%" height="100%" :src="item.thumb || 'https://admin.circular-economy.cn/static/images/default-avatar.png'" mode="aspectFill"></u-image>
 					</view>
 					<view class="fb-light-info">
-						<text class="fb-light-name u-line-1">{{item.name}}</text>
-						<text class="fb-light-sub">立即参与</text>
+						<text class="fb-light-name u-line-2">{{item.name}}</text>
+					</view>
+					<view class="fb-light-btn">
+						<text class="fb-light-btn-text">立即参与</text>
 					</view>
 				</view>
 			</view>
 		</view>
 
-		<!-- 近期活动（最新两条，非轻活动） -->
+		<!-- 近期活动：日期台历 + 信息流，不像海报也不像宫格 -->
 		<view class="fb-section fb-recent-act" v-if="recent_list.length > 0">
 			<view class="fb-section-header">
-				<text class="fb-section-title">近期活动</text>
+				<view class="fb-hd">
+					<view class="fb-hd-bar fb-hd-bar--ink"></view>
+					<text class="fb-section-title">近期活动</text>
+				</view>
 				<view class="fb-section-more" @click="goMoreRecent">
-					<text>更多</text>
-					<u-icon name="arrow-right" size="22" color="#999"></u-icon>
+					<text class="fb-more-text">更多</text>
+					<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
 				</view>
 			</view>
 			<view class="fb-recent-list">
 				<view class="fb-recent-card" v-for="item in recent_list" :key="item.id"
+					hover-class="fb-press" :hover-stay-time="80"
 					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
+					<view class="fb-recent-cal">
+						<text class="fb-recent-cal-d">{{item.date | date('dd')}}</text>
+						<text class="fb-recent-cal-m">{{item.date | date('mm')}}月</text>
+					</view>
 					<view class="fb-recent-cover">
 						<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
 					</view>
 					<view class="fb-recent-info">
-						<text class="fb-recent-name u-line-1">{{item.name}}</text>
-						<text class="fb-recent-meta">
-							<u-icon name="clock" size="20" color="#65676B"></u-icon>
-							<text class="fb-recent-date">{{item.date | date('yy-mm-dd')}}结束</text>
-						</text>
+						<text class="fb-recent-name u-line-2">{{item.name}}</text>
+						<text class="fb-recent-meta">截止 {{item.date | date('yy-mm-dd')}}</text>
 					</view>
+					<u-icon name="arrow-right" size="24" color="#c5d0c7"></u-icon>
 				</view>
 			</view>
 		</view>
@@ -455,7 +480,12 @@
 <style lang="scss" scoped>
 .container {
 	min-height: 100vh;
-	background: #F0F2F5;
+	background: #eef4f0;
+}
+
+.fb-press {
+	opacity: 0.92;
+	transform: scale(0.98);
 }
 
 /* ===== 自定义顶部导航 ===== */
@@ -464,7 +494,6 @@
 	top: 0;
 	z-index: 30;
 	background: #fff;
-	border-bottom: 1rpx solid #E4E6EB;
 	padding: 16rpx 24rpx;
 	padding-top: calc(env(safe-area-inset-top) + 16rpx);
 }
@@ -476,28 +505,38 @@
 	flex: 1;
 	display: flex;
 	align-items: center;
-	height: 72rpx;
-	background: #F0F2F5;
-	border-radius: 36rpx;
-	padding: 0 24rpx;
-	gap: 12rpx;
+	height: 76rpx;
+	background: #f3f8f4;
+	border-radius: 38rpx;
+	padding: 0 10rpx 0 12rpx;
+}
+.fb-search-ico {
+	width: 52rpx;
+	height: 52rpx;
+	border-radius: 50%;
+	background: #e8f8ec;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
 }
 .fb-search-ph {
-	font-size: 28rpx;
-	color: #65676B;
+	margin-left: 12rpx;
+	font-size: 26rpx;
+	color: #9aa39c;
 }
 
 /* ===== Banner 轮播 ===== */
 .fb-banner-wrap {
 	width: 100%;
-	padding: 16rpx 16rpx 0;
-	margin-bottom: 24rpx;
+	padding: 16rpx 24rpx 0;
+	margin-bottom: 8rpx;
 	box-sizing: border-box;
 }
 .fb-banner-swiper {
 	width: 100%;
 	height: 300rpx;
-	border-radius: 16rpx;
+	border-radius: 24rpx;
 	overflow: hidden;
 }
 .fb-banner-item {
@@ -798,196 +837,276 @@
 
 /* ===== 通用板块 ===== */
 .fb-section {
-	margin: 32rpx 0;
-	padding: 0 8rpx;
-}
-.fb-section:first-child {
-	margin-top: 16rpx;
+	margin: 28rpx 0 8rpx;
 }
 .fb-section-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0 24rpx 16rpx;
+	padding: 0 24rpx 18rpx;
+}
+.fb-hd {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+}
+.fb-hd-bar {
+	width: 8rpx;
+	height: 32rpx;
+	border-radius: 8rpx;
+	margin-right: 12rpx;
+	flex-shrink: 0;
+}
+.fb-hd-bar--gold {
+	background: linear-gradient(180deg, #f6d365 0%, #dda017 100%);
+}
+.fb-hd-bar--ink {
+	background: linear-gradient(180deg, #5b6bff 0%, #3d4ec8 100%);
 }
 .fb-section-title {
 	font-size: 34rpx;
 	font-weight: 700;
-	color: #050505;
+	color: #1c2b1e;
+}
+.fb-hd-chip {
+	margin-left: 12rpx;
+	padding: 4rpx 12rpx;
+	border-radius: 999rpx;
+}
+.fb-hd-chip--gold {
+	background: #fff4d8;
+}
+.fb-hd-chip-text {
+	font-size: 20rpx;
+	color: #b88912;
+	font-weight: 600;
+}
+.fb-live-dot {
+	width: 16rpx;
+	height: 16rpx;
+	border-radius: 50%;
+	background: #18af38;
+	margin-right: 12rpx;
+	box-shadow: 0 0 0 6rpx rgba(24, 175, 56, 0.18);
 }
 .fb-section-more {
 	display: flex;
 	align-items: center;
-	gap: 4rpx;
-	font-size: 26rpx;
-	color: #999;
+}
+.fb-more-text {
+	font-size: 24rpx;
+	color: #18af38;
+	font-weight: 600;
+	margin-right: 4rpx;
 }
 
-/* ===== 本周推荐 ===== */
+/* ===== 本周推荐：大图海报 ===== */
 .fb-weekly-scroll {
 	white-space: nowrap;
 	padding-bottom: 8rpx;
 }
 .fb-weekly-list {
 	display: inline-flex;
-	padding: 0 24rpx;
-	gap: 20rpx;
+	padding: 0 24rpx 8rpx;
 }
 .fb-weekly-card {
-	display: inline-flex;
-	flex-direction: column;
-	width: 260rpx;
-	flex-shrink: 0;
-}
-.fb-weekly-cover {
 	position: relative;
-	width: 260rpx;
-	height: 180rpx;
-	border-radius: 16rpx;
+	display: inline-block;
+	width: 520rpx;
+	height: 320rpx;
+	margin-right: 20rpx;
+	border-radius: 28rpx;
 	overflow: hidden;
-	background: #F0F2F5;
+	flex-shrink: 0;
+	background: #dce8de;
+	box-shadow: 0 14rpx 32rpx rgba(180, 130, 20, 0.16);
+}
+.fb-weekly-mask {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 180rpx;
+	background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.72) 100%);
+	pointer-events: none;
+}
+.fb-weekly-tag {
+	position: absolute;
+	top: 16rpx;
+	left: 16rpx;
+	z-index: 2;
+	padding: 6rpx 16rpx;
+	background: linear-gradient(135deg, #f6d365 0%, #dda017 100%);
+	border-radius: 999rpx;
+}
+.fb-weekly-tag-text {
+	font-size: 20rpx;
+	font-weight: 700;
+	color: #fff;
 }
 .fb-weekly-badge {
 	position: absolute;
-	left: 8rpx;
-	bottom: 8rpx;
+	top: 16rpx;
+	right: 16rpx;
 	z-index: 2;
-	padding: 4rpx 12rpx;
-	background: rgba(0, 0, 0, 0.55);
-	border-radius: 18rpx;
+	padding: 6rpx 14rpx;
+	background: rgba(0, 0, 0, 0.45);
+	border-radius: 999rpx;
 }
 .fb-weekly-badge-text {
 	color: #fff;
 	font-size: 20rpx;
 	font-weight: 500;
 }
+.fb-weekly-foot {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2;
+	padding: 20rpx 24rpx 24rpx;
+}
 .fb-weekly-name {
-	margin-top: 12rpx;
-	font-size: 26rpx;
-	font-weight: 600;
-	color: #050505;
-	line-height: 1.4;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #fff;
+	line-height: 1.35;
+	white-space: normal;
 }
 .fb-weekly-date {
-	margin-top: 4rpx;
+	display: block;
+	margin-top: 8rpx;
 	font-size: 22rpx;
-	color: #65676B;
+	color: rgba(255,255,255,0.82);
 }
 
-/* ===== 现在就能参加（轻活动） ===== */
+/* ===== 现在就能参加：绿色行动宫格 ===== */
+.fb-light-act {
+	margin: 24rpx 24rpx 8rpx;
+	padding: 24rpx 0 8rpx;
+	background: linear-gradient(180deg, #e7f8eb 0%, #f4fbf6 100%);
+	border-radius: 28rpx;
+}
+.fb-light-act .fb-section-header {
+	padding: 0 24rpx 16rpx;
+}
 .fb-light-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr 1fr;
-	gap: 16rpx;
-	padding: 0 24rpx;
+	display: flex;
+	flex-wrap: wrap;
+	padding: 0 12rpx 12rpx;
 }
 .fb-light-card {
+	width: 50%;
+	box-sizing: border-box;
+	padding: 0 12rpx 20rpx;
 	display: flex;
 	flex-direction: column;
-	background: #fff;
-	border-radius: 16rpx;
-	overflow: hidden;
-	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.06);
-	border: 1rpx solid #E4E6EB;
-}
-.fb-light-card:active {
-	opacity: 0.92;
 }
 .fb-light-cover {
 	width: 100%;
-	height: 200rpx;
-	background: #F0F2F5;
+	height: 168rpx;
+	border-radius: 20rpx 20rpx 0 0;
+	overflow: hidden;
+	background: #dce8de;
 }
 .fb-light-info {
-	padding: 12rpx 16rpx 8rpx;
-	display: flex;
-	flex-direction: column;
-	gap: 4rpx;
+	background: #fff;
+	padding: 16rpx 16rpx 8rpx;
 }
 .fb-light-name {
 	font-size: 26rpx;
-	font-weight: 600;
-	color: #050505;
-	line-height: 1.4;
-}
-.fb-light-sub {
-	font-size: 22rpx;
-	color: #65676B;
+	font-weight: 700;
+	color: #1c2b1e;
+	line-height: 1.35;
+	height: 70rpx;
+	white-space: normal;
 }
 .fb-light-btn {
-	margin: 0 16rpx 16rpx;
-	padding: 10rpx 0;
+	background: #18af38;
+	border-radius: 0 0 20rpx 20rpx;
+	padding: 12rpx 0;
 	text-align: center;
-	background: linear-gradient(135deg, #34C759 0%, #28A745 100%);
-	border-radius: 20rpx;
 }
 .fb-light-btn-text {
 	font-size: 24rpx;
 	color: #fff;
-	font-weight: 600;
+	font-weight: 700;
 }
 
-/* ===== 近期活动 ===== */
+/* ===== 近期活动：台历信息流 ===== */
 .fb-recent-list {
 	padding: 0 24rpx;
-	display: flex;
-	flex-direction: column;
-	gap: 16rpx;
 }
 .fb-recent-card {
 	display: flex;
 	align-items: center;
 	background: #fff;
-	border-radius: 16rpx;
-	overflow: hidden;
-	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.06);
-	border: 1rpx solid #E4E6EB;
+	border-radius: 24rpx;
+	padding: 16rpx 18rpx 16rpx 16rpx;
+	margin-bottom: 16rpx;
+	box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.06);
 }
-.fb-recent-card:active {
-	opacity: 0.92;
+.fb-recent-cal {
+	width: 88rpx;
+	height: 96rpx;
+	border-radius: 16rpx;
+	background: #eef1ff;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin-right: 14rpx;
+	flex-shrink: 0;
+}
+.fb-recent-cal-d {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #3d4ec8;
+	line-height: 1;
+}
+.fb-recent-cal-m {
+	margin-top: 6rpx;
+	font-size: 20rpx;
+	color: #6b78d4;
 }
 .fb-recent-cover {
 	flex-shrink: 0;
-	width: 200rpx;
-	height: 150rpx;
-	background: #F0F2F5;
+	width: 120rpx;
+	height: 96rpx;
+	border-radius: 16rpx;
+	overflow: hidden;
+	background: #dce8de;
+	margin-right: 16rpx;
 }
 .fb-recent-info {
 	flex: 1;
-	padding: 16rpx 20rpx;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	gap: 8rpx;
+	min-width: 0;
+	margin-right: 8rpx;
 }
 .fb-recent-name {
 	font-size: 28rpx;
-	font-weight: 600;
-	color: #050505;
-	line-height: 1.4;
+	font-weight: 700;
+	color: #1c2b1e;
+	line-height: 1.35;
+	white-space: normal;
 }
 .fb-recent-meta {
-	display: flex;
-	align-items: center;
-	gap: 6rpx;
-}
-.fb-recent-date {
+	display: block;
+	margin-top: 8rpx;
 	font-size: 22rpx;
-	color: #65676B;
+	color: #8a9b8d;
 }
 
 /* ===== 活动列表 ===== */
 .fb-act-list {
-	padding: 16rpx;
-	padding-bottom: calc(88rpx + env(safe-area-inset-bottom));
+	padding: 16rpx 24rpx calc(88rpx + env(safe-area-inset-bottom));
 }
 .fb-act-card {
 	background: #fff;
-	border-radius: 16rpx;
-	margin-bottom: 16rpx;
+	border-radius: 24rpx;
+	margin-bottom: 20rpx;
 	overflow: hidden;
-	box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.08);
-	border: 1rpx solid #E4E6EB;
+	box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.07);
 }
 .fb-act-card:active {
 	opacity: 0.92;
@@ -996,19 +1115,19 @@
 	position: relative;
 	width: 100%;
 	height: 320rpx;
-	background: #F0F2F5;
+	background: #dce8de;
 }
 .fb-act-badge {
 	position: absolute;
-	left: 12rpx;
-	bottom: 12rpx;
+	left: 16rpx;
+	bottom: 16rpx;
 	z-index: 2;
 	display: inline-flex;
 	align-items: center;
-	height: 36rpx;
+	height: 40rpx;
 	padding: 0 14rpx;
-	background: rgba(0, 0, 0, 0.55);
-	border-radius: 18rpx;
+	background: rgba(0, 0, 0, 0.5);
+	border-radius: 20rpx;
 }
 .fb-act-avatars {
 	display: flex;
@@ -1035,14 +1154,13 @@
 }
 .fb-act-title {
 	font-size: 30rpx;
-	font-weight: 600;
-	color: #050505;
+	font-weight: 700;
+	color: #1c2b1e;
 	line-height: 1.4;
 }
 .fb-act-meta {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 20rpx;
 	margin-top: 12rpx;
 }
 .fb-meta-item {
@@ -1050,13 +1168,14 @@
 	align-items: center;
 	min-width: 0;
 	flex: 1;
+	margin-right: 16rpx;
 }
 .fb-meta-item .u-icon {
 	margin-right: 4rpx;
 }
 .fb-meta-text {
 	font-size: 22rpx;
-	color: #65676B;
+	color: #6a7b6e;
 	flex: 1;
 	overflow: hidden;
 	white-space: nowrap;
