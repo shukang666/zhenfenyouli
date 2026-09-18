@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外勤点位巡查</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 24px 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 22px; font-weight: 600; }
+        .header p { font-size: 14px; opacity: 0.85; margin-top: 4px; }
+        
+        .form-body { padding: 20px; }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-group label .required { color: #e74c3c; }
+        
+        .form-control {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0 12px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+            background: #fafafa;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #fff;
+        }
+        
+        /* 搜索下拉 */
+        .search-wrap { position: relative; }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .search-results.show { display: block; }
+        .search-results .item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #333;
+        }
+        .search-results .item:hover { background: #f0f4ff; }
+        .search-results .item .parent { color: #999; font-size: 12px; margin-left: 8px; }
+        .search-results .empty { padding: 12px; color: #999; text-align: center; font-size: 13px; }
+        
+        /* 已选中显示 */
+        .selected-tag {
+            display: inline-block;
+            background: #eef1ff;
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+        .selected-tag .remove {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* 图片上传 */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+        .upload-cell {
+            aspect-ratio: 1;
+            border: 2px dashed #d0d0d0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafafa;
+            overflow: hidden;
+            position: relative;
+        }
+        .upload-cell:hover { border-color: #667eea; background: #f0f4ff; }
+        .upload-cell .icon { font-size: 28px; color: #aaa; }
+        .upload-cell .label { font-size: 12px; color: #888; margin-top: 4px; }
+        .upload-cell .title { font-size: 12px; color: #555; font-weight: 500; margin-top: 2px; }
+        .upload-cell.has-image { border-style: solid; border-color: #2ecc71; }
+        .upload-cell.has-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .upload-cell .progress {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .upload-cell input[type="file"] { display: none; }
+        
+        /* 提交按钮 */
+        .submit-btn {
+            width: 100%;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.2s;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 9999;
+            display: none;
+            text-align: center;
+            max-width: 80%;
+        }
+        .toast.show { display: block; }
+        .toast.success { background: rgba(46,204,113,0.95); }
+        .toast.error { background: rgba(231,76,60,0.95); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>📍 外勤点位巡查</h1>
+        <p>请填写点位信息并上传照片</p>
+    </div>
+    
+    <div class="form-body">
+        <!-- 所属社区 -->
+        <div class="form-group">
+            <label>所属社区 <span class="required">*</span></label>
+            <div class="search-wrap">
+                <input type="text" class="form-control" id="communityInput" placeholder="请输入社区名称搜索..." autocomplete="off">
+                <div class="search-results" id="communityResults"></div>
+            </div>
+            <div id="selectedCommunity"></div>
+        </div>
+        
+        <!-- 点位 -->
+        <div class="form-group">
+            <label>选择点位 <span class="required">*</span></label>
+            <div class="search-wrap">
+                <input type="text" class="form-control" id="unitInput" placeholder="请先选择社区，再搜索点位..." autocomplete="off" disabled>
+                <div class="search-results" id="unitResults"></div>
+            </div>
+            <div id="selectedUnit"></div>
+        </div>
+        
+        <!-- 三张照片 -->
+        <div class="form-group">
+            <label>上传照片 <span class="required">*</span>（门头 / 内部环境 / 宣传品）</label>
+            <div class="upload-grid">
+                <div class="upload-cell" data-field="door_photo" data-title="门头照片">
+                    <span class="icon">📷</span>
+                    <span class="label">点击上传</span>
+                    <span class="title">门头照片</span>
+                    <input type="file" accept="image/*">
+                </div>
+                <div class="upload-cell" data-field="inner_photo" data-title="内部环境">
+                    <span class="icon">📷</span>
+                    <span class="label">点击上传</span>
+                    <span class="title">内部环境</span>
+                    <input type="file" accept="image/*">
+                </div>
+                <div class="upload-cell" data-field="publicity_photo" data-title="宣传品">
+                    <span class="icon">📷</span>
+                    <span class="label">点击上传</span>
+                    <span class="title">宣传品</span>
+                    <input type="file" accept="image/*">
+                </div>
+            </div>
+        </div>
+        
+        <button class="submit-btn" id="submitBtn" onclick="submitForm()">提 交</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 状态
+let state = {
+    communityList: [],
+    unitList: [],
+    selectedCommunity: null,  // { id, name }
+    selectedUnit: null,       // { id, name }
+    photos: { door_photo: '', inner_photo: '', publicity_photo: '' },
+    uploading: false
+};
+
+// Toast
+function showToast(msg, type = '') {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => { toast.className = 'toast '; }, 2500);
+}
+
+// 加载社区列表
+async function loadCommunities() {
+    try {
+        const res = await fetch('/wxapp/forum/get_community_parent_list', { method: 'POST' });
+        const json = await res.json();
+        if (json.code === 1) {
+            state.communityList = json.data || [];
+        }
+    } catch (e) {
+        console.error('加载社区失败', e);
+    }
+}
+
+// 加载小区列表（按社区ID）
+async function loadUnits(pid) {
+    state.unitList = [];
+    state.selectedUnit = null;
+    document.getElementById('unitInput').value = '';
+    document.getElementById('selectedUnit').innerHTML = '';
+    try {
+        const res = await fetch('/wxapp/forum/get_community_list?pid=' + pid, { method: 'POST' });
+        const json = await res.json();
+        if (json.code === 1) {
+            state.unitList = json.data || [];
+        }
+    } catch (e) {
+        console.error('加载点位失败', e);
+    }
+}
+
+// 社区搜索
+document.getElementById('communityInput').addEventListener('input', function() {
+    const kw = this.value.trim().toLowerCase();
+    const box = document.getElementById('communityResults');
+    if (!kw) { box.classList.remove('show'); return; }
+    if (state.communityList.length === 0) { box.classList.remove('show'); return; }
+    
+    const matched = state.communityList.filter(c => 
+        c.name && c.name.toLowerCase().includes(kw)
+    );
+    
+    if (matched.length === 0) {
+        box.innerHTML = '<div class="empty">暂无匹配的社区</div>';
+    } else {
+        box.innerHTML = matched.map(c => 
+            `<div class="item" data-id="${c.id}" data-name="${c.name}">
+                ${c.name}
+            </div>`
+        ).join('');
+        
+        // 点击选择
+        box.querySelectorAll('.item').forEach(el => {
+            el.addEventListener('click', () => {
+                const id = el.dataset.id;
+                const name = el.dataset.name;
+                state.selectedCommunity = { id, name };
+                state.selectedUnit = null;
+                document.getElementById('selectedCommunity').innerHTML = 
+                    `<span class="selected-tag">${name}<span class="remove" onclick="clearCommunity()">×</span></span>`;
+                box.classList.remove('show');
+                
+                // 启用点位输入，加载小区
+                const unitInput = document.getElementById('unitInput');
+                unitInput.disabled = false;
+                unitInput.placeholder = '请输入点位名称搜索...';
+                loadUnits(id);
+            });
+        });
+    }
+    box.classList.add('show');
+});
+
+// 清空社区
+function clearCommunity() {
+    state.selectedCommunity = null;
+    state.selectedUnit = null;
+    document.getElementById('selectedCommunity').innerHTML = '';
+    document.getElementById('selectedUnit').innerHTML = '';
+    document.getElementById('unitInput').value = '';
+    document.getElementById('unitInput').disabled = true;
+    document.getElementById('unitInput').placeholder = '请先选择社区，再搜索点位...';
+    document.getElementById('unitResults').classList.remove('show');
+}
+
+// 点位搜索
+document.getElementById('unitInput').addEventListener('input', function() {
+    if (!state.selectedCommunity) return;
+    const kw = this.value.trim().toLowerCase();
+    const box = document.getElementById('unitResults');
+    if (!kw) { 
+        // 显示全部
+        if (state.unitList.length === 0) {
+            box.innerHTML = '<div class="empty">该社区下暂无点位</div>';
+        } else {
+            box.innerHTML = state.unitList.map(u => 
+                `<div class="item" data-id="${u.id}" data-name="${u.name}">${u.name}</div>`
+            ).join('');
+            bindUnitClick();
+        }
+        box.classList.add('show');
+        return; 
+    }
+    
+    const matched = state.unitList.filter(u => 
+        u.name && u.name.toLowerCase().includes(kw)
+    );
+    
+    if (matched.length === 0) {
+        box.innerHTML = '<div class="empty">暂无匹配的点位</div>';
+    } else {
+        box.innerHTML = matched.map(u => 
+            `<div class="item" data-id="${u.id}" data-name="${u.name}">${u.name}</div>`
+        ).join('');
+        bindUnitClick();
+    }
+    box.classList.add('show');
+});
+
+function bindUnitClick() {
+    document.querySelectorAll('#unitResults .item').forEach(el => {
+        el.addEventListener('click', () => {
+            state.selectedUnit = { id: el.dataset.id, name: el.dataset.name };
+            document.getElementById('selectedUnit').innerHTML = 
+                `<span class="selected-tag">${el.dataset.name}<span class="remove" onclick="clearUnit()">×</span></span>`;
+            document.getElementById('unitResults').classList.remove('show');
+        });
+    });
+}
+
+function clearUnit() {
+    state.selectedUnit = null;
+    document.getElementById('selectedUnit').innerHTML = '';
+}
+
+// 图片上传
+document.querySelectorAll('.upload-cell').forEach(cell => {
+    const input = cell.querySelector('input[type="file"]');
+    cell.addEventListener('click', () => input.click());
+    
+    input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if (!file) return;
+        
+        const field = cell.dataset.field;
+        const label = cell.querySelector('.label');
+        const originalLabel = label.textContent;
+        
+        // 显示上传中
+        cell.classList.add('has-image');
+        cell.innerHTML = '<span class="progress">上传中...</span>';
+        
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const res = await fetch('/wxapp/public/upload_asset', {
+                method: 'POST',
+                body: formData
+            });
+            const json = await res.json();
+            
+            if (json.code === 1) {
+                const url = json.data.url || json.url || '';
+                state.photos[field] = url;
+                cell.innerHTML = `
+                    <img src="${url}" alt="">
+                    <input type="file" accept="image/*">
+                `;
+                cell.classList.add('has-image');
+                cell.dataset.uploaded = '1';
+            } else {
+                showToast(json.msg || '上传失败', 'error');
+                cell.classList.remove('has-image');
+                cell.innerHTML = `
+                    <span class="icon">📷</span>
+                    <span class="label">点击上传</span>
+                    <span class="title">${cell.dataset.title}</span>
+                    <input type="file" accept="image/*">
+                `;
+                input.value = '';
+            }
+        } catch (e) {
+            showToast('上传失败，请重试', 'error');
+            cell.classList.remove('has-image');
+            cell.innerHTML = `
+                <span class="icon">📷</span>
+                <span class="label">点击上传</span>
+                <span class="title">${cell.dataset.title}</span>
+                <input type="file" accept="image/*">
+            `;
+        }
+        
+        // 重新绑定事件
+        const newInput = cell.querySelector('input[type="file"]');
+        newInput.addEventListener('change', () => {
+            input.dispatchEvent(new Event('change'));
+        });
+    });
+});
+
+// 提交
+async function submitForm() {
+    if (!state.selectedCommunity) {
+        showToast('请选择所属社区', 'error');
+        return;
+    }
+    if (!state.selectedUnit) {
+        showToast('请选择点位', 'error');
+        return;
+    }
+    
+    const btn = document.getElementById('submitBtn');
+    if (btn.disabled) return;
+    
+    // 检查三张照片
+    if (!state.photos.door_photo) { showToast('请上传门头照片', 'error'); return; }
+    if (!state.photos.inner_photo) { showToast('请上传内部环境照片', 'error'); return; }
+    if (!state.photos.publicity_photo) { showToast('请上传宣传品照片', 'error'); return; }
+    
+    btn.disabled = true;
+    btn.textContent = '提交中...';
+    
+    try {
+        const formData = new FormData();
+        formData.append('community_id', state.selectedCommunity.id);
+        formData.append('community_name', state.selectedCommunity.name);
+        formData.append('unit_name', state.selectedUnit.name);
+        formData.append('door_photo', state.photos.door_photo);
+        formData.append('inner_photo', state.photos.inner_photo);
+        formData.append('publicity_photo', state.photos.publicity_photo);
+        
+        const res = await fetch('/wxapp/field_worker/submit', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+        
+        if (json.code === 1) {
+            showToast('提交成功！', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast(json.msg || '提交失败', 'error');
+            btn.disabled = false;
+            btn.textContent = '提 交';
+        }
+    } catch (e) {
+        showToast('提交失败，请检查网络', 'error');
+        btn.disabled = false;
+        btn.textContent = '提 交';
+    }
+}
+
+// 页面加载
+loadCommunities();
+
+// 点击外部关闭下拉
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrap')) {
+        document.querySelectorAll('.search-results').forEach(box => box.classList.remove('show'));
+    }
+});
+</script>
+
+</body>
+</html>
