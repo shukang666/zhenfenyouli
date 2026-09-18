@@ -1,0 +1,199 @@
+@charset "utf-8";
+/* 后台内容页轻量美化：挂在 public/header.html，覆盖仪表盘和各业务页。 */
+
+body {
+	background: #f5f7fb;
+	-webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+	padding: 16px 18px 100px;
+}
+
+a {
+	color: #2D8CF0;
+}
+
+a:hover {
+	color: #1b7ee6;
+}
+
+/* 搜索区 / 面板 */
+.well,
+form.well {
+	background: #fff;
+	border: 1px solid #e8edf3;
+	border-radius: 10px;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+}
+
+.panel {
+	border-color: #e8edf3;
+	border-radius: 10px;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+}
+
+.panel-default > .panel-heading {
+	background: #fff;
+	border-color: #eef1f6;
+	font-weight: 600;
+	color: #1f2937;
+}
+
+.panel-body {
+	background: #fff;
+	border-radius: 0 0 10px 10px;
+}
+
+/* 表格 */
+.table > thead > tr > th {
+	background: #f7f9fc;
+	color: #5c6775;
+	font-weight: 600;
+	border-bottom: 1px solid #e8edf3;
+}
+
+.table > tbody > tr > td {
+	vertical-align: middle;
+	color: #374151;
+}
+
+.table-hover > tbody > tr:hover {
+	background-color: #f5f9ff;
+}
+
+.table-bordered,
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > td {
+	border-color: #eef1f6;
+}
+
+/* 表单 / 按钮 */
+.form-control {
+	border-color: #dce3ec;
+	border-radius: 6px;
+	box-shadow: none;
+}
+
+.form-control:focus {
+	border-color: #2D8CF0;
+	box-shadow: 0 0 0 3px rgba(45, 140, 240, .15);
+}
+
+.btn {
+	border-radius: 6px;
+}
+
+.btn-primary {
+	background-color: #2D8CF0;
+	border-color: #2D8CF0;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active {
+	background-color: #1b7ee6;
+	border-color: #1b7ee6;
+}
+
+.btn-success {
+	background-color: #22c55e;
+	border-color: #22c55e;
+}
+
+.btn-default {
+	background: #fff;
+	border-color: #dce3ec;
+	color: #4b5563;
+}
+
+.btn-default:hover {
+	background: #f3f6fb;
+	border-color: #c9d4e2;
+}
+
+/* 页内标签 / 分页 */
+.nav-tabs {
+	border-bottom-color: #e8edf3;
+}
+
+.nav-tabs > li > a {
+	color: #6b7280;
+	border-radius: 8px 8px 0 0;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	color: #2D8CF0;
+	font-weight: 600;
+	border-color: #e8edf3 #e8edf3 #fff;
+}
+
+.pagination > li > a,
+.pagination > li > span {
+	color: #4b5563;
+	border-color: #e8edf3;
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover {
+	background: #2D8CF0;
+	border-color: #2D8CF0;
+}
+
+.label {
+	border-radius: 4px;
+	font-weight: 500;
+}
+
+/* ---------- 仪表盘 ---------- */
+.dash-wrap .panel {
+	border: 1px solid #e8edf3;
+	border-radius: 12px;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+	overflow: hidden;
+}
+
+.dash-wrap .panel-heading {
+	background: #fff;
+	border-bottom: 1px solid #eef1f6;
+	font-weight: 600;
+	padding: 12px 16px;
+}
+
+.dash-wrap .dash-metric {
+	background: #fafbfd;
+	border: 1px solid #eef1f6;
+	border-radius: 12px;
+	padding: 18px 10px 14px;
+	transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.dash-wrap .dash-metric:hover {
+	transform: translateY(-2px);
+	border-color: #2D8CF0;
+	box-shadow: 0 10px 24px rgba(45, 140, 240, .12);
+	color: #666;
+	text-decoration: none;
+}
+
+.dash-wrap .dash-metric-num {
+	color: #111827;
+	font-weight: 700;
+}
+
+.dash-wrap .dash-quick-grid .dash-quick {
+	border-radius: 10px;
+}
+
+.dash-wrap .dash-quick-grid .dash-quick:hover {
+	background: #eff6ff;
+}
+
+.dash-wrap .dash-table > thead > tr > th {
+	background: #f7f9fc;
+}

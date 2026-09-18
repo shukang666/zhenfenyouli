@@ -197,6 +197,7 @@
 				}
 			</style>
 		</if>
+		<link rel="stylesheet" href="__TMPL__/public/assets/css/admin-chrome.css?v=20260918a">
 	</head>
 
 	<body style="min-width:900px;overflow: hidden;">
@@ -209,7 +210,7 @@
 							<else />
 							<img class="logo" width="30" height="30" src="{:cmf_get_asset_url(cmf_get_option('set_config')['app_logo'])}" alt="{$admin.user_login|default=''}">
 						</if>
-						{$set_config.app_name}
+						<span class="brand-name">{$set_config.app_name}</span>
 					</a>
 				</div>
 				<div id="nav-wrapper">
@@ -247,6 +248,7 @@
 											<else />
 											<img class="nav-user-photo" width="30" height="30" src="__TMPL__/public/assets/images/logo-18.png" alt="{$admin.user_login|default=''}">
 										</if>-->
+										<i class="fa fa-user-circle-o navbar-user-icon"></i>
 										<span class="user-info">
 											{:lang('WELCOME_USER',array('user_nickname' => empty($admin['user_nickname'])?$admin['user_login'] : $admin['user_nickname']))}
 										</span>
