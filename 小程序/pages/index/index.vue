@@ -183,7 +183,6 @@
 
 		<!-- 对齐 custom-tab-bar 悬浮条（108rpx 高 + 左右 24rpx + 底部安全区），仅用于引导定位 -->
 		<view id="guide-tabbar" class="guide-tabbar-area"></view>
-		<ai-ask-fab :visible="!showGuide && !guideLoading" @start-guide="forceStartGuide"></ai-ask-fab>
 	</view>
 </template>
 
@@ -424,24 +423,9 @@ export default {
 		// 检测并启动新手引导（仅未完成过、已绑定小区；标记在关闭时再清，避免等渲染时被打断丢失）
 		checkAndStartGuide() {
 			if (this._guideLock || this.showGuide || this.guideLoading) return
-			const manual = uni.getStorageSync('start_guide_now')
-			if (manual) {
-				uni.removeStorageSync('start_guide_now')
-				this._guideLock = true
-				this.guideLoading = true
-				this.waitAndStartGuide()
-				return
-			}
 			if (uni.getStorageSync('has_finished_guide')) return
 			const guideFlag = uni.getStorageSync('new_user_guide')
 			if (!guideFlag || !this.userInfo.community_id) return
-			this._guideLock = true
-			this.guideLoading = true
-			this.waitAndStartGuide()
-		},
-		forceStartGuide() {
-			if (this.showGuide || this.guideLoading) return
-			uni.removeStorageSync('start_guide_now')
 			this._guideLock = true
 			this.guideLoading = true
 			this.waitAndStartGuide()
@@ -466,13 +450,11 @@ export default {
 			this.$nextTick(poll)
 		},
 		onGuideClose() {
-			this._guideLock = false
 			this.guideLoading = false
 			this.showGuide = false
 			this.guideTargetRect = null
 			uni.setStorageSync('has_finished_guide', '1')
 			uni.removeStorageSync('new_user_guide')
-			uni.removeStorageSync('start_guide_now')
 		},
 		onGuideQueryTarget(selector) {
 			if (!selector) {
