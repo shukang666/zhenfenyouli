@@ -3,18 +3,17 @@
 <head>
 	<meta charset="utf-8">
 	<meta content="IE=edge" http-equiv="X-UA-Compatible">
-	<title></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title>{:cmf_get_option('set_config')['app_name']!=''?cmf_get_option('set_config')['app_name']:'数康后台管理系统'}</title>
 	<link rel="stylesheet" href="__PLUGIN_TMPL__/assets/css/admin_login.css" />
 	<link href="__STATIC__/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+	<if condition="$config.b_bg">
 	<style>
-		.login-form .form-group {
-			margin: 20px 0;
-		}
 		.page-login-v3:before {
-			background: url({$config.b_bg} ? ../../upload/{$config.b_bg} : '') center center/cover no-repeat !important;
+			background-image: url(../../upload/{$config.b_bg}) !important;
 		}
 	</style>
+	</if>
 </head>
 <body class="page-login-v3">
 <div class="container">
@@ -22,39 +21,53 @@
 		<div class="swep-left">
 			<div class="swiper-slide">
 				<if condition="$config.b_bg_illus">
-					<img src="../../upload/{$config.b_bg_illus}">
+					<img src="../../upload/{$config.b_bg_illus}" alt="">
 					<else />
-					<img src="__PLUGIN_TMPL__/assets/images/b_bg_illus.png">
+					<img src="__PLUGIN_TMPL__/assets/images/b_bg_illus.png" alt="">
 				</if>
 			</div>
 		</div>
 		<div class="login-content" id="login">
 			<h2 class="brand-text">{:cmf_get_option('set_config')['app_name']!=''?cmf_get_option('set_config')['app_name']:'数康后台管理系统'}</h2>
-			<form id="login-form" class="login-form">
+			<p class="brand-sub hint-admin">使用管理员账号登录后台</p>
+			<p class="brand-sub hint-field">使用后台账号登录，用于 Pad 点位巡查</p>
+
+			<div class="login-tabs" role="tablist">
+				<button type="button" class="login-tab is-active" data-tab="admin" role="tab">
+					<i class="fa fa-desktop"></i> 管理后台
+				</button>
+				<button type="button" class="login-tab" data-tab="field" role="tab">
+					<i class="fa fa-map-marker"></i> 外勤工作台
+				</button>
+			</div>
+
+			<form id="login-form-admin" class="login-form is-active" autocomplete="on">
 				<div class="form-group">
 					<i class="fa fa-user"></i>
-					<input name="username" placeholder="请输入用户名" type="text" required>
+					<input id="admin-username" name="username" placeholder="请输入用户名" type="text" required>
 				</div>
 				<div class="form-group">
 					<i class="fa fa-lock"></i>
-					<input name="password" placeholder="请输入密码" type="password" required>
+					<input id="admin-password" name="password" placeholder="请输入密码" type="password" required>
 				</div>
-				<!--<div class="form-group">
-                    <i class="fa fa-shield"></i>
-                    <input name="captcha" placeholder="请输入验证码" type="text" required style="width: 50%;float: left;margin-right:10px">
-                    <captcha height="40" width="160px" font-size="18" style="cursor: pointer;" />
-                </div>-->
-				<div class="form-group" style="margin-bottom:-21px;">
-					<button id="login-submit" type="submit">登录</button>
+				<div class="form-group form-group-submit">
+					<button id="login-submit-admin" type="submit">登 录</button>
 				</div>
 			</form>
-			<!-- 外勤工作台入口（Pad端适配） -->
-			<div style="margin-top: 46px; text-align: center;">
-				<a href="{:url('admin/FieldWorker/login')}" style="display:inline-block; padding:10px 26px; border:1px solid #2fb74c; color:#2fb74c; border-radius:6px; font-size:14px; text-decoration:none;">
-					<i class="fa fa-map-marker"></i>&nbsp;外勤工作台入口（Pad端）
-				</a>
-				
-			</div>
+
+			<form id="login-form-field" class="login-form" autocomplete="on">
+				<div class="form-group">
+					<i class="fa fa-user"></i>
+					<input id="field-username" name="username" placeholder="请输入用户名 / 手机号" type="text" required>
+				</div>
+				<div class="form-group">
+					<i class="fa fa-lock"></i>
+					<input id="field-password" name="password" placeholder="请输入密码" type="password" required>
+				</div>
+				<div class="form-group form-group-submit">
+					<button id="login-submit-field" type="submit">进入工作台</button>
+				</div>
+			</form>
 		</div>
 	</div>
 </div>
@@ -64,32 +77,83 @@
 <script src="__PLUGIN_TMPL__/assets/js/layer/layer.js"></script>
 <script src="__PLUGIN_TMPL__/assets/js/jquery.form.min.js"></script>
 <script>
-	// 表单提交
-	var $form = $('#login-form');
-	$form.submit(function() {
-		var $btn_submit = $('#login-submit');
-		$form.ajaxSubmit({
-			type: "post",
-			dataType: "json",
+	function switchLoginTab(name) {
+		var isField = name === 'field';
+		$('.login-tab').removeClass('is-active');
+		$('.login-tab[data-tab="' + name + '"]').addClass('is-active');
+		$('#login').toggleClass('is-field', isField);
+		$('.login-form').removeClass('is-active');
+		$('#login-form-' + name).addClass('is-active');
+		if (history.replaceState) {
+			history.replaceState(null, '', isField ? '#field' : (location.pathname + location.search));
+		}
+		setTimeout(function() {
+			var $input = $('#login-form-' + name).find('input[name="username"]');
+			if ($input.length) { $input.trigger('focus'); }
+		}, 40);
+	}
+
+	$('.login-tab').on('click', function() {
+		switchLoginTab($(this).data('tab'));
+	});
+
+	if (location.hash === '#field' || /[?&]entry=field(?:&|$)/.test(location.search)) {
+		switchLoginTab('field');
+	}
+
+	var $adminForm = $('#login-form-admin');
+	$adminForm.submit(function() {
+		var $btn = $('#login-submit-admin');
+		$btn.prop('disabled', true).text('登录中...');
+		$adminForm.ajaxSubmit({
+			type: 'post',
+			dataType: 'json',
 			url: "{:url('public/doLogin')}",
 			success: function(result) {
-				$btn_submit.attr('disabled', false);
 				if (result.code === 1) {
-					layer.msg(result.msg, {
-						time: 1500,
-						anim: 1,
-						icon: 1
-					}, function() {
+					layer.msg(result.msg, { time: 1500, anim: 1, icon: 1 }, function() {
 						window.location = result.url;
 					});
 					return true;
-				} else {
-					$('.verify_img').trigger('click')
 				}
-				layer.msg(result.msg, {
-					time: 1500,
-					anim: 6
-				});
+				$btn.prop('disabled', false).text('登 录');
+				$('.verify_img').trigger('click');
+				layer.msg(result.msg, { time: 1500, anim: 6 });
+			},
+			error: function() {
+				$btn.prop('disabled', false).text('登 录');
+				layer.msg('网络错误，请重试', { time: 1500, anim: 6 });
+			}
+		});
+		return false;
+	});
+
+	$('#login-form-field').submit(function() {
+		var $btn = $('#login-submit-field');
+		var username = $.trim($('#field-username').val());
+		var password = $('#field-password').val();
+		if (!username) { layer.msg('请输入账号', { time: 1500, anim: 6 }); return false; }
+		if (!password) { layer.msg('请输入密码', { time: 1500, anim: 6 }); return false; }
+
+		$btn.prop('disabled', true).text('登录中...');
+		$.ajax({
+			type: 'POST',
+			url: "{:url('admin/FieldWorker/doLogin')}",
+			data: { username: username, password: password },
+			dataType: 'json',
+			success: function(res) {
+				if (res.code == 1) {
+					layer.msg(res.msg || '登录成功', { time: 1200, anim: 1, icon: 1 }, function() {
+						window.location.href = res.url || "{:url('admin/FieldWorker/index')}";
+					});
+				} else {
+					$btn.prop('disabled', false).text('进入工作台');
+					layer.msg(res.msg || '登录失败', { time: 1500, anim: 6 });
+				}
+			},
+			error: function() {
+				$btn.prop('disabled', false).text('进入工作台');
+				layer.msg('网络错误，请重试', { time: 1500, anim: 6 });
 			}
 		});
 		return false;
