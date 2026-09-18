@@ -232,6 +232,7 @@
 		</u-mask>
 
 		<view class="me-tabbar-space"></view>
+		<ai-ask-fab></ai-ask-fab>
 	</view>
 </template>
 

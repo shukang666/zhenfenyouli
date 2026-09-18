@@ -3,7 +3,8 @@
 		"autoscan": true,
 		"custom": {
 			"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue",
-			"^care-pull-hint$": "@/components/care-pull-hint/care-pull-hint.vue"
+			"^care-pull-hint$": "@/components/care-pull-hint/care-pull-hint.vue",
+			"^ai-ask-fab$": "@/components/ai-ask-fab/ai-ask-fab.vue"
 		}
 	},
 	"pages": [{

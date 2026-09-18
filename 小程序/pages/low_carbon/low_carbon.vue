@@ -224,6 +224,7 @@
 			<view class="fb-load-tip"
 				v-if="!active_loading && active_list.length > 0 && active_list.length >= active_total">没有更多了</view>
 		</view>
+		<ai-ask-fab></ai-ask-fab>
 	</view>
 </template>
 
