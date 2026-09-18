@@ -23,10 +23,62 @@ class FieldWorkerController extends BaseController
     }
 
     /**
+     * 加载模板输出（关键！）
+     * 本控制器继承 BaseController 而非 AdminBaseController（避免后台登录拦截），
+     * 但 BaseController 的 fetch() 不做模板路径解析，无扩展名的模板名会被
+     * Think 视图驱动按默认规则解析到站点根目录 view/admin/ 下而报错。
+     * 这里复刻 AdminBaseController 的 fetch + parseTemplate，
+     * 先解析出带 .html 后缀的主题模板路径（如 themes/admin_fengiy/admin/field_worker/login.html），
+     * 驱动见到带扩展名就会跳过自己的路径推算，直接 is_file 命中。
+     */
+    protected function fetch($template = '', $vars = [], $config = [])
+    {
+        $template = $this->parseTemplate($template);
+        return $this->view->fetch($template, $vars, $config);
+    }
+
+    /**
+     * 自动定位模板文件（复刻 AdminBaseController::parseTemplate）
+     * 返回相对入口目录(public/)的路径：themes/<后台主题>/admin/<controller>/<action>.html
+     */
+    protected function parseTemplate($template)
+    {
+        $request = $this->request;
+
+        if (strpos($template, '@')) {
+            // 跨模块调用
+            list($app, $template) = explode('@', $template);
+        }
+
+        $cmfAdminThemePath    = config('template.cmf_admin_theme_path');
+        $cmfAdminDefaultTheme = cmf_get_current_admin_theme();
+        $themePath            = "{$cmfAdminThemePath}{$cmfAdminDefaultTheme}/";
+
+        $app = isset($app) ? $app : $this->app->http->getName();
+
+        $depr = config('view.view_depr');
+        if (0 !== strpos($template, '/')) {
+            $template   = str_replace(['/', ':'], $depr, $template);
+            $controller = cmf_parse_name($request->controller());
+            if ($controller) {
+                if ('' == $template) {
+                    $template = str_replace('.', DIRECTORY_SEPARATOR, $controller) . $depr . cmf_parse_name($request->action(false));
+                } elseif (false === strpos($template, $depr)) {
+                    $template = str_replace('.', DIRECTORY_SEPARATOR, $controller) . $depr . $template;
+                }
+            }
+        } else {
+            $template = str_replace(['/', ':'], $depr, substr($template, 1));
+        }
+
+        return $themePath . ($app ? $app . DIRECTORY_SEPARATOR : '') . ltrim($template, '/') . '.' . ltrim(config('view.view_suffix'), '.');
+    }
+
+    /**
      * 初始化视图配置（关键！）
      * 本控制器继承 BaseController 而非 AdminBaseController（避免后台登录拦截），
-     * 但 BaseController 不设置 view_base，模板会错误解析到站点根目录 view/admin/ 下。
-     * 这里手动复刻 AdminBaseController 的视图配置，让模板解析到后台主题目录。
+     * BaseController 不设置模板替换字符串，模板里的 __STATIC__ / __TMPL__ 不会替换。
+     * 这里复刻 AdminBaseController 的视图配置。
      */
     protected function _initializeView()
     {

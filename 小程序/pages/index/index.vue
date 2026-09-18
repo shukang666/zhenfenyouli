@@ -284,10 +284,8 @@ export default {
 			}
 			// 检测新手引导标记（登录后由 login 页 setStorageSync 设置），检测到后启动引导并清除标记
 			this.checkAndStartGuide()
-			// 保护：如果不在引导流程中，确保原生 tabbar 显示（防止引导异常中断后 tabbar 一直隐藏）
-			if (!this.showGuide && !this.guideLoading) {
-				uni.showTabBar && uni.showTabBar({ animation: false });
-			}
+			// 注意：自定义 tabBar（custom:true）模式下切勿调用 uni.showTabBar()，
+			// 否则会把原生 tabBar 一并强制显示，出现原生+自定义两个 tabbar
 			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
 			this.$nextTick(() => {
 				if (this.isLogin && !this.userInfo.community_id) {
