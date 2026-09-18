@@ -11,9 +11,6 @@
 				<u-form-item label="联系电话" prop="mobile" labelWidth="150">
 					<u-input v-model="form.mobile" placeholder="请输入" input-align="right" />
 				</u-form-item>
-				<u-form-item label="所在小区" prop="community" labelWidth="160">
-					<u-input v-model="form.community" placeholder="请选择" input-align="right" disabled />
-				</u-form-item>
 				<u-form-item label="申请理由" prop="reason" labelWidth="150" label-position="bottom">
 					<u-input v-model="form.reason" placeholder="请输入" />
 				</u-form-item>
@@ -45,8 +42,7 @@
 		</u-form>
 
 
-		<!-- 选择类型 -->
-		<u-select v-model="cate_show" label-name="name" value-name="id" :list="cate_list" @confirm="confirm"></u-select>
+		
 	</view>
 </template>
 
@@ -64,28 +60,23 @@ export default {
 				community_id: 0,
 				sign_image: '',
 			},
-				rules: {
-					reason: [{
-						required: true,
-						message: '请输入申请理由',
-						trigger: ['change', 'blur'],
-					}],
-					community: [{
-						required: true,
-						message: '请输入所在小区',
-						trigger: ['change', 'blur'],
-					}],
-					mobile: [{
-						required: true,
-						message: '请输入联系电话',
-						trigger: ['change', 'blur'],
-					}],
-					name: [{
-						required: true,
-						message: '请输入姓名',
-						trigger: ['change', 'blur'],
-					}],
-				},
+rules: {
+				reason: [{
+					required: true,
+					message: '请输入申请理由',
+					trigger: ['change', 'blur'],
+				}],
+				mobile: [{
+					required: true,
+					message: '请输入联系电话',
+					trigger: ['change', 'blur'],
+				}],
+				name: [{
+					required: true,
+					message: '请输入姓名',
+					trigger: ['change', 'blur'],
+				}],
+			},
 				type_list: [{
 					name: '小区点位巡检',
 					type: 1
@@ -97,8 +88,6 @@ export default {
 					type: 3
 				}],
 				reason_msg: {},
-				cate_show: false,
-				cate_list: [],
 
 			};
 		},
@@ -110,7 +99,6 @@ export default {
 			this.form.community = this.userInfo.community
 			this.form.community_id = this.userInfo.community_id
 			this.get_check()
-			this.get_community_list()
 			// uni.$on('getNameImg', (res) => {
 			// 	this.form.sign_image = res
 			// })
@@ -133,17 +121,6 @@ export default {
 				});
 			},
 
-			// 选择小区
-			confirm(e) {
-				this.form.community_id = e[0].value
-				this.form.community = e[0].label
-			},
-			// 小区列表
-			get_community_list() {
-				this.$u.api.get_community_list().then(res => {
-					this.cate_list = res.data
-				})
-			},
 		// 审核详情
 		get_check() {
 			this.$u.api.get_check().then(res => {
