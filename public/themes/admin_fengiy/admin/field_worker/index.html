@@ -342,7 +342,7 @@
                 <!-- 所属社区 -->
                 <div class="form-group">
                     <label>所属社区<span class="required">*</span></label>
-                    <select class="form-control" id="community_id" name="community_id">
+                    <select class="form-control" id="community_id" name="community_id" onchange="loadPoints()">
                         <option value="">请选择所属社区</option>
                         {volist name="communityList" id="vo"}
                         <option value="{$vo.id}" data-name="{$vo.name}">{$vo.name}</option>
@@ -350,10 +350,12 @@
                     </select>
                 </div>
 
-                <!-- 点位名称 -->
+                <!-- 点位（社区子级） -->
                 <div class="form-group">
                     <label>点位名称<span class="required">*</span></label>
-                    <input type="text" class="form-control" id="point_name" name="point_name" placeholder="请输入巡查点位名称">
+                    <select class="form-control" id="point_id" name="point_id" disabled>
+                        <option value="">请先选择社区</option>
+                    </select>
                 </div>
 
                 <!-- 三张照片上传 -->
@@ -420,6 +422,28 @@
 // 图片字段映射
 var uploadFields = ['door_photo', 'inner_photo', 'publicity_photo'];
 var uploadedImages = { door_photo: '', inner_photo: '', publicity_photo: '' };
+
+// 加载点位（社区子级）
+function loadPoints() {
+    var communityId = $('#community_id').val();
+    var $pointSelect = $('#point_id');
+    if (!communityId) {
+        $pointSelect.html('<option value="">请先选择社区</option>').prop('disabled', true);
+        return;
+    }
+    $pointSelect.html('<option value="">加载中...</option>').prop('disabled', true);
+    $.get('{:url("admin/FieldWorker/getPoints")}', { parent_id: communityId }, function(res) {
+        if (res.code == 1 && res.data && res.data.length > 0) {
+            var options = '<option value="">请选择点位</option>';
+            res.data.forEach(function(item) {
+                options += '<option value="' + item.id + '" data-name="' + item.name + '">' + item.name + '</option>';
+            });
+            $pointSelect.html(options).prop('disabled', false);
+        } else {
+            $pointSelect.html('<option value="">该社区下暂无点位</option>').prop('disabled', true);
+        }
+    }, 'json');
+}
 
 // Tab切换
 $('.tab').on('click', function() {
@@ -498,10 +522,11 @@ $('#inspectForm').on('submit', function(e) {
 
     var communityId = $('#community_id').val();
     var communityName = $('#community_id option:selected').data('name') || '';
-    var pointName = $.trim($('#point_name').val());
+    var pointId = $('#point_id').val();
+    var pointName = $('#point_id option:selected').data('name') || '';
 
     if (!communityId) { showToast('请选择所属社区'); return; }
-    if (!pointName) { showToast('请填写点位名称'); return; }
+    if (!pointId) { showToast('请选择点位'); return; }
     if (!uploadedImages.door_photo) { showToast('请上传门头照片'); return; }
     if (!uploadedImages.inner_photo) { showToast('请上传内部环境照片'); return; }
     if (!uploadedImages.publicity_photo) { showToast('请上传宣传品照片'); return; }
@@ -527,9 +552,9 @@ $('#inspectForm').on('submit', function(e) {
                 showToast('提交成功');
                 // 重置表单
                 setTimeout(function() {
-                    $('#point_name').val('');
-                    uploadFields.forEach(function(f) { removeImage(f); });
                     $('#community_id').val('');
+                    $('#point_id').html('<option value="">请先选择社区</option>').prop('disabled', true);
+                    uploadFields.forEach(function(f) { removeImage(f); });
                     $('#btnSubmit').prop('disabled', false).text('提交巡查');
                 }, 1000);
             } else {
