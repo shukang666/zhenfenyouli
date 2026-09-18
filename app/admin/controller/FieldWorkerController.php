@@ -5,7 +5,7 @@
 namespace app\admin\controller;
 
 use cmf\controller\BaseController;
-use think\Db;
+use think\facade\Db;
 
 /**
  * 外勤工作台入口
