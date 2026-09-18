@@ -293,6 +293,11 @@ class FieldWorkerController extends BaseController
             $this->error('请选择文件');
         }
 
+        // cmf\lib\Upload 写 cmf_asset 表时通过 cmf_get_current_user_id() 取 session('user.id')，
+        // 外勤登录用的是自定义 session key，取不到会导致 asset.user_id 为 null（SQLSTATE 1048）。
+        // 这里同步当前外勤账号 id（cmf_user 表 id）到 session('user.id')。
+        session('user.id', $this->admin_id);
+
         $uploader = new \cmf\lib\Upload();
         $uploader->setFileType('image');
         $result = $uploader->upload();
