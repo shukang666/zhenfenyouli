@@ -313,6 +313,97 @@
         .hidden-file-input {
             display: none;
         }
+
+        /* ===== 社区选择器 ===== */
+        .community-picker {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            background: #fafafa;
+            cursor: pointer;
+            min-height: 46px;
+        }
+        .community-picker:hover {
+            border-color: #2fb74c;
+        }
+        .community-picker .community-placeholder {
+            color: #ccc;
+            font-size: 15px;
+        }
+        .community-picker .community-selected {
+            font-size: 15px;
+            color: #333;
+        }
+        .community-picker .community-parent {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+        .community-dropdown-mask {
+            position: fixed;
+            left: 0; right: 0; top: 0; bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        .community-dropdown {
+            margin-top: 120px;
+            width: 90%;
+            max-width: 500px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        .community-search input {
+            width: 100%;
+            height: 42px;
+            padding: 0 14px;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f7f7f7;
+            outline: none;
+        }
+        .community-search input:focus {
+            border-color: #2fb74c;
+        }
+        .community-dropdown-list {
+            max-height: 50vh;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .community-dropdown-item {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+        }
+        .community-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .community-dropdown-item:hover {
+            background: #f0faf2;
+        }
+        .community-dropdown-item .item-name {
+            font-size: 15px;
+            color: #333;
+        }
+        .community-dropdown-item .item-parent {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+        .community-empty {
+            text-align: center;
+            padding: 30px 0;
+            color: #bbb;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -339,23 +430,29 @@
             <div class="card-title"><i class="fa fa-check-circle-o"></i> 点位巡查录入</div>
 
             <form id="inspectForm">
-                <!-- 所属社区 -->
+                <!-- 所属社区（搜索选择，显示 小区名 + 社区名） -->
                 <div class="form-group">
                     <label>所属社区<span class="required">*</span></label>
-                    <select class="form-control" id="community_id" name="community_id" onchange="loadPoints()">
-                        <option value="">请选择所属社区</option>
-                        {volist name="communityList" id="vo"}
-                        <option value="{$vo.id}" data-name="{$vo.name}">{$vo.name}</option>
-                        {/volist}
-                    </select>
+                    <div class="community-picker" id="communityPicker" onclick="toggleCommunityDropdown()">
+                        <span id="communityText" class="community-placeholder">请选择所属社区</span>
+                        <i class="fa fa-chevron-down"></i>
+                    </div>
+                    <input type="hidden" id="community_id" name="community_id">
+                    <input type="hidden" id="community_name" name="community_name">
+                    <input type="hidden" id="community_parent_id" name="community_parent_id">
+                    <input type="hidden" id="community_parent_name" name="community_parent_name">
                 </div>
 
-                <!-- 点位（社区子级） -->
-                <div class="form-group">
-                    <label>点位名称<span class="required">*</span></label>
-                    <select class="form-control" id="point_id" name="point_id" disabled>
-                        <option value="">请先选择社区</option>
-                    </select>
+                <!-- 社区选择下拉弹窗 -->
+                <div class="community-dropdown-mask" id="communityDropdownMask" style="display:none;" onclick="closeCommunityDropdown()">
+                    <div class="community-dropdown" onclick="event.stopPropagation()">
+                        <div class="community-search">
+                            <input type="text" id="communityKeyword" placeholder="输入小区名称搜索" oninput="onCommunitySearch(this.value)">
+                        </div>
+                        <div class="community-dropdown-list" id="communityList">
+                            <div class="community-empty">请输入小区名称搜索</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 三张照片上传 -->
@@ -423,26 +520,97 @@
 var uploadFields = ['door_photo', 'inner_photo', 'publicity_photo'];
 var uploadedImages = { door_photo: '', inner_photo: '', publicity_photo: '' };
 
-// 加载点位（社区子级）
-function loadPoints() {
-    var communityId = $('#community_id').val();
-    var $pointSelect = $('#point_id');
-    if (!communityId) {
-        $pointSelect.html('<option value="">请先选择社区</option>').prop('disabled', true);
-        return;
+// ===== 社区搜索选择（复用 search_community 逻辑） =====
+var communitySearchTimer = null;
+var communityPage = 1;
+var communityLastPage = 1;
+var communityLoading = false;
+
+function toggleCommunityDropdown() {
+    var $mask = $('#communityDropdownMask');
+    if ($mask.is(':visible')) {
+        closeCommunityDropdown();
+    } else {
+        $mask.show();
+        $('#communityKeyword').val('').focus();
+        loadCommunityList('', true);
     }
-    $pointSelect.html('<option value="">加载中...</option>').prop('disabled', true);
-    $.get('{:url("admin/FieldWorker/getPoints")}', { parent_id: communityId }, function(res) {
-        if (res.code == 1 && res.data && res.data.length > 0) {
-            var options = '<option value="">请选择点位</option>';
-            res.data.forEach(function(item) {
-                options += '<option value="' + item.id + '" data-name="' + item.name + '">' + item.name + '</option>';
-            });
-            $pointSelect.html(options).prop('disabled', false);
+}
+
+function closeCommunityDropdown() {
+    $('#communityDropdownMask').hide();
+}
+
+function onCommunitySearch(value) {
+    if (communitySearchTimer) clearTimeout(communitySearchTimer);
+    var keyword = (value || '').trim();
+    communitySearchTimer = setTimeout(function() {
+        loadCommunityList(keyword, true);
+    }, 300);
+}
+
+function loadCommunityList(keyword, isReset) {
+    if (communityLoading) return;
+    communityLoading = true;
+    if (isReset) {
+        communityPage = 1;
+    }
+    $('#communityList').html('<div class="community-empty">加载中...</div>');
+
+    $.get('{:url("admin/FieldWorker/searchCommunity")}', {
+        keyword: keyword,
+        page: communityPage,
+        page_size: 20
+    }, function(res) {
+        communityLoading = false;
+        if (res.code == 1) {
+            var data = res.data || {};
+            var list = data.data || [];
+            communityLastPage = data.last_page || 1;
+            renderCommunityList(list);
         } else {
-            $pointSelect.html('<option value="">该社区下暂无点位</option>').prop('disabled', true);
+            $('#communityList').html('<div class="community-empty">加载失败</div>');
         }
-    }, 'json');
+    }, 'json').fail(function() {
+        communityLoading = false;
+        $('#communityList').html('<div class="community-empty">加载失败</div>');
+    });
+}
+
+function renderCommunityList(list) {
+    var html = '';
+    if (!list || list.length === 0) {
+        html = '<div class="community-empty">未找到相关小区</div>';
+    } else {
+        list.forEach(function(item) {
+            html += '<div class="community-dropdown-item" onclick="selectCommunity(' + item.id + ', \'' + item.name.replace(/'/g, "\\'") + '\', ' + item.pid + ', \'' + (item.parent_name || '').replace(/'/g, "\\'") + '\')">';
+            html += '<div class="item-name">' + item.name + '</div>';
+            if (item.parent_name) {
+                html += '<div class="item-parent">' + item.parent_name + '</div>';
+            }
+            html += '</div>';
+        });
+        if (communityPage < communityLastPage) {
+            html += '<div class="community-empty" id="loadMoreHint">上拉加载更多</div>';
+        }
+    }
+    $('#communityList').html(html);
+}
+
+function selectCommunity(id, name, pid, parentName) {
+    $('#community_id').val(id);
+    $('#community_name').val(name);
+    $('#community_parent_id').val(pid);
+    $('#community_parent_name').val(parentName);
+
+    var display = name;
+    if (parentName) {
+        display = '<div class="community-selected">' + name + '</div><div class="community-parent">' + parentName + '</div>';
+    } else {
+        display = '<div class="community-selected">' + name + '</div>';
+    }
+    $('#communityText').html(display).removeClass('community-placeholder');
+    closeCommunityDropdown();
 }
 
 // Tab切换
@@ -521,12 +689,10 @@ $('#inspectForm').on('submit', function(e) {
     e.preventDefault();
 
     var communityId = $('#community_id').val();
-    var communityName = $('#community_id option:selected').data('name') || '';
-    var pointId = $('#point_id').val();
-    var pointName = $('#point_id option:selected').data('name') || '';
+    var communityName = $('#community_name').val();
+    var communityParentName = $('#community_parent_name').val();
 
     if (!communityId) { showToast('请选择所属社区'); return; }
-    if (!pointId) { showToast('请选择点位'); return; }
     if (!uploadedImages.door_photo) { showToast('请上传门头照片'); return; }
     if (!uploadedImages.inner_photo) { showToast('请上传内部环境照片'); return; }
     if (!uploadedImages.publicity_photo) { showToast('请上传宣传品照片'); return; }
@@ -535,8 +701,8 @@ $('#inspectForm').on('submit', function(e) {
 
     var postData = {
         community_id: communityId,
-        community_name: communityName,
-        point_name: pointName,
+        community_name: communityParentName,
+        unit_name: communityName,
         door_photo: uploadedImages.door_photo,
         inner_photo: uploadedImages.inner_photo,
         publicity_photo: uploadedImages.publicity_photo
@@ -553,7 +719,10 @@ $('#inspectForm').on('submit', function(e) {
                 // 重置表单
                 setTimeout(function() {
                     $('#community_id').val('');
-                    $('#point_id').html('<option value="">请先选择社区</option>').prop('disabled', true);
+                    $('#community_name').val('');
+                    $('#community_parent_id').val('');
+                    $('#community_parent_name').val('');
+                    $('#communityText').html('请选择所属社区').addClass('community-placeholder');
                     uploadFields.forEach(function(f) { removeImage(f); });
                     $('#btnSubmit').prop('disabled', false).text('提交巡查');
                 }, 1000);

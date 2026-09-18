@@ -198,6 +198,8 @@ class FieldWorkerController extends BaseController
 
     /**
      * 提交点位巡查
+     * 前端传入：community_id(小区ID), community_name(社区名=parent_name), unit_name(小区名)
+     * 与督导监测表单保持一致：community_name 存社区名，unit_name 存小区/点位名
      */
     public function submit()
     {
@@ -212,16 +214,13 @@ class FieldWorkerController extends BaseController
 
         $communityId   = intval($this->request->param('community_id', 0));
         $communityName = trim($this->request->param('community_name', ''));
-        $pointName     = trim($this->request->param('point_name', ''));
+        $unitName      = trim($this->request->param('unit_name', ''));
         $doorPhoto     = trim($this->request->param('door_photo', ''));
         $innerPhoto    = trim($this->request->param('inner_photo', ''));
         $publicityPhoto= trim($this->request->param('publicity_photo', ''));
 
         if ($communityId <= 0) {
             $this->error('请选择所属社区');
-        }
-        if (empty($pointName)) {
-            $this->error('请填写点位名称');
         }
         if (empty($doorPhoto) || empty($innerPhoto) || empty($publicityPhoto)) {
             $this->error('请上传全部三张照片');
@@ -231,7 +230,7 @@ class FieldWorkerController extends BaseController
             'user_id'         => $this->admin_id,
             'community_id'    => $communityId,
             'community_name'  => $communityName,
-            'unit_name'       => $pointName,
+            'unit_name'       => $unitName,
             'unit_type'       => 1,
             'check_date'      => date('Y-m-d'),
             'address'         => '',
