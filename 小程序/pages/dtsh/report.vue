@@ -344,17 +344,19 @@
 		flex: 1;
 	}
 
-	/* ===== 非小区商户输入 ===== */
-	.merchant-input {
-		width: 100%;
-		padding: 20rpx 24rpx;
-		background: #F5F5F5;
-		border-radius: 12rpx;
-		font-size: 28rpx;
-		color: #333;
-		border: 2rpx solid #eee;
-		box-sizing: border-box;
-	}
+/* ===== 非小区商户输入 ===== */
+.merchant-input {
+	width: 100%;
+	padding: 20rpx 24rpx;
+	background: #F5F5F5;
+	border-radius: 12rpx;
+	font-size: 28rpx;
+	color: #333;
+	border: 2rpx solid #eee;
+	box-sizing: border-box;
+	min-height: 80rpx;
+	line-height: 40rpx;
+}
 
 	.upload-area {
 		width: 100%;
