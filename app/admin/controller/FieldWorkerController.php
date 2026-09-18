@@ -251,7 +251,8 @@ class FieldWorkerController extends BaseController
         $total = $query->count();
         $list = $query->limit(($page - 1) * $pageSize, $pageSize)->select();
 
-        $this->success('ok', [
+        // 注意：BaseController::success($msg, $url, $data)，数据必须放第三参数
+        $this->success('ok', '', [
             'data'      => $list,
             'total'     => $total,
             'last_page' => ceil($total / $pageSize),
@@ -287,7 +288,8 @@ class FieldWorkerController extends BaseController
         }
 
         unset($result['name'], $result['id'], $result['preview_url']);
-        $this->success('上传成功!', $result);
+        // 注意：BaseController::success($msg, $url, $data)，数据必须放第三参数
+        $this->success('上传成功!', '', $result);
     }
 
     /**
@@ -382,7 +384,8 @@ class FieldWorkerController extends BaseController
             ->limit($offset, $limit)
             ->select();
 
-        $this->success('ok', [
+        // 注意：BaseController::success($msg, $url, $data)，数据必须放第三参数
+        $this->success('ok', '', [
             'list'      => $list,
             'total'     => $total,
             'page'      => $page,
