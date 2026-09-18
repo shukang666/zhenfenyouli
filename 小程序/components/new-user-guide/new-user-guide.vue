@@ -348,14 +348,15 @@ export default {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 9998;
+	/* 需高于 custom-tab-bar 的 9999，引导期间盖住并拦截底部导航 */
+	z-index: 100001;
 }
 
 /* 遮罩块通用样式 */
 .guide-mask {
 	position: fixed;
 	background: rgba(0, 0, 0, 0.78);
-	z-index: 9998;
+	z-index: 100001;
 	pointer-events: auto;
 	transition: all 0.3s ease;
 }
@@ -369,6 +370,8 @@ export default {
 }
 
 .guide-highlight {
+	/* 高于遮罩层，保证高亮边框可见 */
+	z-index: 100002;
 	animation: guidePulse 1.8s ease-in-out infinite;
 }
 
