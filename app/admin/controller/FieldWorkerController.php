@@ -122,32 +122,47 @@ class FieldWorkerController extends BaseController
             return $check;
         }
 
-        // 加载社区列表（member_community_parent = 社区表）
-        $communityList = Db::name('member_community_parent')
-            ->field('id, name')
-            ->order('list_order asc, id asc')
-            ->select();
-
-        $this->assign('communityList', $communityList);
         $this->assign('workerName', session('FIELD_WORKER_NAME'));
         return $this->fetch('field_worker/index');
     }
 
     /**
-     * 获取子级点位列表（根据社区ID或父级ID）
+     * 搜索小区/点位（复用 search_community 逻辑，返回 name + parent_name）
      */
-    public function getPoints()
+    public function searchCommunity()
     {
-        $parentId = intval($this->request->param('parent_id', 0));
-        if ($parentId <= 0) {
-            $this->error('参数错误');
+        $keyword = trim($this->request->param('keyword', ''));
+        $page    = intval($this->request->param('page', 1));
+        $pageSize = intval($this->request->param('page_size', 20));
+
+        // 去除特殊符号（与小程序 search_community 一致）
+        $pureKeyword = preg_replace('/[^\p{Han}a-zA-Z0-9]/u', '', $keyword);
+
+        $ignoreSymbols = [' ','　','·','•','‧','・','∙','･','.','．','。',',','，','-','–','—','－','_','~','～','(',')','（',')','[',']','【',']','“','”','‘','’'];
+        $nameExpr = 'c.name';
+        foreach ($ignoreSymbols as $symbol) {
+            $nameExpr = "REPLACE({$nameExpr}, '{$symbol}', '')";
         }
-        $list = Db::name('member_community')
-            ->field('id, name')
-            ->where('pid', $parentId)
-            ->order('list_order asc, id asc')
-            ->select();
-        $this->success($list);
+
+        $query = Db::name('member_community')->alias('c')
+            ->leftJoin('member_community_parent p', 'p.id = c.pid')
+            ->field('c.id, c.name, c.pid, p.name as parent_name');
+
+        if ($pureKeyword !== '') {
+            $query->whereRaw("{$nameExpr} LIKE :keyword", ['keyword' => '%' . $pureKeyword . '%']);
+        }
+
+        $query->order('c.list_order asc');
+
+        $total = $query->count();
+        $list = $query->limit(($page - 1) * $pageSize, $pageSize)->select();
+
+        $this->success('ok', [
+            'data'      => $list,
+            'total'     => $total,
+            'last_page' => ceil($total / $pageSize),
+            'page'      => $page,
+        ]);
     }
 
     /**
