@@ -406,7 +406,7 @@ canSubmit() {
 
 			// 加载社区列表（现成接口）
 			loadCommunityList() {
-				this.$u.api.get_community_list().then(res => {
+				this.$u.api.get_community_parent_list().then(res => {
 					this.communityList = res.data || [];
 				}).catch(() => {
 					this.communityList = [];
