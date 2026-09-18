@@ -143,8 +143,11 @@
 		</z-paging>
 
 		<!-- 新手引导 -->
-		<new-user-guide :visible.sync="showGuide" :steps="guideSteps"></new-user-guide>
-		
+		<new-user-guide :visible.sync="showGuide" :steps="guideSteps" @close="onGuideClose"></new-user-guide>
+
+		<!-- 新手引导加载期间透明遮罩：防止等待渲染的 600ms 内用户切页或点击 -->
+		<view v-if="guideLoading" class="guide-loading-mask" catchtap="noop" catchtouchmove="noop"></view>
+
 		<!-- 新手引导 tabbar 定位锚点（透明，仅用于引导高亮时定位底部 tabbar 区域） -->
 		<view class="guide-tabbar-area" style="position: fixed; bottom: 0; left: 0; right: 0; height: 100rpx; pointer-events: none;"></view>
 	</view>
@@ -199,26 +202,32 @@ export default {
 				},
 				// 新手引导：登录成功后首页显示，引导用户了解核心功能
 				showGuide: false,
+				// 引导加载期间遮罩（防止等待渲染的 600ms 内用户切页）
+				guideLoading: false,
 				guideSteps: [
 					{
 						selector: '.home-search-wrap',
-						title: '🔍 搜索活动',
-						desc: '输入活动名称或地点，发现感兴趣的社区活动'
+						icon: '🔍',
+						title: '搜索活动',
+						desc: '输入活动名称或地点，发现感兴趣的社区活动；右侧扫码图标可直达活动详情'
 					},
 					{
 						selector: '.hello-card',
-						title: '👋 问候打卡',
-						desc: '每日签到获取积分，点击「快捷打卡」完成垃圾分类打卡'
+						icon: '👋',
+						title: '问候与打卡',
+						desc: '每日签到获取积分，点击「快捷打卡」一键完成垃圾分类打卡'
 					},
 					{
 						selector: '.content-tabs',
-						title: '📋 热门内容',
-						desc: '浏览「热门活动」和「积分商品」两个板块，参与环保行动获取奖励'
+						icon: '📋',
+						title: '热门内容',
+						desc: '切换「热门活动」与「积分商品」，参与环保行动、兑换心仪好物'
 					},
 					{
 						selector: '.guide-tabbar-area',
-						title: '🧭 底部导航',
-						desc: '5 个主 Tab：首页、活动、健康、积分权益、我的。随时切换，了解社区资讯、参加低碳活动、兑换心仪商品'
+						icon: '🧭',
+						title: '底部导航',
+						desc: '5 个主 Tab：首页、活动、健康、积分权益、我的，随时切换探索'
 					},
 				]
 			}
@@ -292,14 +301,23 @@ export default {
 			if (guideFlag && this.userInfo.community_id) {
 				// 立即清除标记，防止死循环
 				uni.removeStorageSync('new_user_guide');
+				// 立即开启透明遮罩，防止等待渲染的 600ms 内用户切页/点击
+				this.guideLoading = true;
 				// 延迟启动引导，等待页面数据渲染完成
 				this.$nextTick(() => {
 					setTimeout(() => {
 						this.showGuide = true;
+						// 引导组件已弹出，移除加载遮罩
+						this.guideLoading = false;
 					}, 600);
 				});
 			}
 		},
+		// 引导关闭回调
+		onGuideClose() {
+			this.guideLoading = false;
+		},
+		noop() {},
 		// 并行加载所有数据，全部完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
 		async loadAllData() {
 			const startTime = Date.now()
@@ -1069,5 +1087,16 @@ export default {
 	}
 	.goods-scroll {
 		padding-bottom: 160rpx;
+	}
+
+	/* 新手引导加载期间透明遮罩：屏蔽所有点击与切页 */
+	.guide-loading-mask {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 9997;
+		background: rgba(0, 0, 0, 0);
 	}
 </style>
