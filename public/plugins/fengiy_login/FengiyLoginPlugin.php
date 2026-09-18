@@ -18,7 +18,7 @@ class FengiyLoginPlugin extends Plugin
 
     public $info = [
         'name'        => 'FengiyLogin',
-        'title'       => '微巨宝自定义登录页',
+        'title'       => '数康自定义登录页',
         'description' => '支持大背景/轮播图/Logo/名称自定义',
         'status'      => 1,
         'author'      => 'Fengiy',
