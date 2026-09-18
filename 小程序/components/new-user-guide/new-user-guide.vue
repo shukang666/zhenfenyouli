@@ -1,537 +1,374 @@
 <template>
-	<view class="guide-overlay" v-if="visible" catchtouchmove="noop" @tap="onOverlayTap">
-		<!-- 遮罩：4 块 view 拼出洞外区域（最稳方案，不依赖 clip-path/box-shadow） -->
-		<block v-if="targetRect">
-			<view class="guide-mask" :style="maskTopStyle"></view>
-			<view class="guide-mask" :style="maskBottomStyle"></view>
-			<view class="guide-mask" :style="maskLeftStyle"></view>
-			<view class="guide-mask" :style="maskRightStyle"></view>
-		</block>
-		<view v-else class="guide-mask guide-mask--full"></view>
-
-		<!-- 高亮边框（独立层，带脉冲动画） -->
-		<view v-if="targetRect" class="guide-highlight" :style="highlightStyle"></view>
-
-		<!-- 引导描述卡片 -->
-		<view class="guide-card" :style="cardStyle" catchtap="noop">
-			<!-- 顶部装饰条 -->
-			<view class="guide-card__bar">
-				<view class="guide-card__bar-inner"></view>
-			</view>
-			<!-- 主体内容 -->
-			<view class="guide-card__body">
-				<view class="guide-card__title">
-					<text v-if="currentStep.icon" class="guide-card__icon">{{ currentStep.icon }}</text>
-					<text class="guide-card__title-text">{{ currentStep.title }}</text>
+	<view class="guide-overlay" :style="overlayStyle" @touchmove.stop.prevent="noop" @tap="onOverlayTap">
+		<view class="guide-card-wrap" :class="placeBelow ? 'guide-card-wrap--below' : 'guide-card-wrap--above'" :style="cardWrapCss || cardWrapStyle">
+			<view class="guide-card" @tap.stop="noop">
+				<view class="guide-card__head">
+					<view class="guide-card__badge">
+						<text class="guide-card__badge-num">{{ stepIndex + 1 }}</text>
+					</view>
+					<view class="guide-card__head-main">
+						<text class="guide-card__title">{{ currentStep.title }}</text>
+						<view class="guide-card__dots">
+							<view
+								v-for="(item, idx) in steps"
+								:key="idx"
+								class="guide-card__dot"
+								:class="{ 'guide-card__dot--on': idx === stepIndex }"
+							></view>
+						</view>
+					</view>
 				</view>
-				<view class="guide-card__desc">{{ currentStep.desc }}</view>
-			</view>
-			<!-- 底部操作区 -->
-			<view class="guide-card__footer">
-				<view class="guide-card__step">
-					<text class="guide-card__step-current">{{ stepIndex + 1 }}</text>
-					<text class="guide-card__step-total"> / {{ steps.length }}</text>
-				</view>
-				<view class="guide-card__actions">
-					<view class="guide-card__skip" catchtap="close" hover-class="guide-card__skip--hover">跳过</view>
-					<view class="guide-card__next" catchtap="next" hover-class="guide-card__next--hover">
-						<text>{{ stepIndex === steps.length - 1 ? '开启体验' : '下一步' }}</text>
-						<text v-if="stepIndex !== steps.length - 1" class="guide-card__next-arrow">›</text>
+				<text class="guide-card__desc">{{ currentStep.desc }}</text>
+				<view class="guide-card__footer">
+					<view class="guide-card__skip" @tap.stop="close" hover-class="guide-card__skip--on">先跳过</view>
+					<view class="guide-card__next" @tap.stop="next" hover-class="guide-card__next--on">
+						{{ stepIndex === steps.length - 1 ? '开始使用' : '下一步' }}
 					</view>
 				</view>
 			</view>
-			<!-- 指向高亮元素的箭头（朝上/朝下自适应） -->
-			<view v-if="targetRect" class="guide-card__arrow"
-				:class="{ 'guide-card__arrow--up': isArrowUp, 'guide-card__arrow--down': !isArrowUp }"
-				:style="arrowStyle"></view>
 		</view>
 	</view>
 </template>
 
 <script>
-/**
- * 新手引导组件
- *
- * 使用方式：
- *  <new-user-guide :visible.sync="showGuide" :steps="guideSteps" @close="onGuideClose" />
- *
- * steps 配置：
- *  guideSteps: [
- *    { selector: '.hello-card', icon: '👋', title: '问候与快捷打卡', desc: '...' },
- *    { selector: '.home-search-wrap', icon: '🔍', title: '搜索活动', desc: '...' },
- *    // selector 为空时，卡片居中显示，不挖洞
- *    { selector: '', icon: '🎉', title: '开始体验', desc: '...' },
- *  ]
- *
- * 卡片位置自适应：
- *  - 高亮元素位于屏幕上半部分时，卡片显示在元素下方
- *  - 高亮元素位于屏幕下半部分时，卡片显示在元素上方
- *  - 无 selector 时，卡片居中显示
- *
- * 遮罩实现：4 块 view 拼出洞外矩形区域（不依赖 clip-path/box-shadow，兼容性最佳）
- */
-
 export default {
 	name: 'new-user-guide',
+	options: {
+		virtualHost: true,
+		styleIsolation: 'apply-shared'
+	},
 	props: {
-		steps: {
-			type: Array,
-			default: () => []
-		},
-		visible: {
-			type: Boolean,
-			default: false
-		},
-		// 高亮区域向外扩展的内边距（px）
-		padding: {
-			type: Number,
-			default: 8
-		},
-		// 卡片距离高亮元素的间距（px）
-		gap: {
-			type: Number,
-			default: 16
-		}
+		steps: { type: Array, default: () => [] },
+		padding: { type: Number, default: 8 },
+		targetRect: { type: Object, default: null },
+		cardTop: { type: Number, default: 0 },
+		placeBelow: { type: Boolean, default: true },
+		cardWrapCss: { type: String, default: '' }
 	},
 	data() {
 		return {
 			stepIndex: 0,
-			targetRect: null,
 			retryCount: 0,
-			maxRetries: 30,
+			maxRetries: 16,
 			queryTimer: null,
-			// 卡片高度估算值（px），用于定位计算；实际渲染后会通过测量更新
-			cardHeightEst: 220,
-			// 实测的卡片高度（拿到后用于精确定位）
-			cardRealHeight: 0
+			stepReadyAt: 0
 		}
 	},
 	computed: {
 		currentStep() {
-			return this.steps[this.stepIndex] || { title: '', desc: '', selector: '', icon: '' }
+			return this.steps[this.stepIndex] || { title: '', desc: '', selector: '' }
 		},
 		sysInfo() {
 			return uni.getSystemInfoSync()
 		},
-		// 高亮洞的几何信息（带 padding 外扩）
 		hole() {
-			if (!this.targetRect) return null
-			const { left, top, width, height } = this.targetRect
-			const pad = this.padding
-			return {
-				left: left - pad,
-				top: top - pad,
-				right: left + width + pad,
-				bottom: top + height + pad,
-				width: width + pad * 2,
-				height: height + pad * 2,
-				centerX: left + width / 2,
-				centerY: top + height / 2
-			}
-		},
-		// 遮罩-上块
-		maskTopStyle() {
-			const h = this.hole
-			if (!h) return {}
-			return {
-				position: 'fixed',
-				left: '0',
-				top: '0',
-				width: '100%',
-				height: h.top + 'px'
-			}
-		},
-		// 遮罩-下块
-		maskBottomStyle() {
-			const h = this.hole
-			if (!h) return {}
-			const winH = this.sysInfo.windowHeight
-			return {
-				position: 'fixed',
-				left: '0',
-				top: h.bottom + 'px',
-				width: '100%',
-				height: Math.max(0, winH - h.bottom) + 'px'
-			}
-		},
-		// 遮罩-左块
-		maskLeftStyle() {
-			const h = this.hole
-			if (!h) return {}
-			return {
-				position: 'fixed',
-				left: '0',
-				top: h.top + 'px',
-				width: h.left + 'px',
-				height: h.height + 'px'
-			}
-		},
-		// 遮罩-右块
-		maskRightStyle() {
-			const h = this.hole
-			if (!h) return {}
+			const rect = this.targetRect
+			if (!rect) return null
 			const winW = this.sysInfo.windowWidth
+			const winH = this.sysInfo.windowHeight
+			const pad = this.padding
+			const l = Math.max(0, rect.left - pad)
+			const t = Math.max(0, rect.top - pad)
+			const r = Math.min(winW, rect.left + rect.width + pad)
+			const b = Math.min(winH, rect.top + rect.height + pad)
+			const width = r - l
+			const height = b - t
+			if (width < 20 || height < 16) return null
+			if (height > winH * 0.5) return null
 			return {
-				position: 'fixed',
-				left: h.right + 'px',
-				top: h.top + 'px',
-				width: Math.max(0, winW - h.right) + 'px',
-				height: h.height + 'px'
+				left: l,
+				top: t,
+				right: r,
+				bottom: b,
+				width,
+				height,
+				rightRest: Math.max(0, winW - r),
+				bottomRest: Math.max(0, winH - b)
 			}
 		},
-		// 高亮边框样式：与洞精确对齐，带脉冲动画
 		highlightStyle() {
 			const h = this.hole
 			if (!h) return {}
+			return this.boxStyle(h.left, h.top, h.width, h.height)
+		},
+		overlayStyle() {
 			return {
-				position: 'fixed',
-				left: h.left + 'px',
-				top: h.top + 'px',
-				width: h.width + 'px',
-				height: h.height + 'px',
-				border: '2px solid #18AF38',
-				borderRadius: '12px',
-				boxShadow: '0 0 16px rgba(24, 175, 56, 0.6), inset 0 0 8px rgba(24, 175, 56, 0.25)',
-				zIndex: 9999,
-				pointerEvents: 'none',
-				transition: 'all 0.3s ease'
+				position: 'absolute',
+				left: '0px',
+				top: '0px',
+				width: '100%',
+				height: '100%',
+				zIndex: 100053,
+				backgroundColor: 'transparent'
 			}
 		},
-		// 卡片是否位于高亮元素下方（箭头朝上指向元素）
-		isArrowUp() {
-			if (!this.hole) return true
-			return this.hole.centerY < this.sysInfo.windowHeight / 2
-		},
-		// 卡片定位：跟随高亮元素，自适应上/下，加边界保护
-		cardStyle() {
-			const winW = this.sysInfo.windowWidth
-			const winH = this.sysInfo.windowHeight
-			const cardWidth = winW - 32
-			const left = 16
-			// 优先用实测高度，否则用估算值
-			const cardH = this.cardRealHeight || this.cardHeightEst
-
-			if (!this.hole) {
-				// 无目标：屏幕居中（略偏上）
-				const top = Math.floor((winH - cardH) / 2 - winH * 0.05)
-				return {
-					position: 'fixed',
-					left: left + 'px',
-					top: Math.max(40, top) + 'px',
-					width: cardWidth + 'px',
-					zIndex: 10000
-				}
-			}
-
-			const isUpperHalf = this.hole.centerY < winH / 2
-			let cardTop
-			if (isUpperHalf) {
-				// 卡片在洞下方
-				cardTop = this.hole.bottom + this.gap
-				const maxTop = winH - cardH - 20
-				if (cardTop > maxTop) cardTop = maxTop
-			} else {
-				// 卡片在洞上方
-				cardTop = this.hole.top - this.gap - cardH
-				if (cardTop < 40) cardTop = 40
-			}
-			return {
-				position: 'fixed',
-				left: left + 'px',
-				top: cardTop + 'px',
-				width: cardWidth + 'px',
-				zIndex: 10000
-			}
-		},
-		// 箭头样式：水平对齐高亮元素中心，不超出卡片范围
-		arrowStyle() {
-			if (!this.hole) return {}
-			const cardLeft = parseFloat(this.cardStyle.left)
-			const cardW = parseFloat(this.cardStyle.width)
-			const arrowHalf = 12
-			let arrowLeft = this.hole.centerX - cardLeft - arrowHalf
-			arrowLeft = Math.max(20, Math.min(arrowLeft, cardW - 44))
-			return { left: arrowLeft + 'px' }
+		cardWrapStyle() {
+			const sys = this.sysInfo
+			let minTop = (sys.statusBarHeight || 20) + 60
+			try {
+				const menu = uni.getMenuButtonBoundingClientRect()
+				if (menu && menu.bottom) minTop = Math.max(minTop, Math.ceil(menu.bottom) + 16)
+			} catch (e) {}
+			const top = this.cardTop > minTop ? this.cardTop : Math.max(minTop, Math.round(sys.windowHeight * 0.42))
+			return `top:${top}px;left:40rpx;right:40rpx;position:absolute;transform:none;`
 		}
 	},
 	watch: {
-		visible: {
-			immediate: false,
-			handler(val) {
-				if (val) {
-					this.stepIndex = 0
-					this.targetRect = null
-					this.retryCount = 0
-					this.cardRealHeight = 0
-					this.$nextTick(() => {
-						this.queryTargetRect()
-						this.measureCardHeight()
-					})
-				} else {
-					if (this.queryTimer) clearTimeout(this.queryTimer)
-				}
-			}
-		},
 		stepIndex() {
-			this.targetRect = null
 			this.retryCount = 0
+			this.stepReadyAt = Date.now()
 			this.queryTargetRect()
-		}
+		},
+		targetRect(val) {
+			if (val && val.width > 20) this.clearTimers()
+		},
+	},
+	mounted() {
+		this.stepReadyAt = Date.now()
+		this.$nextTick(() => this.queryTargetRect())
+	},
+	beforeDestroy() {
+		this.clearTimers()
 	},
 	methods: {
 		noop() {},
+		boxStyle(left, top, width, height) {
+			const w = typeof width === 'number' ? width + 'px' : width
+			const h = typeof height === 'number' ? height + 'px' : height
+			return {
+				position: 'absolute',
+				left: left + 'px',
+				top: top + 'px',
+				width: w,
+				height: h
+			}
+		},
+		resetQuery() {
+			this.retryCount = 0
+			this.stepReadyAt = Date.now()
+		},
+		clearTimers() {
+			if (this.queryTimer) {
+				clearTimeout(this.queryTimer)
+				this.queryTimer = null
+			}
+		},
 		onOverlayTap() {
+			if (Date.now() - this.stepReadyAt < 280) return
 			this.next()
 		},
-		// 查询目标节点位置
 		queryTargetRect() {
-			const step = this.currentStep
-			if (!step.selector) {
-				this.targetRect = null
+			const selector = this.currentStep.selector
+			if (!selector) {
+				this.$emit('query-target', '')
 				return
 			}
-			if (this.queryTimer) clearTimeout(this.queryTimer)
-			// 首次查询用短延迟（50ms）快速拿到节点；失败再以 200ms 退避重试
-			this.queryTimer = setTimeout(() => {
-				this._doQuery(step.selector)
-			}, this.retryCount === 0 ? 50 : 200)
+			this.clearTimers()
+			this.retryCount = 0
+			this.queryTimer = setTimeout(() => this._doQuery(selector), 80)
 		},
 		_doQuery(selector) {
-			const query = uni.createSelectorQuery()
-			query.select(selector).boundingClientRect(rect => {
-				if (rect && rect.width > 0 && rect.height > 0) {
-					this.targetRect = rect
-					this.retryCount = 0
-				} else if (this.retryCount < this.maxRetries) {
-					this.retryCount++
-					this.queryTimer = setTimeout(() => this._doQuery(selector), 200)
-				} else {
-					this.targetRect = null
-				}
-			}).exec()
-		},
-		// 测量卡片实际高度，用于精确定位
-		measureCardHeight() {
-			this.$nextTick(() => {
-				setTimeout(() => {
-					const query = uni.createSelectorQuery().in(this)
-					query.select('.guide-card').boundingClientRect(rect => {
-						if (rect && rect.height > 0) {
-							this.cardRealHeight = rect.height
-						}
-					}).exec()
-				}, 100)
-			})
-		},
-		next() {
-			if (this.stepIndex < this.steps.length - 1) {
-				this.stepIndex++
-			} else {
-				this.close()
+			this.$emit('query-target', selector)
+			this.retryCount++
+			if (this.retryCount <= this.maxRetries) {
+				this.queryTimer = setTimeout(() => this._doQuery(selector), 200)
 			}
 		},
+		next() {
+			if (this.stepIndex < this.steps.length - 1) this.stepIndex++
+			else this.close()
+		},
 		close() {
-			this.$emit('update:visible', false)
 			this.$emit('close')
-			if (this.queryTimer) clearTimeout(this.queryTimer)
-			this.targetRect = null
-			this.retryCount = 0
+			this.clearTimers()
 		}
 	}
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .guide-overlay {
-	position: fixed;
-	top: 0;
+	position: absolute;
 	left: 0;
+	top: 0;
 	right: 0;
 	bottom: 0;
-	/* 需高于 custom-tab-bar 的 9999，引导期间盖住并拦截底部导航 */
-	z-index: 100001;
+	width: 100%;
+	height: 100%;
+	z-index: 100053;
+	background-color: transparent;
 }
 
-/* 遮罩块通用样式 */
 .guide-mask {
-	position: fixed;
-	background: rgba(0, 0, 0, 0.78);
-	z-index: 100001;
-	pointer-events: auto;
-	transition: all 0.3s ease;
+	background: rgba(8, 22, 14, 0.62);
+	z-index: 1;
 }
 
-/* 无目标时的全屏遮罩 */
 .guide-mask--full {
-	top: 0;
+	position: absolute;
 	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
 	width: 100%;
 	height: 100%;
 }
 
 .guide-highlight {
-	/* 高于遮罩层，保证高亮边框可见 */
-	z-index: 100002;
-	animation: guidePulse 1.8s ease-in-out infinite;
+	z-index: 2;
+	border: 4rpx solid #ffffff;
+	border-radius: 24rpx;
+	box-sizing: border-box;
+	box-shadow: 0 0 0 6rpx #18af38, 0 0 24rpx rgba(24, 175, 56, 0.55);
+	pointer-events: none;
 }
 
-@keyframes guidePulse {
-	0%, 100% {
-		transform: scale(1);
-		opacity: 1;
+.guide-hole-block {
+	z-index: 3;
+	background: transparent;
+}
+
+.guide-card-wrap {
+	position: absolute;
+	left: 40rpx;
+	right: 40rpx;
+	z-index: 100054;
+	pointer-events: none;
+
+	&--below .guide-card::after {
+		content: '';
+		position: absolute;
+		left: 56rpx;
+		top: -16rpx;
+		width: 0;
+		height: 0;
+		border-left: 16rpx solid transparent;
+		border-right: 16rpx solid transparent;
+		border-bottom: 18rpx solid #ffffff;
 	}
-	50% {
-		transform: scale(1.015);
-		opacity: 0.85;
+
+	&--above .guide-card::after {
+		content: '';
+		position: absolute;
+		left: 56rpx;
+		bottom: -16rpx;
+		width: 0;
+		height: 0;
+		border-left: 16rpx solid transparent;
+		border-right: 16rpx solid transparent;
+		border-top: 18rpx solid #ffffff;
 	}
 }
 
 .guide-card {
-	background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
-	border-radius: 24rpx;
-	padding: 0 0 28rpx;
-	box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.22), 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
-	overflow: visible;
+	pointer-events: auto;
+	background: #ffffff;
+	border-radius: 32rpx;
+	padding: 28rpx 28rpx 24rpx;
+	box-shadow: 0 20rpx 60rpx rgba(16, 64, 28, 0.28);
 	position: relative;
-	/* 与高亮层同级，高于遮罩层，保证卡片可点可看 */
-	z-index: 100002;
-	transition: top 0.3s ease, left 0.3s ease;
+	overflow: visible;
 
-	/* 顶部装饰条 */
-	&__bar {
-		height: 8rpx;
-		padding: 0 32rpx;
-		margin-bottom: 28rpx;
-		margin-top: 0;
-
-		&-inner {
-			width: 64rpx;
-			height: 8rpx;
-			background: linear-gradient(90deg, #18AF38 0%, #4cd964 100%);
-			border-radius: 4rpx;
-			margin: 0 auto;
-		}
-	}
-
-	&__body {
-		padding: 0 36rpx;
-	}
-
-	&__title {
+	&__head {
 		display: flex;
 		align-items: center;
 		margin-bottom: 16rpx;
-
-		&-text {
-			font-size: 34rpx;
-			font-weight: 600;
-			color: #1a1a1a;
-			line-height: 1.4;
-		}
 	}
 
-	&__icon {
-		font-size: 36rpx;
-		margin-right: 12rpx;
+	&__badge {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 20rpx;
+		background: linear-gradient(180deg, #2ad24e 0%, #18af38 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 18rpx;
+		flex-shrink: 0;
+	}
+
+	&__badge-num {
+		color: #ffffff;
+		font-size: 32rpx;
+		font-weight: 700;
 		line-height: 1;
 	}
 
+	&__head-main {
+		flex: 1;
+		min-width: 0;
+	}
+
+	&__title {
+		display: block;
+		font-size: 36rpx;
+		font-weight: 700;
+		color: #142018;
+		line-height: 1.3;
+	}
+
+	&__dots {
+		display: flex;
+		align-items: center;
+		margin-top: 12rpx;
+	}
+
+	&__dot {
+		width: 12rpx;
+		height: 12rpx;
+		border-radius: 12rpx;
+		background: #d8e8d9;
+		margin-right: 10rpx;
+
+		&--on {
+			width: 28rpx;
+			background: #18af38;
+		}
+	}
+
 	&__desc {
-		font-size: 26rpx;
-		color: #5e5e5e;
-		line-height: 1.7;
-		margin-bottom: 32rpx;
-		letter-spacing: 0.5rpx;
+		display: block;
+		font-size: 30rpx;
+		color: #3d4a40;
+		line-height: 1.65;
 	}
 
 	&__footer {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		padding: 0 36rpx;
-		border-top: 1rpx solid #f0f0f0;
-		padding-top: 20rpx;
-	}
-
-	&__step {
-		font-size: 26rpx;
-		color: #999;
-		letter-spacing: 1rpx;
-
-		&-current {
-			color: #18AF38;
-			font-weight: 700;
-			font-size: 30rpx;
-		}
-
-		&-total {
-			color: #bbb;
-		}
-	}
-
-	&__actions {
-		display: flex;
-		align-items: center;
+		margin-top: 22rpx;
 	}
 
 	&__skip {
-		font-size: 26rpx;
-		color: #999;
-		padding: 14rpx 28rpx;
-		border-radius: 36rpx;
-		background: #f5f5f5;
+		flex: 1;
+		height: 80rpx;
+		line-height: 80rpx;
+		text-align: center;
+		font-size: 30rpx;
+		color: #6b756e;
+		background: #f3f6f3;
+		border-radius: 40rpx;
 		margin-right: 16rpx;
-		transition: all 0.15s;
+	}
 
-		&--hover {
-			background: #efefef;
-			color: #888;
-		}
+	&__skip--on {
+		background: #e7ece7;
 	}
 
 	&__next {
-		display: flex;
-		align-items: center;
-		font-size: 28rpx;
-		color: #fff;
-		background: linear-gradient(135deg, #18AF38 0%, #0d8a2b 100%);
-		border-radius: 36rpx;
-		padding: 14rpx 36rpx;
-		font-weight: 600;
-		box-shadow: 0 6rpx 16rpx rgba(24, 175, 56, 0.35);
-		transition: all 0.15s;
-
-		&-arrow {
-			margin-left: 6rpx;
-			font-size: 32rpx;
-			line-height: 1;
-		}
-
-		&--hover {
-			transform: scale(0.96);
-			box-shadow: 0 4rpx 10rpx rgba(24, 175, 56, 0.3);
-		}
+		flex: 1.35;
+		height: 80rpx;
+		line-height: 80rpx;
+		text-align: center;
+		font-size: 32rpx;
+		font-weight: 700;
+		color: #ffffff;
+		background: linear-gradient(135deg, #2ad24e 0%, #129a32 100%);
+		border-radius: 40rpx;
 	}
 
-	/* 指向高亮元素的箭头：用 border 三角形实现 */
-	&__arrow {
-		position: absolute;
-		width: 0;
-		height: 0;
-		border-left: 16rpx solid transparent;
-		border-right: 16rpx solid transparent;
-	}
-
-	/* 箭头在卡片顶部、朝上指（卡片在洞下方时） */
-	&__arrow--up {
-		top: -16rpx;
-		border-bottom: 16rpx solid #fff;
-	}
-
-	/* 箭头在卡片底部、朝下指（卡片在洞上方时） */
-	&__arrow--down {
-		bottom: -16rpx;
-		border-top: 16rpx solid #fff;
+	&__next--on {
+		transform: scale(0.98);
 	}
 }
 </style>

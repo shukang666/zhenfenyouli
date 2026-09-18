@@ -19,7 +19,7 @@
 			</template>
 
 			<!-- 活动搜索 + 扫码入口（点击进活动搜索页，右侧扫码直达活动详情） -->
-			<view class="home-search-wrap">
+			<view id="guide-search" class="home-search-wrap">
 				<view class="home-search-box" @click="$u.route('/pages/activity/active-search')">
 					<u-icon name="search" size="28" color="#b0b3bb"></u-icon>
 					<text class="home-search-text">搜索活动名称 / 地点</text>
@@ -40,7 +40,7 @@
 			</view>
 
 			<!-- 问候 + 快捷打卡（浅色卡片，入口指向垃圾分类打卡页） -->
-			<view class="hello-card" v-if="isLogin && todayTask.show">
+			<view id="guide-hello" class="hello-card" v-if="isLogin && todayTask.show">
 				<view class="hello-card__main" @click="$u.route({type:'switchTab', url:'/pages/user/index'})">
 					<view class="hello-card__avatar">
 						<u-image :src="userInfo.avatar || 'https://admin.circular-economy.cn/static/images/default-avatar.png'" width="80" height="80" shape="circle" mode="aspectFill"></u-image>
@@ -81,7 +81,7 @@
 			</view> -->
 
 			<!-- 内容区标签导航：把活动与积分商品合并到同一区块，通过 tab 切换 -->
-			<view class="content-tabs">
+			<view id="guide-tabs" class="content-tabs">
 				<view class="tab-list">
 					<view class="tab-item" :class="{'tab-item--active': currentTab === index}" v-for="(item, index) in tabList" :key="index" @click="switchContentTab(index)">
 						<text class="tab-item__text">{{ item.name }}</text>
@@ -142,14 +142,40 @@
 			</scroll-view>
 		</z-paging>
 
-		<!-- 新手引导 -->
-		<new-user-guide :visible.sync="showGuide" :steps="guideSteps" @close="onGuideClose"></new-user-guide>
+		<!-- 四块 cover-view 挖洞：框内是真实界面，框外才是灰罩 -->
+		<block v-if="showGuide && guideHole">
+			<cover-view :style="guideDimCss(0, 0, guideWinW, guideHole.top)"></cover-view>
+			<cover-view :style="guideDimCss(0, guideHole.bottom, guideWinW, guideHole.bottomRest)"></cover-view>
+			<cover-view :style="guideDimCss(0, guideHole.top, guideHole.left, guideHole.height)"></cover-view>
+			<cover-view :style="guideDimCss(guideHole.right, guideHole.top, guideHole.rightRest, guideHole.height)"></cover-view>
+			<cover-view :style="guideSpotCss"></cover-view>
+		</block>
+		<cover-view
+			v-else-if="showGuide"
+			style="position:fixed;left:0;top:0;right:0;bottom:0;width:100%;height:100%;background:rgba(0,0,0,0.72);z-index:999998;"
+		></cover-view>
+		<view
+			v-if="showGuide"
+			class="guide-root"
+			style="position:fixed;left:0;top:0;right:0;bottom:0;width:100%;height:100%;z-index:999999;"
+			@touchmove.stop.prevent="noop"
+		>
+			<new-user-guide
+				:steps="playingGuideSteps"
+				:target-rect="guideTargetRect"
+				:card-top="guideCardTop"
+				:place-below="guideCardPlaceBelow"
+				:card-wrap-css="guideCardWrapCss"
+				@close="onGuideClose"
+				@query-target="onGuideQueryTarget"
+			></new-user-guide>
+		</view>
 
-		<!-- 新手引导加载期间透明遮罩：防止等待渲染的 600ms 内用户切页或点击 -->
-		<view v-if="guideLoading" class="guide-loading-mask" catchtap="noop" catchtouchmove="noop"></view>
+		<!-- 新手引导加载期间透明遮罩：防止等待首页数据时用户切页或点击 -->
+		<view v-if="guideLoading" class="guide-loading-mask" @tap.stop.prevent="noop" @touchmove.stop.prevent="noop"></view>
 
-		<!-- 新手引导 tabbar 定位锚点（透明，仅用于引导高亮时定位底部 tabbar 区域） -->
-		<view class="guide-tabbar-area" style="position: fixed; bottom: 0; left: 0; right: 0; height: 100rpx; pointer-events: none;"></view>
+		<!-- 对齐 custom-tab-bar 悬浮条（108rpx 高 + 左右 24rpx + 底部安全区），仅用于引导定位 -->
+		<view id="guide-tabbar" class="guide-tabbar-area"></view>
 	</view>
 </template>
 
@@ -202,33 +228,39 @@ export default {
 				},
 				// 新手引导：登录成功后首页显示，引导用户了解核心功能
 				showGuide: false,
-				// 引导加载期间遮罩（防止等待渲染的 600ms 内用户切页）
 				guideLoading: false,
+				playingGuideSteps: [],
+				guideTargetRect: null,
 				guideSteps: [
 					{
-						selector: '.home-search-wrap',
-						icon: '🔍',
-						title: '搜索活动',
-						desc: '输入活动名称或地点，发现感兴趣的社区活动；右侧扫码图标可直达活动详情'
+						selector: '',
+						title: '欢迎来到绿色社区',
+						desc: '这里可以学分类、每日打卡攒积分、报名小区活动。下面用几步带您认一认。'
 					},
 					{
-						selector: '.hello-card',
-						icon: '👋',
-						title: '问候与打卡',
-						desc: '每日签到获取积分，点击「快捷打卡」一键完成垃圾分类打卡'
+						selector: '#guide-search',
+						prefer: 'below',
+						title: '找活动和扫码',
+						desc: '点搜索框能找小区活动。右边扫一扫，可以参加现场活动。'
 					},
 					{
-						selector: '.content-tabs',
-						icon: '📋',
-						title: '热门内容',
-						desc: '切换「热门活动」与「积分商品」，参与环保行动、兑换心仪好物'
+						selector: '#guide-hello',
+						prefer: 'below',
+						title: '签到和分类打卡',
+						desc: '每天先点「签到」。再点「快捷打卡」，拍一张分类照片就能得积分。'
 					},
 					{
-						selector: '.guide-tabbar-area',
-						icon: '🧭',
-						title: '底部导航',
-						desc: '5 个主 Tab：首页、活动、健康、积分权益、我的，随时切换探索'
+						selector: '#guide-tabs',
+						prefer: 'above',
+						title: '活动和积分商品',
+						desc: '点「热门活动」看报名，点「积分商品」用积分兑换。字大、好认。'
 					},
+					{
+						selector: '#guide-tabbar',
+						prefer: 'above',
+						title: '底部五个按钮',
+						desc: '首页、活动、健康、积分权益、我的。随时点，不用记路径。'
+					}
 				]
 			}
 		},
@@ -251,6 +283,87 @@ export default {
 					cols.push(list.slice(i, i + 2))
 				}
 				return cols
+			},
+			guideWinW() {
+				return uni.getSystemInfoSync().windowWidth
+			},
+			guideHole() {
+				const rect = this.guideTargetRect
+				if (!rect) return null
+				const sys = uni.getSystemInfoSync()
+				const winW = sys.windowWidth
+				const winH = sys.windowHeight
+				const pad = 8
+				const left = Math.max(0, rect.left - pad)
+				const top = Math.max(0, rect.top - pad)
+				const right = Math.min(winW, rect.left + rect.width + pad)
+				const bottom = Math.min(winH, rect.top + rect.height + pad)
+				const width = right - left
+				const height = bottom - top
+				if (width < 20 || height < 16 || height > winH * 0.5) return null
+				return {
+					left,
+					top,
+					right,
+					bottom,
+					width,
+					height,
+					rightRest: Math.max(0, winW - right),
+					bottomRest: Math.max(0, winH - bottom)
+				}
+			},
+			guideSpotCss() {
+				const h = this.guideHole
+				if (!h) return ''
+				return `position:fixed;left:${h.left}px;top:${h.top}px;width:${h.width}px;height:${h.height}px;border:3px solid #18AF38;border-radius:12px;box-sizing:border-box;background:transparent;z-index:999998;`
+			},
+			guideSafeTop() {
+				const sys = uni.getSystemInfoSync()
+				// 自定义导航栏：状态栏 + 导航内容约 44px，再留空隙，避免盖住 logo / 胶囊
+				let top = (sys.statusBarHeight || 20) + 44 + 16
+				try {
+					const menu = uni.getMenuButtonBoundingClientRect()
+					if (menu && menu.bottom) top = Math.max(top, Math.ceil(menu.bottom) + 16)
+				} catch (e) {}
+				return top
+			},
+			guideSafeBottom() {
+				const sys = uni.getSystemInfoSync()
+				const tabbar = 108 * sys.windowWidth / 750 + 8
+				const inset = (sys.safeAreaInsets && sys.safeAreaInsets.bottom) || 0
+				return Math.ceil(tabbar + inset + 20)
+			},
+			guideCardTop() {
+				const sys = uni.getSystemInfoSync()
+				const winH = sys.windowHeight
+				const cardH = 230
+				const gap = 18
+				const minTop = this.guideSafeTop
+				const maxTop = winH - this.guideSafeBottom - cardH
+				const hole = this.guideHole
+				if (!hole || maxTop < minTop) {
+					return Math.max(minTop, Math.min(maxTop, Math.round((winH - cardH) / 2)))
+				}
+				const belowTop = hole.bottom + gap
+				const aboveTop = hole.top - gap - cardH
+				const belowOk = belowTop <= maxTop
+				const aboveOk = aboveTop >= minTop
+				// 高亮在上半屏：文案优先放下面，避开自定义导航；在下半屏：优先放上面，避开 tabbar
+				const holeCenter = (hole.top + hole.bottom) / 2
+				const preferBelow = holeCenter < winH * 0.58
+				if (preferBelow && belowOk) return belowTop
+				if (!preferBelow && aboveOk) return aboveTop
+				if (belowOk) return belowTop
+				if (aboveOk) return aboveTop
+				return Math.max(minTop, Math.min(maxTop, preferBelow ? belowTop : aboveTop))
+			},
+			guideCardPlaceBelow() {
+				const hole = this.guideHole
+				if (!hole) return true
+				return this.guideCardTop >= hole.bottom - 8
+			},
+			guideCardWrapCss() {
+				return `position:absolute;left:40rpx;right:40rpx;top:${this.guideCardTop}px;z-index:100054;transform:none;`
 			}
 		},
 		onShareAppMessage() {
@@ -284,9 +397,6 @@ export default {
 			}
 			// 检测新手引导标记（登录后由 login 页 setStorageSync 设置），检测到后启动引导并清除标记
 			this.checkAndStartGuide()
-			// 注意：自定义 tabBar（custom:true）模式下切勿调用 uni.showTabBar()，
-			// 否则会把原生 tabBar 一并强制显示，出现原生+自定义两个 tabbar
-			// 已登录但未设置小区 → 强制跳完善信息页（nextTick 避免 z-paging 白屏）
 			this.$nextTick(() => {
 				if (this.isLogin && !this.userInfo.community_id) {
 					uni.navigateTo({
@@ -296,29 +406,73 @@ export default {
 				}
 			})
 		},
-		methods: {
-		// 检测并启动新手引导（仅在已绑定小区后触发，否则会被 info 页打断）
-		checkAndStartGuide() {
-			const guideFlag = uni.getStorageSync('new_user_guide');
-			if (guideFlag && this.userInfo.community_id) {
-				// 立即清除标记，防止死循环
-				uni.removeStorageSync('new_user_guide');
-				// 立即开启透明遮罩，防止等待渲染的 600ms 内用户切页/点击
-				// 遮罩层级高于 custom-tab-bar，可直接盖住并拦截底部导航，无需 hideTabBar
-				this.guideLoading = true;
-				// 延迟启动引导，等待页面数据渲染完成
-				this.$nextTick(() => {
-					setTimeout(() => {
-						this.showGuide = true;
-						// 引导组件已弹出，移除加载遮罩
-						this.guideLoading = false;
-					}, 600);
-				});
+		onUnload() {
+			if (this._guideWaitTimer) {
+				clearTimeout(this._guideWaitTimer)
+				this._guideWaitTimer = null
 			}
 		},
-		// 引导关闭回调：清除加载遮罩（自定义 tabBar 始终由 custom-tab-bar 组件渲染，无需 showTabBar）
+		methods: {
+		// 检测并启动新手引导（仅未完成过、已绑定小区；标记在关闭时再清，避免等渲染时被打断丢失）
+		checkAndStartGuide() {
+			if (this._guideLock || this.showGuide || this.guideLoading) return
+			if (uni.getStorageSync('has_finished_guide')) return
+			const guideFlag = uni.getStorageSync('new_user_guide')
+			if (!guideFlag || !this.userInfo.community_id) return
+			this._guideLock = true
+			this.guideLoading = true
+			this.waitAndStartGuide()
+		},
+		waitAndStartGuide() {
+			const started = Date.now()
+			const poll = () => {
+				if (!this.guideLoading || this.showGuide) return
+				const pageReady = !this.isLoading
+				const helloReady = this.todayTask.show || Date.now() - started > 2200
+				if ((pageReady && helloReady) || Date.now() - started > 4000) {
+					this.playingGuideSteps = (this.guideSteps || []).filter(step => {
+						if (step.selector === '#guide-hello' && !this.todayTask.show) return false
+						return true
+					})
+					this.showGuide = true
+					this.guideLoading = false
+					return
+				}
+				this._guideWaitTimer = setTimeout(poll, 120)
+			}
+			this.$nextTick(poll)
+		},
 		onGuideClose() {
-			this.guideLoading = false;
+			this.guideLoading = false
+			this.showGuide = false
+			this.guideTargetRect = null
+			uni.setStorageSync('has_finished_guide', '1')
+			uni.removeStorageSync('new_user_guide')
+		},
+		onGuideQueryTarget(selector) {
+			if (!selector) {
+				this.guideTargetRect = null
+				return
+			}
+			this.$nextTick(() => {
+				uni.createSelectorQuery().in(this).select(selector).boundingClientRect(rect => {
+					if (rect && rect.width > 20 && rect.height > 16) {
+						this.guideTargetRect = {
+							left: rect.left,
+							top: rect.top,
+							width: rect.width,
+							height: rect.height
+						}
+					} else {
+						this.guideTargetRect = null
+					}
+				}).exec()
+			})
+		},
+		guideDimCss(left, top, width, height) {
+			const w = Math.max(0, width)
+			const h = Math.max(0, height)
+			return `position:fixed;left:${left}px;top:${top}px;width:${w}px;height:${h}px;background:rgba(0,0,0,0.72);z-index:999998;`
 		},
 		noop() {},
 		// 并行加载所有数据，全部完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
@@ -1092,6 +1246,19 @@ export default {
 		padding-bottom: 160rpx;
 	}
 
+	/* 页面全屏引导层，蒙版用内联 backgroundColor，避免 class 不生效 */
+	.guide-root {
+		position: fixed !important;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 999999;
+		background: transparent;
+	}
+
 	/* 新手引导加载期间透明遮罩：屏蔽所有点击与切页 */
 	.guide-loading-mask {
 		position: fixed;
@@ -1099,8 +1266,19 @@ export default {
 		left: 0;
 		right: 0;
 		bottom: 0;
-		/* 需高于 custom-tab-bar 的 9999，引导等待期盖住并拦截底部导航 */
 		z-index: 100001;
 		background: rgba(0, 0, 0, 0);
+	}
+
+	/* 与 custom-tab-bar 悬浮胶囊对齐，供引导高亮查询 */
+	.guide-tabbar-area {
+		position: fixed;
+		left: 24rpx;
+		right: 24rpx;
+		bottom: calc(4rpx + constant(safe-area-inset-bottom));
+		bottom: calc(4rpx + env(safe-area-inset-bottom));
+		height: 108rpx;
+		pointer-events: none;
+		z-index: 0;
 	}
 </style>
