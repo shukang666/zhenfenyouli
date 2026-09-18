@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>外勤工作台 - 点位巡查</title>
+    <title>外勤工作台 - 督导监测</title>
     <link rel="stylesheet" href="__STATIC__/font-awesome/css/font-awesome.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,16 +25,8 @@
             top: 0;
             z-index: 100;
         }
-        .header h1 {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .header .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-        }
+        .header h1 { font-size: 18px; font-weight: 600; }
+        .header .user-info { display: flex; align-items: center; gap: 12px; font-size: 14px; }
         .header .user-info a {
             color: #fff;
             text-decoration: none;
@@ -44,11 +36,7 @@
             font-size: 12px;
         }
         /* 内容区 */
-        .main {
-            padding: 16px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        .main { padding: 16px; max-width: 600px; margin: 0 auto; }
         /* Tab导航 */
         .tabs {
             display: flex;
@@ -68,11 +56,7 @@
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
         }
-        .tabs .tab.active {
-            color: #2fb74c;
-            border-bottom-color: #2fb74c;
-            font-weight: 600;
-        }
+        .tabs .tab.active { color: #2fb74c; border-bottom-color: #2fb74c; font-weight: 600; }
         /* 表单卡片 */
         .card {
             background: #fff;
@@ -84,17 +68,14 @@
         .card-title {
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .card-title i {
-            color: #2fb74c;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .card-title i { color: #2fb74c; }
+        .card-subtitle { font-size: 13px; color: #999; text-align: center; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
         .form-group label {
             display: block;
             font-size: 14px;
@@ -102,10 +83,7 @@
             margin-bottom: 8px;
             font-weight: 500;
         }
-        .form-group label .required {
-            color: #f56c6c;
-            margin-left: 4px;
-        }
+        .form-group label .required { color: #f56c6c; margin-left: 4px; }
         .form-control {
             width: 100%;
             height: 46px;
@@ -119,81 +97,88 @@
             outline: none;
             -webkit-appearance: none;
         }
-        .form-control:focus {
-            border-color: #2fb74c;
-            background: #fff;
-        }
+        .form-control:focus { border-color: #2fb74c; background: #fff; }
         select.form-control {
             background: #fafafa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 14px center;
         }
-        /* 图片上传区 */
-        .upload-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+        textarea.form-control { height: auto; min-height: 100px; padding: 12px 14px; resize: vertical; }
+        /* 是否/类型 标签选择（仿小程序 u-tag） */
+        .tag-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tag-item {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            border: 1px solid #dcdfe6;
+            color: #909399;
+            background: #fff;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
         }
-        .upload-item {
-            aspect-ratio: 1;
+        .tag-item.active-yes { background: #2fb74c; border-color: #2fb74c; color: #fff; }
+        .tag-item.active-no { background: #f56c6c; border-color: #f56c6c; color: #fff; }
+        /* 检查分组（仿小程序 check-group） */
+        .check-group {
+            background: #fafbfc;
+            border: 1px solid #e4e6eb;
+            border-radius: 10px;
+            padding: 16px 14px;
+            margin-bottom: 20px;
+        }
+        .check-group-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: #333; }
+        /* 照片上传区（通栏，仿小程序 upload-area） */
+        .upload-area {
+            width: 100%;
+            height: 140px;
             background: #f7f8fa;
             border: 2px dashed #ddd;
             border-radius: 10px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
-            overflow: hidden;
             position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
         }
-        .upload-item:hover {
-            border-color: #2fb74c;
-            background: #f0faf2;
+        .upload-area:hover { border-color: #2fb74c; background: #f0faf2; }
+        .upload-area .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .upload-item.has-image {
-            border-style: solid;
-            border-color: #e8e8e8;
-        }
-        .upload-item .upload-icon {
-            font-size: 28px;
-            color: #ccc;
-            margin-bottom: 6px;
-        }
-        .upload-item .upload-text {
-            font-size: 12px;
-            color: #999;
-        }
-        .upload-item img {
+        .upload-area .upload-placeholder i { font-size: 30px; color: #ccc; margin-bottom: 6px; }
+        .upload-area .upload-placeholder span { font-size: 13px; color: #999; }
+        .upload-area .upload-image {
+            position: absolute;
+            top: 0; left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .upload-item .delete-btn {
+        .upload-area .delete-btn {
             position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 24px;
-            height: 24px;
+            top: 6px;
+            right: 6px;
+            width: 26px;
+            height: 26px;
             background: rgba(0,0,0,0.5);
             border-radius: 50%;
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 13px;
             cursor: pointer;
             z-index: 2;
         }
-        .upload-item.uploading::after {
+        .upload-area.uploading::after {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(255,255,255,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        .upload-item.uploading::before {
+        .upload-area.uploading::before {
             content: '\f110';
             font-family: 'FontAwesome';
             position: absolute;
@@ -213,9 +198,9 @@
         .btn-submit {
             width: 100%;
             height: 50px;
-            background: linear-gradient(135deg, #2fb74c, #1a8a32);
+            background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
             border: none;
-            border-radius: 12px;
+            border-radius: 25px;
             color: #fff;
             font-size: 17px;
             font-weight: 600;
@@ -223,58 +208,18 @@
             transition: transform 0.1s;
             margin-top: 10px;
         }
-        .btn-submit:active {
-            transform: scale(0.98);
-        }
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        .btn-submit:active { transform: scale(0.98); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
         /* 记录列表 */
-        .record-item {
-            padding: 14px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .record-item:last-child {
-            border-bottom: none;
-        }
-        .record-item .record-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .record-item .record-community {
-            font-size: 16px;
-            font-weight: 500;
-            color: #333;
-        }
-        .record-item .record-date {
-            font-size: 13px;
-            color: #999;
-        }
-        .record-item .record-photos {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .record-item .record-photos img {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px 0;
-            color: #bbb;
-            font-size: 15px;
-        }
-        .empty-state i {
-            font-size: 40px;
-            display: block;
-            margin-bottom: 10px;
-            color: #ddd;
-        }
+        .record-item { padding: 14px 0; border-bottom: 1px solid #f0f0f0; }
+        .record-item:last-child { border-bottom: none; }
+        .record-item .record-info { display: flex; justify-content: space-between; align-items: center; }
+        .record-item .record-community { font-size: 16px; font-weight: 500; color: #333; }
+        .record-item .record-date { font-size: 13px; color: #999; }
+        .record-item .record-photos { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .record-item .record-photos img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+        .empty-state { text-align: center; padding: 40px 0; color: #bbb; font-size: 15px; }
+        .empty-state i { font-size: 40px; display: block; margin-bottom: 10px; color: #ddd; }
         /* Toast提示 */
         .toast {
             position: fixed;
@@ -288,13 +233,10 @@
             font-size: 14px;
             z-index: 9999;
             display: none;
+            max-width: 80%;
+            text-align: center;
         }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            padding: 20px 0;
-        }
+        .pagination { display: flex; justify-content: center; gap: 12px; padding: 20px 0; }
         .pagination a, .pagination span {
             padding: 8px 16px;
             border-radius: 8px;
@@ -304,105 +246,8 @@
             text-decoration: none;
             box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
-        .pagination .current {
-            background: #2fb74c;
-            color: #fff;
-        }
-        /* 隐藏文件input */
-        .hidden-file-input {
-            display: none;
-        }
-
-        /* ===== 社区选择器 ===== */
-        .community-picker {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 14px;
-            border: 2px solid #e8e8e8;
-            border-radius: 10px;
-            background: #fafafa;
-            cursor: pointer;
-            min-height: 46px;
-        }
-        .community-picker:hover {
-            border-color: #2fb74c;
-        }
-        .community-picker .community-placeholder {
-            color: #ccc;
-            font-size: 15px;
-        }
-        .community-picker .community-selected {
-            font-size: 15px;
-            color: #333;
-        }
-        .community-picker .community-parent {
-            font-size: 12px;
-            color: #999;
-            margin-top: 2px;
-        }
-        .community-dropdown-mask {
-            position: fixed;
-            left: 0; right: 0; top: 0; bottom: 0;
-            background: rgba(0,0,0,0.3);
-            z-index: 999;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-        }
-        .community-dropdown {
-            margin-top: 120px;
-            width: 90%;
-            max-width: 500px;
-            background: #fff;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-        }
-        .community-search input {
-            width: 100%;
-            height: 42px;
-            padding: 0 14px;
-            border: 1px solid #e8e8e8;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #f7f7f7;
-            outline: none;
-        }
-        .community-search input:focus {
-            border-color: #2fb74c;
-        }
-        .community-dropdown-list {
-            max-height: 50vh;
-            overflow-y: auto;
-            margin-top: 10px;
-        }
-        .community-dropdown-item {
-            padding: 12px 8px;
-            border-bottom: 1px solid #f5f5f5;
-            cursor: pointer;
-        }
-        .community-dropdown-item:last-child {
-            border-bottom: none;
-        }
-        .community-dropdown-item:hover {
-            background: #f0faf2;
-        }
-        .community-dropdown-item .item-name {
-            font-size: 15px;
-            color: #333;
-        }
-        .community-dropdown-item .item-parent {
-            font-size: 12px;
-            color: #999;
-            margin-top: 2px;
-        }
-        .community-empty {
-            text-align: center;
-            padding: 30px 0;
-            color: #bbb;
-            font-size: 14px;
-        }
+        .pagination .current { background: #2fb74c; color: #fff; }
+        .hidden-file-input { display: none; }
     </style>
 </head>
 <body>
@@ -416,20 +261,21 @@
     </div>
 </div>
 
-<!-- Tab导航 -->
 <div class="main">
+    <!-- Tab导航 -->
     <div class="tabs">
-        <div class="tab active" data-tab="clock"><i class="fa fa-camera"></i> 点位巡查</div>
+        <div class="tab active" data-tab="clock"><i class="fa fa-camera"></i> 督导监测</div>
         <div class="tab" data-tab="records"><i class="fa fa-list"></i> 巡查记录</div>
     </div>
 
-    <!-- 点位巡查表单 -->
+    <!-- 督导监测表单（字段与小程序 pages/dtsh/supervision-monitor 完全一致） -->
     <div id="tab-clock" class="tab-content">
         <div class="card">
-            <div class="card-title"><i class="fa fa-check-circle-o"></i> 点位巡查录入</div>
+            <div class="card-title" style="justify-content:center;">督导监测</div>
+            <div class="card-subtitle">厨余垃圾督导检查信息登记</div>
 
             <form id="inspectForm">
-                <!-- 所属社区（下拉选择，与小程序一致：数据源为社区列表 get_community_parent_list） -->
+                <!-- 所属社区 * -->
                 <div class="form-group">
                     <label>所属社区<span class="required">*</span></label>
                     <select id="community_id" class="form-control">
@@ -437,50 +283,232 @@
                     </select>
                 </div>
 
-                <!-- 单位名称/点位（手填，与小程序一致） -->
+                <!-- 单位名称 * -->
                 <div class="form-group">
-                    <label>单位名称（点位）<span class="required">*</span></label>
-                    <input type="text" id="unit_name" class="form-control" placeholder="请输入单位/点位名称" autocomplete="off">
+                    <label>单位名称<span class="required">*</span></label>
+                    <input type="text" id="unit_name" class="form-control" placeholder="请输入单位名称" maxlength="50" autocomplete="off">
                 </div>
 
-                <!-- 三张照片上传 -->
+                <!-- 单位类型 * -->
                 <div class="form-group">
-                    <label>门头照片<span class="required">*</span></label>
-                    <div class="upload-grid">
-                        <div class="upload-item" data-field="door_photo" onclick="document.getElementById('file_door').click()">
-                            <i class="upload-icon fa fa-camera"></i>
-                            <span class="upload-text">点击上传</span>
-                            <img style="display:none;" />
+                    <label>单位类型<span class="required">*</span></label>
+                    <div class="tag-group" id="unitTypeGroup">
+                        <span class="tag-item" data-value="1" onclick="setUnitType(1, this)">公共机构</span>
+                        <span class="tag-item" data-value="2" onclick="setUnitType(2, this)">经营场所</span>
+                        <span class="tag-item" data-value="3" onclick="setUnitType(3, this)">沿街商铺</span>
+                        <span class="tag-item" data-value="4" onclick="setUnitType(4, this)">经营区域</span>
+                    </div>
+                </div>
+
+                <!-- 日期 * -->
+                <div class="form-group">
+                    <label>日期<span class="required">*</span></label>
+                    <input type="date" id="check_date" class="form-control">
+                </div>
+
+                <!-- 地址 * -->
+                <div class="form-group">
+                    <label>地址<span class="required">*</span></label>
+                    <input type="text" id="address" class="form-control" placeholder="请输入地址" maxlength="100" autocomplete="off">
+                </div>
+
+                <!-- 联系人 -->
+                <div class="form-group">
+                    <label>联系人</label>
+                    <input type="text" id="contact" class="form-control" placeholder="请输入联系人" maxlength="20" autocomplete="off">
+                </div>
+
+                <!-- 联系电话 -->
+                <div class="form-group">
+                    <label>联系电话</label>
+                    <input type="tel" id="contact_phone" class="form-control" placeholder="请输入联系电话" maxlength="11" autocomplete="off">
+                </div>
+
+                <!-- 是否产生厨余垃圾 -->
+                <div class="form-group">
+                    <label>是否产生厨余垃圾</label>
+                    <div class="tag-group">
+                        <span class="tag-item" onclick="setBoolTag('has_waste', 1, this)">是</span>
+                        <span class="tag-item" onclick="setBoolTag('has_waste', 0, this)">否</span>
+                    </div>
+                </div>
+
+                <!-- 厨余垃圾是否正确分出 -->
+                <div class="form-group">
+                    <label>厨余垃圾是否正确分出</label>
+                    <div class="tag-group">
+                        <span class="tag-item" onclick="setBoolTag('waste_correct', 1, this)">是</span>
+                        <span class="tag-item" onclick="setBoolTag('waste_correct', 0, this)">否</span>
+                    </div>
+                </div>
+
+                <!-- 厨余垃圾流向 -->
+                <div class="form-group">
+                    <label>厨余垃圾流向</label>
+                    <input type="text" id="waste_flow" class="form-control" placeholder="请输入厨余垃圾流向" maxlength="100" autocomplete="off">
+                </div>
+
+                <!-- 门头照片 -->
+                <div class="form-group">
+                    <label>门头照片</label>
+                    <div class="upload-area" data-field="door_photo" onclick="triggerFile('door_photo')">
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                        <img class="upload-image" style="display:none;" />
+                        <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('door_photo')"><i class="fa fa-times"></i></span>
+                    </div>
+                    <input type="file" id="file_door_photo" class="hidden-file-input" accept="image/*" data-field="door_photo">
+                </div>
+
+                <!-- 内部环境照片 -->
+                <div class="form-group">
+                    <label>内部环境照片</label>
+                    <div class="upload-area" data-field="inner_photo" onclick="triggerFile('inner_photo')">
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                        <img class="upload-image" style="display:none;" />
+                        <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('inner_photo')"><i class="fa fa-times"></i></span>
+                    </div>
+                    <input type="file" id="file_inner_photo" class="hidden-file-input" accept="image/*" data-field="inner_photo">
+                </div>
+
+                <!-- 宣传品照片 -->
+                <div class="form-group">
+                    <label>宣传品照片</label>
+                    <div class="upload-area" data-field="publicity_photo" onclick="triggerFile('publicity_photo')">
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                        <img class="upload-image" style="display:none;" />
+                        <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('publicity_photo')"><i class="fa fa-times"></i></span>
+                    </div>
+                    <input type="file" id="file_publicity_photo" class="hidden-file-input" accept="image/*" data-field="publicity_photo">
+                </div>
+
+                <!-- 内部环境检查（分组） -->
+                <div class="check-group">
+                    <div class="check-group-title">内部环境检查</div>
+                    <div class="form-group">
+                        <label>是否合格</label>
+                        <div class="tag-group">
+                            <span class="tag-item" onclick="setBoolTag('inner_qualified', 1, this)">是</span>
+                            <span class="tag-item" onclick="setBoolTag('inner_qualified', 0, this)">否</span>
                         </div>
                     </div>
-                    <input type="file" id="file_door" class="hidden-file-input" accept="image/*" data-field="door_photo">
-                </div>
-
-                <div class="form-group">
-                    <label>内部环境照片<span class="required">*</span></label>
-                    <div class="upload-grid">
-                        <div class="upload-item" data-field="inner_photo" onclick="document.getElementById('file_inner').click()">
-                            <i class="upload-icon fa fa-camera"></i>
-                            <span class="upload-text">点击上传</span>
-                            <img style="display:none;" />
+                    <div class="form-group">
+                        <label>是否需要整改</label>
+                        <div class="tag-group">
+                            <span class="tag-item" onclick="setBoolTag('need_rectify', 1, this)">是</span>
+                            <span class="tag-item" onclick="setBoolTag('need_rectify', 0, this)">否</span>
                         </div>
                     </div>
-                    <input type="file" id="file_inner" class="hidden-file-input" accept="image/*" data-field="inner_photo">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>整改后照片</label>
+                        <div class="upload-area" data-field="inner_rectify_photo" onclick="triggerFile('inner_rectify_photo')">
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                            <img class="upload-image" style="display:none;" />
+                            <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('inner_rectify_photo')"><i class="fa fa-times"></i></span>
+                        </div>
+                        <input type="file" id="file_inner_rectify_photo" class="hidden-file-input" accept="image/*" data-field="inner_rectify_photo">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>宣传品照片<span class="required">*</span></label>
-                    <div class="upload-grid">
-                        <div class="upload-item" data-field="publicity_photo" onclick="document.getElementById('file_publicity').click()">
-                            <i class="upload-icon fa fa-camera"></i>
-                            <span class="upload-text">点击上传</span>
-                            <img style="display:none;" />
+                <!-- 投放点检查（分组） -->
+                <div class="check-group">
+                    <div class="check-group-title">投放点检查</div>
+                    <div class="form-group">
+                        <label>投放点照片</label>
+                        <div class="upload-area" data-field="point_photo" onclick="triggerFile('point_photo')">
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                            <img class="upload-image" style="display:none;" />
+                            <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('point_photo')"><i class="fa fa-times"></i></span>
+                        </div>
+                        <input type="file" id="file_point_photo" class="hidden-file-input" accept="image/*" data-field="point_photo">
+                    </div>
+                    <div class="form-group">
+                        <label>是否合格</label>
+                        <div class="tag-group">
+                            <span class="tag-item" onclick="setBoolTag('point_qualified', 1, this)">是</span>
+                            <span class="tag-item" onclick="setBoolTag('point_qualified', 0, this)">否</span>
                         </div>
                     </div>
-                    <input type="file" id="file_publicity" class="hidden-file-input" accept="image/*" data-field="publicity_photo">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>整改后照片</label>
+                        <div class="upload-area" data-field="point_rectify_photo" onclick="triggerFile('point_rectify_photo')">
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                            <img class="upload-image" style="display:none;" />
+                            <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('point_rectify_photo')"><i class="fa fa-times"></i></span>
+                        </div>
+                        <input type="file" id="file_point_rectify_photo" class="hidden-file-input" accept="image/*" data-field="point_rectify_photo">
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-submit" id="btnSubmit">提交巡查</button>
+                <!-- 点位管理检查（分组） -->
+                <div class="check-group">
+                    <div class="check-group-title">点位管理检查</div>
+                    <div class="form-group">
+                        <label>点位管理照片</label>
+                        <div class="upload-area" data-field="manage_photo" onclick="triggerFile('manage_photo')">
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                            <img class="upload-image" style="display:none;" />
+                            <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('manage_photo')"><i class="fa fa-times"></i></span>
+                        </div>
+                        <input type="file" id="file_manage_photo" class="hidden-file-input" accept="image/*" data-field="manage_photo">
+                    </div>
+                    <div class="form-group">
+                        <label>是否合格</label>
+                        <div class="tag-group">
+                            <span class="tag-item" onclick="setBoolTag('manage_qualified', 1, this)">是</span>
+                            <span class="tag-item" onclick="setBoolTag('manage_qualified', 0, this)">否</span>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>整改后照片</label>
+                        <div class="upload-area" data-field="manage_rectify_photo" onclick="triggerFile('manage_rectify_photo')">
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                            <img class="upload-image" style="display:none;" />
+                            <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('manage_rectify_photo')"><i class="fa fa-times"></i></span>
+                        </div>
+                        <input type="file" id="file_manage_rectify_photo" class="hidden-file-input" accept="image/*" data-field="manage_rectify_photo">
+                    </div>
+                </div>
+
+                <!-- 收运链条照片 -->
+                <div class="form-group">
+                    <label>收运链条照片</label>
+                    <div class="upload-area" data-field="transport_photo" onclick="triggerFile('transport_photo')">
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                        <img class="upload-image" style="display:none;" />
+                        <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('transport_photo')"><i class="fa fa-times"></i></span>
+                    </div>
+                    <input type="file" id="file_transport_photo" class="hidden-file-input" accept="image/*" data-field="transport_photo">
+                </div>
+
+                <!-- 餐饮企业相关宣传 -->
+                <div class="form-group">
+                    <label>餐饮企业相关宣传</label>
+                    <div class="upload-area" data-field="catering_photo" onclick="triggerFile('catering_photo')">
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                        <img class="upload-image" style="display:none;" />
+                        <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('catering_photo')"><i class="fa fa-times"></i></span>
+                    </div>
+                    <input type="file" id="file_catering_photo" class="hidden-file-input" accept="image/*" data-field="catering_photo">
+                </div>
+
+                <!-- 准确率照片 -->
+                <div class="form-group">
+                    <label>准确率照片</label>
+                    <div class="upload-area" data-field="accuracy_photo" onclick="triggerFile('accuracy_photo')">
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
+                        <img class="upload-image" style="display:none;" />
+                        <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('accuracy_photo')"><i class="fa fa-times"></i></span>
+                    </div>
+                    <input type="file" id="file_accuracy_photo" class="hidden-file-input" accept="image/*" data-field="accuracy_photo">
+                </div>
+
+                <!-- 总体评价 -->
+                <div class="form-group">
+                    <label>总体评价</label>
+                    <textarea id="overall_evaluation" class="form-control" placeholder="请输入总体评价" maxlength="500"></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnSubmit">提交</button>
             </form>
         </div>
     </div>
@@ -504,11 +532,46 @@
 
 <script src="__STATIC__/js/jquery.js"></script>
 <script>
-// 图片字段映射
-var uploadFields = ['door_photo', 'inner_photo', 'publicity_photo'];
-var uploadedImages = { door_photo: '', inner_photo: '', publicity_photo: '' };
+// ===== 照片字段（与小程序 form 一致，共 11 项） =====
+var uploadFields = ['door_photo', 'inner_photo', 'publicity_photo',
+    'inner_rectify_photo', 'point_photo', 'point_rectify_photo',
+    'manage_photo', 'manage_rectify_photo',
+    'transport_photo', 'catering_photo', 'accuracy_photo'];
+var uploadedImages = {};
+uploadFields.forEach(function(f) { uploadedImages[f] = ''; });
 
-// ===== 所属社区下拉（与小程序一致：数据源同 /wxapp/forum/get_community_parent_list） =====
+// ===== 是/否、单位类型选择状态（与小程序 form 初始 null 一致） =====
+var formState = {
+    unit_type: null,
+    has_waste: null,
+    waste_correct: null,
+    inner_qualified: null,
+    need_rectify: null,
+    point_qualified: null,
+    manage_qualified: null
+};
+
+// 单位类型单选
+function setUnitType(value, el) {
+    formState.unit_type = value;
+    $('#unitTypeGroup .tag-item').removeClass('active-yes');
+    $(el).addClass('active-yes');
+}
+
+// 是/否选择（再次点击已选中项可取消，回到 null，与小程序初始态一致）
+function setBoolTag(field, value, el) {
+    var $group = $(el).closest('.tag-group');
+    if (formState[field] === value) {
+        formState[field] = null;
+        $group.find('.tag-item').removeClass('active-yes active-no');
+        return;
+    }
+    formState[field] = value;
+    $group.find('.tag-item').removeClass('active-yes active-no');
+    $(el).addClass(value === 1 ? 'active-yes' : 'active-no');
+}
+
+// ===== 所属社区下拉（数据源同 /wxapp/forum/get_community_parent_list） =====
 function loadCommunityParentList() {
     $.get('{:url("admin/FieldWorker/communityParentList")}', function(res) {
         if (res.code == 1) {
@@ -527,8 +590,6 @@ function loadCommunityParentList() {
 }
 loadCommunityParentList();
 
-// （旧的小区搜索弹窗逻辑已移除：所属社区改为社区下拉、点位改为手填）
-
 // Tab切换
 $('.tab').on('click', function() {
     $('.tab').removeClass('active');
@@ -541,7 +602,11 @@ $('.tab').on('click', function() {
     }
 });
 
-// 图片上传绑定
+// ===== 图片上传 =====
+function triggerFile(field) {
+    document.getElementById('file_' + field).click();
+}
+
 $('.hidden-file-input').on('change', function() {
     var field = $(this).data('field');
     var file = this.files[0];
@@ -550,14 +615,12 @@ $('.hidden-file-input').on('change', function() {
     this.value = '';
 });
 
-// 上传图片
 function uploadImage(field, file) {
     var formData = new FormData();
     formData.append('file', file);
 
-    // 显示上传状态
-    var $item = $('.upload-item[data-field="' + field + '"]');
-    $item.addClass('uploading');
+    var $area = $('.upload-area[data-field="' + field + '"]');
+    $area.addClass('uploading');
 
     $.ajax({
         url: '{:url("admin/FieldWorker/upload")}',
@@ -567,52 +630,47 @@ function uploadImage(field, file) {
         contentType: false,
         dataType: 'json',
         success: function(res) {
-            $item.removeClass('uploading');
+            $area.removeClass('uploading');
             if (res.code == 1) {
                 var url = res.data.url;
                 uploadedImages[field] = url;
-                $item.addClass('has-image');
-                $item.find('.upload-icon, .upload-text').hide();
-                var $img = $item.find('img');
-                $img.attr('src', url).show();
-                // 添加删除按钮
-                if (!$item.find('.delete-btn').length) {
-                    $item.append('<span class="delete-btn" onclick="event.stopPropagation(); removeImage(\'' + field + '\')"><i class="fa fa-times"></i></span>');
-                }
+                $area.find('.upload-placeholder').hide();
+                $area.find('.upload-image').attr('src', url).show();
+                $area.find('.delete-btn').show();
             } else {
                 showToast(res.msg || '上传失败');
             }
         },
         error: function() {
-            $item.removeClass('uploading');
+            $area.removeClass('uploading');
             showToast('上传失败，请重试');
         }
     });
 }
 
-// 删除图片
 function removeImage(field) {
     uploadedImages[field] = '';
-    var $item = $('.upload-item[data-field="' + field + '"]');
-    $item.removeClass('has-image');
-    $item.find('.upload-icon, .upload-text').show();
-    $item.find('img').hide().attr('src', '');
-    $item.find('.delete-btn').remove();
+    var $area = $('.upload-area[data-field="' + field + '"]');
+    $area.find('.upload-image').hide().attr('src', '');
+    $area.find('.delete-btn').hide();
+    $area.find('.upload-placeholder').show();
 }
 
-// 表单提交
+// ===== 表单提交（必填规则与小程序一致） =====
 $('#inspectForm').on('submit', function(e) {
     e.preventDefault();
 
-    var communityId = $('#community_id').val();
+    var communityId   = $('#community_id').val();
     var communityName = $('#community_id option:selected').text();
-    var unitName = $.trim($('#unit_name').val());
+    var unitName      = $.trim($('#unit_name').val());
+    var checkDate     = $('#check_date').val();
+    var address       = $.trim($('#address').val());
 
     if (!communityId) { showToast('请选择所属社区'); return; }
     if (!unitName) { showToast('请填写单位名称'); return; }
-    if (!uploadedImages.door_photo) { showToast('请上传门头照片'); return; }
-    if (!uploadedImages.inner_photo) { showToast('请上传内部环境照片'); return; }
-    if (!uploadedImages.publicity_photo) { showToast('请上传宣传品照片'); return; }
+    if (formState.unit_type === null) { showToast('请选择单位类型'); return; }
+    if (!checkDate) { showToast('请选择日期'); return; }
+    if (!address) { showToast('请填写地址'); return; }
 
     $('#btnSubmit').prop('disabled', true).text('提交中...');
 
@@ -620,10 +678,22 @@ $('#inspectForm').on('submit', function(e) {
         community_id: communityId,
         community_name: communityName,
         unit_name: unitName,
-        door_photo: uploadedImages.door_photo,
-        inner_photo: uploadedImages.inner_photo,
-        publicity_photo: uploadedImages.publicity_photo
+        unit_type: formState.unit_type,
+        check_date: checkDate,
+        address: address,
+        contact: $.trim($('#contact').val()),
+        contact_phone: $.trim($('#contact_phone').val()),
+        has_waste: formState.has_waste === 1 ? 1 : 0,
+        waste_correct: formState.waste_correct === 1 ? 1 : 0,
+        waste_flow: $.trim($('#waste_flow').val()),
+        inner_qualified: formState.inner_qualified === 1 ? 1 : 0,
+        need_rectify: formState.need_rectify === 1 ? 1 : 0,
+        point_qualified: formState.point_qualified === 1 ? 1 : 0,
+        manage_qualified: formState.manage_qualified === 1 ? 1 : 0,
+        overall_evaluation: $.trim($('#overall_evaluation').val())
     };
+    // 11 项照片
+    uploadFields.forEach(function(f) { postData[f] = uploadedImages[f]; });
 
     $.ajax({
         type: 'POST',
@@ -632,27 +702,36 @@ $('#inspectForm').on('submit', function(e) {
         dataType: 'json',
         success: function(res) {
             if (res.code == 1) {
-                showToast('提交成功');
-                // 重置表单
+                showToast(res.msg || '已提交');
                 setTimeout(function() {
-                    $('#community_id').val('');
-                    $('#unit_name').val('');
-                    uploadFields.forEach(function(f) { removeImage(f); });
-                    $('#btnSubmit').prop('disabled', false).text('提交巡查');
+                    resetForm();
+                    $('#btnSubmit').prop('disabled', false).text('提交');
                 }, 1000);
             } else {
                 showToast(res.msg || '提交失败');
-                $('#btnSubmit').prop('disabled', false).text('提交巡查');
+                $('#btnSubmit').prop('disabled', false).text('提交');
             }
         },
         error: function() {
             showToast('网络错误，请重试');
-            $('#btnSubmit').prop('disabled', false).text('提交巡查');
+            $('#btnSubmit').prop('disabled', false).text('提交');
         }
     });
 });
 
-// 加载记录
+// 重置表单
+function resetForm() {
+    $('#community_id').val('');
+    $('#unit_name, #address, #contact, #contact_phone, #waste_flow').val('');
+    $('#check_date').val('');
+    $('#overall_evaluation').val('');
+    $('#unitTypeGroup .tag-item').removeClass('active-yes');
+    $('.tag-group .tag-item').removeClass('active-yes active-no');
+    for (var k in formState) { formState[k] = null; }
+    uploadFields.forEach(function(f) { removeImage(f); });
+}
+
+// ===== 巡查记录 =====
 function loadRecords(page) {
     page = page || 1;
     $.get('{:url("admin/FieldWorker/records")}', { page: page }, function(res) {
@@ -681,7 +760,6 @@ function renderRecords(data) {
             }
             html += '</div>';
         });
-        // 分页
         if (data.totalPage > 1) {
             html += '<div class="pagination">';
             for (var i = 1; i <= data.totalPage; i++) {

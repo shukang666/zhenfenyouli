@@ -312,9 +312,9 @@ class FieldWorkerController extends BaseController
     }
 
     /**
-     * 提交点位巡查
-     * 前端传入：community_id(小区ID), community_name(社区名=parent_name), unit_name(小区名)
-     * 与督导监测表单保持一致：community_name 存社区名，unit_name 存小区/点位名
+     * 提交点位巡查（督导监测表单）
+     * 字段与必填规则完全对齐小程序 /wxapp/supervision_monitor/post
+     * （api\wxapp\controller\SupervisionMonitorController::post）
      */
     public function submit()
     {
@@ -330,58 +330,69 @@ class FieldWorkerController extends BaseController
         $communityId   = intval($this->request->param('community_id', 0));
         $communityName = trim($this->request->param('community_name', ''));
         $unitName      = trim($this->request->param('unit_name', ''));
-        $doorPhoto     = trim($this->request->param('door_photo', ''));
-        $innerPhoto    = trim($this->request->param('inner_photo', ''));
-        $publicityPhoto= trim($this->request->param('publicity_photo', ''));
+        $unitType      = intval($this->request->param('unit_type', 0));
+        $checkDate     = trim($this->request->param('check_date', ''));
+        $address       = trim($this->request->param('address', ''));
+        $contact       = trim($this->request->param('contact', ''));
+        $contactPhone  = trim($this->request->param('contact_phone', ''));
 
-        if ($communityId <= 0) {
-            $this->error('请选择所属社区');
-        }
-        if (empty($communityName)) {
+        // 必填校验（与小程序接口一致）
+        if ($communityId <= 0 || empty($communityName)) {
             $this->error('请选择所属社区');
         }
         if (empty($unitName)) {
             $this->error('请填写单位名称');
         }
-        if (empty($doorPhoto) || empty($innerPhoto) || empty($publicityPhoto)) {
-            $this->error('请上传全部三张照片');
+        if (!in_array($unitType, [1, 2, 3, 4])) {
+            $this->error('请选择单位类型');
+        }
+        if (empty($checkDate)) {
+            $this->error('请选择日期');
+        }
+        if (empty($address)) {
+            $this->error('请填写地址');
         }
 
+        // 是否类字段（1=是 0=否，未选择按 0 存，与小程序接口一致）
+        $bool = function ($name) {
+            return $this->request->param($name, 0) == 1 ? 1 : 0;
+        };
+
         $data = [
-            'user_id'         => $this->admin_id,
-            'community_id'    => $communityId,
-            'community_name'  => $communityName,
-            'unit_name'       => $unitName,
-            'unit_type'       => 1,
-            'check_date'      => date('Y-m-d'),
-            'address'         => '',
-            'contact'         => '',
-            'contact_phone'   => '',
-            'has_waste'       => 1,
-            'waste_correct'   => 1,
-            'waste_flow'      => '',
-            'door_photo'      => $doorPhoto,
-            'inner_photo'     => $innerPhoto,
-            'publicity_photo' => $publicityPhoto,
-            'inner_qualified' => 1,
-            'need_rectify'    => 0,
-            'inner_rectify_photo' => '',
-            'point_photo'     => '',
-            'point_qualified' => 1,
-            'point_rectify_photo' => '',
-            'manage_photo'    => '',
-            'manage_qualified'=> 1,
-            'manage_rectify_photo' => '',
-            'transport_photo' => '',
-            'catering_photo'  => '',
-            'accuracy_photo'  => '',
-            'overall_evaluation' => '',
-            'create_time'     => time(),
+            'user_id'              => $this->admin_id,
+            'community_id'         => $communityId,
+            'community_name'       => $communityName,
+            'unit_name'            => $unitName,
+            'unit_type'            => $unitType,
+            'check_date'           => $checkDate,
+            'address'              => $address,
+            'contact'              => $contact,
+            'contact_phone'        => $contactPhone,
+            'has_waste'            => $bool('has_waste'),
+            'waste_correct'        => $bool('waste_correct'),
+            'waste_flow'           => trim($this->request->param('waste_flow', '')),
+            'door_photo'           => trim($this->request->param('door_photo', '')),
+            'inner_photo'          => trim($this->request->param('inner_photo', '')),
+            'publicity_photo'      => trim($this->request->param('publicity_photo', '')),
+            'inner_qualified'      => $bool('inner_qualified'),
+            'need_rectify'         => $bool('need_rectify'),
+            'inner_rectify_photo'  => trim($this->request->param('inner_rectify_photo', '')),
+            'point_photo'          => trim($this->request->param('point_photo', '')),
+            'point_qualified'      => $bool('point_qualified'),
+            'point_rectify_photo'  => trim($this->request->param('point_rectify_photo', '')),
+            'manage_photo'         => trim($this->request->param('manage_photo', '')),
+            'manage_qualified'     => $bool('manage_qualified'),
+            'manage_rectify_photo' => trim($this->request->param('manage_rectify_photo', '')),
+            'transport_photo'      => trim($this->request->param('transport_photo', '')),
+            'catering_photo'       => trim($this->request->param('catering_photo', '')),
+            'accuracy_photo'       => trim($this->request->param('accuracy_photo', '')),
+            'overall_evaluation'   => trim($this->request->param('overall_evaluation', '')),
+            'create_time'          => time(),
         ];
 
         Db::name('supervision_monitor')->insert($data);
 
-        $this->success('提交成功');
+        $this->success('已提交');
     }
 
     /**
