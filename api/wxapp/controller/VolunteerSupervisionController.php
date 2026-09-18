@@ -125,7 +125,12 @@ class VolunteerSupervisionController extends AuthController
     private function getPeakPeriods()
     {
         $config = cmf_get_option('set_config');
-        $periods = json_decode($config['supervision_peak_periods'] ?? '', true);
+        $raw = $config['supervision_peak_periods'] ?? '';
+        if (is_array($raw)) {
+            $periods = $raw;
+        } else {
+            $periods = json_decode($raw, true);
+        }
         if (empty($periods) || (!is_array($periods))) {
             $periods = ['am' => ['07:30', '09:30'], 'pm' => ['16:30', '18:30']];
         }
