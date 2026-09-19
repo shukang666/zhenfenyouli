@@ -28,58 +28,58 @@
 			<p class="scene-sub scene-sub-strong">全球首个智慧低碳服务企业样板</p>
 		</div>
 		<div class="scene-viz" id="scene-viz" aria-hidden="true">
-			<div class="viz-grid"></div>
-			<div class="viz-radar"></div>
-			<div class="viz-orbit viz-orbit-a"></div>
-			<div class="viz-orbit viz-orbit-b"></div>
-			<svg class="viz-net" viewBox="0 0 1600 900" preserveAspectRatio="xMinYMin slice">
-				<g class="viz-pack">
-					<path class="viz-line" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line viz-line-delay" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line viz-line-slow" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
+			<svg class="viz-net" viewBox="0 0 1600 920" preserveAspectRatio="xMinYMax slice">
+				<defs>
+					<linearGradient id="branchFlow" gradientUnits="userSpaceOnUse" x1="-500" y1="920" x2="700" y2="120">
+						<stop offset="0%" stop-color="#0f3d24"/>
+						<stop offset="22%" stop-color="#15803d"/>
+						<stop offset="48%" stop-color="#86efac"/>
+						<stop offset="72%" stop-color="#22c55e"/>
+						<stop offset="100%" stop-color="#14532d"/>
+						<animate attributeName="x1" values="-700;300" dur="7s" repeatCount="indefinite"/>
+						<animate attributeName="x2" values="500;1500" dur="7s" repeatCount="indefinite"/>
+					</linearGradient>
+					<linearGradient id="leafFlow" x1="0%" y1="0%" x2="100%" y2="100%">
+						<stop offset="0%" stop-color="#bbf7d0"/>
+						<stop offset="45%" stop-color="#4ade80"/>
+						<stop offset="100%" stop-color="#16a34a"/>
+						<animate attributeName="x1" values="0%;80%" dur="5s" repeatCount="indefinite"/>
+						<animate attributeName="x2" values="100%;180%" dur="5s" repeatCount="indefinite"/>
+					</linearGradient>
+				</defs>
+				<g class="viz-branches" fill="url(#branchFlow)">
+					<path d="M54 930 C78 742, 104 598, 158 478 C208 372, 292 302, 400 246 L418 278 C316 332, 240 398, 194 498 C146 618, 122 756, 104 930 Z"/>
+					<path d="M400 246 C548 168, 742 108, 960 86 C1148 68, 1328 64, 1490 48 L1496 72 C1334 86, 1156 92, 968 110 C760 132, 578 190, 430 264 Z"/>
+					<path d="M158 478 C318 438, 522 454, 760 428 C990 404, 1220 348, 1472 292 L1480 318 C1230 372, 1004 426, 768 450 C538 476, 342 462, 188 500 Z"/>
+					<path d="M90 720 C248 686, 456 714, 690 690 C940 664, 1188 612, 1456 556 L1464 580 C1198 634, 954 684, 696 710 C468 734, 268 708, 116 742 Z"/>
+					<path d="M292 302 C360 248, 448 198, 568 164 C678 134, 802 122, 930 108 L936 128 C812 142, 694 154, 590 182 C478 214, 398 260, 338 310 Z"/>
+					<path d="M522 454 C610 398, 718 352, 848 330 C956 314, 1074 308, 1196 292 L1202 310 C1082 324, 968 332, 862 348 C740 370, 640 414, 558 466 Z"/>
+					<path d="M456 714 C530 652, 628 604, 748 582 C848 564, 962 558, 1084 538 L1090 556 C972 574, 862 582, 764 598 C652 620, 562 664, 498 720 Z"/>
+					<path d="M104 598 C168 548, 248 512, 348 498 C430 488, 520 492, 612 478 L618 496 C528 508, 442 506, 364 516 C272 528, 200 562, 142 608 Z"/>
 				</g>
-				<g class="viz-pack" transform="translate(520 30)">
-					<path class="viz-line viz-line-slow" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line viz-line-delay" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
-				</g>
-				<g class="viz-pack" transform="translate(1040 -20)">
-					<path class="viz-line viz-line-delay" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line viz-line-slow" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
-				</g>
-				<g class="viz-pack" transform="translate(-60 290)">
-					<path class="viz-line" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line viz-line-slow" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line viz-line-delay" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
-				</g>
-				<g class="viz-pack" transform="translate(460 310)">
-					<path class="viz-line viz-line-delay" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line viz-line-slow" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
-				</g>
-				<g class="viz-pack" transform="translate(980 270)">
-					<path class="viz-line viz-line-slow" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line viz-line-delay" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
-				</g>
-				<g class="viz-pack" transform="translate(160 560)">
-					<path class="viz-line" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line viz-line-delay" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line viz-line-slow" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
-				</g>
-				<g class="viz-pack" transform="translate(680 540)">
-					<path class="viz-line viz-line-slow" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line viz-line-delay" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
-				</g>
-				<g class="viz-pack" transform="translate(1180 500)">
-					<path class="viz-line viz-line-delay" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70"/>
-					<path class="viz-line viz-line-slow" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240"/>
-					<path class="viz-line" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130"/>
+				<g class="viz-leaves" fill="url(#leafFlow)">
+					<g transform="translate(1488 52) rotate(-18)"><g class="viz-leaf"><path d="M0 0 C8 -16 22 -20 38 -6 C24 3 12 14 0 0 Z"/></g></g>
+					<g transform="translate(1410 70) rotate(22)"><g class="viz-leaf viz-leaf-b"><path d="M0 0 C8 -16 22 -20 38 -6 C24 3 12 14 0 0 Z"/></g></g>
+					<g transform="translate(1288 86) rotate(-38)"><g class="viz-leaf"><path d="M0 0 C7 -14 20 -18 34 -5 C21 3 11 13 0 0 Z"/></g></g>
+					<g transform="translate(1180 98) rotate(16)"><g class="viz-leaf viz-leaf-c"><path d="M0 0 C8 -16 22 -20 38 -6 C24 3 12 14 0 0 Z"/></g></g>
+					<g transform="translate(1028 118) rotate(-28)"><g class="viz-leaf viz-leaf-b"><path d="M0 0 C7 -14 20 -18 34 -5 C21 3 11 13 0 0 Z"/></g></g>
+					<g transform="translate(1468 300) rotate(8)"><g class="viz-leaf"><path d="M0 0 C8 -16 22 -20 38 -6 C24 3 12 14 0 0 Z"/></g></g>
+					<g transform="translate(1360 328) rotate(-32)"><g class="viz-leaf viz-leaf-c"><path d="M0 0 C7 -14 20 -18 34 -5 C21 3 11 13 0 0 Z"/></g></g>
+					<g transform="translate(1244 356) rotate(24)"><g class="viz-leaf viz-leaf-b"><path d="M0 0 C8 -16 22 -20 38 -6 C24 3 12 14 0 0 Z"/></g></g>
+					<g transform="translate(1190 296) rotate(-12)"><g class="viz-leaf"><path d="M0 0 C6 -12 16 -16 28 -4 C18 2 9 11 0 0 Z"/></g></g>
+					<g transform="translate(1088 318) rotate(36)"><g class="viz-leaf viz-leaf-c"><path d="M0 0 C7 -14 20 -18 34 -5 C21 3 11 13 0 0 Z"/></g></g>
+					<g transform="translate(1448 562) rotate(-8)"><g class="viz-leaf viz-leaf-b"><path d="M0 0 C8 -16 22 -20 38 -6 C24 3 12 14 0 0 Z"/></g></g>
+					<g transform="translate(1336 588) rotate(28)"><g class="viz-leaf"><path d="M0 0 C7 -14 20 -18 34 -5 C21 3 11 13 0 0 Z"/></g></g>
+					<g transform="translate(1210 616) rotate(-24)"><g class="viz-leaf viz-leaf-c"><path d="M0 0 C8 -16 22 -20 38 -6 C24 3 12 14 0 0 Z"/></g></g>
+					<g transform="translate(1080 542) rotate(14)"><g class="viz-leaf viz-leaf-b"><path d="M0 0 C6 -12 16 -16 28 -4 C18 2 9 11 0 0 Z"/></g></g>
+					<g transform="translate(960 96) rotate(42)"><g class="viz-leaf"><path d="M0 0 C7 -14 20 -18 34 -5 C21 3 11 13 0 0 Z"/></g></g>
+					<g transform="translate(848 334) rotate(-20)"><g class="viz-leaf viz-leaf-c"><path d="M0 0 C8 -16 22 -20 38 -6 C24 3 12 14 0 0 Z"/></g></g>
+					<g transform="translate(748 586) rotate(18)"><g class="viz-leaf viz-leaf-b"><path d="M0 0 C7 -14 20 -18 34 -5 C21 3 11 13 0 0 Z"/></g></g>
+					<g transform="translate(612 482) rotate(-36)"><g class="viz-leaf"><path d="M0 0 C6 -12 16 -16 28 -4 C18 2 9 11 0 0 Z"/></g></g>
+					<g transform="translate(568 168) rotate(10)"><g class="viz-leaf viz-leaf-c"><path d="M0 0 C7 -14 20 -18 34 -5 C21 3 11 13 0 0 Z"/></g></g>
+					<g transform="translate(930 112) rotate(-44)"><g class="viz-leaf viz-leaf-b"><path d="M0 0 C6 -12 16 -16 28 -4 C18 2 9 11 0 0 Z"/></g></g>
 				</g>
 			</svg>
-			<div class="viz-scan"></div>
 		</div>
 		<div id="wrapper" class="login-body">
 			<div class="login-content" id="login">
