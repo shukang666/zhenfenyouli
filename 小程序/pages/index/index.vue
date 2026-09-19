@@ -397,12 +397,14 @@ export default {
 		},
 		onShareAppMessage() {
 			return {
-				path: `/pages/index/index?scene=${this.userInfo.id}`
+				path: `/pages/index/index?scene=${this.userInfo.id}`,
+				imageUrl: this.$u.mpShare.imageUrl
 			}
 		},
 		onShareTimeline() {
 			return {
-				path: `/pages/index/index?scene=${this.userInfo.id}`
+				path: `/pages/index/index?scene=${this.userInfo.id}`,
+				imageUrl: this.$u.mpShare.imageUrl
 			}
 		},
 		onLoad(op) {

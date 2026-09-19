@@ -15,6 +15,8 @@ module.exports = {
 	// loginUrl: 'https://xcxkf052.aubye.com/api/common/public/h5_login',
 	// 图片上传 filetype(默认image,其他video，audio，file)
 	uploadUrl: 'https://admin.circular-economy.cn/api/wxapp/public/upload_asset',
+	// 微信分享卡片封面（5:4）
+	shareCoverUrl: 'https://admin.circular-economy.cn/static/images/share.png',
 	// 配后端数据的接收方式application/json;charset=UTF-8或者application/x-www-form-urlencoded;charset=UTF-8
 	contentType: 'application/json;charset=UTF-8',
 	// 后端返回状态码，如code,status

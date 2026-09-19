@@ -54,12 +54,14 @@
 		},
 		onShareAppMessage() {
 			return {
-				path: `/pages/flhd/flhd?scene=${this.userInfo.id}`
+				path: `/pages/flhd/flhd?scene=${this.userInfo.id}`,
+				imageUrl: this.$u.mpShare.imageUrl
 			}
 		},
 		onShareTimeline() {
 			return {
-				path: `/pages/flhd/flhd?scene=${this.userInfo.id}`
+				path: `/pages/flhd/flhd?scene=${this.userInfo.id}`,
+				imageUrl: this.$u.mpShare.imageUrl
 			}
 		},
 		methods: {
