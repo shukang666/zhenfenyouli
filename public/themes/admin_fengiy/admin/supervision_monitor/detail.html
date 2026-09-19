@@ -17,9 +17,22 @@
 <body>
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
-        <li><a href="{:url('admin/SupervisionMonitor/index')}">督导监测</a></li>
+        <li><a href="{$listUrl}">督导监测</a></li>
         <li class="active"><a href="javascript:;">详情 #{$item.id}</a></li>
     </ul>
+    <div class="margin-top-20">
+        <a class="btn btn-default" href="{$listUrl}">返回列表</a>
+        <notempty name="prevUrl">
+            <a class="btn btn-info" href="{$prevUrl}">上一条</a>
+            <else/>
+            <a class="btn btn-info disabled" href="javascript:;">上一条</a>
+        </notempty>
+        <notempty name="nextUrl">
+            <a class="btn btn-primary" href="{$nextUrl}">下一条</a>
+            <else/>
+            <a class="btn btn-primary disabled" href="javascript:;">下一条</a>
+        </notempty>
+    </div>
 
     <h4 class="margin-top-20">督导监测记录详情</h4>
     <table class="table table-bordered detail-table margin-top-10">
@@ -114,7 +127,19 @@
         </tbody>
     </table>
 
-    <a class="btn btn-default margin-top-20" href="{:url('admin/SupervisionMonitor/index')}">返回列表</a>
+    <div class="margin-top-20">
+        <a class="btn btn-default" href="{$listUrl}">返回列表</a>
+        <notempty name="prevUrl">
+            <a class="btn btn-info" href="{$prevUrl}">上一条</a>
+            <else/>
+            <a class="btn btn-info disabled" href="javascript:;">上一条</a>
+        </notempty>
+        <notempty name="nextUrl">
+            <a class="btn btn-primary" href="{$nextUrl}">下一条</a>
+            <else/>
+            <a class="btn btn-primary disabled" href="javascript:;">下一条</a>
+        </notempty>
+    </div>
 </div>
 <div id="sm-viewer">
     <button type="button" id="sm-close" title="关闭">&times;</button>

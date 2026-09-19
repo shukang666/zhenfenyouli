@@ -95,7 +95,7 @@
                 <td style="max-width:180px;word-break:break-all;">{$vo.overall_evaluation|mb_substr=0,20,'utf-8'}</td>
                 <td>{$vo.create_time|date="Y-m-d H:i"}</td>
                 <td>
-                    <a class="btn btn-xs btn-info" href="{:url('admin/SupervisionMonitor/detail',['id'=>$vo.id])}">详情</a>
+                    <a class="btn btn-xs btn-info" href="{:url('admin/SupervisionMonitor/detail', array_merge($params, ['id'=>$vo.id]))}">详情</a>
                 </td>
             </tr>
         </foreach>

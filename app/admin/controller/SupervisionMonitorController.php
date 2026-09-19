@@ -101,6 +101,26 @@ class SupervisionMonitorController extends AdminBaseController
         $this->assign('photos', $photos);
         $this->assign('photosJson', json_encode($photos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $this->assign('item', $item);
+
+        // 与列表相同筛选 + id 倒序：上一条=更新的（id 更大），下一条=更旧的（id 更小）
+        $where = $this->buildWhere();
+        $prevId = Db::name('supervision_monitor')->alias('r')
+            ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
+            ->where($where)
+            ->where('r.id', '>', $id)
+            ->order('r.id', 'asc')
+            ->value('r.id');
+        $nextId = Db::name('supervision_monitor')->alias('r')
+            ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
+            ->where($where)
+            ->where('r.id', '<', $id)
+            ->order('r.id', 'desc')
+            ->value('r.id');
+        $navQuery = $this->request->except(['id']);
+        $this->assign('prevUrl', $prevId ? (string) url('admin/SupervisionMonitor/detail', array_merge($navQuery, ['id' => intval($prevId)])) : '');
+        $this->assign('nextUrl', $nextId ? (string) url('admin/SupervisionMonitor/detail', array_merge($navQuery, ['id' => intval($nextId)])) : '');
+        $this->assign('listUrl', (string) url('admin/SupervisionMonitor/index', $navQuery));
+
         return $this->fetch();
     }
 
