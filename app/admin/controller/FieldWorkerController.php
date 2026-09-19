@@ -131,13 +131,21 @@ class FieldWorkerController extends BaseController
     {
         if (!$this->isLoggedIn()) {
             session('__LOGIN_BY_CMF_ADMIN_PW__', 1);
-            $loginUrl = (string) url('admin/Public/login') . '#field';
+            $loginUrl = $this->fieldLoginUrl();
             if ($this->request->isPost() || $this->request->isAjax()) {
                 $this->error('请先登录', $loginUrl);
             } else {
                 return $this->redirect($loginUrl);
             }
         }
+    }
+
+    /**
+     * 外勤登录页地址。必须带 entry=field（服务端能读到），不能只靠 #field（浏览器不会发给服务器）。
+     */
+    protected function fieldLoginUrl()
+    {
+        return (string) url('admin/Public/login') . '?entry=field';
     }
 
     protected function assignWorker()
@@ -154,7 +162,7 @@ class FieldWorkerController extends BaseController
         if ($this->isLoggedIn()) {
             return redirect(url('admin/FieldWorker/index'));
         }
-        return $this->redirect((string) url('admin/Public/login') . '#field');
+        return $this->redirect($this->fieldLoginUrl());
     }
 
     /**
@@ -211,7 +219,7 @@ class FieldWorkerController extends BaseController
         session('FIELD_WORKER_ID', null);
         session('FIELD_WORKER_NAME', null);
         session('__LOGIN_BY_CMF_ADMIN_PW__', 1);
-        return redirect((string) url('admin/Public/login') . '#field');
+        return redirect($this->fieldLoginUrl());
     }
 
     /**
