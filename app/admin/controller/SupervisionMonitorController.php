@@ -99,6 +99,7 @@ class SupervisionMonitorController extends AdminBaseController
             }
         }
         $this->assign('photos', $photos);
+        $this->assign('photosJson', json_encode($photos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $this->assign('item', $item);
         return $this->fetch();
     }
