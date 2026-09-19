@@ -54,13 +54,16 @@ class VolunteerTaskController extends AdminBaseController
         if ($this->request->isPost()) {
             $data = $this->request->param();
             $row = [
-                'title'      => htmlspecialchars(trim($data['title'] ?? '')),
-                'content'    => htmlspecialchars(trim($data['content'] ?? '')),
-                'point'      => intval($data['point'] ?? 0),
-                'status'     => intval($data['status'] ?? 1),
-                'admin_id'   => cmf_get_current_admin_id(),
+                'title'       => htmlspecialchars(trim($data['title'] ?? '')),
+                'content'     => htmlspecialchars(trim($data['content'] ?? '')),
+                'point'       => intval($data['point'] ?? 0),
+                'status'      => intval($data['status'] ?? 1),
+                'admin_id'    => cmf_get_current_admin_id(),
                 'update_time' => time(),
             ];
+            if (!$id) {
+                $row['shot_id'] = 0;
+            }
             if ($id) {
                 $this->taskModel->where('id', $id)->update($row);
                 $this->success('更新成功', url('VolunteerTask/index'));
@@ -207,5 +210,70 @@ class VolunteerTaskController extends AdminBaseController
             'update_time' => time(),
         ]);
         $this->success('已拒绝');
+    }
+
+    /**
+     * 随手拍审核通过后发布一条可领取的整改任务。已按 shot_id 去重。
+     * @param array $report cmf_active_shot_report 一行
+     * @return int 任务 id
+     */
+    public static function createFromShotReport(array $report)
+    {
+        $shotId = intval($report['id'] ?? 0);
+        if ($shotId < 1) {
+            return 0;
+        }
+
+        $exist = Db::name('volunteer_task')->where('shot_id', $shotId)->find();
+        if (!empty($exist)) {
+            return intval($exist['id']);
+        }
+
+        $locationType = intval($report['location_type'] ?? 1);
+        if ($locationType == 2) {
+            $place = trim((string) ($report['merchant_name'] ?? ''));
+            $placeExtra = trim((string) ($report['address'] ?? ''));
+            $placeText = $placeExtra !== '' ? ($place . ' - ' . $placeExtra) : $place;
+        } else {
+            $community = trim((string) ($report['community_name'] ?? ''));
+            $point = trim((string) ($report['point_name'] ?? ''));
+            $placeText = trim($community . ' · ' . $point, ' ·');
+        }
+
+        $remark = trim((string) ($report['remark'] ?? ''));
+        $title = $placeText !== '' ? ('随手拍整改：' . $placeText) : '随手拍整改任务';
+        if (function_exists('mb_substr') && mb_strlen($title) > 120) {
+            $title = mb_substr($title, 0, 120);
+        } elseif (strlen($title) > 120) {
+            $title = substr($title, 0, 120);
+        }
+
+        $contentParts = [];
+        if ($remark !== '') {
+            $contentParts[] = $remark;
+        }
+        if ($placeText !== '') {
+            $contentParts[] = '位置：' . $placeText;
+        }
+        $content = implode("\n", $contentParts);
+        if ($content === '') {
+            $content = '请按随手拍问题照片现场整改。';
+        }
+        if (function_exists('mb_substr') && mb_strlen($content) > 1000) {
+            $content = mb_substr($content, 0, 1000);
+        }
+
+        $now = time();
+        return (int) Db::name('volunteer_task')->insertGetId([
+            'shot_id'     => $shotId,
+            'title'       => htmlspecialchars($title),
+            'content'     => htmlspecialchars($content),
+            'image'       => (string) ($report['image'] ?? ''),
+            'point'       => 0,
+            'admin_id'    => (int) cmf_get_current_admin_id(),
+            'status'      => 1,
+            'create_time' => $now,
+            'update_time' => $now,
+        ]);
     }
 }

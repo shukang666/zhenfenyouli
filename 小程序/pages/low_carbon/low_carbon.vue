@@ -35,7 +35,44 @@
 			</swiper>
 		</view>
 
-		<!-- 主题活动：7 个板块（5 大分类 + 2 个快捷入口） -->
+		<!-- 常去入口：轮播下方，对冲咬合、中间能量核，互不重叠 -->
+		<view class="fb-entry-stage">
+			<view class="fb-entry-kicker">
+				<view class="fb-entry-kicker-dot"></view>
+				<text class="fb-entry-kicker-text">常去入口</text>
+				<text class="fb-entry-kicker-hint">点进去就能办</text>
+			</view>
+			<view class="fb-entry-row">
+				<view class="fb-entry-card fb-entry-lgfl" hover-class="fb-press" :hover-stay-time="80" @click="gotoFlhd">
+					<text class="fb-entry-mark">01 分类打卡</text>
+					<text class="fb-entry-emoji">♻️</text>
+					<view class="fb-entry-text">
+						<text class="fb-entry-title">垃圾分类</text>
+						<text class="fb-entry-sub">学习分类 · 拍照打卡</text>
+					</view>
+					<view class="fb-entry-go">
+						<text class="fb-entry-arrow">›</text>
+					</view>
+				</view>
+				<view class="fb-entry-hub">
+					<view class="fb-entry-hub-ring"></view>
+					<view class="fb-entry-hub-core"></view>
+				</view>
+				<view class="fb-entry-card fb-entry-qxl" hover-class="fb-press" :hover-stay-time="80" @click="gotoQxl">
+					<text class="fb-entry-mark">02 山野社区</text>
+					<text class="fb-entry-emoji">⛰️</text>
+					<view class="fb-entry-text">
+						<text class="fb-entry-title">我和七贤岭</text>
+						<text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
+					</view>
+					<view class="fb-entry-go">
+						<text class="fb-entry-arrow">›</text>
+					</view>
+				</view>
+			</view>
+		</view>
+
+		<!-- 主题活动：5 大分类 -->
 		<view class="fb-section fb-theme-act">
 			<view class="fb-section-header">
 				<text class="fb-section-title">主题活动</text>
@@ -58,24 +95,6 @@
 							<text class="fb-cate-mini-sub">{{cate.subtitle}}</text>
 						</view>
 					</view>
-				</view>
-			</view>
-
-			<!-- 2 个快捷入口 -->
-			<view class="fb-entry-row">
-				<view class="fb-entry-card fb-entry-lgfl" @click="gotoFlhd">
-					<view class="fb-entry-text">
-						<text class="fb-entry-title">垃圾分类</text>
-						<text class="fb-entry-sub">学习分类 · 拍照打卡</text>
-					</view>
-					<text class="fb-entry-arrow">›</text>
-				</view>
-				<view class="fb-entry-card fb-entry-qxl" @click="gotoQxl">
-					<view class="fb-entry-text">
-						<text class="fb-entry-title">我和七贤岭</text>
-						<text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
-					</view>
-					<text class="fb-entry-arrow">›</text>
 				</view>
 			</view>
 		</view>
@@ -692,95 +711,251 @@
 	letter-spacing: 0.5rpx;
 }
 
-/* ===== 2 个快捷入口：浅底描边，和上面满铺渐变的主题分类卡区分开 ===== */
+/* ===== 常去入口：对冲咬合 + 斜线流动 + 中间能量核，两卡互不重叠 ===== */
+@keyframes fbEntryStripe {
+	0% { background-position: 0 0, 0 0; }
+	100% { background-position: 40rpx 28rpx, 0 0; }
+}
+@keyframes fbEntryShine {
+	0% { transform: translateX(-130%) skewX(-20deg); opacity: 0; }
+	18% { opacity: 0.9; }
+	42% { opacity: 0; }
+	100% { transform: translateX(240%) skewX(-20deg); opacity: 0; }
+}
+@keyframes fbEntryFloat {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-6rpx); }
+}
+@keyframes fbHubPulse {
+	0%, 100% { transform: scale(1); opacity: 1; }
+	50% { transform: scale(1.16); opacity: 0.7; }
+}
+@keyframes fbHubSpin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+.fb-entry-stage {
+	padding: 12rpx 20rpx 4rpx;
+}
+.fb-entry-kicker {
+	display: flex;
+	align-items: center;
+	padding: 0 12rpx 8rpx;
+}
+.fb-entry-kicker-dot {
+	width: 12rpx;
+	height: 12rpx;
+	border-radius: 50%;
+	background: #18AF38;
+	margin-right: 10rpx;
+	box-shadow: 0 0 0 6rpx rgba(24, 175, 56, 0.18);
+}
+.fb-entry-kicker-text {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #142018;
+}
+.fb-entry-kicker-hint {
+	margin-left: 12rpx;
+	font-size: 22rpx;
+	color: #8A958C;
+}
 .fb-entry-row {
 	display: flex;
-	gap: 20rpx;
-	padding: 20rpx 24rpx 8rpx;
-	margin-top: 8rpx;
-	border-top: 1rpx dashed #D7E4DA;
+	align-items: stretch;
+	padding: 6rpx 0 22rpx;
 }
 .fb-entry-card {
 	flex: 1;
+	min-width: 0;
 	display: flex;
-	align-items: center;
+	flex-direction: column;
+	align-items: flex-start;
 	justify-content: space-between;
-	padding: 28rpx 22rpx 28rpx 28rpx;
-	min-height: 160rpx;
-	border-radius: 16rpx;
-	background: #fff;
-	box-shadow: 0 2rpx 10rpx rgba(16, 64, 28, 0.06);
+	padding: 22rpx 22rpx 20rpx;
+	box-shadow: 0 14rpx 32rpx rgba(16, 40, 24, 0.18);
 	position: relative;
 	overflow: hidden;
-	box-sizing: border-box;
-}
-.fb-entry-card:active {
-	opacity: 0.92;
-	transform: scale(0.98);
-}
-.fb-entry-card::before {
-	content: '';
-	position: absolute;
-	left: 0;
-	top: 0;
-	bottom: 0;
-	width: 10rpx;
-	pointer-events: none;
 }
 .fb-entry-lgfl {
-	border: 2rpx solid #C5D9F7;
-	background: linear-gradient(180deg, #F7FBFF 0%, #FFFFFF 70%);
+	min-height: 236rpx;
+	margin-right: 6rpx;
+	padding-right: 36rpx;
+	color: #fff;
+	clip-path: polygon(0 0, 86% 0, 100% 50%, 86% 100%, 0 100%);
+	background-image:
+		repeating-linear-gradient(
+			-28deg,
+			rgba(255, 255, 255, 0) 0,
+			rgba(255, 255, 255, 0) 14rpx,
+			rgba(255, 255, 255, 0.16) 14rpx,
+			rgba(255, 255, 255, 0.16) 16rpx
+		),
+		linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%);
+	background-size: 40rpx 40rpx, 100% 100%;
+	animation: fbEntryStripe 1.6s linear infinite;
 }
-.fb-entry-lgfl::before {
-	background: #1877F2;
-}
-.fb-entry-lgfl .fb-entry-title {
-	color: #14315C;
-}
-.fb-entry-lgfl .fb-entry-sub {
-	color: #5B7AA3;
-}
-.fb-entry-lgfl .fb-entry-arrow {
-	color: #1877F2;
+.fb-entry-lgfl:active {
+	opacity: 0.92;
+	transform: scale(0.97);
 }
 .fb-entry-qxl {
-	border: 2rpx solid #C9E4C4;
-	background: linear-gradient(180deg, #F6FBF4 0%, #FFFFFF 70%);
+	min-height: 236rpx;
+	margin-left: 6rpx;
+	padding-left: 36rpx;
+	color: #fff;
+	clip-path: polygon(14% 0, 100% 0, 100% 100%, 14% 100%, 0 50%);
+	background-image:
+		repeating-linear-gradient(
+			28deg,
+			rgba(255, 255, 255, 0) 0,
+			rgba(255, 255, 255, 0) 14rpx,
+			rgba(255, 255, 255, 0.16) 14rpx,
+			rgba(255, 255, 255, 0.16) 16rpx
+		),
+		linear-gradient(135deg, #34C759 0%, #28A745 100%);
+	background-size: 40rpx 40rpx, 100% 100%;
+	animation: fbEntryStripe 1.8s linear infinite reverse;
 }
+.fb-entry-qxl:active {
+	opacity: 0.92;
+	transform: scale(0.97);
+}
+.fb-entry-lgfl::before,
+.fb-entry-lgfl::after,
+.fb-entry-qxl::before,
+.fb-entry-qxl::after {
+	content: '';
+	position: absolute;
+	pointer-events: none;
+}
+.fb-entry-lgfl::before,
 .fb-entry-qxl::before {
-	background: #2E7D32;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background: repeating-linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0) 0,
+		rgba(255, 255, 255, 0) 22rpx,
+		rgba(255, 255, 255, 0.08) 22rpx,
+		rgba(255, 255, 255, 0.08) 23rpx
+	);
 }
-.fb-entry-qxl .fb-entry-title {
-	color: #1B3A1C;
+.fb-entry-lgfl::after,
+.fb-entry-qxl::after {
+	top: 0;
+	left: 0;
+	width: 46%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+	animation: fbEntryShine 2.8s ease-in-out infinite;
 }
-.fb-entry-qxl .fb-entry-sub {
-	color: #5A7A56;
+.fb-entry-qxl::after {
+	animation-delay: 1.4s;
 }
-.fb-entry-qxl .fb-entry-arrow {
-	color: #2E7D32;
+.fb-entry-lgfl .fb-entry-title,
+.fb-entry-lgfl .fb-entry-sub,
+.fb-entry-lgfl .fb-entry-arrow,
+.fb-entry-lgfl .fb-entry-mark,
+.fb-entry-qxl .fb-entry-title,
+.fb-entry-qxl .fb-entry-sub,
+.fb-entry-qxl .fb-entry-arrow,
+.fb-entry-qxl .fb-entry-mark {
+	color: #fff;
+}
+.fb-entry-hub {
+	width: 44rpx;
+	flex-shrink: 0;
+	align-self: center;
+	height: 44rpx;
+	position: relative;
+	z-index: 4;
+	pointer-events: none;
+	margin: 0 2rpx;
+}
+.fb-entry-hub-ring {
+	position: absolute;
+	left: -8rpx;
+	top: -8rpx;
+	right: -8rpx;
+	bottom: -8rpx;
+	border: 3rpx solid rgba(24, 175, 56, 0.4);
+	border-top-color: #1877F2;
+	border-radius: 50%;
+	animation: fbHubSpin 3.2s linear infinite;
+}
+.fb-entry-hub-core {
+	position: absolute;
+	left: 8rpx;
+	top: 8rpx;
+	width: 28rpx;
+	height: 28rpx;
+	border-radius: 50%;
+	background: radial-gradient(circle at 35% 30%, #fff 0%, #7CFF9A 38%, #1877F2 100%);
+	box-shadow: 0 0 16rpx rgba(24, 175, 56, 0.7);
+	animation: fbHubPulse 1.6s ease-in-out infinite;
+}
+.fb-entry-mark {
+	font-size: 20rpx;
+	letter-spacing: 2rpx;
+	opacity: 0.78;
+	position: relative;
+	z-index: 1;
+}
+.fb-entry-emoji {
+	font-size: 44rpx;
+	margin: 10rpx 0 6rpx;
+	position: relative;
+	z-index: 1;
+	line-height: 1;
+	animation: fbEntryFloat 2.2s ease-in-out infinite;
+}
+.fb-entry-qxl .fb-entry-emoji {
+	animation-delay: 0.6s;
 }
 .fb-entry-text {
 	display: flex;
 	flex-direction: column;
-	gap: 8rpx;
+	gap: 6rpx;
 	position: relative;
 	z-index: 1;
-	padding-right: 12rpx;
 }
 .fb-entry-title {
-	font-size: 30rpx;
+	font-size: 32rpx;
 	font-weight: 700;
 }
 .fb-entry-sub {
 	font-size: 20rpx;
-	opacity: 1;
+	opacity: 0.9;
+	line-height: 1.3;
 }
-.fb-entry-arrow {
-	font-size: 40rpx;
-	font-weight: 300;
-	opacity: 1;
+.fb-entry-go {
+	align-self: flex-end;
+	width: 48rpx;
+	height: 48rpx;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.22);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	position: relative;
 	z-index: 1;
+	margin-top: 10rpx;
+}
+.fb-entry-lgfl .fb-entry-go {
+	margin-right: 12rpx;
+}
+.fb-entry-qxl .fb-entry-go {
+	align-self: flex-start;
+	margin-left: 4rpx;
+}
+.fb-entry-arrow {
+	font-size: 36rpx;
+	font-weight: 300;
+	opacity: 1;
+	line-height: 1;
 }
 
 /* ===== 标签栏 ===== */

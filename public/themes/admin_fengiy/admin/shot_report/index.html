@@ -97,7 +97,7 @@
     $(function () {
         $('.btn-pass').on('click', function () {
             var id = $(this).data('id');
-            layer.confirm('确认审核通过？审核通过后将自动加入整改清单。', {btn: ['确认', '取消']}, function (index) {
+            layer.confirm('确认审核通过？通过后将自动发布到整改任务，志愿者可领取。', {btn: ['确认', '取消']}, function (index) {
                 $.ajax({
                     url: "{:url('admin/ShotReport/pass')}",
                     type: 'POST',

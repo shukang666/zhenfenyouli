@@ -8,6 +8,7 @@
 		<!-- 任务信息 -->
 		<view class="u-p-30 u-type-white-bg u-radius-6 u-m-t-30">
 			<view class="u-font-30 u-font-bold">{{taskTitle}}</view>
+			<image v-if="shotImage" :src="shotImage" mode="aspectFill" class="shot-thumb u-m-t-16" @click="previewShot"></image>
 			<view class="u-font-26 u-type-info u-m-t-10">{{taskContent}}</view>
 			<view class="u-font-26" style="color:#18AF38; margin-top: 16rpx;" v-if="taskPoint > 0">奖励积分 +{{taskPoint}}</view>
 		</view>
@@ -70,6 +71,7 @@
 				taskTitle: '',
 				taskContent: '',
 				taskPoint: 0,
+				shotImage: '',
 				status: 0,          // log.status: 0=待提交, 1=待审核, 2=失败, 3=通过
 				images: [],
 				content: '',
@@ -80,6 +82,7 @@
 			this.taskTitle = option.title || '';
 			this.taskContent = option.content || '';
 			this.taskPoint = parseInt(option.point) || 0;
+			this.shotImage = option.shot_image ? decodeURIComponent(option.shot_image) : '';
 			this.status = parseInt(option.status) || 0;
 			if (option.images) {
 				try {
@@ -138,6 +141,10 @@
 			},
 			removeImage(idx) {
 				this.images.splice(idx, 1);
+			},
+			previewShot() {
+				if (!this.shotImage) return;
+				uni.previewImage({ urls: [this.shotImage] });
 			},
 			submit() {
 				if (this.images.length == 0 && !this.content) {
@@ -214,5 +221,11 @@
 	color: #333;
 	border: 2rpx solid #eee;
 	box-sizing: border-box;
+}
+.shot-thumb {
+	width: 200rpx;
+	height: 200rpx;
+	border-radius: 12rpx;
+	background: #eee;
 }
 </style>

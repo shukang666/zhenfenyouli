@@ -46,16 +46,16 @@
 				</view>
 			</view>
 			<view class="sk-banner sk-banner--fb"></view>
+			<view class="sk-entry-row sk-entry-row--hero">
+				<view class="sk-entry sk-entry--lg"></view>
+				<view class="sk-entry sk-entry--sm"></view>
+			</view>
 			<view class="sk-sec-title"></view>
 			<view class="sk-cate">
 				<view class="sk-cate-big"></view>
 				<view class="sk-cate-right">
 					<view class="sk-cate-mini" v-for="i in 4" :key="i"></view>
 				</view>
-			</view>
-			<view class="sk-entry-row">
-				<view class="sk-entry"></view>
-				<view class="sk-entry"></view>
 			</view>
 			<view class="sk-sec-title"></view>
 			<view class="sk-h-scroll">
@@ -438,14 +438,24 @@ export default {
 
 .sk-entry-row {
 	display: flex;
+	align-items: stretch;
 	gap: 16rpx;
-	padding: 0 24rpx 8rpx;
+	padding: 8rpx 24rpx 16rpx;
+}
+.sk-entry-row--hero {
+	padding-top: 16rpx;
 }
 .sk-entry {
 	@extend .sk-base;
 	flex: 1;
-	height: 120rpx;
+	height: 160rpx;
 	border-radius: 20rpx;
+}
+.sk-entry--lg {
+	clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
+}
+.sk-entry--sm {
+	clip-path: polygon(12% 0, 100% 0, 100% 100%, 12% 100%, 0 50%);
 }
 
 .sk-weekly {

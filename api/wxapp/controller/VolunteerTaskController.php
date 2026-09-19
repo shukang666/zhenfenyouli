@@ -34,6 +34,12 @@ class VolunteerTaskController extends AuthController
         foreach ($allTasks as &$task) {
             $task['accepted'] = in_array($task['id'], $acceptedTaskIds);
             $task['point']    = intval($task['point']);
+            $task['from_shot'] = intval($task['shot_id'] ?? 0) > 0;
+            if (!empty($task['image'])) {
+                $task['image'] = cmf_get_asset_url($task['image']);
+            } else {
+                $task['image'] = '';
+            }
         }
         unset($task);
 
@@ -93,7 +99,7 @@ class VolunteerTaskController extends AuthController
         $this->checkUser();
         $list = Db::name('volunteer_task_log')->alias('tl')
             ->join('cmf_volunteer_task vt', 'vt.id = tl.task_id', 'LEFT')
-            ->field('tl.*, vt.title as task_title, vt.content as task_content, vt.point as task_point')
+            ->field('tl.*, vt.title as task_title, vt.content as task_content, vt.point as task_point, vt.image as task_image, vt.shot_id')
             ->where('tl.user_id', $this->user_id)
             ->order('tl.id desc')
             ->paginate(15)
@@ -110,6 +116,8 @@ class VolunteerTaskController extends AuthController
                 $item['images_arr'] = array_map(function ($v) {
                     return cmf_get_asset_url($v);
                 }, $imgs);
+                $item['task_image'] = !empty($item['task_image']) ? cmf_get_asset_url($item['task_image']) : '';
+                $item['from_shot'] = intval($item['shot_id'] ?? 0) > 0;
                 $item['status_name'] = $this->logStatusName(intval($item['status']));
                 return $item;
             });

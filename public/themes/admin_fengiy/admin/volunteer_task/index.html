@@ -15,7 +15,9 @@
         <thead>
         <tr>
             <th>ID</th>
+            <th>来源</th>
             <th>任务项</th>
+            <th>问题照片</th>
             <th>任务要求</th>
             <th>任务积分</th>
             <th>状态</th>
@@ -27,7 +29,23 @@
         <foreach name="list" item="vo">
             <tr id="row_{$vo.id}">
                 <td>{$vo.id}</td>
+                <td>
+                    <if condition="$vo.shot_id gt 0">
+                        <span class="label label-info">随手拍</span>
+                    <else/>
+                        <span class="label label-default">手动发布</span>
+                    </if>
+                </td>
                 <td style="max-width:200px;word-break:break-all;">{$vo.title|default='--'}</td>
+                <td>
+                    <notempty name="vo.image">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image)}');">
+                            <img src="{:cmf_get_image_preview_url($vo.image)}" style="width:60px;height:60px;border-radius:4px;">
+                        </a>
+                    <else/>
+                        --
+                    </notempty>
+                </td>
                 <td style="max-width:300px;word-break:break-all;">{$vo.content|default='--'}</td>
                 <td>{$vo.point|default=0}</td>
                 <td>

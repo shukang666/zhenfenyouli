@@ -86,17 +86,9 @@ class ShotReportController extends AdminBaseController
             'audit_time' => time()
         ]);
 
-        // 同步到整改清单
-        Db::name('active_shot_rectify')->insert([
-            'shot_id' => $report['id'],
-            'user_id' => $report['user_id'],
-            'image' => $report['image'],
-            'remark' => $report['remark'],
-            'status' => 0,
-            'create_time' => time(),
-        ]);
+        VolunteerTaskController::createFromShotReport($report);
 
-        $this->success('审核已通过，已加入整改清单');
+        $this->success('审核已通过，已发布到整改任务');
     }
 
     /**

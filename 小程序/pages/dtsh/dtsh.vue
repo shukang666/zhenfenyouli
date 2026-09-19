@@ -108,6 +108,7 @@
 				<view v-if="taskList.length == 0"><u-empty text="暂无可领取任务" mode="list"></u-empty></view>
 				<view v-for="(item, idx) in taskList" :key="idx" class="task-card u-m-b-20">
 					<view class="u-font-30 u-font-bold">{{item.title}}</view>
+					<image v-if="item.image" :src="item.image" mode="aspectFill" class="shot-thumb u-m-t-16" @click="previewShot(item.image)"></image>
 					<view class="u-font-26 u-type-info u-m-t-10">{{item.content}}</view>
 					<view class="u-flex u-row-between u-m-t-20">
 						<view class="u-font-26" style="color:#18AF38;">奖励积分 +{{item.point}}</view>
@@ -121,6 +122,7 @@
 				<view v-if="myTasks.length == 0"><u-empty text="无我的任务" mode="list"></u-empty></view>
 				<view v-for="(item, idx) in myTasks" :key="idx" class="task-card u-m-b-20" @click="goSubmit(item)">
 					<view class="u-font-30 u-font-bold">{{item.task_title}}</view>
+					<image v-if="item.task_image" :src="item.task_image" mode="aspectFill" class="shot-thumb u-m-t-16" @click.stop="previewShot(item.task_image)"></image>
 					<view class="u-font-26 u-type-info u-m-t-10">{{item.task_content}}</view>
 					<view class="u-flex u-row-between u-m-t-20">
 						<view class="u-font-26" style="color:#18AF38;">奖励积分 +{{item.task_point}}</view>
@@ -271,6 +273,7 @@
 					content: item.task_content,
 					point: item.task_point,
 					status: item.status,
+					shot_image: item.task_image || '',
 					images: (item.images_arr && item.images_arr.length > 0) ? JSON.stringify(item.images_arr) : '',
 				}
 			});
@@ -278,6 +281,10 @@
 		taskStatusType(status) {
 			const map = { 0: 'info', 1: 'warning', 2: 'error', 3: 'success' };
 			return map[status] || 'info';
+		},
+		previewShot(url) {
+			if (!url) return;
+			uni.previewImage({ urls: [url] });
 		},
 		// 自定义返回逻辑
 		customBack() {
@@ -307,6 +314,12 @@
 	padding: 24rpx;
 	background: #f9f9f9;
 	border-radius: 12rpx;
+}
+.shot-thumb {
+	width: 200rpx;
+	height: 200rpx;
+	border-radius: 12rpx;
+	background: #eee;
 }
 .vol-grid {
 	gap: 20rpx;
