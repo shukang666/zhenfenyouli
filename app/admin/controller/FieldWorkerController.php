@@ -248,9 +248,18 @@ class FieldWorkerController extends BaseController
             ->where('id', $this->admin_id)
             ->field('id,user_login,user_nickname,user_email,mobile,last_login_time')
             ->find();
+        if (empty($user)) {
+            $user = [];
+        }
+
+        $lastLoginText = '—';
+        if (!empty($user['last_login_time'])) {
+            $lastLoginText = date('Y-m-d H:i', intval($user['last_login_time']));
+        }
 
         $this->assign('workerName', session('FIELD_WORKER_NAME'));
-        $this->assign('user', $user ?: []);
+        $this->assign('user', $user);
+        $this->assign('lastLoginText', $lastLoginText);
         return $this->fetch('field_worker/profile');
     }
 
