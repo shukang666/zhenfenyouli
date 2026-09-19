@@ -24,19 +24,20 @@
 	<div class="stage">
 		<div class="scene-copy">
 			<div class="scene-kicker">
-				<span class="scene-kicker-dot"></span>
 				<span class="scene-kicker-text">SHUKANG AI COMMAND</span>
 			</div>
 			<h1 class="scene-title">数康AI智慧后台</h1>
 			<p class="scene-sub">亚洲最大低碳社区服务平台</p>
 			<p class="scene-sub scene-sub-strong">全球首个智慧低碳服务企业样板</p>
-
-			<div class="scene-viz" aria-hidden="true">
+		</div>
+		<div class="scene-viz-wall" id="scene-viz-wall" aria-hidden="true"></div>
+		<div id="viz-tile-src" hidden>
+			<div class="viz-tile">
 				<div class="viz-grid"></div>
 				<div class="viz-radar"></div>
-				<div class="viz-orbit viz-orbit-a"><span class="viz-sat"></span></div>
-				<div class="viz-orbit viz-orbit-b"><span class="viz-sat viz-sat-b"></span></div>
-				<svg class="viz-net" viewBox="0 0 520 280" preserveAspectRatio="xMidYMid meet">
+				<div class="viz-orbit viz-orbit-a"></div>
+				<div class="viz-orbit viz-orbit-b"></div>
+				<svg class="viz-net" viewBox="0 0 520 280" preserveAspectRatio="xMidYMid slice">
 					<defs>
 						<linearGradient id="vizStroke" x1="0%" y1="0%" x2="100%" y2="0%">
 							<stop offset="0%" stop-color="#4ade80" stop-opacity="0"/>
@@ -47,50 +48,9 @@
 					<path class="viz-line" d="M60 210 C140 160, 180 90, 260 120 S390 80, 460 70" fill="none" stroke="url(#vizStroke)" stroke-width="1.6"/>
 					<path class="viz-line viz-line-delay" d="M40 90 C120 130, 200 220, 300 180 S420 200, 490 240" fill="none" stroke="url(#vizStroke)" stroke-width="1.4"/>
 					<path class="viz-line viz-line-slow" d="M80 40 C160 70, 240 40, 320 90 S400 150, 470 130" fill="none" stroke="url(#vizStroke)" stroke-width="1.2"/>
-					<circle class="viz-node" cx="60" cy="210" r="4.5"/>
-					<circle class="viz-node viz-node-b" cx="260" cy="120" r="6"/>
-					<circle class="viz-node" cx="460" cy="70" r="4.5"/>
-					<circle class="viz-node viz-node-c" cx="300" cy="180" r="5"/>
-					<circle class="viz-node" cx="490" cy="240" r="3.5"/>
-					<circle class="viz-node" cx="80" cy="40" r="3.5"/>
-					<g class="viz-core" transform="translate(258 118)">
-						<circle r="18" fill="rgba(74,222,128,.12)" stroke="rgba(134,239,172,.55)" stroke-width="1.2"/>
-						<circle r="7" fill="#4ade80"/>
-					</g>
 				</svg>
 				<div class="viz-scan"></div>
 			</div>
-
-			<div class="scene-metrics">
-				<div class="metric-card">
-					<div class="metric-ring" style="--p:86"></div>
-					<div class="metric-copy">
-						<strong>低碳治理</strong>
-						<span>分类 · 打卡 · 积分闭环</span>
-					</div>
-				</div>
-				<div class="metric-card">
-					<div class="metric-ring metric-ring-blue" style="--p:74"></div>
-					<div class="metric-copy">
-						<strong>社区运营</strong>
-						<span>活动 · 签到 · 知识学习</span>
-					</div>
-				</div>
-				<div class="metric-card">
-					<div class="metric-ring metric-ring-gold" style="--p:68"></div>
-					<div class="metric-copy">
-						<strong>外勤巡查</strong>
-						<span>点位监测 · 工作台</span>
-					</div>
-				</div>
-			</div>
-
-			<ul class="scene-chips">
-				<li>垃圾分类</li>
-				<li>活动签到</li>
-				<li>积分商城</li>
-				<li>督导监测</li>
-			</ul>
 		</div>
 		<div id="wrapper" class="login-body">
 			<div class="login-content" id="login">
