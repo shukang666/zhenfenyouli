@@ -406,7 +406,6 @@ export default {
 				this.getUserInfoForGrowth()
 				this.getSignStatus()
 			}
-			this.checkAndStartGuide()
 			this.$nextTick(() => {
 				if (this.isLogin && !this.userInfo.community_id) {
 					uni.navigateTo({
@@ -428,16 +427,14 @@ export default {
 			}
 		},
 		methods: {
-		// 检测并启动新手引导（仅未完成过、已绑定小区；标记在关闭时再清，避免等渲染时被打断丢失）
+		// 新手引导改为被动触发：不要在 onShow / 登录里调用。
+		// 以后入口点好了，在点击回调里调 startNewUserGuide() 即可。
 		pauseGuideOverlay() {
 			this.guideOnPage = false
 		},
-		checkAndStartGuide() {
+		startNewUserGuide() {
 			if (this._guideLock || this.showGuide || this.guideLoading) return
-			if (isActiveScanEntry()) return
-			if (uni.getStorageSync('has_finished_guide')) return
-			const guideFlag = uni.getStorageSync('new_user_guide')
-			if (!guideFlag || !this.userInfo.community_id) return
+			this.guideOnPage = true
 			this._guideLock = true
 			this.guideLoading = true
 			this.waitAndStartGuide()
@@ -462,6 +459,7 @@ export default {
 			this.$nextTick(poll)
 		},
 		onGuideClose() {
+			this._guideLock = false
 			this.guideLoading = false
 			this.showGuide = false
 			this.guideTargetRect = null
