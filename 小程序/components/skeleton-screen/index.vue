@@ -1,110 +1,153 @@
 <template>
-	<view class="skeleton-screen" v-show="show">
-		<!-- 首页骨架屏 -->
+	<view class="skeleton-screen" :class="'skeleton-bg--' + type" v-show="show">
+		<!-- 首页：搜索 + banner + 问候打卡卡 + tab + 横向活动卡 -->
 		<view v-if="type === 'index'" class="skeleton-index">
-			<!-- 顶部导航栏 -->
-			<view class="skeleton-navbar"></view>
-			<!-- Banner轮播图 -->
-			<view class="skeleton-banner"></view>
-			<!-- 走马灯通知栏 -->
-			<view class="skeleton-notice"></view>
-			<!-- 核心功能入口 -->
-			<view class="skeleton-entry-grid">
-				<view class="skeleton-entry-main"></view>
-				<view class="skeleton-entry-side">
-					<view class="skeleton-entry-mini"></view>
-					<view class="skeleton-entry-mini"></view>
-					<view class="skeleton-entry-wide"></view>
+			<view class="sk-nav"></view>
+			<view class="sk-search">
+				<view class="sk-search-ico"></view>
+				<view class="sk-search-line"></view>
+				<view class="sk-search-scan"></view>
+			</view>
+			<view class="sk-banner sk-banner--index"></view>
+			<view class="sk-notice"></view>
+			<view class="sk-hello">
+				<view class="sk-hello-avatar"></view>
+				<view class="sk-hello-text">
+					<view class="sk-hello-row">
+						<view class="sk-line sk-line--w220"></view>
+						<view class="sk-hello-sign"></view>
+					</view>
+					<view class="sk-line sk-line--w280 sk-line--sm"></view>
 				</view>
+				<view class="sk-hello-btn"></view>
 			</view>
-			<!-- 热门活动标题 -->
-			<view class="skeleton-section-header"></view>
-			<!-- 热门活动横向滚动卡片 -->
-			<view class="skeleton-active-scroll">
-				<view class="skeleton-active-card" v-for="i in 3" :key="i"></view>
+			<view class="sk-tabs">
+				<view class="sk-tab sk-tab--on"></view>
+				<view class="sk-tab"></view>
+				<view class="sk-tab-more"></view>
 			</view>
-			<!-- 商品标题 -->
-			<view class="skeleton-section-header"></view>
-			<!-- 商品列表 -->
-			<view class="skeleton-goods-grid">
-				<view class="skeleton-goods-card" v-for="i in 4" :key="i"></view>
+			<view class="sk-h-scroll">
+				<view class="sk-active-card" v-for="i in 2" :key="i">
+					<view class="sk-active-cover"></view>
+					<view class="sk-active-body">
+						<view class="sk-line sk-line--w80"></view>
+						<view class="sk-line sk-line--w60 sk-line--sm"></view>
+					</view>
+				</view>
 			</view>
 		</view>
 
-		<!-- 活动页骨架屏 -->
+		<!-- 活动页：搜索 + banner + 主题分类大卡/四小卡 + 两个入口 + 海报横滑 -->
 		<view v-else-if="type === 'low_carbon'" class="skeleton-low-carbon">
-			<!-- 侧边标签栏 -->
-			<view class="skeleton-side-bar">
-				<view class="skeleton-tab-item" v-for="i in 4" :key="i"></view>
+			<view class="sk-fb-nav">
+				<view class="sk-search sk-search--fb">
+					<view class="sk-search-ico"></view>
+					<view class="sk-search-line"></view>
+				</view>
 			</view>
-			<!-- 右侧内容区：本月推荐展示海报，其他标签显示卡片列表 -->
-			<view class="skeleton-content-area">
-				<!-- 骨架占位：根据默认选中标签（本月推荐=海报，其他=卡片）展示对应骨架 -->
-				<view class="skeleton-rec-banner"></view>
+			<view class="sk-banner sk-banner--fb"></view>
+			<view class="sk-sec-title"></view>
+			<view class="sk-cate">
+				<view class="sk-cate-big"></view>
+				<view class="sk-cate-right">
+					<view class="sk-cate-mini" v-for="i in 4" :key="i"></view>
+				</view>
+			</view>
+			<view class="sk-entry-row">
+				<view class="sk-entry"></view>
+				<view class="sk-entry"></view>
+			</view>
+			<view class="sk-sec-title"></view>
+			<view class="sk-h-scroll">
+				<view class="sk-weekly" v-for="i in 2" :key="'w'+i"></view>
 			</view>
 		</view>
 
-		<!-- 健康页骨架屏 -->
+		<!-- 健康页：蓝顶 + 诊断两行入口 + 社区帖 -->
 		<view v-else-if="type === 'health'" class="skeleton-health">
-			<!-- 顶部导航 -->
-			<view class="skeleton-navbar"></view>
-			<!-- 健康诊断卡片 -->
-			<view class="skeleton-health-card">
-				<view class="skeleton-health-row">
-					<view class="skeleton-health-item"></view>
-					<view class="skeleton-health-item"></view>
-				</view>
-				<view class="skeleton-health-row">
-					<view class="skeleton-health-item"></view>
-					<view class="skeleton-health-item"></view>
-				</view>
-				<view class="skeleton-health-row">
-					<view class="skeleton-health-item"></view>
-					<view class="skeleton-health-item"></view>
+			<view class="sk-nav sk-nav--trans"></view>
+			<view class="sk-health-block">
+				<view class="sk-health-hd"></view>
+				<view class="sk-health-body">
+					<view class="sk-health-row">
+						<view class="sk-health-tile"></view>
+						<view class="sk-health-tile"></view>
+					</view>
+					<view class="sk-health-row">
+						<view class="sk-health-tile"></view>
+						<view class="sk-health-tile"></view>
+					</view>
 				</view>
 			</view>
-			<!-- 健康生活社区 -->
-			<view class="skeleton-health-card">
-				<view class="skeleton-forum-item" v-for="i in 3" :key="i"></view>
+			<view class="sk-health-block">
+				<view class="sk-health-hd"></view>
+				<view class="sk-health-body">
+					<view class="sk-forum" v-for="i in 2" :key="i">
+						<view class="sk-forum-top">
+							<view class="sk-forum-av"></view>
+							<view class="sk-line sk-line--w180"></view>
+						</view>
+						<view class="sk-line sk-line--w90"></view>
+						<view class="sk-line sk-line--w70 sk-line--sm"></view>
+					</view>
+				</view>
 			</view>
 		</view>
 
-		<!-- 积分权益页骨架屏 -->
+		<!-- 积分权益：绿顶 + 搜索 + 轮播 + 券 + 分类 + 两列商品 -->
 		<view v-else-if="type === 'mall'" class="skeleton-mall">
-			<!-- 顶部导航 -->
-			<view class="skeleton-navbar"></view>
-			<!-- 搜索框 -->
-			<view class="skeleton-search"></view>
-			<!-- 轮播图 -->
-			<view class="skeleton-banner"></view>
-			<!-- 优惠券 -->
-			<view class="skeleton-coupon"></view>
-			<!-- 分类标签 -->
-			<view class="skeleton-cate-tags">
-				<view class="skeleton-cate-tag" v-for="i in 5" :key="i"></view>
+			<view class="sk-nav sk-nav--trans"></view>
+			<view class="sk-search sk-search--mall">
+				<view class="sk-search-line"></view>
 			</view>
-			<!-- 商品列表 -->
-			<view class="skeleton-goods-grid">
-				<view class="skeleton-goods-card" v-for="i in 4" :key="i"></view>
+			<view class="sk-banner sk-banner--mall"></view>
+			<view class="sk-coupon"></view>
+			<view class="sk-cate-tags">
+				<view class="sk-cate-tag" v-for="i in 4" :key="i"></view>
+			</view>
+			<view class="sk-goods-grid">
+				<view class="sk-goods-card" v-for="i in 4" :key="i">
+					<view class="sk-goods-img"></view>
+					<view class="sk-goods-info">
+						<view class="sk-line sk-line--w80"></view>
+						<view class="sk-line sk-line--w50 sk-line--sm"></view>
+					</view>
+				</view>
 			</view>
 		</view>
 
-		<!-- 我的页骨架屏 -->
+		<!-- 我的：绿头像区 + 积分条 + 功能宫格 -->
 		<view v-else-if="type === 'user'" class="skeleton-user">
-			<!-- 用户信息区 -->
-			<view class="skeleton-user-header">
-				<view class="skeleton-avatar"></view>
-				<view class="skeleton-user-info">
-					<view class="skeleton-user-name"></view>
-					<view class="skeleton-user-phone"></view>
-					<view class="skeleton-user-point"></view>
+			<view class="sk-me-hero">
+				<view class="sk-me-user">
+					<view class="sk-me-avatar"></view>
+					<view class="sk-me-info">
+						<view class="sk-line sk-line--light sk-line--w200"></view>
+						<view class="sk-line sk-line--light sk-line--w160 sk-line--sm"></view>
+					</view>
 				</view>
+				<view class="sk-me-stat"></view>
 			</view>
-			<!-- 环保达人进度 -->
-			<view class="skeleton-progress-card"></view>
-			<!-- 常用功能 -->
-			<view class="skeleton-functions">
-				<view class="skeleton-function-item" v-for="i in 8" :key="i"></view>
+			<view class="sk-me-sheet">
+				<view class="sk-me-grow"></view>
+				<view class="sk-me-card">
+					<view class="sk-line sk-line--w140"></view>
+					<view class="sk-me-grid">
+						<view class="sk-me-item" v-for="i in 4" :key="'a'+i">
+							<view class="sk-me-ico"></view>
+							<view class="sk-line sk-line--w70 sk-line--sm"></view>
+						</view>
+					</view>
+				</view>
+				<view class="sk-me-card">
+					<view class="sk-line sk-line--w140"></view>
+					<view class="sk-me-grid">
+						<view class="sk-me-item" v-for="i in 8" :key="'b'+i">
+							<view class="sk-me-ico"></view>
+							<view class="sk-line sk-line--w70 sk-line--sm"></view>
+						</view>
+					</view>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -120,321 +163,447 @@ export default {
 		},
 		type: {
 			type: String,
-			default: 'index' // index, low_carbon, health, mall, user
+			default: 'index'
 		}
 	}
 }
 </script>
 
 <style lang="scss" scoped>
-/* 骨架屏基础样式 */
 .skeleton-screen {
 	position: fixed;
 	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background-color: #f5f5f5;
 	z-index: 9999;
 	overflow: hidden;
 }
-
-/* 骨架屏闪烁动画 */
-@keyframes skeleton-loading {
-	0% {
-		background-position: -200rpx 0;
-	}
-	100% {
-		background-position: calc(200rpx + 100%) 0;
-	}
+.skeleton-bg--index,
+.skeleton-bg--low_carbon,
+.skeleton-bg--user {
+	background: #eef4f0;
+}
+.skeleton-bg--health {
+	background: #eff4ff;
+}
+.skeleton-bg--mall {
+	background: #eff9f1;
 }
 
-.skeleton-base {
-	background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+@keyframes skeleton-loading {
+	0% { background-position: -200rpx 0; }
+	100% { background-position: calc(200rpx + 100%) 0; }
+}
+
+.sk-base {
+	background: linear-gradient(90deg, #dde6e0 25%, #eef3ef 50%, #dde6e0 75%);
 	background-size: 400rpx 100%;
 	animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+.skeleton-bg--health .sk-base,
+.skeleton-health .sk-health-tile,
+.skeleton-health .sk-forum,
+.skeleton-health .sk-health-hd,
+.skeleton-health .sk-forum-av,
+.skeleton-health .sk-line {
+	background: linear-gradient(90deg, #d5e2f6 25%, #eaf1fb 50%, #d5e2f6 75%);
+	background-size: 400rpx 100%;
+	animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.sk-line {
+	@extend .sk-base;
+	height: 28rpx;
 	border-radius: 8rpx;
 }
-
-/* 首页骨架屏 */
-.skeleton-index {
-	padding: 30rpx;
-	
-	.skeleton-navbar {
-		@extend .skeleton-base;
-		height: 88rpx;
-		margin-bottom: 20rpx;
-	}
-	
-	.skeleton-banner {
-		@extend .skeleton-base;
-		height: 340rpx;
-		border-radius: 24rpx;
-		margin-bottom: 20rpx;
-	}
-	
-	.skeleton-notice {
-		@extend .skeleton-base;
-		height: 60rpx;
-		margin-bottom: 30rpx;
-	}
-	
-	.skeleton-entry-grid {
-		display: flex;
-		gap: 20rpx;
-		margin-bottom: 30rpx;
-		
-		.skeleton-entry-main {
-			@extend .skeleton-base;
-			flex: 1.2;
-			height: 360rpx;
-			border-radius: 20rpx;
-		}
-		
-		.skeleton-entry-side {
-			flex: 1;
-			display: flex;
-			flex-direction: column;
-			gap: 20rpx;
-			
-			.skeleton-entry-mini {
-				@extend .skeleton-base;
-				flex: 1;
-				border-radius: 20rpx;
-			}
-			
-			.skeleton-entry-wide {
-				@extend .skeleton-base;
-				height: 140rpx;
-				border-radius: 20rpx;
-			}
-		}
-	}
-	
-	.skeleton-section-header {
-		@extend .skeleton-base;
-		height: 60rpx;
-		margin-bottom: 20rpx;
-	}
-	
-	.skeleton-active-scroll {
-		display: flex;
-		gap: 20rpx;
-		margin-bottom: 30rpx;
-		
-		.skeleton-active-card {
-			@extend .skeleton-base;
-			width: 540rpx;
-			height: 400rpx;
-			border-radius: 20rpx;
-			flex-shrink: 0;
-		}
-	}
-	
-	.skeleton-goods-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 20rpx;
-		
-		.skeleton-goods-card {
-			@extend .skeleton-base;
-			width: calc(50% - 10rpx);
-			height: 400rpx;
-			border-radius: 20rpx;
-		}
-	}
+.sk-line--sm { height: 22rpx; margin-top: 16rpx; }
+.sk-line--w50 { width: 50%; }
+.sk-line--w60 { width: 60%; }
+.sk-line--w70 { width: 70%; }
+.sk-line--w80 { width: 80%; }
+.sk-line--w90 { width: 90%; }
+.sk-line--w140 { width: 140rpx; height: 32rpx; }
+.sk-line--w160 { width: 160rpx; }
+.sk-line--w180 { width: 180rpx; }
+.sk-line--w200 { width: 200rpx; }
+.sk-line--w220 { width: 220rpx; }
+.sk-line--w280 { width: 280rpx; }
+.sk-line--light {
+	background: linear-gradient(90deg, rgba(255,255,255,0.28) 25%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.28) 75%);
+	background-size: 400rpx 100%;
 }
 
-/* 活动页骨架屏 */
-.skeleton-low-carbon {
+.sk-nav {
+	@extend .sk-base;
+	height: 176rpx;
+	border-radius: 0;
+	background: #fff;
+	animation: none;
+}
+.sk-nav--trans {
+	height: 176rpx;
+	background: transparent;
+	animation: none;
+}
+
+.sk-search {
 	display: flex;
-	height: 100%;
-	
-	.skeleton-side-bar {
-		width: 160rpx;
-		background-color: #f9f9f9;
-		padding: 20rpx 0;
-		
-		.skeleton-tab-item {
-			@extend .skeleton-base;
-			height: 80rpx;
-			margin: 20rpx 15rpx;
-			border-radius: 10rpx;
-		}
-	}
-	
-	.skeleton-content-area {
-		flex: 1;
-		padding: 30rpx;
-		
-		/* 本月推荐海报骨架 */
-		.skeleton-rec-banner {
-			@extend .skeleton-base;
-			width: 100%;
-			height: 100%;
-			min-height: 600rpx;
-			border-radius: 20rpx;
-		}
-	}
+	align-items: center;
+	height: 80rpx;
+	margin: 20rpx 30rpx 0;
+	padding: 0 12rpx 0 16rpx;
+	background: #fff;
+	border-radius: 40rpx;
+	box-sizing: border-box;
+}
+.sk-search--fb {
+	margin: 0;
+	height: 76rpx;
+	background: #f3f8f4;
+	border-radius: 38rpx;
+}
+.sk-search--mall {
+	height: 70rpx;
+	margin: 0 0 24rpx;
+	border: 2rpx solid #cdeece;
+}
+.sk-search-ico {
+	@extend .sk-base;
+	width: 56rpx;
+	height: 56rpx;
+	border-radius: 50%;
+	flex-shrink: 0;
+}
+.sk-search-line {
+	@extend .sk-base;
+	flex: 1;
+	height: 24rpx;
+	margin: 0 16rpx;
+	border-radius: 8rpx;
+}
+.sk-search-scan {
+	@extend .sk-base;
+	width: 64rpx;
+	height: 64rpx;
+	border-radius: 50%;
+	flex-shrink: 0;
 }
 
-/* 健康页骨架屏 */
-.skeleton-health {
-	padding: 30rpx;
-	
-	.skeleton-navbar {
-		@extend .skeleton-base;
-		height: 88rpx;
-		margin-bottom: 20rpx;
-	}
-	
-	.skeleton-health-card {
-		@extend .skeleton-base;
-		padding: 20rpx;
-		border-radius: 20rpx;
-		margin-bottom: 30rpx;
-		
-		.skeleton-health-row {
-			display: flex;
-			gap: 20rpx;
-			margin-bottom: 20rpx;
-			
-			.skeleton-health-item {
-				@extend .skeleton-base;
-				flex: 1;
-				height: 123rpx;
-				border-radius: 10rpx;
-			}
-		}
-		
-		.skeleton-forum-item {
-			@extend .skeleton-base;
-			height: 200rpx;
-			margin-bottom: 20rpx;
-			border-radius: 10rpx;
-		}
-	}
+.sk-banner {
+	@extend .sk-base;
+	margin: 24rpx 30rpx 0;
+	border-radius: 28rpx;
+}
+.sk-banner--index { height: 340rpx; }
+.sk-banner--fb {
+	height: 300rpx;
+	margin: 16rpx 24rpx 0;
+	border-radius: 24rpx;
+}
+.sk-banner--mall {
+	height: 350rpx;
+	margin: 0 0 24rpx;
+	border-radius: 20rpx;
 }
 
-/* 积分权益页骨架屏 */
-.skeleton-mall {
-	padding: 30rpx;
-	
-	.skeleton-navbar {
-		@extend .skeleton-base;
-		height: 88rpx;
-		margin-bottom: 20rpx;
-	}
-	
-	.skeleton-search {
-		@extend .skeleton-base;
-		height: 70rpx;
-		border-radius: 35rpx;
-		margin-bottom: 30rpx;
-	}
-	
-	.skeleton-banner {
-		@extend .skeleton-base;
-		height: 350rpx;
-		border-radius: 20rpx;
-		margin-bottom: 30rpx;
-	}
-	
-	.skeleton-coupon {
-		@extend .skeleton-base;
-		height: 210rpx;
-		border-radius: 20rpx;
-		margin-bottom: 30rpx;
-	}
-	
-	.skeleton-cate-tags {
-		display: flex;
-		gap: 20rpx;
-		margin-bottom: 30rpx;
-		
-		.skeleton-cate-tag {
-			@extend .skeleton-base;
-			width: 120rpx;
-			height: 60rpx;
-			border-radius: 30rpx;
-		}
-	}
-	
-	.skeleton-goods-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 20rpx;
-		
-		.skeleton-goods-card {
-			@extend .skeleton-base;
-			width: calc(50% - 10rpx);
-			height: 450rpx;
-			border-radius: 20rpx;
-		}
-	}
+.sk-notice {
+	@extend .sk-base;
+	height: 64rpx;
+	margin: 20rpx 30rpx 0;
+	border-radius: 20rpx;
 }
 
-/* 我的页骨架屏 */
-.skeleton-user {
-	padding: 30rpx;
-	
-	.skeleton-user-header {
-		display: flex;
-		align-items: center;
-		padding: 150rpx 0 30rpx;
-		
-		.skeleton-avatar {
-			@extend .skeleton-base;
-			width: 130rpx;
-			height: 130rpx;
-			border-radius: 50%;
-		}
-		
-		.skeleton-user-info {
-			margin-left: 30rpx;
-			flex: 1;
-			
-			.skeleton-user-name {
-				@extend .skeleton-base;
-				height: 40rpx;
-				width: 200rpx;
-				margin-bottom: 20rpx;
-			}
-			
-			.skeleton-user-phone {
-				@extend .skeleton-base;
-				height: 30rpx;
-				width: 250rpx;
-				margin-bottom: 20rpx;
-			}
-			
-			.skeleton-user-point {
-				@extend .skeleton-base;
-				height: 30rpx;
-				width: 180rpx;
-			}
-		}
-	}
-	
-	.skeleton-progress-card {
-		@extend .skeleton-base;
-		height: 200rpx;
-		border-radius: 20rpx;
-		margin-bottom: 30rpx;
-	}
-	
-	.skeleton-functions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 30rpx;
-		padding: 30rpx;
-		
-		.skeleton-function-item {
-			@extend .skeleton-base;
-			width: calc(25% - 23rpx);
-			height: 120rpx;
-			border-radius: 10rpx;
-		}
-	}
+.sk-hello {
+	display: flex;
+	align-items: center;
+	margin: 24rpx 30rpx 0;
+	padding: 24rpx 20rpx 24rpx 24rpx;
+	background: linear-gradient(135deg, #2bc24e 0%, #12962e 100%);
+	border-radius: 28rpx;
+	box-sizing: border-box;
+}
+.sk-hello-avatar {
+	width: 80rpx;
+	height: 80rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.35);
+	flex-shrink: 0;
+	margin-right: 18rpx;
+}
+.sk-hello-text { flex: 1; min-width: 0; }
+.sk-hello-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.sk-hello-sign {
+	width: 110rpx;
+	height: 48rpx;
+	border-radius: 32rpx;
+	background: rgba(255,255,255,0.22);
+	flex-shrink: 0;
+	margin-left: 12rpx;
+}
+.sk-hello-btn {
+	width: 140rpx;
+	height: 88rpx;
+	margin-left: 16rpx;
+	background: #fff;
+	border-radius: 20rpx;
+	flex-shrink: 0;
+}
+
+.sk-tabs {
+	display: flex;
+	align-items: center;
+	margin: 28rpx 30rpx 8rpx;
+	padding: 8rpx 12rpx 8rpx 8rpx;
+	background: #fff;
+	border-radius: 20rpx;
+}
+.sk-tab {
+	@extend .sk-base;
+	width: 140rpx;
+	height: 56rpx;
+	border-radius: 14rpx;
+	margin-right: 8rpx;
+}
+.sk-tab--on { width: 160rpx; }
+.sk-tab-more {
+	@extend .sk-base;
+	width: 80rpx;
+	height: 28rpx;
+	margin-left: auto;
+}
+
+.sk-h-scroll {
+	display: flex;
+	padding: 16rpx 0 0 30rpx;
+	overflow: hidden;
+}
+.sk-active-card {
+	width: 540rpx;
+	margin-right: 24rpx;
+	background: #fff;
+	border-radius: 28rpx;
+	overflow: hidden;
+	flex-shrink: 0;
+}
+.sk-active-cover {
+	@extend .sk-base;
+	width: 540rpx;
+	height: 270rpx;
+	border-radius: 0;
+}
+.sk-active-body { padding: 24rpx; }
+
+.sk-fb-nav {
+	background: #fff;
+	padding: 16rpx 24rpx;
+	padding-top: calc(env(safe-area-inset-top) + 16rpx);
+}
+
+.sk-sec-title {
+	@extend .sk-base;
+	width: 160rpx;
+	height: 36rpx;
+	margin: 28rpx 24rpx 16rpx;
+}
+
+.sk-cate {
+	display: flex;
+	gap: 16rpx;
+	padding: 8rpx 24rpx 24rpx;
+}
+.sk-cate-big {
+	@extend .sk-base;
+	width: 210rpx;
+	height: 260rpx;
+	border-radius: 20rpx;
+	flex-shrink: 0;
+}
+.sk-cate-right {
+	flex: 1;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 1fr 1fr;
+	gap: 12rpx;
+	height: 260rpx;
+}
+.sk-cate-mini {
+	@extend .sk-base;
+	border-radius: 16rpx;
+}
+
+.sk-entry-row {
+	display: flex;
+	gap: 16rpx;
+	padding: 0 24rpx 8rpx;
+}
+.sk-entry {
+	@extend .sk-base;
+	flex: 1;
+	height: 120rpx;
+	border-radius: 20rpx;
+}
+
+.sk-weekly {
+	@extend .sk-base;
+	width: 520rpx;
+	height: 320rpx;
+	border-radius: 24rpx;
+	margin-right: 20rpx;
+	flex-shrink: 0;
+}
+
+.skeleton-health { padding: 0 30rpx 30rpx; }
+.sk-health-block {
+	border-radius: 20rpx;
+	overflow: hidden;
+	margin-bottom: 30rpx;
+	background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);
+}
+.sk-health-hd {
+	width: 180rpx;
+	height: 36rpx;
+	margin: 20rpx;
+	border-radius: 8rpx;
+	background: rgba(255,255,255,0.35);
+	animation: none;
+}
+.sk-health-body {
+	background: #fff;
+	border-radius: 20rpx;
+	padding: 20rpx;
+}
+.sk-health-row {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 20rpx;
+	&:last-child { margin-bottom: 0; }
+}
+.sk-health-tile {
+	width: 314rpx;
+	height: 123rpx;
+	border-radius: 10rpx;
+}
+.sk-forum {
+	padding: 20rpx;
+	border-radius: 20rpx;
+	margin-bottom: 20rpx;
+	background: #f4f8ff;
+	animation: none;
+	&:last-child { margin-bottom: 0; }
+}
+.sk-forum-top {
+	display: flex;
+	align-items: center;
+	margin-bottom: 20rpx;
+}
+.sk-forum-av {
+	width: 40rpx;
+	height: 40rpx;
+	border-radius: 50%;
+	margin-right: 10rpx;
+	flex-shrink: 0;
+}
+
+.skeleton-mall { padding: 0 30rpx 30rpx; }
+.sk-coupon {
+	@extend .sk-base;
+	height: 210rpx;
+	border-radius: 20rpx;
+	margin-bottom: 30rpx;
+}
+.sk-cate-tags {
+	display: flex;
+	gap: 20rpx;
+	margin-bottom: 30rpx;
+}
+.sk-cate-tag {
+	@extend .sk-base;
+	width: 120rpx;
+	height: 56rpx;
+	border-radius: 28rpx;
+	flex-shrink: 0;
+}
+.sk-goods-grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+.sk-goods-card {
+	width: 334rpx;
+	margin-bottom: 30rpx;
+	background: #fff;
+	border-radius: 20rpx;
+	overflow: hidden;
+}
+.sk-goods-img {
+	@extend .sk-base;
+	width: 334rpx;
+	height: 334rpx;
+	border-radius: 0;
+}
+.sk-goods-info { padding: 16rpx; }
+
+.sk-me-hero {
+	background: linear-gradient(165deg, #18af38 0%, #12962e 58%, #0e7f26 100%);
+	padding: 120rpx 32rpx 88rpx;
+}
+.sk-me-user { display: flex; align-items: center; }
+.sk-me-avatar {
+	width: 130rpx;
+	height: 130rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.35);
+	flex-shrink: 0;
+}
+.sk-me-info { margin-left: 24rpx; flex: 1; }
+.sk-me-stat {
+	height: 120rpx;
+	margin-top: 32rpx;
+	border-radius: 24rpx;
+	background: rgba(255,255,255,0.22);
+}
+.sk-me-sheet {
+	margin-top: -40rpx;
+	padding: 0 24rpx 40rpx;
+	position: relative;
+}
+.sk-me-grow {
+	@extend .sk-base;
+	height: 160rpx;
+	border-radius: 24rpx;
+	margin-bottom: 24rpx;
+	background: #fff;
+	animation: none;
+	box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.06);
+}
+.sk-me-card {
+	background: #fff;
+	border-radius: 24rpx;
+	padding: 28rpx 20rpx;
+	margin-bottom: 24rpx;
+}
+.sk-me-grid {
+	display: flex;
+	flex-wrap: wrap;
+	margin-top: 24rpx;
+}
+.sk-me-item {
+	width: 25%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 28rpx;
+}
+.sk-me-ico {
+	@extend .sk-base;
+	width: 72rpx;
+	height: 72rpx;
+	border-radius: 20rpx;
+	margin-bottom: 12rpx;
 }
 </style>

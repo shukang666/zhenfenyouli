@@ -20,6 +20,7 @@
 			</view>
 		</view>
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
+		<skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
 		<!-- 顶部 Banner 轮播 -->
 		<view class="fb-banner-wrap" v-if="banner_list && banner_list.length">
@@ -230,8 +231,10 @@
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	import careGesture from '@/common/care-gesture.mixin.js'
+	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 
 	export default {
+		components: { SkeletonScreen },
 		mixins: [careGesture],
 		data() {
 			return {

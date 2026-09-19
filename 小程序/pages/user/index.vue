@@ -9,6 +9,7 @@
 		</view>
 
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
+		<skeleton-screen :show="isLoading" type="user"></skeleton-screen>
 
 		<view class="me-hero">
 			<image v-if="imgUrl" :src="`${imgUrl}user-bg.png`" class="me-hero__bg" mode="aspectFill"></image>
@@ -238,10 +239,13 @@
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	import careGesture from '@/common/care-gesture.mixin.js'
+	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 	export default {
+	components: { SkeletonScreen },
 	mixins: [careGesture],
 	data() {
 		return {
+			isLoading: true,
 			mask_show: false,
 			descShow: false,
 			badge_list: [],
@@ -254,6 +258,8 @@
 			if (this.isLogin) {
 				this.getUserInfo()
 				this.get_new_badge_list()
+			} else {
+				this.isLoading = false
 			}
 		},
 		methods: {
@@ -283,6 +289,8 @@
 				}).catch(err => {
 					this.$u.vuex('userInfo', {})
 					this.$u.vuex('isLogin', false)
+				}).finally(() => {
+					this.isLoading = false
 				})
 			},
 			openKf() {
