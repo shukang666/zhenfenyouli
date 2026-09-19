@@ -1,5 +1,6 @@
 import deepMerge from "../function/deepMerge";
 import validate from "../function/test";
+import { endHttpLoading } from "@/common/http.loading.js";
 class Request {
 	// 设置全局默认配置
 	setConfig(customConfig) {
@@ -28,9 +29,7 @@ class Request {
 
 		return new Promise((resolve, reject) => {
 			options.complete = (response) => {
-				// 请求返回后，隐藏loading(如果请求返回快的话，可能会没有loading)
-				uni.hideLoading();
-				// 清除定时器，如果请求回来了，就无需loading
+				endHttpLoading(options)
 				clearTimeout(this.config.timer);
 				this.config.timer = null;
 				// 判断用户对拦截返回数据的要求，如果originalData为true，返回所有的数据(response)到拦截器，否则只返回response.data

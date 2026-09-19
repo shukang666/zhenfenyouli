@@ -2,15 +2,13 @@ import {
 	devUrl,
 	prodUrl,
 	contentType,
-	showLoading,
-	loadingText,
-	loadingTime,
 	headerTokenName,
 	userTokenName,
 	codeName,
 	successCode,
 	invalidCode,
 } from '@/common/settings'
+import { beginHttpLoading } from '@/common/http.loading.js'
 
 
 // 这里的vm，就是我们在vue文件里面的this，所以我们能在这里获取vuex的变量，比如存放在里面的token变量
@@ -21,29 +19,21 @@ const install = (Vue, vm) => {
 		method: 'GET',
 		// 设置为json，返回后会对数据进行一次JSON.parse()
 		dataType: 'json',
-		showLoading, // 是否显示请求中的loading
-		loadingText, // 请求loading中的文字提示
-		loadingTime, // 在此时间内，请求还没回来的话，就显示加载中动画，单位ms
+		// 关掉 uView 自带的延迟「请求中」，改由下面拦截器立刻出「加载中...」
+		showLoading: false,
 		originalData: false, // 是否在拦截器中返回服务端的原始数据
-		loadingMask: true, // 展示loading的时候，是否给一个透明的蒙层，防止触摸穿透
+		loadingMask: true,
 		// 配置请求头信息
 		header: {
 			'content-type': contentType
 		},
 	});
 
-	// 请求拦截，配置Token等参数
+	// 请求拦截：带 token，等网络时立刻出加载中
 	Vue.prototype.$u.http.interceptor.request = (config) => {
-		// 引用token
-		// 由于使用了vuex统一管理，此处可以用vm.直接取vuex中的值
 		config.header[headerTokenName] = vm.userInfo?. [userTokenName] || '';
-
-		// 可以对某个url进行特别处理，此url参数为this.$u.get(url)中的url值
-		// if(config.url == '/user/login') config.header.noToken = true;
-		// 最后需要将config进行return
+		beginHttpLoading(config)
 		return config;
-		// 如果return一个false值，则会取消本次请求
-		// if(config.url == '/user/rest') return false; // 取消某次请求
 	}
 
 	// 响应拦截，判断状态码是否通过

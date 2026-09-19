@@ -19,16 +19,16 @@ module.exports = {
 	contentType: 'application/json;charset=UTF-8',
 	// 后端返回状态码，如code,status
 	codeName:'code',
-	// 是否显示请求中loading
+	// 是否显示请求中loading（实际由 http.interceptor 出「加载中...」，此处仅作兜底说明）
 	showLoading: true,
 	// 请求loading的文字提示
-	loadingText: '请求中...',
+	loadingText: '加载中...',
 	// 请求头中身份验证字段名称
 	headerTokenName: 'openid',
 	// 用户信息中身份验证字段名称
 	userTokenName: 'openid',
-	// 在此时间内，请求还没回来的话，就显示加载中动画，单位ms
-	loadingTime: 800,
+	// 拦截器已改为立刻出加载中，此值不再驱动 uView 延迟 loading
+	loadingTime: 0,
 	// 操作正常code
 	successCode: 1,
 	// 登录失效code
