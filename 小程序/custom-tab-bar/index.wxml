@@ -1,23 +1,28 @@
 <view class="custom-tab-bar">
   <view class="tab-bar-content">
     <view
-      class="tab-item"
+      wx:if="{{selected >= 0}}"
+      class="tab-indicator {{animOn ? 'tab-indicator--anim' : ''}}"
+      style="transform: translate3d({{selected * 100}}%, 0, 0);"
+    ></view>
+    <view
+      class="tab-item {{selected === index ? 'is-active' : ''}}"
       wx:for="{{list}}"
       wx:key="pagePath"
       data-index="{{index}}"
       data-path="{{item.pagePath}}"
-      bindtap="switchTab"
+      hover-class="tab-item--press"
+      hover-stay-time="70"
+      catchtap="switchTab"
     >
       <view class="tab-icon-wrap">
         <image
-          class="tab-icon {{selected === index ? 'tab-icon--active' : ''}}"
+          class="tab-icon"
           src="{{selected === index ? item.selectedIconPath : item.iconPath}}"
           mode="aspectFit"
         ></image>
       </view>
-      <text class="tab-text {{selected === index ? 'tab-text--active' : ''}}">
-        {{item.text}}
-      </text>
+      <text class="tab-text">{{item.text}}</text>
     </view>
   </view>
 </view>

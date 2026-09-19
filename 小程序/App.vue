@@ -1,7 +1,27 @@
 <script>
     export default {
+        globalData: {
+            tabBarIndex: 0
+        },
         onLaunch: function() {
             // this.$u.wx.wxOauth()
+            // #ifdef MP-WEIXIN
+            setTimeout(() => {
+                const tabs = [
+                    '/pages/low_carbon/low_carbon',
+                    '/pages/health/health',
+                    '/pages/mall/mall',
+                    '/pages/user/index'
+                ]
+                tabs.forEach((url) => {
+                    try {
+                        if (typeof uni.preloadPage === 'function') {
+                            uni.preloadPage({ url })
+                        }
+                    } catch (e) {}
+                })
+            }, 200)
+            // #endif
         },
         onShow: function() {
             this.findSetting()

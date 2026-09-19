@@ -10,30 +10,73 @@
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "首页",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"componentPlaceholder": {
+					"u-navbar": "view",
+					"u-swiper": "view",
+					"u-image": "view",
+					"u-icon": "view",
+					"u-notice-bar": "view",
+					"z-paging": "view",
+					"care-pull-hint": "view",
+					"new-user-guide": "view"
+				}
 			}
 		}, {
 			"path": "pages/user/index",
 			"style": {
 				"navigationBarTitleText": "我的",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"componentPlaceholder": {
+					"u-icon": "view",
+					"u-image": "view",
+					"u-avatar": "view",
+					"u-tag": "view",
+					"u-line-progress": "view",
+					"u-mask": "view",
+					"u-button": "view",
+					"care-pull-hint": "view"
+				}
 			}
 		}, {
 			"path": "pages/health/health",
 			"style": {
 				"navigationBarTitleText": "健康",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"componentPlaceholder": {
+					"u-navbar": "view",
+					"u-image": "view",
+					"u-icon": "view",
+					"u-avatar": "view",
+					"cl-upload": "view",
+					"care-pull-hint": "view"
+				}
 			}
 		}, {
 			"path": "pages/low_carbon/low_carbon",
 			"style": {
-				"navigationBarTitleText": "活动"
+				"navigationBarTitleText": "活动",
+				"componentPlaceholder": {
+					"u-icon": "view",
+					"u-image": "view",
+					"care-pull-hint": "view"
+				}
 			}
 		}, {
 			"path": "pages/mall/mall",
 			"style": {
 				"navigationBarTitleText": "积分权益",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"componentPlaceholder": {
+					"u-navbar": "view",
+					"u-image": "view",
+					"u-icon": "view",
+					"u-search": "view",
+					"u-swiper": "view",
+					"u-button": "view",
+					"u-tag": "view",
+					"care-pull-hint": "view"
+				}
 			}
 		}, {
 			"path": "pages/low_carbon/lsxf/details-new",

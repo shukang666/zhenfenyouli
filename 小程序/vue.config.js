@@ -1,6 +1,62 @@
 const path = require('path')
 const fs = require('fs')
 
+const SKIP_PLACEHOLDER = { 'skeleton-screen': true }
+const SKIP_JSON = {
+  'app.json': true,
+  'project.config.json': true,
+  'project.private.config.json': true
+}
+
+function injectPageComponentPlaceholders(mpRoot) {
+  if (!fs.existsSync(mpRoot)) return
+  const walk = (dir) => {
+    let names
+    try {
+      names = fs.readdirSync(dir)
+    } catch (e) {
+      return
+    }
+    names.forEach((name) => {
+      if (name === 'custom-tab-bar' || name === 'node_modules' || name === 'static') return
+      const full = path.join(dir, name)
+      let stat
+      try {
+        stat = fs.statSync(full)
+      } catch (e) {
+        return
+      }
+      if (stat.isDirectory()) {
+        walk(full)
+        return
+      }
+      if (!name.endsWith('.json') || SKIP_JSON[name]) return
+      let json
+      try {
+        json = JSON.parse(fs.readFileSync(full, 'utf8'))
+      } catch (e) {
+        return
+      }
+      if (json.component === true) return
+      const using = json.usingComponents
+      if (!using || typeof using !== 'object') return
+      const ph = Object.assign({}, json.componentPlaceholder)
+      let changed = false
+      Object.keys(using).forEach((key) => {
+        if (SKIP_PLACEHOLDER[key]) return
+        if (!ph[key]) {
+          ph[key] = 'view'
+          changed = true
+        }
+      })
+      if (!changed) return
+      json.componentPlaceholder = ph
+      fs.writeFileSync(full, JSON.stringify(json))
+    })
+  }
+  walk(mpRoot)
+}
+
 module.exports = {
   configureWebpack: {
     plugins: [
@@ -29,6 +85,7 @@ module.exports = {
                   fs.copyFileSync(src, dest)
                 }
               })
+              injectPageComponentPlaceholders(path.dirname(destDir))
             })
           })
         }

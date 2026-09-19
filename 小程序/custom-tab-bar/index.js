@@ -1,9 +1,31 @@
+function getAppSafe() {
+  try {
+    return getApp()
+  } catch (e) {
+    return null
+  }
+}
+
+function readTabIndex() {
+  const app = getAppSafe()
+  const n = app && app.globalData && app.globalData.tabBarIndex
+  return typeof n === 'number' ? n : 0
+}
+
+function writeTabIndex(index) {
+  const app = getAppSafe()
+  if (!app) return
+  if (!app.globalData) app.globalData = {}
+  app.globalData.tabBarIndex = index
+}
+
 Component({
   options: {
     styleIsolation: 'shared'
   },
   data: {
-    selected: 0,
+    selected: -1,
+    animOn: false,
     list: [
       {
         pagePath: '/pages/index/index',
@@ -37,15 +59,41 @@ Component({
       }
     ]
   },
+  lifetimes: {
+    attached() {
+      this._snapTo(readTabIndex())
+    }
+  },
   methods: {
+    _enableAnim() {
+      if (this.data.animOn) return
+      this.setData({ animOn: true })
+    },
+    _snapTo(index) {
+      writeTabIndex(index)
+      this.setData({ animOn: false, selected: index }, () => {
+        setTimeout(() => this._enableAnim(), 60)
+      })
+    },
     setSelected(index) {
+      writeTabIndex(index)
+      if (this.data.selected < 0 || !this.data.animOn) {
+        this._snapTo(index)
+        return
+      }
+      if (this.data.selected === index) return
       this.setData({ selected: index })
     },
     switchTab(e) {
       const index = e.currentTarget.dataset.index
       const path = e.currentTarget.dataset.path
       if (this.data.selected === index) return
+      writeTabIndex(index)
       wx.switchTab({ url: path })
+      this.setData({
+        selected: index,
+        animOn: this.data.selected >= 0
+      })
     }
   }
 })

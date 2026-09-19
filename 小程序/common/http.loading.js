@@ -1,6 +1,5 @@
 /**
- * 接口加载态：只服务网络请求。
- * 并发计数，全部结束才关掉，避免第一个接口返回就把「加载中」掐掉。
+ * 接口加载态。五个 Tab 页用骨架屏反馈，不出「加载中」挡住点击。
  */
 let pending = 0
 let shown = false
@@ -9,8 +8,29 @@ const SILENT = [
 	'find_setting'
 ]
 
+const TAB_ROUTES = [
+	'pages/index/index',
+	'pages/low_carbon/low_carbon',
+	'pages/health/health',
+	'pages/mall/mall',
+	'pages/user/index'
+]
+
+function isTabPage() {
+	try {
+		const pages = getCurrentPages()
+		if (!pages || !pages.length) return false
+		const cur = pages[pages.length - 1]
+		const route = (cur && (cur.route || cur.__route__)) || ''
+		return TAB_ROUTES.indexOf(route) !== -1
+	} catch (e) {
+		return false
+	}
+}
+
 export function shouldShowHttpLoading(config) {
 	if (!config || config.showLoading === false) return false
+	if (isTabPage()) return false
 	const url = String(config.url || '')
 	for (let i = 0; i < SILENT.length; i++) {
 		if (url.indexOf(SILENT[i]) !== -1) return false
@@ -38,11 +58,10 @@ export function endHttpLoading(config) {
 	if (!config || !config._httpLoading) return
 	config._httpLoading = false
 	pending--
-	if (pending <= 0) {
-		pending = 0
-		if (shown) {
-			shown = false
-			uni.hideLoading()
-		}
+	if (pending > 0) return
+	pending = 0
+	if (shown) {
+		shown = false
+		uni.hideLoading()
 	}
 }
