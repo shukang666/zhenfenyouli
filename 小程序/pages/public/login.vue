@@ -78,9 +78,6 @@ export default {
 			this.code = code;
 		},
 		goAfterLogin() {
-			if (!uni.getStorageSync('has_finished_guide')) {
-				uni.setStorageSync('new_user_guide', '1');
-			}
 			const pending = consumePendingAfterLogin()
 			if (pending) {
 				uni.$emit('pause-new-user-guide')

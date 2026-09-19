@@ -190,7 +190,6 @@
 import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 import NewUserGuide from '@/components/new-user-guide/new-user-guide.vue'
 import careGesture from '@/common/care-gesture.mixin.js'
-import { isActiveScanEntry } from '@/common/scanSignEntry.js'
 export default {
 	components: {
 		SkeletonScreen,
