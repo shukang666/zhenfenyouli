@@ -31,8 +31,11 @@ class VolunteerTaskController extends AuthController
             ->where('user_id', $this->user_id)
             ->column('task_id');
 
+        $dailyLimit = $this->todayClaimCount() >= 1;
+
         foreach ($allTasks as &$task) {
             $task['accepted'] = in_array($task['id'], $acceptedTaskIds);
+            $task['daily_limit'] = $dailyLimit;
             $task['point']    = intval($task['point']);
             $task['from_shot'] = intval($task['shot_id'] ?? 0) > 0;
             if (!empty($task['image'])) {
@@ -71,6 +74,10 @@ class VolunteerTaskController extends AuthController
             ->find();
         if ($exist) {
             $this->error('请勿重复领取');
+        }
+
+        if ($this->todayClaimCount() >= 1) {
+            $this->error('每人每天最多领取 1 条，明天再来');
         }
 
         Db::name('volunteer_task_log')->insert([
@@ -167,6 +174,16 @@ class VolunteerTaskController extends AuthController
         ]);
 
         $this->success('提交成功，请等待审核');
+    }
+
+    /** 当天 0 点起已领取条数（Asia/Shanghai） */
+    protected function todayClaimCount()
+    {
+        $start = strtotime(date('Y-m-d 00:00:00'));
+        return (int) Db::name('volunteer_task_log')
+            ->where('user_id', $this->user_id)
+            ->where('create_time', '>=', $start)
+            ->count();
     }
 
     private function logStatusName($status)

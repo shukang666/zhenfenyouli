@@ -6,7 +6,10 @@
 		</view>
 
 		<!-- Tab 切换 -->
-		<view class="u-type-white-bg u-radius-6 u-m-t-30 u-p-10">
+		<view class="u-type-white-bg u-radius-6 u-m-t-30 u-p-20">
+			<view class="u-font-24 u-type-info">每人每天最多领取 1 条</view>
+		</view>
+		<view class="u-type-white-bg u-radius-6 u-m-t-20 u-p-10">
 			<u-tabs :list="tabs" :is-scroll="false" :current="currentTab" @change="changeTab" active-color="#18AF38"></u-tabs>
 		</view>
 
@@ -20,19 +23,26 @@
 				<view class="u-flex u-row-between u-m-t-20">
 					<view class="u-font-26" style="color:#18AF38;">奖励积分 +{{item.point}}</view>
 					<u-button
-						v-if="!item.accepted"
-						type="success"
-						size="mini"
-						shape="circle"
-						@click="acceptTask(item)"
-					>领取任务</u-button>
-					<u-button
-						v-else
+						v-if="item.accepted"
 						type="info"
 						size="mini"
 						shape="circle"
 						disabled
 					>已领取</u-button>
+					<u-button
+						v-else-if="item.daily_limit"
+						type="info"
+						size="mini"
+						shape="circle"
+						disabled
+					>今日已领</u-button>
+					<u-button
+						v-else
+						type="success"
+						size="mini"
+						shape="circle"
+						@click="acceptTask(item)"
+					>领取任务</u-button>
 				</view>
 			</view>
 		</view>
@@ -115,7 +125,7 @@
 				if (!this.$u.func.checkLogin()) return;
 				uni.showModal({
 					title: '确认领取',
-					content: `确定领取整改任务「${item.title}」吗？`,
+					content: `确定领取「${item.title}」吗？每人每天最多领取 1 条。`,
 					success: (r) => {
 						if (!r.confirm) return;
 						this.$u.api.acceptVolunteerTask({ task_id: item.id }).then(res => {
