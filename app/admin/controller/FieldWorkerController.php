@@ -264,6 +264,26 @@ class FieldWorkerController extends BaseController
     }
 
     /**
+     * 数据统计（督导监测）
+     */
+    public function stats()
+    {
+        $check = $this->requireLogin();
+        if ($check instanceof \think\response\Redirect) {
+            return $check;
+        }
+
+        $payload = [
+            'all'  => $this->collectMonitorStats(0),
+            'mine' => $this->collectMonitorStats(intval($this->admin_id)),
+        ];
+
+        $this->assign('workerName', session('FIELD_WORKER_NAME'));
+        $this->assign('statsJson', json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP));
+        return $this->fetch('field_worker/stats');
+    }
+
+    /**
      * 修改密码
      */
     public function changePassword()
@@ -520,5 +540,124 @@ class FieldWorkerController extends BaseController
             'page'      => $page,
             'totalPage' => ceil($total / $limit),
         ]);
+    }
+
+    /**
+     * 督导监测统计（userId=0 为全部）
+     */
+    protected function collectMonitorStats($userId)
+    {
+        $unitNames = [1 => '公共机构', 2 => '经营场所', 3 => '沿街商铺', 4 => '经营区域'];
+        $today = date('Y-m-d');
+        $monthPrefix = date('Y-m');
+        $trendStart = date('Y-m-d', strtotime('-29 days'));
+
+        $total = intval($this->monitorQuery($userId)->count());
+        $todayCount = intval($this->monitorQuery($userId)->where('check_date', $today)->count());
+        $monthCount = intval($this->monitorQuery($userId)->whereLike('check_date', $monthPrefix . '%')->count());
+        $padCount = intval($this->monitorQuery($userId)->whereLike('submitter_name', '%工作Pad%')->count());
+        $rectifyCount = intval($this->monitorQuery($userId)->where('need_rectify', 1)->count());
+
+        $unitRows = $this->toRows(
+            $this->monitorQuery($userId)->field('unit_type, COUNT(*) as c')->group('unit_type')->select()
+        );
+        $unitMap = [];
+        foreach ($unitRows as $row) {
+            $unitMap[intval($row['unit_type'])] = intval($row['c']);
+        }
+        $units = [];
+        foreach ($unitNames as $type => $name) {
+            $units[] = ['name' => $name, 'value' => isset($unitMap[$type]) ? $unitMap[$type] : 0];
+        }
+
+        $communityRows = $this->toRows(
+            $this->monitorQuery($userId)
+                ->field('community_name, COUNT(*) as c')
+                ->group('community_name')
+                ->order('c desc')
+                ->limit(8)
+                ->select()
+        );
+        $communities = [];
+        foreach ($communityRows as $row) {
+            $name = trim(strval($row['community_name']));
+            $communities[] = [
+                'name'  => $name !== '' ? $name : '未填写',
+                'value' => intval($row['c']),
+            ];
+        }
+
+        $agg = $this->monitorQuery($userId)
+            ->fieldRaw('SUM(CASE WHEN inner_qualified=1 THEN 1 ELSE 0 END) AS inner_yes, SUM(CASE WHEN point_qualified=1 THEN 1 ELSE 0 END) AS point_yes, SUM(CASE WHEN manage_qualified=1 THEN 1 ELSE 0 END) AS manage_yes, SUM(CASE WHEN waste_correct=1 THEN 1 ELSE 0 END) AS waste_yes, SUM(CASE WHEN has_waste=1 THEN 1 ELSE 0 END) AS waste_has')
+            ->find();
+        if (empty($agg)) {
+            $agg = [];
+        }
+        $rates = [
+            ['name' => '内部环境合格', 'yes' => intval(isset($agg['inner_yes']) ? $agg['inner_yes'] : 0)],
+            ['name' => '投放点合格', 'yes' => intval(isset($agg['point_yes']) ? $agg['point_yes'] : 0)],
+            ['name' => '点位管理合格', 'yes' => intval(isset($agg['manage_yes']) ? $agg['manage_yes'] : 0)],
+            ['name' => '厨余正确分出', 'yes' => intval(isset($agg['waste_yes']) ? $agg['waste_yes'] : 0)],
+        ];
+        foreach ($rates as &$rate) {
+            $rate['total'] = $total;
+            $rate['pct'] = $total > 0 ? round($rate['yes'] * 1000 / $total) / 10 : 0;
+        }
+        unset($rate);
+
+        $trendMap = [];
+        $trendRows = $this->toRows(
+            $this->monitorQuery($userId)
+                ->where('check_date', '>=', $trendStart)
+                ->field('check_date, COUNT(*) as c')
+                ->group('check_date')
+                ->select()
+        );
+        foreach ($trendRows as $row) {
+            $trendMap[$row['check_date']] = intval($row['c']);
+        }
+        $trend = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $d = date('Y-m-d', strtotime('-' . $i . ' days'));
+            $trend[] = [
+                'date'  => $d,
+                'label' => date('m-d', strtotime($d)),
+                'value' => isset($trendMap[$d]) ? $trendMap[$d] : 0,
+            ];
+        }
+
+        return [
+            'total'     => $total,
+            'today'     => $todayCount,
+            'month'     => $monthCount,
+            'pad'       => $padCount,
+            'mini'      => max(0, $total - $padCount),
+            'rectify'   => $rectifyCount,
+            'units'     => $units,
+            'communities' => $communities,
+            'rates'     => $rates,
+            'trend'     => $trend,
+            'wasteHas'  => intval(isset($agg['waste_has']) ? $agg['waste_has'] : 0),
+        ];
+    }
+
+    protected function monitorQuery($userId)
+    {
+        $query = Db::name('supervision_monitor');
+        if ($userId > 0) {
+            $query->where('user_id', $userId);
+        }
+        return $query;
+    }
+
+    protected function toRows($result)
+    {
+        if ($result === null || $result === false) {
+            return [];
+        }
+        if (is_object($result) && method_exists($result, 'toArray')) {
+            return $result->toArray();
+        }
+        return array_values((array) $result);
     }
 }

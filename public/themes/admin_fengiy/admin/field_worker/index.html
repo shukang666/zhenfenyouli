@@ -80,6 +80,7 @@
         }
         .entry-icon.green { background: linear-gradient(135deg, #2fb74c, #1a8a32); }
         .entry-icon.blue { background: linear-gradient(135deg, #4c8dff, #2563d8); }
+        .entry-icon.orange { background: linear-gradient(135deg, #f5a623, #e07b00); }
         .entry-name { font-size: 16px; font-weight: 600; }
         .entry-desc { font-size: 12px; color: #999; margin-top: 6px; text-align: center; }
     </style>
@@ -103,6 +104,11 @@
             <div class="entry-icon green"><i class="fa fa-map-marker"></i></div>
             <div class="entry-name">督导监测</div>
             <div class="entry-desc">点位巡查登记</div>
+        </a>
+        <a class="entry-card" href="{:url('admin/FieldWorker/stats')}">
+            <div class="entry-icon orange"><i class="fa fa-bar-chart"></i></div>
+            <div class="entry-name">数据统计</div>
+            <div class="entry-desc">巡查量与合格率</div>
         </a>
         <a class="entry-card" href="{:url('admin/FieldWorker/profile')}">
             <div class="entry-icon blue"><i class="fa fa-user"></i></div>
