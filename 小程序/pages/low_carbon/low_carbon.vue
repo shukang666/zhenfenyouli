@@ -39,8 +39,7 @@
 		<view class="fb-entry-stage">
 			<view class="fb-entry-kicker">
 				<view class="fb-entry-kicker-dot"></view>
-				<text class="fb-entry-kicker-text">常去入口</text>
-				<text class="fb-entry-kicker-hint">点进去就能办</text>
+				<text class="fb-entry-kicker-text">快捷入口</text>
 			</view>
 			<view class="fb-entry-row">
 				<view class="fb-entry-card fb-entry-lgfl" hover-class="fb-press" :hover-stay-time="80" @click="gotoFlhd">
@@ -75,7 +74,11 @@
 		<!-- 主题活动：5 大分类 -->
 		<view class="fb-section fb-theme-act">
 			<view class="fb-section-header">
-				<text class="fb-section-title">主题活动</text>
+				<view class="fb-hd">
+					<view class="fb-entry-kicker-dot"></view>
+					<text class="fb-section-title">主题活动</text>
+					<text class="fb-entry-kicker-hint">按兴趣选一块</text>
+				</view>
 			</view>
 			<view class="fb-cate-wrap">
 				<!-- 左侧大竖卡（第1个：健康生活） -->
@@ -116,6 +119,7 @@
 						hover-class="fb-press" :hover-stay-time="80"
 						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 						<u-image width="520" height="320" :src="item.thumb" mode="aspectFill"></u-image>
+						<view class="fb-weekly-hatch"></view>
 						<view class="fb-weekly-mask"></view>
 						<view class="fb-weekly-tag">
 							<text class="fb-weekly-tag-text">本周精选</text>
@@ -150,6 +154,7 @@
 					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 					<view class="fb-light-cover">
 						<u-image width="100%" height="100%" :src="item.thumb || 'https://admin.circular-economy.cn/static/images/default-avatar.png'" mode="aspectFill"></u-image>
+						<view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
 					</view>
 					<view class="fb-light-info">
 						<text class="fb-light-name u-line-2">{{item.name}}</text>
@@ -213,10 +218,18 @@
 
 		<!-- 活动列表 -->
 		<view class="fb-act-list">
+			<view class="fb-section-header fb-act-list-hd">
+				<view class="fb-hd">
+					<view class="fb-entry-kicker-dot"></view>
+					<text class="fb-section-title">全部活动</text>
+					<text class="fb-entry-kicker-hint">继续往下看</text>
+				</view>
+			</view>
 			<view class="fb-act-card" v-for="item in active_list" :key="item.id"
 				@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 				<view class="fb-act-cover">
 					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+					<view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
 					<view class="fb-act-badge" v-if="item.active_count > 0">
 						<view class="fb-act-avatars" v-if="item.avatar_array && item.avatar_array.length">
 							<image :src="img" class="fb-act-avatar" mode="aspectFill"
@@ -558,12 +571,31 @@
 .fb-banner-swiper {
 	width: 100%;
 	height: 300rpx;
-	border-radius: 24rpx;
+	border-radius: 0;
 	overflow: hidden;
+	clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
+	box-shadow: 0 12rpx 28rpx rgba(16, 48, 24, 0.12);
 }
 .fb-banner-item {
 	width: 100%;
 	height: 100%;
+	position: relative;
+}
+.fb-banner-item::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	pointer-events: none;
+	background: repeating-linear-gradient(
+		-28deg,
+		rgba(255, 255, 255, 0) 0,
+		rgba(255, 255, 255, 0) 16rpx,
+		rgba(255, 255, 255, 0.12) 16rpx,
+		rgba(255, 255, 255, 0.12) 18rpx
+	);
 }
 
 /* ===== 5 大活动分类：左大卡 + 右2x2 ===== */
@@ -575,16 +607,16 @@
 .fb-cate-big {
 	flex: 0 0 210rpx;
 	height: 260rpx;
-	border-radius: 20rpx;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: flex-end;
-	padding: 24rpx;
+	padding: 24rpx 28rpx 24rpx 24rpx;
 	box-shadow: 0 6rpx 20rpx rgba(24, 119, 242, 0.15);
 	color: #fff;
 	position: relative;
 	overflow: hidden;
+	clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
 	transition: transform 0.2s;
 }
 .fb-cate-big:active { 
@@ -599,26 +631,33 @@
 	opacity: 0.9;
 	filter: drop-shadow(0 4rpx 8rpx rgba(0,0,0,0.2));
 }
-/* 左侧大卡装饰圆 */
+/* 左侧大卡：斜线纹理，不用圆形气泡 */
 .fb-cate-big::before {
 	content: '';
 	position: absolute;
-	top: -40rpx;
-	left: -40rpx;
-	width: 140rpx;
-	height: 140rpx;
-	border-radius: 50%;
-	background: rgba(255,255,255,0.12);
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	pointer-events: none;
+	background: repeating-linear-gradient(
+		-32deg,
+		rgba(255,255,255,0) 0,
+		rgba(255,255,255,0) 12rpx,
+		rgba(255,255,255,0.16) 12rpx,
+		rgba(255,255,255,0.16) 14rpx
+	);
 }
 .fb-cate-big::after {
 	content: '';
 	position: absolute;
-	bottom: -30rpx;
-	right: 20rpx;
-	width: 100rpx;
-	height: 100rpx;
-	border-radius: 50%;
-	background: rgba(255,255,255,0.08);
+	width: 28rpx;
+	height: 180%;
+	right: 36rpx;
+	top: -40%;
+	transform: rotate(18deg);
+	background: rgba(255,255,255,0.12);
+	pointer-events: none;
 }
 .fb-cate-big-name {
 	font-size: 34rpx;
@@ -645,7 +684,6 @@
 	height: 260rpx;
 }
 .fb-cate-mini {
-	border-radius: 16rpx;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
@@ -654,32 +692,39 @@
 	box-shadow: 0 3rpx 10rpx rgba(0,0,0,0.06);
 	overflow: hidden;
 	position: relative;
+	clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 28%);
 	transition: transform 0.2s;
 }
 .fb-cate-mini:active { 
 	transform: scale(0.95); 
 	opacity: 0.9;
 }
-/* 小卡装饰圆 */
+/* 小卡：细斜线，不用圆形气泡 */
 .fb-cate-mini::before {
 	content: '';
 	position: absolute;
-	top: -20rpx;
-	right: -20rpx;
-	width: 70rpx;
-	height: 70rpx;
-	border-radius: 50%;
-	background: rgba(255,255,255,0.25);
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	pointer-events: none;
+	background: repeating-linear-gradient(
+		28deg,
+		rgba(255,255,255,0) 0,
+		rgba(255,255,255,0) 10rpx,
+		rgba(255,255,255,0.22) 10rpx,
+		rgba(255,255,255,0.22) 11rpx
+	);
 }
 .fb-cate-mini::after {
 	content: '';
 	position: absolute;
-	bottom: -15rpx;
-	right: 25rpx;
-	width: 40rpx;
-	height: 40rpx;
-	border-radius: 50%;
-	background: rgba(255,255,255,0.15);
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 8rpx;
+	background: rgba(255,255,255,0.55);
+	pointer-events: none;
 }
 .fb-cate-mini-emoji {
 	font-size: 44rpx;
@@ -1033,6 +1078,7 @@
 	font-size: 34rpx;
 	font-weight: 700;
 	color: #1c2b1e;
+	margin-right: 8rpx;
 }
 .fb-hd-chip {
 	margin-left: 12rpx;
@@ -1054,6 +1100,7 @@
 	background: #18af38;
 	margin-right: 12rpx;
 	box-shadow: 0 0 0 6rpx rgba(24, 175, 56, 0.18);
+	animation: fbHubPulse 1.6s ease-in-out infinite;
 }
 .fb-section-more {
 	display: flex;
@@ -1081,11 +1128,36 @@
 	width: 520rpx;
 	height: 320rpx;
 	margin-right: 20rpx;
-	border-radius: 28rpx;
 	overflow: hidden;
 	flex-shrink: 0;
 	background: #dce8de;
 	box-shadow: 0 14rpx 32rpx rgba(180, 130, 20, 0.16);
+	clip-path: polygon(0 10%, 6% 0, 94% 0, 100% 10%, 100% 90%, 94% 100%, 6% 100%, 0 90%);
+}
+.fb-weekly-hatch {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 1;
+	pointer-events: none;
+	background: repeating-linear-gradient(
+		-28deg,
+		rgba(255, 255, 255, 0) 0,
+		rgba(255, 255, 255, 0) 14rpx,
+		rgba(255, 255, 255, 0.14) 14rpx,
+		rgba(255, 255, 255, 0.14) 16rpx
+	);
+}
+.fb-weekly-hatch--soft {
+	background: repeating-linear-gradient(
+		-28deg,
+		rgba(255, 255, 255, 0) 0,
+		rgba(255, 255, 255, 0) 16rpx,
+		rgba(255, 255, 255, 0.08) 16rpx,
+		rgba(255, 255, 255, 0.08) 18rpx
+	);
 }
 .fb-weekly-mask {
 	position: absolute;
@@ -1098,12 +1170,12 @@
 }
 .fb-weekly-tag {
 	position: absolute;
-	top: 16rpx;
-	left: 16rpx;
+	top: 22rpx;
+	left: 28rpx;
 	z-index: 2;
 	padding: 6rpx 16rpx;
 	background: linear-gradient(135deg, #f6d365 0%, #dda017 100%);
-	border-radius: 999rpx;
+	clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
 }
 .fb-weekly-tag-text {
 	font-size: 20rpx;
@@ -1150,8 +1222,16 @@
 .fb-light-act {
 	margin: 24rpx 24rpx 8rpx;
 	padding: 24rpx 0 8rpx;
-	background: linear-gradient(180deg, #e7f8eb 0%, #f4fbf6 100%);
-	border-radius: 28rpx;
+	background-image:
+		repeating-linear-gradient(
+			-28deg,
+			rgba(24, 175, 56, 0) 0,
+			rgba(24, 175, 56, 0) 14rpx,
+			rgba(24, 175, 56, 0.06) 14rpx,
+			rgba(24, 175, 56, 0.06) 16rpx
+		),
+		linear-gradient(180deg, #e7f8eb 0%, #f4fbf6 100%);
+	clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
 }
 .fb-light-act .fb-section-header {
 	padding: 0 24rpx 16rpx;
@@ -1171,9 +1251,15 @@
 .fb-light-cover {
 	width: 100%;
 	height: 168rpx;
-	border-radius: 20rpx 20rpx 0 0;
 	overflow: hidden;
 	background: #dce8de;
+	position: relative;
+}
+.fb-light-card:nth-child(odd) .fb-light-cover {
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 0 82%);
+}
+.fb-light-card:nth-child(even) .fb-light-cover {
+	clip-path: polygon(0 0, 100% 0, 100% 82%, 0 100%);
 }
 .fb-light-info {
 	background: #fff;
@@ -1189,9 +1275,9 @@
 }
 .fb-light-btn {
 	background: #18af38;
-	border-radius: 0 0 20rpx 20rpx;
 	padding: 12rpx 0;
 	text-align: center;
+	clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
 }
 .fb-light-btn-text {
 	font-size: 24rpx;
@@ -1202,21 +1288,40 @@
 /* ===== 近期活动：台历信息流 ===== */
 .fb-recent-list {
 	padding: 0 24rpx;
+	position: relative;
+}
+.fb-recent-list::before {
+	content: '';
+	position: absolute;
+	left: 66rpx;
+	top: 12rpx;
+	bottom: 28rpx;
+	border-left: 3rpx dashed rgba(61, 78, 200, 0.28);
+	pointer-events: none;
 }
 .fb-recent-card {
 	display: flex;
 	align-items: center;
 	background: #fff;
-	border-radius: 24rpx;
 	padding: 16rpx 18rpx 16rpx 16rpx;
 	margin-bottom: 16rpx;
 	box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.06);
+	clip-path: polygon(0 0, 100% 0, 100% 100%, 3% 100%, 0 72%);
+	position: relative;
 }
 .fb-recent-cal {
 	width: 88rpx;
 	height: 96rpx;
-	border-radius: 16rpx;
-	background: #eef1ff;
+	clip-path: polygon(0 12%, 12% 0, 88% 0, 100% 12%, 100% 88%, 88% 100%, 12% 100%, 0 88%);
+	background-image:
+		repeating-linear-gradient(
+			-28deg,
+			rgba(61, 78, 200, 0) 0,
+			rgba(61, 78, 200, 0) 8rpx,
+			rgba(61, 78, 200, 0.08) 8rpx,
+			rgba(61, 78, 200, 0.08) 9rpx
+		),
+		linear-gradient(180deg, #eef1ff 0%, #dfe4ff 100%);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -1267,12 +1372,16 @@
 .fb-act-list {
 	padding: 16rpx 24rpx calc(88rpx + env(safe-area-inset-bottom));
 }
+.fb-act-list-hd {
+	padding-left: 0;
+	padding-right: 0;
+}
 .fb-act-card {
 	background: #fff;
-	border-radius: 24rpx;
 	margin-bottom: 20rpx;
 	overflow: hidden;
 	box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.07);
+	clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
 }
 .fb-act-card:active {
 	opacity: 0.92;
@@ -1282,6 +1391,20 @@
 	width: 100%;
 	height: 320rpx;
 	background: #dce8de;
+	clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
+}
+.fb-act-body {
+	padding: 20rpx 24rpx 22rpx 32rpx;
+	position: relative;
+}
+.fb-act-body::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 16rpx;
+	bottom: 16rpx;
+	width: 8rpx;
+	background: linear-gradient(180deg, #1877F2 0%, #18AF38 100%);
 }
 .fb-act-badge {
 	position: absolute;
@@ -1314,9 +1437,6 @@
 	font-size: 20rpx;
 	font-weight: 500;
 	margin-left: 6rpx;
-}
-.fb-act-body {
-	padding: 20rpx 24rpx 22rpx;
 }
 .fb-act-title {
 	font-size: 30rpx;
