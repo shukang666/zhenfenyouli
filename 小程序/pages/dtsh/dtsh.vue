@@ -263,9 +263,13 @@
 			});
 		},
 		goSubmit(item) {
-			// 点击任务卡片进入提交页时才检查登录
 			if (!this.$u.func.checkLogin()) return;
-			if (item.status == 3) {
+			const st = parseInt(item.status, 10);
+			if (st === 1) {
+				uni.showToast({ title: '审核中，请勿重复提交', icon: 'none' });
+				return;
+			}
+			if (st === 3) {
 				uni.showToast({ title: '任务已完成', icon: 'none' });
 				return;
 			}

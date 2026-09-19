@@ -13,8 +13,8 @@
 			<view class="u-font-26" style="color:#18AF38; margin-top: 16rpx;" v-if="taskPoint > 0">奖励积分 +{{taskPoint}}</view>
 		</view>
 
-		<!-- 提交内容 -->
-		<view class="u-p-30 u-type-white-bg u-radius-6 u-m-t-30" v-if="status != 3">
+		<!-- 提交内容：待提交 / 被拒绝可再交；待审核不允许进这里，双保险仍不展示表单 -->
+		<view class="u-p-30 u-type-white-bg u-radius-6 u-m-t-30" v-if="status == 0 || status == 2">
 			<view class="u-font-28 u-m-b-16">整改照片</view>
 			<view class="upload-area" @click="chooseImage">
 				<view v-if="images.length == 0" class="upload-placeholder">
@@ -51,6 +51,11 @@
 					:customStyle="{ background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)', height: '90rpx', fontSize: '32rpx' }"
 				>提交整改</u-button>
 			</view>
+		</view>
+
+		<view class="u-p-30 u-type-white-bg u-radius-6 u-m-t-30" v-if="status == 1">
+			<view class="u-font-30 u-font-bold" style="color:#E6A23C;">审核中</view>
+			<view class="u-font-26 u-type-info u-m-t-10">已提交整改，请等待后台审核，无需重复提交</view>
 		</view>
 
 		<!-- 已完成的任务显示结果 -->
@@ -147,6 +152,10 @@
 				uni.previewImage({ urls: [this.shotImage] });
 			},
 			submit() {
+				if (this.status == 1 || this.status == 3) {
+					uni.showToast({ title: this.status == 3 ? '任务已完成' : '审核中，请勿重复提交', icon: 'none' });
+					return;
+				}
 				if (this.images.length == 0 && !this.content) {
 					uni.showToast({ title: '请上传整改照片或填写说明', icon: 'none' });
 					return;

@@ -77,7 +77,6 @@
 				<view class="fb-hd">
 					<view class="fb-entry-kicker-dot"></view>
 					<text class="fb-section-title">主题活动</text>
-					<text class="fb-entry-kicker-hint">按兴趣选一块</text>
 				</view>
 			</view>
 			<view class="fb-cate-wrap">
@@ -310,7 +309,7 @@
 						this.loadLightAct(),
 						this.loadRecentAct(),
 						this.loadTags(),
-						this.loadHotActivities(),
+						this.loadAllActivities(),
 					])
 				} catch (e) {
 					console.log('数据加载失败:', e)
@@ -393,25 +392,21 @@
 				})
 			},
 
-			// 加载热门活动（is_recommendation=1）
-			loadHotActivities() {
+			// 底部「全部活动」：不按热门筛，标签栏隐藏时 current_tab 一直是 0
+			loadAllActivities() {
 				this.active_list = []
 				this.active_page = 1
 				this.active_total = 0
 				this.loadActiveList()
 			},
 
-			// 加载活动列表（根据当前 tab 过滤）
+			// 加载活动列表（标签栏隐藏时拉全部；若再打开标签才按 tab 过滤）
 			loadActiveList() {
 				if (this.active_loading) return
 				this.active_loading = true
 
 				const params = { page: this.active_page }
-				if (this.current_tab === 0) {
-					// 热门活动
-					params.is_recommendation = 1
-				} else {
-					// 按标签过滤
+				if (this.current_tab > 0) {
 					const tag = this.tag_list[this.current_tab - 1]
 					if (tag) params.tag = tag
 				}
@@ -571,31 +566,12 @@
 .fb-banner-swiper {
 	width: 100%;
 	height: 300rpx;
-	border-radius: 0;
+	border-radius: 24rpx;
 	overflow: hidden;
-	clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
-	box-shadow: 0 12rpx 28rpx rgba(16, 48, 24, 0.12);
 }
 .fb-banner-item {
 	width: 100%;
 	height: 100%;
-	position: relative;
-}
-.fb-banner-item::after {
-	content: '';
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	bottom: 0;
-	pointer-events: none;
-	background: repeating-linear-gradient(
-		-28deg,
-		rgba(255, 255, 255, 0) 0,
-		rgba(255, 255, 255, 0) 16rpx,
-		rgba(255, 255, 255, 0.12) 16rpx,
-		rgba(255, 255, 255, 0.12) 18rpx
-	);
 }
 
 /* ===== 5 大活动分类：左大卡 + 右2x2 ===== */

@@ -56,6 +56,7 @@ class VolunteerTaskController extends AdminBaseController
             $row = [
                 'title'       => htmlspecialchars(trim($data['title'] ?? '')),
                 'content'     => htmlspecialchars(trim($data['content'] ?? '')),
+                'image'       => trim((string) ($data['image'] ?? '')),
                 'point'       => intval($data['point'] ?? 0),
                 'status'      => intval($data['status'] ?? 1),
                 'admin_id'    => cmf_get_current_admin_id(),
@@ -77,7 +78,9 @@ class VolunteerTaskController extends AdminBaseController
 
         if ($id) {
             $vo = $this->taskModel->where('id', $id)->find();
-            $this->assign('vo', $vo);
+            $this->assign('vo', $vo ?: []);
+        } else {
+            $this->assign('vo', []);
         }
         return $this->fetch();
     }
@@ -137,6 +140,11 @@ class VolunteerTaskController extends AdminBaseController
             ->order('tl.id desc')
             ->paginate(15);
 
+        $list->each(function ($item) {
+            $item['images_arr'] = self::parseLogImages($item['images'] ?? '');
+            return $item;
+        });
+
         $taskList = $this->taskModel->where('status', 1)->column('title', 'id');
         $this->assign('list', $list);
         $list->appends($params);
@@ -162,8 +170,8 @@ class VolunteerTaskController extends AdminBaseController
         if (empty($log)) {
             $this->error('记录不存在');
         }
-        if ($log['status'] != 0) {
-            $this->error('该记录已审核');
+        if (intval($log['status']) !== 1) {
+            $this->error('只能审核「待审核」的提交');
         }
 
         $task = $this->taskModel->where('id', $log['task_id'])->find();
@@ -172,7 +180,7 @@ class VolunteerTaskController extends AdminBaseController
         Db::startTrans();
         try {
             $this->logModel->where('id', $id)->update([
-                'status' => 1,
+                'status' => 3,
                 'point' => $point,
                 'admin_id' => cmf_get_current_admin_id(),
                 'update_time' => time(),
@@ -203,6 +211,9 @@ class VolunteerTaskController extends AdminBaseController
         if (empty($log)) {
             $this->error('记录不存在');
         }
+        if (intval($log['status']) !== 1) {
+            $this->error('只能审核「待审核」的提交');
+        }
         $this->logModel->where('id', $id)->update([
             'status' => 2,
             'reason' => $reason,
@@ -210,6 +221,45 @@ class VolunteerTaskController extends AdminBaseController
             'update_time' => time(),
         ]);
         $this->success('已拒绝');
+    }
+
+    /**
+     * 解析整改提交照片。小程序存 JSON 数组，旧数据可能是逗号分隔。
+     * 后台若直接 explode 再 cmf_get_image_preview_url，会把 JSON 的 "[" 拼成 https://oss.../[
+     */
+    public static function parseLogImages($raw)
+    {
+        $urls = [];
+        if (is_array($raw)) {
+            $urls = $raw;
+        } else {
+            $trim = trim((string) $raw);
+            if ($trim === '') {
+                return [];
+            }
+            if ($trim[0] === '[' || $trim[0] === '{') {
+                $decoded = json_decode($trim, true);
+                if (is_array($decoded)) {
+                    $urls = $decoded;
+                }
+            }
+            if (empty($urls)) {
+                $urls = array_filter(array_map('trim', explode(',', $trim)));
+            }
+        }
+
+        $out = [];
+        foreach ($urls as $u) {
+            if (is_array($u)) {
+                $u = isset($u['url']) ? $u['url'] : '';
+            }
+            $u = trim((string) $u, " \t\n\r\0\x0B\"'");
+            if ($u === '' || $u === '[' || $u === ']') {
+                continue;
+            }
+            $out[] = cmf_get_image_preview_url($u);
+        }
+        return $out;
     }
 
     /**

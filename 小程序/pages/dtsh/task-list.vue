@@ -129,15 +129,15 @@
 				});
 			},
 			goSubmit(item) {
-				// 点击任务卡片进入提交页时才检查登录
 				if (!this.$u.func.checkLogin()) return;
-				if (item.status != 0) {
-					// 待提交(status=0) 才进入提交页；待审核、审核失败也允许重新提交
-					if (item.status == 3) {
-						// 审核通过后不可再提交
-						uni.showToast({ title: '任务已完成', icon: 'none' });
-						return;
-					}
+				const st = parseInt(item.status, 10);
+				if (st === 1) {
+					uni.showToast({ title: '审核中，请勿重复提交', icon: 'none' });
+					return;
+				}
+				if (st === 3) {
+					uni.showToast({ title: '任务已完成', icon: 'none' });
+					return;
 				}
 				this.$u.route({
 					url: '/pages/dtsh/task-submit',

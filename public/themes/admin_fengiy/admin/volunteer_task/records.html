@@ -20,9 +20,10 @@
             <label>状态：</label>
             <select name="status" class="form-control" style="width: 120px;">
                 <option value="">全部</option>
-                <option value="0" <if condition="$status eq '0'">selected="selected"</if>>待审核</option>
-                <option value="1" <if condition="$status eq '1'">selected="selected"</if>>已通过</option>
+                <option value="0" <if condition="$status eq '0'">selected="selected"</if>>待提交</option>
+                <option value="1" <if condition="$status eq '1'">selected="selected"</if>>待审核</option>
                 <option value="2" <if condition="$status eq '2'">selected="selected"</if>>已拒绝</option>
+                <option value="3" <if condition="$status eq '3'">selected="selected"</if>>已通过</option>
             </select>
         </div>
         <div class="form-group">
@@ -55,28 +56,33 @@
                 <td>{$vo.task_title|default='--'}</td>
                 <td style="max-width:200px;word-break:break-all;">{$vo.content|default='--'}</td>
                 <td>
-                    <notempty name="$vo.images">
-                        <php>$imgs = array_filter(explode(',', $vo['images']));</php>
-                        <foreach name="imgs" item="img">
-                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url(trim($img))}');">
-                                <img src="{:cmf_get_image_preview_url(trim($img))}" style="width:60px;height:60px;border-radius:4px;margin-right:4px;">
+                    <notempty name="vo.images_arr">
+                        <foreach name="vo.images_arr" item="img">
+                            <a href="javascript:imagePreviewDialog('{$img}');">
+                                <img src="{$img}" style="width:60px;height:60px;border-radius:4px;margin-right:4px;">
                             </a>
                         </foreach>
+                    <else/>
+                        --
                     </notempty>
                 </td>
                 <td>
                     <if condition="$vo.status == 0">
-                        <span class="label label-warning">待审核</span>
+                        <span class="label label-default">待提交</span>
                     <elseif condition="$vo.status == 1"/>
+                        <span class="label label-warning">待审核</span>
+                    <elseif condition="$vo.status == 3"/>
                         <span class="label label-success">已通过</span>
-                    <else/>
+                    <elseif condition="$vo.status == 2"/>
                         <span class="label label-danger">已拒绝（{$vo.reason}）</span>
+                    <else/>
+                        --
                     </if>
                 </td>
                 <td>{$vo.point|default=0}</td>
                 <td>{$vo.create_time|date="Y-m-d H:i:s"}</td>
                 <td>
-                    <if condition="$vo.status == 0">
+                    <if condition="$vo.status == 1">
                         <a class="btn btn-xs btn-success btn-approve" href="javascript:;" data-id="{$vo.id}">通过</a>
                         <a class="btn btn-xs btn-danger btn-deny" href="javascript:;" data-id="{$vo.id}">拒绝</a>
                     </if>

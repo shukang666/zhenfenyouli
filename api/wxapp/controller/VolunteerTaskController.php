@@ -105,17 +105,8 @@ class VolunteerTaskController extends AuthController
             ->paginate(15)
             ->each(function ($item) {
                 // 解析 images
-                $imgs = [];
-                if (!empty($item['images'])) {
-                    $imgs = json_decode($item['images'], true);
-                    if (!is_array($imgs)) {
-                        // 兼容老数据：仅一张图作为字符串
-                        $imgs = [$item['images']];
-                    }
-                }
-                $item['images_arr'] = array_map(function ($v) {
-                    return cmf_get_asset_url($v);
-                }, $imgs);
+                $imgs = \app\admin\controller\VolunteerTaskController::parseLogImages($item['images'] ?? '');
+                $item['images_arr'] = array_values($imgs);
                 $item['task_image'] = !empty($item['task_image']) ? cmf_get_asset_url($item['task_image']) : '';
                 $item['from_shot'] = intval($item['shot_id'] ?? 0) > 0;
                 $item['status_name'] = $this->logStatusName(intval($item['status']));
@@ -145,8 +136,8 @@ class VolunteerTaskController extends AuthController
         if (empty($log)) {
             $this->error('记录不存在');
         }
-        if ($log['status'] != 0) {
-            $this->error('该任务已提交或已审核');
+        if (!in_array(intval($log['status']), [0, 2], true)) {
+            $this->error('该任务已提交，请等待审核');
         }
 
         // 处理 images 参数
