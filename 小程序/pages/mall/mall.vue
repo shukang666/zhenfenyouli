@@ -20,7 +20,7 @@
 		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(to bottom,#2fb74c,#EFF9F1);">
 			<!-- <u-image width="100%" height="527" src="https://admin.circular-economy.cn/static/index-bg.png"></u-image> -->
 		</view>
-		<view class="u-p-b-30">
+		<view class="u-p-b-30" id="guide-mall-search">
 			<u-search placeholder="搜索商品名称" v-model="keyword" border-color="#18AF38" search-icon-color="#18AF38"></u-search>
 		</view>
 		<u-swiper :list="swiper_list" height="350" mode="none" @click="adLink($event,swiper_list)"></u-swiper>
@@ -62,7 +62,7 @@
 			</view>
 		</view>
 		<!--  -->
-		<view class="u-m-t-30">
+		<view class="u-m-t-30" id="guide-mall-cate">
 			<scroll-view scroll-x="true">
 				<view class="u-flex">
 					<view class="u-m-r-20 u-shrink-no" v-for="(item,index) in cate_list" :key="index" @click="cate_btn(index)">
@@ -71,7 +71,7 @@
 				</view>
 			</scroll-view>
 		</view>
-		<view class="u-m-t-30 u-flex u-row-between u-flex-wrap">
+		<view class="u-m-t-30 u-flex u-row-between u-flex-wrap" id="guide-mall-goods">
 			<view class="u-type-white-bg u-radius-10 u-w-334 u-m-b-30" v-for="(item,index) in goods_list" :key="index" @click="$u.route('/pages/shop/details?id='+item.id)">
 				<u-image width="334" height="334" :src="item.thumb"></u-image>
 				<view class="u-p-10">
@@ -96,6 +96,7 @@
 		</view>
 		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->
 		<view style="height: 160rpx; flex-shrink: 0;"></view>
+		<page-guide page="mall"></page-guide>
 	</view>
 </template>
 

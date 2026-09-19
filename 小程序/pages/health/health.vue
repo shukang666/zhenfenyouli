@@ -20,7 +20,7 @@
 			<!-- <u-image width="100%" height="527" src="/static/index-bg.png"></u-image> -->
 		</view>
 
-		<view class="u-radius-10" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
+		<view class="u-radius-10" id="guide-health-diag" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
 			<view class="u-font-36 u-p-20 white">
 				健康诊断
 			</view>
@@ -46,7 +46,7 @@
 				</view>
 			</view>
 		</view>
-		<view class="u-radius-10 u-m-t-30" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);" v-if="!setting.app_test">
+		<view class="u-radius-10 u-m-t-30" id="guide-health-life" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);" v-if="!setting.app_test">
 			<view class="u-font-36 u-p-20 white u-flex u-row-between">
 				<view class="">
 					健康生活社区
@@ -102,6 +102,7 @@
 		</view>
 		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->
 		<view style="height: 160rpx; flex-shrink: 0;"></view>
+		<page-guide page="health"></page-guide>
 	</view>
 </template>
 

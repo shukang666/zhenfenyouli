@@ -11,7 +11,7 @@
 		<!-- 自定义顶部导航：搜索栏 -->
 		<view class="fb-navbar">
 			<view class="fb-navbar-inner">
-				<view class="fb-search-box" @click="gotoSearch">
+				<view class="fb-search-box" id="guide-fb-search" @click="gotoSearch">
 					<view class="fb-search-ico">
 						<u-icon name="search" size="28" color="#18AF38"></u-icon>
 					</view>
@@ -36,7 +36,7 @@
 		</view>
 
 		<!-- 常去入口：轮播下方，对冲咬合、中间能量核，互不重叠 -->
-		<view class="fb-entry-stage">
+		<view class="fb-entry-stage" id="guide-fb-entry">
 			<view class="fb-entry-kicker">
 				<view class="fb-entry-kicker-dot"></view>
 				<text class="fb-entry-kicker-text">快捷入口</text>
@@ -72,7 +72,7 @@
 		</view>
 
 		<!-- 主题活动：5 大分类 -->
-		<view class="fb-section fb-theme-act">
+		<view class="fb-section fb-theme-act" id="guide-fb-theme">
 			<view class="fb-section-header">
 				<view class="fb-hd">
 					<view class="fb-entry-kicker-dot"></view>
@@ -256,6 +256,7 @@
 			<view class="fb-load-tip"
 				v-if="!active_loading && active_list.length > 0 && active_list.length >= active_total">没有更多了</view>
 		</view>
+		<page-guide page="low_carbon"></page-guide>
 	</view>
 </template>
 

@@ -3,7 +3,8 @@
 		"autoscan": true,
 		"custom": {
 			"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue",
-			"^care-pull-hint$": "@/components/care-pull-hint/care-pull-hint.vue"
+			"^care-pull-hint$": "@/components/care-pull-hint/care-pull-hint.vue",
+			"^page-guide$": "@/components/page-guide/index.vue"
 		}
 	},
 	"pages": [{
@@ -35,7 +36,8 @@
 					"u-line-progress": "view",
 					"u-mask": "view",
 					"u-button": "view",
-					"care-pull-hint": "view"
+					"care-pull-hint": "view",
+					"new-user-guide": "view"
 				}
 			}
 		}, {
@@ -49,7 +51,8 @@
 					"u-icon": "view",
 					"u-avatar": "view",
 					"cl-upload": "view",
-					"care-pull-hint": "view"
+					"care-pull-hint": "view",
+					"new-user-guide": "view"
 				}
 			}
 		}, {
@@ -59,7 +62,8 @@
 				"componentPlaceholder": {
 					"u-icon": "view",
 					"u-image": "view",
-					"care-pull-hint": "view"
+					"care-pull-hint": "view",
+					"new-user-guide": "view"
 				}
 			}
 		}, {
@@ -75,7 +79,8 @@
 					"u-swiper": "view",
 					"u-button": "view",
 					"u-tag": "view",
-					"care-pull-hint": "view"
+					"care-pull-hint": "view",
+					"new-user-guide": "view"
 				}
 			}
 		}, {

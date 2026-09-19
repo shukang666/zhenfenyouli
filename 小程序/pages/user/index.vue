@@ -11,7 +11,7 @@
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 		<skeleton-screen :show="isLoading" type="user"></skeleton-screen>
 
-		<view class="me-hero">
+		<view class="me-hero" id="guide-me-hero">
 			<image v-if="imgUrl" :src="`${imgUrl}user-bg.png`" class="me-hero__bg" mode="aspectFill"></image>
 			<view class="me-hero__orb me-hero__orb--a"></view>
 			<view class="me-hero__orb me-hero__orb--b"></view>
@@ -68,7 +68,7 @@
 				</view>
 			</view>
 
-			<view class="me-card">
+			<view class="me-card" id="guide-me-common">
 				<text class="me-card__title">常用功能</text>
 				<view class="me-grid">
 					<view class="me-grid__item" @click="navigator('/pages/points/points')">
@@ -111,7 +111,7 @@
 					@click="navigator('/pages/store/store')"></u-image>
 			</view>
 
-			<view class="me-card">
+			<view class="me-card" id="guide-me-service">
 				<text class="me-card__title">我的服务</text>
 				<view class="me-grid">
 					<view class="me-grid__item" @click="navigator('pages/my_comment/my_comment')" v-if="!setting.app_test">
@@ -233,6 +233,7 @@
 		</u-mask>
 
 		<view class="me-tabbar-space"></view>
+		<page-guide page="user"></page-guide>
 	</view>
 </template>
 
