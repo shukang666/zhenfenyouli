@@ -9,8 +9,8 @@ use think\facade\Db;
 
 /**
  * 外勤工作台入口
- * 外勤人员用后台账号经 /admin/public/login 登录后进入工作台
- * 仍继承 BaseController，避免套上后台框架壳；登录态与后台共用 ADMIN_ID
+ * 外勤人员在后台登录页切「外勤工作台」标签登录（FIELD_WORKER_* session）
+ * 仍继承 BaseController，避免套上后台框架壳
  */
 class FieldWorkerController extends BaseController
 {
@@ -19,7 +19,7 @@ class FieldWorkerController extends BaseController
     protected function initialize()
     {
         parent::initialize();
-        $this->admin_id = session('ADMIN_ID');
+        $this->admin_id = session('FIELD_WORKER_ID');
     }
 
     /**
@@ -125,27 +125,28 @@ class FieldWorkerController extends BaseController
     }
 
     /**
-     * 要求已登录后台（与 /admin/public/login 同一套 ADMIN_ID）
+     * 要求已登录工作台（FIELD_WORKER_ID，与后台 ADMIN_ID 分开）
      */
     protected function requireLogin()
     {
         if (!$this->isLoggedIn()) {
             session('__LOGIN_BY_CMF_ADMIN_PW__', 1);
+            $loginUrl = (string) url('admin/Public/login') . '#field';
             if ($this->request->isPost() || $this->request->isAjax()) {
-                $this->error('请先登录', url('admin/Public/login'));
+                $this->error('请先登录', $loginUrl);
             } else {
-                return $this->redirect(url('admin/Public/login'));
+                return $this->redirect($loginUrl);
             }
         }
     }
 
     protected function assignWorker()
     {
-        $this->assign('workerName', session('name') ?: '');
+        $this->assign('workerName', session('FIELD_WORKER_NAME') ?: '');
     }
 
     /**
-     * 旧独立登录入口，统一跳到后台登录页
+     * 独立登录页已下线，跳到后台登录页的「外勤工作台」标签
      */
     public function login()
     {
@@ -153,29 +154,64 @@ class FieldWorkerController extends BaseController
         if ($this->isLoggedIn()) {
             return redirect(url('admin/FieldWorker/index'));
         }
-        return $this->redirect(url('admin/Public/login'));
+        return $this->redirect((string) url('admin/Public/login') . '#field');
     }
 
     /**
-     * 旧独立登录提交，提示走后台登录
+     * 工作台登录（后台登录页「外勤工作台」标签提交）
      */
     public function doLogin()
     {
-        session('__LOGIN_BY_CMF_ADMIN_PW__', 1);
-        $this->error('请使用后台登录页登录', url('admin/Public/login'));
+        if (!$this->request->isPost()) {
+            $this->error('非法登录!');
+        }
+
+        $name = $this->request->param('username', '', 'trim');
+        $pass = $this->request->param('password', '', 'trim');
+
+        if (empty($name)) {
+            $this->error('请输入用户名');
+        }
+        if (empty($pass)) {
+            $this->error('请输入密码');
+        }
+
+        if (strpos($name, "@") > 0) {
+            $where[] = ['user_email', '=', $name];
+        } else {
+            $where[] = ['user_login|mobile', '=', $name];
+        }
+        $where[] = ['user_type', 'in', [1, 3]];
+
+        $user = Db::name('user')->where($where)->find();
+
+        if (empty($user)) {
+            $this->error('账号或密码错误');
+        }
+
+        if (!cmf_compare_password($pass, $user['user_pass'])) {
+            $this->error('账号或密码错误');
+        }
+
+        if ($user['id'] != 1 && $user['user_status'] == 0) {
+            $this->error('该账号已被禁用');
+        }
+
+        session('FIELD_WORKER_ID', $user['id']);
+        session('FIELD_WORKER_NAME', $user['user_login']);
+
+        $this->success('登录成功', url('admin/FieldWorker/index'));
     }
 
     /**
-     * 退出（清后台登录态，回到后台登录页）
+     * 退出工作台，回到登录页外勤标签
      */
     public function logout()
     {
-        session('ADMIN_ID', null);
-        session('name', null);
         session('FIELD_WORKER_ID', null);
         session('FIELD_WORKER_NAME', null);
         session('__LOGIN_BY_CMF_ADMIN_PW__', 1);
-        return redirect(url('admin/Public/login'));
+        return redirect((string) url('admin/Public/login') . '#field');
     }
 
     /**
@@ -389,7 +425,8 @@ class FieldWorkerController extends BaseController
         }
 
         // cmf\lib\Upload 写 cmf_asset 表时通过 cmf_get_current_user_id() 取 session('user.id')，
-        // 后台登录不一定带这个 key，上传前同步当前管理员 id。
+        // 外勤登录用的是自定义 session key，取不到会导致 asset.user_id 为 null（SQLSTATE 1048）。
+        // 这里同步当前外勤账号 id（cmf_user 表 id）到 session('user.id')。
         session('user.id', $this->admin_id);
 
         $uploader = new \cmf\lib\Upload();
@@ -481,7 +518,7 @@ class FieldWorkerController extends BaseController
             'catering_photo'       => trim($this->request->param('catering_photo', '')),
             'accuracy_photo'       => trim($this->request->param('accuracy_photo', '')),
             'overall_evaluation'   => trim($this->request->param('overall_evaluation', '')),
-            'submitter_name'       => (session('name') ?: '') . '（工作Pad）',
+            'submitter_name'       => session('FIELD_WORKER_NAME') . '（工作Pad）',
             'create_time'          => time(),
         ];
 
