@@ -140,7 +140,7 @@ a:focus {
 
 .stage {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
 	gap: 56px;
 	width: 100%;
@@ -202,80 +202,60 @@ a:focus {
 	color: rgba(226, 245, 232, .9);
 }
 
-#viz-tile-src {
-	display: none !important;
-}
-
-.scene-viz-wall {
+.scene-viz {
 	position: fixed;
 	z-index: 1;
 	display: none;
-	gap: 12px;
-	padding: 0 0 18px 18px;
+	overflow: hidden;
 	pointer-events: none;
-	overflow: hidden;
-	grid-auto-rows: 1fr;
-}
-
-.viz-tile {
-	position: relative;
-	min-width: 0;
-	min-height: 0;
-	height: 100%;
-	border: 1px solid rgba(134, 239, 172, .16);
-	border-radius: 22px;
-	overflow: hidden;
-	background:
-		radial-gradient(circle at 50% 58%, rgba(74, 222, 128, .16) 0%, rgba(7, 20, 14, .15) 42%, rgba(7, 20, 14, .55) 100%);
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04);
 }
 
 .viz-grid {
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgba(134, 239, 172, .08) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(134, 239, 172, .08) 1px, transparent 1px);
-	background-size: 32px 32px;
-	mask-image: radial-gradient(ellipse 70% 80% at 50% 58%, #000 20%, transparent 78%);
-	-webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 58%, #000 20%, transparent 78%);
+		linear-gradient(rgba(134, 239, 172, .07) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(134, 239, 172, .07) 1px, transparent 1px);
+	background-size: 36px 36px;
+	mask-image: linear-gradient(180deg, rgba(0,0,0,.35) 0%, #000 18%, #000 82%, transparent 100%);
+	-webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.35) 0%, #000 18%, #000 82%, transparent 100%);
 	pointer-events: none;
 }
 
 .viz-radar {
 	position: absolute;
-	left: 50%;
-	top: 56%;
-	width: 260px;
-	height: 260px;
-	margin: -130px 0 0 -130px;
+	left: 42%;
+	top: 58%;
+	width: 62vmin;
+	height: 62vmin;
+	margin: -31vmin 0 0 -31vmin;
 	border-radius: 50%;
-	background: conic-gradient(from 180deg, rgba(74, 222, 128, 0) 0%, rgba(74, 222, 128, .22) 12%, rgba(74, 222, 128, 0) 28%);
-	animation: vizSpinRadar 5.5s linear infinite;
+	background: conic-gradient(from 180deg, rgba(74, 222, 128, 0) 0%, rgba(74, 222, 128, .16) 10%, rgba(74, 222, 128, 0) 26%);
+	animation: vizSpinRadar 7s linear infinite;
 	pointer-events: none;
 }
 
 .viz-orbit {
 	position: absolute;
-	left: 50%;
-	top: 56%;
-	border: 1px dashed rgba(134, 239, 172, .28);
+	left: 42%;
+	top: 58%;
+	border: 1px dashed rgba(134, 239, 172, .22);
 	border-radius: 50%;
 	transform: translate(-50%, -50%);
 	pointer-events: none;
 }
 
 .viz-orbit-a {
-	width: 196px;
-	height: 196px;
-	animation: vizSpinOrbit 18s linear infinite;
+	width: 38vmin;
+	height: 38vmin;
+	animation: vizSpinOrbit 22s linear infinite;
 }
 
 .viz-orbit-b {
-	width: 292px;
-	height: 292px;
-	border-color: rgba(96, 165, 250, .18);
-	animation: vizSpinOrbit 26s linear infinite reverse;
+	width: 56vmin;
+	height: 56vmin;
+	border-color: rgba(96, 165, 250, .16);
+	animation: vizSpinOrbit 32s linear infinite reverse;
 }
 
 @keyframes vizSpinRadar {
@@ -295,13 +275,27 @@ a:focus {
 	height: 100%;
 }
 
-.viz-line {
-	stroke-dasharray: 10 16;
-	animation: vizFlow 3.6s linear infinite;
+.viz-pack path {
+	fill: none;
+	stroke: rgba(134, 239, 172, .55);
+	stroke-width: 1.35;
 }
 
-.viz-line-delay { animation-duration: 4.8s; }
-.viz-line-slow { animation-duration: 6.2s; }
+.viz-line {
+	stroke-dasharray: 10 16;
+	animation: vizFlow 4.2s linear infinite;
+}
+
+.viz-line-delay {
+	stroke: rgba(96, 165, 250, .42);
+	animation-duration: 5.6s;
+}
+
+.viz-line-slow {
+	stroke: rgba(187, 247, 208, .38);
+	stroke-width: 1.1;
+	animation-duration: 7.2s;
+}
 
 @keyframes vizFlow {
 	to { stroke-dashoffset: -180; }
@@ -311,18 +305,18 @@ a:focus {
 	position: absolute;
 	left: 0;
 	right: 0;
-	top: -40%;
-	height: 42%;
-	background: linear-gradient(180deg, transparent, rgba(255,255,255,.08), transparent);
-	animation: vizScan 3.2s ease-in-out infinite;
+	top: -30%;
+	height: 28%;
+	background: linear-gradient(180deg, transparent, rgba(255,255,255,.06), transparent);
+	animation: vizScan 4.4s ease-in-out infinite;
 	pointer-events: none;
 	z-index: 3;
 }
 
 @keyframes vizScan {
 	0% { transform: translateY(0); opacity: 0; }
-	20% { opacity: .8; }
-	100% { transform: translateY(320%); opacity: 0; }
+	18% { opacity: .7; }
+	100% { transform: translateY(420%); opacity: 0; }
 }
 
 .login-body {
@@ -331,7 +325,7 @@ a:focus {
 	flex: 0 0 420px;
 	width: 420px;
 	max-width: 100%;
-	margin: 0;
+	margin: auto 0;
 	background: rgba(18, 24, 32, .72);
 	border: 1px solid rgba(255, 255, 255, .08);
 	border-radius: 18px;
@@ -555,7 +549,7 @@ a:focus {
 		font-size: 32px;
 	}
 
-	.scene-viz-wall {
+	.scene-viz {
 		display: none !important;
 	}
 
