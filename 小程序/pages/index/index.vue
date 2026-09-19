@@ -147,6 +147,27 @@
 					</view>
 				</view>
 			</scroll-view>
+
+			<view class="home-footer">
+				<view class="sk-about">
+					<view class="sk-about-mark"></view>
+					<view class="sk-about-body">
+						<text class="sk-about-kicker">SHUKANG · 数康科技</text>
+						<text class="sk-about-title">把低碳做成社区日常</text>
+						<text class="sk-about-desc">分类打卡、社区活动、积分兑换，一站式低碳服务。</text>
+					</view>
+				</view>
+				<view class="sk-guide-cta" hover-class="sk-guide-cta--on" :hover-stay-time="80" @click="openUsageGuide">
+					<view class="sk-guide-cta-ring"></view>
+					<view class="sk-guide-cta-copy">
+						<text class="sk-guide-cta-hint">第一次来也可以随时看</text>
+						<text class="sk-guide-cta-title">点击查看使用教程</text>
+					</view>
+					<view class="sk-guide-cta-go">
+						<text class="sk-guide-cta-arrow">›</text>
+					</view>
+				</view>
+			</view>
 		</z-paging>
 
 		<!-- 蒙层只用 view：cover-view 是原生层，离开首页后仍会盖住扫码签到页，导致教程关不掉、也点不了签到 -->
@@ -417,6 +438,10 @@ export default {
 		},
 		onHide() {
 			this.pauseGuideOverlay()
+			if (this._guideOpenTimer) {
+				clearTimeout(this._guideOpenTimer)
+				this._guideOpenTimer = null
+			}
 		},
 		onUnload() {
 			uni.$off('pause-new-user-guide', this.pauseGuideOverlay)
@@ -425,12 +450,23 @@ export default {
 				clearTimeout(this._guideWaitTimer)
 				this._guideWaitTimer = null
 			}
+			if (this._guideOpenTimer) {
+				clearTimeout(this._guideOpenTimer)
+				this._guideOpenTimer = null
+			}
 		},
 		methods: {
-		// 新手引导改为被动触发：不要在 onShow / 登录里调用。
-		// 以后入口点好了，在点击回调里调 startNewUserGuide() 即可。
+		// 新手引导：只由首页底部「点击查看使用教程」调用，不要在 onShow / 登录里自动弹。
 		pauseGuideOverlay() {
 			this.guideOnPage = false
+		},
+		openUsageGuide() {
+			uni.pageScrollTo({ scrollTop: 0, duration: 220 })
+			if (this._guideOpenTimer) clearTimeout(this._guideOpenTimer)
+			this._guideOpenTimer = setTimeout(() => {
+				this._guideOpenTimer = null
+				this.startNewUserGuide()
+			}, 260)
 		},
 		startNewUserGuide() {
 			if (this._guideLock || this.showGuide || this.guideLoading) return
@@ -1154,7 +1190,7 @@ export default {
 	.active-scroll {
 		white-space: nowrap;
 		padding-left: 30rpx;
-		padding-bottom: 160rpx;
+		padding-bottom: 24rpx;
 	}
 	.active-card {
 		flex-shrink: 0;
@@ -1226,7 +1262,7 @@ export default {
 	.goods-scroll {
 		white-space: nowrap;
 		padding-left: 30rpx;
-		padding-bottom: 160rpx;
+		padding-bottom: 24rpx;
 	}
 	.goods-cols {
 		display: flex;
@@ -1332,6 +1368,117 @@ export default {
 		height: 100%;
 		z-index: 999999;
 		background: transparent;
+	}
+
+	.home-footer {
+		padding: 8rpx 30rpx calc(160rpx + env(safe-area-inset-bottom));
+	}
+	.sk-about {
+		position: relative;
+		overflow: hidden;
+		padding: 28rpx 28rpx 28rpx 36rpx;
+		background: linear-gradient(135deg, #163524 0%, #1d4a32 58%, #0f2a1c 100%);
+		clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
+	}
+	.sk-about-mark {
+		position: absolute;
+		left: 0;
+		top: 22rpx;
+		bottom: 36rpx;
+		width: 8rpx;
+		background: linear-gradient(180deg, #86efac 0%, #18AF38 100%);
+	}
+	.sk-about-body {
+		display: flex;
+		flex-direction: column;
+	}
+	.sk-about-kicker,
+	.sk-about-title,
+	.sk-about-desc,
+	.sk-guide-cta-hint,
+	.sk-guide-cta-title {
+		display: block;
+	}
+	.sk-about-kicker {
+		font-size: 20rpx;
+		letter-spacing: 0.18em;
+		color: rgba(187, 247, 208, 0.78);
+		font-weight: 600;
+	}
+	.sk-about-title {
+		margin-top: 10rpx;
+		font-size: 34rpx;
+		font-weight: 800;
+		color: #f4fbf6;
+		line-height: 1.3;
+	}
+	.sk-about-desc {
+		margin-top: 10rpx;
+		font-size: 24rpx;
+		line-height: 1.6;
+		color: rgba(226, 245, 232, 0.72);
+	}
+	.sk-guide-cta {
+		position: relative;
+		display: flex;
+		align-items: center;
+		margin-top: -6rpx;
+		padding: 26rpx 22rpx 26rpx 28rpx;
+		background: linear-gradient(118deg, #18AF38 0%, #2bc24e 48%, #86efac 160%);
+		clip-path: polygon(0 14%, 100% 0, 100% 100%, 0 86%);
+		box-shadow: 0 16rpx 36rpx rgba(24, 175, 56, 0.28);
+	}
+	.sk-guide-cta--on {
+		opacity: 0.92;
+	}
+	.sk-guide-cta-ring {
+		flex-shrink: 0;
+		width: 56rpx;
+		height: 56rpx;
+		margin-right: 20rpx;
+		border: 4rpx solid rgba(255, 255, 255, 0.85);
+		border-top-color: transparent;
+		border-radius: 50%;
+		animation: skGuideSpin 1.6s linear infinite;
+	}
+	@keyframes skGuideSpin {
+		to { transform: rotate(360deg); }
+	}
+	.sk-guide-cta-copy {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+	}
+	.sk-guide-cta-hint {
+		font-size: 20rpx;
+		color: rgba(255, 255, 255, 0.78);
+		letter-spacing: 0.06em;
+	}
+	.sk-guide-cta-title {
+		margin-top: 4rpx;
+		font-size: 32rpx;
+		font-weight: 800;
+		color: #fff;
+		letter-spacing: 0.04em;
+	}
+	.sk-guide-cta-go {
+		flex-shrink: 0;
+		width: 56rpx;
+		height: 56rpx;
+		margin-left: 12rpx;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.2);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.sk-guide-cta-arrow {
+		font-size: 44rpx;
+		line-height: 1;
+		color: #fff;
+		font-weight: 300;
+		margin-top: -4rpx;
 	}
 
 	/* 新手引导加载期间透明遮罩：屏蔽所有点击与切页 */
