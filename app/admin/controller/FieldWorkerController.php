@@ -230,7 +230,18 @@ class FieldWorkerController extends BaseController
             return $check;
         }
 
+        $lastCommunityId = 0;
+        $last = Db::name('supervision_monitor')
+            ->where('user_id', $this->admin_id)
+            ->order('id desc')
+            ->field('community_id')
+            ->find();
+        if (!empty($last['community_id'])) {
+            $lastCommunityId = intval($last['community_id']);
+        }
+
         $this->assign('workerName', session('FIELD_WORKER_NAME'));
+        $this->assign('lastCommunityId', $lastCommunityId);
         return $this->fetch('field_worker/monitor');
     }
 

@@ -588,6 +588,7 @@ function setBoolTag(field, value, el) {
 
 // ===== 所属社区下拉（数据源同 /wxapp/forum/get_community_parent_list） =====
 function loadCommunityParentList() {
+    var lastCommunityId = {$lastCommunityId};
     $.get('{:url("admin/FieldWorker/communityParentList")}', function(res) {
         if (res.code == 1) {
             var list = res.data || [];
@@ -596,6 +597,9 @@ function loadCommunityParentList() {
                 html += '<option value="' + item.id + '">' + item.name + '</option>';
             });
             $('#community_id').html(html);
+            if (lastCommunityId) {
+                $('#community_id').val(String(lastCommunityId));
+            }
         } else {
             $('#community_id').html('<option value="">加载失败，请刷新重试</option>');
         }
@@ -736,7 +740,6 @@ $('#inspectForm').on('submit', function(e) {
 
 // 重置表单
 function resetForm() {
-    $('#community_id').val('');
     $('#unit_name, #address, #contact, #contact_phone, #waste_flow').val('');
     $('#check_date').val('');
     $('#overall_evaluation').val('');

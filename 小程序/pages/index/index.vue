@@ -149,20 +149,20 @@
 			</scroll-view>
 		</z-paging>
 
-		<!-- 四块 cover-view 挖洞：框内是真实界面，框外才是灰罩 -->
-		<block v-if="showGuide && guideHole">
-			<cover-view :style="guideDimCss(0, 0, guideWinW, guideHole.top)"></cover-view>
-			<cover-view :style="guideDimCss(0, guideHole.bottom, guideWinW, guideHole.bottomRest)"></cover-view>
-			<cover-view :style="guideDimCss(0, guideHole.top, guideHole.left, guideHole.height)"></cover-view>
-			<cover-view :style="guideDimCss(guideHole.right, guideHole.top, guideHole.rightRest, guideHole.height)"></cover-view>
-			<cover-view :style="guideSpotCss"></cover-view>
+		<!-- 蒙层只用 view：cover-view 是原生层，离开首页后仍会盖住扫码签到页，导致教程关不掉、也点不了签到 -->
+		<block v-if="guideOnPage && showGuide && guideHole">
+			<view :style="guideDimCss(0, 0, guideWinW, guideHole.top)"></view>
+			<view :style="guideDimCss(0, guideHole.bottom, guideWinW, guideHole.bottomRest)"></view>
+			<view :style="guideDimCss(0, guideHole.top, guideHole.left, guideHole.height)"></view>
+			<view :style="guideDimCss(guideHole.right, guideHole.top, guideHole.rightRest, guideHole.height)"></view>
+			<view :style="guideSpotCss"></view>
 		</block>
-		<cover-view
-			v-else-if="showGuide"
-			style="position:fixed;left:0;top:0;right:0;bottom:0;width:100%;height:100%;background:rgba(0,0,0,0.72);z-index:999998;"
-		></cover-view>
 		<view
-			v-if="showGuide"
+			v-else-if="guideOnPage && showGuide"
+			style="position:fixed;left:0;top:0;right:0;bottom:0;width:100%;height:100%;background:rgba(0,0,0,0.72);z-index:999998;"
+		></view>
+		<view
+			v-if="guideOnPage && showGuide"
 			class="guide-root"
 			style="position:fixed;left:0;top:0;right:0;bottom:0;width:100%;height:100%;z-index:999999;"
 			@touchmove.stop.prevent="noop"
@@ -179,7 +179,7 @@
 		</view>
 
 		<!-- 新手引导加载期间透明遮罩：防止等待首页数据时用户切页或点击 -->
-		<view v-if="guideLoading" class="guide-loading-mask" @tap.stop.prevent="noop" @touchmove.stop.prevent="noop"></view>
+		<view v-if="guideOnPage && guideLoading" class="guide-loading-mask" @tap.stop.prevent="noop" @touchmove.stop.prevent="noop"></view>
 
 		<!-- 对齐 custom-tab-bar 悬浮条（108rpx 高 + 左右 24rpx + 底部安全区），仅用于引导定位 -->
 		<view id="guide-tabbar" class="guide-tabbar-area"></view>
@@ -190,6 +190,7 @@
 import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 import NewUserGuide from '@/components/new-user-guide/new-user-guide.vue'
 import careGesture from '@/common/care-gesture.mixin.js'
+import { isActiveScanEntry } from '@/common/scanSignEntry.js'
 export default {
 	components: {
 		SkeletonScreen,
@@ -235,6 +236,7 @@ export default {
 				},
 				// 新手引导：登录成功后首页显示，引导用户了解核心功能
 				showGuide: false,
+				guideOnPage: true,
 				guideLoading: false,
 				playingGuideSteps: [],
 				guideTargetRect: null,
@@ -395,6 +397,9 @@ export default {
 			}
 		},
 		onShow() {
+			this.guideOnPage = true
+			uni.$off('pause-new-user-guide', this.pauseGuideOverlay)
+			uni.$on('pause-new-user-guide', this.pauseGuideOverlay)
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(0)
 			// 已登录则刷新用户成长数据
@@ -402,7 +407,6 @@ export default {
 				this.getUserInfoForGrowth()
 				this.getSignStatus()
 			}
-			// 检测新手引导标记（登录后由 login 页 setStorageSync 设置），检测到后启动引导并清除标记
 			this.checkAndStartGuide()
 			this.$nextTick(() => {
 				if (this.isLogin && !this.userInfo.community_id) {
@@ -413,7 +417,12 @@ export default {
 				}
 			})
 		},
+		onHide() {
+			this.pauseGuideOverlay()
+		},
 		onUnload() {
+			uni.$off('pause-new-user-guide', this.pauseGuideOverlay)
+			this.pauseGuideOverlay()
 			if (this._guideWaitTimer) {
 				clearTimeout(this._guideWaitTimer)
 				this._guideWaitTimer = null
@@ -421,8 +430,12 @@ export default {
 		},
 		methods: {
 		// 检测并启动新手引导（仅未完成过、已绑定小区；标记在关闭时再清，避免等渲染时被打断丢失）
+		pauseGuideOverlay() {
+			this.guideOnPage = false
+		},
 		checkAndStartGuide() {
 			if (this._guideLock || this.showGuide || this.guideLoading) return
+			if (isActiveScanEntry()) return
 			if (uni.getStorageSync('has_finished_guide')) return
 			const guideFlag = uni.getStorageSync('new_user_guide')
 			if (!guideFlag || !this.userInfo.community_id) return

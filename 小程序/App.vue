@@ -23,8 +23,12 @@
             }, 200)
             // #endif
         },
-        onShow: function() {
+        onShow: function(options) {
             this.findSetting()
+            const path = (options && options.path) || ''
+            if (/details-new/.test(path)) {
+                uni.$emit('pause-new-user-guide')
+            }
             // #ifdef MP-WEIXIN
             //小程序更新
             if (uni.getUpdateManager) {

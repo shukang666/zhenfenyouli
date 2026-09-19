@@ -268,6 +268,7 @@
 	import {
 		uploadUrl
 	} from '@/common/settings'
+	import { savePendingActiveDetail, clearPendingAfterLogin } from '@/common/scanSignEntry.js'
 	export default {
 		data() {
 			return {
@@ -349,11 +350,19 @@
 		}
 	},
 		onLoad(option) {
-			if (option.scene) {
-				uni.setStorageSync('vcode', option.scene)
+			const scene = option.scene ? String(option.scene) : ''
+			let sceneVal = scene
+			try {
+				if (sceneVal) sceneVal = decodeURIComponent(sceneVal)
+			} catch (e) {}
+			// 分享链接带 id + scene=邀请人；活动码只有 scene=活动ID，不能把活动ID写成邀请码
+			if (option.id && sceneVal) {
+				uni.setStorageSync('vcode', sceneVal)
 			}
-			this.id = option.id || option.scene
+			this.id = option.id || sceneVal
 			if (option.pid) this.pid = option.pid
+			if (this.id && !this.isLogin) savePendingActiveDetail(this.id)
+			else clearPendingAfterLogin()
 			this.get_new_active_detail(this.id)
 		},
 		onHide() {
