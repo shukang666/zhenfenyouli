@@ -9,7 +9,7 @@ use think\facade\Db;
 
 /**
  * 外勤工作台入口
- * 外勤人员用后台账号登录 → 进入简化版点位巡查
+ * 外勤人员用后台账号登录 → 工作台入口网格 → 督导监测 / 个人信息
  * 登录路由：/admin/field_worker/login
  */
 class FieldWorkerController extends BaseController
@@ -207,7 +207,7 @@ class FieldWorkerController extends BaseController
     }
 
     /**
-     * 工作台首页 - 点位巡查
+     * 工作台首页 - 功能入口
      */
     public function index()
     {
@@ -218,6 +218,89 @@ class FieldWorkerController extends BaseController
 
         $this->assign('workerName', session('FIELD_WORKER_NAME'));
         return $this->fetch('field_worker/index');
+    }
+
+    /**
+     * 督导监测（点位巡查录入，原首页）
+     */
+    public function monitor()
+    {
+        $check = $this->requireLogin();
+        if ($check instanceof \think\response\Redirect) {
+            return $check;
+        }
+
+        $this->assign('workerName', session('FIELD_WORKER_NAME'));
+        return $this->fetch('field_worker/monitor');
+    }
+
+    /**
+     * 个人信息
+     */
+    public function profile()
+    {
+        $check = $this->requireLogin();
+        if ($check instanceof \think\response\Redirect) {
+            return $check;
+        }
+
+        $user = Db::name('user')
+            ->where('id', $this->admin_id)
+            ->field('id,user_login,user_nickname,user_email,mobile,last_login_time')
+            ->find();
+
+        $this->assign('workerName', session('FIELD_WORKER_NAME'));
+        $this->assign('user', $user ?: []);
+        return $this->fetch('field_worker/profile');
+    }
+
+    /**
+     * 修改密码
+     */
+    public function changePassword()
+    {
+        $check = $this->requireLogin();
+        if ($check instanceof \think\response\Redirect) {
+            return $check;
+        }
+
+        if (!$this->request->isPost()) {
+            $this->error('非法请求');
+        }
+
+        $oldPassword = $this->request->param('old_password', '', 'trim');
+        $password    = $this->request->param('password', '', 'trim');
+        $rePassword  = $this->request->param('re_password', '', 'trim');
+
+        if ($oldPassword === '') {
+            $this->error('请输入原密码');
+        }
+        if ($password === '') {
+            $this->error('请输入新密码');
+        }
+        if (strlen($password) < 6) {
+            $this->error('新密码至少 6 位');
+        }
+        if ($password !== $rePassword) {
+            $this->error('两次输入的新密码不一致');
+        }
+
+        $user = Db::name('user')->where('id', $this->admin_id)->find();
+        if (empty($user)) {
+            $this->error('账号不存在');
+        }
+        if (!cmf_compare_password($oldPassword, $user['user_pass'])) {
+            $this->error('原密码不正确');
+        }
+        if (cmf_compare_password($password, $user['user_pass'])) {
+            $this->error('新密码不能与原密码相同');
+        }
+
+        Db::name('user')->where('id', $this->admin_id)->update([
+            'user_pass' => cmf_password($password),
+        ]);
+
+        $this->success('密码已修改');
     }
 
     /**
