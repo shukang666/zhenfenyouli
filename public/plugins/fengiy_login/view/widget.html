@@ -121,6 +121,40 @@
 		switchLoginTab('field');
 	}
 
+	function placeVizWall() {
+		var wall = document.getElementById('scene-viz-wall');
+		var src = document.getElementById('viz-tile-src');
+		var login = document.querySelector('.login-body');
+		var start = document.querySelector('.scene-sub-strong') || document.querySelector('.scene-title');
+		if (!wall || !src || !start) return;
+		if (window.innerWidth <= 900) {
+			wall.style.display = 'none';
+			wall.innerHTML = '';
+			return;
+		}
+		var top = Math.round(start.getBoundingClientRect().bottom + 22);
+		var loginLeft = login ? login.getBoundingClientRect().left : window.innerWidth * 0.62;
+		var right = Math.max(24, Math.round(window.innerWidth - loginLeft + 24));
+		wall.style.display = 'grid';
+		wall.style.top = top + 'px';
+		wall.style.left = '0px';
+		wall.style.right = right + 'px';
+		wall.style.bottom = '0px';
+		var w = wall.clientWidth;
+		var h = wall.clientHeight;
+		if (w < 80 || h < 80) return;
+		var cols = Math.max(1, Math.ceil(w / 440));
+		var rows = Math.max(1, Math.ceil(h / 268));
+		var n = cols * rows;
+		var piece = src.innerHTML;
+		var html = '';
+		for (var i = 0; i < n; i++) html += piece;
+		wall.innerHTML = html;
+		wall.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+	}
+	$(placeVizWall);
+	$(window).on('resize', placeVizWall);
+
 	var $adminForm = $('#login-form-admin');
 	$adminForm.submit(function() {
 		var $btn = $('#login-submit-admin');
