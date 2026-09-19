@@ -226,7 +226,10 @@
 		},
 		// === 整改任务相关 ===
 		changeTab(idx) {
-			this.currentTab = idx;
+			const i = (idx && typeof idx === 'object') ? idx.index : idx
+			this.currentTab = i
+			if (i == 1) this.loadMyTasks()
+			else this.loadTaskList()
 		},
 		loadTaskList() {
 			// 使用 isLogin 状态判断，允许未登录进入页面
@@ -249,10 +252,11 @@
 				content: `确定领取整改任务「${item.title}」吗？`,
 				success: (r) => {
 					if (!r.confirm) return;
-					this.$u.api.acceptVolunteerTask({ task_id: item.id }).then(res => {
-						uni.showToast({ title: res.msg || '领取成功', icon: 'none' });
-						this.loadTaskList();
-					}).catch(err => {
+						this.$u.api.acceptVolunteerTask({ task_id: item.id }).then(res => {
+							uni.showToast({ title: res.msg || '领取成功', icon: 'none' });
+							this.loadTaskList();
+							this.loadMyTasks();
+						}).catch(err => {
 						uni.showToast({ title: (err && err.msg) || '领取失败', icon: 'none' });
 					});
 				}
