@@ -381,47 +381,6 @@
         }
         .pagination .current { background: #2fb74c; color: #fff; }
         .hidden-file-input { display: none; }
-        .pick-mask {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.45);
-            z-index: 400;
-        }
-        .pick-mask.show { display: block; }
-        .pick-sheet {
-            display: none;
-            position: fixed;
-            left: 12px;
-            right: 12px;
-            bottom: 16px;
-            z-index: 401;
-        }
-        .pick-sheet.show { display: block; }
-        .pick-group {
-            background: #fff;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.18);
-        }
-        .pick-sheet .pick-item {
-            width: 100%;
-            height: 52px;
-            border: 0;
-            background: #fff;
-            font-size: 16px;
-            color: #243028;
-            cursor: pointer;
-        }
-        .pick-group .pick-item + .pick-item { border-top: 1px solid #f0f0f0; }
-        .pick-sheet .pick-item:active { background: #f5f7fa; }
-        .pick-sheet .pick-cancel {
-            margin-top: 8px;
-            border-radius: 14px;
-            color: #666;
-            font-weight: 600;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.12);
-        }
     </style>
 </head>
 <body>
@@ -530,7 +489,7 @@
                 <div class="form-group" id="sec-door">
                     <label>门头照片</label>
                     <div class="upload-area" data-field="door_photo" onclick="triggerFile('door_photo')">
-                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                         <img class="upload-image" style="display:none;" />
                         <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('door_photo')"><i class="fa fa-times"></i></span>
                     </div>
@@ -541,7 +500,7 @@
                 <div class="form-group" id="sec-inner-photo">
                     <label>内部环境照片</label>
                     <div class="upload-area" data-field="inner_photo" onclick="triggerFile('inner_photo')">
-                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                         <img class="upload-image" style="display:none;" />
                         <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('inner_photo')"><i class="fa fa-times"></i></span>
                     </div>
@@ -555,7 +514,7 @@
                         <div id="sec-publicity">
                             <div class="photo-cap">宣传品照片</div>
                             <div class="upload-area" data-field="publicity_photo" onclick="triggerFile('publicity_photo')">
-                                <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                                <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                                 <img class="upload-image" style="display:none;" />
                                 <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('publicity_photo')"><i class="fa fa-times"></i></span>
                             </div>
@@ -564,7 +523,7 @@
                         <div id="sec-catering">
                             <div class="photo-cap">餐饮企业相关宣传</div>
                             <div class="upload-area" data-field="catering_photo" onclick="triggerFile('catering_photo')">
-                                <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                                <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                                 <img class="upload-image" style="display:none;" />
                                 <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('catering_photo')"><i class="fa fa-times"></i></span>
                             </div>
@@ -593,7 +552,7 @@
                     <div class="form-group" style="margin-bottom:0;">
                         <label>整改后照片</label>
                         <div class="upload-area" data-field="inner_rectify_photo" onclick="triggerFile('inner_rectify_photo')">
-                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                             <img class="upload-image" style="display:none;" />
                             <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('inner_rectify_photo')"><i class="fa fa-times"></i></span>
                         </div>
@@ -607,7 +566,7 @@
                     <div class="form-group">
                         <label>投放点照片</label>
                         <div class="upload-area" data-field="point_photo" onclick="triggerFile('point_photo')">
-                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                             <img class="upload-image" style="display:none;" />
                             <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('point_photo')"><i class="fa fa-times"></i></span>
                         </div>
@@ -623,7 +582,7 @@
                     <div class="form-group" style="margin-bottom:0;">
                         <label>整改后照片</label>
                         <div class="upload-area" data-field="point_rectify_photo" onclick="triggerFile('point_rectify_photo')">
-                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                             <img class="upload-image" style="display:none;" />
                             <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('point_rectify_photo')"><i class="fa fa-times"></i></span>
                         </div>
@@ -637,7 +596,7 @@
                     <div class="form-group">
                         <label>点位管理照片</label>
                         <div class="upload-area" data-field="manage_photo" onclick="triggerFile('manage_photo')">
-                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                             <img class="upload-image" style="display:none;" />
                             <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('manage_photo')"><i class="fa fa-times"></i></span>
                         </div>
@@ -653,7 +612,7 @@
                     <div class="form-group" style="margin-bottom:0;">
                         <label>整改后照片</label>
                         <div class="upload-area" data-field="manage_rectify_photo" onclick="triggerFile('manage_rectify_photo')">
-                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                             <img class="upload-image" style="display:none;" />
                             <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('manage_rectify_photo')"><i class="fa fa-times"></i></span>
                         </div>
@@ -665,7 +624,7 @@
                 <div class="form-group" id="sec-transport">
                     <label>收运链条照片</label>
                     <div class="upload-area" data-field="transport_photo" onclick="triggerFile('transport_photo')">
-                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                         <img class="upload-image" style="display:none;" />
                         <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('transport_photo')"><i class="fa fa-times"></i></span>
                     </div>
@@ -676,7 +635,7 @@
                 <div class="form-group" id="sec-accuracy">
                     <label>准确率照片</label>
                     <div class="upload-area" data-field="accuracy_photo" onclick="triggerFile('accuracy_photo')">
-                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或从相册选择</span></div>
+                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
                         <img class="upload-image" style="display:none;" />
                         <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('accuracy_photo')"><i class="fa fa-times"></i></span>
                     </div>
@@ -738,14 +697,6 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
-<div class="pick-mask" id="pickMask"></div>
-<div class="pick-sheet" id="pickSheet">
-    <div class="pick-group">
-        <button type="button" class="pick-item" id="pickCamera">拍照</button>
-        <button type="button" class="pick-item" id="pickAlbum">从相册选择</button>
-    </div>
-    <button type="button" class="pick-item pick-cancel" id="pickCancel">取消</button>
-</div>
 
 <script src="__STATIC__/js/jquery.js"></script>
 <script>
@@ -831,41 +782,10 @@ $('.tab').on('click', function() {
     }
 });
 
-// ===== 图片上传（先选拍照/相册，接近小程序 chooseImage） =====
-var pendingPickField = '';
+// ===== 图片上传 =====
 function triggerFile(field) {
-    pendingPickField = field;
-    $('#pickMask, #pickSheet').addClass('show');
+    document.getElementById('file_' + field).click();
 }
-function closePickSheet() {
-    $('#pickMask, #pickSheet').removeClass('show');
-}
-function openSystemPicker(source) {
-    var field = pendingPickField;
-    closePickSheet();
-    if (!field) return;
-    $('#pickGhost').remove();
-    var input = document.createElement('input');
-    input.type = 'file';
-    input.id = 'pickGhost';
-    input.style.display = 'none';
-    if (source === 'camera') {
-        input.accept = 'image/*';
-        input.setAttribute('capture', 'environment');
-    } else {
-        input.accept = 'image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif';
-    }
-    input.addEventListener('change', function() {
-        var file = input.files && input.files[0];
-        if (input.parentNode) input.parentNode.removeChild(input);
-        if (file) uploadImage(field, file);
-    });
-    document.body.appendChild(input);
-    input.click();
-}
-$('#pickCamera').on('click', function() { openSystemPicker('camera'); });
-$('#pickAlbum').on('click', function() { openSystemPicker('album'); });
-$('#pickCancel, #pickMask').on('click', closePickSheet);
 
 $('.hidden-file-input').on('change', function() {
     var field = $(this).data('field');
