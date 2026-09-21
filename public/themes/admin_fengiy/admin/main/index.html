@@ -21,10 +21,24 @@
         padding: 0 8px 16px;
     }
 
+    .dash-col-2 { width: 16.6667%; }
     .dash-col-3 { width: 25%; }
     .dash-col-4 { width: 33.3333%; }
     .dash-col-5 { width: 41.6667%; }
     .dash-col-7 { width: 58.3333%; }
+
+    /* 概览 / 图表区收窄，不占满整行 */
+    .dash-section-narrow {
+        max-width: 880px;
+    }
+
+    .dash-section-narrow.panel {
+        margin-bottom: 12px;
+    }
+
+    .dash-row-charts-narrow {
+        max-width: 880px;
+    }
 
     .dash-wrap .panel {
         margin-bottom: 16px;
@@ -134,8 +148,8 @@
     .dash-metric {
         display: flex;
         align-items: flex-start;
-        min-height: 88px;
-        padding: 10px 12px;
+        min-height: 72px;
+        padding: 8px 10px;
         border: 1px solid #eef1f6;
         border-radius: 12px;
         background: #fafbfd;
@@ -154,15 +168,15 @@
     }
 
     .dash-metric-icon {
-        width: 42px;
-        height: 42px;
-        margin-right: 12px;
-        border-radius: 12px;
+        width: 34px;
+        height: 34px;
+        margin-right: 8px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        font-size: 18px;
+        font-size: 15px;
     }
 
     .dash-metric-body {
@@ -179,7 +193,7 @@
 
     .dash-metric-num {
         display: block;
-        font-size: 19px;
+        font-size: 17px;
         line-height: 1.2;
         font-weight: 700;
         color: #111827;
@@ -194,10 +208,18 @@
 
     .dash-metric-extra {
         display: block;
-        margin-top: 6px;
-        font-size: 12px;
-        line-height: 1.4;
+        margin-top: 4px;
+        font-size: 11px;
+        line-height: 1.35;
         color: #c0c6d0;
+    }
+
+    .dash-metrics-grid {
+        margin: 0 -5px -10px;
+    }
+
+    .dash-metrics-grid > .dash-col-2 {
+        padding: 0 5px 10px;
     }
 
     .c-green { background: #f0fdf4; color: #16a34a; }
@@ -401,6 +423,12 @@
             text-align: left;
         }
 
+        .dash-section-narrow,
+        .dash-row-charts-narrow {
+            max-width: none;
+        }
+
+        .dash-col-2,
         .dash-col-3 { width: 50%; }
 
         .dash-col-4,
@@ -436,7 +464,7 @@
     </div>
 
     <!-- ================= 2. 核心数据概览 ================= -->
-    <div class="panel panel-default">
+    <div class="panel panel-default dash-section-narrow">
         <div class="panel-heading">
             <i class="fa fa-dashboard" style="color:#2D8CF0;"></i>核心数据概览
             <span class="pull-right dash-head-extra">
@@ -448,8 +476,8 @@
             </span>
         </div>
         <div class="panel-body">
-            <div class="dash-flex">
-                <div class="dash-col-3">
+            <div class="dash-flex dash-metrics-grid">
+                <div class="dash-col-2">
                     <a class="dash-metric" href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">
                         <span class="dash-metric-icon c-green"><i class="fa fa-recycle"></i></span>
                         <span class="dash-metric-body">
@@ -459,7 +487,7 @@
                         </span>
                     </a>
                 </div>
-                <div class="dash-col-3">
+                <div class="dash-col-2">
                     <a class="dash-metric" href="javascript:parent.openapp('{:url('Member/index')}','member','用户列表');">
                         <span class="dash-metric-icon c-blue"><i class="fa fa-user-plus"></i></span>
                         <span class="dash-metric-body">
@@ -469,7 +497,7 @@
                         </span>
                     </a>
                 </div>
-                <div class="dash-col-3">
+                <div class="dash-col-2">
                     <a class="dash-metric" href="javascript:parent.openapp('{:url('ActiveClock/index')}','aclock','活动打卡');">
                         <span class="dash-metric-icon c-cyan"><i class="fa fa-check-square-o"></i></span>
                         <span class="dash-metric-body">
@@ -479,7 +507,7 @@
                         </span>
                     </a>
                 </div>
-                <div class="dash-col-3">
+                <div class="dash-col-2">
                     <a class="dash-metric" href="javascript:parent.openapp('{:url('Account/userPointLog')}','point','积分记录');">
                         <span class="dash-metric-icon c-purple"><i class="fa fa-diamond"></i></span>
                         <span class="dash-metric-body">
@@ -489,7 +517,7 @@
                         </span>
                     </a>
                 </div>
-                <div class="dash-col-3">
+                <div class="dash-col-2">
                     <a class="dash-metric" href="javascript:parent.openapp('{:url('Order/index')}','order','订单列表');">
                         <span class="dash-metric-icon c-orange"><i class="fa fa-list-alt"></i></span>
                         <span class="dash-metric-body">
@@ -499,7 +527,7 @@
                         </span>
                     </a>
                 </div>
-                <div class="dash-col-3">
+                <div class="dash-col-2">
                     <a class="dash-metric" href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">
                         <span class="dash-metric-icon c-indigo"><i class="fa fa-thumbs-up"></i></span>
                         <span class="dash-metric-body">
@@ -509,7 +537,7 @@
                         </span>
                     </a>
                 </div>
-                <div class="dash-col-3">
+                <div class="dash-col-2">
                     <a class="dash-metric" href="javascript:parent.openapp('{:url('Active/index1')}','active','活动列表');">
                         <span class="dash-metric-icon c-amber"><i class="fa fa-calendar"></i></span>
                         <span class="dash-metric-body">
@@ -519,7 +547,7 @@
                         </span>
                     </a>
                 </div>
-                <div class="dash-col-3">
+                <div class="dash-col-2">
                     <a class="dash-metric" href="javascript:parent.openapp('{:url('Community/index')}','community','小区列表');">
                         <span class="dash-metric-icon c-rose"><i class="fa fa-building-o"></i></span>
                         <span class="dash-metric-body">
@@ -583,26 +611,26 @@
     </div>
 
     <!-- ================= 5. 打卡分布 ================= -->
-    <div class="dash-flex">
-        <div class="dash-col-5">
+    <div class="dash-flex dash-row-charts-narrow">
+        <div class="dash-col-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-pie-chart" style="color:#22c55e;"></i>近 30 天垃圾分类占比
-                    <span class="pull-right dash-head-extra">数据来源：垃圾打卡</span>
+                    <span class="pull-right dash-head-extra">垃圾打卡</span>
                 </div>
-                <div class="panel-body">
-                    <div id="dash-cate" class="dash-chart" style="height:260px;"></div>
+                <div class="panel-body panel-body-chart">
+                    <div id="dash-cate" class="dash-chart" style="height:220px;"></div>
                 </div>
             </div>
         </div>
-        <div class="dash-col-7">
+        <div class="dash-col-5">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-bar-chart" style="color:#06b6d4;"></i>近 30 天各类打卡量
-                    <span class="pull-right dash-head-extra">点位巡检 / 垃圾打卡 / 桶边督导等</span>
+                    <span class="pull-right dash-head-extra">巡检 / 打卡 / 督导</span>
                 </div>
-                <div class="panel-body">
-                    <div id="dash-type" class="dash-chart" style="height:260px;"></div>
+                <div class="panel-body panel-body-chart">
+                    <div id="dash-type" class="dash-chart" style="height:220px;"></div>
                 </div>
             </div>
         </div>
@@ -913,16 +941,16 @@
         if (cateData.length > 0) {
             cateChart.setOption({
                 tooltip: $.extend({trigger: 'item', formatter: '{b}: {c} 条 ({d}%)'}, tooltipTheme),
-                legend: {bottom: 0, icon: 'circle', itemWidth: 8, itemHeight: 8, textStyle: {color: '#6b7280'}},
+                legend: {bottom: 0, icon: 'circle', itemWidth: 7, itemHeight: 7, textStyle: {color: '#6b7280', fontSize: 11}},
                 color: ['#22c55e', '#06b6d4', '#f59e0b', '#f43f5e', '#8b5cf6', '#3b82f6'],
                 series: [{
                     type: 'pie',
-                    radius: ['46%', '68%'],
-                    center: ['50%', '44%'],
+                    radius: ['42%', '62%'],
+                    center: ['50%', '42%'],
                     avoidLabelOverlap: true,
                     itemStyle: {borderColor: '#fff', borderWidth: 2},
-                    label: {formatter: '{b}\n{d}%', color: '#6b7280', fontSize: 12},
-                    labelLine: {length: 8, length2: 8},
+                    label: {formatter: '{b}\n{d}%', color: '#6b7280', fontSize: 11},
+                    labelLine: {length: 6, length2: 6},
                     data: cateData
                 }]
             });
@@ -949,18 +977,18 @@
             }
             typeChart.setOption({
                 tooltip: $.extend({trigger: 'axis', axisPointer: {type: 'shadow'}}, tooltipTheme),
-                grid: {left: 88, right: 48, top: 16, bottom: 16},
+                grid: {left: 72, right: 36, top: 12, bottom: 12},
                 xAxis: {
                     type: 'value',
                     minInterval: 1,
-                    axisLabel: {color: '#9ca3af'},
+                    axisLabel: {color: '#9ca3af', fontSize: 11},
                     splitLine: {lineStyle: {color: '#f3f4f6'}}
                 },
-                yAxis: {type: 'category', data: names, axisTick: {show: false}, axisLabel: {color: '#4b5563'}},
+                yAxis: {type: 'category', data: names, axisTick: {show: false}, axisLabel: {color: '#4b5563', fontSize: 11}},
                 series: [{
                     type: 'bar',
                     data: values,
-                    barMaxWidth: 16,
+                    barMaxWidth: 14,
                     itemStyle: {color: '#2D8CF0', borderRadius: [0, 6, 6, 0]},
                     label: {show: true, position: 'right', color: '#9ca3af', fontSize: 12}
                 }]
