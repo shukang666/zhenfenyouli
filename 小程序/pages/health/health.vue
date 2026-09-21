@@ -20,7 +20,8 @@
 			<!-- <u-image width="100%" height="527" src="/static/index-bg.png"></u-image> -->
 		</view>
 
-		<view class="u-radius-10" id="guide-health-diag" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
+		<!-- 为了通过小程序审核，先注释掉下面 -->
+		<!-- <view class="u-radius-10" id="guide-health-diag" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
 			<view class="u-font-36 u-p-20 white">
 				健康诊断
 			</view>
@@ -31,13 +32,12 @@
 					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/b2067dad50db00339fec1bd39423168c.png?watermark" @click="$u.toast('功能开发中')"
 						v-if="!setting.app_test"></u-image>
 				</view>
-				<!-- 暂时注释掉下面区域 -->
-				<!-- <view class="u-flex u-row-between u-m-t-20">
+				<view class="u-flex u-row-between u-m-t-20">
 					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/cec0fddb04741996404e1d791be2ee9d.png?watermark"
 						@click="$u.route('/pages/sxjcgj/sxjcgj')"></u-image>
 					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/aba1eaaf62ee9821200689817e12d60f.png?watermark" @click="$u.toast('功能开发中')"
 						v-if="!setting.app_test"></u-image>
-				</view> -->
+				</view>
 				<view class="u-flex u-row-between u-m-t-20">
 					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/32c529525baa3d53fcc4b12f5a289299.png?watermark"
 						@click="$u.route('/pages/healthcare/add?id=0')"></u-image>
@@ -45,7 +45,7 @@
 						v-if="setting.app_test != 1"></u-image>
 				</view>
 			</view>
-		</view>
+		</view> -->
 		<view class="u-radius-10 u-m-t-30" id="guide-health-life" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);" v-if="!setting.app_test">
 			<view class="u-font-36 u-p-20 white u-flex u-row-between">
 				<view class="">
