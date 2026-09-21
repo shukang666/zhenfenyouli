@@ -128,6 +128,20 @@ var task_item_tpl = '<li class="cmf-component-tabitem">' +
 
 var appiframe_tpl = '<iframe style="width:100%;height: 100%;" frameborder="0" class="appiframe"></iframe>';
 
+function notifyIframeResize($iframe) {
+    if (!$iframe || !$iframe.length) {
+        return;
+    }
+    try {
+        var win = $iframe[0].contentWindow;
+        if (win && typeof win.resizeDashCharts === 'function') {
+            setTimeout(function () { win.resizeDashCharts(); }, 60);
+            setTimeout(function () { win.resizeDashCharts(); }, 320);
+        }
+    } catch (e) {
+    }
+}
+
 function openapp(url, appId, appname, refresh) {
     var $app = $("#task-content-inner li[app-id='" + appId + "']");
     $("#task-content-inner .active").removeClass("active");
@@ -145,6 +159,7 @@ function openapp(url, appId, appname, refresh) {
                 window.location.reload(true);
             }
             $loading.hide();
+            notifyIframeResize($appiframe);
         });
         calcTaskContentWidth();
     } else {
@@ -162,8 +177,10 @@ function openapp(url, appId, appname, refresh) {
                     window.location.reload(true);
                 }
                 $loading.hide();
+                notifyIframeResize($iframe);
             });
             $iframe.show();
+            notifyIframeResize($iframe);
         } else {
             if (refresh === true) {//刷新
                 $loading.show();
@@ -174,9 +191,11 @@ function openapp(url, appId, appname, refresh) {
                         window.location.reload(true);
                     }
                     $loading.hide();
+                    notifyIframeResize($iframe);
                 });
             }
             $iframe.show();
+            notifyIframeResize($iframe);
         }
     }
 
