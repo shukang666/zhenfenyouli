@@ -63,9 +63,9 @@
 		</view>
 		<!--  -->
 		<view class="u-m-t-30" id="guide-mall-cate">
-			<scroll-view scroll-x="true">
+			<scroll-view scroll-x="true" :show-scrollbar="false">
 				<view class="u-flex">
-					<view class="u-m-r-20 u-shrink-no" v-for="(item,index) in cate_list" :key="index" @click="cate_btn(index)">
+					<view class="u-m-r-20 u-shrink-no" v-for="(item,index) in cate_list" :key="item.id || index" @click="cate_btn(index)">
 						<u-tag :text="item.cate_name" shape="circle" :bg-color="cate_type==index?'#18AF38':'#fff'" :color="cate_type==index?'#fff':'#666666'" border-color="transparent" />
 					</view>
 				</view>
@@ -77,6 +77,9 @@
 				<view class="u-p-10">
 					<view class="u-font-bold u-line-1">
 						{{item.goods_name}}
+					</view>
+					<view class="u-m-t-10 u-font-22 u-line-1" style="color: #8B6914;" v-if="item.second_name">
+						{{item.second_name}}
 					</view>
 					<view class="u-m-t-10" style="color: #18AF38;">
 						<text v-if="Number(item.price)">{{item.price}}元</text>
@@ -154,15 +157,13 @@
 				}
 			}
 		},
-		// 分类
+		// 地理产区分类
 		get_category() {
 			return this.$u.api.get_category({
-				goods_type: 1
+				geo_zone: 1
 			}).then(res => {
-				this.cate_list = res.data || []
-				if (this.cate_list.length > 0) {
-					return this.get_goods_list()
-				}
+				this.cate_list = [{ id: 0, cate_name: '全部' }, ...(res.data || [])]
+				return this.get_goods_list()
 			})
 		},
 			// 切换分类
@@ -174,11 +175,15 @@
 			},
 		// 列表
 		get_goods_list() {
-			return this.$u.api.get_goods_list({
+			const params = {
 				keyword: this.keyword,
-				first_cate: this.cate_list[this.cate_type]?.id || 0,
 				page: this.page,
-			}).then(res => {
+			}
+			const zoneId = this.cate_list[this.cate_type]?.id || 0
+			if (zoneId) {
+				params.second_cate = zoneId
+			}
+			return this.$u.api.get_goods_list(params).then(res => {
 				this.goods_list = res.data?.data || []
 				this.total = res.data?.total || 0
 			}).catch(err => {

@@ -15,6 +15,9 @@
             <view class="u-font-bold u-font-32 u-m-t-30">
                 {{goods.goods_name}}
             </view>
+            <view class="u-m-t-20 u-font-24" style="color: #8B6914;" v-if="goods.second_name">
+                地理产区：{{goods.second_name}}
+            </view>
         </view>
         <view class="u-p-30 u-type-white-bg u-m-t-30 u-flex u-row-between">
             <view class="u-flex">

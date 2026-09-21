@@ -29,19 +29,22 @@ class GoodsController extends AdminBaseController
     {
         $keyword = $this->request->param('keyword');
         $first_cate = $this->request->param('first_cate');
+        $second_cate = $this->request->param('second_cate');
 
         $map = [];
         $map[] = ['a.delete_time', '=', 0];
         if (!empty($keyword)) $map[] = ['a.goods_name', 'like', "%$keyword%"];
         if (!empty($first_cate)) $map[] = ['a.first_cate', '=', $first_cate];
+        if (!empty($second_cate)) $map[] = ['a.second_cate', '=', $second_cate];
         $Model = new GoodsModel();
         $list = $Model->getInfo($map);
-        $list->appends(['keyword' => $keyword, 'first_cate' => $first_cate]);
+        $list->appends(['keyword' => $keyword, 'first_cate' => $first_cate, 'second_cate' => $second_cate]);
         // 获取分页显示
         $page = $list->render();
         $this->assign("page", $page);
         $this->assign('list', $list);
         $this->assign('cate_list', self::getCateList());
+        $this->assign('geo_zone_list', self::getGeoZoneList());
         return $this->fetch();
     }
 
@@ -50,7 +53,29 @@ class GoodsController extends AdminBaseController
         $map = [];
         $map[] = ['parent_id', '=', 0];
         $map[] = ['status', 'in', [1, 2]];
+        $map[] = ['cate_name', '<>', '地理产区'];
         return GoodsCategoryModel::field('id,cate_name')->where($map)->select();
+    }
+
+    /** 地理产区子分类（17 产区 + 综合文创） */
+    public static function getGeoZoneList()
+    {
+        $parentId = GoodsCategoryModel::where([
+            ['parent_id', '=', 0],
+            ['cate_name', '=', '地理产区'],
+            ['delete_time', '=', 0],
+        ])->value('id');
+        if (empty($parentId)) {
+            return [];
+        }
+        return GoodsCategoryModel::field('id,cate_name')
+            ->where([
+                ['parent_id', '=', $parentId],
+                ['status', '=', 1],
+                ['delete_time', '=', 0],
+            ])
+            ->order('list_order asc,id asc')
+            ->select();
     }
 
     //添加商品或编辑商品
@@ -224,6 +249,7 @@ class GoodsController extends AdminBaseController
             $this->assign('data', $goods_info);
 
             $this->assign('cate_list', self::getCateList());
+            $this->assign('geo_zone_list', self::getGeoZoneList());
             return $this->fetch();
         }
     }

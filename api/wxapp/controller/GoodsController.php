@@ -204,6 +204,18 @@ class GoodsController extends AuthController
      */
     public function get_category($parent_id = 0, $is_home = '', $goods_type = 1)
     {
+        $geo_zone = $this->request->param('geo_zone', 0);
+        if ($geo_zone == 1) {
+            $parent_id = GoodsCategoryModel::where([
+                ['parent_id', '=', 0],
+                ['cate_name', '=', '地理产区'],
+                ['delete_time', '=', 0],
+            ])->value('id');
+            if (empty($parent_id)) {
+                $this->success('获取成功', []);
+                return;
+            }
+        }
 
         $map = [];
         $map[] = ['status', '=', 1];
