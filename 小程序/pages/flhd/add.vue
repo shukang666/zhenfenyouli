@@ -160,9 +160,12 @@
                                 that.form.content = ''
                                 that.form.image = []
                                 that.$refs.uUpload.clear
-                                that.$u.func.prePage().forum_list = []
-                                that.$u.func.prePage().page = 1
-                                that.$u.func.prePage().get_forum_list()
+                                const prev = that.$u.func.prePage()
+                                if (prev && typeof prev.get_forum_list === 'function') {
+                                    prev.forum_list = []
+                                    prev.page = 1
+                                    prev.get_forum_list()
+                                }
                             }).catch(res => {
                                 that.$u.toast(res.msg);
                             })

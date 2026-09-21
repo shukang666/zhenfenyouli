@@ -59,12 +59,7 @@
                 </view>
             </view>
         </view>
-        <u-gap height="120"></u-gap>
-        <view class="submit-btn u-p-30">
-            <u-button type="primary" hover-class="none"
-                :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
-                @click="navigator('/pages/flhd/add')">立即打卡</u-button>
-        </view>
+        <u-gap height="40"></u-gap>
     </view>
 </template>
 
