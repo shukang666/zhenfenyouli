@@ -20,23 +20,58 @@
 		return out;
 	}
 
+	function mergeOptions(options) {
+		var out = {};
+		var k;
+		if (options && typeof options === 'object') {
+			for (k in options) {
+				if (Object.prototype.hasOwnProperty.call(options, k)) {
+					out[k] = options[k];
+				}
+			}
+		}
+		return out;
+	}
+
 	function patchLayer(layerObj) {
-		if (!layerObj || typeof layerObj.msg !== 'function' || layerObj.msg.__cmfPatched) {
+		if (!layerObj || typeof layerObj.msg !== 'function') {
 			return;
 		}
-		var orig = layerObj.msg;
-		layerObj.msg = function (content, options, end) {
-			if (typeof options === 'function') {
-				end = options;
-				options = {};
-			} else if (typeof options === 'number') {
-				options = { time: options };
-			} else if (!options) {
-				options = {};
-			}
-			return orig.call(this, content, assignDefaults(options), end);
-		};
-		layerObj.msg.__cmfPatched = true;
+		if (!layerObj.msg.__cmfPatched) {
+			var origMsg = layerObj.msg;
+			layerObj.msg = function (content, options, end) {
+				if (typeof options === 'function') {
+					end = options;
+					options = {};
+				} else if (typeof options === 'number') {
+					options = { time: options };
+				} else if (!options) {
+					options = {};
+				}
+				return origMsg.call(this, content, assignDefaults(options), end);
+			};
+			layerObj.msg.__cmfPatched = true;
+		}
+		if (typeof layerObj.confirm === 'function' && !layerObj.confirm.__cmfPatched) {
+			var origConfirm = layerObj.confirm;
+			layerObj.confirm = function (content, options, yes, cancel) {
+				if (typeof options === 'function') {
+					cancel = yes;
+					yes = options;
+					options = {};
+				}
+				options = mergeOptions(options);
+				// 默认标题是「信息」，再加关闭叉会和右上角精灵图叠成两个关闭按钮
+				if (options.title == null) {
+					options.title = false;
+				}
+				if (options.closeBtn == null) {
+					options.closeBtn = 0;
+				}
+				return origConfirm.call(this, content, options, yes, cancel);
+			};
+			layerObj.confirm.__cmfPatched = true;
+		}
 	}
 
 	function tryPatchLayer() {
