@@ -8,11 +8,11 @@
 		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(to bottom,#2fb74c,#EFF9F1);">
 		</view>
 		<!-- 主 Banner 图 -->
-		<view class="dtsh-banner" @click="goToClock" v-if="dtshBanner">
+		<view class="dtsh-banner" id="guide-dtsh-clock" @click="goToClock" v-if="dtshBanner">
 			<u-image width="100%" height="360" :src="dtshBanner" mode="aspectFill" border-radius="16"></u-image>
 		</view>
 		<!-- 轻量化任务 -->
-		<view class="task-box u-type-white-bg u-radius-6 u-m-t-20 u-flex u-row-around u-p-t-30 u-p-b-30">
+		<view class="task-box u-type-white-bg u-radius-6 u-m-t-20 u-flex u-row-around u-p-t-30 u-p-b-30" id="guide-dtsh-entry">
 			<view class="task-item u-flex u-col-center u-flex-col" @click="goToPage('/pages/dtsh/report')">
 				<view class="task-icon u-flex u-col-center u-row-center">
 					<u-icon name="camera" size="48" color="#18AF38"></u-icon>
@@ -83,7 +83,7 @@
 		</view> -->
 
 		<!--督导员工作台（督导员+指导员功能合并） -->
-		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30">
+		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30" id="guide-dtsh-vol">
 			<view class="u-font-32 u-font-bold u-m-b-24">督导员工作台</view>
 			<view class="vol-grid vol-grid-single u-flex u-row-center">
 				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome()">
@@ -97,7 +97,7 @@
 		</view>
 
 		<!-- 整改任务 -->
-		<view class="task-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30">
+		<view class="task-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30" id="guide-dtsh-task">
 			<view class="u-font-32 u-font-bold">整改任务</view>
 			<view class="u-font-24 u-type-info u-m-t-8 u-m-b-20">每人每天最多领取 1 条</view>
 			<!-- Tab 切换 -->
@@ -136,6 +136,7 @@
 		</view>
 
 		<u-gap height="40"></u-gap>
+		<page-guide page="dtsh"></page-guide>
 	</view>
 </template>
 

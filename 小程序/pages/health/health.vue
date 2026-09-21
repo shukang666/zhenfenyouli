@@ -21,7 +21,7 @@
 		</view>
 
 		<!-- 为了通过小程序审核，先注释掉下面 -->
-		<!-- <view class="u-radius-10" id="guide-health-diag" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
+		<view class="u-radius-10" id="guide-health-diag" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
 			<view class="u-font-36 u-p-20 white">
 				健康诊断
 			</view>
@@ -45,7 +45,7 @@
 						v-if="setting.app_test != 1"></u-image>
 				</view>
 			</view>
-		</view> -->
+		</view>
 		<view class="u-radius-10 u-m-t-30" id="guide-health-life" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);" v-if="!setting.app_test">
 			<view class="u-font-36 u-p-20 white u-flex u-row-between">
 				<view class="">
