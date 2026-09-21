@@ -33,56 +33,56 @@
         }
         .wrap {
             position: relative; z-index: 1;
-            padding: 10px 12px 14px;
+            padding: 6px 8px 8px;
         }
         .head {
-            display: flex; align-items: center; justify-content: space-between; gap: 12px;
-            margin-bottom: 10px; padding: 10px 14px;
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            margin-bottom: 6px; padding: 6px 10px;
             border: 1px solid rgba(34, 211, 238, .24);
             background: linear-gradient(90deg, rgba(6, 24, 48, .92), rgba(8, 47, 73, .75));
         }
-        .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
         .brand-mark {
-            width: 32px; height: 32px; border-radius: 8px; flex: none;
+            width: 26px; height: 26px; border-radius: 6px; flex: none;
             display: flex; align-items: center; justify-content: center;
             background: linear-gradient(135deg, #22d3ee, #2563eb);
-            color: #04131f; font-size: 16px;
+            color: #04131f; font-size: 13px;
         }
         .brand h1 {
-            font-size: 16px; letter-spacing: 2px; font-weight: 700; white-space: nowrap;
+            font-size: 14px; letter-spacing: 1px; font-weight: 700; white-space: nowrap;
             background: linear-gradient(90deg, #e0f2fe, #67e8f9);
             -webkit-background-clip: text; background-clip: text; color: transparent;
         }
-        .brand small { display: block; color: #64748b; font-size: 10px; letter-spacing: 1px; margin-top: 2px; }
-        .clock-time { font-size: 22px; font-weight: 700; letter-spacing: 2px; color: #67e8f9; line-height: 1.1; }
-        .clock-date { font-size: 11px; color: #64748b; text-align: center; }
-        .head-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+        .brand small { display: block; color: #64748b; font-size: 10px; letter-spacing: 0; margin-top: 1px; }
+        .clock-time { font-size: 18px; font-weight: 700; letter-spacing: 1px; color: #67e8f9; line-height: 1.1; }
+        .clock-date { font-size: 10px; color: #64748b; text-align: center; }
+        .head-actions { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; justify-content: flex-end; }
         .head-actions button {
             color: #67e8f9; border: 1px solid rgba(34,211,238,.35);
-            background: rgba(8, 47, 73, .6); padding: 5px 10px; border-radius: 4px;
-            font-size: 12px; cursor: pointer;
+            background: rgba(8, 47, 73, .6); padding: 3px 8px; border-radius: 4px;
+            font-size: 11px; cursor: pointer; line-height: 1.4;
         }
         .head-actions button:hover { background: rgba(34,211,238,.16); }
-        .meta { font-size: 11px; color: #64748b; white-space: nowrap; }
+        .meta { font-size: 10px; color: #64748b; white-space: nowrap; }
         .kpis {
-            display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px;
-            margin-bottom: 10px;
+            display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px;
+            margin-bottom: 6px;
         }
         .kpi {
-            padding: 8px 10px 7px;
+            padding: 4px 7px 3px;
             border: 1px solid rgba(34, 211, 238, .18);
             background: linear-gradient(180deg, rgba(8, 30, 54, .88), rgba(4, 16, 32, .75));
-            border-left: 3px solid #22d3ee;
+            border-left: 2px solid #22d3ee;
             min-width: 0;
         }
-        .kpi .lab { font-size: 10px; color: #7dd3fc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .kpi .num { font-size: 18px; font-weight: 700; color: #f8fafc; margin: 3px 0 1px; font-variant-numeric: tabular-nums; }
-        .kpi .sub { font-size: 10px; color: #94a3b8; line-height: 1.35; }
+        .kpi .lab { font-size: 9px; color: #7dd3fc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .kpi .num { font-size: 15px; font-weight: 700; color: #f8fafc; margin: 1px 0 0; font-variant-numeric: tabular-nums; line-height: 1.15; }
+        .kpi .sub { font-size: 9px; color: #94a3b8; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .kpi .sub em { color: #4ade80; font-style: normal; }
         .screen-grid {
             display: grid;
             grid-template-columns: repeat(12, minmax(0, 1fr));
-            gap: 8px;
+            gap: 5px;
         }
         .g-3 { grid-column: span 3; }
         .g-4 { grid-column: span 4; }
@@ -96,29 +96,64 @@
             display: flex; flex-direction: column; min-width: 0;
         }
         .ptitle {
-            flex: none; height: 30px; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 10px; font-size: 12px; color: #7dd3fc;
+            flex: none; height: 22px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 8px; font-size: 11px; color: #7dd3fc;
             border-bottom: 1px solid rgba(34,211,238,.1);
             background: linear-gradient(90deg, rgba(34,211,238,.1), transparent 60%);
         }
-        .ptitle i { margin-right: 5px; color: #22d3ee; }
-        .ptitle .sub { font-size: 10px; color: #64748b; }
-        .chart { height: 210px; width: 100%; }
-        .chart-sm { height: 180px; }
+        .ptitle i { margin-right: 4px; color: #22d3ee; font-size: 10px; }
+        .ptitle .sub { font-size: 9px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46%; }
+        .chart { height: 168px; width: 100%; }
+        .chart-sm { height: 148px; }
         .feed {
-            height: 210px; overflow: hidden auto; padding: 6px 10px 8px;
+            height: 148px; overflow: hidden auto; padding: 2px 8px 4px;
         }
         .feed-item {
-            display: flex; justify-content: space-between; gap: 8px;
-            font-size: 11px; color: #cbd5e1; padding: 5px 0;
-            border-bottom: 1px dashed rgba(148,163,184,.12);
+            display: flex; justify-content: space-between; gap: 6px;
+            font-size: 10px; color: #cbd5e1; padding: 3px 0;
+            border-bottom: 1px dashed rgba(148,163,184,.1);
         }
-        .feed-item span { color: #67e8f9; flex: none; }
+        .feed-item span { color: #67e8f9; flex: none; font-size: 9px; }
         .feed-item b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        body.is-embed .head { padding: 8px 12px; margin-bottom: 8px; }
-        body.is-embed .brand h1 { font-size: 15px; }
-        body.is-embed .clock-box { display: none; }
+        body.is-embed {
+            overflow: hidden;
+            height: 100%;
+        }
+        body.is-embed .wrap {
+            height: 100%;
+            padding: 4px 6px 5px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        body.is-embed .head {
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            flex: none;
+        }
+        body.is-embed .brand-mark,
+        body.is-embed .brand small,
+        body.is-embed .clock-box,
         body.is-embed .btn-standalone { display: none; }
+        body.is-embed .brand h1 { font-size: 13px; letter-spacing: 0; }
+        body.is-embed .kpis {
+            margin-bottom: 4px;
+            gap: 4px;
+            flex: none;
+        }
+        body.is-embed .kpi { padding: 3px 6px 2px; }
+        body.is-embed .kpi .num { font-size: 14px; }
+        body.is-embed .screen-grid {
+            flex: 1;
+            min-height: 0;
+            gap: 4px;
+            align-content: start;
+            overflow-y: auto;
+        }
+        body.is-embed .ptitle { height: 20px; font-size: 10px; padding: 0 6px; }
+        body.is-embed .chart,
+        body.is-embed .chart-sm,
+        body.is-embed .feed { height: var(--chart-h, 132px); }
         @media (max-width: 1400px) {
             .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
             .g-3, .g-4, .g-5, .g-6, .g-8 { grid-column: span 6; }
@@ -235,7 +270,20 @@
     function emptyOpt(text) {
         return { title: { text: text || '暂无数据', left: 'center', top: 'middle', textStyle: { color: '#475569', fontSize: 13, fontWeight: 'normal' } } };
     }
+    function applyChartHeights() {
+        if (!IS_EMBED) return;
+        var vh = window.innerHeight || document.documentElement.clientHeight;
+        var head = document.querySelector('.head');
+        var kpis = document.getElementById('kpis');
+        var used = (head ? head.offsetHeight : 0) + (kpis ? kpis.offsetHeight : 0) + 14;
+        var remain = vh - used;
+        var rowH = Math.floor((remain - 16) / 4);
+        if (rowH < 108) rowH = 108;
+        if (rowH > 148) rowH = 148;
+        document.documentElement.style.setProperty('--chart-h', rowH + 'px');
+    }
     function resizeAll() {
+        applyChartHeights();
         for (var k in charts) { if (charts[k]) charts[k].resize(); }
     }
 
@@ -272,8 +320,8 @@
         make('c-trend').setOption({
             color: C,
             tooltip: Object.assign({ trigger: 'axis' }, tip()),
-            legend: { data: ['注册', '打卡', '垃圾打卡', '巡检', '报名', '积分'], top: 0, textStyle: { color: '#94a3b8', fontSize: 10 }, itemWidth: 8, itemHeight: 8 },
-            grid: { left: 40, right: 44, top: 28, bottom: 22 },
+            legend: { data: ['注册', '打卡', '垃圾打卡', '巡检', '报名', '积分'], top: 0, itemGap: 8, textStyle: { color: '#94a3b8', fontSize: 9 }, itemWidth: 7, itemHeight: 7 },
+            grid: { left: 36, right: 38, top: 22, bottom: 16 },
             xAxis: Object.assign({ type: 'category', data: t.labels || [], boundaryGap: false }, axis()),
             yAxis: [
                 Object.assign({ type: 'value', minInterval: 1, splitNumber: 4 }, axis()),
@@ -294,9 +342,10 @@
             tooltip: tip(),
             radar: {
                 indicator: radar.indicator,
-                radius: '62%',
+                radius: '68%',
+                center: ['50%', '52%'],
                 splitNumber: 4,
-                axisName: { color: '#7dd3fc', fontSize: 10 },
+                axisName: { color: '#7dd3fc', fontSize: 9 },
                 splitLine: { lineStyle: { color: 'rgba(34,211,238,.2)' } },
                 splitArea: { areaStyle: { color: ['rgba(34,211,238,.05)', 'rgba(34,211,238,.01)'] } }
             },
@@ -306,7 +355,7 @@
         make('c-funnel').setOption({
             tooltip: Object.assign({ trigger: 'item' }, tip()),
             color: C,
-            series: [{ type: 'funnel', left: '6%', width: '78%', minSize: '10%', label: { color: '#e0f2fe', fontSize: 10 }, data: d.funnel || [] }]
+            series: [{ type: 'funnel', left: '4%', top: 4, bottom: 4, width: '82%', minSize: '8%', label: { color: '#e0f2fe', fontSize: 9 }, data: d.funnel || [] }]
         });
 
         var weeks = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
@@ -319,17 +368,17 @@
         }
         make('c-heat').setOption({
             tooltip: Object.assign({ formatter: function (p) { return weeks[p.value[1]] + ' ' + p.value[0] + '时：' + p.value[2]; } }, tip()),
-            grid: { left: 36, right: 10, top: 6, bottom: 18 },
-            xAxis: Object.assign({ type: 'category', data: hours, axisLabel: { interval: 3, fontSize: 9 } }, axis()),
-            yAxis: Object.assign({ type: 'category', data: weeks, axisLabel: { fontSize: 9 } }, axis()),
+            grid: { left: 32, right: 6, top: 2, bottom: 14 },
+            xAxis: Object.assign({ type: 'category', data: hours, axisLabel: { interval: 4, fontSize: 8 } }, axis()),
+            yAxis: Object.assign({ type: 'category', data: weeks, axisLabel: { fontSize: 8 } }, axis()),
             visualMap: { min: 0, max: heatMax, show: false, inRange: { color: ['#042f2e', '#155e75', '#22d3ee', '#fde047'] } },
             series: [{ type: 'heatmap', data: heatData }]
         });
 
         make('c-hour').setOption({
             tooltip: Object.assign({ trigger: 'axis' }, tip()),
-            grid: { left: 34, right: 10, top: 12, bottom: 18 },
-            xAxis: Object.assign({ type: 'category', data: hours, boundaryGap: false, axisLabel: { interval: 3, fontSize: 9 } }, axis()),
+            grid: { left: 30, right: 6, top: 8, bottom: 14 },
+            xAxis: Object.assign({ type: 'category', data: hours, boundaryGap: false, axisLabel: { interval: 4, fontSize: 8 } }, axis()),
             yAxis: Object.assign({ type: 'value', minInterval: 1, splitNumber: 3 }, axis()),
             series: [{ type: 'line', data: d.hour_today || [], smooth: true, symbol: 'none', lineStyle: { color: '#4ade80' }, areaStyle: { color: 'rgba(74,222,128,.15)' } }]
         });
@@ -337,43 +386,43 @@
         var cate = d.cate_pie || [];
         make('c-cate').setOption(cate.length ? {
             tooltip: Object.assign({ trigger: 'item' }, tip()), color: C,
-            series: [{ type: 'pie', radius: ['22%', '62%'], label: { color: '#bae6fd', fontSize: 10 }, data: cate }]
+            series: [{ type: 'pie', radius: ['24%', '68%'], center: ['50%', '52%'], label: { color: '#bae6fd', fontSize: 9 }, data: cate }]
         } : emptyOpt());
 
         var ps = d.point_source || [];
         make('c-point').setOption(ps.length ? {
             tooltip: Object.assign({ trigger: 'item' }, tip()), color: C,
-            series: [{ type: 'pie', radius: ['38%', '62%'], label: { fontSize: 9, color: '#bae6fd' }, data: ps }]
+            series: [{ type: 'pie', radius: ['40%', '68%'], center: ['50%', '52%'], label: { fontSize: 8, color: '#bae6fd' }, data: ps }]
         } : emptyOpt());
 
         var comm = (d.community || []).slice().reverse();
         make('c-community').setOption(comm.length ? {
             tooltip: Object.assign({ trigger: 'axis' }, tip()),
-            grid: { left: 82, right: 16, top: 6, bottom: 6 },
+            grid: { left: 72, right: 10, top: 2, bottom: 2 },
             xAxis: Object.assign({ type: 'value', minInterval: 1 }, axis()),
-            yAxis: Object.assign({ type: 'category', data: comm.map(function (x) { return x.name; }), axisLabel: { fontSize: 9 } }, axis()),
-            series: [{ type: 'bar', data: comm.map(function (x) { return x.value; }), barMaxWidth: 10, itemStyle: { color: '#67e8f9', borderRadius: [0, 3, 3, 0] } }]
+            yAxis: Object.assign({ type: 'category', data: comm.map(function (x) { return x.name; }), axisLabel: { fontSize: 8, width: 64, overflow: 'truncate' } }, axis()),
+            series: [{ type: 'bar', data: comm.map(function (x) { return x.value; }), barMaxWidth: 8, itemStyle: { color: '#67e8f9', borderRadius: [0, 2, 2, 0] } }]
         } : emptyOpt());
 
         var st = d.street || [];
         make('c-street').setOption(st.length ? {
             tooltip: Object.assign({ trigger: 'item' }, tip()), color: C,
-            series: [{ type: 'treemap', roam: false, breadcrumb: { show: false }, label: { color: '#e0f2fe', fontSize: 11 }, data: st }]
+            series: [{ type: 'treemap', roam: false, breadcrumb: { show: false }, top: 2, bottom: 2, left: 2, right: 2, label: { color: '#e0f2fe', fontSize: 10 }, data: st }]
         } : emptyOpt());
 
         var tb = d.type_bar || [];
         make('c-type').setOption(tb.length ? {
             tooltip: Object.assign({ trigger: 'axis' }, tip()),
-            grid: { left: 56, right: 10, top: 12, bottom: 28 },
-            xAxis: Object.assign({ type: 'category', data: tb.map(function (x) { return x.name; }), axisLabel: { rotate: 18, fontSize: 9 } }, axis()),
-            yAxis: Object.assign({ type: 'value', minInterval: 1 }, axis()),
-            series: [{ type: 'bar', data: tb.map(function (x) { return x.value; }), barMaxWidth: 14, itemStyle: { color: '#818cf8', borderRadius: [3, 3, 0, 0] } }]
+            grid: { left: 48, right: 8, top: 8, bottom: 22 },
+            xAxis: Object.assign({ type: 'category', data: tb.map(function (x) { return x.name; }), axisLabel: { rotate: 16, fontSize: 8 } }, axis()),
+            yAxis: Object.assign({ type: 'value', minInterval: 1, splitNumber: 3 }, axis()),
+            series: [{ type: 'bar', data: tb.map(function (x) { return x.value; }), barMaxWidth: 12, itemStyle: { color: '#818cf8', borderRadius: [2, 2, 0, 0] } }]
         } : emptyOpt());
 
         make('c-task').setOption({
             tooltip: Object.assign({ trigger: 'item' }, tip()),
             color: ['#38bdf8', '#fbbf24', '#fb7185', '#4ade80'],
-            series: [{ type: 'pie', radius: ['36%', '62%'], label: { fontSize: 10, color: '#bae6fd' }, data: d.task_pie || [] }]
+            series: [{ type: 'pie', radius: ['38%', '68%'], center: ['50%', '52%'], label: { fontSize: 9, color: '#bae6fd' }, data: d.task_pie || [] }]
         });
 
         var feed = d.latest || [];
@@ -382,7 +431,7 @@
             fh += '<div class="feed-item"><b>' + feed[i].text + '</b><span>' + feed[i].time + '</span></div>';
         }
         document.getElementById('c-feed').innerHTML = fh || '<div class="feed-item">暂无动态</div>';
-        setTimeout(resizeAll, 60);
+        setTimeout(resizeAll, 80);
     }
 
     function tickClock() {
@@ -422,6 +471,7 @@
 
     tickClock();
     setInterval(tickClock, 1000);
+    applyChartHeights();
     renderKpi(D);
     renderCharts(D);
     setInterval(function () { load(false); }, 90000);
