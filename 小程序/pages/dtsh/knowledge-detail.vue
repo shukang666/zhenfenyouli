@@ -7,7 +7,7 @@
 		<view class="detail-container" v-if="detail && detail.id">
 			<!-- 封面 -->
 			<view class="detail-cover" v-if="detail.image">
-				<u-image width="100%" height="360" :src="detail.image" mode="aspectFill" border-radius="0"></u-image>
+				<u-image width="100%" height="360" :src="'https://admin.circular-economy.cn' + detail.image" mode="aspectFill" border-radius="0"></u-image>
 			</view>
 
 			<!-- 内容 -->
