@@ -16,7 +16,8 @@
         margin: 0 -8px -16px;
     }
 
-    .dash-flex > div[class^="dash-col-"] {
+    .dash-flex > div[class^="dash-col-"],
+    .dash-flex > .dash-col-half {
         box-sizing: border-box;
         padding: 0 8px 16px;
     }
@@ -27,17 +28,13 @@
     .dash-col-5 { width: 41.6667%; }
     .dash-col-7 { width: 58.3333%; }
 
-    /* 概览 / 图表区收窄，不占满整行 */
-    .dash-section-narrow {
-        max-width: 880px;
-    }
-
-    .dash-section-narrow.panel {
-        margin-bottom: 12px;
-    }
-
+    /* 图表区收窄 */
     .dash-row-charts-narrow {
-        max-width: 880px;
+        max-width: 960px;
+    }
+
+    .dash-row-charts-narrow > .dash-col-half {
+        width: 50%;
     }
 
     .dash-wrap .panel {
@@ -148,13 +145,15 @@
     .dash-metric {
         display: flex;
         align-items: flex-start;
-        min-height: 72px;
+        height: 100%;
+        min-height: 78px;
         padding: 8px 10px;
         border: 1px solid #eef1f6;
         border-radius: 12px;
         background: #fafbfd;
         color: #4b5563;
         text-decoration: none;
+        box-sizing: border-box;
         transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
     }
 
@@ -207,19 +206,21 @@
     }
 
     .dash-metric-extra {
-        display: block;
+        display: -webkit-box;
         margin-top: 4px;
         font-size: 11px;
         line-height: 1.35;
         color: #c0c6d0;
+        overflow: hidden;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
     }
 
     .dash-metrics-grid {
-        margin: 0 -5px -10px;
-    }
-
-    .dash-metrics-grid > .dash-col-2 {
-        padding: 0 5px 10px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        align-items: stretch;
     }
 
     .c-green { background: #f0fdf4; color: #16a34a; }
@@ -423,12 +424,18 @@
             text-align: left;
         }
 
-        .dash-section-narrow,
         .dash-row-charts-narrow {
             max-width: none;
         }
 
-        .dash-col-2,
+        .dash-metrics-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dash-row-charts-narrow > .dash-col-half {
+            width: 100%;
+        }
+
         .dash-col-3 { width: 50%; }
 
         .dash-col-4,
@@ -464,7 +471,7 @@
     </div>
 
     <!-- ================= 2. 核心数据概览 ================= -->
-    <div class="panel panel-default dash-section-narrow">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <i class="fa fa-dashboard" style="color:#2D8CF0;"></i>核心数据概览
             <span class="pull-right dash-head-extra">
@@ -476,87 +483,71 @@
             </span>
         </div>
         <div class="panel-body">
-            <div class="dash-flex dash-metrics-grid">
-                <div class="dash-col-2">
-                    <a class="dash-metric" href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">
-                        <span class="dash-metric-icon c-green"><i class="fa fa-recycle"></i></span>
-                        <span class="dash-metric-body">
-                            <span class="dash-metric-name">今日打卡</span>
-                            <span class="dash-metric-num">{$stats.clock_today}<small>条</small></span>
-                            <span class="dash-metric-extra">{$stats.clock_user_today} 人参与 · 近 7 天 {$stats.clock_7d} 条</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="dash-col-2">
-                    <a class="dash-metric" href="javascript:parent.openapp('{:url('Member/index')}','member','用户列表');">
-                        <span class="dash-metric-icon c-blue"><i class="fa fa-user-plus"></i></span>
-                        <span class="dash-metric-body">
-                            <span class="dash-metric-name">今日新增用户</span>
-                            <span class="dash-metric-num">{$stats.user_today}<small>人</small></span>
-                            <span class="dash-metric-extra">近 7 天 {$stats.user_7d} 人 · 近 30 天 {$stats.user_30d} 人</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="dash-col-2">
-                    <a class="dash-metric" href="javascript:parent.openapp('{:url('ActiveClock/index')}','aclock','活动打卡');">
-                        <span class="dash-metric-icon c-cyan"><i class="fa fa-check-square-o"></i></span>
-                        <span class="dash-metric-body">
-                            <span class="dash-metric-name">今日活动签到</span>
-                            <span class="dash-metric-num">{$stats.aclock_today}<small>次</small></span>
-                            <span class="dash-metric-extra">今日报名 {$stats.sign_today} 人次 · 累计 {$stats.aclock_total} 次</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="dash-col-2">
-                    <a class="dash-metric" href="javascript:parent.openapp('{:url('Account/userPointLog')}','point','积分记录');">
-                        <span class="dash-metric-icon c-purple"><i class="fa fa-diamond"></i></span>
-                        <span class="dash-metric-body">
-                            <span class="dash-metric-name">今日发放积分</span>
-                            <span class="dash-metric-num">{$stats.point_today}<small>分</small></span>
-                            <span class="dash-metric-extra">近 7 天 {$stats.point_7d} 分 · 累计 {$stats.point_total} 分</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="dash-col-2">
-                    <a class="dash-metric" href="javascript:parent.openapp('{:url('Order/index')}','order','订单列表');">
-                        <span class="dash-metric-icon c-orange"><i class="fa fa-list-alt"></i></span>
-                        <span class="dash-metric-body">
-                            <span class="dash-metric-name">今日商城订单</span>
-                            <span class="dash-metric-num">{$stats.order_today}<small>单</small></span>
-                            <span class="dash-metric-extra">累计有效订单 {$stats.order_total} 单</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="dash-col-2">
-                    <a class="dash-metric" href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">
-                        <span class="dash-metric-icon c-indigo"><i class="fa fa-thumbs-up"></i></span>
-                        <span class="dash-metric-body">
-                            <span class="dash-metric-name">累计有效打卡</span>
-                            <span class="dash-metric-num">{$stats.clock_total}<small>条</small></span>
-                            <span class="dash-metric-extra">今日删除 {$stats.del_today} 条（含违规清理）</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="dash-col-2">
-                    <a class="dash-metric" href="javascript:parent.openapp('{:url('Active/index1')}','active','活动列表');">
-                        <span class="dash-metric-icon c-amber"><i class="fa fa-calendar"></i></span>
-                        <span class="dash-metric-body">
-                            <span class="dash-metric-name">社区活动</span>
-                            <span class="dash-metric-num">{$stats.active_ing}<small>个进行中</small></span>
-                            <span class="dash-metric-extra">共 {$stats.active_total} 个 · 累计报名 {$stats.sign_total} 人次</span>
-                        </span>
-                    </a>
-                </div>
-                <div class="dash-col-2">
-                    <a class="dash-metric" href="javascript:parent.openapp('{:url('Community/index')}','community','小区列表');">
-                        <span class="dash-metric-icon c-rose"><i class="fa fa-building-o"></i></span>
-                        <span class="dash-metric-body">
-                            <span class="dash-metric-name">覆盖小区</span>
-                            <span class="dash-metric-num">{$stats.community_total}<small>个</small></span>
-                            <span class="dash-metric-extra">{$stats.parent_total} 个社区 · 商家 {$stats.merchant_total} 家 · 督导员 {$stats.supervisor_total} 人</span>
-                        </span>
-                    </a>
-                </div>
+            <div class="dash-metrics-grid">
+                <a class="dash-metric" href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">
+                    <span class="dash-metric-icon c-green"><i class="fa fa-recycle"></i></span>
+                    <span class="dash-metric-body">
+                        <span class="dash-metric-name">今日打卡</span>
+                        <span class="dash-metric-num">{$stats.clock_today}<small>条</small></span>
+                        <span class="dash-metric-extra">{$stats.clock_user_today} 人参与 · 近 7 天 {$stats.clock_7d} 条</span>
+                    </span>
+                </a>
+                <a class="dash-metric" href="javascript:parent.openapp('{:url('Member/index')}','member','用户列表');">
+                    <span class="dash-metric-icon c-blue"><i class="fa fa-user-plus"></i></span>
+                    <span class="dash-metric-body">
+                        <span class="dash-metric-name">今日新增用户</span>
+                        <span class="dash-metric-num">{$stats.user_today}<small>人</small></span>
+                        <span class="dash-metric-extra">近 7 天 {$stats.user_7d} 人 · 近 30 天 {$stats.user_30d} 人</span>
+                    </span>
+                </a>
+                <a class="dash-metric" href="javascript:parent.openapp('{:url('ActiveClock/index')}','aclock','活动打卡');">
+                    <span class="dash-metric-icon c-cyan"><i class="fa fa-check-square-o"></i></span>
+                    <span class="dash-metric-body">
+                        <span class="dash-metric-name">今日活动签到</span>
+                        <span class="dash-metric-num">{$stats.aclock_today}<small>次</small></span>
+                        <span class="dash-metric-extra">今日报名 {$stats.sign_today} 人次 · 累计 {$stats.aclock_total} 次</span>
+                    </span>
+                </a>
+                <a class="dash-metric" href="javascript:parent.openapp('{:url('Account/userPointLog')}','point','积分记录');">
+                    <span class="dash-metric-icon c-purple"><i class="fa fa-diamond"></i></span>
+                    <span class="dash-metric-body">
+                        <span class="dash-metric-name">今日发放积分</span>
+                        <span class="dash-metric-num">{$stats.point_today}<small>分</small></span>
+                        <span class="dash-metric-extra">近 7 天 {$stats.point_7d} 分 · 累计 {$stats.point_total} 分</span>
+                    </span>
+                </a>
+                <a class="dash-metric" href="javascript:parent.openapp('{:url('Order/index')}','order','订单列表');">
+                    <span class="dash-metric-icon c-orange"><i class="fa fa-list-alt"></i></span>
+                    <span class="dash-metric-body">
+                        <span class="dash-metric-name">今日商城订单</span>
+                        <span class="dash-metric-num">{$stats.order_today}<small>单</small></span>
+                        <span class="dash-metric-extra">累计有效订单 {$stats.order_total} 单</span>
+                    </span>
+                </a>
+                <a class="dash-metric" href="javascript:parent.openapp('{:url('Forum/index2')}','forum2','垃圾打卡');">
+                    <span class="dash-metric-icon c-indigo"><i class="fa fa-thumbs-up"></i></span>
+                    <span class="dash-metric-body">
+                        <span class="dash-metric-name">累计有效打卡</span>
+                        <span class="dash-metric-num">{$stats.clock_total}<small>条</small></span>
+                        <span class="dash-metric-extra">今日删除 {$stats.del_today} 条（含违规清理）</span>
+                    </span>
+                </a>
+                <a class="dash-metric" href="javascript:parent.openapp('{:url('Active/index1')}','active','活动列表');">
+                    <span class="dash-metric-icon c-amber"><i class="fa fa-calendar"></i></span>
+                    <span class="dash-metric-body">
+                        <span class="dash-metric-name">社区活动</span>
+                        <span class="dash-metric-num">{$stats.active_ing}<small>个进行中</small></span>
+                        <span class="dash-metric-extra">共 {$stats.active_total} 个 · 累计报名 {$stats.sign_total} 人次</span>
+                    </span>
+                </a>
+                <a class="dash-metric" href="javascript:parent.openapp('{:url('Community/index')}','community','小区列表');">
+                    <span class="dash-metric-icon c-rose"><i class="fa fa-building-o"></i></span>
+                    <span class="dash-metric-body">
+                        <span class="dash-metric-name">覆盖小区</span>
+                        <span class="dash-metric-num">{$stats.community_total}<small>个</small></span>
+                        <span class="dash-metric-extra">{$stats.parent_total} 个社区 · 商家 {$stats.merchant_total} 家 · 督导员 {$stats.supervisor_total} 人</span>
+                    </span>
+                </a>
             </div>
         </div>
     </div>
@@ -612,7 +603,7 @@
 
     <!-- ================= 5. 打卡分布 ================= -->
     <div class="dash-flex dash-row-charts-narrow">
-        <div class="dash-col-4">
+        <div class="dash-col-half">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-pie-chart" style="color:#22c55e;"></i>近 30 天垃圾分类占比
@@ -623,7 +614,7 @@
                 </div>
             </div>
         </div>
-        <div class="dash-col-5">
+        <div class="dash-col-half">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-bar-chart" style="color:#06b6d4;"></i>近 30 天各类打卡量
