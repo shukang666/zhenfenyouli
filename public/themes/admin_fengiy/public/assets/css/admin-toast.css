@@ -15,9 +15,13 @@
 }
 
 .layui-layer-msg.layer-anim,
+.layui-layer-cmf-toast.layer-anim,
 .layui-layer-msg.layer-anim-01,
+.layui-layer-cmf-toast.layer-anim-01,
 .layui-layer-msg.layer-anim-02,
-.layui-layer-msg.layer-anim-05 {
+.layui-layer-cmf-toast.layer-anim-02,
+.layui-layer-msg.layer-anim-05,
+.layui-layer-cmf-toast.layer-anim-05 {
 	-webkit-animation-name: cmfToastIn !important;
 	animation-name: cmfToastIn !important;
 	-webkit-animation-duration: .32s !important;
@@ -26,16 +30,19 @@
 	animation-timing-function: cubic-bezier(.22, 1, .36, 1) !important;
 }
 
-.layui-layer-msg {
+.layui-layer.layui-layer-msg,
+.layui-layer.layui-layer-cmf-toast {
 	min-width: 0 !important;
 	background: transparent !important;
+	background-color: transparent !important;
 	border: none !important;
 	box-shadow: none !important;
 	border-radius: 0 !important;
 	overflow: visible !important;
 }
 
-.layui-layer-msg .layui-layer-content {
+.layui-layer-msg .layui-layer-content,
+.layui-layer-cmf-toast .layui-layer-content {
 	padding: 11px 22px 11px 16px !important;
 	background: #fff !important;
 	color: #111827 !important;
@@ -50,13 +57,15 @@
 }
 
 .layui-layer-msg.layui-layer-hui,
-.layui-layer-hui.layui-layer-msg {
+.layui-layer-hui.layui-layer-msg,
+.layui-layer-cmf-toast.layui-layer-hui {
 	background: transparent !important;
 	filter: none !important;
 }
 
 .layui-layer-msg.layui-layer-hui .layui-layer-content,
-.layui-layer-hui.layui-layer-msg .layui-layer-content {
+.layui-layer-hui.layui-layer-msg .layui-layer-content,
+.layui-layer-cmf-toast.layui-layer-hui .layui-layer-content {
 	background: rgba(17, 24, 39, .92) !important;
 	color: #fff !important;
 	text-align: center !important;
@@ -64,7 +73,8 @@
 	box-shadow: 0 16px 44px rgba(15, 23, 42, .32) !important;
 }
 
-.layui-layer-msg .layui-layer-ico {
+.layui-layer-msg .layui-layer-ico,
+.layui-layer-cmf-toast .layui-layer-ico {
 	position: relative !important;
 	top: auto !important;
 	left: auto !important;
@@ -78,10 +88,12 @@
 	background-color: #e5e7eb !important;
 }
 
-.layui-layer-msg .layui-layer-ico1 {
+.layui-layer-msg .layui-layer-ico1,
+.layui-layer-cmf-toast .layui-layer-ico1 {
 	background-color: #16a34a !important;
 }
-.layui-layer-msg .layui-layer-ico1:after {
+.layui-layer-msg .layui-layer-ico1:after,
+.layui-layer-cmf-toast .layui-layer-ico1:after {
 	content: "";
 	display: block;
 	width: 5px;
@@ -93,11 +105,14 @@
 	transform: rotate(45deg);
 }
 
-.layui-layer-msg .layui-layer-ico2 {
+.layui-layer-msg .layui-layer-ico2,
+.layui-layer-cmf-toast .layui-layer-ico2 {
 	background-color: #dc2626 !important;
 }
 .layui-layer-msg .layui-layer-ico2:before,
-.layui-layer-msg .layui-layer-ico2:after {
+.layui-layer-msg .layui-layer-ico2:after,
+.layui-layer-cmf-toast .layui-layer-ico2:before,
+.layui-layer-cmf-toast .layui-layer-ico2:after {
 	content: "";
 	position: absolute;
 	left: 10px;
@@ -107,19 +122,23 @@
 	background: #fff;
 	border-radius: 1px;
 }
-.layui-layer-msg .layui-layer-ico2:before {
+.layui-layer-msg .layui-layer-ico2:before,
+.layui-layer-cmf-toast .layui-layer-ico2:before {
 	-webkit-transform: rotate(45deg);
 	transform: rotate(45deg);
 }
-.layui-layer-msg .layui-layer-ico2:after {
+.layui-layer-msg .layui-layer-ico2:after,
+.layui-layer-cmf-toast .layui-layer-ico2:after {
 	-webkit-transform: rotate(-45deg);
 	transform: rotate(-45deg);
 }
 
-.layui-layer-msg .layui-layer-ico7 {
+.layui-layer-msg .layui-layer-ico7,
+.layui-layer-cmf-toast .layui-layer-ico7 {
 	background-color: #d97706 !important;
 }
-.layui-layer-msg .layui-layer-ico7:after {
+.layui-layer-msg .layui-layer-ico7:after,
+.layui-layer-cmf-toast .layui-layer-ico7:after {
 	content: "!";
 	display: block;
 	color: #fff;
@@ -133,12 +152,18 @@
 
 .layui-layer-msg .layui-layer-ico3,
 .layui-layer-msg .layui-layer-ico5,
-.layui-layer-msg .layui-layer-ico6 {
+.layui-layer-msg .layui-layer-ico6,
+.layui-layer-cmf-toast .layui-layer-ico3,
+.layui-layer-cmf-toast .layui-layer-ico5,
+.layui-layer-cmf-toast .layui-layer-ico6 {
 	background-color: #2563eb !important;
 }
 .layui-layer-msg .layui-layer-ico3:after,
 .layui-layer-msg .layui-layer-ico5:after,
-.layui-layer-msg .layui-layer-ico6:after {
+.layui-layer-msg .layui-layer-ico6:after,
+.layui-layer-cmf-toast .layui-layer-ico3:after,
+.layui-layer-cmf-toast .layui-layer-ico5:after,
+.layui-layer-cmf-toast .layui-layer-ico6:after {
 	content: "i";
 	display: block;
 	color: #fff;

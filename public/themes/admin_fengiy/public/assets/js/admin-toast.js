@@ -15,9 +15,8 @@
 		if (out.offset == null) {
 			out.offset = '28px';
 		}
-		if (out.skin == null) {
-			out.skin = 'cmf-toast';
-		}
+		// 不能改 skin：layer.msg 默认 skin 是 layui-layer-msg，
+		// 一旦覆盖成别的名字，胶囊样式全部套不上，看起来就只挪了位置。
 		return out;
 	}
 

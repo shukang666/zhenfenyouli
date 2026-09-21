@@ -60,7 +60,7 @@
 				</view>
 
 				<view class="le-ch-main" v-else-if="ch.unlocked && (!ch.passed || isExpanded(ch.id))">
-					<image class="le-cover" v-if="ch.image" :src="ch.image" mode="widthFix"></image>
+					<image class="le-cover" v-if="ch.image" :src="'https://admin.circular-economy.cn' + ch.image" mode="widthFix"></image>
 					<view class="le-article">
 						<rich-text :nodes="ch.content || ''"></rich-text>
 					</view>
