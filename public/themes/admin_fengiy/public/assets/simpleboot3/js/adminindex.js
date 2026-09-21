@@ -151,11 +151,11 @@ function openapp(url, appId, appname, refresh) {
         $app.addClass("active");
         $(".appiframe").hide();
         var $iframe = $("#appiframe-" + appId);
-        var src     = $iframe.get(0).contentWindow.location.href;
-        src         = src.substr(src.indexOf("://") + 3);
-        if (refresh === true) {//刷新
+        // 标签已存在但 iframe 尚未创建（如预置的「数据大屏」标签）
+        if ($iframe.length === 0) {
             $loading.show();
-            $iframe.attr("src", url);
+            $iframe = $(appiframe_tpl).attr("src", url).attr("id", "appiframe-" + appId);
+            $iframe.appendTo("#content");
             $iframe.load(function () {
                 var srcLoaded = $iframe.get(0).contentWindow.location;
                 if (srcLoaded.pathname == GV.ROOT) {
@@ -163,8 +163,21 @@ function openapp(url, appId, appname, refresh) {
                 }
                 $loading.hide();
             });
+            $iframe.show();
+        } else {
+            if (refresh === true) {//刷新
+                $loading.show();
+                $iframe.attr("src", url);
+                $iframe.load(function () {
+                    var srcLoaded = $iframe.get(0).contentWindow.location;
+                    if (srcLoaded.pathname == GV.ROOT) {
+                        window.location.reload(true);
+                    }
+                    $loading.hide();
+                });
+            }
+            $iframe.show();
         }
-        $iframe.show();
     }
 
     //url要添加参数。获取最外部的window.修改href
