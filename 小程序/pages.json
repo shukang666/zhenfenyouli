@@ -279,6 +279,12 @@
 					}
 				},
 				{
+					"path": "xsdld",
+					"style": {
+						"navigationBarTitleText": "小手拉大手"
+					}
+				},
+				{
 					"path": "qxl-learn-exam",
 					"style": {
 						"navigationBarTitleText": "七贤岭学考",
