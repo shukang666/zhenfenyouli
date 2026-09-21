@@ -74,38 +74,7 @@
 				</view>
 			</view>
 
-			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
-			<view class="showcase-section" v-if="showcaseList.length > 0">
-				<view class="showcase-header">
-					<view class="showcase-header__left">
-						<text class="showcase-header__title">活动风采</text>
-						<text class="showcase-header__sub">记录每一次精彩瞬间</text>
-					</view>
-					<view class="showcase-header__more" @click="goShowcaseList">
-						<text>查看全部</text>
-						<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
-					</view>
-				</view>
-				<scroll-view scroll-x class="showcase-scroll" :show-scrollbar="false">
-					<view class="showcase-row">
-						<view class="showcase-card" v-for="item in showcaseList" :key="item.id"
-							hover-class="showcase-card--on" :hover-stay-time="80"
-							@click="goShowcaseDetail(item.id)">
-							<view class="showcase-card__cover">
-								<u-image width="300" height="220" :src="item.cover" border-radius="20rpx 20rpx 0 0" mode="aspectFill"></u-image>
-								<view class="showcase-card__badge" v-if="item.photo_count > 1">
-									<u-icon name="photo" size="20" color="#fff"></u-icon>
-									<text>{{ item.photo_count }}</text>
-								</view>
-							</view>
-							<view class="showcase-card__body">
-								<view class="showcase-card__title u-line-2">{{ item.title }}</view>
-								<view class="showcase-card__date">{{ item.event_date_text }}</view>
-							</view>
-						</view>
-					</view>
-				</scroll-view>
-			</view>
+			
 
 			<!-- 核心功能入口：一行四个图标（iOS毛玻璃风格） -->
 			<!-- <view class="entry-grid">
@@ -181,6 +150,43 @@
 				</view>
 			</scroll-view>
 
+
+
+			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
+			<view class="showcase-section" v-if="showcaseList.length > 0">
+				<view class="showcase-header">
+					<view class="showcase-header__left">
+						<text class="showcase-header__title">活动风采</text>
+						<text class="showcase-header__sub">记录每一次精彩瞬间</text>
+					</view>
+					<view class="showcase-header__more" @click="goShowcaseList">
+						<text>查看全部</text>
+						<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
+					</view>
+				</view>
+				<scroll-view scroll-x class="showcase-scroll" :show-scrollbar="false">
+					<view class="showcase-row">
+						<view class="showcase-card" v-for="item in showcaseList" :key="item.id"
+							hover-class="showcase-card--on" :hover-stay-time="80"
+							@click="goShowcaseDetail(item.id)">
+							<view class="showcase-card__cover">
+								<u-image width="300" height="220" :src="item.cover" border-radius="20rpx 20rpx 0 0" mode="aspectFill"></u-image>
+								<view class="showcase-card__badge" v-if="item.photo_count > 1">
+									<u-icon name="photo" size="20" color="#fff"></u-icon>
+									<text>{{ item.photo_count }}</text>
+								</view>
+							</view>
+							<view class="showcase-card__body">
+								<view class="showcase-card__title u-line-2">{{ item.title }}</view>
+								<view class="showcase-card__date">{{ item.event_date_text }}</view>
+							</view>
+						</view>
+					</view>
+				</scroll-view>
+			</view>
+
+
+			
 			<view class="home-footer">
 				<view class="sk-about">
 					<view class="sk-about-mark"></view>
