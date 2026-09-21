@@ -94,16 +94,18 @@
 			</view>
 		</view>
 
-		<!-- 积分权益：绿顶 + 搜索 + 轮播 + 券 + 分类 + 两列商品 -->
+		<!-- 积分权益：绿顶 + 搜索 + 券 + 产区网格 + 两列商品 -->
 		<view v-else-if="type === 'mall'" class="skeleton-mall">
 			<view class="sk-nav sk-nav--trans"></view>
 			<view class="sk-search sk-search--mall">
 				<view class="sk-search-line"></view>
 			</view>
-			<view class="sk-banner sk-banner--mall"></view>
 			<view class="sk-coupon"></view>
-			<view class="sk-cate-tags">
-				<view class="sk-cate-tag" v-for="i in 4" :key="i"></view>
+			<view class="sk-zone-panel">
+				<view class="sk-line sk-line--w40"></view>
+				<view class="sk-zone-grid">
+					<view class="sk-zone-item" v-for="i in 8" :key="i"></view>
+				</view>
 			</view>
 			<view class="sk-goods-grid">
 				<view class="sk-goods-card" v-for="i in 4" :key="i">
@@ -526,17 +528,24 @@ export default {
 	border-radius: 20rpx;
 	margin-bottom: 30rpx;
 }
-.sk-cate-tags {
-	display: flex;
-	gap: 20rpx;
+.sk-zone-panel {
+	@extend .sk-base;
+	padding: 28rpx 24rpx;
+	border-radius: 24rpx;
 	margin-bottom: 30rpx;
 }
-.sk-cate-tag {
-	@extend .sk-base;
-	width: 120rpx;
-	height: 56rpx;
-	border-radius: 28rpx;
-	flex-shrink: 0;
+.sk-zone-grid {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 20rpx -8rpx -8rpx;
+}
+.sk-zone-item {
+	width: 25%;
+	padding: 8rpx;
+	box-sizing: border-box;
+	height: 88rpx;
+	background: rgba(255,255,255,0.5);
+	border-radius: 16rpx;
 }
 .sk-goods-grid {
 	display: flex;

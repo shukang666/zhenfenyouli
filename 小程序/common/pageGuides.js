@@ -88,8 +88,8 @@ export const PAGE_GUIDES = {
 			{
 				selector: '#guide-mall-cate',
 				prefer: 'below',
-				title: '商品分类',
-				desc: '左右滑选分类，下面列表会跟着变。'
+				title: '地理产区',
+				desc: '点选产区格子，下面会显示当地特色好物。'
 			},
 			{
 				selector: '#guide-mall-goods',
