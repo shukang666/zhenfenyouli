@@ -197,7 +197,7 @@
 				}
 			</style>
 		</if>
-		<link rel="stylesheet" href="__TMPL__/public/assets/css/admin-chrome.css?v=20260921ds">
+		<link rel="stylesheet" href="__TMPL__/public/assets/css/admin-chrome.css?v=20260921dash2">
 	</head>
 
 	<body style="min-width:900px;overflow: hidden;">
@@ -214,12 +214,18 @@
 					</a>
 				</div>
 				<div id="nav-wrapper">
-					<ul class="nav nav-list">
-						<li class="layui-this">
-							<a href="__ROOT__/" title="仪表盘">
-								<i class="fa fa-home"></i>
-								<span class="menu-text"> 仪表盘 </span>
-							</a>
+					<ul class="nav nav-list dash-home-nav">
+						<li class="dash-home-switch layui-this">
+							<div class="dash-home-btns">
+								<a href="javascript:;" class="dash-home-btn active" data-url="{:url('Main/index')}" data-id="home-cockpit" data-name="驾驶舱" title="运营驾驶舱">
+									<i class="fa fa-th-large"></i>
+									<span>驾驶舱</span>
+								</a>
+								<a href="javascript:;" class="dash-home-btn" data-url="{:url('Datascreen/index')}" data-id="home-screen" data-name="数据大屏" title="数据大屏">
+									<i class="fa fa-television"></i>
+									<span>大屏</span>
+								</a>
+							</div>
 						</li>
 					</ul>
 					<ul class="nav nav-list">
@@ -241,12 +247,6 @@
 								</ul>
 							</div>
 							<ul class="nav navbar-nav navbar-right simplewind-nav">
-								<li class="datascreen-entry">
-									<a href="{:url('Datascreen/index')}" target="_blank" title="打开数据大屏">
-										<i class="fa fa-television"></i>
-										<span>数据大屏</span>
-									</a>
-								</li>
 								<li class="light-blue dropdown" style="border-left:none;">
 									<a data-toggle="dropdown" href="#" class="dropdown-toggle">
 										<!--<if condition="isset($admin['avatar']) && $admin['avatar']">
@@ -291,8 +291,11 @@
 						<a id="task-pre" class="task-changebt" title="左移" data-toggle="tooltip"><i class="fa fa-chevron-left"></i></a>
 						<div id="task-content">
 							<ul class="cmf-component-tab" id="task-content-inner">
-								<li class="cmf-component-tabitem noclose" app-id="0" app-url="__ROOT__/" app-name="仪表盘">
-									<a class="cmf-tabs-item-text">仪表盘</a>
+								<li class="cmf-component-tabitem noclose active" app-id="home-cockpit" app-url="{:url('Main/index')}" app-name="驾驶舱">
+									<a class="cmf-tabs-item-text">驾驶舱</a>
+								</li>
+								<li class="cmf-component-tabitem noclose" app-id="home-screen" app-url="{:url('Datascreen/index')}" app-name="数据大屏">
+									<a class="cmf-tabs-item-text">数据大屏</a>
 								</li>
 							</ul>
 							<div style="clear:both;"></div>
@@ -334,7 +337,7 @@
 				</div>
 
 				<div class="page-content" id="content">
-					<iframe src="{:url('Main/index')}" style="width:100%;height: 100%;" frameborder="0" id="appiframe-0"
+					<iframe src="{:url('Main/index')}" style="width:100%;height: 100%;" frameborder="0" id="appiframe-home-cockpit"
 						class="appiframe"></iframe>
 				</div>
 			</div>
@@ -394,7 +397,7 @@
 					var ptitle = $(item.parentNode.parentNode.parentNode).context.innerText;
 					var text = ptitle.split(/[(\r\n)\r\n]+/);
 					var title = text[0].replace(/\s+/g,"");
-					if(title != '仪表盘') {
+					if(title != '驾驶舱' && title != '数据大屏') {
 						$(".two-nav").html(title).removeClass('hidden');
 					}
 					$(".three-nav").html(breadcrumbTitle).removeClass('hidden');
@@ -424,6 +427,29 @@
 				}
 				$(closest_a_next).slideToggle(150).parent().toggleClass("open");
 				return false;
+			});
+
+			var homeTabIds = ['home-cockpit', 'home-screen'];
+			function syncDashHomeBtn(appId) {
+				$('.dash-home-btn').removeClass('active');
+				if (homeTabIds.indexOf(appId) >= 0) {
+					$('.dash-home-btn[data-id="' + appId + '"]').addClass('active');
+					$('#nav-wrapper .dash-home-switch').addClass('layui-this');
+				}
+			}
+			$(document).on('click', '.dash-home-btn', function (e) {
+				e.preventDefault();
+				e.stopPropagation();
+				var url = $(this).data('url');
+				var appId = $(this).data('id');
+				var appName = $(this).data('name');
+				syncDashHomeBtn(appId);
+				$('.two-nav, .three-nav').addClass('hidden');
+				openapp(url, appId, appName);
+				return false;
+			});
+			$('#task-content-inner').on('click', 'li', function () {
+				syncDashHomeBtn($(this).attr('app-id'));
 			});
 		</script>
 	</body>

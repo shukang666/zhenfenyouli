@@ -71,15 +71,17 @@ $(function () {
 
     //一键关闭顶部打开的菜单
     $("#close-wrapper").click(function () {
+        var homeTabIds = ["home-cockpit", "home-screen", "0"];
         $("#task-content-inner").children().each(function () {
-            //保留首页。保留当前页面菜单。
-            if ($(this).attr("app-id") != 0 && $(this).attr("class").indexOf("active") < 0) {
+            //保留驾驶舱/数据大屏。保留当前页面菜单。
+            if (homeTabIds.indexOf($(this).attr("app-id")) < 0 && $(this).attr("class").indexOf("active") < 0) {
                 $(this).remove();
             }
         });
         $("#content iframe:hidden").each(function () {
-            //保留首页iframe
-            if ($(this).attr("src").indexOf("/admin/main/index") < 0) {
+            //保留驾驶舱与数据大屏 iframe
+            var src = $(this).attr("src") || "";
+            if (src.indexOf("/admin/main/index") < 0 && src.indexOf("/admin/datascreen/index") < 0) {
                 $(this).remove();
             }
         });

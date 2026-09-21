@@ -277,22 +277,62 @@ body {
 	vertical-align: middle;
 }
 
-.datascreen-entry > a {
-	display: inline-flex;
-	align-items: center;
+/* ---------- 侧栏：驾驶舱 / 大屏 双入口 ---------- */
+.dash-home-nav > .dash-home-switch {
+	padding: 8px 10px 10px;
+}
+
+.dash-home-nav > .dash-home-switch > a {
+	display: none;
+}
+
+.dash-home-btns {
+	display: flex;
 	gap: 6px;
-	height: 52px;
-	color: #2563eb !important;
 }
 
-.datascreen-entry > a i {
-	color: #2D8CF0;
-	font-size: 15px;
+.dash-home-btn {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	min-height: 58px;
+	padding: 8px 4px;
+	border-radius: 10px;
+	border: 1px solid rgba(255, 255, 255, .12);
+	background: rgba(255, 255, 255, .04);
+	color: rgba(255, 255, 255, .72) !important;
+	text-decoration: none !important;
+	font-size: 12px;
+	line-height: 1.2;
+	transition: background .15s, border-color .15s, color .15s;
 }
 
-.datascreen-entry > a:hover {
-	background: #eff6ff;
-	color: #1d4ed8 !important;
+.dash-home-btn i {
+	font-size: 16px;
+	color: rgba(255, 255, 255, .55);
+}
+
+.dash-home-btn:hover,
+.dash-home-btn.active {
+	background: rgba(45, 140, 240, .22);
+	border-color: rgba(125, 211, 252, .45);
+	color: #fff !important;
+}
+
+.dash-home-btn.active i,
+.dash-home-btn:hover i {
+	color: #7dd3fc;
+}
+
+.sidebar.menu-min .dash-home-btn span {
+	display: none;
+}
+
+.sidebar.menu-min .dash-home-btn {
+	min-height: 42px;
 }
 
 .user-info {
