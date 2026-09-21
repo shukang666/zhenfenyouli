@@ -177,6 +177,8 @@ class DatascreenController extends BaseController
             . " UNION ALL SELECT 'lj', FROM_UNIXTIME(a.create_time,'%Y-%m-%d'), COUNT(*) {$clockFrom} AND a.type = 2 AND a.create_time >= {$ago30} GROUP BY FROM_UNIXTIME(a.create_time,'%Y-%m-%d')"
             . " UNION ALL SELECT 'patrol', FROM_UNIXTIME(a.create_time,'%Y-%m-%d'), COUNT(*) {$clockFrom} AND a.type = 3 AND a.create_time >= {$ago30} GROUP BY FROM_UNIXTIME(a.create_time,'%Y-%m-%d')"
             . " UNION ALL SELECT 'sign', FROM_UNIXTIME(create_time,'%Y-%m-%d'), COUNT(*) FROM {$p}active_sign WHERE create_time >= {$ago30} GROUP BY FROM_UNIXTIME(create_time,'%Y-%m-%d')"
+            . " UNION ALL SELECT 'aclock', FROM_UNIXTIME(create_time,'%Y-%m-%d'), COUNT(*) FROM {$p}active_clock WHERE create_time >= {$ago30} GROUP BY FROM_UNIXTIME(create_time,'%Y-%m-%d')"
+            . " UNION ALL SELECT 'order', FROM_UNIXTIME(create_time,'%Y-%m-%d'), COUNT(*) FROM {$p}shop_order WHERE delete_time = 0 AND create_time >= {$ago30} GROUP BY FROM_UNIXTIME(create_time,'%Y-%m-%d')"
             . " UNION ALL SELECT 'quiz', FROM_UNIXTIME(create_time,'%Y-%m-%d'), COUNT(*) FROM {$p}quiz_log WHERE create_time >= {$ago30} GROUP BY FROM_UNIXTIME(create_time,'%Y-%m-%d')"
             . " UNION ALL SELECT 'point', FROM_UNIXTIME(create_time,'%Y-%m-%d'), IFNULL(SUM(change_amount),0) FROM {$p}user_account_log WHERE delete_time = 0 AND account_type = 2 AND change_amount > 0 AND create_time >= {$ago30} GROUP BY FROM_UNIXTIME(create_time,'%Y-%m-%d')";
         $trendMap = [];
@@ -185,12 +187,13 @@ class DatascreenController extends BaseController
         }
         $trend = [
             'labels' => [], 'user' => [], 'clock' => [], 'lj' => [],
-            'patrol' => [], 'sign' => [], 'quiz' => [], 'point' => [],
+            'patrol' => [], 'sign' => [], 'aclock' => [], 'order' => [],
+            'quiz' => [], 'point' => [],
         ];
         for ($i = 29; $i >= 0; $i--) {
             $d = date('Y-m-d', strtotime("-{$i} day"));
             $trend['labels'][] = date('n/j', strtotime($d));
-            foreach (['user', 'clock', 'lj', 'patrol', 'sign', 'quiz', 'point'] as $k) {
+            foreach (['user', 'clock', 'lj', 'patrol', 'sign', 'aclock', 'order', 'quiz', 'point'] as $k) {
                 $trend[$k][] = isset($trendMap[$d][$k]) ? (int)$trendMap[$d][$k] : 0;
             }
         }

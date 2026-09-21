@@ -81,15 +81,20 @@
         .kpi .sub em { color: #4ade80; font-style: normal; }
         .screen-grid {
             display: grid;
-            grid-template-columns: repeat(12, minmax(0, 1fr));
+            grid-template-columns: repeat(24, minmax(0, 1fr));
             gap: 5px;
         }
-        .g-3 { grid-column: span 3; }
-        .g-4 { grid-column: span 4; }
-        .g-5 { grid-column: span 5; }
-        .g-6 { grid-column: span 6; }
-        .g-8 { grid-column: span 8; }
-        .g-12 { grid-column: span 12; }
+        .u-2 { grid-column: span 2; }
+        .u-3 { grid-column: span 3; }
+        .u-4 { grid-column: span 4; }
+        .u-5 { grid-column: span 5; }
+        .u-6 { grid-column: span 6; }
+        .u-7 { grid-column: span 7; }
+        .u-8 { grid-column: span 8; }
+        .u-9 { grid-column: span 9; }
+        .u-10 { grid-column: span 10; }
+        .u-12 { grid-column: span 12; }
+        .u-15 { grid-column: span 15; }
         .panel {
             border: 1px solid rgba(34, 211, 238, .18);
             background: rgba(4, 18, 36, .78);
@@ -115,53 +120,44 @@
         }
         .feed-item span { color: #67e8f9; flex: none; font-size: 9px; }
         .feed-item b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .feed-wide { column-count: 2; column-gap: 10px; }
+        .feed-wide .feed-item { break-inside: avoid; }
         body.is-embed {
-            overflow: hidden;
-            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: auto;
+            min-height: 100%;
         }
         body.is-embed .wrap {
-            height: 100%;
-            padding: 4px 6px 5px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            padding: 4px 6px 8px;
         }
         body.is-embed .head {
             padding: 4px 8px;
             margin-bottom: 4px;
-            flex: none;
         }
         body.is-embed .brand-mark,
         body.is-embed .brand small,
         body.is-embed .clock-box,
         body.is-embed .btn-standalone { display: none; }
         body.is-embed .brand h1 { font-size: 13px; letter-spacing: 0; }
-        body.is-embed .kpis {
-            margin-bottom: 4px;
-            gap: 4px;
-            flex: none;
-        }
+        body.is-embed .kpis { margin-bottom: 4px; gap: 4px; }
         body.is-embed .kpi { padding: 3px 6px 2px; }
         body.is-embed .kpi .num { font-size: 14px; }
-        body.is-embed .screen-grid {
-            flex: 1;
-            min-height: 0;
-            gap: 4px;
-            align-content: start;
-            overflow-y: auto;
-        }
+        body.is-embed .screen-grid { gap: 4px; }
         body.is-embed .ptitle { height: 20px; font-size: 10px; padding: 0 6px; }
         body.is-embed .chart,
         body.is-embed .chart-sm,
-        body.is-embed .feed { height: var(--chart-h, 132px); }
+        body.is-embed .feed { height: 126px; }
         @media (max-width: 1400px) {
             .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-            .g-3, .g-4, .g-5, .g-6, .g-8 { grid-column: span 6; }
+            .screen-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+            .u-2, .u-3, .u-4, .u-5, .u-6, .u-7, .u-8, .u-9, .u-10, .u-15 { grid-column: span 6; }
         }
         @media (max-width: 900px) {
             .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .g-3, .g-4, .g-5, .g-6, .g-8, .g-12 { grid-column: span 12; }
-            .chart, .chart-sm { height: 220px; }
+            .screen-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+            .u-2, .u-3, .u-4, .u-5, .u-6, .u-7, .u-8, .u-9, .u-10, .u-15 { grid-column: span 1; }
+            .chart, .chart-sm, .feed { height: 200px; }
         }
     </style>
 </head>
@@ -190,56 +186,76 @@
     <section class="kpis" id="kpis"></section>
 
     <section class="screen-grid">
-        <div class="panel g-8">
+        <div class="panel u-15">
             <div class="ptitle"><span><i class="fa fa-line-chart"></i>近 30 日多维趋势</span><span class="sub">注册 / 打卡 / 垃圾打卡 / 巡检 / 报名 / 积分</span></div>
             <div class="chart" id="c-trend"></div>
         </div>
-        <div class="panel g-4">
+        <div class="panel u-9">
             <div class="ptitle"><span><i class="fa fa-bullseye"></i>近 7 日运营雷达</span></div>
             <div class="chart" id="c-radar"></div>
         </div>
 
-        <div class="panel g-3">
+        <div class="panel u-5">
             <div class="ptitle"><span><i class="fa fa-filter"></i>用户成长漏斗</span></div>
             <div class="chart chart-sm" id="c-funnel"></div>
         </div>
-        <div class="panel g-5">
-            <div class="ptitle"><span><i class="fa fa-th"></i>打卡时空热力</span><span class="sub">周 × 小时</span></div>
+        <div class="panel u-5">
+            <div class="ptitle"><span><i class="fa fa-th"></i>打卡热力</span><span class="sub">周×时</span></div>
             <div class="chart chart-sm" id="c-heat"></div>
         </div>
-        <div class="panel g-4">
-            <div class="ptitle"><span><i class="fa fa-clock-o"></i>今日时段脉冲</span></div>
+        <div class="panel u-4">
+            <div class="ptitle"><span><i class="fa fa-clock-o"></i>今日时段</span></div>
             <div class="chart chart-sm" id="c-hour"></div>
         </div>
+        <div class="panel u-5">
+            <div class="ptitle"><span><i class="fa fa-pencil-square-o"></i>答题得分分布</span></div>
+            <div class="chart chart-sm" id="c-quiz"></div>
+        </div>
+        <div class="panel u-5">
+            <div class="ptitle"><span><i class="fa fa-calendar-check-o"></i>近 7 日活动</span><span class="sub">报名 / 打卡</span></div>
+            <div class="chart chart-sm" id="c-active"></div>
+        </div>
 
-        <div class="panel g-3">
-            <div class="ptitle"><span><i class="fa fa-pie-chart"></i>垃圾分类结构</span></div>
+        <div class="panel u-2">
+            <div class="ptitle"><span><i class="fa fa-pie-chart"></i>分类结构</span></div>
             <div class="chart chart-sm" id="c-cate"></div>
         </div>
-        <div class="panel g-3">
-            <div class="ptitle"><span><i class="fa fa-diamond"></i>积分来源构成</span></div>
+        <div class="panel u-2">
+            <div class="ptitle"><span><i class="fa fa-diamond"></i>积分来源</span></div>
             <div class="chart chart-sm" id="c-point"></div>
         </div>
-        <div class="panel g-6">
-            <div class="ptitle"><span><i class="fa fa-building"></i>小区打卡排行 TOP12</span></div>
+        <div class="panel u-5">
+            <div class="ptitle"><span><i class="fa fa-building"></i>小区打卡 TOP12</span></div>
             <div class="chart chart-sm" id="c-community"></div>
         </div>
+        <div class="panel u-5">
+            <div class="ptitle"><span><i class="fa fa-shopping-cart"></i>近 7 日商城订单</span></div>
+            <div class="chart chart-sm" id="c-order"></div>
+        </div>
+        <div class="panel u-5">
+            <div class="ptitle"><span><i class="fa fa-graduation-cap"></i>近 7 日每日答题</span></div>
+            <div class="chart chart-sm" id="c-quiz-trend"></div>
+        </div>
+        <div class="panel u-5">
+            <div class="ptitle"><span><i class="fa fa-camera"></i>随手拍 / 整改</span><span class="sub">任务状态</span></div>
+            <div class="chart chart-sm" id="c-shot"></div>
+        </div>
 
-        <div class="panel g-4">
+        <div class="panel u-4">
             <div class="ptitle"><span><i class="fa fa-sitemap"></i>社区用户分布</span></div>
             <div class="chart chart-sm" id="c-street"></div>
         </div>
-        <div class="panel g-4">
+        <div class="panel u-5">
             <div class="ptitle"><span><i class="fa fa-bar-chart"></i>帖子/打卡类型</span></div>
             <div class="chart chart-sm" id="c-type"></div>
         </div>
-        <div class="panel g-4">
+        <div class="panel u-3">
             <div class="ptitle"><span><i class="fa fa-handshake-o"></i>整改任务</span></div>
             <div class="chart chart-sm" id="c-task"></div>
         </div>
-        <div class="panel g-4">
+        <div class="panel u-12">
             <div class="ptitle"><span><i class="fa fa-rss"></i>实时动态流</span></div>
-            <div class="feed" id="c-feed"></div>
+            <div class="feed feed-wide" id="c-feed"></div>
         </div>
     </section>
 </div>
@@ -270,20 +286,13 @@
     function emptyOpt(text) {
         return { title: { text: text || '暂无数据', left: 'center', top: 'middle', textStyle: { color: '#475569', fontSize: 13, fontWeight: 'normal' } } };
     }
-    function applyChartHeights() {
-        if (!IS_EMBED) return;
-        var vh = window.innerHeight || document.documentElement.clientHeight;
-        var head = document.querySelector('.head');
-        var kpis = document.getElementById('kpis');
-        var used = (head ? head.offsetHeight : 0) + (kpis ? kpis.offsetHeight : 0) + 14;
-        var remain = vh - used;
-        var rowH = Math.floor((remain - 16) / 4);
-        if (rowH < 108) rowH = 108;
-        if (rowH > 148) rowH = 148;
-        document.documentElement.style.setProperty('--chart-h', rowH + 'px');
+    function tail7(arr) {
+        return (arr || []).slice(-7);
+    }
+    function tail7Labels(labels) {
+        return tail7(labels || []);
     }
     function resizeAll() {
-        applyChartHeights();
         for (var k in charts) { if (charts[k]) charts[k].resize(); }
     }
 
@@ -383,31 +392,78 @@
             series: [{ type: 'line', data: d.hour_today || [], smooth: true, symbol: 'none', lineStyle: { color: '#4ade80' }, areaStyle: { color: 'rgba(74,222,128,.15)' } }]
         });
 
+        var qd = d.quiz_dist || [];
+        make('c-quiz').setOption(qd.length ? {
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            grid: { left: 36, right: 6, top: 8, bottom: 18 },
+            xAxis: Object.assign({ type: 'category', data: qd.map(function (x) { return x.name; }), axisLabel: { fontSize: 8 } }, axis()),
+            yAxis: Object.assign({ type: 'value', minInterval: 1, splitNumber: 3 }, axis()),
+            series: [{ type: 'bar', data: qd.map(function (x) { return x.value; }), barMaxWidth: 14, itemStyle: { color: '#fbbf24', borderRadius: [2, 2, 0, 0] } }]
+        } : emptyOpt('暂无答题'));
+
+        var lb7 = tail7Labels(t.labels);
+        make('c-active').setOption({
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            legend: { data: ['活动报名', '活动打卡'], top: 0, textStyle: { fontSize: 8, color: '#94a3b8' }, itemWidth: 6, itemHeight: 6 },
+            grid: { left: 32, right: 6, top: 20, bottom: 14 },
+            xAxis: Object.assign({ type: 'category', data: lb7 }, axis()),
+            yAxis: Object.assign({ type: 'value', minInterval: 1, splitNumber: 3 }, axis()),
+            series: [
+                { name: '活动报名', type: 'line', data: tail7(t.sign), smooth: true, symbol: 'none', lineStyle: { width: 1.5, color: '#38bdf8' } },
+                { name: '活动打卡', type: 'line', data: tail7(t.aclock), smooth: true, symbol: 'none', lineStyle: { width: 1.5, color: '#4ade80' } }
+            ]
+        });
+
         var cate = d.cate_pie || [];
         make('c-cate').setOption(cate.length ? {
             tooltip: Object.assign({ trigger: 'item' }, tip()), color: C,
-            series: [{ type: 'pie', radius: ['24%', '68%'], center: ['50%', '52%'], label: { color: '#bae6fd', fontSize: 9 }, data: cate }]
+            series: [{ type: 'pie', radius: ['30%', '72%'], center: ['50%', '52%'], label: { show: false }, labelLine: { show: false }, data: cate }]
         } : emptyOpt());
 
         var ps = d.point_source || [];
         make('c-point').setOption(ps.length ? {
             tooltip: Object.assign({ trigger: 'item' }, tip()), color: C,
-            series: [{ type: 'pie', radius: ['40%', '68%'], center: ['50%', '52%'], label: { fontSize: 8, color: '#bae6fd' }, data: ps }]
+            series: [{ type: 'pie', radius: ['42%', '72%'], center: ['50%', '52%'], label: { show: false }, labelLine: { show: false }, data: ps }]
         } : emptyOpt());
 
         var comm = (d.community || []).slice().reverse();
         make('c-community').setOption(comm.length ? {
             tooltip: Object.assign({ trigger: 'axis' }, tip()),
-            grid: { left: 72, right: 10, top: 2, bottom: 2 },
+            grid: { left: 58, right: 8, top: 2, bottom: 2 },
             xAxis: Object.assign({ type: 'value', minInterval: 1 }, axis()),
-            yAxis: Object.assign({ type: 'category', data: comm.map(function (x) { return x.name; }), axisLabel: { fontSize: 8, width: 64, overflow: 'truncate' } }, axis()),
-            series: [{ type: 'bar', data: comm.map(function (x) { return x.value; }), barMaxWidth: 8, itemStyle: { color: '#67e8f9', borderRadius: [0, 2, 2, 0] } }]
+            yAxis: Object.assign({ type: 'category', data: comm.map(function (x) { return x.name; }), axisLabel: { fontSize: 7, width: 48, overflow: 'truncate' } }, axis()),
+            series: [{ type: 'bar', data: comm.map(function (x) { return x.value; }), barMaxWidth: 7, itemStyle: { color: '#67e8f9', borderRadius: [0, 2, 2, 0] } }]
         } : emptyOpt());
+
+        make('c-order').setOption({
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            grid: { left: 32, right: 6, top: 8, bottom: 14 },
+            xAxis: Object.assign({ type: 'category', data: lb7 }, axis()),
+            yAxis: Object.assign({ type: 'value', minInterval: 1, splitNumber: 3 }, axis()),
+            series: [{ type: 'bar', data: tail7(t.order), barMaxWidth: 12, itemStyle: { color: '#fb7185', borderRadius: [2, 2, 0, 0] } }]
+        });
+
+        make('c-quiz-trend').setOption({
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            grid: { left: 32, right: 6, top: 8, bottom: 14 },
+            xAxis: Object.assign({ type: 'category', data: lb7 }, axis()),
+            yAxis: Object.assign({ type: 'value', minInterval: 1, splitNumber: 3 }, axis()),
+            series: [{ type: 'line', data: tail7(t.quiz), smooth: true, symbol: 'circle', symbolSize: 4, lineStyle: { color: '#c084fc' }, areaStyle: { color: 'rgba(192,132,252,.12)' } }]
+        });
+
+        var k = d.kpi || {};
+        make('c-shot').setOption({
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            grid: { left: 36, right: 6, top: 8, bottom: 18 },
+            xAxis: Object.assign({ type: 'category', data: ['随手拍', '整改记录', '开放任务'], axisLabel: { fontSize: 8 } }, axis()),
+            yAxis: Object.assign({ type: 'value', minInterval: 1, splitNumber: 3 }, axis()),
+            series: [{ type: 'bar', data: [k.shot_total || 0, k.task_log || 0, k.task_open || 0], barMaxWidth: 16, itemStyle: { color: '#38bdf8', borderRadius: [2, 2, 0, 0] } }]
+        });
 
         var st = d.street || [];
         make('c-street').setOption(st.length ? {
             tooltip: Object.assign({ trigger: 'item' }, tip()), color: C,
-            series: [{ type: 'treemap', roam: false, breadcrumb: { show: false }, top: 2, bottom: 2, left: 2, right: 2, label: { color: '#e0f2fe', fontSize: 10 }, data: st }]
+            series: [{ type: 'treemap', roam: false, breadcrumb: { show: false }, top: 2, bottom: 2, left: 2, right: 2, label: { color: '#e0f2fe', fontSize: 9 }, data: st }]
         } : emptyOpt());
 
         var tb = d.type_bar || [];
@@ -471,7 +527,6 @@
 
     tickClock();
     setInterval(tickClock, 1000);
-    applyChartHeights();
     renderKpi(D);
     renderCharts(D);
     setInterval(function () { load(false); }, 90000);
