@@ -1,8 +1,7 @@
 <?php
 // 覆盖 vendor/thinkcmf/cmf-app/src/admin/controller/PublicController.php
-// 原因：工作台与驾驶舱共用 /admin/public/login，但登录态分开（FIELD_WORKER_* / ADMIN_ID）。
-// 框架默认「已有 ADMIN_ID 就跳后台首页」，且 URL 的 #field 到不了服务端，
-// 会把「工作台未登录」误判成「驾驶舱已登录」，把人送进管理系统。
+// 原因：外勤 / OA 与驾驶舱登录态分开（FIELD_WORKER_* / OA_* / ADMIN_ID）。
+// 框架默认「已有 ADMIN_ID 就跳后台首页」，独立入口未登录时不能被驾驶舱 session 劫持。
 namespace app\admin\controller;
 
 use app\admin\model\RoleUserModel;
@@ -27,8 +26,9 @@ class PublicController extends AdminBaseController
 
         $entry    = $this->request->param('entry', '');
         $admin_id = session('ADMIN_ID');
-        // 进外勤标签时不要用驾驶舱 session 把人送进后台首页
-        if (!empty($admin_id) && $entry !== 'field') {
+        // 独立入口（外勤 / OA）即使浏览器里还有驾驶舱 ADMIN_ID，也不得跳后台首页
+        $isolated = ['field', 'oa'];
+        if (!empty($admin_id) && !in_array((string) $entry, $isolated, true)) {
             return redirect(url("admin/Index/index"));
         }
 

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <title>OA 办公</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+            background: #0f3d32;
+            color: #1a2e28;
+        }
+        .page {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            background:
+                radial-gradient(120% 80% at 10% -10%, rgba(94, 234, 180, .35), transparent 55%),
+                radial-gradient(90% 60% at 100% 0%, rgba(45, 212, 191, .28), transparent 50%),
+                linear-gradient(180deg, #125544 0%, #0c2f28 42%, #f3f6f4 42.1%);
+            padding: calc(12px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+        }
+        .hero { padding: 28px 4px 36px; color: #fff; }
+        .hero .mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            letter-spacing: .08em;
+            background: rgba(255,255,255,.14);
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 999px;
+            padding: 5px 10px;
+            margin-bottom: 16px;
+        }
+        .hero h1 { font-size: 28px; font-weight: 700; letter-spacing: .04em; }
+        .hero p { margin-top: 8px; font-size: 14px; color: rgba(255,255,255,.78); line-height: 1.5; }
+        .card {
+            flex: 1;
+            background: #fff;
+            border-radius: 22px;
+            padding: 26px 20px 22px;
+            box-shadow: 0 18px 40px rgba(12, 47, 40, .18);
+        }
+        .card h2 { font-size: 18px; font-weight: 650; }
+        .card .sub { font-size: 13px; color: #7a8b85; margin: 6px 0 22px; }
+        .field { margin-bottom: 14px; }
+        .field label { display: block; font-size: 12px; color: #6b7c76; margin-bottom: 6px; }
+        .field input {
+            width: 100%;
+            height: 48px;
+            border: 1px solid #e4ece8;
+            border-radius: 12px;
+            padding: 0 14px;
+            font-size: 16px;
+            background: #f7faf8;
+            outline: none;
+        }
+        .field input:focus { border-color: #1d9a6c; background: #fff; }
+        .btn {
+            width: 100%;
+            height: 50px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #21b37a, #14835a);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .btn:disabled { opacity: .55; }
+        .msg {
+            display: none;
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            background: #fdecea;
+            color: #c0392b;
+        }
+        .foot {
+            text-align: center;
+            font-size: 11px;
+            color: #9aa8a3;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="hero">
+        <div class="mark">甄分友礼 · 移动办公</div>
+        <h1>OA 办公</h1>
+        <p>使用管理员账号登录。此入口仅用于手机办公，与管理后台、驾驶舱、外勤工作台互不影响。</p>
+    </div>
+    <div class="card">
+        <h2>登录账号</h2>
+        <p class="sub">账密与后台管理员一致</p>
+        <div class="msg" id="msg"></div>
+        <div class="field">
+            <label>账号</label>
+            <input type="text" id="username" placeholder="用户名 / 手机号" autocomplete="username" inputmode="text">
+        </div>
+        <div class="field">
+            <label>密码</label>
+            <input type="password" id="password" placeholder="请输入密码" autocomplete="current-password">
+        </div>
+        <button class="btn" id="btn" type="button">进入 OA</button>
+        <div class="foot">请用手机打开本页</div>
+    </div>
+</div>
+<script>
+    function showMsg(text) {
+        var el = document.getElementById('msg');
+        el.textContent = text;
+        el.style.display = 'block';
+    }
+    function doLogin() {
+        var username = document.getElementById('username').value.trim();
+        var password = document.getElementById('password').value;
+        if (!username) { showMsg('请输入账号'); return; }
+        if (!password) { showMsg('请输入密码'); return; }
+        var btn = document.getElementById('btn');
+        btn.disabled = true;
+        btn.textContent = '登录中...';
+        var data = new FormData();
+        data.append('username', username);
+        data.append('password', password);
+        fetch("{:url('admin/Oa/doLogin')}", {
+            method: 'POST',
+            body: data,
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        }).then(function (res) { return res.json(); }).then(function (res) {
+            if (res.code == 1) {
+                location.href = res.url || "{:url('admin/Oa/index')}";
+            } else {
+                showMsg(res.msg || '登录失败');
+                btn.disabled = false;
+                btn.textContent = '进入 OA';
+            }
+        }).catch(function () {
+            showMsg('网络异常，请重试');
+            btn.disabled = false;
+            btn.textContent = '进入 OA';
+        });
+    }
+    document.getElementById('btn').addEventListener('click', doLogin);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') doLogin();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>OA 办公</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+            background: #eef3f0;
+            color: #1c2b26;
+            min-height: 100vh;
+            padding-bottom: calc(72px + env(safe-area-inset-bottom));
+        }
+        .top {
+            padding: calc(14px + env(safe-area-inset-top)) 18px 22px;
+            background: linear-gradient(160deg, #157a5a 0%, #1aa06e 55%, #3ecf8e 100%);
+            color: #fff;
+        }
+        .top-row { display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-size: 13px; opacity: .85; }
+        .out {
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,.4);
+            border-radius: 999px;
+            padding: 5px 12px;
+        }
+        .hello { margin-top: 18px; font-size: 24px; font-weight: 700; }
+        .date { margin-top: 6px; font-size: 13px; opacity: .85; }
+        .nums {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .num {
+            flex: 1;
+            background: rgba(255,255,255,.16);
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 14px;
+            padding: 12px 10px;
+        }
+        .num b { display: block; font-size: 20px; }
+        .num span { display: block; margin-top: 4px; font-size: 11px; opacity: .8; }
+        .wrap { padding: 16px 16px 0; }
+        .sec { font-size: 15px; font-weight: 650; margin: 6px 2px 10px; }
+        .todo {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(20, 60, 48, .06);
+        }
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f4f2;
+        }
+        .todo-item:last-child { border-bottom: none; }
+        .todo-item .t { flex: 1; }
+        .todo-item b { display: block; font-size: 14px; font-weight: 600; }
+        .todo-item span { display: block; margin-top: 3px; font-size: 12px; color: #8a9893; }
+        .badge {
+            min-width: 28px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: #14835a;
+        }
+        .badge.zero { color: #b7c2bd; font-weight: 500; }
+        .hint {
+            margin: 14px 2px 0;
+            font-size: 12px;
+            color: #8a9893;
+            line-height: 1.6;
+        }
+        .tabbar {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            height: calc(56px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            background: #fff;
+            border-top: 1px solid #e6eeea;
+            display: flex;
+        }
+        .tabbar a {
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            color: #8a9893;
+            font-size: 11px;
+            padding-top: 8px;
+        }
+        .tabbar a.on { color: #14835a; font-weight: 650; }
+        .tabbar .ic { display: block; font-size: 18px; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+<div class="top">
+    <div class="top-row">
+        <div class="brand">甄分友礼 · OA</div>
+        <a class="out" href="{:url('admin/Oa/logout')}">退出</a>
+    </div>
+    <div class="hello">{$greet}，{$oaName}</div>
+    <div class="date">{$dateText}</div>
+    <div class="nums">
+        <div class="num"><b>{$todoTotal}</b><span>待处理</span></div>
+        <div class="num"><b>{$clockToday}</b><span>今日打卡</span></div>
+        <div class="num"><b>{$userToday}</b><span>今日新用户</span></div>
+    </div>
+</div>
+<div class="wrap">
+    <div class="sec">待办概览</div>
+    <div class="todo">
+        <foreach name="todos" item="it">
+            <div class="todo-item">
+                <div class="t">
+                    <b>{$it.name}</b>
+                    <span>{$it.hint}</span>
+                </div>
+                <div class="badge <eq name='it.zero' value='1'>zero</eq>">{$it.count}</div>
+            </div>
+        </foreach>
+    </div>
+    <p class="hint">当前为手机 OA 工作台首页。审批办理会陆续接到本入口，不会跳进电脑后台或驾驶舱。</p>
+</div>
+<nav class="tabbar">
+    <a class="on" href="{:url('admin/Oa/index')}"><span class="ic">⌂</span>工作台</a>
+    <a href="{:url('admin/Oa/profile')}"><span class="ic">☺</span>我的</a>
+</nav>
+</body>
+</html>
