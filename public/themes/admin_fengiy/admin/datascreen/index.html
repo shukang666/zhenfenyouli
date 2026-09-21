@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{$app_name} · 数据大屏</title>
+    <link rel="stylesheet" href="__STATIC__/font-awesome/css/font-awesome.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            color: #d7f6ff;
+            background: #020817;
+        }
+        #bg-grid, #bg-stars {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+        }
+        #bg-grid {
+            background:
+                radial-gradient(ellipse at 20% 0%, rgba(14, 116, 144, .28), transparent 46%),
+                radial-gradient(ellipse at 90% 100%, rgba(67, 56, 202, .22), transparent 42%),
+                linear-gradient(#03101f, #020817);
+        }
+        #bg-grid:after {
+            content: "";
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(34, 211, 238, .06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 211, 238, .06) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: radial-gradient(ellipse at center, #000 40%, transparent 82%);
+        }
+        .wrap {
+            position: relative; z-index: 1;
+            height: 100%;
+            padding: 10px 14px 12px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .head {
+            height: 56px; flex: none;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px;
+            border: 1px solid rgba(34, 211, 238, .28);
+            background: linear-gradient(90deg, rgba(6, 24, 48, .88), rgba(8, 47, 73, .7), rgba(6, 24, 48, .88));
+            box-shadow: 0 0 24px rgba(34, 211, 238, .12) inset;
+            clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+        }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-mark {
+            width: 34px; height: 34px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #22d3ee, #2563eb);
+            box-shadow: 0 0 18px rgba(34, 211, 238, .45);
+            color: #04131f; font-size: 18px;
+        }
+        .brand h1 {
+            font-size: 20px; letter-spacing: 4px; font-weight: 700;
+            background: linear-gradient(90deg, #e0f2fe, #67e8f9, #a5b4fc);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .brand small { display: block; color: #67e8f9; letter-spacing: 2px; font-size: 11px; opacity: .8; }
+        .clock-box { text-align: center; }
+        .clock-time { font-size: 28px; font-weight: 700; letter-spacing: 3px; color: #67e8f9; text-shadow: 0 0 16px rgba(34,211,238,.6); }
+        .clock-date { font-size: 12px; color: #94a3b8; letter-spacing: 1px; }
+        .head-actions { display: flex; gap: 8px; align-items: center; }
+        .head-actions a, .head-actions button {
+            color: #67e8f9; text-decoration: none; border: 1px solid rgba(34,211,238,.35);
+            background: rgba(8, 47, 73, .6); padding: 6px 12px; border-radius: 4px;
+            font-size: 12px; cursor: pointer; letter-spacing: 1px;
+        }
+        .head-actions a:hover, .head-actions button:hover { background: rgba(34,211,238,.16); }
+        .meta { font-size: 11px; color: #64748b; }
+        .kpis {
+            display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; flex: none;
+        }
+        .kpi {
+            position: relative; padding: 10px 12px 8px;
+            border: 1px solid rgba(34, 211, 238, .22);
+            background: linear-gradient(180deg, rgba(8, 30, 54, .85), rgba(4, 16, 32, .72));
+            overflow: hidden;
+        }
+        .kpi:before {
+            content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+            background: linear-gradient(#22d3ee, #6366f1);
+        }
+        .kpi .lab { font-size: 11px; color: #7dd3fc; letter-spacing: 1px; }
+        .kpi .num {
+            font-size: 22px; font-weight: 700; color: #f8fafc; margin: 4px 0 2px;
+            font-variant-numeric: tabular-nums; text-shadow: 0 0 12px rgba(125,211,252,.35);
+        }
+        .kpi .sub { font-size: 11px; color: #94a3b8; }
+        .kpi .sub em { color: #4ade80; font-style: normal; }
+        .body {
+            flex: 1; min-height: 0;
+            display: grid; grid-template-columns: 1.15fr 1.7fr 1.15fr; grid-template-rows: 1.15fr 1fr; gap: 8px;
+        }
+        .panel {
+            position: relative; min-height: 0;
+            border: 1px solid rgba(34, 211, 238, .2);
+            background: rgba(4, 18, 36, .72);
+            display: flex; flex-direction: column;
+        }
+        .panel:after, .panel:before {
+            content: ""; position: absolute; width: 10px; height: 10px; border: 1px solid #22d3ee;
+        }
+        .panel:before { left: -1px; top: -1px; border-right: 0; border-bottom: 0; }
+        .panel:after { right: -1px; bottom: -1px; border-left: 0; border-top: 0; }
+        .ptitle {
+            flex: none; height: 32px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 12px; font-size: 13px; letter-spacing: 1px; color: #7dd3fc;
+            border-bottom: 1px solid rgba(34,211,238,.12);
+            background: linear-gradient(90deg, rgba(34,211,238,.12), transparent 55%);
+        }
+        .ptitle i { margin-right: 6px; color: #22d3ee; }
+        .chart { flex: 1; min-height: 0; }
+        .mid { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; min-height: 0; }
+        .right-col, .left-col { display: grid; grid-template-rows: 1.05fr .95fr; gap: 8px; min-height: 0; }
+        .stack { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-height: 0; }
+        .feed { flex: 1; overflow: hidden; padding: 8px 12px 10px; }
+        .feed-item {
+            display: flex; justify-content: space-between; gap: 8px;
+            font-size: 12px; color: #cbd5e1; padding: 6px 0;
+            border-bottom: 1px dashed rgba(148,163,184,.15);
+        }
+        .feed-item span { color: #67e8f9; }
+        .scan {
+            position: absolute; left: 0; right: 0; height: 40px; pointer-events: none;
+            background: linear-gradient(transparent, rgba(34,211,238,.08), transparent);
+            animation: scan 5.5s linear infinite;
+        }
+        @keyframes scan { 0% { top: -40px; } 100% { top: 110%; } }
+        @media (max-width: 1200px) {
+            html, body { overflow: auto; height: auto; }
+            .kpis { grid-template-columns: repeat(4, 1fr); }
+            .body { grid-template-columns: 1fr; grid-template-rows: none; height: auto; }
+            .chart { height: 260px; }
+            .left-col, .right-col, .mid, .stack { display: block; }
+            .panel { margin-bottom: 8px; }
+        }
+    </style>
+</head>
+<body>
+<canvas id="bg-stars"></canvas>
+<div id="bg-grid"></div>
+<div class="wrap">
+    <header class="head">
+        <div class="brand">
+            <div class="brand-mark"><i class="fa fa-area-chart"></i></div>
+            <div>
+                <h1>{$app_name} 数据驾驶舱</h1>
+                <small>COMMUNITY ECO DATA COMMAND</small>
+            </div>
+        </div>
+        <div class="clock-box">
+            <div class="clock-time" id="clock-time">--:--:--</div>
+            <div class="clock-date" id="clock-date"></div>
+        </div>
+        <div class="head-actions">
+            <span class="meta" id="meta-info"></span>
+            <button type="button" id="btn-refresh"><i class="fa fa-refresh"></i> 刷新</button>
+            <button type="button" id="btn-full"><i class="fa fa-arrows-alt"></i> 全屏</button>
+            <a href="{:url('Index/index')}"><i class="fa fa-reply"></i> 返回后台</a>
+        </div>
+    </header>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="body">
+        <div class="left-col">
+            <div class="panel">
+                <div class="ptitle"><span><i class="fa fa-bullseye"></i>近 7 日运营雷达</span><span>多维对比</span></div>
+                <div class="chart" id="c-radar"></div>
+                <div class="scan"></div>
+            </div>
+            <div class="panel">
+                <div class="ptitle"><span><i class="fa fa-filter"></i>用户成长漏斗</span><span>注册 → 报名</span></div>
+                <div class="chart" id="c-funnel"></div>
+            </div>
+        </div>
+        <div class="mid">
+            <div class="panel">
+                <div class="ptitle"><span><i class="fa fa-line-chart"></i>近 30 日多维趋势</span><span>注册 / 打卡 / 巡检 / 积分 / 报名</span></div>
+                <div class="chart" id="c-trend"></div>
+            </div>
+            <div class="stack">
+                <div class="panel">
+                    <div class="ptitle"><span><i class="fa fa-th"></i>打卡时空热力</span><span>周×小时 · 近 30 日</span></div>
+                    <div class="chart" id="c-heat"></div>
+                </div>
+                <div class="panel">
+                    <div class="ptitle"><span><i class="fa fa-clock-o"></i>今日时段脉冲</span><span>0-23 时</span></div>
+                    <div class="chart" id="c-hour"></div>
+                </div>
+            </div>
+        </div>
+        <div class="right-col">
+            <div class="stack">
+                <div class="panel">
+                    <div class="ptitle"><span><i class="fa fa-pie-chart"></i>垃圾分类结构</span><span>近 30 日</span></div>
+                    <div class="chart" id="c-cate"></div>
+                </div>
+                <div class="panel">
+                    <div class="ptitle"><span><i class="fa fa-diamond"></i>积分来源构成</span><span>近 30 日发放</span></div>
+                    <div class="chart" id="c-point"></div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="ptitle"><span><i class="fa fa-building"></i>小区打卡排行</span><span>近 30 日 TOP</span></div>
+                <div class="chart" id="c-community"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="body" style="flex: .72; grid-template-rows: 1fr;">
+        <div class="panel">
+            <div class="ptitle"><span><i class="fa fa-sitemap"></i>社区用户分布</span><span>注册量 · 低维</span></div>
+            <div class="chart" id="c-street"></div>
+        </div>
+        <div class="panel">
+            <div class="ptitle"><span><i class="fa fa-bar-chart"></i>帖子/打卡类型</span><span>近 30 日</span></div>
+            <div class="chart" id="c-type"></div>
+        </div>
+        <div class="stack">
+            <div class="panel">
+                <div class="ptitle"><span><i class="fa fa-handshake-o"></i>整改任务状态</span></div>
+                <div class="chart" id="c-task"></div>
+            </div>
+            <div class="panel">
+                <div class="ptitle"><span><i class="fa fa-rss"></i>实时动态流</span></div>
+                <div class="feed" id="c-feed"></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="__TMPL__/public/assets/js/echarts/echarts.min.js"></script>
+<script>
+    var D = {$payloadJson|raw};
+    var AJAX_URL = '{:url("Datascreen/ajax_data")}';
+    var charts = {};
+    var C = ['#22d3ee', '#38bdf8', '#818cf8', '#4ade80', '#fbbf24', '#fb7185', '#c084fc', '#2dd4bf'];
+
+    function nfmt(n) {
+        n = parseInt(n || 0, 10);
+        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+    function tip() {
+        return { backgroundColor: 'rgba(2,8,23,.92)', borderColor: '#22d3ee', textStyle: { color: '#e0f2fe', fontSize: 12 } };
+    }
+    function axis() {
+        return {
+            axisLine: { lineStyle: { color: 'rgba(125,211,252,.25)' } },
+            axisLabel: { color: '#7dd3fc', fontSize: 10 },
+            splitLine: { lineStyle: { color: 'rgba(125,211,252,.08)' } }
+        };
+    }
+    function emptyOpt(text) {
+        return { title: { text: text || '暂无数据', left: 'center', top: 'middle', textStyle: { color: '#475569', fontSize: 13, fontWeight: 'normal' } } };
+    }
+
+    function renderKpi(d) {
+        var k = d.kpi || {};
+        var items = [
+            { lab: '注册用户', num: k.user_total, sub: '今日 <em>+' + nfmt(k.user_today) + '</em> · 7日 ' + nfmt(k.user_7d) },
+            { lab: '垃圾打卡', num: k.lj_total, sub: '今日 <em>+' + nfmt(k.lj_today) + '</em> · 打卡用户 ' + nfmt(k.clock_user_today) },
+            { lab: '点位巡检', num: k.patrol_total, sub: '今日 <em>+' + nfmt(k.patrol_today) + '</em>' },
+            { lab: '活动报名', num: k.sign_total, sub: '进行中活动 ' + nfmt(k.active_ing) + ' · 今日 ' + nfmt(k.sign_today) },
+            { lab: '积分发放', num: k.point_total, sub: '今日 <em>+' + nfmt(k.point_today) + '</em> · 7日 ' + nfmt(k.point_7d) },
+            { lab: '小区 / 社区', num: k.community_total, sub: '社区 ' + nfmt(k.parent_total) + ' · 已绑用户 ' + nfmt(k.user_bind) },
+            { lab: '督导 / 商户', num: k.supervisor_total, sub: '商户 ' + nfmt(k.merchant_total) + ' · 学分类 ' + nfmt(k.learn_user) },
+            { lab: '整改 / 学考', num: k.task_log, sub: '任务 ' + nfmt(k.task_open) + ' · 七贤岭通关 ' + (d.qxl_rate || 0) + '%' }
+        ];
+        var html = '';
+        for (var i = 0; i < items.length; i++) {
+            html += '<div class="kpi"><div class="lab">' + items[i].lab + '</div><div class="num">' + nfmt(items[i].num) + '</div><div class="sub">' + items[i].sub + '</div></div>';
+        }
+        document.getElementById('kpis').innerHTML = html;
+        document.getElementById('meta-info').innerHTML = (d.from_cache ? '缓存' : '实时') + ' · ' + (d.cost_ms || 0) + 'ms · ' + (d.update_time || '');
+    }
+
+    function make(id) {
+        if (typeof echarts === 'undefined') return null;
+        if (charts[id]) { charts[id].dispose(); }
+        charts[id] = echarts.init(document.getElementById(id), null, { renderer: 'canvas' });
+        return charts[id];
+    }
+
+    function renderCharts(d) {
+        if (typeof echarts === 'undefined') return;
+        var t = d.trend || {};
+        var ch = make('c-trend');
+        ch.setOption({
+            color: C,
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            legend: { data: ['注册', '打卡', '垃圾打卡', '巡检', '报名', '积分'], top: 2, textStyle: { color: '#94a3b8', fontSize: 11 }, itemWidth: 10, itemHeight: 8 },
+            grid: { left: 42, right: 46, top: 32, bottom: 22 },
+            xAxis: Object.assign({ type: 'category', data: t.labels || [], boundaryGap: false }, axis()),
+            yAxis: [
+                Object.assign({ type: 'value', minInterval: 1, splitNumber: 4 }, axis()),
+                Object.assign({ type: 'value', minInterval: 1, splitLine: { show: false } }, axis())
+            ],
+            series: [
+                { name: '注册', type: 'line', data: t.user, smooth: true, symbol: 'none', areaStyle: { color: 'rgba(56,189,248,.12)' } },
+                { name: '打卡', type: 'bar', data: t.clock, barMaxWidth: 8, itemStyle: { color: 'rgba(129,140,248,.55)' } },
+                { name: '垃圾打卡', type: 'line', data: t.lj, smooth: true, symbol: 'none', lineStyle: { width: 2 } },
+                { name: '巡检', type: 'line', data: t.patrol, smooth: true, symbol: 'none' },
+                { name: '报名', type: 'line', data: t.sign, smooth: true, symbol: 'none' },
+                { name: '积分', type: 'line', yAxisIndex: 1, data: t.point, smooth: true, symbol: 'none', lineStyle: { width: 2, type: 'dotted' } }
+            ]
+        });
+
+        var radar = d.radar || { indicator: [], value: [] };
+        make('c-radar').setOption({
+            tooltip: tip(),
+            radar: {
+                indicator: radar.indicator,
+                splitNumber: 4,
+                axisName: { color: '#7dd3fc', fontSize: 11 },
+                splitLine: { lineStyle: { color: 'rgba(34,211,238,.2)' } },
+                splitArea: { areaStyle: { color: ['rgba(34,211,238,.05)', 'rgba(34,211,238,.01)'] } },
+                axisLine: { lineStyle: { color: 'rgba(34,211,238,.25)' } }
+            },
+            series: [{
+                type: 'radar',
+                data: [{ value: radar.value, name: '近况', areaStyle: { color: 'rgba(34,211,238,.25)' }, lineStyle: { color: '#22d3ee' }, itemStyle: { color: '#67e8f9' } }]
+            }]
+        });
+
+        var funnel = d.funnel || [];
+        make('c-funnel').setOption({
+            tooltip: Object.assign({ trigger: 'item' }, tip()),
+            color: C,
+            series: [{
+                type: 'funnel', left: '8%', width: '70%', minSize: '12%',
+                label: { color: '#e0f2fe', fontSize: 11, formatter: '{b}\n{c}' },
+                itemStyle: { borderColor: '#020817', borderWidth: 2 },
+                data: funnel
+            }]
+        });
+
+        var weeks = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+        var hours = [];
+        for (var h = 0; h < 24; h++) hours.push(h + '时');
+        var heatData = d.heat || [];
+        var heatMax = 1;
+        for (var hi = 0; hi < heatData.length; hi++) {
+            if (heatData[hi][2] > heatMax) heatMax = heatData[hi][2];
+        }
+        make('c-heat').setOption({
+            tooltip: Object.assign({ formatter: function (p) { return weeks[p.value[1]] + ' ' + p.value[0] + '时：' + p.value[2] + ' 次'; } }, tip()),
+            grid: { left: 40, right: 18, top: 8, bottom: 22 },
+            xAxis: Object.assign({ type: 'category', data: hours, axisLabel: { color: '#7dd3fc', fontSize: 9, interval: 2 } }, axis()),
+            yAxis: Object.assign({ type: 'category', data: weeks }, axis()),
+            visualMap: { min: 0, max: heatMax, show: false, inRange: { color: ['#042f2e', '#155e75', '#22d3ee', '#fde047'] } },
+            series: [{ type: 'heatmap', data: heatData, emphasis: { itemStyle: { shadowBlur: 10, shadowColor: '#22d3ee' } } }]
+        });
+
+        make('c-hour').setOption({
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            grid: { left: 36, right: 12, top: 16, bottom: 22 },
+            xAxis: Object.assign({ type: 'category', data: hours, boundaryGap: false, axisLabel: { interval: 3, color: '#7dd3fc', fontSize: 10 } }, axis()),
+            yAxis: Object.assign({ type: 'value', minInterval: 1, splitNumber: 3 }, axis()),
+            series: [{
+                type: 'line', data: d.hour_today || [], smooth: true, symbol: 'none',
+                lineStyle: { width: 2, color: '#4ade80' },
+                areaStyle: { color: 'rgba(74,222,128,.18)' }
+            }]
+        });
+
+        var cate = d.cate_pie || [];
+        make('c-cate').setOption(cate.length ? {
+            tooltip: Object.assign({ trigger: 'item' }, tip()),
+            color: C,
+            series: [{
+                type: 'pie', roseType: 'radius', radius: ['18%', '68%'], center: ['50%', '52%'],
+                label: { color: '#bae6fd', fontSize: 11, formatter: '{b}\n{d}%' },
+                itemStyle: { borderColor: '#041224', borderWidth: 2 },
+                data: cate
+            }]
+        } : emptyOpt());
+
+        var ps = d.point_source || [];
+        make('c-point').setOption(ps.length ? {
+            tooltip: Object.assign({ trigger: 'item', formatter: '{b}<br/>{c} 积分 ({d}%)' }, tip()),
+            color: C,
+            series: [{
+                type: 'pie', radius: ['42%', '68%'], center: ['50%', '52%'],
+                label: { color: '#bae6fd', fontSize: 11 },
+                data: ps
+            }]
+        } : emptyOpt());
+
+        var comm = (d.community || []).slice().reverse();
+        make('c-community').setOption(comm.length ? {
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            grid: { left: 88, right: 28, top: 8, bottom: 8 },
+            xAxis: Object.assign({ type: 'value', minInterval: 1 }, axis()),
+            yAxis: Object.assign({ type: 'category', data: comm.map(function (x) { return x.name; }), axisLabel: { color: '#7dd3fc', fontSize: 10 } }, axis()),
+            series: [{
+                type: 'bar', data: comm.map(function (x) { return x.value; }), barMaxWidth: 12,
+                itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [{ offset: 0, color: '#0e7490' }, { offset: 1, color: '#67e8f9' }]), borderRadius: [0, 4, 4, 0] }
+            }]
+        } : emptyOpt('暂无小区打卡'));
+
+        var st = d.street || [];
+        make('c-street').setOption(st.length ? {
+            tooltip: Object.assign({ trigger: 'item' }, tip()),
+            color: C,
+            series: [{
+                type: 'treemap', roam: false, nodeClick: false, breadcrumb: { show: false },
+                label: { color: '#e0f2fe', fontSize: 12 },
+                itemStyle: { borderColor: '#041224', borderWidth: 2, gapWidth: 2 },
+                data: st
+            }]
+        } : emptyOpt());
+
+        var tb = d.type_bar || [];
+        make('c-type').setOption(tb.length ? {
+            tooltip: Object.assign({ trigger: 'axis' }, tip()),
+            grid: { left: 70, right: 16, top: 16, bottom: 24 },
+            xAxis: Object.assign({ type: 'category', data: tb.map(function (x) { return x.name; }), axisLabel: { color: '#7dd3fc', fontSize: 10, rotate: 20 } }, axis()),
+            yAxis: Object.assign({ type: 'value', minInterval: 1 }, axis()),
+            series: [{
+                type: 'bar', data: tb.map(function (x) { return x.value; }), barMaxWidth: 18,
+                itemStyle: { color: '#818cf8', borderRadius: [4, 4, 0, 0] }
+            }]
+        } : emptyOpt());
+
+        make('c-task').setOption({
+            tooltip: Object.assign({ trigger: 'item' }, tip()),
+            color: ['#38bdf8', '#fbbf24', '#fb7185', '#4ade80'],
+            series: [{
+                type: 'pie', radius: ['40%', '68%'],
+                label: { color: '#bae6fd', fontSize: 11 },
+                data: d.task_pie || []
+            }]
+        });
+
+        var feed = d.latest || [];
+        var fh = '';
+        for (var i = 0; i < feed.length; i++) {
+            fh += '<div class="feed-item"><b>' + feed[i].text + '</b><span>' + feed[i].time + '</span></div>';
+        }
+        document.getElementById('c-feed').innerHTML = fh || '<div class="feed-item">暂无动态</div>';
+    }
+
+    function tickClock() {
+        var now = new Date();
+        var p = function (n) { return n < 10 ? '0' + n : '' + n; };
+        document.getElementById('clock-time').textContent = p(now.getHours()) + ':' + p(now.getMinutes()) + ':' + p(now.getSeconds());
+        var w = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
+        document.getElementById('clock-date').textContent = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日 星期' + w;
+    }
+
+    function stars() {
+        var c = document.getElementById('bg-stars');
+        var ctx = c.getContext('2d');
+        var dots = [];
+        function resize() {
+            c.width = window.innerWidth;
+            c.height = window.innerHeight;
+            dots = [];
+            for (var i = 0; i < 70; i++) {
+                dots.push({ x: Math.random() * c.width, y: Math.random() * c.height, r: Math.random() * 1.6 + .3, s: Math.random() * .4 + .1 });
+            }
+        }
+        resize();
+        (function loop() {
+            ctx.clearRect(0, 0, c.width, c.height);
+            ctx.fillStyle = 'rgba(125,211,252,.7)';
+            for (var i = 0; i < dots.length; i++) {
+                var d = dots[i];
+                d.y -= d.s;
+                if (d.y < 0) d.y = c.height;
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            requestAnimationFrame(loop);
+        })();
+        window.addEventListener('resize', resize);
+    }
+
+    function bind() {
+        document.getElementById('btn-full').onclick = function () {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        };
+        document.getElementById('btn-refresh').onclick = function () {
+            load(true);
+        };
+        window.addEventListener('resize', function () {
+            for (var k in charts) { if (charts[k]) charts[k].resize(); }
+        });
+    }
+
+    function load(force) {
+        var url = AJAX_URL + (force ? '?refresh=1' : '');
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                try {
+                    var res = JSON.parse(xhr.responseText);
+                    if (res.code == 1 && res.data) {
+                        D = res.data;
+                        renderKpi(D);
+                        renderCharts(D);
+                    }
+                } catch (e) {}
+            }
+        };
+        xhr.send();
+    }
+
+    stars();
+    tickClock();
+    setInterval(tickClock, 1000);
+    bind();
+    renderKpi(D);
+    renderCharts(D);
+    setInterval(function () { load(false); }, 90000);
+</script>
+</body>
+</html>

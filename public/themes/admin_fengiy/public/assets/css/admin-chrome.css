@@ -277,6 +277,24 @@ body {
 	vertical-align: middle;
 }
 
+.datascreen-entry > a {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 52px;
+	color: #2563eb !important;
+}
+
+.datascreen-entry > a i {
+	color: #2D8CF0;
+	font-size: 15px;
+}
+
+.datascreen-entry > a:hover {
+	background: #eff6ff;
+	color: #1d4ed8 !important;
+}
+
 .user-info {
 	vertical-align: middle;
 }
