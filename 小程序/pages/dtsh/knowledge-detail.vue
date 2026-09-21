@@ -1,7 +1,5 @@
 <template>
 	<view class="detail-page">
-		<u-navbar title-color="#fff" title="知识详情" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false" :custom-back="customBack">
-		</u-navbar>
 		<view class="u-abso u-h-552 green-bg"></view>
 
 		<view class="detail-container" v-if="detail && detail.id">

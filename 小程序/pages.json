@@ -624,8 +624,7 @@
 		}, {
 			"path": "knowledge-detail",
 			"style": {
-				"navigationBarTitleText": "知识详情",
-				"navigationStyle": "custom"
+				"navigationBarTitleText": "知识详情"
 			}
 		}, {
 			"path": "volunteer-home",
