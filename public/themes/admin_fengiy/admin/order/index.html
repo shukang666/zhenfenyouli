@@ -240,7 +240,7 @@
                                    data-id="{$item.id}" data-notes="{$item.admin_remark}">
                                     <i class="layui-icon layui-icon-edit"></i>
                                 </a>
-                                <if condition="$item.status == 2 && $item.delivery_type == 1">
+                                <if condition="($item.status == 2 || $item.status == 14) && $item.delivery_type == 1">
                                     <a class="layui-bg-green-light layui-circle op-btn"
                                        href="javascript:parent.openIframeLayer('{:url('send',['id'=>$item.id])}','立即发货',{area: ['800px', '460px']});"
                                        data-toggle="tooltip" title="立即发货">
