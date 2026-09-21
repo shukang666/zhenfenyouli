@@ -3,7 +3,7 @@
 		<view class="dk-hero">
 			<text class="dk-hero-kicker">拍照前先选好场景和种类</text>
 			<text class="dk-hero-title">垃圾分类打卡</text>
-			<text class="dk-hero-desc">家庭、办公或沿街投放都可以。选完种类会自动带上报类型去拍照。</text>
+			<text class="dk-hero-desc">家庭、亲子、办公或沿街投放都可以。选完种类会自动带上报类型去拍照。</text>
 			<view class="dk-steps">
 				<view class="dk-step" :class="{ 'dk-step--on': step === 1 }">
 					<text class="dk-step-n">1</text>
@@ -102,6 +102,7 @@
 				cate_list: [],
 				scenes: [
 					{ key: 'home', name: '家庭', desc: '厨房、客厅、卫生间里的日常投放' },
+					{ key: 'qinzi', name: '亲子', desc: '家长带孩子一起学分类、动手投放' },
 					{ key: 'office', name: '办公', desc: '工位、茶水间、会议室里的投放' },
 					{ key: 'street', name: '沿街', desc: '路边、商铺门前的分类投放点' }
 				]
@@ -358,6 +359,10 @@
 .dk-scene--home {
 	background: linear-gradient(141deg, #D4A017 0%, #A36B08 100%);
 	box-shadow: 0 10rpx 24rpx rgba(163, 107, 8, 0.38);
+}
+.dk-scene--qinzi {
+	background: linear-gradient(141deg, #F0938A 0%, #D94F6A 100%);
+	box-shadow: 0 10rpx 24rpx rgba(217, 79, 106, 0.38);
 }
 .dk-scene--office {
 	background: linear-gradient(141deg, #2B8BB8 0%, #156A90 100%);
