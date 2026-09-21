@@ -1,12 +1,24 @@
 <template>
 	<view class="dk-hub" v-if="!setting.app_test">
 		<view class="dk-hero">
-			<text class="dk-hero-kicker">每天拍一张分类投放</text>
+			<text class="dk-hero-kicker">拍照前先选好场景和种类</text>
 			<text class="dk-hero-title">垃圾分类打卡</text>
-			<text class="dk-hero-desc">选对类型、拍清楚、写一句说明，提交后积分到账。</text>
-			<view class="dk-start" hover-class="dk-start--press" :hover-stay-time="80" @click="goClock">
-				<u-icon name="camera-fill" size="40" color="#18AF38"></u-icon>
-				<text class="dk-start-text">开始拍照打卡</text>
+			<text class="dk-hero-desc">家庭、办公或沿街投放都可以。选完种类会自动带上报类型去拍照。</text>
+			<view class="dk-steps">
+				<view class="dk-step" :class="{ 'dk-step--on': step === 1 }">
+					<text class="dk-step-n">1</text>
+					<text class="dk-step-t">选场景</text>
+				</view>
+				<view class="dk-step-line" :class="{ 'dk-step-line--on': step === 2 }"></view>
+				<view class="dk-step" :class="{ 'dk-step--on': step === 2 }">
+					<text class="dk-step-n">2</text>
+					<text class="dk-step-t">选种类</text>
+				</view>
+				<view class="dk-step-line"></view>
+				<view class="dk-step">
+					<text class="dk-step-n">3</text>
+					<text class="dk-step-t">去拍照</text>
+				</view>
 			</view>
 		</view>
 
@@ -32,40 +44,34 @@
 			<text class="dk-gate-a">去完成 ›</text>
 		</view>
 
-		<view class="dk-block">
-			<text class="dk-block-t">怎么打</text>
-			<view class="dk-how">
-				<view class="dk-how-item">
-					<view class="dk-how-n">1</view>
-					<view class="dk-how-body">
-						<text class="dk-how-h">选垃圾类型</text>
-						<text class="dk-how-s">可回收、厨余、有害或其他，和桶上的一致</text>
-					</view>
-				</view>
-				<view class="dk-how-item">
-					<view class="dk-how-n">2</view>
-					<view class="dk-how-body">
-						<text class="dk-how-h">对准再拍</text>
-						<text class="dk-how-s">拍投放的垃圾本体，光线够、别太远、别被手挡住</text>
-					</view>
-				</view>
-				<view class="dk-how-item">
-					<view class="dk-how-n">3</view>
-					<view class="dk-how-body">
-						<text class="dk-how-h">写一句并提交</text>
-						<text class="dk-how-s">用一句话说明分到哪一类，然后等积分</text>
-					</view>
-				</view>
+		<view class="dk-block" v-if="step === 1">
+			<text class="dk-block-t">你在哪投放</text>
+			<text class="dk-block-hint">先选一个场景，再选对应的垃圾种类</text>
+			<view class="dk-scene" hover-class="dk-card--press" :hover-stay-time="80"
+				v-for="item in scenes" :key="item.key" :class="'dk-scene--' + item.key" @click="pickScene(item)">
+				<text class="dk-scene-name">{{ item.name }}</text>
+				<text class="dk-scene-desc">{{ item.desc }}</text>
+				<text class="dk-scene-go">下一步 ›</text>
 			</view>
 		</view>
 
-
-		<view class="dk-block">
-			<text class="dk-block-t">拍照注意</text>
-			<view class="dk-tips">
-				<text class="dk-tip">照片要能看清垃圾内容，分类要正确。</text>
-				<text class="dk-tip">分错可能危害环境，也可能会被撤销积分。</text>
-				<text class="dk-tip">投完再拍，不要拍空桶或和分类无关的图。</text>
+		<view class="dk-block" v-else>
+			<view class="dk-type-head">
+				<view class="dk-back" hover-class="dk-back--press" :hover-stay-time="80" @click="backScene">
+					<text>‹ 改场景</text>
+				</view>
+				<text class="dk-block-t dk-type-title">{{ selectedScene.name }}投放 · 选种类</text>
+			</view>
+			<text class="dk-block-hint">点一种就会带上报类型去拍照页</text>
+			<view class="dk-types">
+				<view class="dk-type" hover-class="dk-card--press" :hover-stay-time="80"
+					v-for="item in cate_list" :key="item.id"
+					:class="'dk-type--' + cateTone(item.name)"
+					@click="goClock(item)">
+					<text class="dk-type-name">{{ item.name }}</text>
+					<text class="dk-type-hint">{{ cateHint(item.name) }}</text>
+					<text class="dk-type-go">去拍照 ›</text>
+				</view>
 			</view>
 		</view>
 
@@ -91,7 +97,14 @@
 	export default {
 		data() {
 			return {
-				cate_list: []
+				step: 1,
+				selectedScene: {},
+				cate_list: [],
+				scenes: [
+					{ key: 'home', name: '家庭', desc: '厨房、客厅、卫生间里的日常投放' },
+					{ key: 'office', name: '办公', desc: '工位、茶水间、会议室里的投放' },
+					{ key: 'street', name: '沿街', desc: '路边、商铺门前的分类投放点' }
+				]
 			}
 		},
 		computed: {
@@ -126,10 +139,33 @@
 					this.cate_list = res.data || []
 				}).catch(() => {})
 			},
-			goClock() {
+			cateTone(name) {
+				const n = name || ''
+				if (n.indexOf('可回收') >= 0) return 'recycle'
+				if (n.indexOf('厨余') >= 0) return 'food'
+				if (n.indexOf('有害') >= 0) return 'harm'
+				return 'other'
+			},
+			cateHint(name) {
+				const tone = this.cateTone(name)
+				if (tone === 'recycle') return '纸张、塑料瓶、金属罐、织物'
+				if (tone === 'food') return '剩菜剩饭、果皮菜叶'
+				if (tone === 'harm') return '电池、灯管、过期药品'
+				return '受污染纸、破碎陶瓷等不可回收'
+			},
+			pickScene(item) {
+				this.selectedScene = item
+				this.step = 2
+			},
+			backScene() {
+				this.step = 1
+			},
+			goClock(item) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
-				this.$u.route('/pages/flhd/add')
+				if (!item || !item.id) return this.$u.toast('请先选择垃圾种类')
+				const scene = this.selectedScene.name || ''
+				this.$u.route('/pages/flhd/add?cate_id=' + item.id + '&scene=' + encodeURIComponent(scene))
 			},
 			goGate() {
 				if (!this.userInfo.is_learn) return this.$u.route('/pages/flhd/list')
@@ -153,7 +189,7 @@
 	background: #e8f0ea;
 }
 .dk-hero {
-	padding: 40rpx 32rpx 36rpx;
+	padding: 36rpx 32rpx 32rpx;
 	border-radius: 28rpx;
 	background: linear-gradient(145deg, #6dca7c 0%, #18AF38 78%);
 	box-shadow: 0 16rpx 36rpx rgba(24, 175, 56, 0.26);
@@ -172,29 +208,54 @@
 }
 .dk-hero-desc {
 	display: block;
-	margin-top: 14rpx;
+	margin-top: 12rpx;
 	font-size: 26rpx;
 	line-height: 1.55;
 	color: rgba(255, 255, 255, 0.92);
 }
-.dk-start {
-	margin-top: 32rpx;
-	height: 88rpx;
-	border-radius: 44rpx;
-	background: #fff;
+.dk-steps {
+	margin-top: 28rpx;
 	display: flex;
 	align-items: center;
-	justify-content: center;
 }
-.dk-start--press {
-	opacity: 0.9;
-	transform: scale(0.98);
+.dk-step {
+	display: flex;
+	align-items: center;
+	opacity: 0.62;
 }
-.dk-start-text {
-	margin-left: 10rpx;
-	font-size: 32rpx;
+.dk-step--on {
+	opacity: 1;
+}
+.dk-step-n {
+	width: 36rpx;
+	height: 36rpx;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.28);
+	color: #fff;
+	font-size: 22rpx;
 	font-weight: 800;
+	text-align: center;
+	line-height: 36rpx;
+}
+.dk-step--on .dk-step-n {
+	background: #fff;
 	color: #148a2e;
+}
+.dk-step-t {
+	margin-left: 8rpx;
+	font-size: 22rpx;
+	font-weight: 700;
+	color: #fff;
+}
+.dk-step-line {
+	flex: 1;
+	height: 4rpx;
+	margin: 0 12rpx;
+	border-radius: 4rpx;
+	background: rgba(255, 255, 255, 0.28);
+}
+.dk-step-line--on {
+	background: #fff;
 }
 .dk-stats {
 	margin-top: 24rpx;
@@ -261,74 +322,164 @@
 	font-size: 22rpx;
 	color: #8a958c;
 }
-.dk-how {
-	padding: 8rpx 24rpx 12rpx;
-	border-radius: 20rpx;
-	background: #fff;
+.dk-card--press {
+	transform: scale(0.97);
+	opacity: 0.92;
 }
-.dk-how-item {
-	display: flex;
-	padding: 22rpx 0;
-	border-bottom: 1rpx solid #f1f4f2;
+.dk-scene {
+	position: relative;
+	overflow: hidden;
+	margin-bottom: 18rpx;
+	padding: 36rpx 28rpx 32rpx;
+	border-radius: 24rpx;
+	transition: transform 0.1s ease, opacity 0.1s ease;
 }
-.dk-how-item:last-child {
-	border-bottom: none;
+.dk-scene::before {
+	content: '';
+	position: absolute;
+	width: 180rpx;
+	height: 180rpx;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.12);
+	top: -70rpx;
+	right: -40rpx;
+	pointer-events: none;
 }
-.dk-how-n {
-	width: 48rpx;
-	height: 48rpx;
-	border-radius: 16rpx;
-	background: #e8f7ea;
-	color: #18AF38;
-	font-size: 26rpx;
+.dk-scene::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 8rpx;
+	background: rgba(255, 255, 255, 0.22);
+	pointer-events: none;
+}
+.dk-scene--home {
+	background: linear-gradient(141deg, #D4A017 0%, #A36B08 100%);
+	box-shadow: 0 10rpx 24rpx rgba(163, 107, 8, 0.38);
+}
+.dk-scene--office {
+	background: linear-gradient(141deg, #2B8BB8 0%, #156A90 100%);
+	box-shadow: 0 10rpx 24rpx rgba(21, 106, 144, 0.38);
+}
+.dk-scene--street {
+	background: linear-gradient(141deg, #18AF38 0%, #0C7A24 100%);
+	box-shadow: 0 10rpx 24rpx rgba(12, 122, 36, 0.38);
+}
+.dk-scene-name {
+	position: relative;
+	z-index: 1;
+	display: block;
+	font-size: 40rpx;
 	font-weight: 800;
-	text-align: center;
-	line-height: 48rpx;
-	flex-shrink: 0;
+	color: #fff;
 }
-.dk-how-body {
-	margin-left: 18rpx;
-	flex: 1;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-}
-.dk-how-h {
-	font-size: 28rpx;
-	font-weight: 700;
-	color: #1c2b1e;
-}
-.dk-how-s {
-	margin-top: 6rpx;
+.dk-scene-desc {
+	position: relative;
+	z-index: 1;
+	display: block;
+	margin-top: 10rpx;
 	font-size: 24rpx;
-	line-height: 1.5;
-	color: #6b786f;
+	color: rgba(255, 255, 255, 0.92);
 }
-.dk-cates {
+.dk-scene-go {
+	position: relative;
+	z-index: 1;
+	display: block;
+	margin-top: 20rpx;
+	font-size: 24rpx;
+	font-weight: 700;
+	color: #fff;
+}
+.dk-type-head {
+	display: flex;
+	align-items: center;
+	margin-bottom: 8rpx;
+}
+.dk-back {
+	margin-right: 16rpx;
+	padding: 8rpx 16rpx;
+	border-radius: 999rpx;
+	background: #fff;
+	font-size: 24rpx;
+	font-weight: 700;
+	color: #148a2e;
+}
+.dk-back--press {
+	opacity: 0.8;
+}
+.dk-type-title {
+	margin-bottom: 0;
+	flex: 1;
+}
+.dk-types {
 	display: flex;
 	flex-wrap: wrap;
-	margin: 0 -8rpx;
+	justify-content: space-between;
 }
-.dk-cate {
-	margin: 0 8rpx 16rpx;
-	padding: 14rpx 26rpx;
-	border-radius: 12rpx;
-	background: #fff;
-	font-size: 26rpx;
-	color: #2a4a32;
-	font-weight: 600;
-	box-shadow: 0 2rpx 10rpx rgba(20, 48, 28, 0.04);
+.dk-type {
+	position: relative;
+	overflow: hidden;
+	width: 48%;
+	margin-bottom: 20rpx;
+	padding: 28rpx 22rpx 24rpx;
+	border-radius: 22rpx;
+	min-height: 220rpx;
+	transition: transform 0.1s ease, opacity 0.1s ease;
 }
-.dk-tips {
-	padding: 24rpx 28rpx;
-	border-radius: 20rpx;
-	background: #fff;
+.dk-type::before {
+	content: '';
+	position: absolute;
+	width: 120rpx;
+	height: 120rpx;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.12);
+	top: -40rpx;
+	right: -28rpx;
+	pointer-events: none;
 }
-.dk-tip {
+.dk-type--recycle {
+	background: linear-gradient(141deg, #2B8BB8 0%, #156A90 100%);
+	box-shadow: 0 10rpx 22rpx rgba(21, 106, 144, 0.38);
+}
+.dk-type--food {
+	background: linear-gradient(141deg, #C48A3A 0%, #8B5A14 100%);
+	box-shadow: 0 10rpx 22rpx rgba(139, 90, 20, 0.38);
+}
+.dk-type--harm {
+	background: linear-gradient(141deg, #E75E5E 0%, #B32626 100%);
+	box-shadow: 0 10rpx 22rpx rgba(179, 38, 38, 0.38);
+}
+.dk-type--other {
+	background: linear-gradient(141deg, #8A959C 0%, #5C656C 100%);
+	box-shadow: 0 10rpx 22rpx rgba(92, 101, 108, 0.38);
+}
+.dk-type-name {
+	position: relative;
+	z-index: 1;
 	display: block;
-	font-size: 26rpx;
-	line-height: 1.7;
-	color: #4a5c4e;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #fff;
+}
+.dk-type-hint {
+	position: relative;
+	z-index: 1;
+	display: block;
+	margin-top: 10rpx;
+	font-size: 22rpx;
+	line-height: 1.45;
+	color: rgba(255, 255, 255, 0.9);
+}
+.dk-type-go {
+	position: relative;
+	z-index: 1;
+	display: block;
+	margin-top: 22rpx;
+	font-size: 22rpx;
+	font-weight: 700;
+	color: #fff;
 }
 .dk-hist-row {
 	display: flex;

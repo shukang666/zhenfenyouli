@@ -8,14 +8,16 @@
                             <view class="u-font-32 u-font-bold">
                                 上报类型
                             </view>
-                            <view class="u-type-success u-font-24"
-                                @click="previewImage([cate_list[cate_index].waste_thumb])">
+                            <view class="u-type-success u-font-24" @click="previewCate">
                                 查看示例图
                             </view>
                         </view>
+                        <view class="u-font-24 u-type-info u-m-t-10" v-if="sceneName">
+                            本次场景：{{ sceneName }}
+                        </view>
                         <view class="u-flex u-flex-wrap">
-                            <view class="u-m-r-20 u-p-t-20" v-for="(item,index) in cate_list" :key="index"
-                                @click="form.cate_id = item.id,cate_index = index">
+                            <view class="u-m-r-20 u-p-t-20" v-for="(item,index) in cate_list" :key="item.id"
+                                @click="pickCate(index)">
                                 <u-tag :text="item.name" mode="dark" :type="form.cate_id == item.id?'success':'info'" />
                             </view>
                         </view>
@@ -74,7 +76,7 @@
                         </view>
                         <view class="u-p-lr-30 u-m-t-30">
                             <u-button type="success" hover-class="none" shape="circle"
-                                @click="mask_show = false">继续打卡</u-button>
+                                @click="closeMask">继续打卡</u-button>
                         </view>
                         <u-gap height="30"></u-gap>
                     </view>
@@ -107,21 +109,27 @@
                 },
                 cate_list: [],
                 cate_index: 0,
+                pendingCateId: 0,
+                sceneName: '',
                 mask_show: false,
                 msg: ''
             };
         },
         onLoad(option) {
+            this.pendingCateId = option.cate_id ? parseInt(option.cate_id, 10) : 0
+            this.sceneName = option.scene ? decodeURIComponent(option.scene) : ''
             this.get_select_list()
         },
         methods: {
-            //
             switchTab() {
                 uni.switchTab({
                     url: '/pages/mall/mall'
                 })
             },
             // 
+            closeMask() {
+                this.mask_show = false
+            },
             navigateBack() {
                 this.mask_show = false
                 uni.navigateBack()
@@ -137,9 +145,35 @@
                 this.$u.api.get_select_list({
                     type: 2
                 }).then(res => {
-                    this.cate_list = res.data
-                    this.form.cate_id = this.cate_list[0].id
+                    this.cate_list = res.data || []
+                    this.applyPendingCate()
                 })
+            },
+            applyPendingCate() {
+                const list = this.cate_list
+                if (!list.length) return
+                let idx = 0
+                const pending = this.pendingCateId
+                if (pending) {
+                    for (let i = 0; i < list.length; i++) {
+                        if (Number(list[i].id) === Number(pending)) {
+                            idx = i
+                            break
+                        }
+                    }
+                }
+                this.pickCate(idx)
+            },
+            pickCate(index) {
+                const item = this.cate_list[index]
+                if (!item) return
+                this.cate_index = index
+                this.form.cate_id = item.id
+            },
+            previewCate() {
+                const item = this.cate_list[this.cate_index]
+                if (!item || !item.waste_thumb) return this.$u.toast('暂无示例图')
+                this.previewImage([item.waste_thumb])
             },
             // 上传图片
             onSuccess(reslut) {
