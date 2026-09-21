@@ -1,8 +1,42 @@
 <include file="public@header"/>
+<style>
+    /* 活动风采：照片横向 16:9 预览，覆盖全局 pic-list 方图 */
+    .showcase-pic-list {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: flex-start;
+    }
+    .showcase-pic-list li {
+        margin: 0 12px 12px 0;
+    }
+    .showcase-pic-list li img,
+    .showcase-pic-list .btn-upload {
+        width: 180px;
+        height: 101px;
+        object-fit: cover;
+        border-radius: 6px;
+        display: block;
+    }
+    .showcase-pic-list .btn-upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+    .showcase-cover-preview {
+        width: 180px;
+        height: 101px;
+        margin-top: 10px;
+        border-radius: 6px;
+        object-fit: cover;
+        cursor: pointer;
+    }
+</style>
 <script type="text/html" id="photos-item-tpl">
     <li id="saved-image{id}">
         <input id="photos-{id}" type="hidden" name="photos[]" value="{filepath}">
-        <img id="photo-{id}-preview" src="{url}" style="height:80px;width:80px;object-fit:cover;border-radius:4px;">
+        <img id="photo-{id}-preview" src="{url}" style="width:180px;height:101px;object-fit:cover;border-radius:6px;">
         <div>
             <a href="javascript:uploadOneImage('图片上传','#photos-{id}');">替换</a>
             <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
@@ -47,9 +81,9 @@
                 </div>
                 <php>$coverPreviewUrl = cmf_get_image_preview_url($data['cover'] ?? '');</php>
                 <if condition="$coverPreviewUrl">
-                    <img src="{$coverPreviewUrl}" id="showcase-cover-preview" style="height:80px;margin-top:10px;border-radius:4px;" onclick="parent.imagePreviewDialog(this.src);">
+                    <img src="{$coverPreviewUrl}" id="showcase-cover-preview" class="showcase-cover-preview" onclick="parent.imagePreviewDialog(this.src);">
                 <else/>
-                    <img src="" id="showcase-cover-preview" style="height:80px;margin-top:10px;border-radius:4px;display:none;" onclick="parent.imagePreviewDialog(this.src);">
+                    <img src="" id="showcase-cover-preview" class="showcase-cover-preview" style="display:none;" onclick="parent.imagePreviewDialog(this.src);">
                 </if>
                 <a class="btn btn-default" href="javascript:doCoverUpload();" style="margin-top:10px;margin-left:4px;"><i class="fa fa-upload fa-fw"></i></a>
                 <p class="help-block">首页卡片展示用，不填则使用第一张照片</p>
@@ -58,13 +92,13 @@
         <div class="form-group">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>活动照片</label>
             <div class="col-md-8 col-sm-10">
-                <div class="help-block">支持多张上传，第一张将作为默认封面</div>
-                <ul id="photos" class="pic-list list-unstyled form-inline">
+                <div class="help-block">支持多张上传，建议横向照片（16:9），第一张将作为默认封面</div>
+                <ul id="photos" class="showcase-pic-list pic-list list-unstyled form-inline">
                     <notempty name="data.photos">
                         <foreach name="data.photos" item="vo">
-                            <li id="saved-image{$key}" style="cursor:pointer;margin-bottom:5px;margin-right:10px;">
+                            <li id="saved-image{$key}" style="cursor:pointer;">
                                 <input id="photo-{$key}" type="hidden" name="photos[]" value="{$vo}">
-                                <img id="photo-{$key}-preview" src="{:cmf_get_image_preview_url($vo)}" style="height:80px;width:80px;object-fit:cover;border-radius:4px;">
+                                <img id="photo-{$key}-preview" src="{:cmf_get_image_preview_url($vo)}" style="width:180px;height:101px;object-fit:cover;border-radius:6px;">
                                 <div>
                                     <a href="javascript:uploadOneImage('图片上传','#photo-{$key}');">替换</a>
                                     <a href="javascript:(function(){$('#saved-image{$key}').remove();})();">移除</a>

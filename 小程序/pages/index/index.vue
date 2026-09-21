@@ -13,11 +13,13 @@
 		<z-paging ref='paging' v-model='dataList' @query='queryList' @scroll="onZPagingScroll" :use-page-scroll="true" :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="currentTab === 1" :loading-more-enabled="false" :refresher-enabled="false">
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
-				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'#ffffff'}" :border-bottom="false">
-					<image src="https://admin.circular-economy.cn/static/images/logo.png" class="u-w-320 u-h-88 u-m-l-30" mode="aspectFill"></image>
+				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(244,247,245,0.96)'}" :border-bottom="false">
+					<image src="https://admin.circular-economy.cn/static/images/logo.png" class="home-logo" mode="aspectFill"></image>
 				</u-navbar>
 				<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			</template>
+
+			<view class="home-top-glow"></view>
 
 			<!-- 活动搜索 + 扫码入口（点击进活动搜索页，右侧扫码直达活动详情） -->
 			<view id="guide-search" class="home-search-wrap">
@@ -34,12 +36,14 @@
 
 			<!-- Banner 轮播图 -->
 			<view class="banner-wrap">
-				<u-swiper :list="bannerList" height="340" border-radius="28" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
+				<u-swiper :list="bannerList" height="320" border-radius="20" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
 			</view>
 
 			<!-- 走马灯通知栏（后台 home_notice 配置，留空则不显示） -->
 			<view class="notice-bar-wrap" v-if="homeNotice">
-				<u-notice-bar :list="[homeNotice]" :volume-icon="true" :more-icon="false" :close-icon="false" :speed="100" type="none" bg-color="#FFF8E8" color="#9A6B12" :border-radius="20"></u-notice-bar>
+				<view class="notice-bar-inner">
+					<u-notice-bar :list="[homeNotice]" :volume-icon="true" :more-icon="false" :close-icon="false" :speed="100" type="none" bg-color="transparent" color="#8A6D2A" :border-radius="0"></u-notice-bar>
+				</view>
 			</view>
 
 			<!-- 问候 + 快捷打卡（浅色卡片，入口指向垃圾分类打卡页） -->
@@ -74,20 +78,41 @@
 				</view>
 			</view>
 
-			
-
-			<!-- 核心功能入口：一行四个图标（iOS毛玻璃风格） -->
-			<!-- <view class="entry-grid">
-				<view class="entry-item" v-for="item in entry_list" :key="item.key"
-					hover-class="entry-item--hover" :hover-stay-time="80" @click="goEntry(item)">
-					<view class="entry-icon">
-						<image :src="item.svgIcon" class="entry-svg" mode="aspectFit"></image>
+			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
+			<view class="showcase-section" v-if="showcaseList.length > 0">
+				<view class="section-head">
+					<view class="section-head__main">
+						<text class="section-head__title">活动风采</text>
+						<text class="section-head__sub">记录每一次精彩瞬间</text>
 					</view>
-					<view class="entry-name">{{ item.name }}</view>
+					<view class="section-head__more" @click="goShowcaseList">
+						<text>全部</text>
+						<u-icon name="arrow-right" size="20" color="#18AF38"></u-icon>
+					</view>
 				</view>
-			</view> -->
+				<scroll-view scroll-x class="showcase-scroll" :show-scrollbar="false">
+					<view class="showcase-row">
+						<view class="showcase-card" v-for="item in showcaseList" :key="item.id"
+							hover-class="press-scale" :hover-stay-time="80"
+							@click="goShowcaseDetail(item.id)">
+							<view class="showcase-card__cover">
+								<u-image width="280" height="200" :src="item.cover" border-radius="20rpx" mode="aspectFill"></u-image>
+								<view class="showcase-card__badge" v-if="item.photo_count > 1">
+									<u-icon name="photo" size="18" color="#fff"></u-icon>
+									<text>{{ item.photo_count }}</text>
+								</view>
+							</view>
+							<view class="showcase-card__body">
+								<view class="showcase-card__title u-line-2">{{ item.title }}</view>
+								<view class="showcase-card__date">{{ item.event_date_text }}</view>
+							</view>
+						</view>
+					</view>
+				</scroll-view>
+			</view>
 
-			<!-- 内容区标签导航：把活动与积分商品合并到同一区块，通过 tab 切换 -->
+			<!-- 内容区：活动 / 积分商品 -->
+			<view class="content-panel">
 			<view id="guide-tabs" class="content-tabs">
 				<view class="tab-list">
 					<view class="tab-item" :class="{'tab-item--active': currentTab === index}" v-for="(item, index) in tabList" :key="index" @click="switchContentTab(index)">
@@ -104,24 +129,27 @@
 			<scroll-view scroll-x class="active-scroll" :show-scrollbar="false" v-if="currentTab === 0">
 				<view class="u-flex">
 					<view class="active-card" v-for="item in active_list" :key="item.id"
-						hover-class="active-card--on" :hover-stay-time="80"
+						hover-class="press-scale" :hover-stay-time="80"
 						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 						<view class="active-card-cover">
-							<u-image width="540" height="270" :src="item.thumb" border-radius="28rpx 28rpx 0 0"></u-image>
+							<u-image width="500" height="260" :src="item.thumb" border-radius="20rpx 20rpx 0 0"></u-image>
 						</view>
 						<view class="active-card-body">
-							<view class="active-card-title">{{item.name}}</view>
+							<view class="active-card-title u-line-2">{{item.name}}</view>
 							<view class="active-card-info">
 								<view class="active-chip">
-									<u-icon name="clock" size="22" color="#18AF38"></u-icon>
+									<u-icon name="clock" size="20" color="#18AF38"></u-icon>
 									<text class="active-card-text">{{item.date | date('mm月dd日')}}</text>
 								</view>
-								<view class="active-chip">
-									<u-icon name="map" size="22" color="#18AF38"></u-icon>
+								<view class="active-chip active-chip--addr">
+									<u-icon name="map" size="20" color="#18AF38"></u-icon>
 									<text class="active-card-text u-line-1">{{item.address}}</text>
 								</view>
 							</view>
-							<view class="active-card-btn">活动报名</view>
+							<view class="active-card-foot">
+								<text>了解详情</text>
+								<u-icon name="arrow-right" size="20" color="#18AF38"></u-icon>
+							</view>
 						</view>
 					</view>
 				</view>
@@ -131,8 +159,8 @@
 			<scroll-view scroll-x class="goods-scroll" :show-scrollbar="false" v-if="currentTab === 1">
 				<view class="goods-cols">
 					<view class="goods-col" v-for="(col, colIndex) in goodsColumns" :key="colIndex">
-						<view class="goods-card" v-for="item in col" :key="item.id" hover-class="goods-card--on" :hover-stay-time="80" @click="$u.route('/pages/shop/details?id='+item.id)">
-							<u-image width="100%" height="220" :src="item.thumb" :lazy-load="true" border-radius="24rpx 24rpx 0 0"></u-image>
+						<view class="goods-card" v-for="item in col" :key="item.id" hover-class="press-scale" :hover-stay-time="80" @click="$u.route('/pages/shop/details?id='+item.id)">
+							<u-image width="100%" height="200" :src="item.thumb" :lazy-load="true" border-radius="16rpx 16rpx 0 0"></u-image>
 							<view class="goods-card-body">
 								<view class="goods-card-title">{{item.goods_name}}</view>
 								<view class="goods-card-sold">已兑换{{item.sell_count}}次</view>
@@ -149,44 +177,8 @@
 					</view>
 				</view>
 			</scroll-view>
-
-
-
-			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
-			<view class="showcase-section" v-if="showcaseList.length > 0">
-				<view class="showcase-header">
-					<view class="showcase-header__left">
-						<text class="showcase-header__title">活动风采</text>
-						<text class="showcase-header__sub">记录每一次精彩瞬间</text>
-					</view>
-					<view class="showcase-header__more" @click="goShowcaseList">
-						<text>查看全部</text>
-						<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
-					</view>
-				</view>
-				<scroll-view scroll-x class="showcase-scroll" :show-scrollbar="false">
-					<view class="showcase-row">
-						<view class="showcase-card" v-for="item in showcaseList" :key="item.id"
-							hover-class="showcase-card--on" :hover-stay-time="80"
-							@click="goShowcaseDetail(item.id)">
-							<view class="showcase-card__cover">
-								<u-image width="300" height="220" :src="item.cover" border-radius="20rpx 20rpx 0 0" mode="aspectFill"></u-image>
-								<view class="showcase-card__badge" v-if="item.photo_count > 1">
-									<u-icon name="photo" size="20" color="#fff"></u-icon>
-									<text>{{ item.photo_count }}</text>
-								</view>
-							</view>
-							<view class="showcase-card__body">
-								<view class="showcase-card__title u-line-2">{{ item.title }}</view>
-								<view class="showcase-card__date">{{ item.event_date_text }}</view>
-							</view>
-						</view>
-					</view>
-				</scroll-view>
 			</view>
 
-
-			
 			<view class="home-footer">
 				<view class="sk-about">
 					<view class="sk-about-mark"></view>
@@ -897,9 +889,45 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+	$brand: #18AF38;
+	$brand-dark: #12962e;
+	$brand-soft: #e8f7ec;
+	$page-bg: #f4f7f5;
+	$surface: #ffffff;
+	$text: #1a2e22;
+	$text-sub: #5f7166;
+	$text-muted: #95a59b;
+	$radius-md: 20rpx;
+	$radius-lg: 24rpx;
+	$shadow-card: 0 8rpx 32rpx rgba(22, 53, 36, 0.06);
+	$shadow-float: 0 16rpx 40rpx rgba(22, 53, 36, 0.1);
+
 	.container {
+		position: relative;
 		min-height: 100vh;
-		background: #eef4f0;
+		background: $page-bg;
+	}
+
+	.home-top-glow {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 520rpx;
+		background: linear-gradient(180deg, #e3f3e8 0%, rgba(244, 247, 245, 0) 100%);
+		pointer-events: none;
+		z-index: 0;
+	}
+
+	.home-logo {
+		width: 320rpx;
+		height: 88rpx;
+		margin-left: 30rpx;
+	}
+
+	.press-scale {
+		opacity: 0.94;
+		transform: scale(0.985);
 	}
 
 	/* 关怀版下拉提示层 */
@@ -931,24 +959,28 @@ export default {
 	}
 
 	.home-search-wrap {
-		padding: 20rpx 30rpx 0;
+		position: relative;
+		z-index: 1;
+		padding: 16rpx 30rpx 0;
 	}
 
 	.home-search-box {
 		display: flex;
 		align-items: center;
-		height: 80rpx;
-		padding: 0 12rpx 0 16rpx;
-		background: #ffffff;
-		border-radius: 40rpx;
-		box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.08);
+		height: 84rpx;
+		padding: 0 10rpx 0 20rpx;
+		background: rgba(255, 255, 255, 0.92);
+		border: 1rpx solid rgba(24, 175, 56, 0.08);
+		border-radius: 42rpx;
+		box-shadow: $shadow-card;
+		backdrop-filter: blur(12rpx);
 	}
 
 	.home-search-ico {
-		width: 56rpx;
-		height: 56rpx;
+		width: 52rpx;
+		height: 52rpx;
 		border-radius: 50%;
-		background: #e8f8ec;
+		background: $brand-soft;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -957,42 +989,56 @@ export default {
 
 	.home-search-text {
 		flex: 1;
-		margin-left: 12rpx;
+		margin-left: 14rpx;
 		font-size: 26rpx;
-		color: #9aa39c;
+		color: $text-muted;
 	}
 
 	.home-search-scan {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 64rpx;
-		height: 64rpx;
-		margin-left: 8rpx;
+		width: 60rpx;
+		height: 60rpx;
+		margin-left: 10rpx;
 		border-radius: 50%;
-		background: linear-gradient(145deg, #2bc24e 0%, #18af38 100%);
-		box-shadow: 0 6rpx 14rpx rgba(24, 175, 56, 0.28);
+		background: linear-gradient(145deg, #34c759 0%, $brand 100%);
+		box-shadow: 0 8rpx 18rpx rgba(24, 175, 56, 0.25);
 	}
 
 	.banner-wrap {
-		padding: 24rpx 30rpx 0;
-		box-shadow: none;
+		position: relative;
+		z-index: 1;
+		margin: 20rpx 30rpx 0;
+		border-radius: $radius-md;
+		overflow: hidden;
+		box-shadow: $shadow-card;
 	}
 
 	.notice-bar-wrap {
-		padding: 20rpx 30rpx 0;
+		position: relative;
+		z-index: 1;
+		padding: 16rpx 30rpx 0;
+	}
+
+	.notice-bar-inner {
+		overflow: hidden;
+		border-radius: $radius-md;
+		background: linear-gradient(90deg, #fff8e6 0%, #fffdf6 100%);
+		border: 1rpx solid rgba(212, 168, 67, 0.12);
 	}
 
 	.hello-card {
 		position: relative;
+		z-index: 1;
 		overflow: hidden;
 		display: flex;
 		align-items: center;
-		margin: 24rpx 30rpx 0;
-		padding: 24rpx 20rpx 24rpx 24rpx;
-		background: linear-gradient(135deg, #2bc24e 0%, #12962e 100%);
-		border-radius: 28rpx;
-		box-shadow: 0 16rpx 36rpx rgba(24, 175, 56, 0.22);
+		margin: 20rpx 30rpx 0;
+		padding: 26rpx 22rpx 26rpx 26rpx;
+		background: linear-gradient(128deg, #2ecc5a 0%, $brand 52%, $brand-dark 100%);
+		border-radius: $radius-lg;
+		box-shadow: $shadow-float;
 		box-sizing: border-box;
 	}
 	.hello-card__orb {
@@ -1101,11 +1147,11 @@ export default {
 		align-items: center;
 		justify-content: center;
 		margin-left: 16rpx;
-		padding: 16rpx 22rpx;
-		min-width: 140rpx;
-		background: #ffffff;
-		border-radius: 20rpx;
-		box-shadow: 0 8rpx 18rpx rgba(0, 0, 0, 0.1);
+		padding: 18rpx 24rpx;
+		min-width: 132rpx;
+		background: rgba(255, 255, 255, 0.96);
+		border-radius: 18rpx;
+		box-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.08);
 	}
 	.hello-card__btn--on {
 		opacity: 0.88;
@@ -1203,212 +1249,221 @@ export default {
 		color: #999;
 	}
 
-	.showcase-section {
-		margin: 24rpx 30rpx 0;
-		padding: 28rpx 0 8rpx;
-		background: #fff;
-		border-radius: 28rpx;
-		box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.06);
-	}
-	.showcase-header {
+	.section-head {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 0 28rpx 20rpx;
+		padding: 0 24rpx 18rpx;
 	}
-	.showcase-header__title {
+	.section-head__title {
 		display: block;
-		font-size: 32rpx;
+		font-size: 30rpx;
 		font-weight: 700;
-		color: #1c2b1e;
+		color: $text;
+		line-height: 1.3;
 	}
-	.showcase-header__sub {
+	.section-head__sub {
 		display: block;
-		margin-top: 6rpx;
+		margin-top: 4rpx;
 		font-size: 22rpx;
-		color: #8a9b8d;
+		color: $text-muted;
 	}
-	.showcase-header__more {
+	.section-head__more {
 		display: flex;
 		align-items: center;
+		gap: 4rpx;
+		padding: 10rpx 16rpx;
 		font-size: 24rpx;
-		color: #18AF38;
+		color: $brand;
+		background: $brand-soft;
+		border-radius: 999rpx;
+	}
+
+	.showcase-section {
+		position: relative;
+		z-index: 1;
+		margin: 20rpx 30rpx 0;
+		padding: 24rpx 0 12rpx;
+		background: $surface;
+		border-radius: $radius-lg;
+		box-shadow: $shadow-card;
 	}
 	.showcase-scroll {
 		white-space: nowrap;
-		padding-left: 28rpx;
-		padding-bottom: 20rpx;
+		padding-left: 24rpx;
 	}
 	.showcase-row {
 		display: flex;
-		padding-right: 28rpx;
+		padding-right: 24rpx;
 	}
 	.showcase-card {
 		flex-shrink: 0;
-		width: 300rpx;
-		margin-right: 20rpx;
-		background: #f8fbf9;
-		border-radius: 20rpx;
-		overflow: hidden;
-	}
-	.showcase-card--on {
-		opacity: 0.92;
-		transform: scale(0.98);
+		width: 280rpx;
+		margin-right: 16rpx;
 	}
 	.showcase-card__cover {
 		position: relative;
-		width: 300rpx;
-		height: 220rpx;
+		width: 280rpx;
+		height: 200rpx;
+		border-radius: $radius-md;
+		overflow: hidden;
 	}
 	.showcase-card__badge {
 		position: absolute;
-		right: 12rpx;
-		bottom: 12rpx;
+		right: 10rpx;
+		bottom: 10rpx;
 		display: flex;
 		align-items: center;
-		gap: 6rpx;
-		padding: 4rpx 12rpx;
+		gap: 4rpx;
+		padding: 4rpx 10rpx;
 		font-size: 20rpx;
 		color: #fff;
-		background: rgba(0, 0, 0, 0.45);
+		background: rgba(0, 0, 0, 0.42);
 		border-radius: 999rpx;
 	}
 	.showcase-card__body {
-		padding: 18rpx 20rpx 22rpx;
+		padding: 14rpx 4rpx 6rpx;
 	}
 	.showcase-card__title {
 		font-size: 26rpx;
 		font-weight: 600;
-		color: #1c2b1e;
-		line-height: 1.4;
-		min-height: 72rpx;
+		color: $text;
+		line-height: 1.45;
+		min-height: 74rpx;
 	}
 	.showcase-card__date {
-		margin-top: 10rpx;
+		margin-top: 6rpx;
 		font-size: 22rpx;
-		color: #8a9b8d;
+		color: $text-muted;
+	}
+
+	.content-panel {
+		position: relative;
+		z-index: 1;
+		margin: 20rpx 30rpx 0;
+		padding: 20rpx 0 8rpx;
+		background: $surface;
+		border-radius: $radius-lg;
+		box-shadow: $shadow-card;
+		overflow: hidden;
 	}
 
 	.content-tabs {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin: 28rpx 30rpx 8rpx;
-		padding: 8rpx 12rpx 8rpx 8rpx;
-		background: #ffffff;
-		border-radius: 20rpx;
-		box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.05);
+		margin: 0 20rpx 12rpx;
+		padding: 6rpx;
+		background: #f0f4f1;
+		border-radius: 16rpx;
 	}
 	.tab-list {
 		display: flex;
 		align-items: center;
+		flex: 1;
 	}
 	.tab-item {
-		position: relative;
-		margin-right: 8rpx;
-		padding: 14rpx 24rpx;
-		border-radius: 14rpx;
+		flex: 1;
+		text-align: center;
+		padding: 16rpx 0;
+		border-radius: 12rpx;
+		transition: all 0.2s ease;
 	}
 	.tab-item__text {
 		font-size: 28rpx;
-		color: #7a8b7d;
+		color: $text-sub;
 		font-weight: 500;
 	}
 	.tab-item--active {
-		background: #e8f8ec;
+		background: $surface;
+		box-shadow: 0 4rpx 12rpx rgba(22, 53, 36, 0.06);
 	}
 	.tab-item--active .tab-item__text {
-		color: #18af38;
+		color: $brand;
 		font-weight: 700;
 	}
 	.tab-more {
 		display: flex;
 		align-items: center;
-		padding: 10rpx 12rpx;
+		flex-shrink: 0;
+		padding: 12rpx 14rpx 12rpx 8rpx;
 	}
 	.tab-more__text {
 		font-size: 24rpx;
-		color: #18af38;
+		color: $brand;
 		font-weight: 600;
-		margin-right: 4rpx;
+		margin-right: 2rpx;
 	}
 
 	.active-scroll {
 		white-space: nowrap;
-		padding-left: 30rpx;
-		padding-bottom: 24rpx;
+		padding: 8rpx 0 20rpx 20rpx;
 	}
 	.active-card {
 		flex-shrink: 0;
-		width: 540rpx;
-		margin-right: 24rpx;
-		background: #fff;
-		border-radius: 28rpx;
+		width: 500rpx;
+		margin-right: 16rpx;
+		background: #fafcfa;
+		border-radius: $radius-md;
 		overflow: hidden;
-		box-shadow: 0 12rpx 32rpx rgba(16, 48, 24, 0.08);
-	}
-	.active-card--on {
-		opacity: 0.92;
-		transform: scale(0.98);
+		border: 1rpx solid rgba(24, 175, 56, 0.06);
 	}
 	.active-card-cover {
-		width: 540rpx;
-		height: 270rpx;
+		width: 500rpx;
+		height: 260rpx;
 		overflow: hidden;
 	}
 	.active-card-body {
-		padding: 24rpx;
+		padding: 20rpx 22rpx 22rpx;
 	}
 	.active-card-title {
 		font-size: 30rpx;
-		font-weight: bold;
-		color: #1c2b1e;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		font-weight: 700;
+		color: $text;
+		line-height: 1.45;
+		min-height: 86rpx;
 	}
 	.active-card-info {
 		display: flex;
-		align-items: center;
-		margin-top: 16rpx;
+		flex-direction: column;
+		gap: 10rpx;
+		margin-top: 8rpx;
 	}
 	.active-chip {
 		display: flex;
 		align-items: center;
-		flex: 1;
 		min-width: 0;
-		padding: 6rpx 12rpx;
-		margin-right: 12rpx;
-		background: #f3f8f4;
+		padding: 8rpx 14rpx;
+		background: $brand-soft;
 		border-radius: 999rpx;
 	}
-	.active-chip:last-child {
-		margin-right: 0;
+	.active-chip--addr {
+		background: #f3f6f4;
 	}
 	.active-card-text {
-		margin-left: 6rpx;
+		margin-left: 8rpx;
 		font-size: 22rpx;
-		color: #6a7b6e;
+		color: $text-sub;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	.active-card-btn {
-		margin-top: 20rpx;
-		background: linear-gradient(141deg, #2bc24e 0%, #18af38 100%);
-		color: #fff;
-		text-align: center;
-		padding: 18rpx 0;
-		border-radius: 999rpx;
-		font-size: 26rpx;
-		font-weight: bold;
-		box-shadow: 0 8rpx 18rpx rgba(24, 175, 56, 0.22);
+	.active-card-foot {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 4rpx;
+		margin-top: 16rpx;
+		padding-top: 16rpx;
+		border-top: 1rpx solid #edf2ee;
+		font-size: 24rpx;
+		font-weight: 600;
+		color: $brand;
 	}
 
 	.goods-scroll {
 		white-space: nowrap;
-		padding-left: 30rpx;
-		padding-bottom: 24rpx;
+		padding: 8rpx 0 20rpx 20rpx;
 	}
 	.goods-cols {
 		display: flex;
@@ -1416,8 +1471,8 @@ export default {
 	}
 	.goods-col {
 		flex-shrink: 0;
-		width: 320rpx;
-		margin-right: 20rpx;
+		width: 300rpx;
+		margin-right: 16rpx;
 		display: flex;
 		flex-direction: column;
 	}
@@ -1426,26 +1481,22 @@ export default {
 	}
 	.goods-card {
 		width: 100%;
-		margin-bottom: 20rpx;
-		background: #fff;
-		border-radius: 24rpx;
+		margin-bottom: 16rpx;
+		background: #fafcfa;
+		border-radius: $radius-md;
 		overflow: hidden;
 		white-space: normal;
-		box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.06);
-	}
-	.goods-card--on {
-		opacity: 0.92;
-		transform: scale(0.98);
+		border: 1rpx solid rgba(24, 175, 56, 0.06);
 	}
 	.goods-card-body {
-		padding: 20rpx 20rpx 24rpx;
+		padding: 16rpx 18rpx 20rpx;
 	}
 	.goods-card-title {
-		height: 76rpx;
-		font-size: 28rpx;
+		height: 72rpx;
+		font-size: 26rpx;
 		font-weight: 600;
-		line-height: 38rpx;
-		color: #1c2b1e;
+		line-height: 36rpx;
+		color: $text;
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
@@ -1453,18 +1504,18 @@ export default {
 	}
 	.goods-card-sold {
 		display: inline-block;
-		margin-top: 10rpx;
+		margin-top: 8rpx;
 		padding: 4rpx 12rpx;
 		font-size: 20rpx;
-		color: #8a9b8d;
-		background: #f3f8f4;
+		color: $text-muted;
+		background: #f0f4f1;
 		border-radius: 999rpx;
 	}
 	.goods-card-footer {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-top: 16rpx;
+		margin-top: 14rpx;
 	}
 	.goods-card-price {
 		display: flex;
@@ -1474,33 +1525,33 @@ export default {
 		overflow: hidden;
 	}
 	.price-point {
-		font-size: 30rpx;
-		font-weight: bold;
-		color: #18AF38;
+		font-size: 28rpx;
+		font-weight: 700;
+		color: $brand;
 	}
 	.price-plus {
 		margin: 0 4rpx;
-		font-size: 24rpx;
-		font-weight: bold;
-		color: #18AF38;
+		font-size: 22rpx;
+		font-weight: 700;
+		color: $brand;
 	}
 	.price-main {
-		font-size: 24rpx;
-		font-weight: bold;
-		color: #18AF38;
+		font-size: 22rpx;
+		font-weight: 700;
+		color: $brand;
 	}
 	.goods-card-btn {
 		flex-shrink: 0;
-		height: 52rpx;
-		line-height: 52rpx;
-		padding: 0 22rpx;
-		margin-left: 12rpx;
-		background: linear-gradient(141deg, #2bc24e 0%, #18af38 100%);
+		height: 48rpx;
+		line-height: 48rpx;
+		padding: 0 18rpx;
+		margin-left: 10rpx;
+		background: $brand;
 		color: #fff;
-		font-size: 24rpx;
+		font-size: 22rpx;
 		font-weight: 600;
 		text-align: center;
-		border-radius: 26rpx;
+		border-radius: 24rpx;
 	}
 
 	/* 页面全屏引导层，蒙版用内联 backgroundColor，避免 class 不生效 */
@@ -1517,22 +1568,25 @@ export default {
 	}
 
 	.home-footer {
-		padding: 8rpx 30rpx calc(160rpx + env(safe-area-inset-bottom));
+		position: relative;
+		z-index: 1;
+		padding: 24rpx 30rpx calc(160rpx + env(safe-area-inset-bottom));
 	}
 	.sk-about {
 		position: relative;
 		overflow: hidden;
-		padding: 28rpx 28rpx 28rpx 36rpx;
-		background: linear-gradient(135deg, #163524 0%, #1d4a32 58%, #0f2a1c 100%);
-		clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
+		padding: 28rpx 28rpx 28rpx 32rpx;
+		background: linear-gradient(135deg, #1a3d2b 0%, #245a3d 100%);
+		border-radius: $radius-lg $radius-lg 0 0;
 	}
 	.sk-about-mark {
 		position: absolute;
 		left: 0;
-		top: 22rpx;
-		bottom: 36rpx;
-		width: 8rpx;
-		background: linear-gradient(180deg, #86efac 0%, #18AF38 100%);
+		top: 24rpx;
+		bottom: 24rpx;
+		width: 6rpx;
+		border-radius: 0 6rpx 6rpx 0;
+		background: linear-gradient(180deg, #86efac 0%, $brand 100%);
 	}
 	.sk-about-body {
 		display: flex;
@@ -1547,42 +1601,42 @@ export default {
 	}
 	.sk-about-kicker {
 		font-size: 20rpx;
-		letter-spacing: 0.18em;
-		color: rgba(187, 247, 208, 0.78);
+		letter-spacing: 0.12em;
+		color: rgba(187, 247, 208, 0.75);
 		font-weight: 600;
 	}
 	.sk-about-title {
-		margin-top: 10rpx;
-		font-size: 34rpx;
+		margin-top: 8rpx;
+		font-size: 32rpx;
 		font-weight: 800;
 		color: #f4fbf6;
-		line-height: 1.3;
+		line-height: 1.35;
 	}
 	.sk-about-desc {
-		margin-top: 10rpx;
+		margin-top: 8rpx;
 		font-size: 24rpx;
 		line-height: 1.6;
-		color: rgba(226, 245, 232, 0.72);
+		color: rgba(226, 245, 232, 0.7);
 	}
 	.sk-guide-cta {
 		position: relative;
 		display: flex;
 		align-items: center;
-		margin-top: -6rpx;
-		padding: 26rpx 22rpx 26rpx 28rpx;
-		background: linear-gradient(118deg, #18AF38 0%, #2bc24e 48%, #86efac 160%);
-		clip-path: polygon(0 14%, 100% 0, 100% 100%, 0 86%);
-		box-shadow: 0 16rpx 36rpx rgba(24, 175, 56, 0.28);
+		margin-top: 0;
+		padding: 24rpx 22rpx 24rpx 28rpx;
+		background: linear-gradient(118deg, $brand 0%, #34c759 100%);
+		border-radius: 0 0 $radius-lg $radius-lg;
+		box-shadow: $shadow-float;
 	}
 	.sk-guide-cta--on {
-		opacity: 0.92;
+		opacity: 0.94;
 	}
 	.sk-guide-cta-ring {
 		flex-shrink: 0;
-		width: 56rpx;
-		height: 56rpx;
-		margin-right: 20rpx;
-		border: 4rpx solid rgba(255, 255, 255, 0.85);
+		width: 52rpx;
+		height: 52rpx;
+		margin-right: 18rpx;
+		border: 3rpx solid rgba(255, 255, 255, 0.8);
 		border-top-color: transparent;
 		border-radius: 50%;
 		animation: skGuideSpin 1.6s linear infinite;
@@ -1598,29 +1652,27 @@ export default {
 	}
 	.sk-guide-cta-hint {
 		font-size: 20rpx;
-		color: rgba(255, 255, 255, 0.78);
-		letter-spacing: 0.06em;
+		color: rgba(255, 255, 255, 0.8);
 	}
 	.sk-guide-cta-title {
 		margin-top: 4rpx;
-		font-size: 32rpx;
-		font-weight: 800;
+		font-size: 30rpx;
+		font-weight: 700;
 		color: #fff;
-		letter-spacing: 0.04em;
 	}
 	.sk-guide-cta-go {
 		flex-shrink: 0;
-		width: 56rpx;
-		height: 56rpx;
+		width: 52rpx;
+		height: 52rpx;
 		margin-left: 12rpx;
 		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.22);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 	}
 	.sk-guide-cta-arrow {
-		font-size: 44rpx;
+		font-size: 40rpx;
 		line-height: 1;
 		color: #fff;
 		font-weight: 300;
