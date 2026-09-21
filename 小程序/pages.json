@@ -267,6 +267,14 @@
 					}
 				},
 				{
+					"path": "qxl-learn-exam",
+					"style": {
+						"navigationBarTitleText": "七贤岭学考",
+						"navigationBarBackgroundColor": "#0F6E56",
+						"navigationBarTextStyle": "white"
+					}
+				},
+				{
 					"path": "qxl-knowledge",
 					"style": {
 						"navigationBarTitleText": "七贤岭学习"

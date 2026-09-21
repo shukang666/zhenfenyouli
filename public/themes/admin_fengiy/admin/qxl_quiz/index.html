@@ -17,6 +17,15 @@
                 </select>
             </div>
             <div class="form-group">
+                <label>所属文章：</label>
+                <select name="knowledge_id" class="form-control" style="width: 220px;">
+                    <option value="">全部</option>
+                    <foreach name="articles" item="title" key="kid">
+                        <option value="{$kid}" <if condition="$knowledge_id eq $kid">selected="selected"</if>>{$title}</option>
+                    </foreach>
+                </select>
+            </div>
+            <div class="form-group">
                 <label>题目：</label>
                 <input type="text" class="form-control" name="keyword" style="width: 200px;"
                        value="{$keyword}" placeholder="题目关键词">
@@ -40,6 +49,7 @@
                 <th width="50">排序</th>
                 <th width="50">ID</th>
                 <th>题目内容</th>
+                <th width="180">所属文章</th>
                 <th width="80">正确答案</th>
                 <th width="80">状态</th>
                 <th width="150">创建时间</th>
@@ -56,6 +66,7 @@
                     </td>
                     <td>{$vo.id}</td>
                     <td style="max-width:300px;word-break:break-all;">{$vo.title}</td>
+                    <td>{$vo.knowledge_title|default='未绑定'}</td>
                     <td><span class="label label-success">{$vo.correct_option}</span></td>
                     <td>
                         <if condition="$vo.status == 1">

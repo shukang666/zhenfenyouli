@@ -19,17 +19,21 @@
 					<text class="qxl-section-sub">{{cate.subtitle}}</text>
 				</view>
 
-				<!-- 认识七贤岭：学与考入口 -->
-				<view class="qxl-learn-grid" v-if="cate.id === 6">
-					<view class="qxl-learn-card qxl-learn-card--learn" @click="goLearn">
-						<u-icon name="bookmark" size="40" color="#fff"></u-icon>
-						<text class="qxl-learn-name">七贤岭学习</text>
-						<text class="qxl-learn-desc">了解七贤岭故事</text>
+				<!-- 认识七贤岭：学考融合入口 -->
+				<view class="qxl-learn-hero" v-if="cate.id === 6" @click="goLearnExam">
+					<view class="qxl-learn-hero-copy">
+						<text class="qxl-learn-kicker">学考融合</text>
+						<text class="qxl-learn-name">七贤岭学考</text>
+						<text class="qxl-learn-desc">读完本篇立刻测验，过关解锁下一篇</text>
+						<view class="qxl-learn-progress">
+							<view class="qxl-learn-progress-track">
+								<view class="qxl-learn-progress-fill" :style="{width: learnProgressWidth}"></view>
+							</view>
+							<text class="qxl-learn-progress-text">{{learnProgressText}}</text>
+						</view>
 					</view>
-					<view class="qxl-learn-card qxl-learn-card--quiz" @click="goQuiz">
-						<u-icon name="edit-pen" size="40" color="#fff"></u-icon>
-						<text class="qxl-learn-name">七贤岭考试</text>
-						<text class="qxl-learn-desc">每日答题赢积分</text>
+					<view class="qxl-learn-cta">
+						<text>开始</text>
 					</view>
 				</view>
 
@@ -91,17 +95,27 @@
 				heroBgImage: '',
 				statusBarHeight: 20,
 				navBarHeight: 88,
+				learnPassed: 0,
+				learnTotal: 0,
 			};
 		},
 	computed: {
 		// 导航栏绝对定位在 Hero 顶部，Hero 只需 padding-top 留出安全区+导航栏高度
 		heroBgStyle() {
-			// 导航栏占据的像素 = statusBarHeight(px) + 88(rpx/2=px)
 			const padTopPx = this.statusBarHeight + 44
 			if (this.heroBgImage) {
 				return `background-image: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center; padding-top: ${padTopPx}px;`
 			}
 			return `padding-top: ${padTopPx}px;`
+		},
+		learnProgressWidth() {
+			if (!this.learnTotal) return '12%';
+			return Math.max(12, Math.round((this.learnPassed / this.learnTotal) * 100)) + '%';
+		},
+		learnProgressText() {
+			if (!this.learnTotal) return '边学边考 · 过关解锁';
+			if (this.learnPassed >= this.learnTotal) return '已全部通关';
+			return '已通关 ' + this.learnPassed + '/' + this.learnTotal + ' 篇';
 		}
 	},
 		onLoad() {
@@ -109,6 +123,9 @@
 			this.statusBarHeight = sys.statusBarHeight || 20
 			this.loadHeroBg()
 			this.loadQxlCategories()
+		},
+		onShow() {
+			this.loadLearnProgress()
 		},
 		methods: {
 			// 加载七贤岭 Hero 背景图配置
@@ -175,11 +192,16 @@
 		gotoDetail(id) {
 			this.$u.route(`/pages/activity/lsxf/details-new?id=${id}`)
 		},
-		goLearn() {
-			this.$u.route('/pages/activity/qxl-knowledge')
+		goLearnExam() {
+			this.$u.route('/pages/activity/qxl-learn-exam')
 		},
-		goQuiz() {
-			this.$u.route('/pages/activity/qxl-quiz')
+		loadLearnProgress() {
+			this.$u.api.getQxlLearnPath().then(res => {
+				if (res.code == 1) {
+					this.learnPassed = res.data.passed_count || 0
+					this.learnTotal = res.data.total_count || 0
+				}
+			}).catch(() => {})
 		},
 		navigateBack() {
 			uni.navigateBack()
@@ -328,36 +350,101 @@
 	flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 
-/* ===== 认识七贤岭 内嵌学与考入口 ===== */
-.qxl-learn-grid {
+/* ===== 认识七贤岭 学考融合入口 ===== */
+.qxl-learn-hero {
+	position: relative;
+	overflow: hidden;
 	display: flex;
-	gap: 16rpx;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20rpx;
 	margin-bottom: 16rpx;
+	padding: 32rpx 28rpx;
+	border-radius: 20rpx;
+	background: linear-gradient(141deg, #0F6E56 0%, #1FA971 100%);
 }
-.qxl-learn-card {
+.qxl-learn-hero::before {
+	content: '';
+	position: absolute;
+	width: 220rpx;
+	height: 220rpx;
+	border-radius: 50%;
+	right: -40rpx;
+	top: -80rpx;
+	background: rgba(255,255,255,0.16);
+	pointer-events: none;
+}
+.qxl-learn-hero::after {
+	content: '';
+	position: absolute;
+	width: 140rpx;
+	height: 140rpx;
+	border-radius: 50%;
+	right: 80rpx;
+	bottom: -70rpx;
+	background: rgba(255,255,255,0.1);
+	pointer-events: none;
+}
+.qxl-learn-hero:active { transform: scale(0.98); }
+.qxl-learn-hero-copy {
+	position: relative;
+	z-index: 1;
 	flex: 1;
-	border-radius: 16rpx;
-	padding: 20rpx;
+	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
 	gap: 8rpx;
 }
-.qxl-learn-card:active { transform: scale(0.97); }
-.qxl-learn-card--learn {
-	background: linear-gradient(135deg, #4A9BFF 0%, #1877F2 100%);
-}
-.qxl-learn-card--quiz {
-	background: linear-gradient(135deg, #34C759 0%, #28A745 100%);
+.qxl-learn-kicker {
+	font-size: 20rpx;
+	letter-spacing: 3rpx;
+	color: rgba(255,255,255,0.75);
 }
 .qxl-learn-name {
-	font-size: 28rpx;
-	font-weight: 700;
+	font-size: 36rpx;
+	font-weight: 800;
 	color: #fff;
 }
 .qxl-learn-desc {
 	font-size: 22rpx;
-	color: rgba(255,255,255,0.8);
+	color: rgba(255,255,255,0.86);
+	line-height: 1.45;
+}
+.qxl-learn-progress {
+	margin-top: 12rpx;
+}
+.qxl-learn-progress-track {
+	height: 10rpx;
+	border-radius: 10rpx;
+	background: rgba(255,255,255,0.22);
+	overflow: hidden;
+}
+.qxl-learn-progress-fill {
+	height: 100%;
+	border-radius: 10rpx;
+	background: #fff;
+}
+.qxl-learn-progress-text {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 20rpx;
+	color: rgba(255,255,255,0.86);
+}
+.qxl-learn-cta {
+	position: relative;
+	z-index: 1;
+	flex-shrink: 0;
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.18);
+	border: 2rpx solid rgba(255,255,255,0.35);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 26rpx;
+	font-weight: 700;
 }
 
 /* ===== 空态 ===== */

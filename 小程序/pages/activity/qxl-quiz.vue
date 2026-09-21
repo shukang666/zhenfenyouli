@@ -116,9 +116,10 @@
 				showReview: false,
 			};
 		},
-		onShow() {
-			this.checkStatus();
+		onLoad() {
+			uni.redirectTo({ url: '/pages/activity/qxl-learn-exam' });
 		},
+		onShow() {},
 		computed: {
 			currentQuestion() {
 				return this.questions[this.currentIndex] || {};

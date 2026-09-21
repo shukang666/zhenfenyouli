@@ -16,6 +16,18 @@
         <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('admin/QxlQuiz/add')}">
     </if>
         <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>所属文章</label>
+            <div class="col-md-6 col-sm-10">
+                <select class="form-control" name="knowledge_id" required>
+                    <option value="">请选择学习文章</option>
+                    <foreach name="articles" item="title" key="kid">
+                        <option value="{$kid}" <if condition="$data.knowledge_id eq $kid">selected="selected"</if>>{$title}</option>
+                    </foreach>
+                </select>
+                <p class="help-block">学考融合后，题目会出现在对应文章阅读之后。</p>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>题目内容</label>
             <div class="col-md-8 col-sm-10">
                 <textarea class="form-control" name="title" rows="3" required placeholder="请输入题目内容">{$data.title|default=''}</textarea>

@@ -68,7 +68,7 @@
 			};
 		},
 		onLoad() {
-			this.refreshList();
+			uni.redirectTo({ url: '/pages/activity/qxl-learn-exam' });
 		},
 		onReachBottom() {
 			if (this.hasMore && !this.loading) {

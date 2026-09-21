@@ -44,6 +44,10 @@ const wxapp = {
 	getQxlKnowledgeList: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_list', params),
 	// 七贤岭学习 - 详情
 	getQxlKnowledgeDetail: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_detail', params),
+	// 七贤岭学考融合路径
+	getQxlLearnPath: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_learn_path', params),
+	// 七贤岭学考 - 提交本篇测验
+	submitQxlChapter: (params = {}) => uni.$u.post('/wxapp/qxl_quiz/submit_chapter', params),
 
 	// 七贤岭考试 - 获取题目
 	getQxlQuiz: (params = {}) => uni.$u.get('/wxapp/qxl_quiz/get_quiz', params),

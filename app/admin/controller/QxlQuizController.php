@@ -22,18 +22,25 @@ class QxlQuizController extends AdminBaseController
         // 状态筛选
         $status = $this->request->param('status', '');
         if ($status !== '') {
-            $where[] = ['status', '=', intval($status)];
+            $where[] = ['q.status', '=', intval($status)];
         }
 
         // 关键词搜索
         $keyword = $this->request->param('keyword', '');
         if (!empty($keyword)) {
-            $where[] = ['title', 'like', '%' . trim($keyword) . '%'];
+            $where[] = ['q.title', 'like', '%' . trim($keyword) . '%'];
         }
 
-        $list = Db::name('qxl_quiz_question')
+        $knowledgeId = $this->request->param('knowledge_id', '');
+        if ($knowledgeId !== '') {
+            $where[] = ['q.knowledge_id', '=', intval($knowledgeId)];
+        }
+
+        $list = Db::name('qxl_quiz_question')->alias('q')
+            ->leftJoin('cmf_qxl_knowledge k', 'k.id = q.knowledge_id')
             ->where($where)
-            ->order('list_order asc, id desc')
+            ->field('q.*, k.title as knowledge_title')
+            ->order('q.list_order asc, q.id desc')
             ->paginate(15);
 
         $this->assign('list', $list);
@@ -42,6 +49,8 @@ class QxlQuizController extends AdminBaseController
         $this->assign('params', $params);
         $this->assign('status', $status);
         $this->assign('keyword', $keyword);
+        $this->assign('knowledge_id', $knowledgeId);
+        $this->assign('articles', $this->articleOptions());
         return $this->fetch();
     }
 
@@ -58,6 +67,7 @@ class QxlQuizController extends AdminBaseController
             // C/D 选项可为空
             $data['option_c'] = $data['option_c'] ?? '';
             $data['option_d'] = $data['option_d'] ?? '';
+            $data['knowledge_id'] = intval($data['knowledge_id'] ?? 0);
             $data['create_time'] = time();
             $data['update_time'] = time();
             unset($data['id']);
@@ -77,7 +87,9 @@ class QxlQuizController extends AdminBaseController
             'option_d' => '',
             'correct_option' => '',
             'list_order' => 0,
+            'knowledge_id' => 0,
         ]);
+        $this->assign('articles', $this->articleOptions());
         return $this->fetch();
     }
 
@@ -99,6 +111,7 @@ class QxlQuizController extends AdminBaseController
             }
             $data['option_c'] = $data['option_c'] ?? '';
             $data['option_d'] = $data['option_d'] ?? '';
+            $data['knowledge_id'] = intval($data['knowledge_id'] ?? 0);
             $data['update_time'] = time();
             unset($data['id']);
 
@@ -107,7 +120,16 @@ class QxlQuizController extends AdminBaseController
         }
 
         $this->assign('data', $question);
+        $this->assign('articles', $this->articleOptions());
         return $this->fetch('add');
+    }
+
+    private function articleOptions()
+    {
+        return Db::name('qxl_knowledge')
+            ->where('status', 1)
+            ->order('list_order asc, id asc')
+            ->column('title', 'id');
     }
 
     /**

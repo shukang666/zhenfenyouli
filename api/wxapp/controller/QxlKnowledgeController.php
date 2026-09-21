@@ -55,6 +55,99 @@ class QxlKnowledgeController extends AuthController
     }
 
     /**
+     * 学考融合路径：按篇章顺序返回学习内容 + 本篇题目 + 通关/解锁状态
+     * GET /wxapp/qxl_knowledge/get_learn_path
+     */
+    public function get_learn_path()
+    {
+        $articles = Db::name('qxl_knowledge')
+            ->where('status', 1)
+            ->order('list_order asc, id asc')
+            ->select()
+            ->toArray();
+
+        $passedMap = [];
+        if (!empty($this->user_id)) {
+            $logs = Db::name('qxl_chapter_log')
+                ->where('user_id', $this->user_id)
+                ->where('passed', 1)
+                ->column('id', 'knowledge_id');
+            $passedMap = $logs ?: [];
+        }
+
+        $questionsByKid = [];
+        $questionRows = Db::name('qxl_quiz_question')
+            ->where('status', 1)
+            ->where('knowledge_id', '>', 0)
+            ->field('id, knowledge_id, title, option_a, option_b, option_c, option_d')
+            ->order('list_order asc, id asc')
+            ->select()
+            ->toArray();
+        foreach ($questionRows as $q) {
+            $kid = intval($q['knowledge_id']);
+            unset($q['knowledge_id']);
+            $questionsByKid[$kid][] = $q;
+        }
+
+        $chapters = [];
+        $prevPassed = true;
+        $passedCount = 0;
+        $currentId = 0;
+
+        foreach ($articles as $item) {
+            $kid = intval($item['id']);
+            $passed = isset($passedMap[$kid]);
+            $unlocked = $prevPassed;
+            if ($passed) {
+                $passedCount++;
+            }
+            if ($unlocked && !$passed && $currentId === 0) {
+                $currentId = $kid;
+            }
+
+            $chapter = [
+                'id'            => $kid,
+                'title'         => $item['title'],
+                'image'         => $this->formatImage($item['image']),
+                'category'      => $item['category'],
+                'unlocked'      => $unlocked ? 1 : 0,
+                'passed'        => $passed ? 1 : 0,
+                'question_count'=> isset($questionsByKid[$kid]) ? count($questionsByKid[$kid]) : 0,
+                'content'       => '',
+                'questions'     => [],
+            ];
+
+            if ($unlocked) {
+                $chapter['content'] = $item['content'] ?: '';
+            }
+            if ($unlocked && !$passed) {
+                $chapter['questions'] = $questionsByKid[$kid] ?? [];
+            }
+
+            $chapters[] = $chapter;
+            $prevPassed = $passed;
+        }
+
+        if ($currentId === 0 && !empty($chapters)) {
+            foreach ($chapters as $ch) {
+                if (intval($ch['unlocked']) === 1 && intval($ch['passed']) === 0) {
+                    $currentId = intval($ch['id']);
+                    break;
+                }
+            }
+        }
+
+        $total = count($chapters);
+        $this->success('success', [
+            'chapters'     => $chapters,
+            'passed_count' => $passedCount,
+            'total_count'  => $total,
+            'all_passed'   => $total > 0 && $passedCount >= $total,
+            'current_id'   => $currentId,
+        ]);
+    }
+
+    /**
      * 获取七贤岭学习详情
      * GET /wxapp/qxl_knowledge/get_detail
      */

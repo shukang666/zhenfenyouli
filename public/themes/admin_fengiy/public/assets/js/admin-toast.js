@@ -1,0 +1,87 @@
+/**
+ * 后台轻提示默认体验：顶部胶囊、轻入场。不改业务回调。
+ */
+(function (w) {
+	function assignDefaults(options) {
+		var out = {};
+		var k;
+		if (options && typeof options === 'object') {
+			for (k in options) {
+				if (Object.prototype.hasOwnProperty.call(options, k)) {
+					out[k] = options[k];
+				}
+			}
+		}
+		if (out.offset == null) {
+			out.offset = '28px';
+		}
+		if (out.skin == null) {
+			out.skin = 'cmf-toast';
+		}
+		return out;
+	}
+
+	function patchLayer(layerObj) {
+		if (!layerObj || typeof layerObj.msg !== 'function' || layerObj.msg.__cmfPatched) {
+			return;
+		}
+		var orig = layerObj.msg;
+		layerObj.msg = function (content, options, end) {
+			if (typeof options === 'function') {
+				end = options;
+				options = {};
+			} else if (typeof options === 'number') {
+				options = { time: options };
+			} else if (!options) {
+				options = {};
+			}
+			return orig.call(this, content, assignDefaults(options), end);
+		};
+		layerObj.msg.__cmfPatched = true;
+	}
+
+	function tryPatchLayer() {
+		if (w.layer) {
+			patchLayer(w.layer);
+		}
+		if (w.layui && w.layui.layer) {
+			patchLayer(w.layui.layer);
+		}
+	}
+
+	function patchNoty() {
+		if (!w.noty || w.noty.__cmfPatched) {
+			return !!w.noty;
+		}
+		var orig = w.noty;
+		var wrapped = function (opts) {
+			opts = opts || {};
+			if (opts.modal && !opts.buttons) {
+				opts.modal = false;
+			}
+			return orig(opts);
+		};
+		wrapped.__cmfPatched = true;
+		var k;
+		for (k in orig) {
+			if (Object.prototype.hasOwnProperty.call(orig, k)) {
+				wrapped[k] = orig[k];
+			}
+		}
+		w.noty = wrapped;
+		return true;
+	}
+
+	tryPatchLayer();
+	patchNoty();
+
+	var n = 0;
+	var timer = setInterval(function () {
+		tryPatchLayer();
+		patchNoty();
+		n += 1;
+		if (n > 80) {
+			clearInterval(timer);
+		}
+	}, 100);
+})(window);
