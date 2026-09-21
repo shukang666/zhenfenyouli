@@ -74,6 +74,39 @@
 				</view>
 			</view>
 
+			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
+			<view class="showcase-section" v-if="showcaseList.length > 0">
+				<view class="showcase-header">
+					<view class="showcase-header__left">
+						<text class="showcase-header__title">活动风采</text>
+						<text class="showcase-header__sub">记录每一次精彩瞬间</text>
+					</view>
+					<view class="showcase-header__more" @click="goShowcaseList">
+						<text>查看全部</text>
+						<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
+					</view>
+				</view>
+				<scroll-view scroll-x class="showcase-scroll" :show-scrollbar="false">
+					<view class="showcase-row">
+						<view class="showcase-card" v-for="item in showcaseList" :key="item.id"
+							hover-class="showcase-card--on" :hover-stay-time="80"
+							@click="goShowcaseDetail(item.id)">
+							<view class="showcase-card__cover">
+								<u-image width="300" height="220" :src="item.cover" border-radius="20rpx 20rpx 0 0" mode="aspectFill"></u-image>
+								<view class="showcase-card__badge" v-if="item.photo_count > 1">
+									<u-icon name="photo" size="20" color="#fff"></u-icon>
+									<text>{{ item.photo_count }}</text>
+								</view>
+							</view>
+							<view class="showcase-card__body">
+								<view class="showcase-card__title u-line-2">{{ item.title }}</view>
+								<view class="showcase-card__date">{{ item.event_date_text }}</view>
+							</view>
+						</view>
+					</view>
+				</scroll-view>
+			</view>
+
 			<!-- 核心功能入口：一行四个图标（iOS毛玻璃风格） -->
 			<!-- <view class="entry-grid">
 				<view class="entry-item" v-for="item in entry_list" :key="item.key"
@@ -223,6 +256,7 @@ export default {
 				bannerList: [],
 				dataList: [],
 				active_list: [],
+				showcaseList: [],
 				homeNotice: '',
 				// 问候模块数据
 				greetingHour: new Date().getHours(),
@@ -537,6 +571,7 @@ export default {
 				await Promise.all([
 					this.getBannerList(),
 					this.get_new_active_list(),
+					this.getShowcaseList(),
 					this.getHomeEntries(),
 					this.getHomeNotice()
 				])
@@ -582,6 +617,23 @@ export default {
 				// 接口失败不影响，保留 fallback
 			}
 		},
+			// 活动风采预览（首页展示最新 6 条）
+			async getShowcaseList() {
+				try {
+					let res = await this.$u.api.getActivityShowcaseList({ page: 1, limit: 6 });
+					if (res.code == 1) {
+						this.showcaseList = (res.data && res.data.list) || [];
+					}
+				} catch (e) {
+					// 接口失败不显示板块
+				}
+			},
+			goShowcaseList() {
+				this.$u.route('/pages/activity/showcase-list');
+			},
+			goShowcaseDetail(id) {
+				this.$u.route('/pages/activity/showcase-detail?id=' + id);
+			},
 			// 拉首页走马灯通知（后台 home_notice 配置，留空则不显示）
 			async getHomeNotice() {
 				try {
@@ -1143,6 +1195,92 @@ export default {
 		align-items: center;
 		font-size: 24rpx;
 		color: #999;
+	}
+
+	.showcase-section {
+		margin: 24rpx 30rpx 0;
+		padding: 28rpx 0 8rpx;
+		background: #fff;
+		border-radius: 28rpx;
+		box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.06);
+	}
+	.showcase-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 28rpx 20rpx;
+	}
+	.showcase-header__title {
+		display: block;
+		font-size: 32rpx;
+		font-weight: 700;
+		color: #1c2b1e;
+	}
+	.showcase-header__sub {
+		display: block;
+		margin-top: 6rpx;
+		font-size: 22rpx;
+		color: #8a9b8d;
+	}
+	.showcase-header__more {
+		display: flex;
+		align-items: center;
+		font-size: 24rpx;
+		color: #18AF38;
+	}
+	.showcase-scroll {
+		white-space: nowrap;
+		padding-left: 28rpx;
+		padding-bottom: 20rpx;
+	}
+	.showcase-row {
+		display: flex;
+		padding-right: 28rpx;
+	}
+	.showcase-card {
+		flex-shrink: 0;
+		width: 300rpx;
+		margin-right: 20rpx;
+		background: #f8fbf9;
+		border-radius: 20rpx;
+		overflow: hidden;
+	}
+	.showcase-card--on {
+		opacity: 0.92;
+		transform: scale(0.98);
+	}
+	.showcase-card__cover {
+		position: relative;
+		width: 300rpx;
+		height: 220rpx;
+	}
+	.showcase-card__badge {
+		position: absolute;
+		right: 12rpx;
+		bottom: 12rpx;
+		display: flex;
+		align-items: center;
+		gap: 6rpx;
+		padding: 4rpx 12rpx;
+		font-size: 20rpx;
+		color: #fff;
+		background: rgba(0, 0, 0, 0.45);
+		border-radius: 999rpx;
+	}
+	.showcase-card__body {
+		padding: 18rpx 20rpx 22rpx;
+	}
+	.showcase-card__title {
+		font-size: 26rpx;
+		font-weight: 600;
+		color: #1c2b1e;
+		line-height: 1.4;
+		min-height: 72rpx;
+	}
+	.showcase-card__date {
+		margin-top: 10rpx;
+		font-size: 22rpx;
+		color: #8a9b8d;
 	}
 
 	.content-tabs {

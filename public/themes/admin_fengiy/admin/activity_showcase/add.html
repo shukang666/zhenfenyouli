@@ -1,0 +1,119 @@
+<include file="public@header"/>
+<script type="text/html" id="photos-item-tpl">
+    <li id="saved-image{id}">
+        <input id="photos-{id}" type="hidden" name="photos[]" value="{filepath}">
+        <img id="photo-{id}-preview" src="{url}" style="height:80px;width:80px;object-fit:cover;border-radius:4px;">
+        <div>
+            <a href="javascript:uploadOneImage('图片上传','#photos-{id}');">替换</a>
+            <a href="javascript:(function(){$('#saved-image{id}').remove();})();">移除</a>
+        </div>
+    </li>
+</script>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('admin/ActivityShowcase/index')}">活动风采</a></li>
+        <if condition="$data.id">
+            <li class="active"><a href="javascript:;">编辑风采</a></li>
+        <else/>
+            <li class="active"><a href="javascript:;">添加风采</a></li>
+        </if>
+    </ul>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('admin/ActivityShowcase/add', ['id'=>$data.id])}">
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>标题</label>
+            <div class="col-md-8 col-sm-10">
+                <input type="text" class="form-control" name="title" value="{$data.title|default=''}" required placeholder="如：垃圾分类宣讲会、社区环保日活动">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>活动日期</label>
+            <div class="col-md-4 col-sm-10">
+                <input type="date" class="form-control" name="event_date" value="{$data.event_date|default=''}" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">简介</label>
+            <div class="col-md-8 col-sm-10">
+                <textarea class="form-control" name="description" rows="3" placeholder="可选，简要描述本次活动">{$data.description|default=''}</textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">封面图</label>
+            <div class="col-md-6 col-sm-10">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="showcase-cover" name="cover" value="{$data.cover|default=''}" placeholder="留空则自动取第一张照片">
+                </div>
+                <php>$coverPreviewUrl = cmf_get_image_preview_url($data['cover'] ?? '');</php>
+                <if condition="$coverPreviewUrl">
+                    <img src="{$coverPreviewUrl}" id="showcase-cover-preview" style="height:80px;margin-top:10px;border-radius:4px;" onclick="parent.imagePreviewDialog(this.src);">
+                <else/>
+                    <img src="" id="showcase-cover-preview" style="height:80px;margin-top:10px;border-radius:4px;display:none;" onclick="parent.imagePreviewDialog(this.src);">
+                </if>
+                <a class="btn btn-default" href="javascript:doCoverUpload();" style="margin-top:10px;margin-left:4px;"><i class="fa fa-upload fa-fw"></i></a>
+                <p class="help-block">首页卡片展示用，不填则使用第一张照片</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>活动照片</label>
+            <div class="col-md-8 col-sm-10">
+                <div class="help-block">支持多张上传，第一张将作为默认封面</div>
+                <ul id="photos" class="pic-list list-unstyled form-inline">
+                    <notempty name="data.photos">
+                        <foreach name="data.photos" item="vo">
+                            <li id="saved-image{$key}" style="cursor:pointer;margin-bottom:5px;margin-right:10px;">
+                                <input id="photo-{$key}" type="hidden" name="photos[]" value="{$vo}">
+                                <img id="photo-{$key}-preview" src="{:cmf_get_image_preview_url($vo)}" style="height:80px;width:80px;object-fit:cover;border-radius:4px;">
+                                <div>
+                                    <a href="javascript:uploadOneImage('图片上传','#photo-{$key}');">替换</a>
+                                    <a href="javascript:(function(){$('#saved-image{$key}').remove();})();">移除</a>
+                                </div>
+                            </li>
+                        </foreach>
+                    </notempty>
+                    <a href="javascript:uploadMultiImage('图片上传','#photos','photos-item-tpl');" class="btn btn-default btn-upload">
+                        <i class="layui-icon layui-icon-upload"></i>
+                        <div>选择图片</div>
+                    </a>
+                </ul>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">排序</label>
+            <div class="col-md-2 col-sm-10">
+                <input type="number" class="form-control" name="list_order" value="{$data.list_order|default='0'}" placeholder="数字越小越靠前">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">状态</label>
+            <div class="col-md-4 col-sm-10">
+                <label class="checkbox-inline" style="padding-top:0;">
+                    <input type="checkbox" name="status" value="1" <if condition="$data.status neq 0">checked="checked"</if>> 启用
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary js-ajax-submit">保存</button>
+                <a href="{:url('admin/ActivityShowcase/index')}" class="btn btn-default">返回</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+function doCoverUpload(){
+    openUploadDialog('封面图上传', function (dialog, files) {
+        var filepath = files[0].filepath || '';
+        $('#showcase-cover').val(filepath);
+        var previewUrl = files[0].preview_url || files[0].filepath || '';
+        if(previewUrl && !/^https?:\/\//.test(previewUrl)){
+            previewUrl = GV.WEB_ROOT + previewUrl;
+        }
+        $('#showcase-cover-preview').attr('src', previewUrl).show();
+    }, {}, 0, 'image', 'admin');
+}
+</script>
+</body>
+</html>

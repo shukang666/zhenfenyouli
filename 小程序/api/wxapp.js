@@ -35,6 +35,11 @@ const wxapp = {
 	// 分类知识挑战 - 检查今日是否已答
 	checkTodayQuiz: (params = {}) => uni.$u.get('/wxapp/quiz/check_today', params),
 
+	// 活动风采 - 列表
+	getActivityShowcaseList: (params = {}) => uni.$u.get('/wxapp/activity_showcase/get_list', params),
+	// 活动风采 - 详情
+	getActivityShowcaseDetail: (params = {}) => uni.$u.get('/wxapp/activity_showcase/get_detail', params),
+
 	// 分类知识 - 列表
 	getKnowledgeList: (params = {}) => uni.$u.get('/wxapp/knowledge/get_list', params),
 	// 分类知识 - 详情

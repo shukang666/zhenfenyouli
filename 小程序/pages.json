@@ -248,6 +248,18 @@
 					}
 				},
 				{
+					"path": "showcase-list",
+					"style": {
+						"navigationBarTitleText": "活动风采"
+					}
+				},
+				{
+					"path": "showcase-detail",
+					"style": {
+						"navigationBarTitleText": "风采详情"
+					}
+				},
+				{
 					"path": "active-list",
 					"style": {
 						"navigationBarTitleText": "活动列表",
