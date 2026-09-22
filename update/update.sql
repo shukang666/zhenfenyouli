@@ -41,3 +41,6 @@ CREATE TABLE IF NOT EXISTS `cmf_clock_tutorial` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_cate_key` (`cate_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='垃圾打卡页教程';
+
+-- 打卡教程改为富文本（后台 UEditor，小程序 u-parse 展示，可插图）
+ALTER TABLE `cmf_clock_tutorial` ADD COLUMN `content` mediumtext COMMENT '教程富文本HTML' AFTER `title`;

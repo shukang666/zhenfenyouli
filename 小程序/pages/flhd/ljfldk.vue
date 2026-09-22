@@ -1,9 +1,7 @@
 <template>
-	<view class="dk-hub" v-if="!setting.app_test">
-		<view class="dk-hero">
-			<text class="dk-hero-kicker">拍照前先选好场景和种类</text>
-			<text class="dk-hero-title">垃圾分类打卡</text>
-			<text class="dk-hero-desc">在对应场景卡片里点垃圾种类，直接进入拍照打卡。</text>
+	<view class="dk-hub dk-hub--page" v-if="!setting.app_test">
+		<view class="dk-banner">
+			<text class="dk-banner-title">践行真分</text>
 		</view>
 
 		<view class="dk-stats" v-if="isLogin">
@@ -28,53 +26,69 @@
 			<text class="dk-gate-a">去完成 ›</text>
 		</view>
 
-		<view class="dk-block">
+		<view class="dk-block dk-block--scenes">
 			<text class="dk-block-t">你在哪投放</text>
-			<text class="dk-block-hint">家庭、办公点大按钮；亲子、沿街点具体种类</text>
+			<text class="dk-block-hint">家庭、办公、沿街点卡片进入；亲子请选择种类</text>
+			<view class="dk-scene-list">
 			<view
-				class="dk-scene"
+				class="dk-scene-card"
 				v-for="item in scenes"
 				:key="item.key"
-				:class="'dk-scene--' + item.key"
+				:class="'dk-scene-card--' + item.key"
+				:hover-class="item.layout === 'entry' ? 'dk-scene-card--press' : ''"
+				:hover-stay-time="80"
+				@click="onSceneCardTap(item)"
 			>
-				<text class="dk-scene-name">{{ item.name }}</text>
-				<text class="dk-scene-desc">{{ item.desc }}</text>
-				<view
-					v-if="item.fullEntry"
-					class="dk-scene-main-btn"
-					hover-class="dk-card--press"
-					:hover-stay-time="80"
-					@click="goSceneEntry(item.key)"
-				>
-					<text class="dk-scene-main-t">{{ item.entryLabel || '去打卡' }}</text>
+				<view class="dk-scene-cover-wrap">
+					<view class="dk-scene-cover" :class="'dk-scene-cover--' + item.key">
+						<u-icon :name="item.icon" :size="sceneIconSize" color="#ffffff"></u-icon>
+					</view>
 				</view>
-				<view v-else class="dk-scene-chips">
+				<view class="dk-scene-body">
+					<text class="dk-scene-name">{{ item.name }}</text>
+					<text class="dk-scene-desc">{{ item.desc }}</text>
 					<view
-						class="dk-chip"
-						v-for="(chip, ci) in item.chips"
-						:key="item.key + '-' + ci"
-						hover-class="dk-card--press"
-						:hover-stay-time="80"
-						@click="goFromChip(item.key, ci)"
+						v-if="item.layout === 'chips'"
+						class="dk-scene-btn-row"
 					>
-						<text class="dk-chip-text">{{ chip.label }}</text>
-						<text class="dk-chip-go">去拍照 ›</text>
+						<view
+							class="dk-scene-btn"
+							v-for="(chip, ci) in item.chips"
+							:key="item.key + '-' + ci"
+							hover-class="dk-scene-btn--press"
+							:hover-stay-time="80"
+							@click.stop="goFromChip(item.key, ci)"
+						>
+							<text class="dk-scene-btn-t">{{ chip.label }}</text>
+						</view>
+					</view>
+					<view
+						v-else
+						class="dk-scene-actions"
+					>
+						<view
+							class="dk-scene-btn dk-scene-btn--primary"
+							hover-class="dk-scene-btn--press"
+							:hover-stay-time="80"
+							@click.stop="navigateScene(item.key)"
+						>
+							<text class="dk-scene-btn-t">立即真分</text>
+						</view>
 					</view>
 				</view>
 			</view>
+			</view>
 		</view>
 
-		<view class="dk-block">
+		<view class="dk-block dk-block--hist">
 			<text class="dk-block-t">过往记录</text>
 			<view class="dk-hist-row">
 				<view class="dk-hist-btn dk-hist-btn--mine" hover-class="dk-hist-btn--press" :hover-stay-time="80" @click="goMy">
 					<text class="dk-hist-name">我的打卡</text>
-					<text class="dk-hist-sub">只看自己交过的</text>
 					<text class="dk-hist-go">查看 ›</text>
 				</view>
 				<view class="dk-hist-btn dk-hist-btn--pick" hover-class="dk-hist-btn--press" :hover-stay-time="80" @click="goChoice">
 					<text class="dk-hist-name">精选打卡</text>
-					<text class="dk-hist-sub">看看别人怎么分</text>
 					<text class="dk-hist-go">查看 ›</text>
 				</view>
 			</view>
@@ -94,32 +108,39 @@
 						key: 'home',
 						name: '家庭',
 						desc: '厨房、客厅、卫生间里的日常投放',
-						fullEntry: true,
-						entryLabel: '家庭垃圾分类打卡',
-						entrySub: '进入后选择四类垃圾并拍照',
+						layout: 'entry',
+						icon: 'home-fill',
 					},
 					{
 						key: 'qinzi',
 						name: '亲子',
 						desc: '家长带孩子一起学分类、动手投放',
+						layout: 'chips',
+						icon: 'plus-people-fill',
 						chips: [{ label: '可回收' }, { label: '有害' }],
 					},
 					{
 						key: 'office',
 						name: '办公',
 						desc: '部分办公大厦设有真分角，可分类投放',
-						chips: [{ label: '真分角', zhenfenjiao: true }],
+						layout: 'entry',
+						icon: 'grid-fill',
 					},
 					{
 						key: 'street',
 						name: '沿街',
 						desc: '路边、商铺门前的分类投放点',
+						layout: 'entry',
+						icon: 'map-fill',
 						chips: [{ label: '厨余垃圾' }],
 					},
 				],
 			}
 		},
 		computed: {
+			sceneIconSize() {
+				return 76
+			},
 			streak() {
 				const u = this.userInfo || {}
 				return u.clock_days || u.continuous_days || u.clock_count || 0
@@ -151,7 +172,11 @@
 					this.cate_list = res.data || []
 				}).catch(() => {})
 			},
-			goSceneEntry(sceneKey) {
+			onSceneCardTap(item) {
+				if (!item || item.layout !== 'entry') return
+				this.navigateScene(item.key)
+			},
+			navigateScene(sceneKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				const scene = this.scenes.find(s => s.key === sceneKey)
@@ -161,6 +186,16 @@
 						'/pages/flhd/add?scene_key=home&scene=' + encodeURIComponent(scene.name),
 					)
 					return
+				}
+				if (sceneKey === 'office') {
+					this.$u.route(
+						'/pages/flhd/add?scene_key=zhenfenjiao&scene=' +
+							encodeURIComponent(scene.name),
+					)
+					return
+				}
+				if (sceneKey === 'street') {
+					this.goFromChip('street', 0)
 				}
 			},
 			goFromChip(sceneKey, chipIndex) {
@@ -206,9 +241,39 @@
 
 <style lang="scss" scoped>
 .dk-hub {
-	min-height: 100vh;
-	padding: 24rpx 28rpx 80rpx;
 	background: #e8f0ea;
+}
+.dk-hub--page {
+	height: 100%;
+	min-height: 100%;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	padding: 0 28rpx;
+	padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+	overflow: hidden;
+}
+.dk-banner {
+	margin: 0 -28rpx 0;
+	flex-shrink: 0;
+	padding: 28rpx 28rpx 48rpx;
+	text-align: center;
+	background: linear-gradient(
+		180deg,
+		#18af38 0%,
+		#2bb84a 28%,
+		#6ecf85 52%,
+		#b8e4c4 72%,
+		#e8f0ea 100%
+	);
+}
+.dk-banner-title {
+	display: block;
+	font-size: 56rpx;
+	font-weight: 800;
+	color: #fff;
+	letter-spacing: 8rpx;
+	text-shadow: 0 4rpx 16rpx rgba(12, 90, 36, 0.22);
 }
 .dk-hero {
 	padding: 36rpx 32rpx 32rpx;
@@ -280,12 +345,16 @@
 	background: #fff;
 }
 .dk-stats {
-	margin-top: 24rpx;
-	padding: 28rpx 12rpx;
+	position: relative;
+	z-index: 1;
+	flex-shrink: 0;
+	margin-top: -22rpx;
+	padding: 18rpx 12rpx;
 	border-radius: 20rpx;
 	background: #fff;
 	display: flex;
 	align-items: center;
+	box-shadow: 0 8rpx 24rpx rgba(36, 48, 40, 0.06);
 }
 .dk-stat {
 	flex: 1;
@@ -294,23 +363,26 @@
 	align-items: center;
 }
 .dk-stat-num {
-	font-size: 36rpx;
+	font-size: 32rpx;
 	font-weight: 800;
 	color: #148a2e;
+	line-height: 1.2;
 }
 .dk-stat-lab {
-	margin-top: 6rpx;
+	margin-top: 4rpx;
 	font-size: 22rpx;
 	color: #8a958c;
+	line-height: 1.25;
 }
 .dk-stat-line {
 	width: 1rpx;
-	height: 56rpx;
+	height: 44rpx;
 	background: #e8eee9;
 }
 .dk-gate {
-	margin-top: 16rpx;
-	padding: 22rpx 24rpx;
+	flex-shrink: 0;
+	margin-top: 12rpx;
+	padding: 18rpx 20rpx;
 	border-radius: 16rpx;
 	background: #fff7e6;
 	display: flex;
@@ -329,137 +401,154 @@
 	color: #c47b00;
 }
 .dk-block {
-	margin-top: 28rpx;
+	margin-top: 16rpx;
+}
+.dk-block--scenes {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	margin-top: 12rpx;
+}
+.dk-block--hist {
+	flex-shrink: 0;
+	margin-top: 10rpx;
 }
 .dk-block-t {
 	display: block;
-	margin-bottom: 16rpx;
+	margin-bottom: 6rpx;
 	font-size: 30rpx;
 	font-weight: 700;
 	color: #243028;
 }
 .dk-block-hint {
 	display: block;
-	margin: -8rpx 0 16rpx;
+	margin: 0 0 10rpx;
 	font-size: 22rpx;
 	color: #8a958c;
+}
+.dk-scene-list {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
 }
 .dk-card--press {
 	transform: scale(0.97);
 	opacity: 0.92;
 }
-.dk-scene {
-	position: relative;
-	overflow: hidden;
-	margin-bottom: 18rpx;
-	padding: 36rpx 28rpx 32rpx;
-	border-radius: 24rpx;
+.dk-scene-card {
+	display: flex;
+	align-items: stretch;
+	flex: 1;
+	min-height: 0;
+	padding: 16rpx;
+	border-radius: 20rpx;
+	background: #fff;
+	box-shadow: 0 6rpx 20rpx rgba(36, 48, 40, 0.06);
 	transition: transform 0.1s ease, opacity 0.1s ease;
 }
-.dk-scene::before {
-	content: '';
-	position: absolute;
-	width: 180rpx;
-	height: 180rpx;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.12);
-	top: -70rpx;
-	right: -40rpx;
-	pointer-events: none;
+.dk-scene-card--press {
+	transform: scale(0.99);
+	opacity: 0.96;
 }
-.dk-scene::after {
-	content: '';
-	position: absolute;
-	left: 0;
-	bottom: 0;
+.dk-scene-cover-wrap {
+	flex-shrink: 0;
+	align-self: stretch;
+	height: 100%;
+	width: auto;
+	max-width: 40%;
+	aspect-ratio: 1;
+}
+.dk-scene-cover {
 	width: 100%;
-	height: 8rpx;
-	background: rgba(255, 255, 255, 0.22);
-	pointer-events: none;
-}
-.dk-scene--home {
-	background: linear-gradient(141deg, #D4A017 0%, #A36B08 100%);
-	box-shadow: 0 10rpx 24rpx rgba(163, 107, 8, 0.38);
-}
-.dk-scene--qinzi {
-	background: linear-gradient(141deg, #F0938A 0%, #D94F6A 100%);
-	box-shadow: 0 10rpx 24rpx rgba(217, 79, 106, 0.38);
-}
-.dk-scene--office {
-	background: linear-gradient(141deg, #2B8BB8 0%, #156A90 100%);
-	box-shadow: 0 10rpx 24rpx rgba(21, 106, 144, 0.38);
-}
-.dk-scene--street {
-	background: linear-gradient(141deg, #18AF38 0%, #0C7A24 100%);
-	box-shadow: 0 10rpx 24rpx rgba(12, 122, 36, 0.38);
-}
-.dk-scene-name {
-	position: relative;
-	z-index: 1;
-	display: block;
-	font-size: 40rpx;
-	font-weight: 800;
-	color: #fff;
-}
-.dk-scene-desc {
-	position: relative;
-	z-index: 1;
-	display: block;
-	margin-top: 10rpx;
-	font-size: 24rpx;
-	color: rgba(255, 255, 255, 0.92);
-}
-.dk-scene-chips {
-	position: relative;
-	z-index: 1;
-	margin-top: 22rpx;
-	display: flex;
-	flex-wrap: wrap;
-	gap: 14rpx;
-}
-.dk-chip {
-	flex: 1;
-	min-width: 42%;
-	padding: 18rpx 20rpx;
+	height: 100%;
 	border-radius: 16rpx;
-	background: rgba(255, 255, 255, 0.22);
-	border: 1rpx solid rgba(255, 255, 255, 0.35);
+	overflow: hidden;
+	background: #eef5f0;
 	display: flex;
 	align-items: center;
+	justify-content: center;
+}
+.dk-scene-cover--home {
+	background: linear-gradient(145deg, #f8ecd0 0%, #e8c56a 100%);
+}
+.dk-scene-cover--qinzi {
+	background: linear-gradient(145deg, #fde8e6 0%, #f0a8b0 100%);
+}
+.dk-scene-cover--office {
+	background: linear-gradient(145deg, #dceef8 0%, #7eb8d4 100%);
+}
+.dk-scene-cover--street {
+	background: linear-gradient(145deg, #dff5e6 0%, #6fcf88 100%);
+}
+.dk-scene-body {
+	flex: 1;
+	min-width: 0;
+	margin-left: 18rpx;
+	display: flex;
+	flex-direction: column;
 	justify-content: space-between;
+	padding: 4rpx 0;
+}
+.dk-scene-name {
+	display: block;
+	font-size: 34rpx;
+	font-weight: 800;
+	color: #243028;
+	line-height: 1.25;
+}
+.dk-scene-desc {
+	display: -webkit-box;
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	line-height: 1.45;
+	color: #8a958c;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	flex: 1;
+}
+.dk-scene-actions {
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-end;
+	margin-top: 10rpx;
+}
+.dk-scene-btn-row {
+	display: flex;
+	gap: 14rpx;
+	margin-top: 10rpx;
+}
+.dk-scene-btn {
+	flex: 1;
+	padding: 14rpx 10rpx;
+	border-radius: 999rpx;
+	text-align: center;
+	background: #f0f7f2;
+	border: 2rpx solid #c8e6d0;
 	transition: transform 0.1s ease, opacity 0.1s ease;
 }
-.dk-chip-text {
-	font-size: 28rpx;
+.dk-scene-btn--primary {
+	flex: none;
+	padding: 14rpx 28rpx;
+	border: none;
+	background: linear-gradient(141deg, #a4db88 0%, #18af38 100%);
+	box-shadow: 0 6rpx 16rpx rgba(24, 175, 56, 0.28);
+}
+.dk-scene-btn--primary .dk-scene-btn-t {
+	color: #fff;
 	font-weight: 700;
-	color: #fff;
 }
-.dk-chip-go {
-	font-size: 22rpx;
-	color: rgba(255, 255, 255, 0.9);
+.dk-scene-btn--press {
+	transform: scale(0.96);
+	opacity: 0.9;
 }
-.dk-scene-main-btn {
-	position: relative;
-	z-index: 1;
-	margin-top: 24rpx;
-	padding: 28rpx 32rpx;
-	border-radius: 20rpx;
-	background: rgba(255, 255, 255, 0.28);
-	border: 2rpx solid rgba(255, 255, 255, 0.45);
-	text-align: center;
-}
-.dk-scene-main-t {
-	display: block;
-	font-size: 32rpx;
-	font-weight: 800;
-	color: #fff;
-}
-.dk-scene-main-sub {
-	display: block;
-	margin-top: 10rpx;
-	font-size: 24rpx;
-	color: rgba(255, 255, 255, 0.88);
-	line-height: 1.45;
+.dk-scene-btn-t {
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #148a2e;
 }
 .dk-type-head {
 	display: flex;
@@ -559,8 +648,8 @@
 	overflow: hidden;
 	flex: 1;
 	margin: 0 10rpx;
-	padding: 32rpx 24rpx 28rpx;
-	border-radius: 24rpx;
+	padding: 22rpx 18rpx 18rpx;
+	border-radius: 20rpx;
 	transition: transform 0.1s ease, opacity 0.1s ease;
 }
 .dk-hist-btn::before {
@@ -604,21 +693,20 @@
 	font-weight: 800;
 	color: #fff;
 }
-.dk-hist-sub {
-	position: relative;
-	z-index: 1;
-	display: block;
-	margin-top: 10rpx;
-	font-size: 22rpx;
-	color: rgba(255, 255, 255, 0.88);
-}
 .dk-hist-go {
 	position: relative;
 	z-index: 1;
 	display: block;
-	margin-top: 20rpx;
+	margin-top: 12rpx;
 	font-size: 24rpx;
 	font-weight: 700;
 	color: #fff;
+}
+</style>
+
+<style lang="scss">
+page {
+	height: 100%;
+	background: #e8f0ea;
 }
 </style>

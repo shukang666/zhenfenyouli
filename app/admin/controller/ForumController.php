@@ -365,6 +365,10 @@ class ForumController extends ToolController
         }
         $labels = ClockTutorialModel::cateKeyLabels();
         $item['cate_key_label'] = $labels[$item['cate_key']] ?? $item['cate_key'];
+        $arr = $item->toArray();
+        if (trim((string)($arr['content'] ?? '')) === '') {
+            $item['content'] = ClockTutorialModel::buildLegacyHtml($arr);
+        }
         return $this->fetch('clock_tutorial_update', ['item' => $item]);
     }
 
@@ -379,16 +383,16 @@ class ForumController extends ToolController
             $this->error('记录不存在');
         }
         $save = [
-            'title'        => trim((string)$this->request->param('title', '')),
-            'intro'        => trim((string)$this->request->param('intro', '')),
-            'examples'     => trim((string)$this->request->param('examples', '')),
-            'photo_lines'  => trim((string)$this->request->param('photo_lines', '')),
-            'notice_lines' => trim((string)$this->request->param('notice_lines', '')),
-            'status'       => (int)$this->request->param('status', 1),
-            'update_time'  => time(),
+            'title'       => trim((string)$this->request->param('title', '')),
+            'content'     => (string)$this->request->param('content', ''),
+            'status'      => (int)$this->request->param('status', 1),
+            'update_time' => time(),
         ];
         if ($save['title'] === '') {
             $this->error('请填写教程标题');
+        }
+        if (trim($save['content']) === '') {
+            $this->error('请填写教程正文（富文本）');
         }
         ClockTutorialModel::where('id', $id)->update($save);
         $this->success('保存成功', url('clock_tutorial_index'));

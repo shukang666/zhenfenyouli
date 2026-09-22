@@ -26,7 +26,7 @@
 		<!-- 签到表单 -->
 		<view class="u-p-40 u-type-white-bg u-radius-6 u-m-t-30" v-if="!todaySigned && inPeakHour">
 			<view class="u-font-28 u-m-b-16">督导小区</view>
-			<view class="select-row" @click="showCommunity = true">
+			<view class="select-row" @click="openCommunityPicker">
 				<text v-if="form.community_name" class="u-font-28">{{form.community_name}}</text>
 				<text v-else class="u-font-28 u-type-info">请选择督导小区</text>
 				<u-icon name="arrow-right" color="#ccc"></u-icon>
@@ -84,8 +84,31 @@
 			</view>
 		</view>
 
-		<!-- 小区选择 -->
-		<u-select v-model="showCommunity" label-name="label" value-name="value" :list="communityList" @confirm="confirmCommunity"></u-select>
+		<!-- 小区选择（模糊搜索） -->
+		<view v-if="showCommunityDropdown" class="community-dropdown-mask" @click="showCommunityDropdown = false">
+			<view class="community-dropdown" @click.stop>
+				<view class="u-font-28 u-font-bold u-m-b-16">选择督导小区</view>
+				<view class="u-radius-5 u-p-lr-20" style="background-color: #f7f7f7;">
+					<u-input v-model="communityKeyword" type="text" placeholder="输入小区名称搜索" :clearable="true" @input="onCommunitySearch" />
+				</view>
+				<scroll-view scroll-y class="community-dropdown-list" @scrolltolower="loadMoreCommunity" lower-threshold="50">
+					<view v-if="!communityResults.length && !communityLoading" class="u-text-center u-p-30 u-font-24 u-type-info">
+						{{ communityKeyword ? '未找到相关小区' : '输入名称搜索，或下滑加载更多' }}
+					</view>
+					<view
+						v-for="item in communityResults"
+						:key="item.id"
+						class="u-p-lr-20 u-p-tb-15 community-dropdown-item"
+						@click="selectCommunity(item)"
+					>
+						<view class="u-font-28">{{ item.name }}</view>
+						<view class="u-font-24 u-type-info" v-if="item.parent_name">{{ item.parent_name }}</view>
+					</view>
+					<view v-if="communityLoading" class="u-text-center u-p-tb-20 u-font-24 u-type-info">加载中...</view>
+					<view v-if="communityNoMore && communityResults.length" class="u-text-center u-p-tb-20 u-font-24 u-type-info">没有更多了</view>
+				</scroll-view>
+			</view>
+		</view>
 		<!-- 点位选择 -->
 		<u-select v-model="showPoint" label-name="label" value-name="value" :list="pointList" @confirm="confirmPoint"></u-select>
 
@@ -112,16 +135,26 @@
 					image: '',
 					content: '',
 				},
-				showCommunity: false,
 				showPoint: false,
-				communityList: [],
+				showCommunityDropdown: false,
+				communityKeyword: '',
+				communityResults: [],
+				communityPage: 1,
+				communityLastPage: 1,
+				communityLoading: false,
+				communitySearchTimer: null,
 				pointList: [],
 				historyList: [],
 			};
 		},
+		computed: {
+			communityNoMore() {
+				return this.communityPage >= this.communityLastPage;
+			},
+		},
 		onLoad() {
+			this.peakText = this.formatPeakText(this.peakPeriods);
 			this.loadToday();
-			this.loadCommunityList();
 			this.loadHistory();
 		},
 		onShow() {
@@ -155,13 +188,51 @@
 				if (periods.pm && periods.pm.length >= 2) parts.push(`${periods.pm[0]}-${periods.pm[1]}`);
 				return parts.length > 0 ? parts.join('、') : '未配置';
 			},
-			loadCommunityList() {
-				this.$u.api.get_community_list().then(res => {
-					this.communityList = (res.data || []).map(item => ({
-						label: item.name,
-						value: item.id,
-					}));
-				}).catch(() => {});
+			openCommunityPicker() {
+				this.showCommunityDropdown = true;
+				this.communityKeyword = '';
+				this.communityPage = 1;
+				this.communityResults = [];
+				this.loadCommunityList('', true);
+			},
+			loadCommunityList(keyword, isReset = false) {
+				if (this.communityLoading) return;
+				this.communityLoading = true;
+				const page = isReset ? 1 : this.communityPage;
+				this.$u.api.search_community({ keyword, page, page_size: 20 }).then(res => {
+					const data = res.data || {};
+					const list = data.data || [];
+					if (isReset) {
+						this.communityResults = list;
+						this.communityPage = 1;
+					} else {
+						this.communityResults = this.communityResults.concat(list);
+					}
+					this.communityLastPage = data.last_page || 1;
+				}).catch(() => {}).finally(() => {
+					this.communityLoading = false;
+				});
+			},
+			loadMoreCommunity() {
+				if (this.communityLoading || this.communityNoMore) return;
+				this.communityPage++;
+				this.loadCommunityList(this.communityKeyword.trim(), false);
+			},
+			onCommunitySearch(value) {
+				if (this.communitySearchTimer) clearTimeout(this.communitySearchTimer);
+				const keyword = (value || '').trim();
+				this.communitySearchTimer = setTimeout(() => {
+					this.loadCommunityList(keyword, true);
+				}, 300);
+			},
+			selectCommunity(item) {
+				if (!item || !item.id) return;
+				this.form.community_id = item.id;
+				this.form.community_name = item.name;
+				this.form.point_id = 0;
+				this.form.point_name = '';
+				this.showCommunityDropdown = false;
+				this.loadPointList(item.id);
 			},
 			loadPointList(communityId) {
 				this.$u.api.get_community_cate_list({ community_id: communityId }).then(res => {
@@ -177,15 +248,6 @@
 				this.$u.api.getVolunteerMyList({ page: 1, page_size: 10 }).then(res => {
 					this.historyList = res.data.data || [];
 				}).catch(() => {});
-			},
-			confirmCommunity(e) {
-				const item = e[0];
-				this.form.community_id = item.value;
-				this.form.community_name = item.label;
-				// 切换小区时加载点位
-				this.form.point_id = 0;
-				this.form.point_name = '';
-				this.loadPointList(item.value);
 			},
 			confirmPoint(e) {
 				const item = e[0];
@@ -328,5 +390,35 @@
 	padding: 20rpx;
 	background: #f9f9f9;
 	border-radius: 12rpx;
+}
+.community-dropdown-mask {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.35);
+	z-index: 999;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+}
+.community-dropdown {
+	margin-top: 200rpx;
+	width: 690rpx;
+	background-color: #fff;
+	border-radius: 16rpx;
+	padding: 24rpx;
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+}
+.community-dropdown-list {
+	max-height: 560rpx;
+	margin-top: 16rpx;
+}
+.community-dropdown-item {
+	border-bottom: 1rpx solid #f0f0f0;
+	&:last-child {
+		border-bottom: none;
+	}
 }
 </style>

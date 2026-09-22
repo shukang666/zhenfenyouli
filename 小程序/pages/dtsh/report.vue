@@ -39,11 +39,21 @@
 				</view>
 				<view>
 					<view class="u-font-24 u-type-info u-m-b-8">问题点位</view>
-					<view class="location-picker" @click="showPointPicker = true">
+					<view class="location-picker" @click="openPointPicker">
 						<text v-if="form.point_name" class="location-text">{{ form.point_name }}</text>
-						<text v-else class="location-placeholder">请选择点位</text>
-						<u-icon name="arrow-right" size="24" color="#999"></u-icon>
+						<text v-else class="location-placeholder">选填，请选择点位</text>
+						<view class="location-picker-tail">
+							<text
+								v-if="form.point_id"
+								class="point-clear-link"
+								@click.stop="clearPoint"
+							>不选点位</text>
+							<u-icon name="arrow-right" size="24" color="#999"></u-icon>
+						</view>
 					</view>
+				</view>
+				<view class="u-font-22 u-type-info u-m-t-12 point-field-hint">
+					选填。若问题不在固定点位，可不选；请在下方「问题描述」中写明楼栋、单元或具体位置。
 				</view>
 			</view>
 
@@ -187,7 +197,7 @@
 			canSubmit() {
 				if (!this.form.image || !this.form.remark) return false;
 				if (this.form.location_type == 1) {
-					return this.form.community_id > 0 && this.form.point_id > 0;
+					return this.form.community_id > 0;
 				} else {
 					// 非小区：需要商户名称+地址
 					return this.form.merchant_name.trim() && this.form.address.trim();
@@ -295,7 +305,17 @@
 				});
 			},
 
-			// 点位选择确认
+			openPointPicker() {
+				if (!this.form.community_id) {
+					uni.showToast({ title: '请先选择所属小区', icon: 'none' });
+					return;
+				}
+				this.showPointPicker = true;
+			},
+			clearPoint() {
+				this.form.point_id = 0;
+				this.form.point_name = '';
+			},
 			onPointConfirm(e) {
 				if (e && e.length) {
 					this.form.point_id = e[0].value;
@@ -363,10 +383,7 @@
 						uni.showToast({ title: '请选择所属小区', icon: 'none' });
 						return;
 					}
-					if (!this.form.point_id) {
-						uni.showToast({ title: '请选择问题点位', icon: 'none' });
-						return;
-					}
+
 				} else {
 					if (!this.form.merchant_name.trim()) {
 						uni.showToast({ title: '请填写商户名称', icon: 'none' });
@@ -427,6 +444,27 @@
 		background: #F5F5F5;
 		border-radius: 12rpx;
 		border: 2rpx solid #eee;
+	}
+
+	.location-picker-tail {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+		margin-left: 12rpx;
+	}
+
+	.point-clear-link {
+		font-size: 24rpx;
+		color: #8a958c;
+		margin-right: 10rpx;
+		padding: 6rpx 16rpx;
+		line-height: 1.3;
+		background: #ebebeb;
+		border-radius: 999rpx;
+	}
+
+	.point-field-hint {
+		line-height: 1.55;
 	}
 
 	.location-text {

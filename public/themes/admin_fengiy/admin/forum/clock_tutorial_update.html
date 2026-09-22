@@ -19,30 +19,14 @@
             <label class="col-sm-2 control-label"><span class="form-required">*</span>教程标题</label>
             <div class="col-sm-8">
                 <input type="text" class="form-control" name="title" value="{$item.title}" required>
+                <p class="help-block">仅后台列表展示；正文标题可在富文本里自行排版。</p>
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-2 control-label">简介</label>
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>教程正文</label>
             <div class="col-sm-8">
-                <textarea class="form-control" name="intro" rows="3">{$item.intro}</textarea>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">包括哪些</label>
-            <div class="col-sm-8">
-                <textarea class="form-control" name="examples" rows="2" placeholder="常见举例说明">{$item.examples}</textarea>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">拍照要求</label>
-            <div class="col-sm-8">
-                <textarea class="form-control" name="photo_lines" rows="5" placeholder="每行一条">{$item.photo_lines}</textarea>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">注意事项</label>
-            <div class="col-sm-8">
-                <textarea class="form-control" name="notice_lines" rows="5" placeholder="每行一条">{$item.notice_lines}</textarea>
+                <script type="text/plain" id="content" name="content">{$item.content|default=''}</script>
+                <p class="help-block">富文本一整块展示在小程序打卡页下方，可插入示例图片、分段与列表。</p>
             </div>
         </div>
         <div class="form-group">
@@ -63,5 +47,20 @@
     </form>
 </div>
 <script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript">
+    var editorURL = GV.WEB_ROOT;
+</script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+    });
+</script>
 </body>
 </html>

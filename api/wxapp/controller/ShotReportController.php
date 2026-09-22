@@ -55,9 +55,7 @@ class ShotReportController extends AuthController
             if (empty($communityName)) {
                 $this->error('请选择小区');
             }
-            if (empty($pointName)) {
-                $this->error('请选择点位');
-            }
+            // 点位选填；未选点位时依赖问题描述中的具体位置
         } else {
             if (empty($merchantName)) {
                 $this->error('请填写商户名称');
@@ -107,7 +105,9 @@ class ShotReportController extends AuthController
                 if ($item['location_type'] == 2) {
                     $item['location_text'] = $item['merchant_name'] . ' - ' . $item['address'];
                 } else {
-                    $item['location_text'] = $item['community_name'] . ' · ' . $item['point_name'];
+                    $item['location_text'] = !empty($item['point_name'])
+                        ? ($item['community_name'] . ' · ' . $item['point_name'])
+                        : ($item['community_name'] . '（见问题描述）');
                 }
                 return $item;
             });

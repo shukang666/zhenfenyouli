@@ -485,7 +485,8 @@
 			{
 				"path": "ljfldk",
 				"style": {
-					"navigationBarTitleText": "垃圾分类打卡"
+					"navigationBarTitleText": "践行真分",
+					"disableScroll": true
 				}
 			},
 			{

@@ -32,26 +32,16 @@
             <u-button type="success" hover-class="none" @click="submit()">确认提交</u-button>
         </view>
 
-        <view class="clock-guide u-m-lr-30 u-m-b-40" v-if="cateGuide && cateGuide.title">
-            <text class="clock-guide-title">{{ cateGuide.title }}</text>
-            <text class="clock-guide-p">{{ cateGuide.intro }}</text>
-            <text class="clock-guide-label">包括哪些</text>
-            <text class="clock-guide-p">{{ cateGuide.examples }}</text>
-            <text class="clock-guide-label">拍照要求</text>
-            <view class="clock-guide-li" v-for="(line, i) in cateGuide.photo" :key="'p' + i">
-                <text class="clock-guide-dot">·</text>
-                <text class="clock-guide-t">{{ line }}</text>
-            </view>
-            <text class="clock-guide-label">注意事项</text>
-            <view class="clock-guide-li" v-for="(line, i) in cateGuide.notice" :key="'n' + i">
-                <text class="clock-guide-dot">·</text>
-                <text class="clock-guide-t">{{ line }}</text>
+        <view class="clock-guide u-m-lr-30 u-m-b-40" v-if="cateGuideContent">
+            <text class="clock-guide-title" v-if="cateGuideTitle">{{ cateGuideTitle }}</text>
+            <view class="clock-guide-rich">
+                <u-parse :html="cateGuideContent"></u-parse>
             </view>
             <view class="clock-guide-more" @click="goLearn">
                 <text>想学更多分类知识？去看分类指导 ›</text>
             </view>
         </view>
-        <view class="clock-guide-empty u-m-lr-30 u-m-b-40" v-else-if="tutorialLoaded && !cateGuide">
+        <view class="clock-guide-empty u-m-lr-30 u-m-b-40" v-else-if="tutorialLoaded && !cateGuideContent">
             <text>该种类教程暂未配置，请联系管理员在后台「打卡教程」中完善。</text>
         </view>
 
@@ -160,10 +150,17 @@
             cateKind() {
                 return resolveCateKind(this.currentCateName) || 'default'
             },
-            cateGuide() {
+            cateGuideTitle() {
                 const kind = resolveCateKind(this.currentCateName)
-                if (!kind || !this.tutorialMap) return null
-                return this.tutorialMap[kind] || null
+                if (!kind || !this.tutorialMap) return ''
+                const guide = this.tutorialMap[kind]
+                return (guide && guide.title) ? guide.title : ''
+            },
+            cateGuideContent() {
+                const kind = resolveCateKind(this.currentCateName)
+                if (!kind || !this.tutorialMap) return ''
+                const guide = this.tutorialMap[kind]
+                return (guide && guide.content) ? guide.content : ''
             },
             panelCateName() {
                 if (this.isLegacyMode) return '上报类型'
@@ -398,28 +395,10 @@
     font-weight: 600;
     color: #444;
 }
-.clock-guide-p {
-    display: block;
-    margin-top: 10rpx;
+.clock-guide-rich {
+    margin-top: 12rpx;
     font-size: 26rpx;
-    line-height: 1.55;
-    color: #666;
-}
-.clock-guide-li {
-    display: flex;
-    margin-top: 10rpx;
-    align-items: flex-start;
-}
-.clock-guide-dot {
-    width: 28rpx;
-    font-size: 26rpx;
-    color: #18af38;
-    line-height: 1.55;
-}
-.clock-guide-t {
-    flex: 1;
-    font-size: 26rpx;
-    line-height: 1.55;
+    line-height: 1.6;
     color: #666;
 }
 .clock-guide-more {
