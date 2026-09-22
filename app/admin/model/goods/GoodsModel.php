@@ -134,29 +134,47 @@ class GoodsModel extends ToolModel
         return $data;
     }
 
-    /** 活动是否已配置签到（融合在活动编辑里：开启打卡 或 线下活动签到） */
+    /** 活动是否已配置「签到」（非日常打卡 is_clock） */
     public static function activeHasSignConfigured($active): bool
     {
         if (empty($active)) {
             return false;
         }
-        if ((int)($active['is_clock'] ?? 0) === 1) {
+        // 扫码参加：详情页为「立即签到」，签到写入 active_clock
+        if ((int)($active['join_type'] ?? 0) === 2) {
             return true;
         }
-        return ActiveModel::isOfflineEvent($active);
+        // 线下活动：须填写允许签到起止时间
+        if (ActiveModel::isOfflineEvent($active)) {
+            $start = (int)($active['offline_sign_start'] ?? 0);
+            $end = (int)($active['offline_sign_end'] ?? 0);
+            return $start > 0 && $end > 0 && $end > $start;
+        }
+        return false;
+    }
+
+    /** 查询条件：仅已配置签到的活动 */
+    protected static function applySignConfiguredWhere($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('join_type', '=', 2)
+                ->whereOr(function ($q2) {
+                    $q2->where('event_kind', '=', ActiveModel::EVENT_KIND_OFFLINE)
+                        ->where('offline_sign_start', '>', 0)
+                        ->where('offline_sign_end', '>', 0)
+                        ->whereRaw('offline_sign_end > offline_sign_start');
+                });
+        });
     }
 
     /** 后台下拉：已配置签到的活动 */
     public static function getSignActiveListForAdmin(int $ensureIncludeActiveId = 0)
     {
-        $list = ActiveModel::field('id,name,is_clock,event_kind')
+        $query = ActiveModel::field('id,name,join_type,event_kind,offline_sign_start,offline_sign_end')
             ->where('delete_time', 0)
-            ->where(function ($q) {
-                $q->where('is_clock', 1)
-                    ->whereOr('event_kind', '=', ActiveModel::EVENT_KIND_OFFLINE);
-            })
-            ->order('id desc')
-            ->select();
+            ->where('status', 1);
+        self::applySignConfiguredWhere($query);
+        $list = $query->order('id desc')->select();
 
         $ensureIncludeActiveId = (int)$ensureIncludeActiveId;
         if ($ensureIncludeActiveId > 0) {
@@ -168,7 +186,7 @@ class GoodsModel extends ToolModel
                 }
             }
             if (!$exists) {
-                $extra = ActiveModel::field('id,name,is_clock,event_kind')
+                $extra = ActiveModel::field('id,name,join_type,event_kind,offline_sign_start,offline_sign_end')
                     ->where('id', $ensureIncludeActiveId)
                     ->where('delete_time', 0)
                     ->find();
