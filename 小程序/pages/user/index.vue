@@ -22,7 +22,6 @@
 					</view>
 					<view class="me-user__info" v-if="!isLogin">
 						<view class="user-login-btn" @click="$u.route('/pages/public/login')">
-							<u-icon name="account" size="28" color="#ffffff"></u-icon>
 							<text class="user-login-btn__text">立即登录</text>
 						</view>
 						<text class="user-login-sub">登录后解锁积分、活动与打卡</text>
