@@ -36,9 +36,6 @@
 						</view>
 						<u-icon name="arrow-right" size="24" color="#999"></u-icon>
 					</view>
-					<view class="u-font-22 u-type-info u-m-t-8" v-if="userCommunityName">
-						默认为您所在小区，可切换为本次举报的小区（不会修改个人资料）
-					</view>
 				</view>
 				<view>
 					<view class="u-font-24 u-type-info u-m-b-8">问题点位</view>
