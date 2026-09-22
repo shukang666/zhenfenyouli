@@ -11,28 +11,6 @@
 		<!-- <view class="dtsh-banner" id="guide-dtsh-clock" @click="goToClock" v-if="dtshBanner">
 			<u-image width="100%" height="360" :src="dtshBanner" mode="aspectFill" border-radius="16"></u-image>
 		</view> -->
-		<!-- 轻量化任务 -->
-		<view class="task-box u-type-white-bg u-radius-6 u-m-t-20 u-flex u-row-around u-p-t-30 u-p-b-30" id="guide-dtsh-entry">
-			<view class="task-item u-flex u-col-center u-flex-col" @click="goToPage('/pages/dtsh/report')">
-				<view class="task-icon u-flex u-col-center u-row-center">
-					<u-icon name="camera" size="48" color="#18AF38"></u-icon>
-				</view>
-				<text class="task-text u-font-24 u-m-t-12">随手发现问题</text>
-			</view>
-			<view class="task-item u-flex u-col-center u-flex-col" @click="goToPage('/pages/dtsh/quiz')">
-				<view class="task-icon u-flex u-col-center u-row-center">
-					<u-icon name="edit-pen" size="48" color="#18AF38"></u-icon>
-				</view>
-				<text class="task-text u-font-24 u-m-t-12">分类知识挑战</text>
-			</view>
-			<view class="task-item u-flex u-col-center u-flex-col" @click="goToPage('/pages/dtsh/knowledge')">
-				<view class="task-icon u-flex u-col-center u-row-center">
-					<u-icon name="file-text" size="48" color="#18AF38"></u-icon>
-				</view>
-				<text class="task-text u-font-24 u-m-t-12">学会分类知识</text>
-			</view>
-		</view>
-
 		<!-- <view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
 			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/11f9c0ccaefaeb375e7cea7000914a8b.png?watermark"></u-image>
 			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
@@ -313,10 +291,6 @@
 		goToClock() {
 			this.$u.route('/pages/flhd/ljfldk')
 		},
-		// 轻量化任务跳转
-		goToPage(url) {
-			this.$u.route(url)
-		},
 		// === 整改任务相关 ===
 		changeTab(idx) {
 			const i = (idx && typeof idx === 'object') ? idx.index : idx
@@ -402,15 +376,6 @@
 </script>
 
 <style lang="scss">
-.task-icon {
-	width: 100rpx;
-	height: 100rpx;
-	background: #E8F7EA;
-	border-radius: 16rpx;
-}
-.task-text {
-	color: #333;
-}
 .task-card {
 	padding: 24rpx;
 	background: #f9f9f9;

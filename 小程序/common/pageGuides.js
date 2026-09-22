@@ -26,8 +26,14 @@ export const PAGE_GUIDES = {
 			{
 				selector: '#guide-fb-entry',
 				prefer: 'below',
-				title: '两个快捷入口',
-				desc: '左边去垃圾分类学习打卡，右边进「我和七贤岭」。'
+				title: '快捷入口',
+				desc: '垃圾分类工作台、亲子活动、楼宇减碳、七贤岭等，点卡片进入。'
+			},
+			{
+				selector: '#guide-fb-light-task',
+				prefer: 'below',
+				title: '分类小任务',
+				desc: '随手拍问题、答题挑战、看分类知识，不用先进工作台也能用。'
 			},
 			{
 				selector: '#guide-fb-theme',
@@ -152,12 +158,6 @@ export const PAGE_GUIDES = {
 				prefer: 'below',
 				title: '去拍照打卡',
 				desc: '点这张图进入打卡。先学会分类、通过考试，才能拍照交作业。'
-			},
-			{
-				selector: '#guide-dtsh-entry',
-				prefer: 'below',
-				title: '三个常用入口',
-				desc: '随手拍发现问题、分类知识挑战答题、看分类知识文章。'
 			},
 			{
 				selector: '#guide-dtsh-vol',

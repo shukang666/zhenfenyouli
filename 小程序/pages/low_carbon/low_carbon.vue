@@ -147,6 +147,45 @@
       </view>
     </view>
 
+    <!-- 分类轻量化入口（随手拍 / 答题 / 知识，原 dtsh 页 task-box） -->
+    <view class="fb-light-task" id="guide-fb-light-task">
+      <view class="fb-light-task-box">
+        <view
+          class="fb-light-task-item"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoDtshPage('/pages/dtsh/report')"
+        >
+          <view class="fb-light-task-icon">
+            <u-icon name="camera" size="44" color="#18AF38"></u-icon>
+          </view>
+          <text class="fb-light-task-text">随手发现问题</text>
+        </view>
+        <view
+          class="fb-light-task-item"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoDtshPage('/pages/dtsh/quiz')"
+        >
+          <view class="fb-light-task-icon">
+            <u-icon name="edit-pen" size="44" color="#18AF38"></u-icon>
+          </view>
+          <text class="fb-light-task-text">分类知识挑战</text>
+        </view>
+        <view
+          class="fb-light-task-item"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoDtshPage('/pages/dtsh/knowledge')"
+        >
+          <view class="fb-light-task-icon">
+            <u-icon name="file-text" size="44" color="#18AF38"></u-icon>
+          </view>
+          <text class="fb-light-task-text">学会分类知识</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 主题活动：5 大分类 -->
     <view class="fb-section fb-theme-act" id="guide-fb-theme">
       <view class="fb-section-header">
@@ -734,6 +773,10 @@ export default {
       this.$u.route("/pages/dtsh/dtsh");
     },
 
+    gotoDtshPage(url) {
+      this.$u.route(url);
+    },
+
     // 小手拉大手
     gotoXsdld() {
       this.$u.route("/pages/activity/xsdld");
@@ -1133,6 +1176,42 @@ export default {
   grid-template-columns: 1fr 1fr;
   gap: 12rpx;
   padding: 4rpx 0 16rpx;
+}
+
+.fb-light-task {
+  padding: 0 20rpx 8rpx;
+}
+.fb-light-task-box {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  padding: 28rpx 12rpx 24rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 6rpx 18rpx rgba(16, 40, 24, 0.08);
+}
+.fb-light-task-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+.fb-light-task-icon {
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f7ea;
+  border-radius: 16rpx;
+}
+.fb-light-task-text {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #333;
+  text-align: center;
+  line-height: 1.35;
 }
 .fb-entry-card {
   min-width: 0;
