@@ -137,6 +137,7 @@ class ForumController extends ToolController
                 $item['cate_name'] = ForumCateModel::where('id', $item['cate_id'])->value('name');
             } elseif ($item['type'] == 2) {
                 $item['cate_name'] = SelectModel::where('id', $item['cate_id'])->value('name');
+                $item['clock_scene_label'] = $this->formatClockSceneLabel($item['clock_scene'] ?? '');
             } elseif ($item['type'] == 3 || $item['type'] == 4) {//定位巡检
                 $item['cate_name'] = CommunityCateModel::where('id', $item['cate_id'])->value('name', '');
             } else {
@@ -872,6 +873,25 @@ class ForumController extends ToolController
         $savePath = "upload/file/" . md5(time() . rand(1,99999)) . ".png";
         file_put_contents($savePath, $imageData);
         return $savePath;
+    }
+
+    /**
+     * 垃圾打卡投放场景展示名
+     */
+    protected function formatClockSceneLabel($key)
+    {
+        $key = trim((string)$key);
+        if ($key === '') {
+            return '-';
+        }
+        $map = [
+            'home'         => '家庭',
+            'qinzi'        => '亲子',
+            'street'       => '沿街',
+            'zhenfenjiao'  => '真分角',
+            'office'       => '办公',
+        ];
+        return $map[$key] ?? $key;
     }
 
 }

@@ -3,23 +3,7 @@
 		<view class="dk-hero">
 			<text class="dk-hero-kicker">拍照前先选好场景和种类</text>
 			<text class="dk-hero-title">垃圾分类打卡</text>
-			<text class="dk-hero-desc">家庭、亲子、办公或沿街投放都可以。选完种类会自动带上报类型去拍照。</text>
-			<view class="dk-steps">
-				<view class="dk-step" :class="{ 'dk-step--on': step === 1 }">
-					<text class="dk-step-n">1</text>
-					<text class="dk-step-t">选场景</text>
-				</view>
-				<view class="dk-step-line" :class="{ 'dk-step-line--on': step === 2 }"></view>
-				<view class="dk-step" :class="{ 'dk-step--on': step === 2 }">
-					<text class="dk-step-n">2</text>
-					<text class="dk-step-t">选种类</text>
-				</view>
-				<view class="dk-step-line"></view>
-				<view class="dk-step">
-					<text class="dk-step-n">3</text>
-					<text class="dk-step-t">去拍照</text>
-				</view>
-			</view>
+			<text class="dk-hero-desc">在对应场景卡片里点垃圾种类，直接进入拍照打卡。</text>
 		</view>
 
 		<view class="dk-stats" v-if="isLogin">
@@ -44,33 +28,29 @@
 			<text class="dk-gate-a">去完成 ›</text>
 		</view>
 
-		<view class="dk-block" v-if="step === 1">
+		<view class="dk-block">
 			<text class="dk-block-t">你在哪投放</text>
-			<text class="dk-block-hint">先选一个场景，再选对应的垃圾种类</text>
-			<view class="dk-scene" hover-class="dk-card--press" :hover-stay-time="80"
-				v-for="item in scenes" :key="item.key" :class="'dk-scene--' + item.key" @click="pickScene(item)">
+			<text class="dk-block-hint">场景卡片仅作区分，请点卡片内的垃圾种类</text>
+			<view
+				class="dk-scene"
+				v-for="item in scenes"
+				:key="item.key"
+				:class="'dk-scene--' + item.key"
+			>
 				<text class="dk-scene-name">{{ item.name }}</text>
 				<text class="dk-scene-desc">{{ item.desc }}</text>
-				<text class="dk-scene-go">下一步 ›</text>
-			</view>
-		</view>
-
-		<view class="dk-block" v-else>
-			<view class="dk-type-head">
-				<view class="dk-back" hover-class="dk-back--press" :hover-stay-time="80" @click="backScene">
-					<text>‹ 改场景</text>
-				</view>
-				<text class="dk-block-t dk-type-title">{{ selectedScene.name }}投放 · 选种类</text>
-			</view>
-			<text class="dk-block-hint">点一种就会带上报类型去拍照页</text>
-			<view class="dk-types">
-				<view class="dk-type" hover-class="dk-card--press" :hover-stay-time="80"
-					v-for="item in cate_list" :key="item.id"
-					:class="'dk-type--' + cateTone(item.name)"
-					@click="goClock(item)">
-					<text class="dk-type-name">{{ item.name }}</text>
-					<text class="dk-type-hint">{{ cateHint(item.name) }}</text>
-					<text class="dk-type-go">去拍照 ›</text>
+				<view class="dk-scene-chips">
+					<view
+						class="dk-chip"
+						v-for="(chip, ci) in item.chips"
+						:key="item.key + '-' + ci"
+						hover-class="dk-card--press"
+						:hover-stay-time="80"
+						@click="goFromChip(item.key, ci)"
+					>
+						<text class="dk-chip-text">{{ chip.label }}</text>
+						<text class="dk-chip-go">去拍照 ›</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -94,18 +74,38 @@
 </template>
 
 <script>
+	import { resolveCateByLabel } from '@/common/clockScene.js'
+
 	export default {
 		data() {
 			return {
-				step: 1,
-				selectedScene: {},
 				cate_list: [],
 				scenes: [
-					{ key: 'home', name: '家庭', desc: '厨房、客厅、卫生间里的日常投放' },
-					{ key: 'qinzi', name: '亲子', desc: '家长带孩子一起学分类、动手投放' },
-					{ key: 'office', name: '办公', desc: '工位、茶水间、会议室里的投放' },
-					{ key: 'street', name: '沿街', desc: '路边、商铺门前的分类投放点' }
-				]
+					{
+						key: 'home',
+						name: '家庭',
+						desc: '厨房、客厅、卫生间里的日常投放',
+						chips: [{ label: '可回收' }, { label: '不可回收' }],
+					},
+					{
+						key: 'qinzi',
+						name: '亲子',
+						desc: '家长带孩子一起学分类、动手投放',
+						chips: [{ label: '可回收' }, { label: '有害' }],
+					},
+					{
+						key: 'office',
+						name: '办公',
+						desc: '部分办公大厦设有真分角，可分类投放',
+						chips: [{ label: '真分角', zhenfenjiao: true }],
+					},
+					{
+						key: 'street',
+						name: '沿街',
+						desc: '路边、商铺门前的分类投放点',
+						chips: [{ label: '厨余垃圾' }],
+					},
+				],
 			}
 		},
 		computed: {
@@ -140,33 +140,31 @@
 					this.cate_list = res.data || []
 				}).catch(() => {})
 			},
-			cateTone(name) {
-				const n = name || ''
-				if (n.indexOf('可回收') >= 0) return 'recycle'
-				if (n.indexOf('厨余') >= 0) return 'food'
-				if (n.indexOf('有害') >= 0) return 'harm'
-				return 'other'
-			},
-			cateHint(name) {
-				const tone = this.cateTone(name)
-				if (tone === 'recycle') return '纸张、塑料瓶、金属罐、织物'
-				if (tone === 'food') return '剩菜剩饭、果皮菜叶'
-				if (tone === 'harm') return '电池、灯管、过期药品'
-				return '受污染纸、破碎陶瓷等不可回收'
-			},
-			pickScene(item) {
-				this.selectedScene = item
-				this.step = 2
-			},
-			backScene() {
-				this.step = 1
-			},
-			goClock(item) {
+			goFromChip(sceneKey, chipIndex) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
-				if (!item || !item.id) return this.$u.toast('请先选择垃圾种类')
-				const scene = this.selectedScene.name || ''
-				this.$u.route('/pages/flhd/add?cate_id=' + item.id + '&scene=' + encodeURIComponent(scene))
+				const scene = this.scenes.find(s => s.key === sceneKey)
+				const chip = scene && scene.chips && scene.chips[chipIndex]
+				if (!scene || !chip) return
+				if (chip.zhenfenjiao || chip.label === '真分角') {
+					this.$u.route(
+						'/pages/flhd/add?scene_key=zhenfenjiao&scene=' +
+							encodeURIComponent('办公'),
+					)
+					return
+				}
+				const cate = resolveCateByLabel(this.cate_list, chip.label)
+				if (!cate || !cate.id) {
+					return this.$u.toast('暂未配置「' + chip.label + '」种类')
+				}
+				const q =
+					'scene_key=' +
+					encodeURIComponent(scene.key) +
+					'&scene=' +
+					encodeURIComponent(scene.name) +
+					'&cate_id=' +
+					cate.id
+				this.$u.route('/pages/flhd/add?' + q)
 			},
 			goGate() {
 				if (!this.userInfo.is_learn) return this.$u.route('/pages/flhd/list')
@@ -388,14 +386,34 @@
 	font-size: 24rpx;
 	color: rgba(255, 255, 255, 0.92);
 }
-.dk-scene-go {
+.dk-scene-chips {
 	position: relative;
 	z-index: 1;
-	display: block;
-	margin-top: 20rpx;
-	font-size: 24rpx;
+	margin-top: 22rpx;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14rpx;
+}
+.dk-chip {
+	flex: 1;
+	min-width: 42%;
+	padding: 18rpx 20rpx;
+	border-radius: 16rpx;
+	background: rgba(255, 255, 255, 0.22);
+	border: 1rpx solid rgba(255, 255, 255, 0.35);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	transition: transform 0.1s ease, opacity 0.1s ease;
+}
+.dk-chip-text {
+	font-size: 28rpx;
 	font-weight: 700;
 	color: #fff;
+}
+.dk-chip-go {
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.9);
 }
 .dk-type-head {
 	display: flex;

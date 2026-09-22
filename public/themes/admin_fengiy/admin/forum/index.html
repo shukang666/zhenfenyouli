@@ -178,6 +178,7 @@
                 </if>
                 <th width="300px">内容</th>
                 <if condition="$params.type==2">
+                    <th>投放场景</th>
                     <th>垃圾分类</th>
                 </if>
 
@@ -244,6 +245,7 @@
                     </td>
 
                     <if condition="$params.type==2">
+                        <td>{$vo.clock_scene_label|default='-'}</td>
                         <td>{$vo.cate_name}</td>
                     </if>
 

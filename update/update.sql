@@ -18,3 +18,6 @@ UPDATE `cmf_admin_menu` SET `name` = '签到（已弃用）'
 WHERE `app` = 'admin' AND `controller` = 'active' AND `action` = 'sign' AND `name` = '签到';
 -- 已有存量标签默认为固定分类(tag_type=1)，如需将某些标签设为动态主题，请手动更新：
 -- UPDATE `cmf_active_tab` SET `tag_type` = 2 WHERE `name` IN ('净美七贤岭', '金秋开学季');
+
+-- 垃圾打卡投放场景（家庭/亲子/沿街/真分角等）
+ALTER TABLE `cmf_forum` ADD COLUMN `clock_scene` varchar(50) NOT NULL DEFAULT '' COMMENT '打卡投放场景' AFTER `subject_community_id`;

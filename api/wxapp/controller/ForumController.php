@@ -82,6 +82,15 @@ class ForumController extends AuthController
 
         $params['community_id'] = $this->user_info['subject_community_id'];
 
+        if ($type == 2 && isset($params['clock_scene'])) {
+            $allowed = ['home', 'qinzi', 'street', 'zhenfenjiao', 'office', ''];
+            $scene = trim((string)$params['clock_scene']);
+            if (!in_array($scene, $allowed, true)) {
+                $scene = '';
+            }
+            $params['clock_scene'] = mb_substr($scene, 0, 50);
+        }
+
         if (!empty($params['image'])) {
             $params['image'] = json_encode($params['image']);
         }
