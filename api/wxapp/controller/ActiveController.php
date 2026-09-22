@@ -22,6 +22,7 @@ use app\admin\model\active\ActiveClockActionUserModel;
 use app\admin\model\active\ActiveClockPushUserModel;
 use app\admin\model\forum\ForumCommentModel;
 use app\admin\model\forum\ForumLikeModel;
+use app\admin\model\goods\GoodsModel;
 use app\admin\model\member\MemberModel;
 use think\facade\Db;
 
@@ -580,25 +581,32 @@ class ActiveController extends AuthController
     }
 
     /**
-     * 详情：多日打卡挑战进度
+     * 详情：打卡满 N 天兑礼（累计自然日 + 绑定商品列表）
      */
     protected function appendClockChallengeForDetail(&$item): void
     {
+        $activeId = (int)($item['id'] ?? 0);
         $item['is_clock_challenge'] = (int)($item['is_clock_challenge'] ?? 0);
         $item['clock_challenge_days'] = (int)($item['clock_challenge_days'] ?? 0);
-        $item['clock_challenge_point'] = (int)($item['clock_challenge_point'] ?? 0);
+        $item['clock_challenge_user_days'] = 0;
+        $item['clock_challenge_can_redeem'] = 0;
         $item['clock_challenge_progress'] = 0;
-        $item['clock_challenge_rewarded'] = 0;
-        if ($item['is_clock_challenge'] !== 1 || empty($item['sign_id']) || !$this->user_id) {
+        $item['redeem_goods_list'] = [];
+
+        if ($item['is_clock_challenge'] !== 1) {
             return;
         }
-        $timestamps = ActiveClockModel::where('user_id', $this->user_id)
-            ->where('active_id', $item['id'])
-            ->where('sign_id', $item['sign_id'])
-            ->column('date_time');
-        $item['clock_challenge_progress'] = $this->getMaxContinueSignDays($timestamps);
-        $rewarded = ActiveSIgnModel::where('id', $item['sign_id'])->value('clock_challenge_rewarded');
-        $item['clock_challenge_rewarded'] = (int)$rewarded;
+
+        $item['redeem_goods_list'] = GoodsModel::listRedeemGoodsForActive($activeId);
+        if (!$this->user_id) {
+            return;
+        }
+        $progress = GoodsModel::getSignRequireProgress($this->user_id, $activeId);
+        $userDays = (int)($progress['user_clock_days'] ?? 0);
+        $needDays = (int)($progress['require_clock_days'] ?? 0);
+        $item['clock_challenge_user_days'] = $userDays;
+        $item['clock_challenge_progress'] = $userDays;
+        $item['clock_challenge_can_redeem'] = ($needDays > 0 && $userDays >= $needDays) ? 1 : 0;
     }
 
     /**
@@ -927,8 +935,6 @@ class ActiveController extends AuthController
             AccountLogModel::add_account_log($this->user_id, 2, 225, $send_point, ['remark' => '垃圾打卡扣除']);
         }
 
-        $this->tryGrantClockChallengeReward($active_info, (int)$sign_id);
-
         // ===== 打卡动作触发判断 =====
         $action_trigger = $this->checkAndTriggerClockAction($active_id, $sign_id);
 
@@ -1208,47 +1214,6 @@ class ActiveController extends AuthController
         }
 
         return $maxDays;
-    }
-
-    /**
-     * 多日打卡挑战：连续满 N 天一次性发奖励（每用户每活动仅一次）
-     */
-    protected function tryGrantClockChallengeReward($activeInfo, int $signId): void
-    {
-        if (intval($activeInfo['is_clock_challenge'] ?? 0) !== 1) {
-            return;
-        }
-        $targetDays = intval($activeInfo['clock_challenge_days'] ?? 0);
-        $bonusPoint = intval($activeInfo['clock_challenge_point'] ?? 0);
-        if ($targetDays < 1 || $signId <= 0) {
-            return;
-        }
-
-        $sign = ActiveSIgnModel::where('id', $signId)->where('user_id', $this->user_id)->find();
-        if (empty($sign) || intval($sign['clock_challenge_rewarded'] ?? 0) === 1) {
-            return;
-        }
-
-        $timestamps = ActiveClockModel::where('user_id', $this->user_id)
-            ->where('active_id', $activeInfo['id'])
-            ->where('sign_id', $signId)
-            ->column('date_time');
-        if ($this->getMaxContinueSignDays($timestamps) < $targetDays) {
-            return;
-        }
-
-        ActiveSIgnModel::where('id', $signId)->update([
-            'clock_challenge_rewarded' => 1,
-        ]);
-        if ($bonusPoint > 0) {
-            AccountLogModel::add_account_log(
-                $this->user_id,
-                2,
-                225,
-                $bonusPoint,
-                ['remark' => '多日打卡挑战达成']
-            );
-        }
     }
 
 }

@@ -221,14 +221,14 @@ class ActiveController extends ToolController
             }
             $params['is_clock_challenge'] = empty($params['is_clock_challenge']) ? 0 : 1;
             $params['clock_challenge_days'] = max(0, (int)($params['clock_challenge_days'] ?? 0));
-            $params['clock_challenge_point'] = max(0, (int)($params['clock_challenge_point'] ?? 0));
             if ($params['event_kind'] !== ActiveModel::EVENT_KIND_OFFLINE && $params['is_clock_challenge']) {
                 $params['is_clock'] = 1;
+                $params['clock_challenge_point'] = 0;
                 if ($params['clock_challenge_days'] < 1) {
-                    $this->error('开启多日打卡挑战时请填写挑战天数（至少 1 天）');
+                    $this->error('开启打卡兑礼时请填写所需打卡天数（至少 1 天）');
                 }
                 if (empty($params['clock_start_time']) || empty($params['clock_end_time'])) {
-                    $this->error('多日打卡挑战请填写下方「活动开始/结束日期」（打卡有效期）');
+                    $this->error('打卡兑礼请填写下方「活动开始/结束日期」（打卡有效期）');
                 }
             } elseif (!$params['is_clock_challenge']) {
                 $params['clock_challenge_days'] = 0;

@@ -27,7 +27,7 @@
 			</view>
 			<!-- 挑战/打卡标签 -->
 			<view class="challenge-badge" v-if="item.is_clock_challenge == 1">
-				<text class="challenge-text">{{ item.clock_challenge_days || 0 }}天挑战</text>
+				<text class="challenge-text">{{ item.clock_challenge_days || 0 }}天兑礼</text>
 			</view>
 			<view class="challenge-badge" v-else-if="item.is_clock == 1">
 				<text class="challenge-text">打卡挑战</text>

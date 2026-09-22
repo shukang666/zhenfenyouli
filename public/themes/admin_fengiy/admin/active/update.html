@@ -217,30 +217,21 @@
                 </div>
             </div>
 
-            <div class="form-group event-kind-normal-only">
-                <label class="col-sm-2 control-label">多日打卡挑战:</label>
+			<div class="form-group event-kind-normal-only">
+                <label class="col-sm-2 control-label">打卡兑换礼品:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="checkbox" lay-skin="switch" class="form-control" lay-filter="is_clock_challenge" name="is_clock_challenge" value="1"
                         <if condition="!empty($item.is_clock_challenge) && $item.is_clock_challenge==1">checked</if> lay-text="开启|关闭">
-                    <p class="help-block">不勾选为普通活动；勾选后用户需在活动期内每日打卡，<strong>连续</strong>满指定天数一次性发放挑战奖励积分（可同时配置下方「每次打卡赠送积分」）。</p>
+                    <p class="help-block">勾选后用户在本活动<strong>累计打卡</strong>满指定天数（不要求连续）即可兑换礼品；请在「积分商城 → 商品编辑 → 前置签到条件」选择本活动绑定礼品。可同时配置「每次打卡赠送积分」。</p>
                 </div>
             </div>
 
             <div class="form-group clock-challenge-panel event-kind-normal-only">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>挑战天数:</label>
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>兑礼所需打卡天数:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="number" class="form-control" name="clock_challenge_days" min="1" max="365"
                            value="{$item.clock_challenge_days|default='7'}">
-                    <p class="help-block">连续打卡达到该天数后发放「达成奖励积分」（断签后重新累计连续天数）。</p>
-                </div>
-            </div>
-
-            <div class="form-group clock-challenge-panel event-kind-normal-only">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>达成奖励积分:</label>
-                <div class="col-md-6 col-sm-10">
-                    <input type="number" class="form-control" name="clock_challenge_point" min="0"
-                           value="{$item.clock_challenge_point|default='0'}">
-                    <p class="help-block">挑战达成时一次性发放（与每次打卡积分叠加）。</p>
+                    <p class="help-block">按自然日去重累计打卡天数，达到该天数后用户可兑换已绑定本活动的商品。</p>
                 </div>
             </div>
 

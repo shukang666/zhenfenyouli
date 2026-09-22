@@ -134,7 +134,7 @@ class GoodsModel extends ToolModel
         return $data;
     }
 
-    /** 活动是否已配置「签到」（活动内线下签到，不含旧版独立签到列表 join_type=2） */
+    /** 活动是否可作为商品「前置签到/打卡」条件（线下签到 或 打卡兑礼） */
     public static function activeHasSignConfigured($active): bool
     {
         if (empty($active)) {
@@ -142,6 +142,9 @@ class GoodsModel extends ToolModel
         }
         if ((int)($active['join_type'] ?? 0) === 2) {
             return false;
+        }
+        if ((int)($active['is_clock_challenge'] ?? 0) === 1 && (int)($active['is_clock'] ?? 0) === 1) {
+            return (int)($active['clock_challenge_days'] ?? 0) >= 1;
         }
         if (!ActiveModel::isOfflineEvent($active)) {
             return false;
@@ -151,20 +154,28 @@ class GoodsModel extends ToolModel
         return $start > 0 && $end > 0 && $end > $start;
     }
 
-    /** 查询条件：仅活动内已配置线下签到的活动 */
+    /** 查询条件：可绑定为商品前置条件的活动 */
     protected static function applySignConfiguredWhere($query)
     {
-        return $query->where('join_type', '<>', 2)
-            ->where('event_kind', '=', ActiveModel::EVENT_KIND_OFFLINE)
-            ->where('offline_sign_start', '>', 0)
-            ->where('offline_sign_end', '>', 0)
-            ->whereRaw('offline_sign_end > offline_sign_start');
+        return $query->where(function ($q) {
+            $q->where(function ($q2) {
+                $q2->where('join_type', '<>', 2)
+                    ->where('event_kind', '=', ActiveModel::EVENT_KIND_OFFLINE)
+                    ->where('offline_sign_start', '>', 0)
+                    ->where('offline_sign_end', '>', 0)
+                    ->whereRaw('offline_sign_end > offline_sign_start');
+            })->whereOr(function ($q3) {
+                $q3->where('is_clock_challenge', '=', 1)
+                    ->where('is_clock', '=', 1)
+                    ->where('clock_challenge_days', '>', 0);
+            });
+        });
     }
 
     /** 后台下拉：已配置签到的活动 */
     public static function getSignActiveListForAdmin(int $ensureIncludeActiveId = 0)
     {
-        $query = ActiveModel::field('id,name,join_type,event_kind,offline_sign_start,offline_sign_end')
+        $query = ActiveModel::field('id,name,join_type,event_kind,offline_sign_start,offline_sign_end,is_clock,is_clock_challenge,clock_challenge_days')
             ->where('delete_time', 0)
             ->where('status', 1);
         self::applySignConfiguredWhere($query);
@@ -180,7 +191,7 @@ class GoodsModel extends ToolModel
                 }
             }
             if (!$exists) {
-                $extra = ActiveModel::field('id,name,join_type,event_kind,offline_sign_start,offline_sign_end')
+                $extra = ActiveModel::field('id,name,join_type,event_kind,offline_sign_start,offline_sign_end,is_clock,is_clock_challenge,clock_challenge_days')
                     ->where('id', $ensureIncludeActiveId)
                     ->where('delete_time', 0)
                     ->find();
@@ -208,7 +219,26 @@ class GoodsModel extends ToolModel
         return self::activeHasSignConfigured($active);
     }
 
-    /** 用户是否已在该签到活动完成至少一次签到（active_clock） */
+    /** 用户在本活动的累计打卡天数（按自然日去重） */
+    public static function countUserClockDays(int $userId, int $activeId): int
+    {
+        if ($userId <= 0 || $activeId <= 0) {
+            return 0;
+        }
+        $timestamps = ActiveClockModel::where('user_id', $userId)
+            ->where('active_id', $activeId)
+            ->column('date_time');
+        if (empty($timestamps)) {
+            return 0;
+        }
+        $days = [];
+        foreach ($timestamps as $ts) {
+            $days[date('Y-m-d', (int)$ts)] = true;
+        }
+        return count($days);
+    }
+
+    /** 用户是否满足商品绑定的活动前置条件 */
     public static function userMetSignRequire(int $userId, $goodsInfo): bool
     {
         $activeId = (int)($goodsInfo['require_active_id'] ?? 0);
@@ -218,9 +248,68 @@ class GoodsModel extends ToolModel
         if ($userId <= 0) {
             return false;
         }
+        $active = ActiveModel::where('id', $activeId)->where('delete_time', 0)->find();
+        if (empty($active)) {
+            return false;
+        }
+        if ((int)($active['is_clock_challenge'] ?? 0) === 1) {
+            $need = max(1, (int)($active['clock_challenge_days'] ?? 0));
+            return self::countUserClockDays($userId, $activeId) >= $need;
+        }
         return ActiveClockModel::where('user_id', $userId)
                 ->where('active_id', $activeId)
                 ->count() > 0;
+    }
+
+    /** 前置条件进度（小程序展示） */
+    public static function getSignRequireProgress(int $userId, int $activeId): array
+    {
+        $active = ActiveModel::where('id', $activeId)->where('delete_time', 0)->find();
+        if (empty($active)) {
+            return [
+                'require_mode' => 'none',
+                'require_clock_days' => 0,
+                'user_clock_days' => 0,
+            ];
+        }
+        if ((int)($active['is_clock_challenge'] ?? 0) === 1) {
+            $need = max(1, (int)($active['clock_challenge_days'] ?? 0));
+            $cur = self::countUserClockDays($userId, $activeId);
+            return [
+                'require_mode' => 'clock_days',
+                'require_clock_days' => $need,
+                'user_clock_days' => $cur,
+            ];
+        }
+        return [
+            'require_mode' => 'sign_once',
+            'require_clock_days' => 1,
+            'user_clock_days' => ActiveClockModel::where('user_id', $userId)->where('active_id', $activeId)->count() > 0 ? 1 : 0,
+        ];
+    }
+
+    /** 绑定某活动、可兑换的礼品列表（小程序活动页） */
+    public static function listRedeemGoodsForActive(int $activeId): array
+    {
+        if ($activeId <= 0) {
+            return [];
+        }
+        $list = self::where('require_active_id', $activeId)
+            ->where('delete_time', 0)
+            ->where('status', 1)
+            ->field('id,goods_name,thumb,point,price,stock,sell_count')
+            ->order('list_order asc,id desc')
+            ->select();
+        $out = [];
+        foreach ($list as $row) {
+            $item = is_array($row) ? $row : $row->toArray();
+            $thumb = $item['thumb'] ?? '';
+            $item['thumb'] = $thumb ? cmf_get_asset_url($thumb) : '';
+            $item['point'] = (int)($item['point'] ?? 0);
+            $item['price'] = $item['price'] ?? 0;
+            $out[] = $item;
+        }
+        return $out;
     }
 
     public static function getRequireActiveName(int $activeId): string
@@ -238,8 +327,13 @@ class GoodsModel extends ToolModel
         if ($activeId <= 0) {
             return '';
         }
-        $activeName = self::getRequireActiveName($activeId) ?: '指定签到活动';
+        $activeName = self::getRequireActiveName($activeId) ?: '指定活动';
         $goodsName = $goodsInfo['goods_name'] ?? '该商品';
+        $active = ActiveModel::where('id', $activeId)->where('delete_time', 0)->find();
+        if (!empty($active) && (int)($active['is_clock_challenge'] ?? 0) === 1) {
+            $need = max(1, (int)($active['clock_challenge_days'] ?? 0));
+            return '请先在活动「' . $activeName . '」累计打卡满 ' . $need . ' 天后再兑换（' . $goodsName . '）';
+        }
         return '请先完成活动「' . $activeName . '」的签到后再兑换（' . $goodsName . '）';
     }
 
@@ -255,14 +349,22 @@ class GoodsModel extends ToolModel
             return $data;
         }
         $data['require_active_name'] = self::getRequireActiveName($activeId);
+        $progress = self::getSignRequireProgress($userId, $activeId);
+        $data['require_mode'] = $progress['require_mode'];
+        $data['require_clock_days'] = (int)$progress['require_clock_days'];
+        $data['user_clock_days'] = (int)$progress['user_clock_days'];
         $met = self::userMetSignRequire($userId, $data);
         $data['require_sign_met'] = $met ? 1 : 0;
         if (!$met) {
-            $name = $data['require_active_name'] ?: '指定签到活动';
-            $data['require_sign_tip'] = '请先完成活动「' . $name . '」的签到后再兑换';
+            $name = $data['require_active_name'] ?: '指定活动';
+            if ($progress['require_mode'] === 'clock_days') {
+                $data['require_sign_tip'] = '请先在活动「' . $name . '」累计打卡 '
+                    . $progress['user_clock_days'] . '/' . $progress['require_clock_days'] . ' 天后再兑换';
+            } else {
+                $data['require_sign_tip'] = '请先完成活动「' . $name . '」的签到后再兑换';
+            }
         }
         return $data;
     }
-
 
 }

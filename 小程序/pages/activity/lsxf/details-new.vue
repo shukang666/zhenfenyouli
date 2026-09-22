@@ -17,8 +17,8 @@
 					<text class="badge-text">线下活动</text>
 				</view>
 				<view class="hero-badge" v-else-if="info.is_clock_challenge == 1">
-					<text class="badge-icon">🎯</text>
-					<text class="badge-text">{{info.clock_challenge_days}}天挑战</text>
+					<text class="badge-icon">🎁</text>
+					<text class="badge-text">打卡兑礼</text>
 				</view>
 				<view class="hero-badge" v-else-if="info.is_clock == 1">
 					<text class="badge-icon">🎯</text>
@@ -77,20 +77,43 @@
 			</view>
 		</view>
 
-		<!-- 多日打卡挑战进度 -->
+		<!-- 打卡兑礼：礼品列表 -->
+		<view class="redeem-goods glass-card" v-if="info.is_clock_challenge == 1 && redeemGoodsList.length">
+			<view class="section-header">
+				<view class="section-bar section-bar--gold"></view>
+				<text class="section-title">可兑换礼品</text>
+			</view>
+			<text class="redeem-goods-tip">在本活动累计打卡满 {{ info.clock_challenge_days }} 天（不要求连续）后，可兑换以下礼品</text>
+			<view class="redeem-goods-list">
+				<view class="redeem-goods-item" v-for="g in redeemGoodsList" :key="g.id" @click="goRedeemGoods(g.id)">
+					<u-image width="120" height="120" :src="g.thumb" mode="aspectFill" border-radius="16"></u-image>
+					<view class="redeem-goods-meta">
+						<text class="redeem-goods-name u-line-2">{{ g.goods_name }}</text>
+						<text class="redeem-goods-price">
+							<text v-if="Number(g.price)">{{ g.price }}元</text>
+							<text v-if="Number(g.price) && g.point"> + </text>
+							<text v-if="g.point">{{ g.point }}积分</text>
+						</text>
+					</view>
+					<text class="redeem-goods-arrow">›</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- 打卡兑礼进度（已报名用户） -->
 		<view class="challenge-progress glass-card" v-if="info.is_clock_challenge == 1 && info.is_sign == 1">
 			<view class="section-header">
 				<view class="section-bar section-bar--gold"></view>
-				<text class="section-title">打卡挑战</text>
+				<text class="section-title">我的打卡进度</text>
 			</view>
 			<view class="challenge-progress-row">
-				<text class="challenge-progress-text">连续打卡 {{ clockChallengeProgress }}/{{ info.clock_challenge_days }} 天</text>
-				<text class="challenge-reward-tip" v-if="info.clock_challenge_point > 0">达成 +{{ info.clock_challenge_point }} 积分</text>
+				<text class="challenge-progress-text">累计打卡 {{ clockChallengeProgress }}/{{ info.clock_challenge_days }} 天</text>
+				<text class="challenge-reward-tip" v-if="info.clock_challenge_can_redeem == 1">已满足兑礼条件</text>
 			</view>
 			<view class="challenge-bar-track">
 				<view class="challenge-bar-fill" :style="{ width: clockChallengePercent + '%' }"></view>
 			</view>
-			<text class="challenge-done-tip" v-if="info.clock_challenge_rewarded == 1">挑战奖励已发放</text>
+			<text class="challenge-done-tip" v-if="info.clock_challenge_can_redeem == 1 && redeemGoodsList.length">前往上方礼品或积分商城兑换</text>
 		</view>
 
 		<!-- 活动概览（适合人群 + 活动时长） -->
@@ -373,13 +396,19 @@
 			actionFormFields() {
 				return (this.actionTrigger && this.actionTrigger.forms) || [];
 			},
-			// 副标�?- 根据活动类型生成
+			redeemGoodsList() {
+				return (this.info && this.info.redeem_goods_list) || [];
+			},
 			subtitle() {
 				if (Number(this.info.is_date_pending) === 1) {
 					return '具体时间确定后将另行通知';
 				}
 				if (this.info.is_clock_challenge == 1) {
-					return `连续打卡 ${this.info.clock_challenge_days || 0} 天，赢取挑战奖励`;
+					const n = this.redeemGoodsList.length;
+					if (n > 0) {
+						return `累计打卡 ${this.info.clock_challenge_days || 0} 天，可兑换 ${n} 款礼品`;
+					}
+					return `累计打卡 ${this.info.clock_challenge_days || 0} 天后可兑换礼品（请在商品中绑定本活动）`;
 				}
 				if (this.info.is_clock == 1) {
 					return '每天30秒，让社区更绿色';
@@ -463,12 +492,16 @@
 		},
 		heroPointValue() {
 			if (Number(this.info.is_clock_challenge) === 1) {
-				return this.info.clock_challenge_point || 0;
+				const n = this.redeemGoodsList.length;
+				return n > 0 ? n : (this.info.clock_challenge_days || 0);
 			}
 			return this.info.send_point || 0;
 		},
 		heroPointLabel() {
-			return Number(this.info.is_clock_challenge) === 1 ? '挑战奖励' : '积分奖励';
+			if (Number(this.info.is_clock_challenge) === 1) {
+				return this.redeemGoodsList.length > 0 ? '款礼品' : '天可兑礼';
+			}
+			return '积分奖励';
 		},
 		clockChallengeProgress() {
 			return Number(this.info.clock_challenge_progress) || 0;
@@ -485,15 +518,14 @@
 		},
 		flowStep1Desc() {
 			if (Number(this.info.is_clock_challenge) === 1) {
-				return `在活动期内每日打卡，连续 ${this.info.clock_challenge_days || 0} 天达成挑战`;
+				return `在活动期内打卡，累计满 ${this.info.clock_challenge_days || 0} 天即可兑换礼品`;
 			}
 			if (this.info.is_clock == 1) return '完成垃圾分类打卡任务';
 			return '点击下方按钮，加入活动';
 		},
 		flowStep2Desc() {
 			if (Number(this.info.is_clock_challenge) === 1) {
-				const p = this.info.clock_challenge_point || 0;
-				return p > 0 ? `达成挑战获得 ${p} 积分，亦可叠加每次打卡积分` : '达成挑战获得奖励，亦可叠加每次打卡积分';
+				return '满足天数后，在礼品列表或积分商城兑换（商品需绑定本活动）';
 			}
 			return '获得积分，解锁徽章';
 		}
@@ -567,6 +599,10 @@
 			// 返回上一�?
 			navigateBack() {
 				uni.navigateBack();
+			},
+			goRedeemGoods(goodsId) {
+				if (!goodsId) return;
+				this.$u.route('/pages/shop/details', { id: goodsId });
 			},
 			// 分享
 			handleShare() {
@@ -1096,6 +1132,49 @@
 		margin-top: 14rpx;
 		font-size: 24rpx;
 		color: #18AF38;
+	}
+
+	.redeem-goods {
+		padding: 24rpx 28rpx 28rpx;
+	}
+	.redeem-goods-tip {
+		display: block;
+		font-size: 24rpx;
+		color: #5a6b5e;
+		line-height: 1.5;
+		margin-bottom: 20rpx;
+	}
+	.redeem-goods-item {
+		display: flex;
+		align-items: center;
+		padding: 20rpx 0;
+		border-top: 1rpx solid #eef3ef;
+	}
+	.redeem-goods-item:first-of-type {
+		border-top: none;
+		padding-top: 0;
+	}
+	.redeem-goods-meta {
+		flex: 1;
+		margin-left: 20rpx;
+		min-width: 0;
+	}
+	.redeem-goods-name {
+		font-size: 28rpx;
+		font-weight: 600;
+		color: #1c2b1e;
+	}
+	.redeem-goods-price {
+		display: block;
+		margin-top: 10rpx;
+		font-size: 24rpx;
+		color: #e54d42;
+		font-weight: 600;
+	}
+	.redeem-goods-arrow {
+		font-size: 36rpx;
+		color: #b0bdb3;
+		margin-left: 12rpx;
 	}
 
 	.info-card {
