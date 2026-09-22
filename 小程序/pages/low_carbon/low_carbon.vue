@@ -1,122 +1,177 @@
 <template>
-	<view class="container" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
-		
-		<!-- 关怀版下拉提示 -->
-		<view class="care-pull-layer" :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }" v-if="showCareHint">
-			<view class="care-pull-content">
-<text class="care-pull-text">{{ carePullHeight >= 90 ? '松开进入关怀版' : '下拉进入关怀版' }}</text>
-			<u-icon :name="carePullHeight >= 90 ? 'arrow-up' : 'arrow-down'" size="28" color="#18AF38"></u-icon>
-			</view>
-		</view>
-		<!-- 自定义顶部导航：搜索栏 -->
-		<view class="fb-navbar">
-			<view class="fb-navbar-inner">
-				<view class="fb-search-box" id="guide-fb-search" @click="gotoSearch">
-					<view class="fb-search-ico">
-						<u-icon name="search" size="28" color="#18AF38"></u-icon>
-					</view>
-					<text class="fb-search-ph">搜索活动名称 / 地点</text>
-				</view>
-			</view>
-		</view>
-		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
-		<skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
+  <view
+    class="container"
+    @touchstart="onCareTouchStart"
+    @touchmove="onCareTouchMove"
+    @touchend="onCareTouchEnd"
+  >
+    <!-- 关怀版下拉提示 -->
+    <view
+      class="care-pull-layer"
+      :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }"
+      v-if="showCareHint"
+    >
+      <view class="care-pull-content">
+        <text class="care-pull-text">{{
+          carePullHeight >= 90 ? "松开进入关怀版" : "下拉进入关怀版"
+        }}</text>
+        <u-icon
+          :name="carePullHeight >= 90 ? 'arrow-up' : 'arrow-down'"
+          size="28"
+          color="#18AF38"
+        ></u-icon>
+      </view>
+    </view>
+    <!-- 自定义顶部导航：搜索栏 -->
+    <view class="fb-navbar">
+      <view class="fb-navbar-inner">
+        <view class="fb-search-box" id="guide-fb-search" @click="gotoSearch">
+          <view class="fb-search-ico">
+            <u-icon name="search" size="28" color="#18AF38"></u-icon>
+          </view>
+          <text class="fb-search-ph">搜索活动名称 / 地点</text>
+        </view>
+      </view>
+    </view>
+    <care-pull-hint :visible="!showCareHint"></care-pull-hint>
+    <skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
-		<!-- 顶部 Banner 轮播 -->
-		<view class="fb-banner-wrap" v-if="banner_list && banner_list.length">
-			<swiper class="fb-banner-swiper" :indicator-dots="banner_list.length > 1"
-				indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff"
-				autoplay circular :interval="4000" @change="onBannerChange">
-				<swiper-item v-for="(banner, idx) in banner_list" :key="idx" @click="handleBannerTap(banner)">
-					<view class="fb-banner-item">
-						<u-image width="100%" height="100%" :src="banner.image" mode="aspectFill"></u-image>
-					</view>
-				</swiper-item>
-			</swiper>
-		</view>
+    <!-- 顶部 Banner 轮播 -->
+    <!-- <view class="fb-banner-wrap" v-if="banner_list && banner_list.length">
+      <swiper
+        class="fb-banner-swiper"
+        :indicator-dots="banner_list.length > 1"
+        indicator-color="rgba(255,255,255,0.5)"
+        indicator-active-color="#fff"
+        autoplay
+        circular
+        :interval="4000"
+        @change="onBannerChange"
+      >
+        <swiper-item
+          v-for="(banner, idx) in banner_list"
+          :key="idx"
+          @click="handleBannerTap(banner)"
+        >
+          <view class="fb-banner-item">
+            <u-image
+              width="100%"
+              height="100%"
+              :src="banner.image"
+              mode="aspectFill"
+            ></u-image>
+          </view>
+        </swiper-item>
+      </swiper>
+    </view> -->
 
-		<!-- 常去入口：轮播下方 2×2 快捷卡片 -->
-		<view class="fb-entry-stage" id="guide-fb-entry">
-			<view class="fb-entry-kicker">
-				<view class="fb-entry-kicker-dot"></view>
-				<text class="fb-entry-kicker-text">快捷入口</text>
-			</view>
-			<view class="fb-entry-row">
-				<view class="fb-entry-card fb-entry-lgfl" hover-class="fb-press" :hover-stay-time="80" @click="gotoFlhd">
-					<text class="fb-entry-mark">01 分类打卡</text>
-					<view class="fb-entry-main">
-						<text class="fb-entry-emoji">♻️</text>
-						<view class="fb-entry-text">
-							<text class="fb-entry-title">垃圾分类</text>
-							<text class="fb-entry-sub">学习分类 · 拍照打卡</text>
-						</view>
-						<view class="fb-entry-go">
-							<text class="fb-entry-arrow">›</text>
-						</view>
-					</view>
-				</view>
-				<view class="fb-entry-card fb-entry-xsd" hover-class="fb-press" :hover-stay-time="80" @click="gotoXsdld">
-					<text class="fb-entry-mark">02 亲子同行</text>
-					<view class="fb-entry-main">
-						<text class="fb-entry-emoji">🤝</text>
-						<view class="fb-entry-text">
-							<text class="fb-entry-title">小手拉大手</text>
-							<text class="fb-entry-sub">家长与孩子同行</text>
-						</view>
-						<view class="fb-entry-go">
-							<text class="fb-entry-arrow">›</text>
-						</view>
-					</view>
-				</view>
-				<view class="fb-entry-card fb-entry-office" hover-class="fb-press" :hover-stay-time="80" @click="gotoOfficeBuilding">
-					<text class="fb-entry-mark">03 楼宇减碳</text>
-					<view class="fb-entry-main">
-						<text class="fb-entry-emoji">🏢</text>
-						<view class="fb-entry-text">
-							<text class="fb-entry-title">办公楼宇</text>
-							<text class="fb-entry-sub">绿色办公 · 源头分类</text>
-						</view>
-						<view class="fb-entry-go">
-							<text class="fb-entry-arrow">›</text>
-						</view>
-					</view>
-				</view>
-				<view class="fb-entry-card fb-entry-qxl" hover-class="fb-press" :hover-stay-time="80" @click="gotoQxl">
-					<text class="fb-entry-mark">04 山野社区</text>
-					<view class="fb-entry-main">
-						<text class="fb-entry-emoji">⛰️</text>
-						<view class="fb-entry-text">
-							<text class="fb-entry-title">我和七贤岭</text>
-							<text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
-						</view>
-						<view class="fb-entry-go">
-							<text class="fb-entry-arrow">›</text>
-						</view>
-					</view>
-				</view>
-			</view>
-		</view>
+    <!-- 常去入口：轮播下方 2×2 快捷卡片 -->
+    <view class="fb-entry-stage" id="guide-fb-entry">
+      <view class="fb-entry-kicker">
+        <view class="fb-entry-kicker-dot"></view>
+        <text class="fb-entry-kicker-text">快捷入口</text>
+      </view>
+      <view class="fb-entry-row">
+        <view
+          class="fb-entry-card fb-entry-lgfl"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoFlhd"
+        >
+          <text class="fb-entry-mark">01 分类打卡</text>
+          <view class="fb-entry-main">
+            <text class="fb-entry-emoji">♻️</text>
+            <view class="fb-entry-text">
+              <text class="fb-entry-title">垃圾分类</text>
+              <text class="fb-entry-sub">学习分类 · 拍照打卡</text>
+            </view>
+            <view class="fb-entry-go">
+              <text class="fb-entry-arrow">›</text>
+            </view>
+          </view>
+        </view>
+        <view
+          class="fb-entry-card fb-entry-xsd"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoXsdld"
+        >
+          <text class="fb-entry-mark">02 亲子同行</text>
+          <view class="fb-entry-main">
+            <text class="fb-entry-emoji">🤝</text>
+            <view class="fb-entry-text">
+              <text class="fb-entry-title">小手拉大手</text>
+              <text class="fb-entry-sub">家长与孩子同行</text>
+            </view>
+            <view class="fb-entry-go">
+              <text class="fb-entry-arrow">›</text>
+            </view>
+          </view>
+        </view>
+        <view
+          class="fb-entry-card fb-entry-office"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoOfficeBuilding"
+        >
+          <text class="fb-entry-mark">03 楼宇减碳</text>
+          <view class="fb-entry-main">
+            <text class="fb-entry-emoji">🏢</text>
+            <view class="fb-entry-text">
+              <text class="fb-entry-title">办公楼宇</text>
+              <text class="fb-entry-sub">绿色办公 · 源头分类</text>
+            </view>
+            <view class="fb-entry-go">
+              <text class="fb-entry-arrow">›</text>
+            </view>
+          </view>
+        </view>
+        <view
+          class="fb-entry-card fb-entry-qxl"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoQxl"
+        >
+          <text class="fb-entry-mark">04 山野社区</text>
+          <view class="fb-entry-main">
+            <text class="fb-entry-emoji">⛰️</text>
+            <view class="fb-entry-text">
+              <text class="fb-entry-title">我和七贤岭</text>
+              <text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
+            </view>
+            <view class="fb-entry-go">
+              <text class="fb-entry-arrow">›</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
 
-		<!-- 主题活动：5 大分类 -->
-		<view class="fb-section fb-theme-act" id="guide-fb-theme">
-			<view class="fb-section-header">
-				<view class="fb-hd">
-					<view class="fb-entry-kicker-dot"></view>
-					<text class="fb-section-title">主题活动</text>
-				</view>
-			</view>
-			<!-- 现行：一行五个圆钮 + 下方文字 -->
-			<view class="fb-theme-row">
-				<view class="fb-theme-item" v-for="cate in main_categories" :key="cate.id"
-					hover-class="fb-press" :hover-stay-time="80"
-					@click="gotoCateList(cate)">
-					<view class="fb-theme-circle" :style="{ background: cate.bgColor }">
-						<text class="fb-theme-emoji">{{ cate.emoji }}</text>
-					</view>
-					<text class="fb-theme-label">{{ cate.name }}</text>
-				</view>
-			</view>
-			<!-- 备用：左大卡 + 右 2×2（已弃用）
+    <!-- 主题活动：5 大分类 -->
+    <view class="fb-section fb-theme-act" id="guide-fb-theme">
+      <view class="fb-section-header">
+        <view class="fb-hd">
+          <view class="fb-entry-kicker-dot"></view>
+          <text class="fb-section-title">主题活动</text>
+        </view>
+      </view>
+      <!-- 现行：一行五个圆钮 + 下方文字 -->
+      <view class="fb-theme-row">
+        <view
+          class="fb-theme-item"
+          v-for="cate in main_categories"
+          :key="cate.id"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoCateList(cate)"
+        >
+          <view class="fb-theme-circle" :style="{ background: cate.bgColor }">
+            <text class="fb-theme-emoji">{{ cate.emoji }}</text>
+          </view>
+          <text class="fb-theme-label">{{ cate.name }}</text>
+        </view>
+      </view>
+      <!-- 备用：左大卡 + 右 2×2（已弃用）
 			<view class="fb-cate-wrap">
 				<view class="fb-cate-big" :style="{background: main_categories[0].bgColor}"
 					@click="gotoCateList(main_categories[0])">
@@ -136,558 +191,1115 @@
 				</view>
 			</view>
 			-->
-		</view>
+    </view>
 
-		<!-- 本周推荐：大图海报横滑，和下面两块刻意做成不同版式 -->
-		<view class="fb-section fb-weekly-rec" v-if="weekly_list.length > 0">
-			<view class="fb-section-header">
-				<view class="fb-hd">
-					<view class="fb-hd-bar fb-hd-bar--gold"></view>
-					<text class="fb-section-title">本周推荐</text>
-					<view class="fb-hd-chip fb-hd-chip--gold">
-						<text class="fb-hd-chip-text">精选海报</text>
-					</view>
-				</view>
-			</view>
-			<scroll-view scroll-x class="fb-weekly-scroll" :show-scrollbar="false">
-				<view class="fb-weekly-list">
-					<view class="fb-weekly-card" v-for="item in weekly_list" :key="item.id"
-						hover-class="fb-press" :hover-stay-time="80"
-						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
-						<u-image width="520" height="320" :src="item.thumb" mode="aspectFill"></u-image>
-						<view class="fb-weekly-hatch"></view>
-						<view class="fb-weekly-mask"></view>
-						<view class="fb-weekly-tag">
-							<text class="fb-weekly-tag-text">本周精选</text>
-						</view>
-						<view class="fb-weekly-badge" v-if="item.active_count > 0">
-							<text class="fb-weekly-badge-text">{{item.active_count}}人参与</text>
-						</view>
-						<view class="fb-weekly-foot">
-							<text class="fb-weekly-name u-line-2">{{item.name}}</text>
-							<text class="fb-weekly-date">{{ formatActiveDate(item) }}{{ item.is_date_pending == 1 ? '' : ' 结束' }}</text>
-						</view>
-					</view>
-				</view>
-			</scroll-view>
-		</view>
+    <!-- 本周推荐：大图海报横滑，和下面两块刻意做成不同版式 -->
+    <view class="fb-section fb-weekly-rec" v-if="weekly_list.length > 0">
+      <view class="fb-section-header">
+        <view class="fb-hd">
+          <view class="fb-hd-bar fb-hd-bar--gold"></view>
+          <text class="fb-section-title">本周推荐</text>
+          <view class="fb-hd-chip fb-hd-chip--gold">
+            <text class="fb-hd-chip-text">精选海报</text>
+          </view>
+        </view>
+      </view>
+      <scroll-view scroll-x class="fb-weekly-scroll" :show-scrollbar="false">
+        <view class="fb-weekly-list">
+          <view
+            class="fb-weekly-card"
+            v-for="item in weekly_list"
+            :key="item.id"
+            hover-class="fb-press"
+            :hover-stay-time="80"
+            @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
+          >
+            <u-image
+              width="520"
+              height="320"
+              :src="item.thumb"
+              mode="aspectFill"
+            ></u-image>
+            <view class="fb-weekly-hatch"></view>
+            <view class="fb-weekly-mask"></view>
+            <view class="fb-weekly-tag">
+              <text class="fb-weekly-tag-text">本周精选</text>
+            </view>
+            <view class="fb-weekly-badge" v-if="item.active_count > 0">
+              <text class="fb-weekly-badge-text"
+                >{{ item.active_count }}人参与</text
+              >
+            </view>
+            <view class="fb-weekly-foot">
+              <text class="fb-weekly-name u-line-2">{{ item.name }}</text>
+              <text class="fb-weekly-date"
+                >{{ formatActiveDate(item)
+                }}{{ item.is_date_pending == 1 ? "" : " 结束" }}</text
+              >
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
 
-		<!-- 现在就能参加：绿色行动块，强调立刻点 -->
-		<view class="fb-section fb-light-act" v-if="light_list.length > 0">
-			<view class="fb-section-header">
-				<view class="fb-hd">
-					<view class="fb-live-dot"></view>
-					<text class="fb-section-title">现在就能参加</text>
-				</view>
-				<view class="fb-section-more" @click="goMoreLight">
-					<text class="fb-more-text">更多</text>
-					<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
-				</view>
-			</view>
-			<view class="fb-light-grid">
-				<view class="fb-light-card" v-for="item in light_list" :key="item.id"
-					hover-class="fb-press" :hover-stay-time="80"
-					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
-					<view class="fb-light-cover">
-						<u-image width="100%" height="100%" :src="item.thumb || 'https://admin.circular-economy.cn/static/images/default-avatar.png'" mode="aspectFill"></u-image>
-						<view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
-					</view>
-					<view class="fb-light-info">
-						<text class="fb-light-name u-line-2">{{item.name}}</text>
-					</view>
-					<view class="fb-light-btn">
-						<text class="fb-light-btn-text">立即参与</text>
-					</view>
-				</view>
-			</view>
-		</view>
+    <!-- 现在就能参加：绿色行动块，强调立刻点 -->
+    <view class="fb-section fb-light-act" v-if="light_list.length > 0">
+      <view class="fb-section-header">
+        <view class="fb-hd">
+          <view class="fb-live-dot"></view>
+          <text class="fb-section-title">现在就能参加</text>
+        </view>
+        <view class="fb-section-more" @click="goMoreLight">
+          <text class="fb-more-text">更多</text>
+          <u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
+        </view>
+      </view>
+      <view class="fb-light-grid">
+        <view
+          class="fb-light-card"
+          v-for="item in light_list"
+          :key="item.id"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
+        >
+          <view class="fb-light-cover">
+            <u-image
+              width="100%"
+              height="100%"
+              :src="
+                item.thumb ||
+                'https://admin.circular-economy.cn/static/images/default-avatar.png'
+              "
+              mode="aspectFill"
+            ></u-image>
+            <view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
+          </view>
+          <view class="fb-light-info">
+            <text class="fb-light-name u-line-2">{{ item.name }}</text>
+          </view>
+          <view class="fb-light-btn">
+            <text class="fb-light-btn-text">立即参与</text>
+          </view>
+        </view>
+      </view>
+    </view>
 
-		<!-- 近期活动：日期台历 + 信息流，不像海报也不像宫格 -->
-		<view class="fb-section fb-recent-act" v-if="recent_list.length > 0">
-			<view class="fb-section-header">
-				<view class="fb-hd">
-					<view class="fb-hd-bar fb-hd-bar--ink"></view>
-					<text class="fb-section-title">近期活动</text>
-				</view>
-				<view class="fb-section-more" @click="goMoreRecent">
-					<text class="fb-more-text">更多</text>
-					<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
-				</view>
-			</view>
-			<view class="fb-recent-list">
-				<view class="fb-recent-card" v-for="item in recent_list" :key="item.id"
-					hover-class="fb-press" :hover-stay-time="80"
-					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
-					<view class="fb-recent-cal">
-						<text class="fb-recent-cal-d">{{ formatRecentCalDay(item) }}</text>
-						<text class="fb-recent-cal-m">{{ formatRecentCalMonth(item) }}</text>
-					</view>
-					<view class="fb-recent-cover">
-						<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
-					</view>
-					<view class="fb-recent-info">
-						<text class="fb-recent-name u-line-2">{{item.name}}</text>
-						<text class="fb-recent-meta">{{ formatRecentMeta(item) }}</text>
-					</view>
-					<u-icon name="arrow-right" size="24" color="#c5d0c7"></u-icon>
-				</view>
-			</view>
-		</view>
+    <!-- 近期活动：日期台历 + 信息流，不像海报也不像宫格 -->
+    <view class="fb-section fb-recent-act" v-if="recent_list.length > 0">
+      <view class="fb-section-header">
+        <view class="fb-hd">
+          <view class="fb-hd-bar fb-hd-bar--ink"></view>
+          <text class="fb-section-title">近期活动</text>
+        </view>
+        <view class="fb-section-more" @click="goMoreRecent">
+          <text class="fb-more-text">更多</text>
+          <u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
+        </view>
+      </view>
+      <view class="fb-recent-list">
+        <view
+          class="fb-recent-card"
+          v-for="item in recent_list"
+          :key="item.id"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
+        >
+          <view class="fb-recent-cal">
+            <text class="fb-recent-cal-d">{{ formatRecentCalDay(item) }}</text>
+            <text class="fb-recent-cal-m">{{
+              formatRecentCalMonth(item)
+            }}</text>
+          </view>
+          <view class="fb-recent-cover">
+            <u-image
+              width="100%"
+              height="100%"
+              :src="item.thumb"
+              mode="aspectFill"
+            ></u-image>
+          </view>
+          <view class="fb-recent-info">
+            <text class="fb-recent-name u-line-2">{{ item.name }}</text>
+            <text class="fb-recent-meta">{{ formatRecentMeta(item) }}</text>
+          </view>
+          <u-icon name="arrow-right" size="24" color="#c5d0c7"></u-icon>
+        </view>
+      </view>
+    </view>
 
-		<!-- 标签栏：热门活动 + 动态标签（已隐藏，保留代码备用） -->
-		<view class="fb-tab-bar" v-if="false">
-			<scroll-view scroll-x class="fb-tab-scroll" :show-scrollbar="false" :scroll-into-view="'tab-' + current_tab" scroll-with-animation>
-				<view class="fb-tab-list">
-					<view class="fb-tab-item" :class="{'fb-tab-active': current_tab === 0}" id="tab-0"
-						@click="switchTab(0)">
-						<text class="fb-tab-text">热门活动</text>
-					</view>
-					<view class="fb-tab-item"
-						:class="{'fb-tab-active': current_tab === idx + 1}"
-						v-for="(tag, idx) in tag_list" :key="tag" :id="'tab-' + (idx + 1)"
-						@click="switchTab(idx + 1)">
-						<text class="fb-tab-text">{{tag}}</text>
-					</view>
-				</view>
-			</scroll-view>
-		</view>
+    <!-- 标签栏：热门活动 + 动态标签（已隐藏，保留代码备用） -->
+    <view class="fb-tab-bar" v-if="false">
+      <scroll-view
+        scroll-x
+        class="fb-tab-scroll"
+        :show-scrollbar="false"
+        :scroll-into-view="'tab-' + current_tab"
+        scroll-with-animation
+      >
+        <view class="fb-tab-list">
+          <view
+            class="fb-tab-item"
+            :class="{ 'fb-tab-active': current_tab === 0 }"
+            id="tab-0"
+            @click="switchTab(0)"
+          >
+            <text class="fb-tab-text">热门活动</text>
+          </view>
+          <view
+            class="fb-tab-item"
+            :class="{ 'fb-tab-active': current_tab === idx + 1 }"
+            v-for="(tag, idx) in tag_list"
+            :key="tag"
+            :id="'tab-' + (idx + 1)"
+            @click="switchTab(idx + 1)"
+          >
+            <text class="fb-tab-text">{{ tag }}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
 
-		<!-- 活动列表 -->
-		<view class="fb-act-list">
-			<view class="fb-section-header fb-act-list-hd">
-				<view class="fb-hd">
-					<view class="fb-entry-kicker-dot"></view>
-					<text class="fb-section-title">全部活动</text>
-					<text class="fb-entry-kicker-hint">继续往下看</text>
-				</view>
-			</view>
-			<view class="fb-act-card" v-for="item in active_list" :key="item.id"
-				@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
-				<view class="fb-act-cover">
-					<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
-					<view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
-					<view class="fb-act-badge" v-if="item.active_count > 0">
-						<view class="fb-act-avatars" v-if="item.avatar_array && item.avatar_array.length">
-							<image :src="img" class="fb-act-avatar" mode="aspectFill"
-								v-for="(img, i) in item.avatar_array.slice(0, 3)" :key="i"></image>
-						</view>
-						<text class="fb-act-badge-text">{{item.active_count}}人参与</text>
-					</view>
-				</view>
-				<view class="fb-act-body">
-					<view class="fb-act-title u-line-1">{{item.name}}</view>
-					<view class="fb-act-meta">
-						<view class="fb-meta-item">
-							<u-icon name="clock" size="22" color="#65676B"></u-icon>
-							<text class="fb-meta-text">{{ formatActiveDate(item) }}</text>
-						</view>
-						<view class="fb-meta-item fb-meta-loc" v-if="item.address && item.address.trim()">
-							<u-icon name="map" size="22" color="#65676B"></u-icon>
-							<text class="fb-meta-text u-line-1">{{item.address}}</text>
-						</view>
-					</view>
-				</view>
-			</view>
+    <!-- 原「全部活动」列表位：督导员工作台 + 整改任务（列表改由右上角「更多」进 active-list） -->
+    <view class="fb-act-list">
+      <view class="fb-section-header fb-act-list-hd">
+        <view class="fb-hd">
+          <view class="fb-entry-kicker-dot"></view>
+          <text class="fb-section-title">全部活动</text>
+        </view>
+        <view class="fb-section-more" @click="goMoreAll">
+          <text class="fb-more-text">更多</text>
+          <u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
+        </view>
+      </view>
 
-			<!-- 空态/加载中：均不显示 -->
-			<view class="fb-load-tip"
-				v-if="!active_loading && active_list.length > 0 && active_list.length >= active_total">没有更多了</view>
-		</view>
-		<page-guide page="low_carbon"></page-guide>
-	</view>
+      <view
+        class="vol-section u-type-white-bg u-radius-16 u-p-30"
+        id="guide-dtsh-vol"
+      >
+        <view class="u-font-32 u-font-bold u-m-b-20">督导员工作台</view>
+        <view
+          class="vol-intro u-text-center u-p-b-24"
+          style="border-bottom: 1rpx solid #f0f0f0"
+        >
+          <view class="u-font-28 u-font-bold" style="color: #18af38"
+            >督导员工作平台</view
+          >
+          <view
+            class="u-font-22 u-type-info u-m-t-12 u-line-2"
+            style="line-height: 1.7"
+          >
+            履行督导职责，参与桶边督导与巡检巡查，监测督导动态，推动商户共治与分类治理
+          </view>
+          <view class="u-m-t-16" v-if="!isVolunteer">
+            <u-button
+              type="primary"
+              size="mini"
+              hover-class="none"
+              :customStyle="{
+                background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)',
+              }"
+              @click="goVolunteerApply"
+              >申请督导员</u-button
+            >
+          </view>
+        </view>
+        <view class="u-font-28 u-font-bold u-m-t-24 u-m-b-8">快捷功能</view>
+        <view class="vol-grid-3">
+          <view
+            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
+            @click="goVolunteerPage('/pages/dtsh/volunteer-sign')"
+          >
+            <view
+              class="vol-grid-icon u-flex u-col-center u-row-center"
+              style="
+                background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);
+              "
+            >
+              <u-icon name="clock" size="44" color="#fff"></u-icon>
+            </view>
+            <text class="u-font-24 u-m-t-8">志愿督导</text>
+          </view>
+          <view
+            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
+            @click="goVolunteerMonitor"
+          >
+            <view
+              class="vol-grid-icon u-flex u-col-center u-row-center"
+              style="
+                background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);
+              "
+            >
+              <u-icon name="eye" size="44" color="#fff"></u-icon>
+            </view>
+            <text class="u-font-24 u-m-t-8">督导监测</text>
+          </view>
+          <view
+            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
+            @click="goVolunteerPage('/pages/zzhd/dwxj/dwxj?type=3')"
+          >
+            <view
+              class="vol-grid-icon u-flex u-col-center u-row-center"
+              style="
+                background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);
+              "
+            >
+              <u-icon name="eye" size="44" color="#fff"></u-icon>
+            </view>
+            <text class="u-font-24 u-m-t-8">督导巡查</text>
+          </view>
+          <view
+            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
+            @click="goVolunteerReport(2)"
+          >
+            <view
+              class="vol-grid-icon u-flex u-col-center u-row-center"
+              style="
+                background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);
+              "
+            >
+              <u-icon name="camera" size="44" color="#fff"></u-icon>
+            </view>
+            <text class="u-font-24 u-m-t-8">随手发现问题</text>
+          </view>
+          <view
+            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
+            @click="goVolunteerReport(1)"
+          >
+            <view
+              class="vol-grid-icon u-flex u-col-center u-row-center"
+              style="
+                background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);
+              "
+            >
+              <u-icon name="warning" size="44" color="#fff"></u-icon>
+            </view>
+            <text class="u-font-24 u-m-t-8">问题反馈</text>
+          </view>
+          <view
+            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
+            @click="goVolunteerMerchantInspect"
+          >
+            <view
+              class="vol-grid-icon u-flex u-col-center u-row-center"
+              style="
+                background: linear-gradient(135deg, #42a5f5 0%, #1565c0 100%);
+              "
+            >
+              <u-icon name="home" size="44" color="#fff"></u-icon>
+            </view>
+            <text class="u-font-24 u-m-t-8">商户共治</text>
+          </view>
+        </view>
+        <view
+          class="u-m-t-24 u-p-t-20"
+          v-if="volunteerSupervision.total > 0"
+          style="border-top: 1rpx solid #f0f0f0"
+        >
+          <view class="u-font-28 u-font-bold u-m-b-16">我的志愿督导</view>
+          <view class="u-flex u-row-between">
+            <view class="u-type-info u-font-24">累计签到次数</view>
+            <view class="u-font-bold" style="color: #18af38"
+              >{{ volunteerSupervision.total }} 次</view
+            >
+          </view>
+          <view
+            class="u-flex u-row-between u-m-t-10"
+            v-if="volunteerSupervision.last_date"
+          >
+            <view class="u-type-info u-font-24">最近签到</view>
+            <view class="u-font-24">{{ volunteerSupervision.last_date }}</view>
+          </view>
+        </view>
+      </view>
+
+      <view
+        class="task-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30"
+        id="guide-dtsh-task"
+      >
+        <view class="u-font-32 u-font-bold">整改任务</view>
+        <view class="u-font-24 u-type-info u-m-t-8 u-m-b-20"
+          >每人每天最多领取 1 条</view
+        >
+        <view class="u-p-lr-10 u-m-b-20">
+          <u-tabs
+            :list="taskTabs"
+            :is-scroll="false"
+            :current="currentTab"
+            @change="changeTaskTab"
+            active-color="#18AF38"
+          ></u-tabs>
+        </view>
+        <view v-if="currentTab == 0">
+          <view v-if="taskList.length == 0"
+            ><u-empty text="暂无可领取任务" mode="list"></u-empty
+          ></view>
+          <view
+            v-for="(item, idx) in taskList"
+            :key="idx"
+            class="task-card u-m-b-20"
+          >
+            <view class="u-font-30 u-font-bold">{{ item.title }}</view>
+            <image
+              v-if="item.image"
+              :src="item.image"
+              mode="aspectFill"
+              class="shot-thumb u-m-t-16"
+              @click="previewShot(item.image)"
+            ></image>
+            <view class="u-font-26 u-type-info u-m-t-10">{{ item.content }}</view>
+            <view class="u-flex u-row-between u-m-t-20">
+              <view class="u-font-26" style="color: #18af38"
+                >奖励积分 +{{ item.point }}</view
+              >
+              <u-button
+                v-if="item.accepted"
+                type="info"
+                size="mini"
+                shape="circle"
+                disabled
+                >已领取</u-button
+              >
+              <u-button
+                v-else-if="item.daily_limit"
+                type="info"
+                size="mini"
+                shape="circle"
+                disabled
+                >今日已领</u-button
+              >
+              <u-button
+                v-else
+                type="success"
+                size="mini"
+                shape="circle"
+                @click="acceptTask(item)"
+                >领取任务</u-button
+              >
+            </view>
+          </view>
+        </view>
+        <view v-if="currentTab == 1">
+          <view v-if="myTasks.length == 0"
+            ><u-empty text="无我的任务" mode="list"></u-empty
+          ></view>
+          <view
+            v-for="(item, idx) in myTasks"
+            :key="idx"
+            class="task-card u-m-b-20"
+            @click="goSubmitTask(item)"
+          >
+            <view class="u-font-30 u-font-bold">{{ item.task_title }}</view>
+            <image
+              v-if="item.task_image"
+              :src="item.task_image"
+              mode="aspectFill"
+              class="shot-thumb u-m-t-16"
+              @click.stop="previewShot(item.task_image)"
+            ></image>
+            <view class="u-font-26 u-type-info u-m-t-10">{{
+              item.task_content
+            }}</view>
+            <view class="u-flex u-row-between u-m-t-20">
+              <view class="u-font-26" style="color: #18af38"
+                >奖励积分 +{{ item.task_point }}</view
+              >
+              <u-tag
+                :text="item.status_name"
+                :type="taskStatusType(item.status)"
+                mode="dark"
+              />
+            </view>
+            <view
+              v-if="item.status == 2 && item.reason"
+              class="u-font-24 u-type-error u-m-t-10"
+              >拒绝原因：{{ item.reason }}</view
+            >
+          </view>
+        </view>
+      </view>
+
+      <template v-if="false">
+        <view
+          class="fb-act-card"
+          v-for="item in active_list"
+          :key="item.id"
+          @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
+        >
+          <view class="fb-act-cover">
+            <u-image
+              width="100%"
+              height="100%"
+              :src="item.thumb"
+              mode="aspectFill"
+            ></u-image>
+            <view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
+            <view class="fb-act-badge" v-if="item.active_count > 0">
+              <view
+                class="fb-act-avatars"
+                v-if="item.avatar_array && item.avatar_array.length"
+              >
+                <image
+                  :src="img"
+                  class="fb-act-avatar"
+                  mode="aspectFill"
+                  v-for="(img, i) in item.avatar_array.slice(0, 3)"
+                  :key="i"
+                ></image>
+              </view>
+              <text class="fb-act-badge-text">{{ item.active_count }}人参与</text>
+            </view>
+          </view>
+          <view class="fb-act-body">
+            <view class="fb-act-title u-line-1">{{ item.name }}</view>
+            <view class="fb-act-meta">
+              <view class="fb-meta-item">
+                <u-icon name="clock" size="22" color="#65676B"></u-icon>
+                <text class="fb-meta-text">{{ formatActiveDate(item) }}</text>
+              </view>
+              <view
+                class="fb-meta-item fb-meta-loc"
+                v-if="item.address && item.address.trim()"
+              >
+                <u-icon name="map" size="22" color="#65676B"></u-icon>
+                <text class="fb-meta-text u-line-1">{{ item.address }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view
+          class="fb-load-tip"
+          v-if="
+            !active_loading &&
+            active_list.length > 0 &&
+            active_list.length >= active_total
+          "
+          >没有更多了</view
+        >
+      </template>
+    </view>
+    <page-guide page="low_carbon"></page-guide>
+  </view>
 </template>
 
 <script>
-	import { checkCommunity } from '@/common/communityCheck.mixin.js'
-	import careGesture from '@/common/care-gesture.mixin.js'
-	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
+import { checkCommunity } from "@/common/communityCheck.mixin.js";
+import careGesture from "@/common/care-gesture.mixin.js";
+import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 
-	export default {
-		components: { SkeletonScreen },
-		mixins: [careGesture],
-		data() {
-			return {
-				isLoading: true,
-				banner_list: [],
-				current_tab: 0,
-				tag_list: [],
-				active_list: [],
-				active_page: 1,
-				active_total: 0,
-				active_loading: false,
-				weekly_list: [],
-				light_list: [],
-				recent_list: [],
-				// 5 大活动分类（硬编码，后台新增不显示）
-				// community_cate_id 对应数据库 cmf_active_community_cate.id
-			main_categories: [
-				{ id: 1, name: '健康运动', subtitle: 'Healthy Life', emoji: '🏃', bgColor: 'linear-gradient(135deg, #E7F0FE 0%, #1877F2 100%)' },
-				{ id: 2, name: '学习成长', subtitle: 'Growing Up', emoji: '🌟', bgColor: 'linear-gradient(135deg, #D4FC79 0%, #96E6A1 100%)' },
-				{ id: 3, name: '兴趣体验', subtitle: 'Hobby Time', emoji: '🎨', bgColor: 'linear-gradient(135deg, #FFD194 0%, #FF9A56 100%)' },
-				{ id: 4, name: '交流互动', subtitle: 'Neighbors', emoji: '🤝', bgColor: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)' },
-				{ id: 5, name: '公益行动', subtitle: 'Volunteer', emoji: '💚', bgColor: 'linear-gradient(135deg, #A18CD1 0%, #D8B4FE 100%)' },
-			],
-			};
-		},
-		onLoad(options) {
-			this.loadAllData()
-		},
-		onShow() {
-			this.updateTabBarSelected(1)
-			if (checkCommunity(this)) return
-			if (!this.isLogin) return
-		},
-		methods: {
-			formatActiveDate(item) {
-				if (Number(item.is_date_pending) === 1) {
-					return '时间待定'
-				}
-				if (!item.date) {
-					return '—'
-				}
-				return this.$u.timeFormat(item.date, 'yy-mm-dd')
-			},
-			formatRecentCalDay(item) {
-				if (Number(item.is_date_pending) === 1) return '待定'
-				if (!item.date) return '—'
-				return this.$u.timeFormat(item.date, 'dd')
-			},
-			formatRecentCalMonth(item) {
-				if (Number(item.is_date_pending) === 1) return '时间'
-				if (!item.date) return ''
-				return this.$u.timeFormat(item.date, 'mm') + '月'
-			},
-			formatRecentMeta(item) {
-				if (Number(item.is_date_pending) === 1) return '时间待定'
-				if (!item.date) return '截止 —'
-				return '截止 ' + this.$u.timeFormat(item.date, 'yy-mm-dd')
-			},
-			async loadAllData() {
-				const startTime = Date.now()
-				try {
-				await Promise.all([
-						this.loadBanners(),
-						this.loadWeeklyRec(),
-						this.loadLightAct(),
-						this.loadRecentAct(),
-						this.loadTags(),
-						this.loadAllActivities(),
-					])
-				} catch (e) {
-					console.log('数据加载失败:', e)
-				} finally {
-					const elapsed = Date.now() - startTime
-					if (elapsed < 400) {
-						setTimeout(() => { this.isLoading = false }, 400 - elapsed)
-					} else {
-						this.isLoading = false
-					}
-				}
-			},
+export default {
+  components: { SkeletonScreen },
+  mixins: [careGesture],
+  data() {
+    return {
+      isLoading: true,
+      banner_list: [],
+      current_tab: 0,
+      tag_list: [],
+      active_list: [],
+      active_page: 1,
+      active_total: 0,
+      active_loading: false,
+      weekly_list: [],
+      light_list: [],
+      recent_list: [],
+      // 5 大活动分类（硬编码，后台新增不显示）
+      // community_cate_id 对应数据库 cmf_active_community_cate.id
+      checkRole: null,
+      volunteerSupervision: {
+        total: 0,
+        last_date: "",
+      },
+      taskTabs: [{ name: "可领取" }, { name: "我的任务" }],
+      currentTab: 0,
+      taskList: [],
+      myTasks: [],
+      main_categories: [
+        {
+          id: 1,
+          name: "健康运动",
+          subtitle: "Healthy Life",
+          emoji: "🏃",
+          bgColor: "linear-gradient(135deg, #E7F0FE 0%, #1877F2 100%)",
+        },
+        {
+          id: 2,
+          name: "学习成长",
+          subtitle: "Growing Up",
+          emoji: "🌟",
+          bgColor: "linear-gradient(135deg, #D4FC79 0%, #96E6A1 100%)",
+        },
+        {
+          id: 3,
+          name: "兴趣体验",
+          subtitle: "Hobby Time",
+          emoji: "🎨",
+          bgColor: "linear-gradient(135deg, #FFD194 0%, #FF9A56 100%)",
+        },
+        {
+          id: 4,
+          name: "交流互动",
+          subtitle: "Neighbors",
+          emoji: "🤝",
+          bgColor: "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)",
+        },
+        {
+          id: 5,
+          name: "公益行动",
+          subtitle: "Volunteer",
+          emoji: "💚",
+          bgColor: "linear-gradient(135deg, #A18CD1 0%, #D8B4FE 100%)",
+        },
+      ],
+    };
+  },
+  computed: {
+    isVolunteer() {
+      return this.checkRole && this.checkRole.is_approved;
+    },
+  },
+  onLoad(options) {
+    this.loadAllData();
+  },
+  onShow() {
+    this.updateTabBarSelected(1);
+    if (checkCommunity(this)) return;
+    this.loadCheckRole();
+    this.loadTaskList();
+    this.loadMyTasks();
+  },
+  methods: {
+    formatActiveDate(item) {
+      if (Number(item.is_date_pending) === 1) {
+        return "时间待定";
+      }
+      if (!item.date) {
+        return "—";
+      }
+      return this.$u.timeFormat(item.date, "yy-mm-dd");
+    },
+    formatRecentCalDay(item) {
+      if (Number(item.is_date_pending) === 1) return "待定";
+      if (!item.date) return "—";
+      return this.$u.timeFormat(item.date, "dd");
+    },
+    formatRecentCalMonth(item) {
+      if (Number(item.is_date_pending) === 1) return "时间";
+      if (!item.date) return "";
+      return this.$u.timeFormat(item.date, "mm") + "月";
+    },
+    formatRecentMeta(item) {
+      if (Number(item.is_date_pending) === 1) return "时间待定";
+      if (!item.date) return "截止 —";
+      return "截止 " + this.$u.timeFormat(item.date, "yy-mm-dd");
+    },
+    async loadAllData() {
+      const startTime = Date.now();
+      try {
+        await Promise.all([
+          this.loadBanners(),
+          this.loadWeeklyRec(),
+          this.loadLightAct(),
+          this.loadRecentAct(),
+          this.loadTags(),
+          // this.loadAllActivities(), // 底部不再内嵌列表，见 goMoreAll → active-list
+        ]);
+      } catch (e) {
+        console.log("数据加载失败:", e);
+      } finally {
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 400) {
+          setTimeout(() => {
+            this.isLoading = false;
+          }, 400 - elapsed);
+        } else {
+          this.isLoading = false;
+        }
+      }
+    },
 
-		// 加载本周推荐活动（is_month_recommend=1，最多取 10 条）
-		loadWeeklyRec() {
-			return this.$u.api.get_new_active_list({
-				is_month_recommend: 1,
-				page_size: 10,
-				page: 1
-			}).then(res => {
-				this.weekly_list = res.data?.data || []
-			}).catch(() => {
-				this.weekly_list = []
-			})
-		},
+    // 加载本周推荐活动（is_month_recommend=1，最多取 10 条）
+    loadWeeklyRec() {
+      return this.$u.api
+        .get_new_active_list({
+          is_month_recommend: 1,
+          page_size: 10,
+          page: 1,
+        })
+        .then((res) => {
+          this.weekly_list = res.data?.data || [];
+        })
+        .catch(() => {
+          this.weekly_list = [];
+        });
+    },
 
-		// 加载轻活动（tag=轻活动，取最新 3 条）
-		loadLightAct() {
-			return this.$u.api.get_new_active_list({
-				tag: '轻活动',
-				page_size: 3,
-				page: 1
-			}).then(res => {
-				this.light_list = res.data?.data || []
-			}).catch(() => {
-				this.light_list = []
-			})
-		},
+    // 加载轻活动（tag=轻活动，取最新 3 条）
+    loadLightAct() {
+      return this.$u.api
+        .get_new_active_list({
+          tag: "轻活动",
+          page_size: 3,
+          page: 1,
+        })
+        .then((res) => {
+          this.light_list = res.data?.data || [];
+        })
+        .catch(() => {
+          this.light_list = [];
+        });
+    },
 
-		// 轻活动"更多" → 全部活动列表（选中"轻活动"筛选）
-		goMoreLight() {
-			this.$u.route({ url: '/pages/activity/active-list', params: { filter: 'light' } })
-		},
+    // 「全部活动」区块右上角更多 → 全部活动列表页
+    goMoreAll() {
+      this.$u.route({
+        url: "/pages/activity/active-list",
+        params: { filter: "all" },
+      });
+    },
 
-		// 加载近期活动（非轻活动，按时间倒序取最新2条）
-		loadRecentAct() {
-			return this.$u.api.get_new_active_list({
-				tag: '轻活动',
-				exclude_tag: 1,
-				page_size: 2,
-				page: 1,
-				order: 'start_time desc'
-			}).then(res => {
-				this.recent_list = res.data?.data || []
-			}).catch(() => {
-				this.recent_list = []
-			})
-		},
+    // 轻活动"更多" → 全部活动列表（选中"轻活动"筛选）
+    goMoreLight() {
+      this.$u.route({
+        url: "/pages/activity/active-list",
+        params: { filter: "light" },
+      });
+    },
 
-		// 近期活动"更多" → 全部活动列表（选中"线下活动"筛选）
-		goMoreRecent() {
-			this.$u.route({ url: '/pages/activity/active-list', params: { filter: 'all' } })
-		},
+    // 加载近期活动（非轻活动，按时间倒序取最新2条）
+    loadRecentAct() {
+      return this.$u.api
+        .get_new_active_list({
+          tag: "轻活动",
+          exclude_tag: 1,
+          page_size: 2,
+          page: 1,
+          order: "start_time desc",
+        })
+        .then((res) => {
+          this.recent_list = res.data?.data || [];
+        })
+        .catch(() => {
+          this.recent_list = [];
+        });
+    },
 
-		// 加载 Banner（slide group id=9 活动页Banner）
-		loadBanners() {
-				return this.$u.api.find_slide({ id: 9 }).then(res => {
-					this.banner_list = res.data || []
-				}).catch(() => {
-					this.banner_list = []
-				})
-			},
+    // 近期活动"更多" → 全部活动列表（选中"线下活动"筛选）
+    goMoreRecent() {
+      this.$u.route({
+        url: "/pages/activity/active-list",
+        params: { filter: "all" },
+      });
+    },
 
-			// 加载活动标签（去重）
-			loadTags() {
-				return this.$u.api.get_active_tags_list().then(res => {
-					this.tag_list = res.data || []
-				}).catch(() => {
-					this.tag_list = []
-				})
-			},
+    // 加载 Banner（slide group id=9 活动页Banner）
+    loadBanners() {
+      return this.$u.api
+        .find_slide({ id: 9 })
+        .then((res) => {
+          this.banner_list = res.data || [];
+        })
+        .catch(() => {
+          this.banner_list = [];
+        });
+    },
 
-			// 底部「全部活动」：不按热门筛，标签栏隐藏时 current_tab 一直是 0
-			loadAllActivities() {
-				this.active_list = []
-				this.active_page = 1
-				this.active_total = 0
-				this.loadActiveList()
-			},
+    // 加载活动标签（去重）
+    loadTags() {
+      return this.$u.api
+        .get_active_tags_list()
+        .then((res) => {
+          this.tag_list = res.data || [];
+        })
+        .catch(() => {
+          this.tag_list = [];
+        });
+    },
 
-			// 加载活动列表（标签栏隐藏时拉全部；若再打开标签才按 tab 过滤）
-			loadActiveList() {
-				if (this.active_loading) return
-				this.active_loading = true
+    loadCheckRole() {
+      if (!this.isLogin) {
+        this.checkRole = null;
+        this.volunteerSupervision = { total: 0, last_date: "" };
+        return;
+      }
+      this.$u.api
+        .getCheckRole()
+        .then((res) => {
+          this.checkRole = res.data || null;
+          if (this.checkRole && this.checkRole.is_approved) {
+            this.loadVolunteerSupervision();
+          } else {
+            this.volunteerSupervision = { total: 0, last_date: "" };
+          }
+        })
+        .catch(() => {
+          this.checkRole = null;
+          this.volunteerSupervision = { total: 0, last_date: "" };
+        });
+    },
+    loadVolunteerSupervision() {
+      this.$u.api
+        .getVolunteerMyList({ page: 1, page_size: 1 })
+        .then((res) => {
+          this.volunteerSupervision.total = res.data.total || 0;
+          if (res.data.data && res.data.data.length > 0) {
+            this.volunteerSupervision.last_date = res.data.data[0].supervision_date;
+          }
+        })
+        .catch(() => {});
+    },
+    goVolunteerPage(url) {
+      if (!this.$u.func.checkLogin()) return;
+      this.$u.route(url);
+    },
+    goVolunteerReport(locationType) {
+      if (!this.$u.func.checkLogin()) return;
+      const approved = this.isVolunteer ? 1 : 0;
+      this.$u.route(
+        `/pages/dtsh/report?location_type=${locationType}&can_submit=${approved}`,
+      );
+    },
+    goVolunteerMonitor() {
+      if (!this.$u.func.checkLogin()) return;
+      const approved = this.isVolunteer ? 1 : 0;
+      this.$u.route(`/pages/dtsh/supervision-monitor?can_submit=${approved}`);
+    },
+    goVolunteerMerchantInspect() {
+      if (!this.$u.func.checkLogin()) return;
+      this.$u.route("/pages/dtsh/merchant-inspect");
+    },
+    goVolunteerApply() {
+      if (!this.$u.func.checkLogin()) return;
+      this.$u.route("/pages/zzhd/add");
+    },
+    changeTaskTab(idx) {
+      const i = idx && typeof idx === "object" ? idx.index : idx;
+      this.currentTab = i;
+      if (i == 1) this.loadMyTasks();
+      else this.loadTaskList();
+    },
+    loadTaskList() {
+      if (!this.isLogin) return;
+      this.$u.api
+        .getVolunteerTaskList()
+        .then((res) => {
+          this.taskList = res.data || [];
+        })
+        .catch(() => {});
+    },
+    loadMyTasks() {
+      if (!this.isLogin) return;
+      this.$u.api
+        .getMyVolunteerTasks({ page: 1, page_size: 20 })
+        .then((res) => {
+          this.myTasks = res.data.data || [];
+        })
+        .catch(() => {});
+    },
+    acceptTask(item) {
+      if (!this.$u.func.checkLogin()) return;
+      uni.showModal({
+        title: "确认领取",
+        content: `确定领取「${item.title}」吗？每人每天最多领取 1 条。`,
+        success: (r) => {
+          if (!r.confirm) return;
+          this.$u.api
+            .acceptVolunteerTask({ task_id: item.id })
+            .then((res) => {
+              uni.showToast({ title: res.msg || "领取成功", icon: "none" });
+              this.loadTaskList();
+              this.loadMyTasks();
+            })
+            .catch((err) => {
+              uni.showToast({
+                title: (err && err.msg) || "领取失败",
+                icon: "none",
+              });
+            });
+        },
+      });
+    },
+    goSubmitTask(item) {
+      if (!this.$u.func.checkLogin()) return;
+      const st = parseInt(item.status, 10);
+      if (st === 1) {
+        uni.showToast({ title: "审核中，请勿重复提交", icon: "none" });
+        return;
+      }
+      if (st === 3) {
+        uni.showToast({ title: "任务已完成", icon: "none" });
+        return;
+      }
+      this.$u.route({
+        url: "/pages/dtsh/task-submit",
+        params: {
+          log_id: item.id,
+          title: item.task_title,
+          content: item.task_content,
+          point: item.task_point,
+          status: item.status,
+          shot_image: item.task_image || "",
+          images:
+            item.images_arr && item.images_arr.length > 0
+              ? JSON.stringify(item.images_arr)
+              : "",
+        },
+      });
+    },
+    taskStatusType(status) {
+      const map = { 0: "info", 1: "warning", 2: "error", 3: "success" };
+      return map[status] || "info";
+    },
+    previewShot(url) {
+      if (!url) return;
+      uni.previewImage({ urls: [url] });
+    },
 
-				const params = { page: this.active_page }
-				if (this.current_tab > 0) {
-					const tag = this.tag_list[this.current_tab - 1]
-					if (tag) params.tag = tag
-				}
+    // 底部「全部活动」：不按热门筛，标签栏隐藏时 current_tab 一直是 0（列表 UI 已注释，方法保留）
+    loadAllActivities() {
+      this.active_list = [];
+      this.active_page = 1;
+      this.active_total = 0;
+      this.loadActiveList();
+    },
 
-				this.$u.api.get_new_active_list(params).then(res => {
-					let data = res.data || {}
-					let list = data.data || []
-					if (this.active_page == 1) {
-						this.active_list = list
-					} else {
-						this.active_list.push(...list)
-					}
-					this.active_total = data.total || list.length
-				}).catch(err => {
-					this.$u.toast(err.msg)
-				}).finally(() => {
-					this.active_loading = false
-				})
-			},
+    // 加载活动列表（标签栏隐藏时拉全部；若再打开标签才按 tab 过滤）
+    loadActiveList() {
+      if (this.active_loading) return;
+      this.active_loading = true;
 
-			// 切换标签
-			switchTab(index) {
-				if (this.current_tab === index) return
-				this.current_tab = index
-				this.active_list = []
-				this.active_page = 1
-				this.active_total = 0
-				this.loadActiveList()
-			},
+      const params = { page: this.active_page };
+      if (this.current_tab > 0) {
+        const tag = this.tag_list[this.current_tab - 1];
+        if (tag) params.tag = tag;
+      }
 
-			// Banner 点击处理
-			handleBannerTap(banner) {
-				const url = banner.url || ''
-				const target = banner.target || ''
-				if (!url) return
+      this.$u.api
+        .get_new_active_list(params)
+        .then((res) => {
+          let data = res.data || {};
+          let list = data.data || [];
+          if (this.active_page == 1) {
+            this.active_list = list;
+          } else {
+            this.active_list.push(...list);
+          }
+          this.active_total = data.total || list.length;
+        })
+        .catch((err) => {
+          this.$u.toast(err.msg);
+        })
+        .finally(() => {
+          this.active_loading = false;
+        });
+    },
 
-				// 如果是完整页面路径，直接跳转
-				if (url.startsWith('/pages/')) {
-					if (target === 'switchTab') {
-						uni.switchTab({ url })
-					} else {
-						uni.navigateTo({ url })
-					}
-					return
-				}
+    // 切换标签
+    switchTab(index) {
+      if (this.current_tab === index) return;
+      this.current_tab = index;
+      this.active_list = [];
+      this.active_page = 1;
+      this.active_total = 0;
+      this.loadActiveList();
+    },
 
-				// 如果是数字，当作活动 ID
-				if (/^\d+$/.test(url)) {
-					this.$u.route(`/pages/activity/lsxf/details-new?id=${url}`)
-					return
-				}
+    // Banner 点击处理
+    handleBannerTap(banner) {
+      const url = banner.url || "";
+      const target = banner.target || "";
+      if (!url) return;
 
-				// 如果是 active?id=xxx 格式
-				const match = url.match(/id=(\d+)/)
-				if (match) {
-					this.$u.route(`/pages/activity/lsxf/details-new?id=${match[1]}`)
-					return
-				}
-			},
+      // 如果是完整页面路径，直接跳转
+      if (url.startsWith("/pages/")) {
+        if (target === "switchTab") {
+          uni.switchTab({ url });
+        } else {
+          uni.navigateTo({ url });
+        }
+        return;
+      }
 
-			// 点击分类 → 进入分类列表页
-			gotoCateList(cate) {
-				this.$u.route(`/pages/activity/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name)}`)
-			},
+      // 如果是数字，当作活动 ID
+      if (/^\d+$/.test(url)) {
+        this.$u.route(`/pages/activity/lsxf/details-new?id=${url}`);
+        return;
+      }
 
-		// 垃圾分类入口 → 低碳生活二级页面（含垃圾分类、自治活动、社交活动）
-		gotoFlhd() {
-			this.$u.route('/pages/dtsh/dtsh')
-		},
+      // 如果是 active?id=xxx 格式
+      const match = url.match(/id=(\d+)/);
+      if (match) {
+        this.$u.route(`/pages/activity/lsxf/details-new?id=${match[1]}`);
+        return;
+      }
+    },
 
-			// 小手拉大手
-			gotoXsdld() {
-				this.$u.route('/pages/activity/xsdld')
-			},
+    // 点击分类 → 进入分类列表页
+    gotoCateList(cate) {
+      this.$u.route(
+        `/pages/activity/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name)}`,
+      );
+    },
 
-			// 办公楼宇（占位页，后续再补内容）
-			gotoOfficeBuilding() {
-				this.$u.route('/pages/activity/office-building')
-			},
+    // 垃圾分类入口 → 低碳生活二级页面（含垃圾分类、自治活动、社交活动）
+    gotoFlhd() {
+      this.$u.route("/pages/dtsh/dtsh");
+    },
 
-			// 我和七贤岭入口
-			gotoQxl() {
-				this.$u.route('/pages/activity/love-qixianling')
-			},
+    // 小手拉大手
+    gotoXsdld() {
+      this.$u.route("/pages/activity/xsdld");
+    },
 
-			// 搜索
-			gotoSearch() {
-				this.$u.route('/pages/activity/active-search')
-			},
+    // 办公楼宇（占位页，后续再补内容）
+    gotoOfficeBuilding() {
+      this.$u.route("/pages/activity/office-building");
+    },
 
-			// tabbar
-			updateTabBarSelected(index) {
-				if (typeof this.$mp.page.getTabBar === 'function' && this.$mp.page.getTabBar()) {
-					this.$mp.page.getTabBar().setSelected(index)
-				}
-			},
+    // 我和七贤岭入口
+    gotoQxl() {
+      this.$u.route("/pages/activity/love-qixianling");
+    },
 
-			// Banner 切换（可选埋点）
-			onBannerChange() {},
-		},
+    // 搜索
+    gotoSearch() {
+      this.$u.route("/pages/activity/active-search");
+    },
 
-		onReachBottom() {
-			if (this.active_list.length >= this.active_total) return
-			if (this.active_loading) return
-			this.active_page++
-			this.loadActiveList()
-		}
-	}
+    // tabbar
+    updateTabBarSelected(index) {
+      if (
+        typeof this.$mp.page.getTabBar === "function" &&
+        this.$mp.page.getTabBar()
+      ) {
+        this.$mp.page.getTabBar().setSelected(index);
+      }
+    },
+
+    // Banner 切换（可选埋点）
+    onBannerChange() {},
+  },
+
+  onReachBottom() {
+    // 原内嵌全部活动分页（列表已注释）
+    // if (this.active_list.length >= this.active_total) return;
+    // if (this.active_loading) return;
+    // this.active_page++;
+    // this.loadActiveList();
+  },
+};
 </script>
 
 <style lang="scss" scoped>
 .container {
-	min-height: 100vh;
-	background: #eef4f0;
+  min-height: 100vh;
+  background: #eef4f0;
 }
 
 .fb-press {
-	opacity: 0.92;
-	transform: scale(0.98);
+  opacity: 0.92;
+  transform: scale(0.98);
 }
 
 /* ===== 自定义顶部导航 ===== */
 .fb-navbar {
-	position: sticky;
-	top: 0;
-	z-index: 30;
-	background: #fff;
-	padding: 16rpx 24rpx;
-	padding-top: calc(env(safe-area-inset-top) + 16rpx);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: #fff;
+  padding: 16rpx 24rpx;
+  padding-top: calc(env(safe-area-inset-top) + 16rpx);
 }
 .fb-navbar-inner {
-	display: flex;
-	align-items: center;
+  display: flex;
+  align-items: center;
 }
 .fb-search-box {
-	flex: 1;
-	display: flex;
-	align-items: center;
-	height: 76rpx;
-	background: #f3f8f4;
-	border-radius: 38rpx;
-	padding: 0 10rpx 0 12rpx;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 76rpx;
+  background: #f3f8f4;
+  border-radius: 38rpx;
+  padding: 0 10rpx 0 12rpx;
 }
 .fb-search-ico {
-	width: 52rpx;
-	height: 52rpx;
-	border-radius: 50%;
-	background: #e8f8ec;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: #e8f8ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 .fb-search-ph {
-	margin-left: 12rpx;
-	font-size: 26rpx;
-	color: #9aa39c;
+  margin-left: 12rpx;
+  font-size: 26rpx;
+  color: #9aa39c;
 }
 
 /* ===== Banner 轮播 ===== */
 .fb-banner-wrap {
-	width: 100%;
-	padding: 16rpx 24rpx 0;
-	margin-bottom: 8rpx;
-	box-sizing: border-box;
+  width: 100%;
+  padding: 16rpx 24rpx 0;
+  margin-bottom: 8rpx;
+  box-sizing: border-box;
 }
 .fb-banner-swiper {
-	width: 100%;
-	height: 300rpx;
-	border-radius: 24rpx;
-	overflow: hidden;
+  width: 100%;
+  height: 300rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
 }
 .fb-banner-item {
-	width: 100%;
-	height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 /* ===== 主题活动：一行五个圆钮 ===== */
 .fb-theme-row {
-	display: flex;
-	flex-direction: row;
-	align-items: flex-start;
-	justify-content: space-between;
-	padding: 4rpx 20rpx 20rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 4rpx 20rpx 20rpx;
 }
 .fb-theme-item {
-	flex: 1;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .fb-theme-circle {
-	width: 104rpx;
-	height: 104rpx;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	box-shadow: 0 8rpx 20rpx rgba(16, 48, 24, 0.12);
-	border: 4rpx solid rgba(255, 255, 255, 0.85);
-	box-sizing: border-box;
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 20rpx rgba(16, 48, 24, 0.12);
+  border: 4rpx solid rgba(255, 255, 255, 0.85);
+  box-sizing: border-box;
 }
 .fb-theme-emoji {
-	font-size: 44rpx;
-	line-height: 1;
+  font-size: 44rpx;
+  line-height: 1;
 }
 .fb-theme-label {
-	margin-top: 14rpx;
-	width: 100%;
-	padding: 0 4rpx;
-	box-sizing: border-box;
-	font-size: 22rpx;
-	font-weight: 600;
-	color: #142018;
-	text-align: center;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+  margin-top: 14rpx;
+  width: 100%;
+  padding: 0 4rpx;
+  box-sizing: border-box;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #142018;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 备用：左大卡 + 右 2×2 样式（已弃用，恢复时取消注释）
@@ -849,99 +1461,133 @@
 
 /* ===== 常去入口：对冲咬合 + 斜线流动 + 中间能量核，两卡互不重叠 ===== */
 @keyframes fbEntryStripe {
-	0% { background-position: 0 0, 0 0; }
-	100% { background-position: 40rpx 28rpx, 0 0; }
+  0% {
+    background-position:
+      0 0,
+      0 0;
+  }
+  100% {
+    background-position:
+      40rpx 28rpx,
+      0 0;
+  }
 }
 @keyframes fbEntryShine {
-	0% { transform: translateX(-130%) skewX(-20deg); opacity: 0; }
-	18% { opacity: 0.9; }
-	42% { opacity: 0; }
-	100% { transform: translateX(240%) skewX(-20deg); opacity: 0; }
+  0% {
+    transform: translateX(-130%) skewX(-20deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.9;
+  }
+  42% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(240%) skewX(-20deg);
+    opacity: 0;
+  }
 }
 @keyframes fbEntryFloat {
-	0%, 100% { transform: translateY(0); }
-	50% { transform: translateY(-6rpx); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6rpx);
+  }
 }
 @keyframes fbHubPulse {
-	0%, 100% { transform: scale(1); opacity: 1; }
-	50% { transform: scale(1.16); opacity: 0.7; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.16);
+    opacity: 0.7;
+  }
 }
 @keyframes fbHubSpin {
-	0% { transform: rotate(0deg); }
-	100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 .fb-entry-stage {
-	padding: 12rpx 20rpx 4rpx;
+  padding: 12rpx 20rpx 4rpx;
 }
 .fb-entry-kicker {
-	display: flex;
-	align-items: center;
-	padding: 0 12rpx 8rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 12rpx 8rpx;
 }
 .fb-entry-kicker-dot {
-	width: 12rpx;
-	height: 12rpx;
-	border-radius: 50%;
-	background: #18AF38;
-	margin-right: 10rpx;
-	box-shadow: 0 0 0 6rpx rgba(24, 175, 56, 0.18);
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #18af38;
+  margin-right: 10rpx;
+  box-shadow: 0 0 0 6rpx rgba(24, 175, 56, 0.18);
 }
 .fb-entry-kicker-text {
-	font-size: 28rpx;
-	font-weight: 700;
-	color: #142018;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #142018;
 }
 .fb-entry-kicker-hint {
-	margin-left: 12rpx;
-	font-size: 22rpx;
-	color: #8A958C;
+  margin-left: 12rpx;
+  font-size: 22rpx;
+  color: #8a958c;
 }
 .fb-entry-row {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 12rpx;
-	padding: 4rpx 0 16rpx;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12rpx;
+  padding: 4rpx 0 16rpx;
 }
 .fb-entry-card {
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	justify-content: flex-start;
-	gap: 8rpx;
-	padding: 16rpx 14rpx 14rpx;
-	min-height: 0;
-	border-radius: 16rpx;
-	box-shadow: 0 6rpx 18rpx rgba(16, 40, 24, 0.1);
-	position: relative;
-	overflow: hidden;
-	color: #fff;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8rpx;
+  padding: 16rpx 14rpx 14rpx;
+  min-height: 0;
+  border-radius: 16rpx;
+  box-shadow: 0 6rpx 18rpx rgba(16, 40, 24, 0.1);
+  position: relative;
+  overflow: hidden;
+  color: #fff;
 }
 .fb-entry-lgfl {
-	background: linear-gradient(145deg, #5aa8ff 0%, #1877F2 100%);
+  background: linear-gradient(145deg, #5aa8ff 0%, #1877f2 100%);
 }
 .fb-entry-xsd {
-	background: linear-gradient(145deg, #f5a89e 0%, #e85d7a 55%, #d94f6a 100%);
+  background: linear-gradient(145deg, #f5a89e 0%, #e85d7a 55%, #d94f6a 100%);
 }
 .fb-entry-office {
-	background: linear-gradient(145deg, #8b9dc3 0%, #5c6b8a 55%, #4a5568 100%);
+  background: linear-gradient(145deg, #8b9dc3 0%, #5c6b8a 55%, #4a5568 100%);
 }
 .fb-entry-qxl {
-	background: linear-gradient(145deg, #45d06a 0%, #28A745 100%);
+  background: linear-gradient(145deg, #45d06a 0%, #28a745 100%);
 }
 .fb-entry-lgfl::after,
 .fb-entry-xsd::after,
 .fb-entry-office::after,
 .fb-entry-qxl::after {
-	content: '';
-	position: absolute;
-	top: -24rpx;
-	right: -24rpx;
-	width: 88rpx;
-	height: 88rpx;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.14);
-	pointer-events: none;
+  content: "";
+  position: absolute;
+  top: -24rpx;
+  right: -24rpx;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  pointer-events: none;
 }
 .fb-entry-lgfl .fb-entry-title,
 .fb-entry-lgfl .fb-entry-sub,
@@ -959,575 +1605,631 @@
 .fb-entry-qxl .fb-entry-sub,
 .fb-entry-qxl .fb-entry-arrow,
 .fb-entry-qxl .fb-entry-mark {
-	color: #fff;
+  color: #fff;
 }
 .fb-entry-mark {
-	font-size: 16rpx;
-	letter-spacing: 1rpx;
-	opacity: 0.82;
-	position: relative;
-	z-index: 1;
-	white-space: nowrap;
+  font-size: 16rpx;
+  letter-spacing: 1rpx;
+  opacity: 0.82;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
 }
 .fb-entry-main {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	width: 100%;
-	gap: 10rpx;
-	position: relative;
-	z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  gap: 10rpx;
+  position: relative;
+  z-index: 1;
 }
 .fb-entry-emoji {
-	font-size: 32rpx;
-	margin: 0;
-	flex-shrink: 0;
-	line-height: 1;
+  font-size: 32rpx;
+  margin: 0;
+  flex-shrink: 0;
+  line-height: 1;
 }
 .fb-entry-text {
-	display: flex;
-	flex-direction: column;
-	gap: 2rpx;
-	flex: 1;
-	min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+  flex: 1;
+  min-width: 0;
 }
 .fb-entry-title {
-	font-size: 26rpx;
-	font-weight: 700;
-	line-height: 1.3;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1.3;
 }
 .fb-entry-sub {
-	font-size: 20rpx;
-	opacity: 0.9;
-	line-height: 1.35;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 2;
-	overflow: hidden;
+  font-size: 20rpx;
+  opacity: 0.9;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 .fb-entry-go {
-	flex-shrink: 0;
-	width: 36rpx;
-	height: 36rpx;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.24);
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  flex-shrink: 0;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .fb-entry-arrow {
-	font-size: 28rpx;
-	font-weight: 300;
-	opacity: 1;
-	line-height: 1;
+  font-size: 28rpx;
+  font-weight: 300;
+  opacity: 1;
+  line-height: 1;
 }
 
 /* ===== 标签栏 ===== */
 .fb-tab-bar {
-	position: sticky;
-	top: 0;
-	z-index: 20;
-	background: #fff;
-	border-top: 1rpx solid #E4E6EB;
-	border-bottom: 1rpx solid #E4E6EB;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #fff;
+  border-top: 1rpx solid #e4e6eb;
+  border-bottom: 1rpx solid #e4e6eb;
 }
 .fb-tab-scroll {
-	white-space: nowrap;
-	height: 80rpx;
+  white-space: nowrap;
+  height: 80rpx;
 }
 .fb-tab-list {
-	display: inline-flex;
-	align-items: center;
-	padding: 0 16rpx;
-	height: 100%;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16rpx;
+  height: 100%;
 }
 .fb-tab-item {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	height: 56rpx;
-	padding: 0 24rpx;
-	margin-right: 8rpx;
-	border-radius: 28rpx;
-	background: #F0F2F5;
-	flex-shrink: 0;
-	transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 56rpx;
+  padding: 0 24rpx;
+  margin-right: 8rpx;
+  border-radius: 28rpx;
+  background: #f0f2f5;
+  flex-shrink: 0;
+  transition: all 0.2s;
 }
 .fb-tab-active {
-	background: #E7F0FE;
+  background: #e7f0fe;
 }
 .fb-tab-active .fb-tab-text {
-	color: #1877F2;
-	font-weight: 600;
+  color: #1877f2;
+  font-weight: 600;
 }
 .fb-tab-text {
-	font-size: 26rpx;
-	color: #65676B;
+  font-size: 26rpx;
+  color: #65676b;
 }
 
 /* ===== 通用板块 ===== */
 .fb-section {
-	margin: 28rpx 0 8rpx;
+  margin: 28rpx 0 8rpx;
 }
 .fb-section-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0 24rpx 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx 18rpx;
 }
 .fb-hd {
-	display: flex;
-	align-items: center;
-	min-width: 0;
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 .fb-hd-bar {
-	width: 8rpx;
-	height: 32rpx;
-	border-radius: 8rpx;
-	margin-right: 12rpx;
-	flex-shrink: 0;
+  width: 8rpx;
+  height: 32rpx;
+  border-radius: 8rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
 }
 .fb-hd-bar--gold {
-	background: linear-gradient(180deg, #f6d365 0%, #dda017 100%);
+  background: linear-gradient(180deg, #f6d365 0%, #dda017 100%);
 }
 .fb-hd-bar--ink {
-	background: linear-gradient(180deg, #5b6bff 0%, #3d4ec8 100%);
+  background: linear-gradient(180deg, #5b6bff 0%, #3d4ec8 100%);
 }
 .fb-section-title {
-	font-size: 34rpx;
-	font-weight: 700;
-	color: #1c2b1e;
-	margin-right: 8rpx;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1c2b1e;
+  margin-right: 8rpx;
 }
 .fb-hd-chip {
-	margin-left: 12rpx;
-	padding: 4rpx 12rpx;
-	border-radius: 999rpx;
+  margin-left: 12rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
 }
 .fb-hd-chip--gold {
-	background: #fff4d8;
+  background: #fff4d8;
 }
 .fb-hd-chip-text {
-	font-size: 20rpx;
-	color: #b88912;
-	font-weight: 600;
+  font-size: 20rpx;
+  color: #b88912;
+  font-weight: 600;
 }
 .fb-live-dot {
-	width: 16rpx;
-	height: 16rpx;
-	border-radius: 50%;
-	background: #18af38;
-	margin-right: 12rpx;
-	box-shadow: 0 0 0 6rpx rgba(24, 175, 56, 0.18);
-	animation: fbHubPulse 1.6s ease-in-out infinite;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #18af38;
+  margin-right: 12rpx;
+  box-shadow: 0 0 0 6rpx rgba(24, 175, 56, 0.18);
+  animation: fbHubPulse 1.6s ease-in-out infinite;
 }
 .fb-section-more {
-	display: flex;
-	align-items: center;
+  display: flex;
+  align-items: center;
 }
 .fb-more-text {
-	font-size: 24rpx;
-	color: #18af38;
-	font-weight: 600;
-	margin-right: 4rpx;
+  font-size: 24rpx;
+  color: #18af38;
+  font-weight: 600;
+  margin-right: 4rpx;
 }
 
 /* ===== 本周推荐：大图海报 ===== */
 .fb-weekly-scroll {
-	white-space: nowrap;
-	padding-bottom: 8rpx;
+  white-space: nowrap;
+  padding-bottom: 8rpx;
 }
 .fb-weekly-list {
-	display: inline-flex;
-	padding: 0 24rpx 8rpx;
+  display: inline-flex;
+  padding: 0 24rpx 8rpx;
 }
 .fb-weekly-card {
-	position: relative;
-	display: inline-block;
-	width: 520rpx;
-	height: 320rpx;
-	margin-right: 20rpx;
-	overflow: hidden;
-	flex-shrink: 0;
-	background: #dce8de;
-	box-shadow: 0 14rpx 32rpx rgba(180, 130, 20, 0.16);
-	clip-path: polygon(0 10%, 6% 0, 94% 0, 100% 10%, 100% 90%, 94% 100%, 6% 100%, 0 90%);
+  position: relative;
+  display: inline-block;
+  width: 520rpx;
+  height: 320rpx;
+  margin-right: 20rpx;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #dce8de;
+  box-shadow: 0 14rpx 32rpx rgba(180, 130, 20, 0.16);
+  clip-path: polygon(
+    0 10%,
+    6% 0,
+    94% 0,
+    100% 10%,
+    100% 90%,
+    94% 100%,
+    6% 100%,
+    0 90%
+  );
 }
 .fb-weekly-hatch {
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	bottom: 0;
-	z-index: 1;
-	pointer-events: none;
-	background: repeating-linear-gradient(
-		-28deg,
-		rgba(255, 255, 255, 0) 0,
-		rgba(255, 255, 255, 0) 14rpx,
-		rgba(255, 255, 255, 0.14) 14rpx,
-		rgba(255, 255, 255, 0.14) 16rpx
-	);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    -28deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0) 14rpx,
+    rgba(255, 255, 255, 0.14) 14rpx,
+    rgba(255, 255, 255, 0.14) 16rpx
+  );
 }
 .fb-weekly-hatch--soft {
-	background: repeating-linear-gradient(
-		-28deg,
-		rgba(255, 255, 255, 0) 0,
-		rgba(255, 255, 255, 0) 16rpx,
-		rgba(255, 255, 255, 0.08) 16rpx,
-		rgba(255, 255, 255, 0.08) 18rpx
-	);
+  background: repeating-linear-gradient(
+    -28deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0) 16rpx,
+    rgba(255, 255, 255, 0.08) 16rpx,
+    rgba(255, 255, 255, 0.08) 18rpx
+  );
 }
 .fb-weekly-mask {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	height: 180rpx;
-	background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.72) 100%);
-	pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 180rpx;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.72) 100%
+  );
+  pointer-events: none;
 }
 .fb-weekly-tag {
-	position: absolute;
-	top: 22rpx;
-	left: 28rpx;
-	z-index: 2;
-	padding: 6rpx 16rpx;
-	background: linear-gradient(135deg, #f6d365 0%, #dda017 100%);
-	clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+  position: absolute;
+  top: 22rpx;
+  left: 28rpx;
+  z-index: 2;
+  padding: 6rpx 16rpx;
+  background: linear-gradient(135deg, #f6d365 0%, #dda017 100%);
+  clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
 }
 .fb-weekly-tag-text {
-	font-size: 20rpx;
-	font-weight: 700;
-	color: #fff;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #fff;
 }
 .fb-weekly-badge {
-	position: absolute;
-	top: 16rpx;
-	right: 16rpx;
-	z-index: 2;
-	padding: 6rpx 14rpx;
-	background: rgba(0, 0, 0, 0.45);
-	border-radius: 999rpx;
+  position: absolute;
+  top: 16rpx;
+  right: 16rpx;
+  z-index: 2;
+  padding: 6rpx 14rpx;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 999rpx;
 }
 .fb-weekly-badge-text {
-	color: #fff;
-	font-size: 20rpx;
-	font-weight: 500;
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 500;
 }
 .fb-weekly-foot {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	z-index: 2;
-	padding: 20rpx 24rpx 24rpx;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 20rpx 24rpx 24rpx;
 }
 .fb-weekly-name {
-	font-size: 30rpx;
-	font-weight: 700;
-	color: #fff;
-	line-height: 1.35;
-	white-space: normal;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.35;
+  white-space: normal;
 }
 .fb-weekly-date {
-	display: block;
-	margin-top: 8rpx;
-	font-size: 22rpx;
-	color: rgba(255,255,255,0.82);
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 /* ===== 现在就能参加：绿色行动宫格 ===== */
 .fb-light-act {
-	margin: 24rpx 24rpx 8rpx;
-	padding: 24rpx 0 8rpx;
-	background-image:
-		repeating-linear-gradient(
-			-28deg,
-			rgba(24, 175, 56, 0) 0,
-			rgba(24, 175, 56, 0) 14rpx,
-			rgba(24, 175, 56, 0.06) 14rpx,
-			rgba(24, 175, 56, 0.06) 16rpx
-		),
-		linear-gradient(180deg, #e7f8eb 0%, #f4fbf6 100%);
-	clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
+  margin: 24rpx 24rpx 8rpx;
+  padding: 24rpx 0 8rpx;
+  background-image:
+    repeating-linear-gradient(
+      -28deg,
+      rgba(24, 175, 56, 0) 0,
+      rgba(24, 175, 56, 0) 14rpx,
+      rgba(24, 175, 56, 0.06) 14rpx,
+      rgba(24, 175, 56, 0.06) 16rpx
+    ),
+    linear-gradient(180deg, #e7f8eb 0%, #f4fbf6 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
 }
 .fb-light-act .fb-section-header {
-	padding: 0 24rpx 16rpx;
+  padding: 0 24rpx 16rpx;
 }
 .fb-light-grid {
-	display: flex;
-	flex-wrap: wrap;
-	padding: 0 12rpx 12rpx;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 12rpx 12rpx;
 }
 .fb-light-card {
-	width: 50%;
-	box-sizing: border-box;
-	padding: 0 12rpx 20rpx;
-	display: flex;
-	flex-direction: column;
+  width: 50%;
+  box-sizing: border-box;
+  padding: 0 12rpx 20rpx;
+  display: flex;
+  flex-direction: column;
 }
 .fb-light-cover {
-	width: 100%;
-	height: 168rpx;
-	overflow: hidden;
-	background: #dce8de;
-	position: relative;
+  width: 100%;
+  height: 168rpx;
+  overflow: hidden;
+  background: #dce8de;
+  position: relative;
 }
 .fb-light-card:nth-child(odd) .fb-light-cover {
-	clip-path: polygon(0 0, 100% 0, 100% 100%, 0 82%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 82%);
 }
 .fb-light-card:nth-child(even) .fb-light-cover {
-	clip-path: polygon(0 0, 100% 0, 100% 82%, 0 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 82%, 0 100%);
 }
 .fb-light-info {
-	background: #fff;
-	padding: 16rpx 16rpx 8rpx;
+  background: #fff;
+  padding: 16rpx 16rpx 8rpx;
 }
 .fb-light-name {
-	font-size: 26rpx;
-	font-weight: 700;
-	color: #1c2b1e;
-	line-height: 1.35;
-	height: 70rpx;
-	white-space: normal;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #1c2b1e;
+  line-height: 1.35;
+  height: 70rpx;
+  white-space: normal;
 }
 .fb-light-btn {
-	background: #18af38;
-	padding: 12rpx 0;
-	text-align: center;
-	clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+  background: #18af38;
+  padding: 12rpx 0;
+  text-align: center;
+  clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
 }
 .fb-light-btn-text {
-	font-size: 24rpx;
-	color: #fff;
-	font-weight: 700;
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: 700;
 }
 
 /* ===== 近期活动：台历信息流 ===== */
 .fb-recent-list {
-	padding: 0 24rpx;
-	position: relative;
+  padding: 0 24rpx;
+  position: relative;
 }
 .fb-recent-list::before {
-	content: '';
-	position: absolute;
-	left: 66rpx;
-	top: 12rpx;
-	bottom: 28rpx;
-	border-left: 3rpx dashed rgba(61, 78, 200, 0.28);
-	pointer-events: none;
+  content: "";
+  position: absolute;
+  left: 66rpx;
+  top: 12rpx;
+  bottom: 28rpx;
+  border-left: 3rpx dashed rgba(61, 78, 200, 0.28);
+  pointer-events: none;
 }
 .fb-recent-card {
-	display: flex;
-	align-items: center;
-	background: #fff;
-	padding: 16rpx 18rpx 16rpx 16rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.06);
-	clip-path: polygon(0 0, 100% 0, 100% 100%, 3% 100%, 0 72%);
-	position: relative;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 16rpx 18rpx 16rpx 16rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.06);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 3% 100%, 0 72%);
+  position: relative;
 }
 .fb-recent-cal {
-	width: 88rpx;
-	height: 96rpx;
-	clip-path: polygon(0 12%, 12% 0, 88% 0, 100% 12%, 100% 88%, 88% 100%, 12% 100%, 0 88%);
-	background-image:
-		repeating-linear-gradient(
-			-28deg,
-			rgba(61, 78, 200, 0) 0,
-			rgba(61, 78, 200, 0) 8rpx,
-			rgba(61, 78, 200, 0.08) 8rpx,
-			rgba(61, 78, 200, 0.08) 9rpx
-		),
-		linear-gradient(180deg, #eef1ff 0%, #dfe4ff 100%);
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	margin-right: 14rpx;
-	flex-shrink: 0;
+  width: 88rpx;
+  height: 96rpx;
+  clip-path: polygon(
+    0 12%,
+    12% 0,
+    88% 0,
+    100% 12%,
+    100% 88%,
+    88% 100%,
+    12% 100%,
+    0 88%
+  );
+  background-image:
+    repeating-linear-gradient(
+      -28deg,
+      rgba(61, 78, 200, 0) 0,
+      rgba(61, 78, 200, 0) 8rpx,
+      rgba(61, 78, 200, 0.08) 8rpx,
+      rgba(61, 78, 200, 0.08) 9rpx
+    ),
+    linear-gradient(180deg, #eef1ff 0%, #dfe4ff 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14rpx;
+  flex-shrink: 0;
 }
 .fb-recent-cal-d {
-	font-size: 36rpx;
-	font-weight: 700;
-	color: #3d4ec8;
-	line-height: 1;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #3d4ec8;
+  line-height: 1;
 }
 .fb-recent-cal-m {
-	margin-top: 6rpx;
-	font-size: 20rpx;
-	color: #6b78d4;
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  color: #6b78d4;
 }
 .fb-recent-cover {
-	flex-shrink: 0;
-	width: 120rpx;
-	height: 96rpx;
-	border-radius: 16rpx;
-	overflow: hidden;
-	background: #dce8de;
-	margin-right: 16rpx;
+  flex-shrink: 0;
+  width: 120rpx;
+  height: 96rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #dce8de;
+  margin-right: 16rpx;
 }
 .fb-recent-info {
-	flex: 1;
-	min-width: 0;
-	margin-right: 8rpx;
+  flex: 1;
+  min-width: 0;
+  margin-right: 8rpx;
 }
 .fb-recent-name {
-	font-size: 28rpx;
-	font-weight: 700;
-	color: #1c2b1e;
-	line-height: 1.35;
-	white-space: normal;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1c2b1e;
+  line-height: 1.35;
+  white-space: normal;
 }
 .fb-recent-meta {
-	display: block;
-	margin-top: 8rpx;
-	font-size: 22rpx;
-	color: #8a9b8d;
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8a9b8d;
 }
 
 /* ===== 活动列表 ===== */
 .fb-act-list {
-	padding: 16rpx 24rpx calc(88rpx + env(safe-area-inset-bottom));
+  padding: 16rpx 24rpx calc(88rpx + env(safe-area-inset-bottom));
 }
 .fb-act-list-hd {
-	padding-left: 0;
-	padding-right: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 .fb-act-card {
-	background: #fff;
-	margin-bottom: 20rpx;
-	overflow: hidden;
-	box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.07);
-	clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
+  background: #fff;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.07);
+  clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
 }
 .fb-act-card:active {
-	opacity: 0.92;
+  opacity: 0.92;
 }
 .fb-act-cover {
-	position: relative;
-	width: 100%;
-	height: 320rpx;
-	background: #dce8de;
-	clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
+  position: relative;
+  width: 100%;
+  height: 320rpx;
+  background: #dce8de;
+  clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
 }
 .fb-act-body {
-	padding: 20rpx 24rpx 22rpx 32rpx;
-	position: relative;
+  padding: 20rpx 24rpx 22rpx 32rpx;
+  position: relative;
 }
 .fb-act-body::before {
-	content: '';
-	position: absolute;
-	left: 0;
-	top: 16rpx;
-	bottom: 16rpx;
-	width: 8rpx;
-	background: linear-gradient(180deg, #1877F2 0%, #18AF38 100%);
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16rpx;
+  bottom: 16rpx;
+  width: 8rpx;
+  background: linear-gradient(180deg, #1877f2 0%, #18af38 100%);
 }
 .fb-act-badge {
-	position: absolute;
-	left: 16rpx;
-	bottom: 16rpx;
-	z-index: 2;
-	display: inline-flex;
-	align-items: center;
-	height: 40rpx;
-	padding: 0 14rpx;
-	background: rgba(0, 0, 0, 0.5);
-	border-radius: 20rpx;
+  position: absolute;
+  left: 16rpx;
+  bottom: 16rpx;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  padding: 0 14rpx;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 20rpx;
 }
 .fb-act-avatars {
-	display: flex;
+  display: flex;
 }
 .fb-act-avatar {
-	width: 24rpx;
-	height: 24rpx;
-	border-radius: 50%;
-	margin-left: -6rpx;
-	border: 2rpx solid #fff;
-	background: #F0F2F5;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  margin-left: -6rpx;
+  border: 2rpx solid #fff;
+  background: #f0f2f5;
 }
 .fb-act-avatar:first-child {
-	margin-left: 0;
+  margin-left: 0;
 }
 .fb-act-badge-text {
-	color: #fff;
-	font-size: 20rpx;
-	font-weight: 500;
-	margin-left: 6rpx;
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 500;
+  margin-left: 6rpx;
 }
 .fb-act-title {
-	font-size: 30rpx;
-	font-weight: 700;
-	color: #1c2b1e;
-	line-height: 1.4;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1c2b1e;
+  line-height: 1.4;
 }
 .fb-act-meta {
-	display: flex;
-	flex-wrap: wrap;
-	margin-top: 12rpx;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12rpx;
 }
 .fb-meta-item {
-	display: flex;
-	align-items: center;
-	min-width: 0;
-	flex: 1;
-	margin-right: 16rpx;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+  margin-right: 16rpx;
 }
 .fb-meta-item .u-icon {
-	margin-right: 4rpx;
+  margin-right: 4rpx;
 }
 .fb-meta-text {
-	font-size: 22rpx;
-	color: #6a7b6e;
-	flex: 1;
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
+  font-size: 22rpx;
+  color: #6a7b6e;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* ===== 空态/加载 ===== */
 .fb-empty {
-	text-align: center;
-	padding: 100rpx 0;
+  text-align: center;
+  padding: 100rpx 0;
 }
 .fb-empty-text {
-	font-size: 28rpx;
-	color: #65676B;
+  font-size: 28rpx;
+  color: #65676b;
 }
 .fb-load-tip {
-	text-align: center;
-	padding: 30rpx 0;
-	font-size: 24rpx;
-	color: #65676B;
+  text-align: center;
+  padding: 30rpx 0;
+  font-size: 24rpx;
+  color: #65676b;
 }
 
 /* 关怀版下拉提示层 */
 .care-pull-layer {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	background: linear-gradient(180deg, #E8F5EE 0%, rgba(232, 245, 238, 0.9) 100%);
-	display: flex;
-	align-items: flex-end;
-	justify-content: center;
-	padding-bottom: 16rpx;
-	z-index: 9998;
-	pointer-events: none;
-	
-	.care-pull-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 8rpx;
-		
-		.care-pull-text {
-			font-size: 28rpx;
-			color: #18AF38;
-			font-weight: 500;
-		}
-	}
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    180deg,
+    #e8f5ee 0%,
+    rgba(232, 245, 238, 0.9) 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 16rpx;
+  z-index: 9998;
+  pointer-events: none;
+
+  .care-pull-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8rpx;
+
+    .care-pull-text {
+      font-size: 28rpx;
+      color: #18af38;
+      font-weight: 500;
+    }
+  }
+}
+
+.vol-grid-3 {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8rpx;
+}
+.vol-grid-item {
+  width: 33.33%;
+  padding: 16rpx 8rpx;
+  box-sizing: border-box;
+}
+.vol-grid-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 20rpx;
+}
+.task-section {
+  margin-bottom: 30rpx;
+}
+.task-card {
+  padding: 24rpx;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+}
+.shot-thumb {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 12rpx;
+  background: #eee;
 }
 </style>

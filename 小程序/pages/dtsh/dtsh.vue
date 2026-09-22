@@ -82,7 +82,7 @@
 			</view>
 		</view> -->
 
-		<!-- 督导员工作台（原 volunteer-home 内容内嵌） -->
+		<!-- 督导员工作台、整改任务已迁至活动 Tab「全部活动」区块（low_carbon.vue），此处保留注释代码
 		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30" id="guide-dtsh-vol">
 			<view class="u-font-32 u-font-bold u-m-b-20">督导员工作台</view>
 			<view class="vol-intro u-text-center u-p-b-24" style="border-bottom: 1rpx solid #f0f0f0;">
@@ -148,15 +148,12 @@
 			</view>
 		</view>
 
-		<!-- 整改任务 -->
 		<view class="task-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30" id="guide-dtsh-task">
 			<view class="u-font-32 u-font-bold">整改任务</view>
 			<view class="u-font-24 u-type-info u-m-t-8 u-m-b-20">每人每天最多领取 1 条</view>
-			<!-- Tab 切换 -->
 			<view class="u-p-lr-10 u-m-b-20">
 				<u-tabs :list="taskTabs" :is-scroll="false" :current="currentTab" @change="changeTab" active-color="#18AF38"></u-tabs>
 			</view>
-			<!-- 可领取列表 -->
 			<view v-if="currentTab == 0">
 				<view v-if="taskList.length == 0"><u-empty text="暂无可领取任务" mode="list"></u-empty></view>
 				<view v-for="(item, idx) in taskList" :key="idx" class="task-card u-m-b-20">
@@ -171,7 +168,6 @@
 					</view>
 				</view>
 			</view>
-			<!-- 我的任务列表 -->
 			<view v-if="currentTab == 1">
 				<view v-if="myTasks.length == 0"><u-empty text="无我的任务" mode="list"></u-empty></view>
 				<view v-for="(item, idx) in myTasks" :key="idx" class="task-card u-m-b-20" @click="goSubmit(item)">
@@ -186,6 +182,7 @@
 				</view>
 			</view>
 		</view>
+		-->
 
 		<u-gap height="40"></u-gap>
 		<page-guide page="dtsh"></page-guide>
@@ -198,39 +195,30 @@
 			return {
 				swiper_list: [],
 				dtshBanner: '',
-				checkRole: null, // { is_approved, role_type, role_name }
-				volunteerSupervision: {
-					total: 0,
-					last_date: '',
-				},
-				taskTabs: [
-					{ name: '可领取' },
-					{ name: '我的任务' },
-				],
-				currentTab: 0,
-				taskList: [],
-				myTasks: [],
+				// checkRole / 整改任务等已迁至 low_carbon「全部活动」区块
+				// checkRole: null,
+				// volunteerSupervision: { total: 0, last_date: '' },
+				// taskTabs: [{ name: '可领取' }, { name: '我的任务' }],
+				// currentTab: 0,
+				// taskList: [],
+				// myTasks: [],
 			};
 		},
-		computed: {
-			isVolunteer() {
-				return this.checkRole && this.checkRole.is_approved;
-			}
-		},
+		// computed: { isVolunteer() { return this.checkRole && this.checkRole.is_approved; } },
 		onLoad() {
 			this.find_slide()
 			this.loadBanner()
-			this.loadCheckRole()
-			this.loadTaskList()
-			this.loadMyTasks()
+			// this.loadCheckRole()
+			// this.loadTaskList()
+			// this.loadMyTasks()
 		},
 		onShow() {
-			this.loadCheckRole()
-			this.loadTaskList()
-			this.loadMyTasks()
+			// this.loadCheckRole()
+			// this.loadTaskList()
+			// this.loadMyTasks()
 		},
 		methods: {
-		// 加载用户角色（允许未登录进入，不强制跳转登录）
+		/* 督导员工作台 / 整改任务逻辑已迁至 low_carbon.vue
 		loadCheckRole() {
 			if (!this.isLogin) {
 				this.checkRole = null;
@@ -392,6 +380,7 @@
 			if (!url) return;
 			uni.previewImage({ urls: [url] });
 		},
+		*/
 		// 自定义返回逻辑
 		customBack() {
 			uni.navigateBack({
@@ -416,33 +405,7 @@
 .task-text {
 	color: #333;
 }
-.task-card {
-	padding: 24rpx;
-	background: #f9f9f9;
-	border-radius: 12rpx;
-}
-.shot-thumb {
-	width: 200rpx;
-	height: 200rpx;
-	border-radius: 12rpx;
-	background: #eee;
-}
-.vol-grid-3 {
-	display: flex;
-	flex-wrap: wrap;
-	margin: 0 -8rpx;
-}
-.vol-grid-item {
-	width: 33.33%;
-	padding: 16rpx 8rpx;
-	box-sizing: border-box;
-}
-.vol-grid-icon {
-	width: 88rpx;
-	height: 88rpx;
-	border-radius: 20rpx;
-}
-.task-section {
-	margin-bottom: 30rpx;
-}
+/* 督导员/整改任务样式已迁至 low_carbon.vue
+.task-card { ... }
+*/
 </style>
