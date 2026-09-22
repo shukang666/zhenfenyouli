@@ -37,7 +37,7 @@
     <skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
     <!-- 顶部 Banner 轮播 -->
-    <!-- <view class="fb-banner-wrap" v-if="banner_list && banner_list.length">
+    <view class="fb-banner-wrap" v-if="banner_list && banner_list.length">
       <swiper
         class="fb-banner-swiper"
         :indicator-dots="banner_list.length > 1"
@@ -63,7 +63,7 @@
           </view>
         </swiper-item>
       </swiper>
-    </view> -->
+    </view>
 
     <!-- 常去入口：轮播下方 2×2 快捷卡片 -->
     <view class="fb-entry-stage" id="guide-fb-entry">
@@ -78,11 +78,11 @@
           :hover-stay-time="80"
           @click="gotoFlhd"
         >
-          <text class="fb-entry-mark">01 分类打卡</text>
+          <text class="fb-entry-mark">01 工作台</text>
           <view class="fb-entry-main">
             <text class="fb-entry-emoji">♻️</text>
             <view class="fb-entry-text">
-              <text class="fb-entry-title">垃圾分类</text>
+              <text class="fb-entry-title">垃圾分类工作台</text>
               <text class="fb-entry-sub">学习分类 · 拍照打卡</text>
             </view>
             <view class="fb-entry-go">
