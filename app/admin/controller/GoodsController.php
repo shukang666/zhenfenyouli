@@ -17,6 +17,7 @@ use app\admin\model\goods\GoodsModel;
 use app\admin\model\goods\GoodsSkuAttrModel;
 use app\admin\model\goods\GoodsSkuModel;
 use app\admin\model\goods\GoodsCategoryModel;
+use app\admin\model\active\ActiveModel;
 use cmf\controller\AdminBaseController;
 use cmf\lib\Upload;
 use think\facade\Db;
@@ -38,6 +39,16 @@ class GoodsController extends AdminBaseController
         if (!empty($second_cate)) $map[] = ['a.second_cate', '=', $second_cate];
         $Model = new GoodsModel();
         $list = $Model->getInfo($map);
+        $activeNames = ActiveModel::where('join_type', 2)->column('name', 'id');
+        $list->each(function ($item) use ($activeNames) {
+            $aid = (int)($item['require_active_id'] ?? 0);
+            if ($aid > 0) {
+                $item['require_active_name'] = $activeNames[$aid] ?? '已失效';
+            } else {
+                $item['require_active_name'] = '';
+            }
+            return $item;
+        });
         $list->appends(['keyword' => $keyword, 'first_cate' => $first_cate, 'second_cate' => $second_cate]);
         // 获取分页显示
         $page = $list->render();
@@ -107,6 +118,10 @@ class GoodsController extends AdminBaseController
             if (empty($param['is_take'])) $param['is_take'] = 0;
             if (empty($param['is_express'])) $param['is_express'] = 0;
             if (empty($param['user_id'])) $param['check_status'] = 2;
+            $param['require_active_id'] = GoodsModel::normalizeRequireActiveId($param['require_active_id'] ?? 0);
+            if ($param['require_active_id'] > 0 && !GoodsModel::isValidSignRequireActiveId($param['require_active_id'])) {
+                $this->error('前置签到活动无效，请从签到列表中选择');
+            }
             Db::startTrans();
 
             if (empty($goods_id)) {
@@ -250,6 +265,7 @@ class GoodsController extends AdminBaseController
 
             $this->assign('cate_list', self::getCateList());
             $this->assign('geo_zone_list', self::getGeoZoneList());
+            $this->assign('sign_active_list', GoodsModel::getSignActiveListForAdmin());
             return $this->fetch();
         }
     }

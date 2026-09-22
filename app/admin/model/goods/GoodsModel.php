@@ -12,6 +12,8 @@ namespace app\admin\model\goods;
 
 use api\wxapp\model\CommonModel;
 use api\wxapp\model\OrderCommentModel;
+use app\admin\model\active\ActiveClockModel;
+use app\admin\model\active\ActiveModel;
 use app\admin\model\shop\ShopModel;
 use app\admin\model\ToolModel;
 use think\Model;
@@ -128,6 +130,89 @@ class GoodsModel extends ToolModel
         } else {
             $data['sku_list'] = [];
             $data['attr_list'] = [];
+        }
+        return $data;
+    }
+
+    /** 后台签到列表（join_type=2）供商品前置条件下拉 */
+    public static function getSignActiveListForAdmin()
+    {
+        return ActiveModel::field('id,name')
+            ->where('delete_time', 0)
+            ->where('join_type', 2)
+            ->order('id desc')
+            ->select();
+    }
+
+    public static function normalizeRequireActiveId($activeId): int
+    {
+        return max(0, (int)$activeId);
+    }
+
+    /** 是否为有效的签到活动前置条件 */
+    public static function isValidSignRequireActiveId(int $activeId): bool
+    {
+        if ($activeId <= 0) {
+            return true;
+        }
+        return ActiveModel::where('id', $activeId)
+                ->where('delete_time', 0)
+                ->where('join_type', 2)
+                ->count() > 0;
+    }
+
+    /** 用户是否已在该签到活动完成至少一次签到（active_clock） */
+    public static function userMetSignRequire(int $userId, $goodsInfo): bool
+    {
+        $activeId = (int)($goodsInfo['require_active_id'] ?? 0);
+        if ($activeId <= 0) {
+            return true;
+        }
+        if ($userId <= 0) {
+            return false;
+        }
+        return ActiveClockModel::where('user_id', $userId)
+                ->where('active_id', $activeId)
+                ->count() > 0;
+    }
+
+    public static function getRequireActiveName(int $activeId): string
+    {
+        if ($activeId <= 0) {
+            return '';
+        }
+        $name = ActiveModel::where('id', $activeId)->value('name');
+        return $name ? (string)$name : '';
+    }
+
+    public static function signRequireErrorMessage($goodsInfo): string
+    {
+        $activeId = (int)($goodsInfo['require_active_id'] ?? 0);
+        if ($activeId <= 0) {
+            return '';
+        }
+        $activeName = self::getRequireActiveName($activeId) ?: '指定签到活动';
+        $goodsName = $goodsInfo['goods_name'] ?? '该商品';
+        return '请先完成活动「' . $activeName . '」的签到后再兑换（' . $goodsName . '）';
+    }
+
+    /** 小程序商品详情：附加前置签到展示字段 */
+    public static function appendSignRequireForWxapp(array $data, int $userId = 0): array
+    {
+        $activeId = (int)($data['require_active_id'] ?? 0);
+        $data['require_active_id'] = $activeId;
+        $data['require_active_name'] = '';
+        $data['require_sign_met'] = 1;
+        $data['require_sign_tip'] = '';
+        if ($activeId <= 0) {
+            return $data;
+        }
+        $data['require_active_name'] = self::getRequireActiveName($activeId);
+        $met = self::userMetSignRequire($userId, $data);
+        $data['require_sign_met'] = $met ? 1 : 0;
+        if (!$met) {
+            $name = $data['require_active_name'] ?: '指定签到活动';
+            $data['require_sign_tip'] = '请先完成活动「' . $name . '」的签到后再兑换';
         }
         return $data;
     }

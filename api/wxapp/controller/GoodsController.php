@@ -325,6 +325,9 @@ class GoodsController extends AuthController
         $OrderCommentModel = new OrderCommentModel();
         $data['point_avg'] = $OrderCommentModel->where('goods_id', $id)->avg('point');
         $data['is_collect'] = GoodsColModel::where(['goods_id' => $id, 'user_id' => $this->user_id,])->count();
+        if (is_array($data)) {
+            $data = GoodsModel::appendSignRequireForWxapp($data, (int)$this->user_id);
+        }
         $this->success('获取成功', $data);
     }
 
@@ -409,6 +412,12 @@ class GoodsController extends AuthController
         $CartModel = new CartModel();
         $GoodsModel = new GoodsModel();
         $goods_info = $GoodsModel->where('id', $goods_id)->find();
+        if (empty($goods_info)) {
+            $this->error('商品不存在');
+        }
+        if (!GoodsModel::userMetSignRequire((int)$this->user_id, $goods_info)) {
+            $this->error(GoodsModel::signRequireErrorMessage($goods_info));
+        }
         $map = [];
         $map['shop_id'] = $goods_info['user_id'];
         $map['goods_id'] = $goods_id;

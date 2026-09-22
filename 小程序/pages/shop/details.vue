@@ -18,6 +18,16 @@
             <view class="u-m-t-20 u-font-24" style="color: #8B6914;" v-if="goods.second_name">
                 地理产区：{{goods.second_name}}
             </view>
+            <view class="sign-require-bar u-m-t-20" v-if="goods.require_active_id > 0">
+                <view class="u-font-24 sign-require-text">
+                    <text v-if="goods.require_sign_met">已满足签到条件：{{ goods.require_active_name }}</text>
+                    <text v-else>{{ goods.require_sign_tip || ('需先完成「' + goods.require_active_name + '」签到') }}</text>
+                </view>
+                <view class="u-m-t-15" v-if="!goods.require_sign_met">
+                    <u-button type="primary" size="mini" hover-class="none" :customStyle="{background: '#18AF38'}"
+                        @click="goSignActive">去签到</u-button>
+                </view>
+            </view>
         </view>
         <view class="u-p-30 u-type-white-bg u-m-t-30 u-flex u-row-between">
             <view class="u-flex">
@@ -114,18 +124,36 @@
         },
         data() {
             return {
+                goodsId: '',
                 goods: {},
                 comment_list: []
             };
         },
         onLoad(option) {
+            this.goodsId = option.id
             this.get_goods_detail(option.id)
+        },
+        onShow() {
+            if (!this.goodsId || !this.isLogin) return
+            this.$u.api.get_goods_detail({ id: this.goodsId }).then(res => {
+                this.goods = res.data
+            })
         },
         methods: {
             //加入购物车/购买(addcart加入购物车 buy立即购买)
             handleBuy(type) {
                 if (!this.isLogin) return this.$u.func.checkLogin();
+                if (this.goods.require_active_id > 0 && !this.goods.require_sign_met) {
+                    this.$u.toast(this.goods.require_sign_tip || '请先完成活动签到后再兑换');
+                    return;
+                }
                 this.$refs.sku.init(type, this.goods);
+            },
+            goSignActive() {
+                if (!this.goods.require_active_id) return;
+                this.$u.route('/pages/activity/lsxf/details-new', {
+                    id: this.goods.require_active_id
+                });
             },
             //确定购买
             submitOrder(data) {
@@ -207,6 +235,18 @@
 </script>
 
 <style lang="scss">
+    .sign-require-bar {
+        padding: 20rpx 24rpx;
+        background: #fff8e6;
+        border-radius: 12rpx;
+        border: 1rpx solid #ffe0a3;
+    }
+
+    .sign-require-text {
+        color: #8B6914;
+        line-height: 1.5;
+    }
+
     .submit-btn {
         background: #FFFFFF;
         display: flex;

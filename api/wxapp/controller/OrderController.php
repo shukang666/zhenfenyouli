@@ -132,6 +132,12 @@ class OrderController extends AuthController
             $new_goods_list = [];
             foreach ($old_goods_list as $old_goods_item) {
                 $goods_info = $GoodsModel->where(['id' => $old_goods_item['goods_id']])->find();
+                if (empty($goods_info)) {
+                    $this->error('商品不存在');
+                }
+                if (!GoodsModel::userMetSignRequire((int)$this->user_id, $goods_info)) {
+                    $this->error(GoodsModel::signRequireErrorMessage($goods_info));
+                }
                 $new_goods_list[$goods_info['user_id']][] = $old_goods_item;
             }
 

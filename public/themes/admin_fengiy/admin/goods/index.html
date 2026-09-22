@@ -73,6 +73,7 @@
                 <th>价格</th>
                 <th>库存</th>
                 <th>销量</th>
+                <th>前置签到</th>
                 <th width="80">上架</th>
                 <th width="80">推荐</th>
                 <th width="150">{:lang('ACTIONS')}</th>
@@ -101,6 +102,13 @@
                     <td>{$vo.price}</td>
                     <td>{$vo.stock}</td>
                     <td>{$vo.sell_count}</td>
+                    <td>
+                        <notempty name="vo.require_active_name">
+                            {$vo.require_active_name}
+                            <else/>
+                            —
+                        </notempty>
+                    </td>
                     <td>
                         <div class="layui-form" style="margin-bottom: 8px">
                             <input type="checkbox" lay-skin="switch" lay-text="是|否" lay-filter="status" name="status" value="{$vo.id}" <if condition="$vo.status == 1">checked</if>>
