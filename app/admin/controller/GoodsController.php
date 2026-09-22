@@ -17,7 +17,6 @@ use app\admin\model\goods\GoodsModel;
 use app\admin\model\goods\GoodsSkuAttrModel;
 use app\admin\model\goods\GoodsSkuModel;
 use app\admin\model\goods\GoodsCategoryModel;
-use app\admin\model\active\ActiveModel;
 use cmf\controller\AdminBaseController;
 use cmf\lib\Upload;
 use think\facade\Db;
@@ -39,11 +38,14 @@ class GoodsController extends AdminBaseController
         if (!empty($second_cate)) $map[] = ['a.second_cate', '=', $second_cate];
         $Model = new GoodsModel();
         $list = $Model->getInfo($map);
-        $activeNames = ActiveModel::where('join_type', 2)->column('name', 'id');
-        $list->each(function ($item) use ($activeNames) {
+        $list->each(function ($item) {
             $aid = (int)($item['require_active_id'] ?? 0);
             if ($aid > 0) {
-                $item['require_active_name'] = $activeNames[$aid] ?? '已失效';
+                if (GoodsModel::isValidSignRequireActiveId($aid)) {
+                    $item['require_active_name'] = GoodsModel::getRequireActiveName($aid);
+                } else {
+                    $item['require_active_name'] = '已失效';
+                }
             } else {
                 $item['require_active_name'] = '';
             }
@@ -120,7 +122,7 @@ class GoodsController extends AdminBaseController
             if (empty($param['user_id'])) $param['check_status'] = 2;
             $param['require_active_id'] = GoodsModel::normalizeRequireActiveId($param['require_active_id'] ?? 0);
             if ($param['require_active_id'] > 0 && !GoodsModel::isValidSignRequireActiveId($param['require_active_id'])) {
-                $this->error('前置签到活动无效，请从签到列表中选择');
+                $this->error('前置签到活动无效，请选择已开启签到的活动');
             }
             Db::startTrans();
 
@@ -265,7 +267,8 @@ class GoodsController extends AdminBaseController
 
             $this->assign('cate_list', self::getCateList());
             $this->assign('geo_zone_list', self::getGeoZoneList());
-            $this->assign('sign_active_list', GoodsModel::getSignActiveListForAdmin());
+            $requireActiveId = (int)($goods_info['require_active_id'] ?? 0);
+            $this->assign('sign_active_list', GoodsModel::getSignActiveListForAdmin($requireActiveId));
             return $this->fetch();
         }
     }

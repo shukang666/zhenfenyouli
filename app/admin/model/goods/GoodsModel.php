@@ -134,16 +134,51 @@ class GoodsModel extends ToolModel
         return $data;
     }
 
-    /** 可作为兑换前置条件的活动：历史签到列表 + 线下活动 */
-    public static function getSignActiveListForAdmin()
+    /** 活动是否已配置签到（融合在活动编辑里：开启打卡 或 线下活动签到） */
+    public static function activeHasSignConfigured($active): bool
     {
-        return ActiveModel::field('id,name,event_kind,join_type')
+        if (empty($active)) {
+            return false;
+        }
+        if ((int)($active['is_clock'] ?? 0) === 1) {
+            return true;
+        }
+        return ActiveModel::isOfflineEvent($active);
+    }
+
+    /** 后台下拉：已配置签到的活动 */
+    public static function getSignActiveListForAdmin(int $ensureIncludeActiveId = 0)
+    {
+        $list = ActiveModel::field('id,name,is_clock,event_kind')
             ->where('delete_time', 0)
             ->where(function ($q) {
-                $q->where('join_type', 2)->whereOr('event_kind', ActiveModel::EVENT_KIND_OFFLINE);
+                $q->where('is_clock', 1)
+                    ->whereOr('event_kind', '=', ActiveModel::EVENT_KIND_OFFLINE);
             })
             ->order('id desc')
             ->select();
+
+        $ensureIncludeActiveId = (int)$ensureIncludeActiveId;
+        if ($ensureIncludeActiveId > 0) {
+            $exists = false;
+            foreach ($list as $row) {
+                if ((int)$row['id'] === $ensureIncludeActiveId) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                $extra = ActiveModel::field('id,name,is_clock,event_kind')
+                    ->where('id', $ensureIncludeActiveId)
+                    ->where('delete_time', 0)
+                    ->find();
+                if ($extra) {
+                    $list->unshift($extra);
+                }
+            }
+        }
+
+        return $list;
     }
 
     public static function normalizeRequireActiveId($activeId): int
@@ -157,12 +192,8 @@ class GoodsModel extends ToolModel
         if ($activeId <= 0) {
             return true;
         }
-        return ActiveModel::where('id', $activeId)
-                ->where('delete_time', 0)
-                ->where(function ($q) {
-                    $q->where('join_type', 2)->whereOr('event_kind', ActiveModel::EVENT_KIND_OFFLINE);
-                })
-                ->count() > 0;
+        $active = ActiveModel::where('id', $activeId)->where('delete_time', 0)->find();
+        return self::activeHasSignConfigured($active);
     }
 
     /** 用户是否已在该签到活动完成至少一次签到（active_clock） */
