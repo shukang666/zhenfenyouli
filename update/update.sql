@@ -4,7 +4,19 @@ ALTER TABLE `cmf_auth_rule` MODIFY COLUMN `app` varchar(50) CHARACTER SET utf8mb
 ALTER TABLE `cmf_active_tab` ADD COLUMN `tag_type` tinyint(1) NOT NULL DEFAULT 1 COMMENT '标签类型：1=固定分类，2=动态主题' AFTER `is_fixed`;
 
 -- 商品兑换前置签到（require_active_id：用户在对应活动 active_clock 至少 1 次后可兑换）
-ALTER TABLE `cmf_goods` ADD COLUMN `require_active_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '兑换需完成该签到活动至少1次签到，0无限制' AFTER `point`;
+-- 若报 #1060 Duplicate column，说明字段已加过，可忽略
+SET @__goods_req_active := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_goods' AND COLUMN_NAME = 'require_active_id'
+);
+SET @__sql_goods_req_active := IF(
+  @__goods_req_active > 0,
+  'SELECT ''cmf_goods.require_active_id already exists'' AS msg',
+  'ALTER TABLE `cmf_goods` ADD COLUMN `require_active_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT ''兑换需完成该签到活动至少1次签到，0无限制'' AFTER `point`'
+);
+PREPARE __stmt_goods_req_active FROM @__sql_goods_req_active;
+EXECUTE __stmt_goods_req_active;
+DEALLOCATE PREPARE __stmt_goods_req_active;
 
 -- 活动形态：1正常活动 2线下活动（定位/口令签到）
 ALTER TABLE `cmf_active` ADD COLUMN `event_kind` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT '1正常活动 2线下活动' AFTER `join_type`;
