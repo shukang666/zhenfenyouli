@@ -20,10 +20,10 @@
             </view>
             <view class="sign-require-bar u-m-t-20" v-if="goods.require_active_id > 0">
                 <view class="u-font-24 sign-require-text">
-                    <text v-if="goods.require_sign_met">已满足签到条件：{{ goods.require_active_name }}</text>
-                    <text v-else>{{ goods.require_sign_tip || ('需先完成「' + goods.require_active_name + '」签到') }}</text>
+                    <text v-if="signRequireMet">已满足签到条件：{{ signRequireActiveName }}</text>
+                    <text v-else>{{ signRequireHint }}</text>
                 </view>
-                <view class="u-m-t-15" v-if="!goods.require_sign_met">
+                <view class="u-m-t-15" v-if="!signRequireMet">
                     <u-button type="primary" size="mini" hover-class="none" :customStyle="{background: '#18AF38'}"
                         @click="goSignActive">去签到</u-button>
                 </view>
@@ -129,6 +129,22 @@
                 comment_list: []
             };
         },
+        computed: {
+            signRequireActiveName() {
+                const name = this.goods && this.goods.require_active_name
+                return name && String(name).trim() ? String(name).trim() : '指定活动'
+            },
+            signRequireMet() {
+                return Number(this.goods && this.goods.require_sign_met) === 1
+            },
+            signRequireHint() {
+                const tip = this.goods && this.goods.require_sign_tip
+                if (tip && String(tip).trim() && String(tip).indexOf('undefined') < 0) {
+                    return String(tip).trim()
+                }
+                return '需先完成「' + this.signRequireActiveName + '」签到后再兑换'
+            },
+        },
         onLoad(option) {
             this.goodsId = option.id
             this.get_goods_detail(option.id)
@@ -143,8 +159,8 @@
             //加入购物车/购买(addcart加入购物车 buy立即购买)
             handleBuy(type) {
                 if (!this.isLogin) return this.$u.func.checkLogin();
-                if (this.goods.require_active_id > 0 && !this.goods.require_sign_met) {
-                    this.$u.toast(this.goods.require_sign_tip || '请先完成活动签到后再兑换');
+                if (this.goods.require_active_id > 0 && !this.signRequireMet) {
+                    this.$u.toast(this.signRequireHint);
                     return;
                 }
                 this.$refs.sku.init(type, this.goods);

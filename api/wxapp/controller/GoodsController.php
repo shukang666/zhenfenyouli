@@ -321,13 +321,17 @@ class GoodsController extends AuthController
         $map = [];
         $map[] = ['a.id', '=', $id];
         $data = $GoodsModel->getInfo($map, $this->page_size, $id, 'a.*', 'a.list_order,a.id desc', 1);
+        if (empty($data)) {
+            $this->error('商品不存在');
+        }
+        if (!is_array($data)) {
+            $data = $data->toArray();
+        }
 
         $OrderCommentModel = new OrderCommentModel();
         $data['point_avg'] = $OrderCommentModel->where('goods_id', $id)->avg('point');
         $data['is_collect'] = GoodsColModel::where(['goods_id' => $id, 'user_id' => $this->user_id,])->count();
-        if (is_array($data)) {
-            $data = GoodsModel::appendSignRequireForWxapp($data, (int)$this->user_id);
-        }
+        $data = GoodsModel::appendSignRequireForWxapp($data, (int)$this->user_id);
         $this->success('获取成功', $data);
     }
 
