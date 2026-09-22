@@ -195,7 +195,7 @@ class ActiveController extends ToolController
                 $params['is_clock'] = 0;
                 $params['join_type'] = 1;
                 if (empty($params['offline_sign_start']) || empty($params['offline_sign_end'])) {
-                    $this->error('线下活动请设置允许签到开始与结束时间');
+                    $this->error('线下活动请在「活动类型」下方绿色区域填写「允许签到开始/结束」时间');
                 }
                 if ($params['offline_sign_end'] <= $params['offline_sign_start']) {
                     $this->error('签到结束时间须晚于开始时间');

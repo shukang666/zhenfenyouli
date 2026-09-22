@@ -67,14 +67,63 @@
         </div>
 
         <if condition="$params.type == 1">
+        <php>
+            $event_kind_val = isset($item['event_kind']) ? intval($item['event_kind']) : 1;
+            $offline_panel_show = $event_kind_val === 2 ? 'block' : 'none';
+            $offline_start_val = '';
+            $offline_end_val = '';
+            if (!empty($item['offline_sign_start'])) {
+                $offline_start_val = date('Y-m-d\TH:i', $item['offline_sign_start']);
+            }
+            if (!empty($item['offline_sign_end'])) {
+                $offline_end_val = date('Y-m-d\TH:i', $item['offline_sign_end']);
+            }
+        </php>
         <div class="form-group">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>活动类型:</label>
             <div class="col-md-6 col-sm-10">
                 <select class="form-control" name="event_kind" id="event_kind">
-                    <option value="1" <if condition="empty($item.event_kind) || $item.event_kind == 1">selected</if>>正常活动</option>
-                    <option value="2" <if condition="!empty($item.event_kind) && $item.event_kind == 2">selected</if>>线下活动</option>
+                    <option value="1" <if condition="$event_kind_val == 1">selected</if>>正常活动</option>
+                    <option value="2" <if condition="$event_kind_val == 2">selected</if>>线下活动</option>
                 </select>
-                <p class="help-block">线下活动：用户在活动页报名，到达允许签到时间后可在现场定位签到（500米内）；原「签到列表」仅保留历史记录。</p>
+                <p class="help-block">选「线下活动」后，请在下方填写允许签到时间；用户在小程序报名后，到点方可定位签到。</p>
+            </div>
+        </div>
+        <div id="offline-event-panel" style="display:{$offline_panel_show}; margin: 0 0 20px 0; padding: 15px 0; border: 1px dashed #5cb85c; border-radius: 6px; background: #f9fff9;">
+            <div class="form-group event-kind-offline-only">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>允许签到开始:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="datetime-local" class="form-control" name="offline_sign_start" id="offline_sign_start"
+                           value="{$offline_start_val}">
+                    <p class="help-block">此前用户仅可报名，签到按钮为灰色不可点。</p>
+                </div>
+            </div>
+            <div class="form-group event-kind-offline-only">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>允许签到结束:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="datetime-local" class="form-control" name="offline_sign_end" id="offline_sign_end"
+                           value="{$offline_end_val}">
+                </div>
+            </div>
+            <div class="form-group event-kind-offline-only">
+                <label class="col-sm-2 control-label">口令签到（兜底）:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control" name="offline_sign_password" maxlength="32"
+                           value="{$item.offline_sign_password|default=''}" placeholder="选填，定位失败时管理员告知用户">
+                </div>
+            </div>
+            <div class="form-group event-kind-offline-only">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>签到赠送积分:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="send_point" id="offline_send_point" min="0"
+                           value="{$item.send_point|default='0'}">
+                    <span>现场签到成功后赠送（每用户每场活动限签一次）</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-md-6 col-sm-10">
+                    <p class="help-block text-danger" style="margin:0;">线下活动还须在本页下方填写「地址」并在地图上标点（用于 500 米定位签到）。</p>
+                </div>
             </div>
         </div>
         </if>
@@ -157,39 +206,7 @@
                 </div>
             </div>
 
-            <div class="form-group event-kind-offline-only show_hidden">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>允许签到开始:</label>
-                <div class="col-md-6 col-sm-10">
-                    <input type="datetime-local" class="form-control" name="offline_sign_start"
-                           value="<if condition='!empty($item.offline_sign_start)'>{:date('Y-m-d\TH:i', $item.offline_sign_start)}</if>">
-                    <p class="help-block">此前用户仅可报名，签到按钮为灰色不可点。</p>
-                </div>
-            </div>
-            <div class="form-group event-kind-offline-only show_hidden">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>允许签到结束:</label>
-                <div class="col-md-6 col-sm-10">
-                    <input type="datetime-local" class="form-control" name="offline_sign_end"
-                           value="<if condition='!empty($item.offline_sign_end)'>{:date('Y-m-d\TH:i', $item.offline_sign_end)}</if>">
-                </div>
-            </div>
-            <div class="form-group event-kind-offline-only show_hidden">
-                <label class="col-sm-2 control-label">口令签到（兜底）:</label>
-                <div class="col-md-6 col-sm-10">
-                    <input type="text" class="form-control" name="offline_sign_password" maxlength="32"
-                           value="{$item.offline_sign_password|default=''}" placeholder="选填，定位失败时管理员告知用户">
-                    <p class="help-block">小程序签到弹窗内提供不明显的「口令签到」入口，校验此密码。</p>
-                </div>
-            </div>
-            <div class="form-group event-kind-offline-only show_hidden">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>签到赠送积分:</label>
-                <div class="col-md-6 col-sm-10">
-                    <input type="number" class="form-control" name="send_point" min="0"
-                           value="{$item.send_point|default='0'}">
-                    <span>现场签到成功后赠送（每用户每场活动限签一次）</span>
-                </div>
-            </div>
-
-            <div class="form-group clock show_hidden">
+            <div class="form-group clock show_hidden event-kind-normal-clock">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>活动开始日期:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="date" class="form-control" name="clock_start_time" required <if condition="!empty($item.clock_start_time)"> value="{:date('Y-m-d',$item.clock_start_time)}" </if> >
@@ -197,7 +214,7 @@
                 </div>
             </div>
 
-            <div class="form-group clock show_hidden">
+            <div class="form-group clock show_hidden event-kind-normal-clock">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>活动结束日期:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="date" class="form-control" name="clock_end_time" required <if condition="!empty($item.clock_end_time)"> value="{:date('Y-m-d',$item.clock_end_time)}" </if> >
@@ -205,7 +222,7 @@
                 </div>
             </div>
 
-            <div class="form-group clock show_hidden">
+            <div class="form-group clock show_hidden event-kind-normal-clock">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>赠送积分:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="number" class="form-control" name="send_point" required <if condition="!empty($item.send_point)"> value="{$item.send_point}" </if> >
@@ -213,7 +230,7 @@
                 </div>
             </div>
 
-            <div class="form-group clock show_hidden">
+            <div class="form-group clock show_hidden event-kind-normal-clock">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>可报名身份:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="checkbox" class="form-control" name="role[]" value="1" title="居民" <if condition="!empty($item.role) && in_array(1,$item.role)">checked</if> >
@@ -223,7 +240,7 @@
                 </div>
             </div>
 
-            <div class="form-group clock show_hidden">
+            <div class="form-group clock show_hidden event-kind-normal-clock">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>连续打卡天数:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="number" class="form-control" name="sign_day" value="{$item.sign_day|default=''}" required>
@@ -231,7 +248,7 @@
                 </div>
             </div>
 
-            <div class="form-group clock show_hidden">
+            <div class="form-group clock show_hidden event-kind-normal-clock">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>是否开启徽章:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="checkbox" lay-skin="switch" class="form-control" lay-filter="is_badge" name="is_badge" value="1" <if condition="!empty($item.is_badge) && $item.is_badge==1">checked</if> lay-text="是|否">
@@ -573,9 +590,9 @@
     // 参加方式由入口决定：活动列表进入=1小程序参加，签到列表进入=2扫码参加，编辑时取本记录的值
     var join_type = $('input[name=join_type]').val() || '1';
 
-    $('.show_hidden').hide();
+    $('.clock.show_hidden, .badge1.show_hidden').hide();
     if(is_clock == 1){
-        $('.clock').show();
+        $('.event-kind-normal-clock').show();
     }
     if(is_badge == 1){
         $('.badge1').show();
@@ -593,20 +610,27 @@
 
     function toggleEventKind(val) {
         val = parseInt(val, 10) || 1;
+        var $panel = $('#offline-event-panel');
+        if (!$panel.length) {
+            return;
+        }
         if (val === 2) {
-            $('.event-kind-offline-only').show();
+            $panel.show();
             $('.event-kind-normal-only').hide();
-            $('.clock').hide();
-            $('.clock').find('input,select,textarea').prop('disabled', true).prop('required', false);
-            $('.event-kind-offline-only').find('input,select').prop('disabled', false);
-            $('.event-kind-offline-only').find('[name=offline_sign_start],[name=offline_sign_end]').prop('required', true);
+            $('.event-kind-normal-clock').hide();
+            $('.event-kind-normal-clock').find('input,select,textarea').prop('disabled', true).prop('required', false);
+            $('#offline_sign_start,#offline_sign_end').prop('disabled', false).prop('required', true);
+            $('#offline_send_point,[name=offline_sign_password]').prop('disabled', false);
+            $('.clock [name=send_point]').prop('disabled', true);
         } else {
-            $('.event-kind-offline-only').hide();
-            $('.event-kind-offline-only').find('input,select').prop('disabled', true).prop('required', false);
-            $('.clock').find('input,select,textarea').prop('disabled', false);
+            $panel.hide();
+            $('#offline_sign_start,#offline_sign_end,[name=offline_sign_password],#offline_send_point')
+                .prop('disabled', true).prop('required', false);
             $('.event-kind-normal-only').show();
+            $('.event-kind-normal-clock').find('input,select,textarea').prop('disabled', false);
+            $('.clock [name=send_point]').prop('disabled', false);
             if (is_clock == 1) {
-                $('.clock').show();
+                $('.event-kind-normal-clock').show();
             }
         }
     }
@@ -623,15 +647,14 @@
 
         // 监听switch开关
         form.on('switch(is_clock)', function(data){
-            // data.elem 当前DOM元素
-            // data.elem.checked true=开启，false=关闭
             var status = data.elem.checked ? 1 : 0;
-            // console.log('徽章开关状态：', status);
-
+            if (parseInt($('#event_kind').val(), 10) === 2) {
+                return;
+            }
             if(status == 1){
-                $('.clock').show();
+                $('.event-kind-normal-clock').show();
             }else{
-                $('.clock').hide();
+                $('.event-kind-normal-clock').hide();
             }
         });
 
