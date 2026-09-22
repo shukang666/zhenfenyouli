@@ -35,6 +35,9 @@
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
         <li class="active"><a href="{:url('index',['type'=>$params.type])}">列表</a></li>
+        <if condition="$params.type==2">
+            <li><a href="{:url('clock_tutorial_index')}">打卡教程</a></li>
+        </if>
         <!--			        <li><a href="{:url('update',['type'=>1])}">添加</a></li>-->
     </ul>
     <form class="ajax-form well form-inline margin-top-20 layui-form" method="get"

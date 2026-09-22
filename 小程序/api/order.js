@@ -10,6 +10,7 @@ const order = {
     get_forum_list: (params = {}) => uni.$u.post('/wxapp/forum/get_forum_list', params),
     // 发布
     add_forum: (params = {}) => uni.$u.post('/wxapp/forum/add_forum', params),
+    get_clock_tutorial: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_tutorial', params),
     // 删除发布
     del_forum: (params = {}) => uni.$u.post('/wxapp/forum/del_forum', params),
     // 评论列表

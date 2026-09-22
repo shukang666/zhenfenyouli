@@ -37,7 +37,7 @@
             <u-button type="success" hover-class="none" @click="submit()">确认提交</u-button>
         </view>
 
-        <view class="clock-guide u-m-lr-30 u-m-b-40" v-if="cateGuide">
+        <view class="clock-guide u-m-lr-30 u-m-b-40" v-if="cateGuide && cateGuide.title">
             <text class="clock-guide-title">{{ cateGuide.title }}</text>
             <text class="clock-guide-p">{{ cateGuide.intro }}</text>
             <text class="clock-guide-label">包括哪些</text>
@@ -55,6 +55,9 @@
             <view class="clock-guide-more" @click="goLearn">
                 <text>想学更多分类知识？去看分类指导 ›</text>
             </view>
+        </view>
+        <view class="clock-guide-empty u-m-lr-30 u-m-b-40" v-else-if="tutorialLoaded && !cateGuide">
+            <text>该种类教程暂未配置，请联系管理员在后台「打卡教程」中完善。</text>
         </view>
 
         <u-mask :show="mask_show">
@@ -97,7 +100,6 @@
     import { uploadUrl } from '@/common/settings'
     import {
         ADD_PAGE_META,
-        CATE_GUIDE,
         clockSceneLabel,
         resolveCateKind,
         buildSceneCateTitle,
@@ -126,6 +128,8 @@
                 currentCateName: '',
                 mask_show: false,
                 msg: '',
+                tutorialMap: {},
+                tutorialLoaded: false,
             }
         },
         computed: {
@@ -162,7 +166,8 @@
             },
             cateGuide() {
                 const kind = resolveCateKind(this.currentCateName)
-                return kind ? CATE_GUIDE[kind] : null
+                if (!kind || !this.tutorialMap) return null
+                return this.tutorialMap[kind] || null
             },
             panelCateName() {
                 if (this.isLegacyMode) return '上报类型'
@@ -180,6 +185,7 @@
                 SCENE_KEYS.indexOf(this.sceneKey) < 0
             this.pendingCateId = cateId
             this.form.clock_scene = this.isLegacyMode ? 'zhenfenjiao' : this.sceneKey
+            this.loadTutorials()
             this.get_select_list()
         },
         methods: {
@@ -199,6 +205,14 @@
             },
             previewImage(urls) {
                 uni.previewImage({ urls })
+            },
+            loadTutorials() {
+                this.$u.api.get_clock_tutorial().then(res => {
+                    this.tutorialMap = res.data || {}
+                    this.tutorialLoaded = true
+                }).catch(() => {
+                    this.tutorialLoaded = true
+                })
             },
             get_select_list() {
                 this.$u.api.get_select_list({ type: 2 }).then(res => {
@@ -413,6 +427,14 @@
     border-top: 1rpx solid #eee;
     font-size: 26rpx;
     color: #18af38;
+}
+.clock-guide-empty {
+    padding: 28rpx;
+    border-radius: 20rpx;
+    background: #fff;
+    font-size: 26rpx;
+    color: #999;
+    text-align: center;
 }
 .warp {
     display: flex;

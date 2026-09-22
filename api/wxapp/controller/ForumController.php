@@ -8,6 +8,7 @@ use app\admin\model\active\ActiveUserModel;
 use app\admin\model\basic\CollectModel;
 use app\admin\model\basic\NewsModel;
 use app\admin\model\basic\SelectModel;
+use app\admin\model\forum\ClockTutorialModel;
 use app\admin\model\forum\ForumCateModel;
 use app\admin\model\forum\ForumCommentModel;
 use app\admin\model\forum\ForumHandleModel;
@@ -42,6 +43,20 @@ class ForumController extends AuthController
         $memberModel = new MemberModel();
         $list = $memberModel->where('status', 1)->fetchSql(true)->select();
         $this->success('请求成功', $list);
+    }
+
+    /**
+     * 垃圾打卡教程（按 cate_key：recycle/other/harm/food）
+     */
+    public function get_clock_tutorial()
+    {
+        $cateKey = trim((string)$this->request->param('cate_key', ''));
+        $map = ClockTutorialModel::mapForWxapp();
+        if ($cateKey !== '') {
+            $one = $map[$cateKey] ?? null;
+            $this->success('请求成功', $one);
+        }
+        $this->success('请求成功', $map);
     }
 
 

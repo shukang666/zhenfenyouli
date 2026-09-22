@@ -6,6 +6,7 @@ use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\basic\SelectModel;
 use app\admin\model\forum\ForumCateModel;
+use app\admin\model\forum\ClockTutorialModel;
 use app\admin\model\forum\ForumDeleteLogModel;
 use app\admin\model\forum\ForumHandleModel;
 use app\admin\model\forum\ForumModel;
@@ -341,6 +342,56 @@ class ForumController extends ToolController
     public function index2()
     {
         return redirect((string)url('index', ['type' => 2]));
+    }
+
+    /** 垃圾打卡 · 打卡教程配置 */
+    public function clock_tutorial_index()
+    {
+        $list = ClockTutorialModel::order('list_order asc,id asc')->select();
+        $labels = ClockTutorialModel::cateKeyLabels();
+        $list->each(function ($item) use ($labels) {
+            $item['cate_key_label'] = $labels[$item['cate_key']] ?? $item['cate_key'];
+            return $item;
+        });
+        return $this->fetch('clock_tutorial_index', ['list' => $list]);
+    }
+
+    public function clock_tutorial_update()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        $item = ClockTutorialModel::where('id', $id)->find();
+        if (empty($item)) {
+            $this->error('记录不存在');
+        }
+        $labels = ClockTutorialModel::cateKeyLabels();
+        $item['cate_key_label'] = $labels[$item['cate_key']] ?? $item['cate_key'];
+        return $this->fetch('clock_tutorial_update', ['item' => $item]);
+    }
+
+    public function clock_tutorial_update_post()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('非法请求');
+        }
+        $id = $this->request->param('id', 0, 'intval');
+        $item = ClockTutorialModel::where('id', $id)->find();
+        if (empty($item)) {
+            $this->error('记录不存在');
+        }
+        $save = [
+            'title'        => trim((string)$this->request->param('title', '')),
+            'intro'        => trim((string)$this->request->param('intro', '')),
+            'examples'     => trim((string)$this->request->param('examples', '')),
+            'photo_lines'  => trim((string)$this->request->param('photo_lines', '')),
+            'notice_lines' => trim((string)$this->request->param('notice_lines', '')),
+            'status'       => (int)$this->request->param('status', 1),
+            'update_time'  => time(),
+        ];
+        if ($save['title'] === '') {
+            $this->error('请填写教程标题');
+        }
+        ClockTutorialModel::where('id', $id)->update($save);
+        $this->success('保存成功', url('clock_tutorial_index'));
     }
 
     public function index3()

@@ -21,3 +21,19 @@ WHERE `app` = 'admin' AND `controller` = 'active' AND `action` = 'sign' AND `nam
 
 -- 垃圾打卡投放场景（家庭/亲子/沿街/真分角等）
 ALTER TABLE `cmf_forum` ADD COLUMN `clock_scene` varchar(50) NOT NULL DEFAULT '' COMMENT '打卡投放场景' AFTER `subject_community_id`;
+
+-- 垃圾打卡教程（后台「垃圾分类活动-垃圾打卡-打卡教程」）
+CREATE TABLE IF NOT EXISTS `cmf_clock_tutorial` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cate_key` varchar(20) NOT NULL DEFAULT '' COMMENT 'recycle/other/harm/food',
+  `title` varchar(100) NOT NULL DEFAULT '',
+  `intro` varchar(500) NOT NULL DEFAULT '',
+  `examples` varchar(500) NOT NULL DEFAULT '',
+  `photo_lines` text COMMENT '拍照要求，每行一条',
+  `notice_lines` text COMMENT '注意事项，每行一条',
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `list_order` int(11) NOT NULL DEFAULT '0',
+  `update_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_cate_key` (`cate_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='垃圾打卡页教程';

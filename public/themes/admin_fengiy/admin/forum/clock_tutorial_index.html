@@ -1,0 +1,51 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index',['type'=>2])}">垃圾打卡列表</a></li>
+        <li class="active"><a href="{:url('clock_tutorial_index')}">打卡教程</a></li>
+    </ul>
+    <p class="margin-top-20 text-muted">小程序打卡页「确认提交」下方展示的教程与要求，按垃圾种类分别配置（每行一条拍照要求/注意事项）。</p>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>种类标识</th>
+            <th>种类名称</th>
+            <th>教程标题</th>
+            <th>状态</th>
+            <th>更新时间</th>
+            <th>{:lang('ACTIONS')}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.cate_key}</td>
+                <td>{$vo.cate_key_label}</td>
+                <td>{$vo.title}</td>
+                <td>
+                    <if condition="$vo.status eq 1">
+                        <span class="label label-success">启用</span>
+                        <else/>
+                        <span class="label label-default">停用</span>
+                    </if>
+                </td>
+                <td>
+                    <if condition="$vo.update_time gt 0">
+                        {:date('Y-m-d H:i',$vo.update_time)}
+                        <else/>
+                        -
+                    </if>
+                </td>
+                <td>
+                    <a class="btn btn-xs btn-primary" href="{:url('clock_tutorial_update',['id'=>$vo.id])}">编辑</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
