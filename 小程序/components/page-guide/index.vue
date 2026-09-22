@@ -14,15 +14,25 @@
 				<text class="pg-bubble-text">遇到困难了吗？可以点我~</text>
 			</view>
 			<view class="pg-pet">
-				<view class="pg-ear pg-ear-l"></view>
-				<view class="pg-ear pg-ear-r"></view>
-				<view class="pg-face">
+				<view class="pg-body">
+					<view class="pg-bud"></view>
+					<view class="pg-leaf">
+						<view class="pg-leaf-vein"></view>
+					</view>
+					<view class="pg-sprout">
+						<view class="pg-sprout-stem"></view>
+						<view class="pg-sprout-leaf pg-sprout-leaf-l"></view>
+						<view class="pg-sprout-leaf pg-sprout-leaf-r"></view>
+					</view>
 					<view class="pg-eye pg-eye-l"></view>
 					<view class="pg-eye pg-eye-r"></view>
 					<view class="pg-blush pg-blush-l"></view>
 					<view class="pg-blush pg-blush-r"></view>
 					<view class="pg-mouth"></view>
-					<view class="pg-dot"></view>
+				</view>
+				<view class="pg-feet">
+					<view class="pg-foot"></view>
+					<view class="pg-foot"></view>
 				</view>
 			</view>
 		</view>
@@ -509,82 +519,141 @@ export default {
 }
 .pg-pet {
 	position: relative;
-	width: 88rpx;
-	height: 88rpx;
-	animation: pgBreathe 2.4s ease-in-out infinite;
+	width: 108rpx;
+	height: 124rpx;
+	animation: pgBreathe 2.6s ease-in-out infinite;
 }
-.pg-face {
+.pg-body {
 	position: relative;
-	width: 88rpx;
-	height: 88rpx;
+	width: 108rpx;
+	height: 100rpx;
 	border-radius: 50%;
-	background: radial-gradient(circle at 38% 32%, #bbf7d0 0%, #4ade80 42%, #22c55e 100%);
-	box-shadow: 0 8rpx 16rpx rgba(22, 101, 52, 0.28);
+	background: radial-gradient(circle at 42% 32%, #d4f5b8 0%, #8ee06a 38%, #5ec948 72%, #45b838 100%);
+	box-shadow: 0 8rpx 18rpx rgba(46, 125, 50, 0.32);
+	z-index: 1;
 }
-.pg-ear {
+.pg-bud {
 	position: absolute;
-	top: -6rpx;
+	top: 2rpx;
+	right: 22rpx;
+	width: 18rpx;
+	height: 18rpx;
+	border-radius: 50%;
+	background: radial-gradient(circle at 35% 30%, #ffd080 0%, #f5a623 100%);
+	box-shadow: 0 2rpx 4rpx rgba(180, 100, 20, 0.25);
+	z-index: 3;
+}
+.pg-leaf {
+	position: absolute;
+	left: -8rpx;
+	bottom: 18rpx;
+	width: 36rpx;
+	height: 48rpx;
+	border-radius: 0 80% 0 80%;
+	background: linear-gradient(145deg, #7ed957 0%, #3d9e3a 100%);
+	transform: rotate(-28deg);
+	box-shadow: inset -4rpx -4rpx 0 rgba(255, 255, 255, 0.2);
+	z-index: 2;
+}
+.pg-leaf-vein {
+	position: absolute;
+	left: 50%;
+	top: 12%;
+	width: 2rpx;
+	height: 72%;
+	margin-left: -1rpx;
+	background: rgba(34, 100, 40, 0.35);
+	border-radius: 2rpx;
+}
+.pg-sprout {
+	position: absolute;
+	right: 4rpx;
+	bottom: 22rpx;
 	width: 28rpx;
-	height: 36rpx;
-	border-radius: 50% 50% 40% 40%;
-	background: #16a34a;
-	z-index: 0;
+	height: 40rpx;
+	z-index: 2;
 }
-.pg-ear-l {
-	left: 8rpx;
-	transform: rotate(-22deg);
+.pg-sprout-stem {
+	position: absolute;
+	right: 10rpx;
+	bottom: 0;
+	width: 4rpx;
+	height: 28rpx;
+	border-radius: 4rpx;
+	background: #3d8f3a;
+	transform: rotate(12deg);
 }
-.pg-ear-r {
-	right: 8rpx;
-	transform: rotate(22deg);
-	background: #15803d;
+.pg-sprout-leaf {
+	position: absolute;
+	width: 14rpx;
+	height: 10rpx;
+	border-radius: 0 100% 0 100%;
+	background: #6fcf4a;
+}
+.pg-sprout-leaf-l {
+	left: 0;
+	top: 8rpx;
+	transform: rotate(-35deg);
+}
+.pg-sprout-leaf-r {
+	right: 0;
+	top: 4rpx;
+	transform: rotate(25deg);
+	background: #5cb85c;
 }
 .pg-eye {
 	position: absolute;
-	top: 32rpx;
-	width: 10rpx;
+	top: 38rpx;
+	width: 12rpx;
 	height: 12rpx;
 	border-radius: 50%;
-	background: #14532d;
-	z-index: 1;
+	background: #1a1a1a;
+	z-index: 2;
 }
-.pg-eye-l { left: 24rpx; }
-.pg-eye-r { right: 24rpx; }
+.pg-eye-l { left: 28rpx; }
+.pg-eye-r { right: 28rpx; }
 .pg-blush {
 	position: absolute;
-	top: 44rpx;
-	width: 12rpx;
-	height: 8rpx;
+	top: 50rpx;
+	width: 14rpx;
+	height: 9rpx;
 	border-radius: 50%;
-	background: rgba(251, 146, 60, 0.45);
-	z-index: 1;
+	background: rgba(255, 160, 160, 0.55);
+	z-index: 2;
 }
-.pg-blush-l { left: 14rpx; }
-.pg-blush-r { right: 14rpx; }
+.pg-blush-l { left: 16rpx; }
+.pg-blush-r { right: 16rpx; }
 .pg-mouth {
 	position: absolute;
 	left: 50%;
-	top: 50rpx;
-	width: 22rpx;
-	height: 10rpx;
-	margin-left: -11rpx;
-	border-bottom: 4rpx solid #14532d;
-	border-radius: 0 0 12rpx 12rpx;
-	z-index: 1;
+	top: 56rpx;
+	width: 18rpx;
+	height: 8rpx;
+	margin-left: -9rpx;
+	border-bottom: 3rpx solid #2d5a2a;
+	border-radius: 0 0 10rpx 10rpx;
+	z-index: 2;
 }
-.pg-dot {
+.pg-feet {
 	position: absolute;
-	right: 8rpx;
-	bottom: 16rpx;
-	width: 12rpx;
-	height: 12rpx;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	gap: 14rpx;
+	z-index: 0;
+}
+.pg-foot {
+	width: 24rpx;
+	height: 16rpx;
 	border-radius: 50%;
-	background: #fbbf24;
-	z-index: 1;
+	background: linear-gradient(180deg, #5ec948 0%, #45b838 100%);
+	box-shadow: 0 4rpx 8rpx rgba(46, 125, 50, 0.2);
 }
 @keyframes pgBreathe {
 	0%, 100% { transform: scale(1) translateY(0); }
-	50% { transform: scale(1.08) translateY(-6rpx); }
+	50% { transform: scale(1.05) translateY(-5rpx); }
 }
 .pg-dim-full {
 	position: fixed;
