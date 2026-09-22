@@ -94,12 +94,12 @@
 					</view>
 					<text class="u-font-24 u-m-t-8">督导巡查</text>
 				</view>
-				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerReport(2)">
+				<!-- <view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerReport(2)">
 					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">
 						<u-icon name="camera" size="44" color="#fff"></u-icon>
 					</view>
 					<text class="u-font-24 u-m-t-8">随手发现问题</text>
-				</view>
+				</view> -->
 				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerReport(1)">
 					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
 						<u-icon name="warning" size="44" color="#fff"></u-icon>
