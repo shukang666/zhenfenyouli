@@ -48,7 +48,12 @@
                         <input name="list_orders[{$vo.id}]" class="input-order" type="text" value="{$vo.list_order}">
                     </td>
                     <!--                <td>{$vo.id}</td>-->
-                    <td>{$vo.name}</td>
+                    <td>
+                        {$vo.name}
+                        <if condition="!empty($vo.event_kind) && $vo.event_kind == 2">
+                            <span class="label label-info" style="margin-left:4px;">线下</span>
+                        </if>
+                    </td>
                     <if condition="$params.type == 1">
                         <td>
                             <if condition="$vo.is_clock == 1">

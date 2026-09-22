@@ -66,6 +66,19 @@
             </div>
         </div>
 
+        <if condition="$params.type == 1">
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>活动类型:</label>
+            <div class="col-md-6 col-sm-10">
+                <select class="form-control" name="event_kind" id="event_kind">
+                    <option value="1" <if condition="empty($item.event_kind) || $item.event_kind == 1">selected</if>>正常活动</option>
+                    <option value="2" <if condition="!empty($item.event_kind) && $item.event_kind == 2">selected</if>>线下活动</option>
+                </select>
+                <p class="help-block">线下活动：用户在活动页报名，到达允许签到时间后可在现场定位签到（500米内）；原「签到列表」仅保留历史记录。</p>
+            </div>
+        </div>
+        </if>
+
         <if condition="!empty($item['join_type'])">
             <input type="hidden" name="join_type" value="{$item.join_type}">
             <else/>
@@ -137,10 +150,42 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group event-kind-normal-only">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>是否需要打卡:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="checkbox" lay-skin="switch" class="form-control" lay-filter="is_clock" name="is_clock" value="1" <if condition="!empty($item.is_clock) && $item.is_clock==1">checked</if> lay-text="是|否">
+                </div>
+            </div>
+
+            <div class="form-group event-kind-offline-only show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>允许签到开始:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="datetime-local" class="form-control" name="offline_sign_start"
+                           value="<if condition='!empty($item.offline_sign_start)'>{:date('Y-m-d\TH:i', $item.offline_sign_start)}</if>">
+                    <p class="help-block">此前用户仅可报名，签到按钮为灰色不可点。</p>
+                </div>
+            </div>
+            <div class="form-group event-kind-offline-only show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>允许签到结束:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="datetime-local" class="form-control" name="offline_sign_end"
+                           value="<if condition='!empty($item.offline_sign_end)'>{:date('Y-m-d\TH:i', $item.offline_sign_end)}</if>">
+                </div>
+            </div>
+            <div class="form-group event-kind-offline-only show_hidden">
+                <label class="col-sm-2 control-label">口令签到（兜底）:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="text" class="form-control" name="offline_sign_password" maxlength="32"
+                           value="{$item.offline_sign_password|default=''}" placeholder="选填，定位失败时管理员告知用户">
+                    <p class="help-block">小程序签到弹窗内提供不明显的「口令签到」入口，校验此密码。</p>
+                </div>
+            </div>
+            <div class="form-group event-kind-offline-only show_hidden">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>签到赠送积分:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="send_point" min="0"
+                           value="{$item.send_point|default='0'}">
+                    <span>现场签到成功后赠送（每用户每场活动限签一次）</span>
                 </div>
             </div>
 
@@ -545,6 +590,31 @@
         }
     }
     toggleJoinType(join_type);
+
+    function toggleEventKind(val) {
+        val = parseInt(val, 10) || 1;
+        if (val === 2) {
+            $('.event-kind-offline-only').show();
+            $('.event-kind-normal-only').hide();
+            $('.clock').hide();
+            $('.clock').find('input,select,textarea').prop('disabled', true).prop('required', false);
+            $('.event-kind-offline-only').find('input,select').prop('disabled', false);
+            $('.event-kind-offline-only').find('[name=offline_sign_start],[name=offline_sign_end]').prop('required', true);
+        } else {
+            $('.event-kind-offline-only').hide();
+            $('.event-kind-offline-only').find('input,select').prop('disabled', true).prop('required', false);
+            $('.clock').find('input,select,textarea').prop('disabled', false);
+            $('.event-kind-normal-only').show();
+            if (is_clock == 1) {
+                $('.clock').show();
+            }
+        }
+    }
+    var event_kind_init = $('#event_kind').val() || '1';
+    toggleEventKind(event_kind_init);
+    $('#event_kind').on('change', function () {
+        toggleEventKind($(this).val());
+    });
 
 </script>
 <script>

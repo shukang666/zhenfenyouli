@@ -37,7 +37,7 @@
 			</view>
 		</view>
 
-		<!-- 活动页：搜索 + banner + 主题分类大卡/四小卡 + 两个入口 + 海报横滑 -->
+		<!-- 活动页：搜索 + banner + 主题五圆钮 + 两个入口 + 海报横滑 -->
 		<view v-else-if="type === 'low_carbon'" class="skeleton-low-carbon">
 			<view class="sk-fb-nav">
 				<view class="sk-search sk-search--fb">
@@ -51,10 +51,10 @@
 				<view class="sk-entry sk-entry--sm"></view>
 			</view>
 			<view class="sk-sec-title"></view>
-			<view class="sk-cate">
-				<view class="sk-cate-big"></view>
-				<view class="sk-cate-right">
-					<view class="sk-cate-mini" v-for="i in 4" :key="i"></view>
+			<view class="sk-theme-row">
+				<view class="sk-theme-item" v-for="i in 5" :key="i">
+					<view class="sk-theme-circle"></view>
+					<view class="sk-theme-label"></view>
 				</view>
 			</view>
 			<view class="sk-sec-title"></view>
@@ -413,30 +413,32 @@ export default {
 	margin: 28rpx 24rpx 16rpx;
 }
 
-.sk-cate {
+.sk-theme-row {
 	display: flex;
-	gap: 16rpx;
-	padding: 8rpx 24rpx 24rpx;
+	justify-content: space-between;
+	padding: 8rpx 20rpx 24rpx;
 }
-.sk-cate-big {
-	@extend .sk-base;
-	width: 210rpx;
-	height: 260rpx;
-	border-radius: 20rpx;
-	flex-shrink: 0;
-}
-.sk-cate-right {
+.sk-theme-item {
 	flex: 1;
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 1fr 1fr;
-	gap: 12rpx;
-	height: 260rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
-.sk-cate-mini {
+.sk-theme-circle {
 	@extend .sk-base;
-	border-radius: 16rpx;
+	width: 104rpx;
+	height: 104rpx;
+	border-radius: 50%;
 }
+.sk-theme-label {
+	@extend .sk-base;
+	width: 72rpx;
+	height: 22rpx;
+	margin-top: 14rpx;
+	border-radius: 8rpx;
+}
+
+/* 备用：旧版主题分类骨架 sk-cate-* 已弃用 */
 
 .sk-entry-row {
 	display: flex;

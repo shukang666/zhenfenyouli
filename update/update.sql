@@ -5,5 +5,11 @@ ALTER TABLE `cmf_active_tab` ADD COLUMN `tag_type` tinyint(1) NOT NULL DEFAULT 1
 
 -- 商品兑换前置签到（后台签到列表 join_type=2，完成 active_clock 后可兑换）
 ALTER TABLE `cmf_goods` ADD COLUMN `require_active_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '兑换需完成该签到活动至少1次签到，0无限制' AFTER `point`;
+
+-- 活动形态：1正常活动 2线下活动（定位/口令签到）
+ALTER TABLE `cmf_active` ADD COLUMN `event_kind` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT '1正常活动 2线下活动' AFTER `join_type`;
+ALTER TABLE `cmf_active` ADD COLUMN `offline_sign_start` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '线下允许签到开始时间戳' AFTER `event_kind`;
+ALTER TABLE `cmf_active` ADD COLUMN `offline_sign_end` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '线下允许签到结束时间戳' AFTER `offline_sign_start`;
+ALTER TABLE `cmf_active` ADD COLUMN `offline_sign_password` varchar(32) NOT NULL DEFAULT '' COMMENT '线下口令签到兜底' AFTER `offline_sign_end`;
 -- 已有存量标签默认为固定分类(tag_type=1)，如需将某些标签设为动态主题，请手动更新：
 -- UPDATE `cmf_active_tab` SET `tag_type` = 2 WHERE `name` IN ('净美七贤岭', '金秋开学季');

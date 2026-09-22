@@ -12,7 +12,11 @@
 			
 			<!-- 封面上的标题信息 -->
 			<view class="hero-content">
-				<view class="hero-badge" v-if="info.is_clock == 1">
+				<view class="hero-badge" v-if="isOfflineEvent">
+					<text class="badge-icon">📍</text>
+					<text class="badge-text">线下活动</text>
+				</view>
+				<view class="hero-badge" v-else-if="info.is_clock == 1">
 					<text class="badge-icon">🎯</text>
 					<text class="badge-text">挑战活动</text>
 				</view>
@@ -151,8 +155,31 @@
 				<u-icon name="share" size="36" color="#18AF38"></u-icon>
 				<text class="share-icon">分享</text>
 			</view>
+			<!-- 线下活动：报名 + 限时定位签到 -->
+			<view class="action-area" v-if="isOfflineEvent">
+				<u-button
+					v-if="info.is_sign == 0"
+					class="action-btn primary-btn"
+					:disabled="info.is_end == 1"
+					@click="handleSign"
+				>
+					{{ info.is_end == 1 ? '活动已结束' : '立即报名' }}
+				</u-button>
+				<u-button v-else-if="info.is_sign_clock == 1" class="action-btn success-btn" disabled>
+					已签到 ✓
+				</u-button>
+				<u-button v-else-if="info.offline_sign_ended == 1" class="action-btn" disabled>
+					签到已结束
+				</u-button>
+				<u-button v-else-if="info.offline_sign_wait == 1" class="action-btn" disabled>
+					签到未开始
+				</u-button>
+				<u-button v-else class="action-btn primary-btn" @click="openOfflineSignPopup">
+					签到
+				</u-button>
+			</view>
 			<!-- 非打卡活动：报名按钮（扫码参加活动统一叫"签到"） -->
-			<view class="action-area" v-if="info.is_clock == 0">
+			<view class="action-area" v-else-if="info.is_clock == 0">
 				<u-button 
 					v-if="info.is_sign == 0"
 					class="action-btn primary-btn"
@@ -170,7 +197,7 @@
 				</u-button>
 			</view>
 			<!-- 打卡活动：排行榜 + 打卡 -->
-			<view class="action-area clock-actions" v-if="info.is_clock == 1">
+			<view class="action-area clock-actions" v-else-if="info.is_clock == 1">
 				<u-button class="action-btn rank-btn" @click="goToRank">
 					<text class="btn-icon">🏆</text>
 					<text>排行榜</text>
@@ -192,7 +219,7 @@
 					<view class="success-icon">
 						<text class="success-emoji">🎉</text>
 					</view>
-					<view class="success-title">{{isScanJoin ? '签到成功!' : '打卡成功!'}}</view>
+					<view class="success-title">{{isOfflineEvent || isScanJoin ? '签到成功!' : '打卡成功!'}}</view>
 					<view class="success-point">
 						<text class="point-label">获得积分</text>
 						<text class="point-value">+{{info.send_point}}</text>
@@ -203,6 +230,27 @@
 			</view>
 		</u-mask>
 		
+		<!-- 线下活动签到弹窗 -->
+		<u-popup v-model="offline_sign_show" mode="bottom" border-radius="24" closeable>
+			<view class="clock-popup offline-sign-popup">
+				<view class="popup-header">
+					<text class="popup-title">现场签到</text>
+					<text class="popup-subtitle">需在活动地点 500 米范围内</text>
+				</view>
+				<view class="offline-loc-hint u-font-24 u-type-info u-m-b-20">
+					{{ offlineLocHint || '正在获取您的位置…' }}
+				</view>
+				<u-button class="confirm-btn" :loading="offlineSignLoading" @click="submitOfflineLocationSign">确认签到</u-button>
+				<view class="offline-pwd-entry" v-if="info.has_offline_password == 1" @click="offlinePwdShow = !offlinePwdShow">
+					定位困难？口令签到
+				</view>
+				<view v-if="offlinePwdShow && info.has_offline_password == 1" class="offline-pwd-box">
+					<u-input v-model="offlinePassword" type="password" placeholder="请输入签到口令" border />
+					<u-button class="confirm-btn u-m-t-20" size="medium" :loading="offlineSignLoading" @click="submitOfflinePasswordSign">提交口令</u-button>
+				</view>
+			</view>
+		</u-popup>
+
 		<!-- 打卡弹窗 -->
 		<u-popup v-model="sign_clock_show" mode="bottom" border-radius="24" closeable>
 			<view class="clock-popup">
@@ -282,6 +330,13 @@
 				pid: '',
 				id: '',
 				sign_clock_show: false,
+				offline_sign_show: false,
+				offlineSignLoading: false,
+				offlineLocHint: '',
+				offlineLat: '',
+				offlineLng: '',
+				offlinePwdShow: false,
+				offlinePassword: '',
 				form: {
 					image_url: '',
 				},
@@ -313,6 +368,9 @@
 		isScanJoin() {
 			return this.info.join_type == 2;
 		},
+		isOfflineEvent() {
+			return Number(this.info.event_kind) === 2;
+		},
 		// 打卡/签到按钮文本（扫码参加活动显示"立即签到"）
 		clockBtnText() {
 			const done = this.info.is_sign == 1 && this.info.is_sign_clock == 1;
@@ -323,6 +381,19 @@
 		},
 		// 活动时间文本 - 根据活动类型显示不同格式
 		activityTimeText() {
+			if (this.isOfflineEvent) {
+				const fmt = (ts) => {
+					if (!ts) return '';
+					const d = new Date(ts * 1000);
+					const p = (n) => String(n).padStart(2, '0');
+					return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+				};
+				const s = fmt(this.info.offline_sign_start);
+				const e = fmt(this.info.offline_sign_end);
+				if (s && e) return `签到 ${s} ~ ${e}`;
+				if (this.info.date) return '截止至' + this.formatDate(this.info.date);
+				return '详见活动说明';
+			}
 			if (this.info.is_clock == 1) {
 				// 打卡活动：使�?clock_start_time �?clock_end_time
 				let startTime = '';
@@ -367,6 +438,11 @@
 		},
 		onHide() {
 			this.tipShow = false
+		},
+		onShow() {
+			if (this.id) {
+				this.get_new_active_detail(this.id)
+			}
 		},
 		onShareTimeline() {
 			return {
@@ -428,6 +504,87 @@
 		// 上传组件状态变化回�?
 		handleUploadChange() {},
 		// 打卡/签到按钮（打卡活动不需要先报名，直接打卡）
+		openOfflineSignPopup() {
+			if (!this.isLogin) return this.$u.route('/pages/public/login')
+			this.offlinePwdShow = false
+			this.offlinePassword = ''
+			this.offline_sign_show = true
+			this.refreshOfflineLocation()
+		},
+		refreshOfflineLocation() {
+			this.offlineLocHint = '正在获取您的位置…'
+			this.offlineLat = ''
+			this.offlineLng = ''
+			uni.getLocation({
+				type: 'gcj02',
+				success: (res) => {
+					this.offlineLat = res.latitude
+					this.offlineLng = res.longitude
+					const dist = this.calcDistanceMeters(
+						res.latitude, res.longitude,
+						this.info.lat * 1, this.info.lng * 1
+					)
+					if (dist <= 500) {
+						this.offlineLocHint = `已在签到范围内（约 ${Math.round(dist)} 米）`
+					} else {
+						this.offlineLocHint = `当前距活动地点约 ${Math.round(dist)} 米，需在 500 米内`
+					}
+				},
+				fail: () => {
+					this.offlineLocHint = '未能获取定位，请开启位置权限或尝试口令签到'
+				}
+			})
+		},
+		calcDistanceMeters(lat1, lng1, lat2, lng2) {
+			const R = 6371000
+			const dLat = (lat2 - lat1) * Math.PI / 180
+			const dLng = (lng2 - lng1) * Math.PI / 180
+			const a = Math.sin(dLat / 2) ** 2
+				+ Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2
+			return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+		},
+		async submitOfflineLocationSign() {
+			if (!this.offlineLat || !this.offlineLng) {
+				this.refreshOfflineLocation()
+				return this.$u.toast('请先允许获取位置')
+			}
+			this.offlineSignLoading = true
+			try {
+				await this.$u.api.post_offline_event_sign({
+					active_id: this.info.id,
+					lat: this.offlineLat,
+					lng: this.offlineLng,
+					sign_mode: 'location'
+				})
+				this.offline_sign_show = false
+				this.showType = 2
+				this.tipShow = true
+				setTimeout(() => this.get_new_active_detail(this.info.id), 500)
+			} catch (e) {
+				this.$u.toast(e.msg || '签到失败')
+			} finally {
+				this.offlineSignLoading = false
+			}
+		},
+		async submitOfflinePasswordSign() {
+			if (!this.offlinePassword) return this.$u.toast('请输入口令')
+			this.offlineSignLoading = true
+			try {
+				await this.$u.api.post_offline_event_sign({
+					active_id: this.info.id,
+					password: this.offlinePassword,
+					sign_mode: 'password'
+				})
+				this.offline_sign_show = false
+				this.showType = 2
+				this.tipShow = true
+				setTimeout(() => this.get_new_active_detail(this.info.id), 500)
+			} catch (e) {
+				this.$u.toast(e.msg || '签到失败')
+			} finally {
+				this.offlineSignLoading = false
+			}
+		},
 		handleClock() {
 			if (!this.isLogin) return this.$u.route('/pages/public/login')
 			if (this.isScanJoin) {
@@ -1138,6 +1295,23 @@
 			font-size: 28rpx;
 			font-weight: 700;
 		}
+	}
+
+	.offline-pwd-entry {
+		margin-top: 28rpx;
+		text-align: center;
+		font-size: 22rpx;
+		color: #b0b8b2;
+		text-decoration: underline;
+	}
+
+	.offline-pwd-box {
+		margin-top: 24rpx;
+	}
+
+	.offline-loc-hint {
+		line-height: 1.5;
+		padding: 0 10rpx;
 	}
 
 	.clock-popup {

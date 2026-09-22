@@ -86,15 +86,25 @@
 					<text class="fb-section-title">主题活动</text>
 				</view>
 			</view>
+			<!-- 现行：一行五个圆钮 + 下方文字 -->
+			<view class="fb-theme-row">
+				<view class="fb-theme-item" v-for="cate in main_categories" :key="cate.id"
+					hover-class="fb-press" :hover-stay-time="80"
+					@click="gotoCateList(cate)">
+					<view class="fb-theme-circle" :style="{ background: cate.bgColor }">
+						<text class="fb-theme-emoji">{{ cate.emoji }}</text>
+					</view>
+					<text class="fb-theme-label">{{ cate.name }}</text>
+				</view>
+			</view>
+			<!-- 备用：左大卡 + 右 2×2（已弃用）
 			<view class="fb-cate-wrap">
-				<!-- 左侧大竖卡（第1个：健康生活） -->
 				<view class="fb-cate-big" :style="{background: main_categories[0].bgColor}"
 					@click="gotoCateList(main_categories[0])">
 					<text class="fb-cate-big-emoji">{{main_categories[0].emoji}}</text>
 					<text class="fb-cate-big-name">{{main_categories[0].name}}</text>
 					<text class="fb-cate-big-sub">Healthy Life</text>
 				</view>
-				<!-- 右侧 2x2（第2-5个） -->
 				<view class="fb-cate-right">
 					<view class="fb-cate-mini" v-for="(cate, idx) in main_categories.slice(1)" :key="cate.id"
 						:style="{background: cate.bgColor}" @click="gotoCateList(cate)">
@@ -106,6 +116,7 @@
 					</view>
 				</view>
 			</view>
+			-->
 		</view>
 
 		<!-- 本周推荐：大图海报横滑，和下面两块刻意做成不同版式 -->
@@ -587,7 +598,51 @@
 	height: 100%;
 }
 
-/* ===== 5 大活动分类：左大卡 + 右2x2 ===== */
+/* ===== 主题活动：一行五个圆钮 ===== */
+.fb-theme-row {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	justify-content: space-between;
+	padding: 4rpx 20rpx 20rpx;
+}
+.fb-theme-item {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.fb-theme-circle {
+	width: 104rpx;
+	height: 104rpx;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 8rpx 20rpx rgba(16, 48, 24, 0.12);
+	border: 4rpx solid rgba(255, 255, 255, 0.85);
+	box-sizing: border-box;
+}
+.fb-theme-emoji {
+	font-size: 44rpx;
+	line-height: 1;
+}
+.fb-theme-label {
+	margin-top: 14rpx;
+	width: 100%;
+	padding: 0 4rpx;
+	box-sizing: border-box;
+	font-size: 22rpx;
+	font-weight: 600;
+	color: #142018;
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* 备用：左大卡 + 右 2×2 样式（已弃用，恢复时取消注释）
 .fb-cate-wrap {
 	display: flex;
 	gap: 16rpx;
@@ -608,8 +663,8 @@
 	clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
 	transition: transform 0.2s;
 }
-.fb-cate-big:active { 
-	transform: scale(0.96); 
+.fb-cate-big:active {
+	transform: scale(0.96);
 	opacity: 0.9;
 }
 .fb-cate-big-emoji {
@@ -620,7 +675,6 @@
 	opacity: 0.9;
 	filter: drop-shadow(0 4rpx 8rpx rgba(0,0,0,0.2));
 }
-/* 左侧大卡：斜线纹理，不用圆形气泡 */
 .fb-cate-big::before {
 	content: '';
 	position: absolute;
@@ -684,11 +738,10 @@
 	clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%, 0 28%);
 	transition: transform 0.2s;
 }
-.fb-cate-mini:active { 
-	transform: scale(0.95); 
+.fb-cate-mini:active {
+	transform: scale(0.95);
 	opacity: 0.9;
 }
-/* 小卡：细斜线，不用圆形气泡 */
 .fb-cate-mini::before {
 	content: '';
 	position: absolute;
@@ -744,6 +797,7 @@
 	margin-top: 2rpx;
 	letter-spacing: 0.5rpx;
 }
+*/
 
 /* ===== 常去入口：对冲咬合 + 斜线流动 + 中间能量核，两卡互不重叠 ===== */
 @keyframes fbEntryStripe {

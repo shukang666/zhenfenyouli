@@ -4,6 +4,7 @@ namespace api\wxapp\controller;
 
 use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
+use api\wxapp\model\GeoUtil;
 use app\admin\model\active\ActiveCateModel;
 use app\admin\model\active\ActiveClockModel;
 use app\admin\model\active\ActiveCommunityCateModel;
@@ -498,7 +499,7 @@ class ActiveController extends AuthController
         $where[] = ['user_id', '=', $this->user_id];
         $sign_info = ActiveSIgnModel::where($where)->find();
         // 只有打卡活动（is_clock=1）才自动报名，非打卡活动需用户手动报名
-        if(empty($sign_info) && $this->user_id && intval($item['is_clock']) === 1){
+        if (empty($sign_info) && $this->user_id && intval($item['is_clock']) === 1 && !ActiveModel::isOfflineEvent($item)) {
             // 自动创建报名记录，跳过角色条件校验和积分扣除
             $sign_data = [];
             $sign_data['user_id'] = $this->user_id;
@@ -515,15 +516,40 @@ class ActiveController extends AuthController
         //参与人数
         $item['active_count'] = ActiveSIgnModel::where('active_id', $item['id'])->count();
 
-        $date_time = strtotime(date('Y-m-d 00:00:00'));
-        //是否打卡
-        $where = [];
-        $where[] = ['active_id', '=', $item['id']];
-        $where[] = ['user_id', '=', $this->user_id];
-        $where[] = ['sign_id', '=', $item['sign_id'] ];
-        $where[] = ['date_time', '=', $date_time];
-        $clock_info = ActiveClockModel::where($where)->find();
-        $item['is_sign_clock'] = empty($clock_info)?0:1;
+        $item['event_kind'] = (int)($item['event_kind'] ?? ActiveModel::EVENT_KIND_NORMAL);
+        $item['offline_sign_start'] = (int)($item['offline_sign_start'] ?? 0);
+        $item['offline_sign_end'] = (int)($item['offline_sign_end'] ?? 0);
+        $now = time();
+        $item['offline_sign_open'] = 0;
+        $item['offline_sign_wait'] = 0;
+        $item['offline_sign_ended'] = 0;
+        if (ActiveModel::isOfflineEvent($item)) {
+            if ($item['offline_sign_start'] > 0 && $now < $item['offline_sign_start']) {
+                $item['offline_sign_wait'] = 1;
+            } elseif ($item['offline_sign_end'] > 0 && $now > $item['offline_sign_end']) {
+                $item['offline_sign_ended'] = 1;
+            } else {
+                $item['offline_sign_open'] = 1;
+            }
+        }
+
+        //是否打卡 / 线下是否已签到
+        if (ActiveModel::isOfflineEvent($item)) {
+            $clock_info = ActiveClockModel::where([
+                ['active_id', '=', $item['id']],
+                ['user_id', '=', $this->user_id],
+            ])->find();
+            $item['is_sign_clock'] = empty($clock_info) ? 0 : 1;
+        } else {
+            $date_time = strtotime(date('Y-m-d 00:00:00'));
+            $where = [];
+            $where[] = ['active_id', '=', $item['id']];
+            $where[] = ['user_id', '=', $this->user_id];
+            $where[] = ['sign_id', '=', $item['sign_id']];
+            $where[] = ['date_time', '=', $date_time];
+            $clock_info = ActiveClockModel::where($where)->find();
+            $item['is_sign_clock'] = empty($clock_info) ? 0 : 1;
+        }
 
 //        $item['sign_id'] = $sign_info['id'];
 
@@ -532,7 +558,106 @@ class ActiveController extends AuthController
         if($item['date'] < time()){
             $item['is_end'] = 1;
         }
+        $pwdConfigured = 0;
+        if (ActiveModel::isOfflineEvent($item)) {
+            $pwdRow = ActiveModel::where('id', $item['id'])->value('offline_sign_password');
+            $pwdConfigured = ($pwdRow !== '' && $pwdRow !== null) ? 1 : 0;
+        }
+        unset($item['offline_sign_password']);
+        $item['has_offline_password'] = $pwdConfigured;
         $this->success('请求成功', $item);
+    }
+
+    /**
+     * 线下活动现场签到（定位 500 米内或口令）
+     */
+    public function post_offline_event_sign()
+    {
+        $this->checkUser();
+        $active_id = (int)$this->request->param('active_id');
+        $lat = $this->request->param('lat');
+        $lng = $this->request->param('lng');
+        $password = trim((string)$this->request->param('password', ''));
+        $sign_mode = trim((string)$this->request->param('sign_mode', 'location'));
+
+        $active_info = ActiveModel::where('id', $active_id)->find();
+        if (empty($active_info) || !ActiveModel::isOfflineEvent($active_info)) {
+            $this->error('活动不存在或不是线下活动');
+        }
+        if ($active_info['date'] < time()) {
+            $this->error('活动已结束');
+        }
+        $start = (int)$active_info['offline_sign_start'];
+        $end = (int)$active_info['offline_sign_end'];
+        $now = time();
+        if ($start > 0 && $now < $start) {
+            $this->error('签到尚未开始');
+        }
+        if ($end > 0 && $now > $end) {
+            $this->error('签到已结束');
+        }
+
+        $sign_info = ActiveSIgnModel::where([
+            ['active_id', '=', $active_id],
+            ['user_id', '=', $this->user_id],
+        ])->find();
+        if (empty($sign_info)) {
+            $this->error('请先报名参加活动');
+        }
+
+        $exists = ActiveClockModel::where([
+            ['active_id', '=', $active_id],
+            ['user_id', '=', $this->user_id],
+        ])->find();
+        if (!empty($exists)) {
+            $this->error('已签到');
+        }
+
+        $verified = false;
+        if ($sign_mode === 'password' && $password !== '') {
+            $cfgPwd = (string)($active_info['offline_sign_password'] ?? '');
+            if ($cfgPwd === '') {
+                $this->error('本活动未开启口令签到');
+            }
+            if ($password !== $cfgPwd) {
+                $this->error('口令不正确');
+            }
+            $verified = true;
+        } else {
+            if ($lat === '' || $lng === '' || $lat === null || $lng === null) {
+                $this->error('请授权位置信息后重试');
+            }
+            $targetLat = (float)$active_info['lat'];
+            $targetLng = (float)$active_info['lng'];
+            if ($targetLat == 0.0 && $targetLng == 0.0) {
+                $this->error('活动未配置签到地点');
+            }
+            $dist = GeoUtil::distanceMeters($lat, $lng, $targetLat, $targetLng);
+            if ($dist > 500) {
+                $this->error('您不在签到范围内（距活动地点约' . (int)round($dist) . '米，需在500米内）');
+            }
+            $verified = true;
+        }
+        if (!$verified) {
+            $this->error('签到失败');
+        }
+
+        $date_time = strtotime(date('Y-m-d 00:00:00'));
+        $send_point = (int)($active_info['send_point'] ?? 0);
+        ActiveClockModel::create([
+            'user_id' => $this->user_id,
+            'active_id' => $active_id,
+            'sign_id' => $sign_info['id'],
+            'date_time' => $date_time,
+            'image_url' => '',
+            'send_point' => $send_point,
+        ]);
+
+        if ($send_point > 0) {
+            AccountLogModel::add_account_log($this->user_id, 2, 225, $send_point, ['remark' => '线下活动签到']);
+        }
+
+        $this->success('签到成功');
     }
 
     /**

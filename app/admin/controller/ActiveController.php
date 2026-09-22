@@ -176,6 +176,34 @@ class ActiveController extends ToolController
             if(isset($params['role'])) $params['role'] = implode(',',$params['role']);
             if(!empty($params['clock_start_time'])) $params['clock_start_time'] = strtotime($params['clock_start_time']);
             if(!empty($params['clock_end_time'])) $params['clock_end_time'] = strtotime($params['clock_end_time']);
+            $params['event_kind'] = (int)($params['event_kind'] ?? ActiveModel::EVENT_KIND_NORMAL);
+            if (!in_array($params['event_kind'], [ActiveModel::EVENT_KIND_NORMAL, ActiveModel::EVENT_KIND_OFFLINE], true)) {
+                $params['event_kind'] = ActiveModel::EVENT_KIND_NORMAL;
+            }
+            if (!empty($params['offline_sign_start'])) {
+                $params['offline_sign_start'] = strtotime($params['offline_sign_start']);
+            } else {
+                $params['offline_sign_start'] = 0;
+            }
+            if (!empty($params['offline_sign_end'])) {
+                $params['offline_sign_end'] = strtotime($params['offline_sign_end']);
+            } else {
+                $params['offline_sign_end'] = 0;
+            }
+            $params['offline_sign_password'] = trim((string)($params['offline_sign_password'] ?? ''));
+            if ($params['event_kind'] === ActiveModel::EVENT_KIND_OFFLINE) {
+                $params['is_clock'] = 0;
+                $params['join_type'] = 1;
+                if (empty($params['offline_sign_start']) || empty($params['offline_sign_end'])) {
+                    $this->error('线下活动请设置允许签到开始与结束时间');
+                }
+                if ($params['offline_sign_end'] <= $params['offline_sign_start']) {
+                    $this->error('签到结束时间须晚于开始时间');
+                }
+                if (empty($params['lat']) || empty($params['lng'])) {
+                    $this->error('线下活动请在地图上设置活动地点经纬度');
+                }
+            }
             $params['is_clock'] = empty($params['is_clock']) ? 0 : 1;
             $params['is_badge'] = empty($params['is_badge']) ? 0 : 1;
             $params['is_month_recommend'] = empty($params['is_month_recommend']) ? 0 : 1;

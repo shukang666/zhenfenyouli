@@ -19,6 +19,8 @@ const home = {
 	post_new_active_sign: (params = {}) => uni.$u.post('/wxapp/active/post_new_active_sign', params),
 	// 报名打卡 
 	post_new_sign_clock: (params = {}) => uni.$u.post('/wxapp/active/post_new_sign_clock', params),
+	// 线下活动现场签到
+	post_offline_event_sign: (params = {}) => uni.$u.post('/wxapp/active/post_offline_event_sign', params),
 	// 商家申请 
 	add_shop_new: (params = {}) => uni.$u.post('/wxapp/check/add_shop', params),
 	// 商家申请详情  

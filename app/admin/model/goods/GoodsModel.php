@@ -134,12 +134,14 @@ class GoodsModel extends ToolModel
         return $data;
     }
 
-    /** 后台签到列表（join_type=2）供商品前置条件下拉 */
+    /** 可作为兑换前置条件的活动：历史签到列表 + 线下活动 */
     public static function getSignActiveListForAdmin()
     {
-        return ActiveModel::field('id,name')
+        return ActiveModel::field('id,name,event_kind,join_type')
             ->where('delete_time', 0)
-            ->where('join_type', 2)
+            ->where(function ($q) {
+                $q->where('join_type', 2)->whereOr('event_kind', ActiveModel::EVENT_KIND_OFFLINE);
+            })
             ->order('id desc')
             ->select();
     }
@@ -157,7 +159,9 @@ class GoodsModel extends ToolModel
         }
         return ActiveModel::where('id', $activeId)
                 ->where('delete_time', 0)
-                ->where('join_type', 2)
+                ->where(function ($q) {
+                    $q->where('join_type', 2)->whereOr('event_kind', ActiveModel::EVENT_KIND_OFFLINE);
+                })
                 ->count() > 0;
     }
 
