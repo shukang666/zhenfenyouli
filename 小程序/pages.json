@@ -285,6 +285,12 @@
 					}
 				},
 				{
+					"path": "office-building",
+					"style": {
+						"navigationBarTitleText": "办公楼宇"
+					}
+				},
+				{
 					"path": "qxl-learn-exam",
 					"style": {
 						"navigationBarTitleText": "七贤岭学考",

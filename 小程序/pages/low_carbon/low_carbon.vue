@@ -64,8 +64,19 @@
 						<text class="fb-entry-arrow">›</text>
 					</view>
 				</view>
+				<view class="fb-entry-card fb-entry-office" hover-class="fb-press" :hover-stay-time="80" @click="gotoOfficeBuilding">
+					<text class="fb-entry-mark">03 楼宇环保</text>
+					<text class="fb-entry-emoji">🏢</text>
+					<view class="fb-entry-text">
+						<text class="fb-entry-title">办公楼宇</text>
+						<text class="fb-entry-sub">敬请期待</text>
+					</view>
+					<view class="fb-entry-go">
+						<text class="fb-entry-arrow">›</text>
+					</view>
+				</view>
 				<view class="fb-entry-card fb-entry-qxl" hover-class="fb-press" :hover-stay-time="80" @click="gotoQxl">
-					<text class="fb-entry-mark">03 山野社区</text>
+					<text class="fb-entry-mark">04 山野社区</text>
 					<text class="fb-entry-emoji">⛰️</text>
 					<view class="fb-entry-text">
 						<text class="fb-entry-title">我和七贤岭</text>
@@ -525,6 +536,11 @@
 				this.$u.route('/pages/activity/xsdld')
 			},
 
+			// 办公楼宇（占位页，后续再补内容）
+			gotoOfficeBuilding() {
+				this.$u.route('/pages/activity/office-building')
+			},
+
 			// 我和七贤岭入口
 			gotoQxl() {
 				this.$u.route('/pages/activity/love-qixianling')
@@ -899,11 +915,15 @@
 .fb-entry-xsd {
 	background: linear-gradient(145deg, #f5a89e 0%, #e85d7a 55%, #d94f6a 100%);
 }
+.fb-entry-office {
+	background: linear-gradient(145deg, #8b9dc3 0%, #5c6b8a 55%, #4a5568 100%);
+}
 .fb-entry-qxl {
 	background: linear-gradient(145deg, #45d06a 0%, #28A745 100%);
 }
 .fb-entry-lgfl::after,
 .fb-entry-xsd::after,
+.fb-entry-office::after,
 .fb-entry-qxl::after {
 	content: '';
 	position: absolute;
@@ -923,6 +943,10 @@
 .fb-entry-xsd .fb-entry-sub,
 .fb-entry-xsd .fb-entry-arrow,
 .fb-entry-xsd .fb-entry-mark,
+.fb-entry-office .fb-entry-title,
+.fb-entry-office .fb-entry-sub,
+.fb-entry-office .fb-entry-arrow,
+.fb-entry-office .fb-entry-mark,
 .fb-entry-qxl .fb-entry-title,
 .fb-entry-qxl .fb-entry-sub,
 .fb-entry-qxl .fb-entry-arrow,
