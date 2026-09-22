@@ -361,323 +361,73 @@
       </scroll-view>
     </view>
 
-    <!-- 原「全部活动」列表位：督导员工作台 + 整改任务（列表改由右上角「更多」进 active-list） -->
+    <!-- 活动列表 -->
     <view class="fb-act-list">
       <view class="fb-section-header fb-act-list-hd">
         <view class="fb-hd">
           <view class="fb-entry-kicker-dot"></view>
           <text class="fb-section-title">全部活动</text>
-        </view>
-        <view class="fb-section-more" @click="goMoreAll">
-          <text class="fb-more-text">更多</text>
-          <u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
+          <text class="fb-entry-kicker-hint">继续往下看</text>
         </view>
       </view>
-
       <view
-        class="vol-section u-type-white-bg u-radius-16 u-p-30"
-        id="guide-dtsh-vol"
+        class="fb-act-card"
+        v-for="item in active_list"
+        :key="item.id"
+        @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
       >
-        <view class="u-font-32 u-font-bold u-m-b-20">督导员工作台</view>
-        <view
-          class="vol-intro u-text-center u-p-b-24"
-          style="border-bottom: 1rpx solid #f0f0f0"
-        >
-          <view class="u-font-28 u-font-bold" style="color: #18af38"
-            >督导员工作平台</view
-          >
-          <view
-            class="u-font-22 u-type-info u-m-t-12 u-line-2"
-            style="line-height: 1.7"
-          >
-            履行督导职责，参与桶边督导与巡检巡查，监测督导动态，推动商户共治与分类治理
-          </view>
-          <view class="u-m-t-16" v-if="!isVolunteer">
-            <u-button
-              type="primary"
-              size="mini"
-              hover-class="none"
-              :customStyle="{
-                background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)',
-              }"
-              @click="goVolunteerApply"
-              >申请督导员</u-button
+        <view class="fb-act-cover">
+          <u-image
+            width="100%"
+            height="100%"
+            :src="item.thumb"
+            mode="aspectFill"
+          ></u-image>
+          <view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
+          <view class="fb-act-badge" v-if="item.active_count > 0">
+            <view
+              class="fb-act-avatars"
+              v-if="item.avatar_array && item.avatar_array.length"
             >
+              <image
+                :src="img"
+                class="fb-act-avatar"
+                mode="aspectFill"
+                v-for="(img, i) in item.avatar_array.slice(0, 3)"
+                :key="i"
+              ></image>
+            </view>
+            <text class="fb-act-badge-text">{{ item.active_count }}人参与</text>
           </view>
         </view>
-        <view class="u-font-28 u-font-bold u-m-t-24 u-m-b-8">快捷功能</view>
-        <view class="vol-grid-3">
-          <view
-            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
-            @click="goVolunteerPage('/pages/dtsh/volunteer-sign')"
-          >
-            <view
-              class="vol-grid-icon u-flex u-col-center u-row-center"
-              style="
-                background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);
-              "
-            >
-              <u-icon name="clock" size="44" color="#fff"></u-icon>
+        <view class="fb-act-body">
+          <view class="fb-act-title u-line-1">{{ item.name }}</view>
+          <view class="fb-act-meta">
+            <view class="fb-meta-item">
+              <u-icon name="clock" size="22" color="#65676B"></u-icon>
+              <text class="fb-meta-text">{{ formatActiveDate(item) }}</text>
             </view>
-            <text class="u-font-24 u-m-t-8">志愿督导</text>
-          </view>
-          <view
-            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
-            @click="goVolunteerMonitor"
-          >
             <view
-              class="vol-grid-icon u-flex u-col-center u-row-center"
-              style="
-                background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);
-              "
+              class="fb-meta-item fb-meta-loc"
+              v-if="item.address && item.address.trim()"
             >
-              <u-icon name="eye" size="44" color="#fff"></u-icon>
+              <u-icon name="map" size="22" color="#65676B"></u-icon>
+              <text class="fb-meta-text u-line-1">{{ item.address }}</text>
             </view>
-            <text class="u-font-24 u-m-t-8">督导监测</text>
-          </view>
-          <view
-            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
-            @click="goVolunteerPage('/pages/zzhd/dwxj/dwxj?type=3')"
-          >
-            <view
-              class="vol-grid-icon u-flex u-col-center u-row-center"
-              style="
-                background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);
-              "
-            >
-              <u-icon name="eye" size="44" color="#fff"></u-icon>
-            </view>
-            <text class="u-font-24 u-m-t-8">督导巡查</text>
-          </view>
-          <view
-            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
-            @click="goVolunteerReport(2)"
-          >
-            <view
-              class="vol-grid-icon u-flex u-col-center u-row-center"
-              style="
-                background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);
-              "
-            >
-              <u-icon name="camera" size="44" color="#fff"></u-icon>
-            </view>
-            <text class="u-font-24 u-m-t-8">随手发现问题</text>
-          </view>
-          <view
-            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
-            @click="goVolunteerReport(1)"
-          >
-            <view
-              class="vol-grid-icon u-flex u-col-center u-row-center"
-              style="
-                background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);
-              "
-            >
-              <u-icon name="warning" size="44" color="#fff"></u-icon>
-            </view>
-            <text class="u-font-24 u-m-t-8">问题反馈</text>
-          </view>
-          <view
-            class="vol-grid-item u-flex u-col-center u-row-center u-flex-col"
-            @click="goVolunteerMerchantInspect"
-          >
-            <view
-              class="vol-grid-icon u-flex u-col-center u-row-center"
-              style="
-                background: linear-gradient(135deg, #42a5f5 0%, #1565c0 100%);
-              "
-            >
-              <u-icon name="home" size="44" color="#fff"></u-icon>
-            </view>
-            <text class="u-font-24 u-m-t-8">商户共治</text>
-          </view>
-        </view>
-        <view
-          class="u-m-t-24 u-p-t-20"
-          v-if="volunteerSupervision.total > 0"
-          style="border-top: 1rpx solid #f0f0f0"
-        >
-          <view class="u-font-28 u-font-bold u-m-b-16">我的志愿督导</view>
-          <view class="u-flex u-row-between">
-            <view class="u-type-info u-font-24">累计签到次数</view>
-            <view class="u-font-bold" style="color: #18af38"
-              >{{ volunteerSupervision.total }} 次</view
-            >
-          </view>
-          <view
-            class="u-flex u-row-between u-m-t-10"
-            v-if="volunteerSupervision.last_date"
-          >
-            <view class="u-type-info u-font-24">最近签到</view>
-            <view class="u-font-24">{{ volunteerSupervision.last_date }}</view>
           </view>
         </view>
       </view>
 
+      <!-- 空态/加载中：均不显示 -->
       <view
-        class="task-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30"
-        id="guide-dtsh-task"
+        class="fb-load-tip"
+        v-if="
+          !active_loading &&
+          active_list.length > 0 &&
+          active_list.length >= active_total
+        "
+        >没有更多了</view
       >
-        <view class="u-font-32 u-font-bold">整改任务</view>
-        <view class="u-font-24 u-type-info u-m-t-8 u-m-b-20"
-          >每人每天最多领取 1 条</view
-        >
-        <view class="u-p-lr-10 u-m-b-20">
-          <u-tabs
-            :list="taskTabs"
-            :is-scroll="false"
-            :current="currentTab"
-            @change="changeTaskTab"
-            active-color="#18AF38"
-          ></u-tabs>
-        </view>
-        <view v-if="currentTab == 0">
-          <view v-if="taskList.length == 0"
-            ><u-empty text="暂无可领取任务" mode="list"></u-empty
-          ></view>
-          <view
-            v-for="(item, idx) in taskList"
-            :key="idx"
-            class="task-card u-m-b-20"
-          >
-            <view class="u-font-30 u-font-bold">{{ item.title }}</view>
-            <image
-              v-if="item.image"
-              :src="item.image"
-              mode="aspectFill"
-              class="shot-thumb u-m-t-16"
-              @click="previewShot(item.image)"
-            ></image>
-            <view class="u-font-26 u-type-info u-m-t-10">{{ item.content }}</view>
-            <view class="u-flex u-row-between u-m-t-20">
-              <view class="u-font-26" style="color: #18af38"
-                >奖励积分 +{{ item.point }}</view
-              >
-              <u-button
-                v-if="item.accepted"
-                type="info"
-                size="mini"
-                shape="circle"
-                disabled
-                >已领取</u-button
-              >
-              <u-button
-                v-else-if="item.daily_limit"
-                type="info"
-                size="mini"
-                shape="circle"
-                disabled
-                >今日已领</u-button
-              >
-              <u-button
-                v-else
-                type="success"
-                size="mini"
-                shape="circle"
-                @click="acceptTask(item)"
-                >领取任务</u-button
-              >
-            </view>
-          </view>
-        </view>
-        <view v-if="currentTab == 1">
-          <view v-if="myTasks.length == 0"
-            ><u-empty text="无我的任务" mode="list"></u-empty
-          ></view>
-          <view
-            v-for="(item, idx) in myTasks"
-            :key="idx"
-            class="task-card u-m-b-20"
-            @click="goSubmitTask(item)"
-          >
-            <view class="u-font-30 u-font-bold">{{ item.task_title }}</view>
-            <image
-              v-if="item.task_image"
-              :src="item.task_image"
-              mode="aspectFill"
-              class="shot-thumb u-m-t-16"
-              @click.stop="previewShot(item.task_image)"
-            ></image>
-            <view class="u-font-26 u-type-info u-m-t-10">{{
-              item.task_content
-            }}</view>
-            <view class="u-flex u-row-between u-m-t-20">
-              <view class="u-font-26" style="color: #18af38"
-                >奖励积分 +{{ item.task_point }}</view
-              >
-              <u-tag
-                :text="item.status_name"
-                :type="taskStatusType(item.status)"
-                mode="dark"
-              />
-            </view>
-            <view
-              v-if="item.status == 2 && item.reason"
-              class="u-font-24 u-type-error u-m-t-10"
-              >拒绝原因：{{ item.reason }}</view
-            >
-          </view>
-        </view>
-      </view>
-
-      <template v-if="false">
-        <view
-          class="fb-act-card"
-          v-for="item in active_list"
-          :key="item.id"
-          @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
-        >
-          <view class="fb-act-cover">
-            <u-image
-              width="100%"
-              height="100%"
-              :src="item.thumb"
-              mode="aspectFill"
-            ></u-image>
-            <view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
-            <view class="fb-act-badge" v-if="item.active_count > 0">
-              <view
-                class="fb-act-avatars"
-                v-if="item.avatar_array && item.avatar_array.length"
-              >
-                <image
-                  :src="img"
-                  class="fb-act-avatar"
-                  mode="aspectFill"
-                  v-for="(img, i) in item.avatar_array.slice(0, 3)"
-                  :key="i"
-                ></image>
-              </view>
-              <text class="fb-act-badge-text">{{ item.active_count }}人参与</text>
-            </view>
-          </view>
-          <view class="fb-act-body">
-            <view class="fb-act-title u-line-1">{{ item.name }}</view>
-            <view class="fb-act-meta">
-              <view class="fb-meta-item">
-                <u-icon name="clock" size="22" color="#65676B"></u-icon>
-                <text class="fb-meta-text">{{ formatActiveDate(item) }}</text>
-              </view>
-              <view
-                class="fb-meta-item fb-meta-loc"
-                v-if="item.address && item.address.trim()"
-              >
-                <u-icon name="map" size="22" color="#65676B"></u-icon>
-                <text class="fb-meta-text u-line-1">{{ item.address }}</text>
-              </view>
-            </view>
-          </view>
-        </view>
-        <view
-          class="fb-load-tip"
-          v-if="
-            !active_loading &&
-            active_list.length > 0 &&
-            active_list.length >= active_total
-          "
-          >没有更多了</view
-        >
-      </template>
     </view>
     <page-guide page="low_carbon"></page-guide>
   </view>
@@ -706,15 +456,6 @@ export default {
       recent_list: [],
       // 5 大活动分类（硬编码，后台新增不显示）
       // community_cate_id 对应数据库 cmf_active_community_cate.id
-      checkRole: null,
-      volunteerSupervision: {
-        total: 0,
-        last_date: "",
-      },
-      taskTabs: [{ name: "可领取" }, { name: "我的任务" }],
-      currentTab: 0,
-      taskList: [],
-      myTasks: [],
       main_categories: [
         {
           id: 1,
@@ -754,20 +495,13 @@ export default {
       ],
     };
   },
-  computed: {
-    isVolunteer() {
-      return this.checkRole && this.checkRole.is_approved;
-    },
-  },
   onLoad(options) {
     this.loadAllData();
   },
   onShow() {
     this.updateTabBarSelected(1);
     if (checkCommunity(this)) return;
-    this.loadCheckRole();
-    this.loadTaskList();
-    this.loadMyTasks();
+    if (!this.isLogin) return;
   },
   methods: {
     formatActiveDate(item) {
@@ -803,7 +537,7 @@ export default {
           this.loadLightAct(),
           this.loadRecentAct(),
           this.loadTags(),
-          // this.loadAllActivities(), // 底部不再内嵌列表，见 goMoreAll → active-list
+          this.loadAllActivities(),
         ]);
       } catch (e) {
         console.log("数据加载失败:", e);
@@ -849,14 +583,6 @@ export default {
         .catch(() => {
           this.light_list = [];
         });
-    },
-
-    // 「全部活动」区块右上角更多 → 全部活动列表页
-    goMoreAll() {
-      this.$u.route({
-        url: "/pages/activity/active-list",
-        params: { filter: "all" },
-      });
     },
 
     // 轻活动"更多" → 全部活动列表（选中"轻活动"筛选）
@@ -917,146 +643,7 @@ export default {
         });
     },
 
-    loadCheckRole() {
-      if (!this.isLogin) {
-        this.checkRole = null;
-        this.volunteerSupervision = { total: 0, last_date: "" };
-        return;
-      }
-      this.$u.api
-        .getCheckRole()
-        .then((res) => {
-          this.checkRole = res.data || null;
-          if (this.checkRole && this.checkRole.is_approved) {
-            this.loadVolunteerSupervision();
-          } else {
-            this.volunteerSupervision = { total: 0, last_date: "" };
-          }
-        })
-        .catch(() => {
-          this.checkRole = null;
-          this.volunteerSupervision = { total: 0, last_date: "" };
-        });
-    },
-    loadVolunteerSupervision() {
-      this.$u.api
-        .getVolunteerMyList({ page: 1, page_size: 1 })
-        .then((res) => {
-          this.volunteerSupervision.total = res.data.total || 0;
-          if (res.data.data && res.data.data.length > 0) {
-            this.volunteerSupervision.last_date = res.data.data[0].supervision_date;
-          }
-        })
-        .catch(() => {});
-    },
-    goVolunteerPage(url) {
-      if (!this.$u.func.checkLogin()) return;
-      this.$u.route(url);
-    },
-    goVolunteerReport(locationType) {
-      if (!this.$u.func.checkLogin()) return;
-      const approved = this.isVolunteer ? 1 : 0;
-      this.$u.route(
-        `/pages/dtsh/report?location_type=${locationType}&can_submit=${approved}`,
-      );
-    },
-    goVolunteerMonitor() {
-      if (!this.$u.func.checkLogin()) return;
-      const approved = this.isVolunteer ? 1 : 0;
-      this.$u.route(`/pages/dtsh/supervision-monitor?can_submit=${approved}`);
-    },
-    goVolunteerMerchantInspect() {
-      if (!this.$u.func.checkLogin()) return;
-      this.$u.route("/pages/dtsh/merchant-inspect");
-    },
-    goVolunteerApply() {
-      if (!this.$u.func.checkLogin()) return;
-      this.$u.route("/pages/zzhd/add");
-    },
-    changeTaskTab(idx) {
-      const i = idx && typeof idx === "object" ? idx.index : idx;
-      this.currentTab = i;
-      if (i == 1) this.loadMyTasks();
-      else this.loadTaskList();
-    },
-    loadTaskList() {
-      if (!this.isLogin) return;
-      this.$u.api
-        .getVolunteerTaskList()
-        .then((res) => {
-          this.taskList = res.data || [];
-        })
-        .catch(() => {});
-    },
-    loadMyTasks() {
-      if (!this.isLogin) return;
-      this.$u.api
-        .getMyVolunteerTasks({ page: 1, page_size: 20 })
-        .then((res) => {
-          this.myTasks = res.data.data || [];
-        })
-        .catch(() => {});
-    },
-    acceptTask(item) {
-      if (!this.$u.func.checkLogin()) return;
-      uni.showModal({
-        title: "确认领取",
-        content: `确定领取「${item.title}」吗？每人每天最多领取 1 条。`,
-        success: (r) => {
-          if (!r.confirm) return;
-          this.$u.api
-            .acceptVolunteerTask({ task_id: item.id })
-            .then((res) => {
-              uni.showToast({ title: res.msg || "领取成功", icon: "none" });
-              this.loadTaskList();
-              this.loadMyTasks();
-            })
-            .catch((err) => {
-              uni.showToast({
-                title: (err && err.msg) || "领取失败",
-                icon: "none",
-              });
-            });
-        },
-      });
-    },
-    goSubmitTask(item) {
-      if (!this.$u.func.checkLogin()) return;
-      const st = parseInt(item.status, 10);
-      if (st === 1) {
-        uni.showToast({ title: "审核中，请勿重复提交", icon: "none" });
-        return;
-      }
-      if (st === 3) {
-        uni.showToast({ title: "任务已完成", icon: "none" });
-        return;
-      }
-      this.$u.route({
-        url: "/pages/dtsh/task-submit",
-        params: {
-          log_id: item.id,
-          title: item.task_title,
-          content: item.task_content,
-          point: item.task_point,
-          status: item.status,
-          shot_image: item.task_image || "",
-          images:
-            item.images_arr && item.images_arr.length > 0
-              ? JSON.stringify(item.images_arr)
-              : "",
-        },
-      });
-    },
-    taskStatusType(status) {
-      const map = { 0: "info", 1: "warning", 2: "error", 3: "success" };
-      return map[status] || "info";
-    },
-    previewShot(url) {
-      if (!url) return;
-      uni.previewImage({ urls: [url] });
-    },
-
-    // 底部「全部活动」：不按热门筛，标签栏隐藏时 current_tab 一直是 0（列表 UI 已注释，方法保留）
+    // 底部「全部活动」：不按热门筛，标签栏隐藏时 current_tab 一直是 0
     loadAllActivities() {
       this.active_list = [];
       this.active_page = 1;
@@ -1182,11 +769,10 @@ export default {
   },
 
   onReachBottom() {
-    // 原内嵌全部活动分页（列表已注释）
-    // if (this.active_list.length >= this.active_total) return;
-    // if (this.active_loading) return;
-    // this.active_page++;
-    // this.loadActiveList();
+    if (this.active_list.length >= this.active_total) return;
+    if (this.active_loading) return;
+    this.active_page++;
+    this.loadActiveList();
   },
 };
 </script>
@@ -2201,35 +1787,5 @@ export default {
       font-weight: 500;
     }
   }
-}
-
-.vol-grid-3 {
-  display: flex;
-  flex-wrap: wrap;
-  margin: 0 -8rpx;
-}
-.vol-grid-item {
-  width: 33.33%;
-  padding: 16rpx 8rpx;
-  box-sizing: border-box;
-}
-.vol-grid-icon {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: 20rpx;
-}
-.task-section {
-  margin-bottom: 30rpx;
-}
-.task-card {
-  padding: 24rpx;
-  background: #f9f9f9;
-  border-radius: 12rpx;
-}
-.shot-thumb {
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 12rpx;
-  background: #eee;
 }
 </style>
