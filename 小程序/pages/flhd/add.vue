@@ -32,17 +32,17 @@
             <u-button type="success" hover-class="none" @click="submit()">确认提交</u-button>
         </view>
 
-        <view class="clock-guide u-m-lr-30 u-m-b-40" v-if="cateGuideContent">
-            <text class="clock-guide-title" v-if="cateGuideTitle">{{ cateGuideTitle }}</text>
+        <view class="clock-guide u-m-lr-30 u-m-b-40" v-if="sceneGuideContent">
+            <text class="clock-guide-title" v-if="sceneGuideTitle">{{ sceneGuideTitle }}</text>
             <view class="clock-guide-rich">
-                <u-parse :html="cateGuideContent"></u-parse>
+                <u-parse :html="sceneGuideContent"></u-parse>
             </view>
             <view class="clock-guide-more" @click="goLearn">
                 <text>想学更多分类知识？去看分类指导 ›</text>
             </view>
         </view>
-        <view class="clock-guide-empty u-m-lr-30 u-m-b-40" v-else-if="tutorialLoaded && !cateGuideContent">
-            <text>该种类教程暂未配置，请联系管理员在后台「打卡教程」中完善。</text>
+        <view class="clock-guide-empty u-m-lr-30 u-m-b-40" v-else-if="tutorialLoaded && !sceneGuideContent">
+            <text>本场景教程暂未配置，请联系管理员在后台「打卡教程」中完善。</text>
         </view>
 
         <u-mask :show="mask_show">
@@ -87,6 +87,7 @@
         ADD_PAGE_META,
         clockSceneLabel,
         resolveCateKind,
+        resolveTutorialSceneKey,
         buildSceneCateTitle,
         buildSceneCateSubtitle,
     } from '@/common/clockScene.js'
@@ -150,16 +151,15 @@
             cateKind() {
                 return resolveCateKind(this.currentCateName) || 'default'
             },
-            cateGuideTitle() {
-                const kind = resolveCateKind(this.currentCateName)
-                if (!kind || !this.tutorialMap) return ''
-                const guide = this.tutorialMap[kind]
+            tutorialSceneKey() {
+                return resolveTutorialSceneKey(this.sceneKey)
+            },
+            sceneGuideTitle() {
+                const guide = this.tutorialMap && this.tutorialMap[this.tutorialSceneKey]
                 return (guide && guide.title) ? guide.title : ''
             },
-            cateGuideContent() {
-                const kind = resolveCateKind(this.currentCateName)
-                if (!kind || !this.tutorialMap) return ''
-                const guide = this.tutorialMap[kind]
+            sceneGuideContent() {
+                const guide = this.tutorialMap && this.tutorialMap[this.tutorialSceneKey]
                 return (guide && guide.content) ? guide.content : ''
             },
             panelCateName() {

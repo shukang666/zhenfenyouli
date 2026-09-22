@@ -7,6 +7,19 @@
 			</view>
 		</view>
 
+		<view class="fb-special-entries">
+			<view class="fb-special-entry fb-s-lgfl" hover-class="fb-special-entry--press" :hover-stay-time="80" @click="gotoFlhd">
+				<text class="fb-s-entry-title">垃圾分类</text>
+				<text class="fb-s-entry-sub">学习分类 · 拍照打卡</text>
+				<text class="fb-s-entry-arrow">›</text>
+			</view>
+			<view class="fb-special-entry fb-s-qxl" hover-class="fb-special-entry--press" :hover-stay-time="80" @click="gotoQxl">
+				<text class="fb-s-entry-title">我和七贤岭</text>
+				<text class="fb-s-entry-sub">发现 · 玩 · 记录 · 守护</text>
+				<text class="fb-s-entry-arrow">›</text>
+			</view>
+		</view>
+
 		<view class="xsd-body">
 			<view class="xsd-section" v-for="cate in sections" :key="cate.id">
 				<view class="xsd-section-head">
@@ -136,6 +149,12 @@
 			gotoDetail(id) {
 				this.$u.route(`/pages/activity/lsxf/details-new?id=${id}`)
 			},
+			gotoFlhd() {
+				this.$u.route('/pages/flhd/ljfldk')
+			},
+			gotoQxl() {
+				this.$u.route('/pages/activity/love-qixianling')
+			},
 		},
 	}
 </script>
@@ -178,9 +197,56 @@
 	letter-spacing: 2rpx;
 }
 
+.fb-special-entries {
+	display: flex;
+	gap: 16rpx;
+	padding: 16rpx;
+	background: #f0f2f5;
+	position: relative;
+	z-index: 11;
+}
+.fb-special-entry {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 28rpx 24rpx;
+	border-radius: 16rpx;
+	position: relative;
+}
+.fb-special-entry--press {
+	opacity: 0.88;
+}
+.fb-s-lgfl {
+	background: linear-gradient(135deg, #4a9bff 0%, #1877f2 100%);
+	color: #fff;
+}
+.fb-s-qxl {
+	background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+	color: #fff;
+}
+.fb-s-entry-title {
+	font-size: 30rpx;
+	font-weight: 700;
+}
+.fb-s-entry-sub {
+	font-size: 22rpx;
+	opacity: 0.9;
+	margin-top: 4rpx;
+}
+.fb-s-entry-arrow {
+	position: absolute;
+	right: 20rpx;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 40rpx;
+	font-weight: 300;
+	opacity: 0.9;
+}
+
 .xsd-body {
-	padding: 24rpx 16rpx 100rpx;
-	margin-top: -24rpx;
+	padding: 8rpx 16rpx 100rpx;
+	margin-top: 0;
 	position: relative;
 	z-index: 10;
 }

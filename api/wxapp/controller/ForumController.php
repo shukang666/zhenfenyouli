@@ -46,14 +46,18 @@ class ForumController extends AuthController
     }
 
     /**
-     * 垃圾打卡教程（按 cate_key：recycle/other/harm/food）
+     * 垃圾打卡教程（按场景 scene_key：home/qinzi/street/zhenfenjiao，参数名兼容 cate_key / scene_key）
      */
     public function get_clock_tutorial()
     {
-        $cateKey = trim((string)$this->request->param('cate_key', ''));
+        $sceneKey = trim((string)$this->request->param('scene_key', ''));
+        if ($sceneKey === '') {
+            $sceneKey = trim((string)$this->request->param('cate_key', ''));
+        }
         $map = ClockTutorialModel::mapForWxapp();
-        if ($cateKey !== '') {
-            $one = $map[$cateKey] ?? null;
+        if ($sceneKey !== '') {
+            $sceneKey = ClockTutorialModel::normalizeSceneKey($sceneKey);
+            $one = $sceneKey !== '' ? ($map[$sceneKey] ?? null) : null;
             $this->success('请求成功', $one);
         }
         $this->success('请求成功', $map);

@@ -71,7 +71,17 @@ export const ADD_PAGE_META = {
 	},
 }
 
-/** 根据后台种类名称解析教程 cate_key（与 cmf_clock_tutorial.cate_key 一致） */
+/** 打卡教程场景键（与 cmf_clock_tutorial.cate_key 存 scene 一致） */
+export function resolveTutorialSceneKey(sceneKey) {
+	const key = String(sceneKey || '').trim()
+	if (!key) return 'zhenfenjiao'
+	if (key === 'office') return 'zhenfenjiao'
+	const allowed = ['home', 'qinzi', 'street', 'zhenfenjiao']
+	if (allowed.indexOf(key) >= 0) return key
+	return 'zhenfenjiao'
+}
+
+/** 根据后台种类名称解析面板样式等（非教程） */
 export function resolveCateKind(cateName) {
 	const name = cateName || ''
 	if (name.indexOf('不可回收') >= 0 || name.indexOf('其他') >= 0) return 'other'

@@ -44,3 +44,10 @@ CREATE TABLE IF NOT EXISTS `cmf_clock_tutorial` (
 
 -- 打卡教程改为富文本（后台 UEditor，小程序 u-parse 展示，可插图）
 ALTER TABLE `cmf_clock_tutorial` ADD COLUMN `content` mediumtext COMMENT '教程富文本HTML' AFTER `title`;
+
+-- 打卡教程按场景维度（cate_key 字段存 home/qinzi/street/zhenfenjiao，与垃圾种类解耦）
+ALTER TABLE `cmf_clock_tutorial` MODIFY COLUMN `cate_key` varchar(20) NOT NULL DEFAULT '' COMMENT '场景 home/qinzi/street/zhenfenjiao';
+UPDATE `cmf_clock_tutorial` SET `cate_key`='home' WHERE `cate_key`='recycle';
+UPDATE `cmf_clock_tutorial` SET `cate_key`='qinzi' WHERE `cate_key`='harm';
+UPDATE `cmf_clock_tutorial` SET `cate_key`='street' WHERE `cate_key`='food';
+UPDATE `cmf_clock_tutorial` SET `cate_key`='zhenfenjiao' WHERE `cate_key`='other';

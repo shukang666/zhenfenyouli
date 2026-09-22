@@ -8,14 +8,30 @@ class ClockTutorialModel extends Model
 {
     protected $name = 'clock_tutorial';
 
-    public static function cateKeyLabels()
+    /** 表字段 cate_key 存打卡场景标识 */
+    public static function sceneKeyLabels()
     {
         return [
-            'recycle' => '可回收物',
-            'other'   => '其他垃圾',
-            'harm'    => '有害垃圾',
-            'food'    => '厨余垃圾',
+            'home'        => '家庭',
+            'qinzi'       => '亲子',
+            'street'      => '沿街',
+            'zhenfenjiao' => '办公（真分角）',
         ];
+    }
+
+    public static function cateKeyLabels()
+    {
+        return self::sceneKeyLabels();
+    }
+
+    public static function normalizeSceneKey($key)
+    {
+        $key = trim((string)$key);
+        if ($key === 'office') {
+            return 'zhenfenjiao';
+        }
+        $allowed = array_keys(self::sceneKeyLabels());
+        return in_array($key, $allowed, true) ? $key : '';
     }
 
     /**
