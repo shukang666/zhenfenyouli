@@ -82,16 +82,68 @@
 			</view>
 		</view> -->
 
-		<!--督导员工作台（督导员+指导员功能合并） -->
+		<!-- 督导员工作台（原 volunteer-home 内容内嵌） -->
 		<view class="vol-section u-m-t-30 u-type-white-bg u-radius-16 u-p-30" id="guide-dtsh-vol">
-			<view class="u-font-32 u-font-bold u-m-b-24">督导员工作台</view>
-			<view class="vol-grid vol-grid-single u-flex u-row-center">
-				<view class="vol-card u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerHome()">
-					<view class="vol-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);">
-						<u-icon name="edit-pen-fill" size="56" color="#fff"></u-icon>
+			<view class="u-font-32 u-font-bold u-m-b-20">督导员工作台</view>
+			<view class="vol-intro u-text-center u-p-b-24" style="border-bottom: 1rpx solid #f0f0f0;">
+				<view class="u-font-28 u-font-bold" style="color:#18AF38;">督导员工作平台</view>
+				<view class="u-font-22 u-type-info u-m-t-12 u-line-2" style="line-height: 1.7;">
+					履行督导职责，参与桶边督导与巡检巡查，监测督导动态，推动商户共治与分类治理
+				</view>
+				<view class="u-m-t-16" v-if="!isVolunteer">
+					<u-button type="primary" size="mini" hover-class="none"
+						:customStyle="{background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)'}"
+						@click="goVolunteerApply">申请督导员</u-button>
+				</view>
+			</view>
+			<view class="u-font-28 u-font-bold u-m-t-24 u-m-b-8">快捷功能</view>
+			<view class="vol-grid-3">
+				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerPage('/pages/dtsh/volunteer-sign')">
+					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);">
+						<u-icon name="clock" size="44" color="#fff"></u-icon>
 					</view>
-					<text class="u-font-28 u-font-bold u-m-t-14" style="color:#333;">督导员</text>
-					<text class="u-font-22 u-type-info u-m-t-6">督导监测/巡查/治理</text>
+					<text class="u-font-24 u-m-t-8">志愿督导</text>
+				</view>
+				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerMonitor">
+					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
+						<u-icon name="eye" size="44" color="#fff"></u-icon>
+					</view>
+					<text class="u-font-24 u-m-t-8">督导监测</text>
+				</view>
+				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerPage('/pages/zzhd/dwxj/dwxj?type=3')">
+					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">
+						<u-icon name="eye" size="44" color="#fff"></u-icon>
+					</view>
+					<text class="u-font-24 u-m-t-8">督导巡查</text>
+				</view>
+				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerReport(2)">
+					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">
+						<u-icon name="camera" size="44" color="#fff"></u-icon>
+					</view>
+					<text class="u-font-24 u-m-t-8">随手发现问题</text>
+				</view>
+				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerReport(1)">
+					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
+						<u-icon name="warning" size="44" color="#fff"></u-icon>
+					</view>
+					<text class="u-font-24 u-m-t-8">问题反馈</text>
+				</view>
+				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerMerchantInspect">
+					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #42a5f5 0%, #1565c0 100%);">
+						<u-icon name="home" size="44" color="#fff"></u-icon>
+					</view>
+					<text class="u-font-24 u-m-t-8">商户共治</text>
+				</view>
+			</view>
+			<view class="u-m-t-24 u-p-t-20" v-if="volunteerSupervision.total > 0" style="border-top: 1rpx solid #f0f0f0;">
+				<view class="u-font-28 u-font-bold u-m-b-16">我的志愿督导</view>
+				<view class="u-flex u-row-between">
+					<view class="u-type-info u-font-24">累计签到次数</view>
+					<view class="u-font-bold" style="color:#18AF38;">{{ volunteerSupervision.total }} 次</view>
+				</view>
+				<view class="u-flex u-row-between u-m-t-10" v-if="volunteerSupervision.last_date">
+					<view class="u-type-info u-font-24">最近签到</view>
+					<view class="u-font-24">{{ volunteerSupervision.last_date }}</view>
 				</view>
 			</view>
 		</view>
@@ -147,6 +199,10 @@
 				swiper_list: [],
 				dtshBanner: '',
 				checkRole: null, // { is_approved, role_type, role_name }
+				volunteerSupervision: {
+					total: 0,
+					last_date: '',
+				},
 				taskTabs: [
 					{ name: '可领取' },
 					{ name: '我的任务' },
@@ -169,16 +225,59 @@
 			this.loadMyTasks()
 		},
 		onShow() {
+			this.loadCheckRole()
 			this.loadTaskList()
 			this.loadMyTasks()
 		},
 		methods: {
 		// 加载用户角色（允许未登录进入，不强制跳转登录）
 		loadCheckRole() {
-			if (!this.isLogin) return;
+			if (!this.isLogin) {
+				this.checkRole = null;
+				this.volunteerSupervision = { total: 0, last_date: '' };
+				return;
+			}
 			this.$u.api.getCheckRole().then(res => {
 				this.checkRole = res.data || null;
+				if (this.checkRole && this.checkRole.is_approved) {
+					this.loadVolunteerSupervision();
+				} else {
+					this.volunteerSupervision = { total: 0, last_date: '' };
+				}
+			}).catch(() => {
+				this.checkRole = null;
+				this.volunteerSupervision = { total: 0, last_date: '' };
+			});
+		},
+		loadVolunteerSupervision() {
+			this.$u.api.getVolunteerMyList({ page: 1, page_size: 1 }).then(res => {
+				this.volunteerSupervision.total = res.data.total || 0;
+				if (res.data.data && res.data.data.length > 0) {
+					this.volunteerSupervision.last_date = res.data.data[0].supervision_date;
+				}
 			}).catch(() => {});
+		},
+		goVolunteerPage(url) {
+			if (!this.$u.func.checkLogin()) return;
+			this.$u.route(url);
+		},
+		goVolunteerReport(locationType) {
+			if (!this.$u.func.checkLogin()) return;
+			const approved = this.isVolunteer ? 1 : 0;
+			this.$u.route(`/pages/dtsh/report?location_type=${locationType}&can_submit=${approved}`);
+		},
+		goVolunteerMonitor() {
+			if (!this.$u.func.checkLogin()) return;
+			const approved = this.isVolunteer ? 1 : 0;
+			this.$u.route(`/pages/dtsh/supervision-monitor?can_submit=${approved}`);
+		},
+		goVolunteerMerchantInspect() {
+			if (!this.$u.func.checkLogin()) return;
+			this.$u.route('/pages/dtsh/merchant-inspect');
+		},
+		goVolunteerApply() {
+			if (!this.$u.func.checkLogin()) return;
+			this.$u.route('/pages/zzhd/add');
 		},
 			// 跳转页面
 			navigator(url) {
@@ -222,10 +321,6 @@
 		// 轻量化任务跳转
 		goToPage(url) {
 			this.$u.route(url)
-		},
-		// 跳转督导员门户（不强制登录，让用户先看到页面，功能入口点击时再检查登录）
-		goVolunteerHome() {
-			this.$u.route('/pages/dtsh/volunteer-home');
 		},
 		// === 整改任务相关 ===
 		changeTab(idx) {
@@ -332,23 +427,20 @@
 	border-radius: 12rpx;
 	background: #eee;
 }
-.vol-grid {
-	gap: 20rpx;
+.vol-grid-3 {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 -8rpx;
 }
-.vol-card {
-	flex: 1;
-	padding: 30rpx 0;
-	background: #fff;
-	border-radius: 12rpx;
+.vol-grid-item {
+	width: 33.33%;
+	padding: 16rpx 8rpx;
+	box-sizing: border-box;
 }
-.vol-icon {
-	width: 110rpx;
-	height: 110rpx;
-	border-radius: 28rpx;
-	background: linear-gradient(141deg, #A4DB88 0%, #18AF38 100%);
-}
-.vol-icon-blue {
-	background: linear-gradient(141deg, #64B5F6 0%, #1976D2 100%);
+.vol-grid-icon {
+	width: 88rpx;
+	height: 88rpx;
+	border-radius: 20rpx;
 }
 .task-section {
 	margin-bottom: 30rpx;
