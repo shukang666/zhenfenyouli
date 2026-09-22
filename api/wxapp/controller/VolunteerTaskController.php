@@ -111,16 +111,54 @@ class VolunteerTaskController extends AuthController
             ->order('tl.id desc')
             ->paginate(15)
             ->each(function ($item) {
-                // 解析 images
-                $imgs = \app\admin\controller\VolunteerTaskController::parseLogImages($item['images'] ?? '');
-                $item['images_arr'] = array_values($imgs);
-                $item['task_image'] = !empty($item['task_image']) ? cmf_get_asset_url($item['task_image']) : '';
-                $item['from_shot'] = intval($item['shot_id'] ?? 0) > 0;
-                $item['status_name'] = $this->logStatusName(intval($item['status']));
-                return $item;
+                return $this->enrichMyTaskRow($item);
             });
 
         $this->success('获取成功', $list);
+    }
+
+    /**
+     * 我的任务列表行：补全任务信息，任务被删时不返回 null
+     */
+    protected function enrichMyTaskRow($item)
+    {
+        $item = is_array($item) ? $item : $item->toArray();
+
+        $imgs = \app\admin\controller\VolunteerTaskController::parseLogImages($item['images'] ?? '');
+        $item['images_arr'] = array_values($imgs);
+
+        $title = $item['task_title'] ?? '';
+        $content = $item['task_content'] ?? '';
+        $point = $item['task_point'] ?? 0;
+        $image = $item['task_image'] ?? '';
+        $shotId = intval($item['shot_id'] ?? 0);
+
+        if ($title === null || $title === '') {
+            $task = Db::name('volunteer_task')->where('id', $item['task_id'])->find();
+            if (!empty($task)) {
+                $title = $task['title'];
+                $content = $task['content'];
+                $point = $task['point'];
+                $image = $task['image'];
+                $shotId = intval($task['shot_id'] ?? 0);
+            } else {
+                $title = '整改任务（已下架）';
+                if ($content === null || $content === '') {
+                    $content = '关联任务已删除，请等待管理员审核您的提交';
+                }
+                $point = 0;
+                $image = '';
+            }
+        }
+
+        $item['task_title'] = (string)$title;
+        $item['task_content'] = (string)($content ?? '');
+        $item['task_point'] = intval($point);
+        $item['task_image'] = !empty($image) ? cmf_get_asset_url($image) : '';
+        $item['shot_id'] = $shotId;
+        $item['from_shot'] = $shotId > 0;
+        $item['status_name'] = $this->logStatusName(intval($item['status']));
+        return $item;
     }
 
     /**

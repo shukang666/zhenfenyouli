@@ -105,6 +105,13 @@ class VolunteerTaskController extends AdminBaseController
     public function delete()
     {
         $id = $this->request->param('id', 0, 'intval');
+        if (empty($id)) {
+            $this->error('参数错误');
+        }
+        $logCount = (int)$this->logModel->where('task_id', $id)->count();
+        if ($logCount > 0) {
+            $this->error('该任务已有 ' . $logCount . ' 条领取/提交记录，不能删除，请改为「停用」');
+        }
         $this->taskModel->where('id', $id)->delete();
         $this->success('删除成功');
     }
