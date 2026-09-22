@@ -381,6 +381,17 @@ class ActiveController extends AuthController
     }
 
     /**
+     * 小手拉大手板块分类（云间亲子分类汇 / 分类小当家·亲子实践营）
+     */
+    public function get_xsdld_cate_list()
+    {
+        $list = ActiveCommunityCateModel::where('cate_group', 'xsdld')
+            ->order('list_order asc, id asc')
+            ->select();
+        $this->success('请求成功', $list);
+    }
+
+    /**
      * 活动列表
      * @OA\Get (
      *tags={"新版活动"},
@@ -397,6 +408,7 @@ class ActiveController extends AuthController
     public function get_new_active_list(){
         $page_size = $this->request->param('page_size', 10);
         $community_cate_id = $this->request->param('community_cate_id');
+        $xsdld_cate_id = (int)$this->request->param('xsdld_cate_id', 0);
         $is_recommendation = $this->request->param('is_recommendation');
         $keyword = $this->request->param('keyword');
         $is_put = $this->request->param('is_put');
@@ -419,6 +431,9 @@ class ActiveController extends AuthController
                 $q->where('community_cate_id', '=', $community_cate_id)
                   ->whereOr('cate_id', '=', $community_cate_id);
             });
+        }
+        if ($xsdld_cate_id > 0) {
+            $query = $query->where('xsdld_cate_id', '=', $xsdld_cate_id);
         }
         // 活动标签过滤（FIND_IN_SET处理逗号分隔的tags字段）
         if(!empty($tag)) {

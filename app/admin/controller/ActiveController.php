@@ -71,18 +71,30 @@ class ActiveController extends ToolController
         }
         $where[] = ['join_type', '=', $join_type];
 
-        // 发现七贤岭(id=6)是小程序"我和七贤岭"页固定栏目，非活动分类，不可作为活动的七贤岭分类选项
-        $community_cate_list = ActiveCommunityCateModel::whereNotIn('id', [6])->order('list_order asc,id desc')->select();
+        $community_cate_list = ActiveCommunityCateModel::where('cate_group', 'qxl')
+            ->whereNotIn('id', [6])
+            ->order('list_order asc,id desc')
+            ->select();
+        $xsdld_cate_list = ActiveCommunityCateModel::where('cate_group', 'xsdld')
+            ->order('list_order asc,id desc')
+            ->select();
         $this->assign('community_cate_list', $community_cate_list);
+        $this->assign('xsdld_cate_list', $xsdld_cate_list);
         $this->assign('cate_list', (new  ActiveCateModel())->select());
         return $where;
     }
 
     public function get_params()
     {
-        // 发现七贤岭(id=6)是小程序"我和七贤岭"页固定栏目，非活动分类，不可作为活动的七贤岭分类选项
-        $community_cate_list = ActiveCommunityCateModel::whereNotIn('id', [6])->order('list_order asc,id desc')->select();
+        $community_cate_list = ActiveCommunityCateModel::where('cate_group', 'qxl')
+            ->whereNotIn('id', [6])
+            ->order('list_order asc,id desc')
+            ->select();
+        $xsdld_cate_list = ActiveCommunityCateModel::where('cate_group', 'xsdld')
+            ->order('list_order asc,id desc')
+            ->select();
         $this->assign('community_cate_list', $community_cate_list);
+        $this->assign('xsdld_cate_list', $xsdld_cate_list);
         $this->assign('cate_list', (new  ActiveCateModel())->select());
     }
 

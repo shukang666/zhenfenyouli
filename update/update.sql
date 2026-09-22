@@ -23,6 +23,10 @@ WHERE `app` = 'admin' AND `controller` = 'active' AND `action` = 'sign' AND `nam
 ALTER TABLE `cmf_forum` ADD COLUMN `clock_scene` varchar(50) NOT NULL DEFAULT '' COMMENT '打卡投放场景' AFTER `subject_community_id`;
 
 -- 垃圾打卡教程（后台「垃圾分类活动-垃圾打卡-打卡教程」）
+-- 小手拉大手活动分类（后台「小手大手分类」下拉）
+ALTER TABLE `cmf_active` ADD COLUMN `xsdld_cate_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '小手拉大手分类' AFTER `community_cate_id`;
+ALTER TABLE `cmf_active_community_cate` ADD COLUMN `cate_group` varchar(20) NOT NULL DEFAULT '' COMMENT 'qxl=七贤岭 xsdld=小手拉大手' AFTER `name`;
+
 CREATE TABLE IF NOT EXISTS `cmf_clock_tutorial` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `cate_key` varchar(20) NOT NULL DEFAULT '' COMMENT 'recycle/other/harm/food',
