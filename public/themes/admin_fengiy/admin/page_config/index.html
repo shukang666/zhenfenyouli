@@ -32,6 +32,25 @@
                         </div>
 
                         <div class="form-group">
+                            <label class="col-sm-2 control-label">小手拉大手 Hero 背景图</label>
+                            <div class="col-md-6 col-sm-10">
+                                <input type="hidden" name="xsdld_hero_bg" id="xsdld_hero_bg" value="{$xsdld_hero_bg}">
+                                <a href="javascript:uploadOneImage('选择背景图','#xsdld_hero_bg');">
+                                    <notempty name="xsdld_hero_bg">
+                                        <img src="{:cmf_get_image_preview_url($xsdld_hero_bg)}" id="xsdld_hero_bg-preview" width="270" style="cursor: hand; border-radius: 4px; border: 1px solid #ddd;"/>
+                                        <else />
+                                        <img src="__TMPL__/public/assets/images/default-image.png" id="xsdld_hero_bg-preview" width="270" style="cursor: hand; border-radius: 4px; border: 1px solid #ddd;"/>
+                                    </notempty>
+                                </a>
+                                <input type="button" class="btn btn-sm" onclick="$('#xsdld_hero_bg-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#xsdld_hero_bg').val('');return false;" value="取消图片">
+                                <p class="help-block" style="margin-top:8px;">
+                                    建议尺寸 750×640 像素（宽×高），JPG 或 PNG 格式，大小不超过 2MB<br>
+                                    上传后，小程序「小手拉大手」页面顶部将显示此背景图；不设置则使用默认渐变背景
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
                             <label class="col-sm-2 control-label">低碳生活主 Banner 图</label>
                             <div class="col-md-6 col-sm-10">
                                 <input type="hidden" name="dtsh_banner" id="dtsh_banner" value="{$dtsh_banner}">

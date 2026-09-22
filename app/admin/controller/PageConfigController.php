@@ -19,6 +19,7 @@ class PageConfigController extends AdminBaseController
 
         if ($this->request->isPost()) {
             $qxl_hero_bg = $this->request->param('qxl_hero_bg', '');
+            $xsdld_hero_bg = $this->request->param('xsdld_hero_bg', '');
             $dtsh_banner = $this->request->param('dtsh_banner', '');
 
             // 读取现有配置并更新
@@ -27,6 +28,7 @@ class PageConfigController extends AdminBaseController
                 $config = [];
             }
             $config['qxl_hero_bg'] = $qxl_hero_bg;
+            $config['xsdld_hero_bg'] = $xsdld_hero_bg;
             $config['dtsh_banner'] = $dtsh_banner;
 
             $res = cmf_set_option($option_name, $config, true);
@@ -38,8 +40,10 @@ class PageConfigController extends AdminBaseController
         } else {
             $config = cmf_get_option($option_name);
             $qxl_hero_bg = $config['qxl_hero_bg'] ?? '';
+            $xsdld_hero_bg = $config['xsdld_hero_bg'] ?? '';
             $dtsh_banner = $config['dtsh_banner'] ?? '';
             $this->assign('qxl_hero_bg', $qxl_hero_bg);
+            $this->assign('xsdld_hero_bg', $xsdld_hero_bg);
             $this->assign('dtsh_banner', $dtsh_banner);
             return $this->fetch();
         }

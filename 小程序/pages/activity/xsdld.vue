@@ -79,9 +79,17 @@
 		onLoad() {
 			const sys = uni.getSystemInfoSync()
 			this.statusBarHeight = sys.statusBarHeight || 20
+			this.loadHeroBg()
 			this.loadSections()
 		},
 		methods: {
+			async loadHeroBg() {
+				try {
+					const res = await this.$u.api.getPageConfig()
+					const url = res.data?.xsdld_hero_bg || ''
+					if (url) this.heroBgImage = url
+				} catch (e) {}
+			},
 			buildSections(list) {
 				const defaults = ['云间亲子分类汇', '分类小当家·亲子实践营']
 				const source = list && list.length ? list : defaults.map((name, i) => ({ id: i + 1, name }))

@@ -143,7 +143,7 @@ class BasicController extends AuthController
                 $value['carbon_notice'] = [$value['carbon_notice']];
             }
             // 补全需要完整 URL 的图片字段
-            $image_keys = ['app_logo', 'qxl_hero_bg', 'dtsh_banner'];
+            $image_keys = ['app_logo', 'qxl_hero_bg', 'xsdld_hero_bg', 'dtsh_banner'];
             foreach ($image_keys as $img_key) {
                 if (!empty($value[$img_key])) {
                     $value[$img_key] = cmf_get_asset_url($value[$img_key]);

@@ -37,7 +37,7 @@
 			</view>
 		</view>
 
-		<!-- 活动页：搜索 + banner + 主题五圆钮 + 两个入口 + 海报横滑 -->
+		<!-- 活动 Tab：搜索 + banner + 快捷 2×2 + 分类随手学 3 卡 + 主题五圆钮 + 海报横滑 -->
 		<view v-else-if="type === 'low_carbon'" class="skeleton-low-carbon">
 			<view class="sk-fb-nav">
 				<view class="sk-search sk-search--fb">
@@ -46,9 +46,13 @@
 				</view>
 			</view>
 			<view class="sk-banner sk-banner--fb"></view>
-			<view class="sk-entry-row sk-entry-row--hero">
-				<view class="sk-entry sk-entry--lg"></view>
-				<view class="sk-entry sk-entry--sm"></view>
+			<view class="sk-entry-kicker"></view>
+			<view class="sk-entry-grid">
+				<view class="sk-entry-card" v-for="i in 4" :key="'e' + i"></view>
+			</view>
+			<view class="sk-entry-kicker sk-entry-kicker--alt"></view>
+			<view class="sk-entry-grid sk-entry-grid--triple">
+				<view class="sk-entry-card sk-entry-card--sm" v-for="i in 3" :key="'t' + i"></view>
 			</view>
 			<view class="sk-sec-title"></view>
 			<view class="sk-theme-row">
@@ -57,38 +61,32 @@
 					<view class="sk-theme-label"></view>
 				</view>
 			</view>
-			<view class="sk-sec-title"></view>
+			<view class="sk-sec-title sk-sec-title--wide"></view>
 			<view class="sk-h-scroll">
-				<view class="sk-weekly" v-for="i in 2" :key="'w'+i"></view>
+				<view class="sk-weekly" v-for="i in 2" :key="'w' + i"></view>
+			</view>
+			<view class="sk-light-grid">
+				<view class="sk-light-card" v-for="i in 2" :key="'l' + i"></view>
 			</view>
 		</view>
 
-		<!-- 健康页：蓝顶 + 诊断两行入口 + 社区帖 -->
+		<!-- 健康页：蓝顶 + 健康生活社区帖列表 -->
 		<view v-else-if="type === 'health'" class="skeleton-health">
 			<view class="sk-nav sk-nav--trans"></view>
 			<view class="sk-health-block">
-				<view class="sk-health-hd"></view>
-				<view class="sk-health-body">
-					<view class="sk-health-row">
-						<view class="sk-health-tile"></view>
-						<view class="sk-health-tile"></view>
-					</view>
-					<view class="sk-health-row">
-						<view class="sk-health-tile"></view>
-						<view class="sk-health-tile"></view>
-					</view>
+				<view class="sk-health-hd sk-health-hd--row">
+					<view class="sk-line sk-line--w200 sk-line--light-h"></view>
+					<view class="sk-health-more"></view>
 				</view>
-			</view>
-			<view class="sk-health-block">
-				<view class="sk-health-hd"></view>
 				<view class="sk-health-body">
-					<view class="sk-forum" v-for="i in 2" :key="i">
+					<view class="sk-forum" v-for="i in 3" :key="i">
 						<view class="sk-forum-top">
 							<view class="sk-forum-av"></view>
 							<view class="sk-line sk-line--w180"></view>
 						</view>
 						<view class="sk-line sk-line--w90"></view>
 						<view class="sk-line sk-line--w70 sk-line--sm"></view>
+						<view class="sk-forum-img"></view>
 					</view>
 				</view>
 			</view>
@@ -440,26 +438,49 @@ export default {
 
 /* 备用：旧版主题分类骨架 sk-cate-* 已弃用 */
 
-.sk-entry-row {
-	display: flex;
-	align-items: stretch;
-	gap: 16rpx;
-	padding: 8rpx 24rpx 16rpx;
-}
-.sk-entry-row--hero {
-	padding-top: 16rpx;
-}
-.sk-entry {
+.sk-entry-kicker {
 	@extend .sk-base;
-	flex: 1;
-	height: 160rpx;
+	width: 120rpx;
+	height: 28rpx;
+	margin: 20rpx 24rpx 12rpx;
+	border-radius: 8rpx;
+}
+.sk-entry-kicker--alt {
+	width: 140rpx;
+	margin-top: 8rpx;
+}
+.sk-entry-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12rpx;
+	padding: 0 24rpx 12rpx;
+}
+.sk-entry-grid--triple {
+	grid-template-columns: repeat(3, 1fr);
+	padding-bottom: 20rpx;
+}
+.sk-entry-card {
+	@extend .sk-base;
+	height: 148rpx;
 	border-radius: 20rpx;
 }
-.sk-entry--lg {
-	clip-path: polygon(0 0, 88% 0, 100% 50%, 88% 100%, 0 100%);
+.sk-entry-card--sm {
+	height: 120rpx;
+	border-radius: 16rpx;
 }
-.sk-entry--sm {
-	clip-path: polygon(12% 0, 100% 0, 100% 100%, 12% 100%, 0 50%);
+.sk-sec-title--wide {
+	width: 200rpx;
+}
+.sk-light-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16rpx;
+	padding: 8rpx 24rpx 24rpx;
+}
+.sk-light-card {
+	@extend .sk-base;
+	height: 280rpx;
+	border-radius: 20rpx;
 }
 
 .sk-weekly {
@@ -485,6 +506,29 @@ export default {
 	border-radius: 8rpx;
 	background: rgba(255,255,255,0.35);
 	animation: none;
+}
+.sk-health-hd--row {
+	width: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.sk-line--light-h {
+	background: linear-gradient(90deg, rgba(255,255,255,0.35) 25%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0.35) 75%);
+	background-size: 400rpx 100%;
+	animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+.sk-health-more {
+	width: 80rpx;
+	height: 28rpx;
+	border-radius: 8rpx;
+	background: rgba(255,255,255,0.28);
+}
+.sk-forum-img {
+	@extend .sk-base;
+	height: 160rpx;
+	margin-top: 16rpx;
+	border-radius: 12rpx;
 }
 .sk-health-body {
 	background: #fff;
