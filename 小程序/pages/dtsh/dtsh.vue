@@ -8,9 +8,9 @@
 		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(to bottom,#2fb74c,#EFF9F1);">
 		</view>
 		<!-- 主 Banner 图 -->
-		<view class="dtsh-banner" id="guide-dtsh-clock" @click="goToClock" v-if="dtshBanner">
+		<!-- <view class="dtsh-banner" id="guide-dtsh-clock" @click="goToClock" v-if="dtshBanner">
 			<u-image width="100%" height="360" :src="dtshBanner" mode="aspectFill" border-radius="16"></u-image>
-		</view>
+		</view> -->
 		<!-- 轻量化任务 -->
 		<view class="task-box u-type-white-bg u-radius-6 u-m-t-20 u-flex u-row-around u-p-t-30 u-p-b-30" id="guide-dtsh-entry">
 			<view class="task-item u-flex u-col-center u-flex-col" @click="goToPage('/pages/dtsh/report')">
