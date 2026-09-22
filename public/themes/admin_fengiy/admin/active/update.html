@@ -179,13 +179,16 @@
         <if condition="$params.type == 1">
 
             <div class="form-group">
-                <label class="col-sm-2 control-label"><span class="form-required">*</span>活动截止日期:</label>
+                <label class="col-sm-2 control-label"><span class="form-required" id="date-required-mark">*</span>活动截止日期:</label>
                 <div class="col-md-2 col-sm-10">
-                    <input type="date" class="form-control" name="date"
-                           value="{$item.date|default=''}" required>
+                    <input type="date" class="form-control" name="date" id="active_date_input"
+                           value="{$item.date|default=''}">
                 </div>
-                <div class="col-md-6 col-sm-10">
-                    <p class="help-block" style="margin-top:7px;">超过该日期后，小程序活动详情页显示「活动已结束」，不能再报名/打卡；该日期也会作为活动时间显示在活动列表上。</p>
+                <div class="col-md-6 col-sm-10" style="margin-top:7px;">
+                    <input type="checkbox" lay-skin="primary" lay-filter="is_date_pending" name="is_date_pending" id="is_date_pending" value="1"
+                           title="时间待定"
+                           <if condition="!empty($item.is_date_pending) && $item.is_date_pending==1">checked</if>>
+                    <p class="help-block">勾选「时间待定」可不填截止日期；小程序将显示「时间待定」提示，且不会因日期过期自动变为已结束。</p>
                 </div>
             </div>
 
@@ -364,10 +367,15 @@
             <else>
 
                 <div class="form-group">
-                    <label class="col-sm-2 control-label"><span class="form-required">*</span>活动日期:</label>
+                    <label class="col-sm-2 control-label"><span class="form-required" id="date-required-mark-alt">*</span>活动日期:</label>
                     <div class="col-md-2 col-sm-10">
-                        <input type="date" class="form-control" name="date"
-                               value="{$item.date|default=''}" required>
+                        <input type="date" class="form-control" name="date" id="active_date_input_alt"
+                               value="{$item.date|default=''}">
+                    </div>
+                    <div class="col-md-6 col-sm-10" style="margin-top:7px;">
+                        <input type="checkbox" lay-skin="primary" lay-filter="is_date_pending" name="is_date_pending" value="1" title="时间待定"
+                               class="is-date-pending-cb" id="is_date_pending_alt"
+                               <if condition="!empty($item.is_date_pending) && $item.is_date_pending==1">checked</if>>
                     </div>
                 </div>
 
@@ -662,6 +670,19 @@
                 window.__toggleEventKind($(this).val());
             }
         });
+
+        function toggleDatePending() {
+            var pending = $('#is_date_pending').prop('checked')
+                || $('#is_date_pending_alt').prop('checked')
+                || $('.is-date-pending-cb').prop('checked');
+            $('#active_date_input,#active_date_input_alt').prop('required', !pending);
+            $('#date-required-mark,#date-required-mark-alt').toggle(!pending);
+        }
+        toggleDatePending();
+        form.on('checkbox(is_date_pending)', function () {
+            toggleDatePending();
+        });
+        $('#is_date_pending, .is-date-pending-cb').on('change', toggleDatePending);
 
         // 监听switch开关
         form.on('switch(is_clock)', function(data){

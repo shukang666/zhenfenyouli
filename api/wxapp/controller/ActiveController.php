@@ -459,11 +459,8 @@ class ActiveController extends AuthController
 
 //            $item['sign_id'] = empty($sign_info)?'':$sign_info['id'];
 
-            //是否已结束
-            $item['is_end'] = 0;
-            if($item['date'] < time()){
-                $item['is_end'] = 1;
-            }
+            $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
+            $item['is_end'] = ActiveModel::resolveIsEnd($item);
             return $item;
         });
         $this->success('请求成功', $list);
@@ -553,11 +550,8 @@ class ActiveController extends AuthController
 
 //        $item['sign_id'] = $sign_info['id'];
 
-        //是否已结束
-        $item['is_end'] = 0;
-        if($item['date'] < time()){
-            $item['is_end'] = 1;
-        }
+        $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
+        $item['is_end'] = ActiveModel::resolveIsEnd($item);
         $pwdConfigured = 0;
         if (ActiveModel::isOfflineEvent($item)) {
             $pwdRow = ActiveModel::where('id', $item['id'])->value('offline_sign_password');
@@ -584,7 +578,7 @@ class ActiveController extends AuthController
         if (empty($active_info) || !ActiveModel::isOfflineEvent($active_info)) {
             $this->error('活动不存在或不是线下活动');
         }
-        if ($active_info['date'] < time()) {
+        if (!ActiveModel::isDatePending($active_info) && $active_info['date'] < time()) {
             $this->error('活动已结束');
         }
         $start = (int)$active_info['offline_sign_start'];
@@ -721,7 +715,9 @@ class ActiveController extends AuthController
         $active_id = $this->request->param('active_id');
         $item = ActiveModel::where('id',$active_id)->find();
         if(empty($item)) $this->error('活动不存在');
-        if($item['date'] < time()) $this->error('活动已结束');
+        if (!ActiveModel::isDatePending($item) && $item['date'] < time()) {
+            $this->error('活动已结束');
+        }
         $role = explode(',',$item['role']);
         //是否具备报名条件
         if($item['is_clock'] == 1){

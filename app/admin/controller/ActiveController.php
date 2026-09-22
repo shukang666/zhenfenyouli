@@ -207,7 +207,14 @@ class ActiveController extends ToolController
             $params['is_clock'] = empty($params['is_clock']) ? 0 : 1;
             $params['is_badge'] = empty($params['is_badge']) ? 0 : 1;
             $params['is_month_recommend'] = empty($params['is_month_recommend']) ? 0 : 1;
-
+            $params['is_date_pending'] = empty($params['is_date_pending']) ? 0 : 1;
+            if ($params['is_date_pending']) {
+                if (empty($params['date'])) {
+                    $params['date'] = 0;
+                }
+            } elseif (empty($params['date'])) {
+                $this->error('请填写活动截止日期，或勾选「时间待定」');
+            }
 
             $params = $this->setParamData($params);
             $share_url = 'pages/activity/lsxf/details-new';

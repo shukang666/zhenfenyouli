@@ -355,6 +355,9 @@
 			},
 			// 副标�?- 根据活动类型生成
 			subtitle() {
+				if (Number(this.info.is_date_pending) === 1) {
+					return '具体时间确定后将另行通知';
+				}
 				if (this.info.is_clock == 1) {
 					return '每天30秒，让社区更绿色';
 				}
@@ -381,6 +384,22 @@
 		},
 		// 活动时间文本 - 根据活动类型显示不同格式
 		activityTimeText() {
+			if (Number(this.info.is_date_pending) === 1) {
+				if (this.isOfflineEvent) {
+					const fmt = (ts) => {
+						if (!ts) return '';
+						const d = new Date(ts * 1000);
+						const p = (n) => String(n).padStart(2, '0');
+						return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+					};
+					const s = fmt(this.info.offline_sign_start);
+					const e = fmt(this.info.offline_sign_end);
+					if (s && e) {
+						return `现场签到 ${s} ~ ${e}（活动截止日期待定）`;
+					}
+				}
+				return '活动时间待定，敬请关注后续通知';
+			}
 			if (this.isOfflineEvent) {
 				const fmt = (ts) => {
 					if (!ts) return '';

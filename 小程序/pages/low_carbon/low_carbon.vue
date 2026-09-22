@@ -146,7 +146,7 @@
 						</view>
 						<view class="fb-weekly-foot">
 							<text class="fb-weekly-name u-line-2">{{item.name}}</text>
-							<text class="fb-weekly-date">{{item.date | date('yy-mm-dd')}} 结束</text>
+							<text class="fb-weekly-date">{{ formatActiveDate(item) }}{{ item.is_date_pending == 1 ? '' : ' 结束' }}</text>
 						</view>
 					</view>
 				</view>
@@ -200,15 +200,15 @@
 					hover-class="fb-press" :hover-stay-time="80"
 					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 					<view class="fb-recent-cal">
-						<text class="fb-recent-cal-d">{{item.date | date('dd')}}</text>
-						<text class="fb-recent-cal-m">{{item.date | date('mm')}}月</text>
+						<text class="fb-recent-cal-d">{{ item.is_date_pending == 1 ? '待定' : (item.date | date('dd')) }}</text>
+						<text class="fb-recent-cal-m">{{ item.is_date_pending == 1 ? '时间' : (item.date | date('mm') + '月') }}</text>
 					</view>
 					<view class="fb-recent-cover">
 						<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
 					</view>
 					<view class="fb-recent-info">
 						<text class="fb-recent-name u-line-2">{{item.name}}</text>
-						<text class="fb-recent-meta">截止 {{item.date | date('yy-mm-dd')}}</text>
+						<text class="fb-recent-meta">{{ item.is_date_pending == 1 ? '时间待定' : ('截止 ' + (item.date | date('yy-mm-dd'))) }}</text>
 					</view>
 					<u-icon name="arrow-right" size="24" color="#c5d0c7"></u-icon>
 				</view>
@@ -260,7 +260,7 @@
 					<view class="fb-act-meta">
 						<view class="fb-meta-item">
 							<u-icon name="clock" size="22" color="#65676B"></u-icon>
-							<text class="fb-meta-text">{{item.date | date('yy-mm-dd')}}</text>
+							<text class="fb-meta-text">{{ formatActiveDate(item) }}</text>
 						</view>
 						<view class="fb-meta-item fb-meta-loc" v-if="item.address && item.address.trim()">
 							<u-icon name="map" size="22" color="#65676B"></u-icon>
@@ -319,6 +319,15 @@
 			if (!this.isLogin) return
 		},
 		methods: {
+			formatActiveDate(item) {
+				if (Number(item.is_date_pending) === 1) {
+					return '时间待定'
+				}
+				if (!item.date) {
+					return '—'
+				}
+				return this.$u.timeFormat(item.date, 'yy-mm-dd')
+			},
 			async loadAllData() {
 				const startTime = Date.now()
 				try {
