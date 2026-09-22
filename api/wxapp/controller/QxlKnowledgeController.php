@@ -118,7 +118,7 @@ class QxlKnowledgeController extends AuthController
             ];
 
             if ($unlocked) {
-                $chapter['content'] = $item['content'] ?: '';
+                $chapter['content'] = $this->formatContent($item['content'] ?? '');
             }
             if ($unlocked && !$passed) {
                 $chapter['questions'] = $questionsByKid[$kid] ?? [];
@@ -163,6 +163,7 @@ class QxlKnowledgeController extends AuthController
         Db::name('qxl_knowledge')->where('id', $id)->inc('view_count')->update();
 
         $knowledge['image'] = $this->formatImage($knowledge['image']);
+        $knowledge['content'] = $this->formatContent($knowledge['content'] ?? '');
         $knowledge['create_time_friendly'] = date('Y-m-d', $knowledge['create_time']);
 
         $this->success('success', $knowledge);
@@ -188,5 +189,23 @@ class QxlKnowledgeController extends AuthController
         if (empty($image)) return '';
         if (preg_match('/^(http|https):\/\//', $image)) return $image;
         return cmf_get_asset_url($image);
+    }
+
+    /**
+     * 学考正文：库内可能是 htmlspecialchars 后的 HTML，需解码再给小程序 rich-text
+     */
+    private function formatContent($content)
+    {
+        if ($content === '' || $content === null) {
+            return '';
+        }
+        $html = htmlspecialchars_decode((string)$content, ENT_QUOTES);
+        if (strpos($html, '&lt;') !== false && strpos($html, '<') === false) {
+            $html = htmlspecialchars_decode($html, ENT_QUOTES);
+        }
+        if (function_exists('cmf_replace_content_file_url')) {
+            $html = cmf_replace_content_file_url($html);
+        }
+        return $html;
     }
 }

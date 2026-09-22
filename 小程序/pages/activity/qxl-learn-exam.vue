@@ -137,6 +137,19 @@
 				const n = idx + 1;
 				return n < 10 ? '0' + n : '' + n;
 			},
+			formatArticleContent(html) {
+				if (!html) return '';
+				let s = String(html);
+				if (s.indexOf('&lt;') !== -1 && s.indexOf('<') === -1) {
+					s = s
+						.replace(/&lt;/g, '<')
+						.replace(/&gt;/g, '>')
+						.replace(/&amp;/g, '&')
+						.replace(/&quot;/g, '"')
+						.replace(/&#39;/g, "'");
+				}
+				return s;
+			},
 			chapterClass(ch) {
 				if (ch.passed) return 'is-passed';
 				if (ch.unlocked) return 'is-current';
@@ -182,7 +195,10 @@
 					this.loading = false;
 					if (res.code == 1) {
 						const data = res.data || {};
-						this.chapters = data.chapters || [];
+						this.chapters = (data.chapters || []).map(ch => ({
+							...ch,
+							content: this.formatArticleContent(ch.content),
+						}));
 						this.passedCount = data.passed_count || 0;
 						this.totalCount = data.total_count || 0;
 						this.allPassed = !!data.all_passed;
