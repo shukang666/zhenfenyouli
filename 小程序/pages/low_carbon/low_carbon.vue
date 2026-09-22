@@ -147,41 +147,66 @@
       </view>
     </view>
 
-    <!-- 分类轻量化入口（随手拍 / 答题 / 知识，原 dtsh 页 task-box） -->
+    <!-- 分类轻量化入口（与快捷入口同套卡片样式） -->
     <view class="fb-light-task" id="guide-fb-light-task">
-      <view class="fb-light-task-box">
+      <view class="fb-entry-kicker">
+        <view class="fb-entry-kicker-dot"></view>
+        <text class="fb-entry-kicker-text">分类随手学</text>
+      </view>
+      <view class="fb-entry-row fb-entry-row--triple">
         <view
-          class="fb-light-task-item"
+          class="fb-entry-card fb-entry-shot"
           hover-class="fb-press"
           :hover-stay-time="80"
           @click="gotoDtshPage('/pages/dtsh/report')"
         >
-          <view class="fb-light-task-icon">
-            <u-icon name="camera" size="44" color="#18AF38"></u-icon>
+          <text class="fb-entry-mark">随手拍</text>
+          <view class="fb-entry-main">
+            <text class="fb-entry-emoji">📷</text>
+            <view class="fb-entry-text">
+              <text class="fb-entry-title">随手发现问题</text>
+              <text class="fb-entry-sub">拍照上报现场</text>
+            </view>
+            <view class="fb-entry-go">
+              <text class="fb-entry-arrow">›</text>
+            </view>
           </view>
-          <text class="fb-light-task-text">随手发现问题</text>
         </view>
         <view
-          class="fb-light-task-item"
+          class="fb-entry-card fb-entry-quiz"
           hover-class="fb-press"
           :hover-stay-time="80"
           @click="gotoDtshPage('/pages/dtsh/quiz')"
         >
-          <view class="fb-light-task-icon">
-            <u-icon name="edit-pen" size="44" color="#18AF38"></u-icon>
+          <text class="fb-entry-mark">小挑战</text>
+          <view class="fb-entry-main">
+            <text class="fb-entry-emoji">✏️</text>
+            <view class="fb-entry-text">
+              <text class="fb-entry-title">分类知识挑战</text>
+              <text class="fb-entry-sub">答题领积分</text>
+            </view>
+            <view class="fb-entry-go">
+              <text class="fb-entry-arrow">›</text>
+            </view>
           </view>
-          <text class="fb-light-task-text">分类知识挑战</text>
         </view>
         <view
-          class="fb-light-task-item"
+          class="fb-entry-card fb-entry-know"
           hover-class="fb-press"
           :hover-stay-time="80"
           @click="gotoDtshPage('/pages/dtsh/knowledge')"
         >
-          <view class="fb-light-task-icon">
-            <u-icon name="file-text" size="44" color="#18AF38"></u-icon>
+          <text class="fb-entry-mark">学知识</text>
+          <view class="fb-entry-main">
+            <text class="fb-entry-emoji">📚</text>
+            <view class="fb-entry-text">
+              <text class="fb-entry-title">学会分类知识</text>
+              <text class="fb-entry-sub">边看边学分类</text>
+            </view>
+            <view class="fb-entry-go">
+              <text class="fb-entry-arrow">›</text>
+            </view>
           </view>
-          <text class="fb-light-task-text">学会分类知识</text>
         </view>
       </view>
     </view>
@@ -1179,39 +1204,71 @@ export default {
 }
 
 .fb-light-task {
-  padding: 0 20rpx 8rpx;
+  padding: 4rpx 20rpx 8rpx;
 }
-.fb-light-task-box {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-around;
-  padding: 28rpx 12rpx 24rpx;
-  background: #fff;
-  border-radius: 16rpx;
-  box-shadow: 0 6rpx 18rpx rgba(16, 40, 24, 0.08);
+.fb-entry-row--triple {
+  grid-template-columns: repeat(3, 1fr);
+  padding-bottom: 12rpx;
 }
-.fb-light-task-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 0;
+.fb-entry-row--triple .fb-entry-card {
+  padding: 14rpx 10rpx 12rpx;
 }
-.fb-light-task-icon {
-  width: 96rpx;
-  height: 96rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #e8f7ea;
-  border-radius: 16rpx;
+.fb-entry-row--triple .fb-entry-main {
+  gap: 6rpx;
 }
-.fb-light-task-text {
-  margin-top: 12rpx;
-  font-size: 24rpx;
-  color: #333;
-  text-align: center;
-  line-height: 1.35;
+.fb-entry-row--triple .fb-entry-emoji {
+  font-size: 28rpx;
+}
+.fb-entry-row--triple .fb-entry-title {
+  font-size: 22rpx;
+  line-height: 1.25;
+}
+.fb-entry-row--triple .fb-entry-sub {
+  font-size: 18rpx;
+  -webkit-line-clamp: 1;
+}
+.fb-entry-row--triple .fb-entry-go {
+  width: 30rpx;
+  height: 30rpx;
+}
+.fb-entry-row--triple .fb-entry-arrow {
+  font-size: 28rpx;
+}
+.fb-entry-shot {
+  background: linear-gradient(145deg, #ffb88a 0%, #e86a3a 55%, #d45a28 100%);
+}
+.fb-entry-quiz {
+  background: linear-gradient(145deg, #7eb8ff 0%, #3d7ee8 55%, #2a5fc4 100%);
+}
+.fb-entry-know {
+  background: linear-gradient(145deg, #6ee09a 0%, #22a85a 55%, #178f47 100%);
+}
+.fb-entry-shot::after,
+.fb-entry-quiz::after,
+.fb-entry-know::after {
+  content: "";
+  position: absolute;
+  top: -24rpx;
+  right: -24rpx;
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  pointer-events: none;
+}
+.fb-entry-shot .fb-entry-title,
+.fb-entry-shot .fb-entry-sub,
+.fb-entry-shot .fb-entry-arrow,
+.fb-entry-shot .fb-entry-mark,
+.fb-entry-quiz .fb-entry-title,
+.fb-entry-quiz .fb-entry-sub,
+.fb-entry-quiz .fb-entry-arrow,
+.fb-entry-quiz .fb-entry-mark,
+.fb-entry-know .fb-entry-title,
+.fb-entry-know .fb-entry-sub,
+.fb-entry-know .fb-entry-arrow,
+.fb-entry-know .fb-entry-mark {
+  color: #fff;
 }
 .fb-entry-card {
   min-width: 0;
