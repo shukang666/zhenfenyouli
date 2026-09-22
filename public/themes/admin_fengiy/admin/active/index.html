@@ -53,6 +53,9 @@
                         <if condition="!empty($vo.event_kind) && $vo.event_kind == 2">
                             <span class="label label-info" style="margin-left:4px;">线下</span>
                         </if>
+                        <if condition="!empty($vo.is_clock_challenge) && $vo.is_clock_challenge == 1">
+                            <span class="label label-success" style="margin-left:4px;">{$vo.clock_challenge_days}天挑战</span>
+                        </if>
                     </td>
                     <if condition="$params.type == 1">
                         <td>

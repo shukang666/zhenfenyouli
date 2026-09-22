@@ -16,9 +16,13 @@
 					<text class="badge-icon">📍</text>
 					<text class="badge-text">线下活动</text>
 				</view>
+				<view class="hero-badge" v-else-if="info.is_clock_challenge == 1">
+					<text class="badge-icon">🎯</text>
+					<text class="badge-text">{{info.clock_challenge_days}}天挑战</text>
+				</view>
 				<view class="hero-badge" v-else-if="info.is_clock == 1">
 					<text class="badge-icon">🎯</text>
-					<text class="badge-text">挑战活动</text>
+					<text class="badge-text">打卡活动</text>
 				</view>
 				<text class="hero-title">{{info.name}}</text>
 				<text class="hero-subtitle">{{subtitle}}</text>
@@ -26,8 +30,8 @@
 				<!-- 快速统计 -->
 				<view class="hero-stats">
 					<view class="stat-item">
-						<text class="stat-value">{{info.send_point || 0}}</text>
-						<text class="stat-label">积分奖励</text>
+						<text class="stat-value">{{ heroPointValue }}</text>
+						<text class="stat-label">{{ heroPointLabel }}</text>
 					</view>
 					<view class="stat-divider"></view>
 					<view class="stat-item">
@@ -71,6 +75,22 @@
 				</view>
 				<text class="info-arrow">›</text>
 			</view>
+		</view>
+
+		<!-- 多日打卡挑战进度 -->
+		<view class="challenge-progress glass-card" v-if="info.is_clock_challenge == 1 && info.is_sign == 1">
+			<view class="section-header">
+				<view class="section-bar section-bar--gold"></view>
+				<text class="section-title">打卡挑战</text>
+			</view>
+			<view class="challenge-progress-row">
+				<text class="challenge-progress-text">连续打卡 {{ clockChallengeProgress }}/{{ info.clock_challenge_days }} 天</text>
+				<text class="challenge-reward-tip" v-if="info.clock_challenge_point > 0">达成 +{{ info.clock_challenge_point }} 积分</text>
+			</view>
+			<view class="challenge-bar-track">
+				<view class="challenge-bar-fill" :style="{ width: clockChallengePercent + '%' }"></view>
+			</view>
+			<text class="challenge-done-tip" v-if="info.clock_challenge_rewarded == 1">挑战奖励已发放</text>
 		</view>
 
 		<!-- 活动概览（适合人群 + 活动时长） -->
@@ -123,15 +143,15 @@
 				<view class="flow-item">
 					<view class="flow-number">1</view>
 					<view class="flow-content">
-						<text class="flow-title">{{info.is_clock == 1 ? '每日打卡' : '报名参与'}}</text>
-						<text class="flow-desc">{{info.is_clock == 1 ? '完成垃圾分类打卡任务' : '点击下方按钮，加入活动'}}</text>
+						<text class="flow-title">{{ flowStep1Title }}</text>
+						<text class="flow-desc">{{ flowStep1Desc }}</text>
 					</view>
 				</view>
 				<view class="flow-item">
 					<view class="flow-number">2</view>
 					<view class="flow-content">
 						<text class="flow-title">领取奖励</text>
-						<text class="flow-desc">获得积分，解锁徽章</text>
+						<text class="flow-desc">{{ flowStep2Desc }}</text>
 					</view>
 				</view>
 			</view>
@@ -197,7 +217,7 @@
 				</u-button>
 			</view>
 			<!-- 打卡活动：排行榜 + 打卡 -->
-			<view class="action-area clock-actions" v-else-if="info.is_clock == 1">
+			<view class="action-area clock-actions" v-else-if="info.is_clock == 1 || info.is_clock_challenge == 1">
 				<u-button class="action-btn rank-btn" @click="goToRank">
 					<text class="btn-icon">🏆</text>
 					<text>排行榜</text>
@@ -358,6 +378,9 @@
 				if (Number(this.info.is_date_pending) === 1) {
 					return '具体时间确定后将另行通知';
 				}
+				if (this.info.is_clock_challenge == 1) {
+					return `连续打卡 ${this.info.clock_challenge_days || 0} 天，赢取挑战奖励`;
+				}
 				if (this.info.is_clock == 1) {
 					return '每天30秒，让社区更绿色';
 				}
@@ -413,8 +436,8 @@
 				if (this.info.date) return '截止至' + this.formatDate(this.info.date);
 				return '详见活动说明';
 			}
-			if (this.info.is_clock == 1) {
-				// 打卡活动：使�?clock_start_time �?clock_end_time
+			if (this.info.is_clock == 1 || this.info.is_clock_challenge == 1) {
+				// 打卡活动：使用 clock_start_time 与 clock_end_time
 				let startTime = '';
 				let endTime = '';
 				if (this.info.clock_start_time) {
@@ -437,6 +460,42 @@
 				}
 				return '不限';
 			}
+		},
+		heroPointValue() {
+			if (Number(this.info.is_clock_challenge) === 1) {
+				return this.info.clock_challenge_point || 0;
+			}
+			return this.info.send_point || 0;
+		},
+		heroPointLabel() {
+			return Number(this.info.is_clock_challenge) === 1 ? '挑战奖励' : '积分奖励';
+		},
+		clockChallengeProgress() {
+			return Number(this.info.clock_challenge_progress) || 0;
+		},
+		clockChallengePercent() {
+			const total = Number(this.info.clock_challenge_days) || 0;
+			if (total <= 0) return 0;
+			const cur = this.clockChallengeProgress;
+			return Math.min(100, Math.round((cur / total) * 100));
+		},
+		flowStep1Title() {
+			if (this.info.is_clock == 1 || this.info.is_clock_challenge == 1) return '每日打卡';
+			return '报名参与';
+		},
+		flowStep1Desc() {
+			if (Number(this.info.is_clock_challenge) === 1) {
+				return `在活动期内每日打卡，连续 ${this.info.clock_challenge_days || 0} 天达成挑战`;
+			}
+			if (this.info.is_clock == 1) return '完成垃圾分类打卡任务';
+			return '点击下方按钮，加入活动';
+		},
+		flowStep2Desc() {
+			if (Number(this.info.is_clock_challenge) === 1) {
+				const p = this.info.clock_challenge_point || 0;
+				return p > 0 ? `达成挑战获得 ${p} 积分，亦可叠加每次打卡积分` : '达成挑战获得奖励，亦可叠加每次打卡积分';
+			}
+			return '获得积分，解锁徽章';
 		}
 	},
 		onLoad(option) {
@@ -999,6 +1058,44 @@
 		border-radius: 28rpx;
 		margin-bottom: 20rpx;
 		box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.06);
+	}
+
+	.challenge-progress {
+		padding: 24rpx 28rpx 28rpx;
+	}
+	.challenge-progress-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 16rpx;
+	}
+	.challenge-progress-text {
+		font-size: 28rpx;
+		font-weight: 600;
+		color: #1c2b1e;
+	}
+	.challenge-reward-tip {
+		font-size: 24rpx;
+		color: #18AF38;
+		font-weight: 600;
+	}
+	.challenge-bar-track {
+		height: 16rpx;
+		border-radius: 999rpx;
+		background: #e8f3eb;
+		overflow: hidden;
+	}
+	.challenge-bar-fill {
+		height: 100%;
+		border-radius: 999rpx;
+		background: linear-gradient(90deg, #A4DB88 0%, #18AF38 100%);
+		transition: width 0.3s ease;
+	}
+	.challenge-done-tip {
+		display: block;
+		margin-top: 14rpx;
+		font-size: 24rpx;
+		color: #18AF38;
 	}
 
 	.info-card {

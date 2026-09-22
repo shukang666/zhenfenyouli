@@ -28,7 +28,23 @@ ALTER TABLE `cmf_active` ADD COLUMN `is_date_pending` tinyint(1) unsigned NOT NU
 -- 旧版独立签到菜单改名（幂等：已是新名则不再改）
 UPDATE `cmf_admin_menu` SET `name` = '签到（已弃用）'
 WHERE `app` = 'admin' AND `controller` = 'active' AND `action` = 'sign' AND `name` = '签到';
--- 已有存量标签默认为固定分类(tag_type=1)，如需将某些标签设为动态主题，请手动更新：
+-- 活动多日打卡挑战（社区活动 type=1，勾选后配置连续天数与达成奖励积分）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'is_clock_challenge');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `is_clock_challenge` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT ''1开启多日打卡挑战'' AFTER `is_clock`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'clock_challenge_days');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `clock_challenge_days` int(10) unsigned NOT NULL DEFAULT 0 COMMENT ''连续打卡目标天数'' AFTER `is_clock_challenge`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'clock_challenge_point');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `clock_challenge_point` int(10) unsigned NOT NULL DEFAULT 0 COMMENT ''达成挑战一次性奖励积分'' AFTER `clock_challenge_days`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active_sign' AND COLUMN_NAME = 'clock_challenge_rewarded');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active_sign` ADD COLUMN `clock_challenge_rewarded` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT ''多日挑战奖励已发放'' AFTER `end_time`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
 -- UPDATE `cmf_active_tab` SET `tag_type` = 2 WHERE `name` IN ('净美七贤岭', '金秋开学季');
 
 -- 垃圾打卡投放场景（家庭/亲子/沿街/真分角等）

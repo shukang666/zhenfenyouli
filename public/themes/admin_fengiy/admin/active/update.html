@@ -218,6 +218,33 @@
             </div>
 
             <div class="form-group event-kind-normal-only">
+                <label class="col-sm-2 control-label">多日打卡挑战:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="checkbox" lay-skin="switch" class="form-control" lay-filter="is_clock_challenge" name="is_clock_challenge" value="1"
+                        <if condition="!empty($item.is_clock_challenge) && $item.is_clock_challenge==1">checked</if> lay-text="开启|关闭">
+                    <p class="help-block">不勾选为普通活动；勾选后用户需在活动期内每日打卡，<strong>连续</strong>满指定天数一次性发放挑战奖励积分（可同时配置下方「每次打卡赠送积分」）。</p>
+                </div>
+            </div>
+
+            <div class="form-group clock-challenge-panel event-kind-normal-only">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>挑战天数:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="clock_challenge_days" min="1" max="365"
+                           value="{$item.clock_challenge_days|default='7'}">
+                    <p class="help-block">连续打卡达到该天数后发放「达成奖励积分」（断签后重新累计连续天数）。</p>
+                </div>
+            </div>
+
+            <div class="form-group clock-challenge-panel event-kind-normal-only">
+                <label class="col-sm-2 control-label"><span class="form-required">*</span>达成奖励积分:</label>
+                <div class="col-md-6 col-sm-10">
+                    <input type="number" class="form-control" name="clock_challenge_point" min="0"
+                           value="{$item.clock_challenge_point|default='0'}">
+                    <p class="help-block">挑战达成时一次性发放（与每次打卡积分叠加）。</p>
+                </div>
+            </div>
+
+            <div class="form-group event-kind-normal-only">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>是否需要打卡:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="checkbox" lay-skin="switch" class="form-control" lay-filter="is_clock" name="is_clock" value="1" <if condition="!empty($item.is_clock) && $item.is_clock==1">checked</if> lay-text="是|否">
@@ -610,12 +637,17 @@
 <script>
     var is_clock = '{$item.is_clock|default=0}';
     var is_badge = '{$item.is_badge|default=0}';
+    var is_clock_challenge = '{$item.is_clock_challenge|default=0}';
     // 参加方式由入口决定：活动列表进入=1小程序参加，签到列表进入=2扫码参加，编辑时取本记录的值
     var join_type = $('input[name=join_type]').val() || '1';
 
     $('.clock.show_hidden, .badge1.show_hidden').hide();
+    $('.clock-challenge-panel').hide();
     if(is_clock == 1){
         $('.event-kind-normal-clock').show();
+    }
+    if(is_clock_challenge == 1){
+        $('.clock-challenge-panel').show();
     }
     if(is_badge == 1){
         $('.badge1').show();
@@ -706,6 +738,26 @@
                 $('.event-kind-normal-clock').hide();
             }
         });
+
+        function toggleClockChallenge(on) {
+            if (parseInt($('#event_kind').val(), 10) === 2) {
+                return;
+            }
+            if (on) {
+                $('.clock-challenge-panel').show();
+                $('input[name=is_clock]').prop('checked', true);
+                form.render('checkbox');
+                $('.event-kind-normal-clock').show();
+            } else {
+                $('.clock-challenge-panel').hide();
+            }
+        }
+        form.on('switch(is_clock_challenge)', function (data) {
+            toggleClockChallenge(data.elem.checked ? 1 : 0);
+        });
+        if (parseInt(is_clock_challenge, 10) === 1) {
+            toggleClockChallenge(1);
+        }
 
         // 监听switch开关
         form.on('switch(is_badge)', function(data){

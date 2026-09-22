@@ -205,6 +205,9 @@ class ActiveController extends ToolController
             $params['offline_sign_password'] = trim((string)($params['offline_sign_password'] ?? ''));
             if ($params['event_kind'] === ActiveModel::EVENT_KIND_OFFLINE) {
                 $params['is_clock'] = 0;
+                $params['is_clock_challenge'] = 0;
+                $params['clock_challenge_days'] = 0;
+                $params['clock_challenge_point'] = 0;
                 $params['join_type'] = 1;
                 if (empty($params['offline_sign_start']) || empty($params['offline_sign_end'])) {
                     $this->error('线下活动请在「活动类型」下方绿色区域填写「允许签到开始/结束」时间');
@@ -215,6 +218,21 @@ class ActiveController extends ToolController
                 if (empty($params['lat']) || empty($params['lng'])) {
                     $this->error('线下活动请在地图上设置活动地点经纬度');
                 }
+            }
+            $params['is_clock_challenge'] = empty($params['is_clock_challenge']) ? 0 : 1;
+            $params['clock_challenge_days'] = max(0, (int)($params['clock_challenge_days'] ?? 0));
+            $params['clock_challenge_point'] = max(0, (int)($params['clock_challenge_point'] ?? 0));
+            if ($params['event_kind'] !== ActiveModel::EVENT_KIND_OFFLINE && $params['is_clock_challenge']) {
+                $params['is_clock'] = 1;
+                if ($params['clock_challenge_days'] < 1) {
+                    $this->error('开启多日打卡挑战时请填写挑战天数（至少 1 天）');
+                }
+                if (empty($params['clock_start_time']) || empty($params['clock_end_time'])) {
+                    $this->error('多日打卡挑战请填写下方「活动开始/结束日期」（打卡有效期）');
+                }
+            } elseif (!$params['is_clock_challenge']) {
+                $params['clock_challenge_days'] = 0;
+                $params['clock_challenge_point'] = 0;
             }
             $params['is_clock'] = empty($params['is_clock']) ? 0 : 1;
             $params['is_badge'] = empty($params['is_badge']) ? 0 : 1;

@@ -16,23 +16,31 @@
 			<view class="pg-pet">
 				<view class="pg-body">
 					<view class="pg-bud"></view>
-					<view class="pg-leaf">
-						<view class="pg-leaf-vein"></view>
+					<view class="pg-hand pg-hand-l">
+						<view class="pg-leaf">
+							<view class="pg-leaf-vein"></view>
+						</view>
+						<view class="pg-palm">
+							<view class="pg-finger"></view>
+							<view class="pg-finger pg-finger-2"></view>
+						</view>
 					</view>
-					<view class="pg-sprout">
-						<view class="pg-sprout-stem"></view>
-						<view class="pg-sprout-leaf pg-sprout-leaf-l"></view>
-						<view class="pg-sprout-leaf pg-sprout-leaf-r"></view>
+					<view class="pg-hand pg-hand-r">
+						<view class="pg-sprout">
+							<view class="pg-sprout-stem"></view>
+							<view class="pg-sprout-leaf pg-sprout-leaf-l"></view>
+							<view class="pg-sprout-leaf pg-sprout-leaf-r"></view>
+						</view>
+						<view class="pg-palm pg-palm-r">
+							<view class="pg-finger"></view>
+							<view class="pg-finger pg-finger-2"></view>
+						</view>
 					</view>
 					<view class="pg-eye pg-eye-l"></view>
 					<view class="pg-eye pg-eye-r"></view>
 					<view class="pg-blush pg-blush-l"></view>
 					<view class="pg-blush pg-blush-r"></view>
 					<view class="pg-mouth"></view>
-				</view>
-				<view class="pg-feet">
-					<view class="pg-foot"></view>
-					<view class="pg-foot"></view>
 				</view>
 			</view>
 		</view>
@@ -519,18 +527,67 @@ export default {
 }
 .pg-pet {
 	position: relative;
-	width: 108rpx;
-	height: 124rpx;
+	width: 112rpx;
+	height: 112rpx;
 	animation: pgBreathe 2.6s ease-in-out infinite;
 }
 .pg-body {
 	position: relative;
-	width: 108rpx;
-	height: 100rpx;
+	width: 112rpx;
+	height: 112rpx;
 	border-radius: 50%;
 	background: radial-gradient(circle at 42% 32%, #d4f5b8 0%, #8ee06a 38%, #5ec948 72%, #45b838 100%);
 	box-shadow: 0 8rpx 18rpx rgba(46, 125, 50, 0.32);
-	z-index: 1;
+	overflow: visible;
+}
+.pg-hand {
+	position: absolute;
+	z-index: 4;
+}
+.pg-hand-l {
+	left: -12rpx;
+	bottom: 24rpx;
+	width: 50rpx;
+	height: 58rpx;
+}
+.pg-hand-r {
+	right: -10rpx;
+	bottom: 26rpx;
+	width: 42rpx;
+	height: 54rpx;
+}
+.pg-palm {
+	position: absolute;
+	width: 22rpx;
+	height: 22rpx;
+	border-radius: 50%;
+	background: radial-gradient(circle at 38% 32%, #a8e878 0%, #5cb848 55%, #3d9a38 100%);
+	border: 2rpx solid rgba(45, 110, 50, 0.45);
+	box-shadow: 0 2rpx 6rpx rgba(34, 100, 40, 0.25);
+	z-index: 5;
+}
+.pg-hand-l .pg-palm {
+	right: 0;
+	bottom: 8rpx;
+}
+.pg-palm-r {
+	left: 0;
+	bottom: 6rpx;
+}
+.pg-finger {
+	position: absolute;
+	width: 8rpx;
+	height: 8rpx;
+	border-radius: 50%;
+	background: #5cb848;
+	border: 1rpx solid rgba(45, 110, 50, 0.35);
+	top: -2rpx;
+	left: 2rpx;
+}
+.pg-finger-2 {
+	left: auto;
+	right: 0;
+	top: 0;
 }
 .pg-bud {
 	position: absolute;
@@ -545,15 +602,16 @@ export default {
 }
 .pg-leaf {
 	position: absolute;
-	left: -8rpx;
-	bottom: 18rpx;
+	left: -2rpx;
+	bottom: 10rpx;
 	width: 36rpx;
 	height: 48rpx;
 	border-radius: 0 80% 0 80%;
-	background: linear-gradient(145deg, #7ed957 0%, #3d9e3a 100%);
-	transform: rotate(-28deg);
-	box-shadow: inset -4rpx -4rpx 0 rgba(255, 255, 255, 0.2);
-	z-index: 2;
+	background: linear-gradient(145deg, #8ee06a 0%, #3d9e3a 100%);
+	transform: rotate(-20deg);
+	transform-origin: 85% 88%;
+	box-shadow: 0 2rpx 6rpx rgba(34, 100, 40, 0.15);
+	z-index: 3;
 }
 .pg-leaf-vein {
 	position: absolute;
@@ -567,21 +625,21 @@ export default {
 }
 .pg-sprout {
 	position: absolute;
-	right: 4rpx;
-	bottom: 22rpx;
+	right: 2rpx;
+	bottom: 14rpx;
 	width: 28rpx;
-	height: 40rpx;
-	z-index: 2;
+	height: 38rpx;
+	z-index: 3;
 }
 .pg-sprout-stem {
 	position: absolute;
-	right: 10rpx;
+	left: 10rpx;
 	bottom: 0;
 	width: 4rpx;
-	height: 28rpx;
+	height: 24rpx;
 	border-radius: 4rpx;
 	background: #3d8f3a;
-	transform: rotate(12deg);
+	transform: rotate(8deg);
 }
 .pg-sprout-leaf {
 	position: absolute;
@@ -591,65 +649,48 @@ export default {
 	background: #6fcf4a;
 }
 .pg-sprout-leaf-l {
-	left: 0;
-	top: 8rpx;
+	left: 2rpx;
+	top: 0;
 	transform: rotate(-35deg);
 }
 .pg-sprout-leaf-r {
 	right: 0;
-	top: 4rpx;
+	top: 2rpx;
 	transform: rotate(25deg);
 	background: #5cb85c;
 }
 .pg-eye {
 	position: absolute;
-	top: 38rpx;
+	top: 42rpx;
 	width: 12rpx;
 	height: 12rpx;
 	border-radius: 50%;
 	background: #1a1a1a;
-	z-index: 2;
+	z-index: 5;
 }
-.pg-eye-l { left: 28rpx; }
-.pg-eye-r { right: 28rpx; }
+.pg-eye-l { left: 30rpx; }
+.pg-eye-r { right: 30rpx; }
 .pg-blush {
 	position: absolute;
-	top: 50rpx;
+	top: 54rpx;
 	width: 14rpx;
 	height: 9rpx;
 	border-radius: 50%;
 	background: rgba(255, 160, 160, 0.55);
-	z-index: 2;
+	z-index: 5;
 }
-.pg-blush-l { left: 16rpx; }
-.pg-blush-r { right: 16rpx; }
+.pg-blush-l { left: 18rpx; }
+.pg-blush-r { right: 18rpx; }
 .pg-mouth {
 	position: absolute;
 	left: 50%;
-	top: 56rpx;
+	top: 60rpx;
 	width: 18rpx;
 	height: 8rpx;
 	margin-left: -9rpx;
 	border-bottom: 3rpx solid #2d5a2a;
 	border-radius: 0 0 10rpx 10rpx;
-	z-index: 2;
-}
-.pg-feet {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	display: flex;
-	justify-content: center;
-	gap: 14rpx;
-	z-index: 0;
-}
-.pg-foot {
-	width: 24rpx;
-	height: 16rpx;
-	border-radius: 50%;
-	background: linear-gradient(180deg, #5ec948 0%, #45b838 100%);
-	box-shadow: 0 4rpx 8rpx rgba(46, 125, 50, 0.2);
+	z-index: 5;
 }
 @keyframes pgBreathe {
 	0%, 100% { transform: scale(1) translateY(0); }

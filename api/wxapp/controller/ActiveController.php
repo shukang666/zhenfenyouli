@@ -511,7 +511,8 @@ class ActiveController extends AuthController
         $where[] = ['user_id', '=', $this->user_id];
         $sign_info = ActiveSIgnModel::where($where)->find();
         // 只有打卡活动（is_clock=1）才自动报名，非打卡活动需用户手动报名
-        if (empty($sign_info) && $this->user_id && intval($item['is_clock']) === 1 && !ActiveModel::isOfflineEvent($item)) {
+        $autoClockJoin = intval($item['is_clock']) === 1 || intval($item['is_clock_challenge'] ?? 0) === 1;
+        if (empty($sign_info) && $this->user_id && $autoClockJoin && !ActiveModel::isOfflineEvent($item)) {
             // 自动创建报名记录，跳过角色条件校验和积分扣除
             $sign_data = [];
             $sign_data['user_id'] = $this->user_id;
@@ -574,7 +575,30 @@ class ActiveController extends AuthController
         }
         unset($item['offline_sign_password']);
         $item['has_offline_password'] = $pwdConfigured;
+        $this->appendClockChallengeForDetail($item);
         $this->success('请求成功', $item);
+    }
+
+    /**
+     * 详情：多日打卡挑战进度
+     */
+    protected function appendClockChallengeForDetail(&$item): void
+    {
+        $item['is_clock_challenge'] = (int)($item['is_clock_challenge'] ?? 0);
+        $item['clock_challenge_days'] = (int)($item['clock_challenge_days'] ?? 0);
+        $item['clock_challenge_point'] = (int)($item['clock_challenge_point'] ?? 0);
+        $item['clock_challenge_progress'] = 0;
+        $item['clock_challenge_rewarded'] = 0;
+        if ($item['is_clock_challenge'] !== 1 || empty($item['sign_id']) || !$this->user_id) {
+            return;
+        }
+        $timestamps = ActiveClockModel::where('user_id', $this->user_id)
+            ->where('active_id', $item['id'])
+            ->where('sign_id', $item['sign_id'])
+            ->column('date_time');
+        $item['clock_challenge_progress'] = $this->getMaxContinueSignDays($timestamps);
+        $rewarded = ActiveSIgnModel::where('id', $item['sign_id'])->value('clock_challenge_rewarded');
+        $item['clock_challenge_rewarded'] = (int)$rewarded;
     }
 
     /**
@@ -903,6 +927,8 @@ class ActiveController extends AuthController
             AccountLogModel::add_account_log($this->user_id, 2, 225, $send_point, ['remark' => '垃圾打卡扣除']);
         }
 
+        $this->tryGrantClockChallengeReward($active_info, (int)$sign_id);
+
         // ===== 打卡动作触发判断 =====
         $action_trigger = $this->checkAndTriggerClockAction($active_id, $sign_id);
 
@@ -1182,6 +1208,47 @@ class ActiveController extends AuthController
         }
 
         return $maxDays;
+    }
+
+    /**
+     * 多日打卡挑战：连续满 N 天一次性发奖励（每用户每活动仅一次）
+     */
+    protected function tryGrantClockChallengeReward($activeInfo, int $signId): void
+    {
+        if (intval($activeInfo['is_clock_challenge'] ?? 0) !== 1) {
+            return;
+        }
+        $targetDays = intval($activeInfo['clock_challenge_days'] ?? 0);
+        $bonusPoint = intval($activeInfo['clock_challenge_point'] ?? 0);
+        if ($targetDays < 1 || $signId <= 0) {
+            return;
+        }
+
+        $sign = ActiveSIgnModel::where('id', $signId)->where('user_id', $this->user_id)->find();
+        if (empty($sign) || intval($sign['clock_challenge_rewarded'] ?? 0) === 1) {
+            return;
+        }
+
+        $timestamps = ActiveClockModel::where('user_id', $this->user_id)
+            ->where('active_id', $activeInfo['id'])
+            ->where('sign_id', $signId)
+            ->column('date_time');
+        if ($this->getMaxContinueSignDays($timestamps) < $targetDays) {
+            return;
+        }
+
+        ActiveSIgnModel::where('id', $signId)->update([
+            'clock_challenge_rewarded' => 1,
+        ]);
+        if ($bonusPoint > 0) {
+            AccountLogModel::add_account_log(
+                $this->user_id,
+                2,
+                225,
+                $bonusPoint,
+                ['remark' => '多日打卡挑战达成']
+            );
+        }
     }
 
 }
