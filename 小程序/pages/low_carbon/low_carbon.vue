@@ -200,15 +200,15 @@
 					hover-class="fb-press" :hover-stay-time="80"
 					@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 					<view class="fb-recent-cal">
-						<text class="fb-recent-cal-d">{{ item.is_date_pending == 1 ? '待定' : (item.date | date('dd')) }}</text>
-						<text class="fb-recent-cal-m">{{ item.is_date_pending == 1 ? '时间' : (item.date | date('mm') + '月') }}</text>
+						<text class="fb-recent-cal-d">{{ formatRecentCalDay(item) }}</text>
+						<text class="fb-recent-cal-m">{{ formatRecentCalMonth(item) }}</text>
 					</view>
 					<view class="fb-recent-cover">
 						<u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
 					</view>
 					<view class="fb-recent-info">
 						<text class="fb-recent-name u-line-2">{{item.name}}</text>
-						<text class="fb-recent-meta">{{ item.is_date_pending == 1 ? '时间待定' : ('截止 ' + (item.date | date('yy-mm-dd'))) }}</text>
+						<text class="fb-recent-meta">{{ formatRecentMeta(item) }}</text>
 					</view>
 					<u-icon name="arrow-right" size="24" color="#c5d0c7"></u-icon>
 				</view>
@@ -327,6 +327,21 @@
 					return '—'
 				}
 				return this.$u.timeFormat(item.date, 'yy-mm-dd')
+			},
+			formatRecentCalDay(item) {
+				if (Number(item.is_date_pending) === 1) return '待定'
+				if (!item.date) return '—'
+				return this.$u.timeFormat(item.date, 'dd')
+			},
+			formatRecentCalMonth(item) {
+				if (Number(item.is_date_pending) === 1) return '时间'
+				if (!item.date) return ''
+				return this.$u.timeFormat(item.date, 'mm') + '月'
+			},
+			formatRecentMeta(item) {
+				if (Number(item.is_date_pending) === 1) return '时间待定'
+				if (!item.date) return '截止 —'
+				return '截止 ' + this.$u.timeFormat(item.date, 'yy-mm-dd')
 			},
 			async loadAllData() {
 				const startTime = Date.now()
