@@ -30,7 +30,7 @@
 
 		<view class="dk-block">
 			<text class="dk-block-t">你在哪投放</text>
-			<text class="dk-block-hint">场景卡片仅作区分，请点卡片内的垃圾种类</text>
+			<text class="dk-block-hint">家庭、办公点大按钮；亲子、沿街点具体种类</text>
 			<view
 				class="dk-scene"
 				v-for="item in scenes"
@@ -39,7 +39,16 @@
 			>
 				<text class="dk-scene-name">{{ item.name }}</text>
 				<text class="dk-scene-desc">{{ item.desc }}</text>
-				<view class="dk-scene-chips">
+				<view
+					v-if="item.fullEntry"
+					class="dk-scene-main-btn"
+					hover-class="dk-card--press"
+					:hover-stay-time="80"
+					@click="goSceneEntry(item.key)"
+				>
+					<text class="dk-scene-main-t">{{ item.entryLabel || '去打卡' }}</text>
+				</view>
+				<view v-else class="dk-scene-chips">
 					<view
 						class="dk-chip"
 						v-for="(chip, ci) in item.chips"
@@ -85,7 +94,9 @@
 						key: 'home',
 						name: '家庭',
 						desc: '厨房、客厅、卫生间里的日常投放',
-						chips: [{ label: '可回收' }, { label: '不可回收' }],
+						fullEntry: true,
+						entryLabel: '家庭垃圾分类打卡',
+						entrySub: '进入后选择四类垃圾并拍照',
 					},
 					{
 						key: 'qinzi',
@@ -139,6 +150,18 @@
 				this.$u.api.get_select_list({ type: 2 }).then(res => {
 					this.cate_list = res.data || []
 				}).catch(() => {})
+			},
+			goSceneEntry(sceneKey) {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
+				const scene = this.scenes.find(s => s.key === sceneKey)
+				if (!scene) return
+				if (sceneKey === 'home') {
+					this.$u.route(
+						'/pages/flhd/add?scene_key=home&scene=' + encodeURIComponent(scene.name),
+					)
+					return
+				}
 			},
 			goFromChip(sceneKey, chipIndex) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -414,6 +437,29 @@
 .dk-chip-go {
 	font-size: 22rpx;
 	color: rgba(255, 255, 255, 0.9);
+}
+.dk-scene-main-btn {
+	position: relative;
+	z-index: 1;
+	margin-top: 24rpx;
+	padding: 28rpx 32rpx;
+	border-radius: 20rpx;
+	background: rgba(255, 255, 255, 0.28);
+	border: 2rpx solid rgba(255, 255, 255, 0.45);
+	text-align: center;
+}
+.dk-scene-main-t {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #fff;
+}
+.dk-scene-main-sub {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 24rpx;
+	color: rgba(255, 255, 255, 0.88);
+	line-height: 1.45;
 }
 .dk-type-head {
 	display: flex;

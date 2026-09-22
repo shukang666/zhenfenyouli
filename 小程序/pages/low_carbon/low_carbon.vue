@@ -903,7 +903,7 @@ export default {
 }
 .fb-banner-swiper {
   width: 100%;
-  height: 300rpx;
+  height: 330rpx;
   border-radius: 24rpx;
   overflow: hidden;
 }

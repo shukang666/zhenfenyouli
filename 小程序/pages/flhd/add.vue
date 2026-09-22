@@ -1,10 +1,5 @@
 <template>
     <view :class="['clock-add', pageTheme]" v-if="!setting.app_test">
-        <view class="clock-add-hero">
-            <text class="clock-add-kicker">{{ sceneLabel ? '场景：' + sceneLabel : '垃圾分类打卡' }}</text>
-            <text class="clock-add-title">{{ pageTitle }}</text>
-            <text class="clock-add-sub">{{ pageSubtitle }}</text>
-        </view>
 
         <view class="u-p-30">
             <view class="clock-panel" :class="'clock-panel--' + cateKind">
@@ -106,7 +101,8 @@
         buildSceneCateSubtitle,
     } from '@/common/clockScene.js'
 
-    const SCENE_KEYS = ['home', 'qinzi', 'street']
+    /** 单种类入口（须带 cate_id）；家庭与真分角为四类自选 */
+    const SINGLE_CATE_SCENES = ['qinzi', 'street']
 
     export default {
         data() {
@@ -136,11 +132,11 @@
             sceneLabel() {
                 return clockSceneLabel(this.sceneKey, this.sceneName)
             },
-            isSceneMode() {
-                return SCENE_KEYS.indexOf(this.sceneKey) >= 0
-            },
             pageMeta() {
-                const key = this.isLegacyMode ? 'zhenfenjiao' : this.sceneKey
+                let key = this.sceneKey
+                if (this.isLegacyMode) {
+                    key = this.sceneKey === 'home' ? 'home' : 'zhenfenjiao'
+                }
                 return ADD_PAGE_META[key] || ADD_PAGE_META.zhenfenjiao
             },
             pageTheme() {
@@ -180,11 +176,16 @@
             this.sceneName = option.scene ? decodeURIComponent(option.scene) : ''
             this.isLegacyMode =
                 !this.sceneKey ||
+                this.sceneKey === 'home' ||
                 this.sceneKey === 'zhenfenjiao' ||
                 this.sceneKey === 'office' ||
-                SCENE_KEYS.indexOf(this.sceneKey) < 0
+                SINGLE_CATE_SCENES.indexOf(this.sceneKey) < 0
             this.pendingCateId = cateId
-            this.form.clock_scene = this.isLegacyMode ? 'zhenfenjiao' : this.sceneKey
+            if (this.isLegacyMode) {
+                this.form.clock_scene = this.sceneKey === 'home' ? 'home' : 'zhenfenjiao'
+            } else {
+                this.form.clock_scene = this.sceneKey
+            }
             this.loadTutorials()
             this.get_select_list()
         },
@@ -233,7 +234,7 @@
                         }
                     }
                 }
-                if (this.isSceneMode && !pending) {
+                if (!this.isLegacyMode && !pending) {
                     this.$u.toast('请从打卡页选择垃圾种类')
                     setTimeout(() => uni.navigateBack(), 1500)
                     return
@@ -284,7 +285,7 @@
                             cate_id: that.form.cate_id,
                             content: that.form.content,
                             image: that.form.image,
-                            clock_scene: that.form.clock_scene || 'zhenfenjiao',
+                                clock_scene: that.form.clock_scene || (that.sceneKey === 'home' ? 'home' : 'zhenfenjiao'),
                         }).then(msg => {
                             that.msg = msg
                             that.mask_show = true

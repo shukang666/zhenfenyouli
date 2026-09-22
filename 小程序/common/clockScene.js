@@ -9,10 +9,7 @@ export const SCENE_META = {
 
 /** 各场景在 add 页展示的分类块（按名称匹配 cate_list） */
 export const SECTION_KEYS = {
-	home: [
-		{ key: 'recycle', match: '可回收', exclude: '不可' },
-		{ key: 'other', match: '不可回收' },
-	],
+	home: null,
 	qinzi: [
 		{ key: 'recycle', match: '可回收', exclude: '不可' },
 		{ key: 'harm', match: '有害' },
@@ -54,6 +51,8 @@ export function clockSceneLabel(sceneKey, sceneName) {
 export const ADD_PAGE_META = {
 	home: {
 		theme: 'clock-add--home',
+		title: '家庭垃圾分类打卡',
+		subtitle: '选择垃圾种类并上传家中投放照片',
 		placeholder: '可补充家中投放位置或注意事项',
 	},
 	qinzi: {
