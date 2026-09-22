@@ -891,8 +891,8 @@
 .fb-entry-row {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 16rpx;
-	padding: 6rpx 0 22rpx;
+	gap: 12rpx;
+	padding: 4rpx 0 16rpx;
 }
 .fb-entry-card {
 	min-width: 0;
@@ -900,10 +900,10 @@
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: space-between;
-	padding: 24rpx 22rpx 20rpx;
-	min-height: 200rpx;
-	border-radius: 22rpx;
-	box-shadow: 0 10rpx 28rpx rgba(16, 40, 24, 0.12);
+	padding: 16rpx 14rpx 14rpx;
+	min-height: 0;
+	border-radius: 16rpx;
+	box-shadow: 0 6rpx 18rpx rgba(16, 40, 24, 0.1);
 	position: relative;
 	overflow: hidden;
 	color: #fff;
@@ -926,10 +926,10 @@
 .fb-entry-qxl::after {
 	content: '';
 	position: absolute;
-	top: -30rpx;
-	right: -30rpx;
-	width: 120rpx;
-	height: 120rpx;
+	top: -24rpx;
+	right: -24rpx;
+	width: 88rpx;
+	height: 88rpx;
 	border-radius: 50%;
 	background: rgba(255, 255, 255, 0.14);
 	pointer-events: none;
@@ -953,7 +953,7 @@
 	color: #fff;
 }
 .fb-entry-mark {
-	font-size: 18rpx;
+	font-size: 16rpx;
 	letter-spacing: 1rpx;
 	opacity: 0.82;
 	position: relative;
@@ -961,8 +961,8 @@
 	white-space: nowrap;
 }
 .fb-entry-emoji {
-	font-size: 44rpx;
-	margin: 10rpx 0 6rpx;
+	font-size: 32rpx;
+	margin: 4rpx 0 2rpx;
 	position: relative;
 	z-index: 1;
 	line-height: 1;
@@ -970,18 +970,18 @@
 .fb-entry-text {
 	display: flex;
 	flex-direction: column;
-	gap: 4rpx;
+	gap: 2rpx;
 	position: relative;
 	z-index: 1;
 	width: 100%;
 }
 .fb-entry-title {
-	font-size: 30rpx;
+	font-size: 26rpx;
 	font-weight: 700;
-	line-height: 1.35;
+	line-height: 1.3;
 }
 .fb-entry-sub {
-	font-size: 22rpx;
+	font-size: 20rpx;
 	opacity: 0.9;
 	line-height: 1.35;
 	display: -webkit-box;
@@ -991,8 +991,8 @@
 }
 .fb-entry-go {
 	align-self: flex-end;
-	width: 44rpx;
-	height: 44rpx;
+	width: 36rpx;
+	height: 36rpx;
 	border-radius: 50%;
 	background: rgba(255, 255, 255, 0.24);
 	display: flex;
@@ -1000,10 +1000,10 @@
 	justify-content: center;
 	position: relative;
 	z-index: 1;
-	margin-top: 8rpx;
+	margin-top: 4rpx;
 }
 .fb-entry-arrow {
-	font-size: 36rpx;
+	font-size: 28rpx;
 	font-weight: 300;
 	opacity: 1;
 	line-height: 1;
