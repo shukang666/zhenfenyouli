@@ -35,7 +35,7 @@
 			</swiper>
 		</view>
 
-		<!-- 常去入口：轮播下方三列快捷卡片 -->
+		<!-- 常去入口：轮播下方 2×2 快捷卡片 -->
 		<view class="fb-entry-stage" id="guide-fb-entry">
 			<view class="fb-entry-kicker">
 				<view class="fb-entry-kicker-dot"></view>
@@ -889,20 +889,19 @@
 	color: #8A958C;
 }
 .fb-entry-row {
-	display: flex;
-	align-items: stretch;
-	gap: 14rpx;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16rpx;
 	padding: 6rpx 0 22rpx;
 }
 .fb-entry-card {
-	flex: 1;
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: space-between;
-	padding: 20rpx 16rpx 18rpx;
-	min-height: 228rpx;
+	padding: 24rpx 22rpx 20rpx;
+	min-height: 200rpx;
 	border-radius: 22rpx;
 	box-shadow: 0 10rpx 28rpx rgba(16, 40, 24, 0.12);
 	position: relative;
@@ -962,8 +961,8 @@
 	white-space: nowrap;
 }
 .fb-entry-emoji {
-	font-size: 38rpx;
-	margin: 8rpx 0 4rpx;
+	font-size: 44rpx;
+	margin: 10rpx 0 6rpx;
 	position: relative;
 	z-index: 1;
 	line-height: 1;
@@ -977,12 +976,12 @@
 	width: 100%;
 }
 .fb-entry-title {
-	font-size: 26rpx;
+	font-size: 30rpx;
 	font-weight: 700;
 	line-height: 1.35;
 }
 .fb-entry-sub {
-	font-size: 18rpx;
+	font-size: 22rpx;
 	opacity: 0.9;
 	line-height: 1.35;
 	display: -webkit-box;
