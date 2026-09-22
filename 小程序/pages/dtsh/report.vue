@@ -28,9 +28,16 @@
 				<view class="u-font-28 u-m-b-16">小区与点位</view>
 				<view class="u-m-b-20">
 					<view class="u-font-24 u-type-info u-m-b-8">所属小区</view>
-					<view class="location-display">
-						<u-icon name="home" size="28" color="#18AF38"></u-icon>
-						<text class="location-text">{{ communityName || '未绑定小区' }}</text>
+					<view class="location-picker" @click="toggleCommunityDropdown">
+						<view class="u-flex u-flex-1 u-col-center">
+							<u-icon name="home" size="28" color="#18AF38" class="u-m-r-10"></u-icon>
+							<text v-if="form.community_name" class="location-text">{{ form.community_name }}</text>
+							<text v-else class="location-placeholder">未绑定小区，请点击选择</text>
+						</view>
+						<u-icon name="arrow-right" size="24" color="#999"></u-icon>
+					</view>
+					<view class="u-font-22 u-type-info u-m-t-8" v-if="userCommunityName">
+						默认为您所在小区，可切换为本次举报的小区（不会修改个人资料）
 					</view>
 				</view>
 				<view>
@@ -113,6 +120,32 @@
 			:list="pointList"
 			@confirm="onPointConfirm"
 		></u-select>
+
+		<!-- 小区选择（搜索 + 列表，仅本次提交） -->
+		<view v-if="showCommunityDropdown" class="community-dropdown-mask" @click="showCommunityDropdown = false">
+			<view class="community-dropdown" @click.stop>
+				<view class="u-font-28 u-font-bold u-m-b-16">选择小区</view>
+				<view class="u-radius-5 u-p-lr-20" style="background-color: #f7f7f7;">
+					<u-input v-model="communityKeyword" type="text" placeholder="输入小区名称搜索" :clearable="true" @input="onCommunitySearch" />
+				</view>
+				<scroll-view scroll-y class="community-dropdown-list" @scrolltolower="loadMoreCommunity" lower-threshold="50">
+					<view v-if="!communityResults.length && !communityLoading" class="u-text-center u-p-30 u-font-24 u-type-info">
+						{{ communityKeyword ? '未找到相关小区' : '输入名称搜索，或下滑加载更多' }}
+					</view>
+					<view
+						v-for="item in communityResults"
+						:key="item.id"
+						class="u-p-lr-20 u-p-tb-15 community-dropdown-item"
+						@click="selectReportCommunity(item)"
+					>
+						<view class="u-font-28">{{ item.name }}</view>
+						<view class="u-font-24 u-type-info" v-if="item.parent_name">{{ item.parent_name }}</view>
+					</view>
+					<view v-if="communityLoading" class="u-text-center u-p-tb-20 u-font-24 u-type-info">加载中...</view>
+					<view v-if="communityNoMore && communityResults.length" class="u-text-center u-p-tb-20 u-font-24 u-type-info">没有更多了</view>
+				</scroll-view>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -136,19 +169,28 @@
 					merchant_name: '',
 					address: '',
 				},
-				communityName: '',   // 用户绑定的小区名称
-				communityId: 0,     // 用户绑定的小区ID
-				pointList: [],      // 点位列表
+				userCommunityName: '',
+				userCommunityId: 0,
+				pointList: [],
 				showPointPicker: false,
+				showCommunityDropdown: false,
+				communityKeyword: '',
+				communityResults: [],
+				communityPage: 1,
+				communityLastPage: 1,
+				communityLoading: false,
+				communitySearchTimer: null,
 				uploadUrl,
 			};
 		},
 		computed: {
+			communityNoMore() {
+				return this.communityPage >= this.communityLastPage;
+			},
 			canSubmit() {
 				if (!this.form.image || !this.form.remark) return false;
 				if (this.form.location_type == 1) {
-					// 小区内：需要小区+点位
-					return this.communityId > 0 && this.form.point_id > 0;
+					return this.form.community_id > 0 && this.form.point_id > 0;
 				} else {
 					// 非小区：需要商户名称+地址
 					return this.form.merchant_name.trim() && this.form.address.trim();
@@ -177,21 +219,79 @@
 			loadUserCommunity() {
 				this.$u.api.getUserInfo().then(res => {
 					if (res.data) {
-						this.communityName = res.data.community || '';
-						this.communityId = res.data.community_id || 0;
-						this.form.community_id = this.communityId;
-						this.form.community_name = this.communityName;
-						// 加载点位列表
-						if (this.communityId > 0) {
-							this.loadPointList();
+						this.userCommunityName = res.data.community || '';
+						this.userCommunityId = res.data.community_id || 0;
+						this.form.community_id = this.userCommunityId;
+						this.form.community_name = this.userCommunityName;
+						if (this.form.community_id > 0) {
+							this.loadPointList(this.form.community_id);
 						}
 					}
 				}).catch(() => {});
 			},
 
-			// 加载点位列表
-			loadPointList() {
-				this.$u.api.get_community_cate_list().then(res => {
+			toggleCommunityDropdown() {
+				this.showCommunityDropdown = !this.showCommunityDropdown;
+				if (this.showCommunityDropdown) {
+					this.communityKeyword = '';
+					this.communityPage = 1;
+					this.communityResults = [];
+					this.loadCommunityList('', true);
+				}
+			},
+
+			loadCommunityList(keyword, isReset = false) {
+				if (this.communityLoading) return;
+				this.communityLoading = true;
+				const page = isReset ? 1 : this.communityPage;
+				this.$u.api.search_community({ keyword, page, page_size: 20 }).then(res => {
+					const data = res.data || {};
+					const list = data.data || [];
+					if (isReset) {
+						this.communityResults = list;
+						this.communityPage = 1;
+					} else {
+						this.communityResults = this.communityResults.concat(list);
+					}
+					this.communityLastPage = data.last_page || 1;
+				}).catch(() => {}).finally(() => {
+					this.communityLoading = false;
+				});
+			},
+
+			loadMoreCommunity() {
+				if (this.communityLoading || this.communityNoMore) return;
+				this.communityPage++;
+				this.loadCommunityList(this.communityKeyword.trim(), false);
+			},
+
+			onCommunitySearch(value) {
+				if (this.communitySearchTimer) clearTimeout(this.communitySearchTimer);
+				const keyword = (value || '').trim();
+				this.communitySearchTimer = setTimeout(() => {
+					this.loadCommunityList(keyword, true);
+				}, 300);
+			},
+
+			selectReportCommunity(item) {
+				if (!item || !item.id) return;
+				this.form.community_id = item.id;
+				this.form.community_name = item.name;
+				this.form.point_id = 0;
+				this.form.point_name = '';
+				this.showCommunityDropdown = false;
+				this.communityKeyword = '';
+				this.communityResults = [];
+				this.loadPointList(item.id);
+			},
+
+			loadPointList(communityId) {
+				const cid = communityId || this.form.community_id;
+				if (!cid) {
+					this.pointList = [];
+					return;
+				}
+				this.$u.api.get_community_cate_list({ community_id: cid }).then(res => {
 					this.pointList = res.data || [];
 				}).catch(() => {
 					this.pointList = [];
@@ -262,8 +362,8 @@
 
 				// 根据位置类型校验
 				if (this.form.location_type == 1) {
-					if (this.communityId <= 0) {
-						uni.showToast({ title: '请先绑定小区', icon: 'none' });
+					if (!this.form.community_id) {
+						uni.showToast({ title: '请选择所属小区', icon: 'none' });
 						return;
 					}
 					if (!this.form.point_id) {
@@ -394,5 +494,39 @@
 		color: #333;
 		border: 2rpx solid #eee;
 		box-sizing: border-box;
+	}
+
+	.community-dropdown-mask {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		background-color: rgba(0, 0, 0, 0.35);
+		z-index: 999;
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+	}
+
+	.community-dropdown {
+		margin-top: 200rpx;
+		width: 690rpx;
+		background-color: #fff;
+		border-radius: 16rpx;
+		padding: 24rpx;
+		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+	}
+
+	.community-dropdown-list {
+		max-height: 560rpx;
+		margin-top: 16rpx;
+	}
+
+	.community-dropdown-item {
+		border-bottom: 1rpx solid #f0f0f0;
+		&:last-child {
+			border-bottom: none;
+		}
 	}
 </style>

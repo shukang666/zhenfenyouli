@@ -805,10 +805,14 @@ class ForumController extends AuthController
      */
     public function get_community_cate_list(CommunityCateModel $communityCateModel)
     {
-        $cate_id = $this->request->param('cate_id', 0);
+        $communityId = (int)$this->request->param('community_id', 0);
+        $cate_id = (int)$this->request->param('cate_id', 0);
+        if (!$communityId && $cate_id) {
+            $communityId = $cate_id;
+        }
         $where = [];
-        if ($cate_id) {
-            $where[] = ['cate_id', '=', $cate_id];
+        if ($communityId > 0) {
+            $where[] = ['cate_id', '=', $communityId];
         } else {
             $this->checkUser();
             $where[] = ['cate_id', '=', $this->user_info['community_id']];
