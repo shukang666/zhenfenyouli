@@ -134,7 +134,7 @@ export default {
 		},
 		guideSafeBottom() {
 			const sys = uni.getSystemInfoSync()
-			const tabbar = 108 * sys.windowWidth / 750 + 8
+			const tabbar = (108 + 16) * sys.windowWidth / 750
 			const inset = (sys.safeAreaInsets && sys.safeAreaInsets.bottom) || 0
 			return Math.ceil(tabbar + inset + 20)
 		},
@@ -206,7 +206,7 @@ export default {
 			const rpx = uni.getSystemInfoSync().windowWidth / 750
 			return {
 				r: 18 * rpx,
-				b: 108 * rpx + 4 * rpx + inset + 12 * rpx
+				b: 108 * rpx + 16 * rpx + inset + 12 * rpx
 			}
 		},
 		clampRB(r, b) {
@@ -456,7 +456,7 @@ export default {
 			const height = 108 * rpx
 			const left = 24 * rpx
 			const width = sys.windowWidth - 48 * rpx
-			const bottomGap = 4 * rpx + inset
+			const bottomGap = 16 * rpx + inset
 			const winH = sys.windowHeight || sys.screenHeight
 			const top = winH - bottomGap - height
 			return { left, top, width, height }
@@ -613,8 +613,8 @@ export default {
 	position: fixed;
 	left: 24rpx;
 	right: 24rpx;
-	bottom: calc(4rpx + constant(safe-area-inset-bottom));
-	bottom: calc(4rpx + env(safe-area-inset-bottom));
+	bottom: calc(16rpx + constant(safe-area-inset-bottom));
+	bottom: calc(16rpx + env(safe-area-inset-bottom));
 	height: 108rpx;
 	pointer-events: none;
 	z-index: 1;

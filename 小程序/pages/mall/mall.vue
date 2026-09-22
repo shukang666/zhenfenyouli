@@ -469,7 +469,7 @@
 	}
 
 	.tabbar-placeholder {
-		height: 160rpx;
+		height: 172rpx;
 		flex-shrink: 0;
 	}
 	

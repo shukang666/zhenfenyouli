@@ -239,7 +239,7 @@
 		<!-- 新手引导加载期间透明遮罩：防止等待首页数据时用户切页或点击 -->
 		<view v-if="guideOnPage && guideLoading" class="guide-loading-mask" @tap.stop.prevent="noop" @touchmove.stop.prevent="noop"></view>
 
-		<!-- 对齐 custom-tab-bar 悬浮条（108rpx 高 + 左右 24rpx + 底部安全区），仅用于引导定位 -->
+		<!-- 对齐 custom-tab-bar 悬浮条（108rpx 高 + 左右 24rpx + 底 16rpx + 安全区），仅用于引导定位 -->
 		<view id="guide-tabbar" class="guide-tabbar-area"></view>
 	</view>
 </template>
@@ -396,7 +396,7 @@ export default {
 			},
 			guideSafeBottom() {
 				const sys = uni.getSystemInfoSync()
-				const tabbar = 108 * sys.windowWidth / 750 + 8
+				const tabbar = (108 + 16) * sys.windowWidth / 750
 				const inset = (sys.safeAreaInsets && sys.safeAreaInsets.bottom) || 0
 				return Math.ceil(tabbar + inset + 20)
 			},
@@ -1576,7 +1576,7 @@ export default {
 	.home-footer {
 		position: relative;
 		z-index: 1;
-		padding: 24rpx 30rpx calc(160rpx + env(safe-area-inset-bottom));
+		padding: 24rpx 30rpx calc(172rpx + env(safe-area-inset-bottom));
 	}
 	.sk-about {
 		position: relative;
@@ -1701,8 +1701,8 @@ export default {
 		position: fixed;
 		left: 24rpx;
 		right: 24rpx;
-		bottom: calc(4rpx + constant(safe-area-inset-bottom));
-		bottom: calc(4rpx + env(safe-area-inset-bottom));
+		bottom: calc(16rpx + constant(safe-area-inset-bottom));
+		bottom: calc(16rpx + env(safe-area-inset-bottom));
 		height: 108rpx;
 		pointer-events: none;
 		z-index: 0;

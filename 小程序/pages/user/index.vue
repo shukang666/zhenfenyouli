@@ -648,7 +648,7 @@
 	}
 
 	.me-tabbar-space {
-		height: 160rpx;
+		height: 172rpx;
 	}
 
 	.care-pull-layer {

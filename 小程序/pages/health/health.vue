@@ -101,7 +101,7 @@
 			</view>
 		</view>
 		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->
-		<view style="height: 160rpx; flex-shrink: 0;"></view>
+		<view style="height: 172rpx; flex-shrink: 0;"></view>
 		<page-guide page="health"></page-guide>
 	</view>
 </template>
