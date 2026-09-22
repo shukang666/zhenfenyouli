@@ -4,6 +4,12 @@ const install = (Vue, vm) => {
 	// 检查登录状态
 	const checkLogin = (e = {}) => {
 		if (!vm.isLogin) {
+			// 避免曾打开活动详情留下的 pending，登录后被误 reLaunch 到签到活动
+			if (!e.keepPending) {
+				try {
+					uni.removeStorageSync('pending_after_login')
+				} catch (err) {}
+			}
 			uni.navigateTo({
 				url: '/pages/public/login'
 			})

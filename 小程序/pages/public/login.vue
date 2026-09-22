@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { consumePendingAfterLogin } from '@/common/scanSignEntry.js'
+import { consumePendingAfterLogin, clearPendingAfterLogin } from '@/common/scanSignEntry.js'
 export default {
 	data() {
 		return {
@@ -78,6 +78,18 @@ export default {
 			this.code = code;
 		},
 		goAfterLogin() {
+			const pages = getCurrentPages()
+			// 从学考/商城等 navigateTo 进登录：回上一页，勿用历史 pending 跳活动详情
+			if (pages.length > 1) {
+				clearPendingAfterLogin()
+				uni.$emit('pause-new-user-guide')
+				this.$u.func.showToast({
+					title: '登录成功',
+					icon: 'success',
+					back: true,
+				})
+				return
+			}
 			const pending = consumePendingAfterLogin()
 			if (pending) {
 				uni.$emit('pause-new-user-guide')

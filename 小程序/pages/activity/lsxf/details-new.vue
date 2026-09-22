@@ -316,7 +316,7 @@
 	import {
 		uploadUrl
 	} from '@/common/settings'
-	import { savePendingActiveDetail, clearPendingAfterLogin } from '@/common/scanSignEntry.js'
+	import { clearPendingAfterLogin } from '@/common/scanSignEntry.js'
 	export default {
 		data() {
 			return {
@@ -451,8 +451,8 @@
 			}
 			this.id = option.id || sceneVal
 			if (option.pid) this.pid = option.pid
-			if (this.id && !this.isLogin) savePendingActiveDetail(this.id)
-			else clearPendingAfterLogin()
+			// 应用内点进详情靠登录后 navigateBack；仅扫码旧页 stub 会写 pending_after_login
+			if (this.isLogin) clearPendingAfterLogin()
 			this.get_new_active_detail(this.id)
 		},
 		onHide() {
