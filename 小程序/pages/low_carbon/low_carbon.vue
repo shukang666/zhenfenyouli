@@ -44,46 +44,54 @@
 			<view class="fb-entry-row">
 				<view class="fb-entry-card fb-entry-lgfl" hover-class="fb-press" :hover-stay-time="80" @click="gotoFlhd">
 					<text class="fb-entry-mark">01 分类打卡</text>
-					<text class="fb-entry-emoji">♻️</text>
-					<view class="fb-entry-text">
-						<text class="fb-entry-title">垃圾分类</text>
-						<text class="fb-entry-sub">学习分类 · 拍照打卡</text>
-					</view>
-					<view class="fb-entry-go">
-						<text class="fb-entry-arrow">›</text>
+					<view class="fb-entry-main">
+						<text class="fb-entry-emoji">♻️</text>
+						<view class="fb-entry-text">
+							<text class="fb-entry-title">垃圾分类</text>
+							<text class="fb-entry-sub">学习分类 · 拍照打卡</text>
+						</view>
+						<view class="fb-entry-go">
+							<text class="fb-entry-arrow">›</text>
+						</view>
 					</view>
 				</view>
 				<view class="fb-entry-card fb-entry-xsd" hover-class="fb-press" :hover-stay-time="80" @click="gotoXsdld">
 					<text class="fb-entry-mark">02 亲子同行</text>
-					<text class="fb-entry-emoji">🤝</text>
-					<view class="fb-entry-text">
-						<text class="fb-entry-title">小手拉大手</text>
-						<text class="fb-entry-sub">家长与孩子同行</text>
-					</view>
-					<view class="fb-entry-go">
-						<text class="fb-entry-arrow">›</text>
+					<view class="fb-entry-main">
+						<text class="fb-entry-emoji">🤝</text>
+						<view class="fb-entry-text">
+							<text class="fb-entry-title">小手拉大手</text>
+							<text class="fb-entry-sub">家长与孩子同行</text>
+						</view>
+						<view class="fb-entry-go">
+							<text class="fb-entry-arrow">›</text>
+						</view>
 					</view>
 				</view>
 				<view class="fb-entry-card fb-entry-office" hover-class="fb-press" :hover-stay-time="80" @click="gotoOfficeBuilding">
-					<text class="fb-entry-mark">03 楼宇环保</text>
-					<text class="fb-entry-emoji">🏢</text>
-					<view class="fb-entry-text">
-						<text class="fb-entry-title">办公楼宇</text>
-						<text class="fb-entry-sub">敬请期待</text>
-					</view>
-					<view class="fb-entry-go">
-						<text class="fb-entry-arrow">›</text>
+					<text class="fb-entry-mark">03 楼宇减碳</text>
+					<view class="fb-entry-main">
+						<text class="fb-entry-emoji">🏢</text>
+						<view class="fb-entry-text">
+							<text class="fb-entry-title">办公楼宇</text>
+							<text class="fb-entry-sub">绿色办公 · 源头分类</text>
+						</view>
+						<view class="fb-entry-go">
+							<text class="fb-entry-arrow">›</text>
+						</view>
 					</view>
 				</view>
 				<view class="fb-entry-card fb-entry-qxl" hover-class="fb-press" :hover-stay-time="80" @click="gotoQxl">
 					<text class="fb-entry-mark">04 山野社区</text>
-					<text class="fb-entry-emoji">⛰️</text>
-					<view class="fb-entry-text">
-						<text class="fb-entry-title">我和七贤岭</text>
-						<text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
-					</view>
-					<view class="fb-entry-go">
-						<text class="fb-entry-arrow">›</text>
+					<view class="fb-entry-main">
+						<text class="fb-entry-emoji">⛰️</text>
+						<view class="fb-entry-text">
+							<text class="fb-entry-title">我和七贤岭</text>
+							<text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
+						</view>
+						<view class="fb-entry-go">
+							<text class="fb-entry-arrow">›</text>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -899,7 +907,8 @@
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	justify-content: space-between;
+	justify-content: flex-start;
+	gap: 8rpx;
 	padding: 16rpx 14rpx 14rpx;
 	min-height: 0;
 	border-radius: 16rpx;
@@ -960,20 +969,27 @@
 	z-index: 1;
 	white-space: nowrap;
 }
-.fb-entry-emoji {
-	font-size: 32rpx;
-	margin: 4rpx 0 2rpx;
+.fb-entry-main {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 100%;
+	gap: 10rpx;
 	position: relative;
 	z-index: 1;
+}
+.fb-entry-emoji {
+	font-size: 32rpx;
+	margin: 0;
+	flex-shrink: 0;
 	line-height: 1;
 }
 .fb-entry-text {
 	display: flex;
 	flex-direction: column;
 	gap: 2rpx;
-	position: relative;
-	z-index: 1;
-	width: 100%;
+	flex: 1;
+	min-width: 0;
 }
 .fb-entry-title {
 	font-size: 26rpx;
@@ -990,7 +1006,7 @@
 	overflow: hidden;
 }
 .fb-entry-go {
-	align-self: flex-end;
+	flex-shrink: 0;
 	width: 36rpx;
 	height: 36rpx;
 	border-radius: 50%;
@@ -998,9 +1014,6 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	position: relative;
-	z-index: 1;
-	margin-top: 4rpx;
 }
 .fb-entry-arrow {
 	font-size: 28rpx;
