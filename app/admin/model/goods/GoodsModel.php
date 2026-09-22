@@ -134,37 +134,31 @@ class GoodsModel extends ToolModel
         return $data;
     }
 
-    /** 活动是否已配置「签到」（非日常打卡 is_clock） */
+    /** 活动是否已配置「签到」（活动内线下签到，不含旧版独立签到列表 join_type=2） */
     public static function activeHasSignConfigured($active): bool
     {
         if (empty($active)) {
             return false;
         }
-        // 扫码参加：详情页为「立即签到」，签到写入 active_clock
         if ((int)($active['join_type'] ?? 0) === 2) {
-            return true;
+            return false;
         }
-        // 线下活动：须填写允许签到起止时间
-        if (ActiveModel::isOfflineEvent($active)) {
-            $start = (int)($active['offline_sign_start'] ?? 0);
-            $end = (int)($active['offline_sign_end'] ?? 0);
-            return $start > 0 && $end > 0 && $end > $start;
+        if (!ActiveModel::isOfflineEvent($active)) {
+            return false;
         }
-        return false;
+        $start = (int)($active['offline_sign_start'] ?? 0);
+        $end = (int)($active['offline_sign_end'] ?? 0);
+        return $start > 0 && $end > 0 && $end > $start;
     }
 
-    /** 查询条件：仅已配置签到的活动 */
+    /** 查询条件：仅活动内已配置线下签到的活动 */
     protected static function applySignConfiguredWhere($query)
     {
-        return $query->where(function ($q) {
-            $q->where('join_type', '=', 2)
-                ->whereOr(function ($q2) {
-                    $q2->where('event_kind', '=', ActiveModel::EVENT_KIND_OFFLINE)
-                        ->where('offline_sign_start', '>', 0)
-                        ->where('offline_sign_end', '>', 0)
-                        ->whereRaw('offline_sign_end > offline_sign_start');
-                });
-        });
+        return $query->where('join_type', '<>', 2)
+            ->where('event_kind', '=', ActiveModel::EVENT_KIND_OFFLINE)
+            ->where('offline_sign_start', '>', 0)
+            ->where('offline_sign_end', '>', 0)
+            ->whereRaw('offline_sign_end > offline_sign_start');
     }
 
     /** 后台下拉：已配置签到的活动 */

@@ -6,6 +6,9 @@
         <li class="active"><a href="{:url('sign_list')}">签到列表</a></li>
         <li><a href="{:url('update',['type'=>1,'join_type'=>2])}">添加</a></li>
     </ul>
+    <div class="alert alert-warning" style="margin-top: 12px;">
+        本模块为旧版独立签到，已弃用。新活动请在「社区活动」中编辑，活动类型选「线下活动」并配置签到时间；商品兑换前置条件也在商品编辑里绑定上述活动。
+    </div>
     <form class="well form-inline margin-top-20" method="get" action="{:url('sign_list')}">
         关键字：
         <input type="text" class="form-control" name="name" style="width: 140px;"

@@ -12,5 +12,9 @@ ALTER TABLE `cmf_active` ADD COLUMN `offline_sign_start` int(10) unsigned NOT NU
 ALTER TABLE `cmf_active` ADD COLUMN `offline_sign_end` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '线下允许签到结束时间戳' AFTER `offline_sign_start`;
 ALTER TABLE `cmf_active` ADD COLUMN `offline_sign_password` varchar(32) NOT NULL DEFAULT '' COMMENT '线下口令签到兜底' AFTER `offline_sign_end`;
 ALTER TABLE `cmf_active` ADD COLUMN `is_date_pending` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT '1活动时间待定' AFTER `date`;
+
+-- 旧版独立签到菜单改名（幂等：已是新名则不再改）
+UPDATE `cmf_admin_menu` SET `name` = '签到（已弃用）'
+WHERE `app` = 'admin' AND `controller` = 'active' AND `action` = 'sign' AND `name` = '签到';
 -- 已有存量标签默认为固定分类(tag_type=1)，如需将某些标签设为动态主题，请手动更新：
 -- UPDATE `cmf_active_tab` SET `tag_type` = 2 WHERE `name` IN ('净美七贤岭', '金秋开学季');
