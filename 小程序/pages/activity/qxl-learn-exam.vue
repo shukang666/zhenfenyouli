@@ -218,6 +218,9 @@
 						return;
 					}
 				}
+				if (!this.$u.func.checkLogin()) {
+					return;
+				}
 				const answers = questions.map(q => ({
 					qid: q.id,
 					answer: picked[q.id],
@@ -246,9 +249,14 @@
 						this.$set(this.failMap, ch.id, '答对 ' + data.correct_count + '/' + data.total_count + '，还有 ' + wrong + ' 题可对照上文再选一次');
 						uni.showToast({ title: '尚未全部答对', icon: 'none' });
 					}
-				}).catch(() => {
+				}).catch((err) => {
 					this.submittingId = 0;
-					uni.showToast({ title: '网络错误，请重试', icon: 'none' });
+					const msg = err && err.msg;
+					if (!this.isLogin || msg === '用户不存在') {
+						this.$u.func.checkLogin();
+						return;
+					}
+					uni.showToast({ title: msg || '网络错误，请重试', icon: 'none' });
 				});
 			},
 		}
