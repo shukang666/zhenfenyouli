@@ -234,6 +234,16 @@ class ShopOrderModel extends Model
         }
     }
 
+    /** 支付方式文案（与 getInfo 内 pay_type_name 一致） */
+    public static function getPayName($payType = -1)
+    {
+        $payTypeName = [0 => '未支付', 1 => '微信支付', 2 => '余额支付', 3 => '积分支付'];
+        if ($payType == -1) {
+            return $payTypeName;
+        }
+        return $payTypeName[$payType] ?? '未知';
+    }
+
 
     public static function getOrderStatusCount($status, $map = []): int
     {
