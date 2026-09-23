@@ -210,7 +210,7 @@ class OrderController extends AdminBaseController
         if ($order_info['status'] == 12) {
             if ($status == 14) {
                 //拒绝退款
-                $order_info->save(['status' => 14, 'refuse_time' => time(), 'refuse_reason' => $text]);
+                $order_info->save(['status' => 14, 'refuse_reason' => $text]);
                 $this->success('操作成功');
             } elseif ($status == 16) {
 
@@ -245,7 +245,7 @@ class OrderController extends AdminBaseController
             //拒绝退款
             if ($status == 14) {
                 //拒绝退款
-                $order_info->save(['status' => 14, 'refuse_time' => time(), 'refuse_reason' => $text]);
+                $order_info->save(['status' => 14, 'refuse_reason' => $text]);
                 $this->success('操作成功');
             } elseif ($status == 20) {
 
@@ -375,10 +375,8 @@ class OrderController extends AdminBaseController
             }
 
             ShopOrderModel::where('id', $id)->update([
-                'status'       => 16,
-                'delete_time'  => time(),
-                'refuse_time'  => 0,
-                'refuse_reason'=> '',
+                'status'      => 16,
+                'delete_time' => time(),
             ]);
 
             Db::commit();
