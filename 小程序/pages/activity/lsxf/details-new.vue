@@ -313,6 +313,20 @@
 						max-count="1"
 					></u-upload>
 				</view>
+				<view class="clock-share-field">
+					<view class="field-label">
+						经验分享
+						<text class="field-optional">选填</text>
+					</view>
+					<u-input
+						v-model="form.experience_share"
+						type="textarea"
+						height="150"
+						maxlength="500"
+						placeholder="分享本次参与的小心得、做法或感受"
+						border
+					/>
+				</view>
 				<u-button class="confirm-btn" @click="post_new_sign_clock">确认打卡</u-button>
 			</view>
 		</u-popup>
@@ -382,6 +396,7 @@
 				offlinePassword: '',
 				form: {
 					image_url: '',
+					experience_share: '',
 				},
 				image_url: [],
 				// 打卡动作触发数据
@@ -739,6 +754,7 @@
 					}
 					let res = await this.$u.api.post_new_sign_clock(params)
 					this.sign_clock_show = false
+					this.form.experience_share = ''
 					this.showType = 2
 					this.tipShow = true
 
@@ -1534,7 +1550,25 @@
 		.upload-area {
 			display: flex;
 			justify-content: center;
-			margin-bottom: 40rpx;
+			margin-bottom: 32rpx;
+		}
+
+		.clock-share-field {
+			margin-bottom: 32rpx;
+
+			.field-label {
+				font-size: 28rpx;
+				color: #1c2b1e;
+				font-weight: 600;
+				margin-bottom: 16rpx;
+			}
+
+			.field-optional {
+				margin-left: 8rpx;
+				font-size: 22rpx;
+				font-weight: 400;
+				color: #8a9b8d;
+			}
 		}
 		
 		.confirm-btn {

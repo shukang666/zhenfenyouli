@@ -885,6 +885,10 @@ class ActiveController extends AuthController
     public function post_new_sign_clock(){
         $sign_id = $this->request->param('sign_id');
         $image_url = $this->request->param('image_url');
+        $experience_share = trim((string)$this->request->param('experience_share', ''));
+        if (mb_strlen($experience_share, 'UTF-8') > 500) {
+            $this->error('经验分享不超过500字');
+        }
         $item = ActiveSIgnModel::where('id',$sign_id)->find();
         if(empty($item)) $this->error('报名记录不存在');
         if($item['start_time'] > time()) $this->error('打卡时间未到');
@@ -904,6 +908,7 @@ class ActiveController extends AuthController
         $data['date_time'] = $date_time;
         $clock_info = ActiveClockModel::where($data)->find();
         $data['image_url'] = $image_url;
+        $data['experience_share'] = $experience_share;
         $data['send_point'] = $send_point;
         if(empty($clock_info)){
             ActiveClockModel::create($data);

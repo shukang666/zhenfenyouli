@@ -50,16 +50,23 @@ export default {
 		onCareTouchStart(e) {
 			if (!this.careGesture.isInTop) return
 			this.careGesture.startY = e.touches[0].clientY
+			this.careGesture.startX = e.touches[0].clientX
 			this.careGesture.startTime = Date.now()
 		},
 
 		// 触摸移动
 		onCareTouchMove(e) {
 			if (!this.careGesture.isInTop) return
-			
+
 			const currentY = e.touches[0].clientY
+			const currentX = e.touches[0].clientX
 			const diff = currentY - this.careGesture.startY
-			
+			const diffX = currentX - (this.careGesture.startX || currentX)
+
+			// 横向滑动（如活动风采 scroll-x）时不抢手势
+			if (Math.abs(diffX) > Math.abs(diff) && Math.abs(diffX) > 12) {
+				return
+			}
 			// 只在下拉时触发
 			if (diff > 10) {
 				this.careGesture.pullDistance = diff

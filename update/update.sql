@@ -79,3 +79,8 @@ UPDATE `cmf_clock_tutorial` SET `cate_key`='home' WHERE `cate_key`='recycle';
 UPDATE `cmf_clock_tutorial` SET `cate_key`='qinzi' WHERE `cate_key`='harm';
 UPDATE `cmf_clock_tutorial` SET `cate_key`='street' WHERE `cate_key`='food';
 UPDATE `cmf_clock_tutorial` SET `cate_key`='zhenfenjiao' WHERE `cate_key`='other';
+
+-- 活动打卡记录：经验分享（小程序打卡抽屉选填）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active_clock' AND COLUMN_NAME = 'experience_share');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active_clock` ADD COLUMN `experience_share` varchar(500) NOT NULL DEFAULT '''' COMMENT ''打卡经验分享'' AFTER `image_url`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
