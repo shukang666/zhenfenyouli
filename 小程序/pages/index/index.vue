@@ -150,7 +150,7 @@
 
 
 
-			<!-- 活动风采：叠层 + 可视轮播滑动 -->
+			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
 			<view class="showcase-section" v-if="showcaseList.length > 0">
 				<view class="section-head">
 					<view class="section-head__main">
@@ -162,92 +162,25 @@
 						<u-icon name="arrow-right" size="20" color="#18AF38"></u-icon>
 					</view>
 				</view>
-
-				<view
-					class="showcase-stage"
-					:class="showcaseDeckShift ? 'showcase-stage--shift' : ''"
-				>
-					<view class="showcase-deck" v-if="showcaseList.length > 1">
-						<view class="showcase-deck-card showcase-deck-card--far"></view>
-						<view class="showcase-deck-card showcase-deck-card--near"></view>
-					</view>
-
-					<scroll-view
-						v-if="showcaseList.length > 1"
-						scroll-x
-						:show-scrollbar="false"
-						:scroll-with-animation="true"
-						:scroll-left="showcaseScrollLeft"
-						class="showcase-scroll"
-						@scroll="onShowcaseScroll"
-					>
-						<view class="showcase-scroll-track">
-							<view
-								class="showcase-scroll-item"
-								v-for="(item, idx) in showcaseList"
-								:key="item.id"
-							>
-								<view
-									class="showcase-hero"
-									hover-class="showcase-hero--press"
-									:data-idx="idx"
-									@click="onShowcaseHeroTap"
-								>
-									<view class="showcase-hero__img">
-										<u-image width="100%" height="100%" :src="item.cover" mode="aspectFill"></u-image>
-									</view>
-									<view class="showcase-hero__shade"></view>
-									<view class="showcase-hero__content">
-										<view class="showcase-hero__tags">
-											<text class="showcase-hero__tag" v-if="item.photo_count > 1">{{ item.photo_count }} 图</text>
-											<text class="showcase-hero__tag showcase-hero__tag--glass">轻触预览</text>
-										</view>
-										<text class="showcase-hero__title u-line-2">{{ item.title }}</text>
-										<text class="showcase-hero__date">{{ item.event_date_text }}</text>
-									</view>
+				<scroll-view scroll-x class="showcase-scroll" :show-scrollbar="false">
+					<view class="showcase-row">
+						<view class="showcase-card" v-for="item in showcaseList" :key="item.id"
+							hover-class="press-scale" :hover-stay-time="80"
+							@click="goShowcaseDetail(item.id)">
+							<view class="showcase-card__cover">
+								<u-image width="280" height="200" :src="item.cover" border-radius="20rpx" mode="aspectFill"></u-image>
+								<view class="showcase-card__badge" v-if="item.photo_count > 1">
+									<u-icon name="photo" size="18" color="#fff"></u-icon>
+									<text>{{ item.photo_count }}</text>
 								</view>
 							</view>
-						</view>
-					</scroll-view>
-
-					<view
-						v-else
-						class="showcase-scroll showcase-scroll--single"
-					>
-						<view
-							class="showcase-hero showcase-hero--single"
-							hover-class="showcase-hero--press"
-							@click="openShowcasePreview"
-						>
-						<view class="showcase-hero__img">
-							<u-image width="100%" height="100%" :src="showcaseList[0].cover" mode="aspectFill"></u-image>
-						</view>
-						<view class="showcase-hero__shade"></view>
-						<view class="showcase-hero__content">
-							<view class="showcase-hero__tags">
-								<text class="showcase-hero__tag" v-if="showcaseList[0].photo_count > 1">{{ showcaseList[0].photo_count }} 图</text>
-								<text class="showcase-hero__tag showcase-hero__tag--glass">轻触预览</text>
+							<view class="showcase-card__body">
+								<view class="showcase-card__title u-line-2">{{ item.title }}</view>
+								<view class="showcase-card__date">{{ item.event_date_text }}</view>
 							</view>
-							<text class="showcase-hero__title u-line-2">{{ showcaseList[0].title }}</text>
-							<text class="showcase-hero__date">{{ showcaseList[0].event_date_text }}</text>
-						</view>
 						</view>
 					</view>
-				</view>
-
-				<view class="showcase-foot" v-if="showcaseList.length > 1">
-					<view class="showcase-dots">
-						<view
-							class="showcase-dot"
-							v-for="(item, idx) in showcaseList"
-							:key="item.id"
-							:class="idx === showcaseIndex ? 'showcase-dot--on' : ''"
-							:data-idx="idx"
-							@click="scrollToShowcaseIndex"
-						></view>
-					</view>
-					<text class="showcase-foot-hint">左右滑动切换风采</text>
-				</view>
+				</scroll-view>
 			</view>
 
 
@@ -273,55 +206,6 @@
 				</view>
 			</view>
 		</z-paging>
-
-		<!-- 活动风采：全屏沉浸式预览（可滑动切换） -->
-		<view
-			v-if="showcasePreviewShow && showcaseCurrentItem"
-			class="showcase-preview"
-			:class="showcasePreviewAnim ? 'showcase-preview--in' : ''"
-			@touchmove.stop.prevent="noop"
-		>
-			<view class="showcase-preview__top">
-				<view class="showcase-preview__close" hover-class="showcase-preview__close--on" @click="closeShowcasePreview">
-					<u-icon name="close" size="32" color="#fff"></u-icon>
-				</view>
-				<text class="showcase-preview__counter" v-if="showcaseList.length > 1">
-					{{ showcaseIndex + 1 }} / {{ showcaseList.length }}
-				</text>
-				<view class="showcase-preview__link" hover-class="showcase-preview__link--on" @click="goShowcaseListFromPreview">
-					全部风采
-				</view>
-			</view>
-
-			<swiper
-				class="showcase-preview__swiper"
-				:current="showcaseIndex"
-				circular
-				:duration="320"
-				easing-function="easeOutCubic"
-				@change="onShowcasePreviewSwiperChange"
-			>
-				<swiper-item v-for="item in showcaseList" :key="item.id">
-					<view class="showcase-preview__slide">
-						<u-image width="100%" height="100%" :src="item.cover" mode="aspectFill"></u-image>
-						<view class="showcase-preview__slide-fade"></view>
-					</view>
-				</swiper-item>
-			</swiper>
-
-			<view class="showcase-preview__sheet">
-				<view class="showcase-preview__sheet-handle"></view>
-				<text class="showcase-preview__title">{{ showcaseCurrentItem.title }}</text>
-				<text class="showcase-preview__meta">{{ showcaseCurrentItem.event_date_text }}</text>
-				<text class="showcase-preview__desc" v-if="showcaseCurrentItem.description">{{ showcaseCurrentItem.description }}</text>
-				<view class="showcase-preview__actions">
-					<view class="showcase-preview__btn showcase-preview__btn--main" hover-class="showcase-preview__btn--on" @click="goShowcaseDetailFromPreview">
-						查看详情与相册
-					</view>
-				</view>
-				<text class="showcase-preview__swipe-tip" v-if="showcaseList.length > 1">左右滑动切换其他风采</text>
-			</view>
-		</view>
 
 		<!-- 蒙层只用 view：cover-view 是原生层，离开首页后仍会盖住扫码签到页，导致教程关不掉、也点不了签到 -->
 		<block v-if="guideOnPage && showGuide && guideHole">
@@ -377,12 +261,6 @@ export default {
 				dataList: [],
 				active_list: [],
 				showcaseList: [],
-				showcaseIndex: 0,
-				showcasePreviewShow: false,
-				showcasePreviewAnim: false,
-				showcaseDeckShift: false,
-				showcaseScrollLeft: 0,
-				showcaseCardStepPx: 0,
 				homeNotice: '',
 				// 问候模块数据
 				greetingHour: new Date().getHours(),
@@ -472,12 +350,6 @@ export default {
 					cols.push(list.slice(i, i + 2))
 				}
 				return cols
-			},
-			showcaseCurrentItem() {
-				const list = this.showcaseList || []
-				if (!list.length) return null
-				const idx = this.showcaseIndex % list.length
-				return list[idx] || list[0]
 			},
 			guideWinW() {
 				return uni.getSystemInfoSync().windowWidth
@@ -749,15 +621,12 @@ export default {
 				// 接口失败不影响，保留 fallback
 			}
 		},
-			// 活动风采预览（首页展示最新 6 条）
+			// 活动风采（首页展示最新 6 条）
 			async getShowcaseList() {
 				try {
 					let res = await this.$u.api.getActivityShowcaseList({ page: 1, limit: 6 });
 					if (res.code == 1) {
 						this.showcaseList = (res.data && res.data.list) || [];
-						this.showcaseIndex = 0
-						this.showcaseScrollLeft = 0
-						this.$nextTick(() => this.calcShowcaseCardStep())
 					}
 				} catch (e) {
 					// 接口失败不显示板块
@@ -768,81 +637,6 @@ export default {
 			},
 			goShowcaseDetail(id) {
 				this.$u.route('/pages/activity/showcase-detail?id=' + id);
-			},
-			calcShowcaseCardStep() {
-				const sys = uni.getSystemInfoSync()
-				// 与 .showcase-scroll-item 宽度 + 间距一致（rpx → px）
-				this.showcaseCardStepPx = (640 / 750) * sys.windowWidth
-			},
-			onShowcaseScroll(e) {
-				const step = this.showcaseCardStepPx
-				if (!step) return
-				const sl = e.detail && e.detail.scrollLeft
-				if (typeof sl !== 'number') return
-				const idx = Math.round(sl / step)
-				const max = this.showcaseList.length - 1
-				const next = idx < 0 ? 0 : (idx > max ? max : idx)
-				if (next !== this.showcaseIndex) {
-					this.showcaseIndex = next
-					this.pulseShowcaseDeck()
-				}
-			},
-			scrollToShowcaseIndex(e) {
-				const idx = parseInt(e.currentTarget.dataset.idx, 10)
-				if (isNaN(idx)) return
-				this.showcaseIndex = idx
-				this.showcaseScrollLeft = idx * this.showcaseCardStepPx
-				this.pulseShowcaseDeck()
-			},
-			onShowcaseHeroTap(e) {
-				const idx = parseInt(e.currentTarget.dataset.idx, 10)
-				if (!isNaN(idx)) {
-					this.showcaseIndex = idx
-				}
-				this.openShowcasePreview()
-			},
-			onShowcasePreviewSwiperChange(e) {
-				const cur = e.detail && e.detail.current
-				if (typeof cur !== 'number') return
-				this.showcaseIndex = cur
-				if (this.showcaseCardStepPx) {
-					this.showcaseScrollLeft = cur * this.showcaseCardStepPx
-				}
-			},
-			pulseShowcaseDeck() {
-				this.showcaseDeckShift = true
-				if (this._showcaseDeckTimer) clearTimeout(this._showcaseDeckTimer)
-				this._showcaseDeckTimer = setTimeout(() => {
-					this.showcaseDeckShift = false
-				}, 450)
-			},
-			openShowcasePreview() {
-				if (!this.showcaseCurrentItem) return
-				this.showcasePreviewShow = true
-				this.showcasePreviewAnim = false
-				this.$nextTick(() => {
-					this.showcasePreviewAnim = true
-				})
-			},
-			closeShowcasePreview() {
-				this.showcasePreviewAnim = false
-				setTimeout(() => {
-					this.showcasePreviewShow = false
-				}, 220)
-			},
-			goShowcaseDetailFromPreview() {
-				const item = this.showcaseCurrentItem
-				if (!item || !item.id) return
-				this.closeShowcasePreview()
-				setTimeout(() => {
-					this.goShowcaseDetail(item.id)
-				}, 240)
-			},
-			goShowcaseListFromPreview() {
-				this.closeShowcasePreview()
-				setTimeout(() => {
-					this.goShowcaseList()
-				}, 240)
 			},
 			// 拉首页走马灯通知（后台 home_notice 配置，留空则不显示）
 			async getHomeNotice() {
@@ -1495,327 +1289,58 @@ export default {
 		position: relative;
 		z-index: 1;
 		margin: 20rpx 30rpx 0;
-		padding: 24rpx 0 16rpx;
+		padding: 24rpx 0 12rpx;
 		background: $surface;
 		border-radius: $radius-lg;
 		box-shadow: $shadow-card;
-		overflow: hidden;
-	}
-	.showcase-stage {
-		position: relative;
-		height: 420rpx;
-		margin-top: 4rpx;
-	}
-	.showcase-deck {
-		position: absolute;
-		left: 56rpx;
-		right: 56rpx;
-		top: 28rpx;
-		bottom: 0;
-		z-index: 0;
-		pointer-events: none;
-	}
-	.showcase-deck-card {
-		position: absolute;
-		left: 0;
-		right: 0;
-		border-radius: 32rpx;
-		background: linear-gradient(145deg, #dfece3 0%, #c5dcc9 100%);
-		box-shadow: 0 16rpx 40rpx rgba(24, 48, 32, 0.08);
-		transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
-	}
-	.showcase-deck-card--far {
-		top: 36rpx;
-		height: 340rpx;
-		transform: scale(0.9) translateY(24rpx);
-		opacity: 0.45;
-	}
-	.showcase-deck-card--near {
-		top: 18rpx;
-		height: 360rpx;
-		transform: scale(0.95) translateY(12rpx);
-		opacity: 0.65;
-	}
-	.showcase-stage--shift .showcase-deck-card--near {
-		transform: scale(0.93) translateY(18rpx);
-	}
-	.showcase-stage--shift .showcase-deck-card--far {
-		transform: scale(0.88) translateY(28rpx);
 	}
 	.showcase-scroll {
-		position: relative;
-		z-index: 2;
-		width: 100%;
-		height: 420rpx;
 		white-space: nowrap;
+		padding-left: 24rpx;
 	}
-	.showcase-scroll--single {
-		padding: 0 32rpx;
-		box-sizing: border-box;
-		height: 380rpx;
+	.showcase-row {
+		display: flex;
+		padding-right: 24rpx;
 	}
-	.showcase-scroll-track {
-		display: inline-flex;
-		flex-direction: row;
-		align-items: stretch;
-		height: 100%;
-		padding: 0 32rpx 8rpx;
-		box-sizing: border-box;
-	}
-	.showcase-scroll-item {
+	.showcase-card {
 		flex-shrink: 0;
-		width: 620rpx;
-		margin-right: 20rpx;
-		height: 380rpx;
+		width: 280rpx;
+		margin-right: 16rpx;
 	}
-	.showcase-scroll-item:last-child {
-		margin-right: 32rpx;
-	}
-	.showcase-hero {
+	.showcase-card__cover {
 		position: relative;
-		height: 380rpx;
-		margin: 0;
-		border-radius: 32rpx;
+		width: 280rpx;
+		height: 200rpx;
+		border-radius: $radius-md;
 		overflow: hidden;
-		box-shadow: 0 20rpx 48rpx rgba(16, 40, 24, 0.18);
-		transform: translateZ(0);
-		transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 	}
-	.showcase-hero--single {
-		margin: 0;
-	}
-	.showcase-hero--press {
-		transform: scale(0.98);
-	}
-	.showcase-hero__img {
+	.showcase-card__badge {
 		position: absolute;
-		left: 0;
-		top: 0;
-		width: 100%;
-		height: 100%;
-	}
-	.showcase-hero__shade {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		height: 55%;
-		background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.72) 100%);
-		pointer-events: none;
-	}
-	.showcase-hero__content {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		padding: 28rpx 28rpx 32rpx;
-		z-index: 2;
-	}
-	.showcase-hero__tags {
+		right: 10rpx;
+		bottom: 10rpx;
 		display: flex;
-		flex-wrap: wrap;
-		gap: 10rpx;
-		margin-bottom: 12rpx;
-	}
-	.showcase-hero__tag {
-		padding: 6rpx 14rpx;
+		align-items: center;
+		gap: 4rpx;
+		padding: 4rpx 10rpx;
 		font-size: 20rpx;
+		color: #fff;
+		background: rgba(0, 0, 0, 0.42);
+		border-radius: 999rpx;
+	}
+	.showcase-card__body {
+		padding: 14rpx 4rpx 6rpx;
+	}
+	.showcase-card__title {
+		font-size: 26rpx;
 		font-weight: 600;
-		color: #fff;
-		background: rgba(24, 175, 56, 0.85);
-		border-radius: 999rpx;
+		color: $text;
+		line-height: 1.45;
+		min-height: 74rpx;
 	}
-	.showcase-hero__tag--glass {
-		background: rgba(255, 255, 255, 0.22);
-		backdrop-filter: blur(8px);
-		border: 1rpx solid rgba(255, 255, 255, 0.28);
-	}
-	.showcase-hero__title {
-		display: block;
-		font-size: 32rpx;
-		font-weight: 700;
-		color: #fff;
-		line-height: 1.35;
-		text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.35);
-	}
-	.showcase-hero__date {
-		display: block;
-		margin-top: 8rpx;
-		font-size: 24rpx;
-		color: rgba(255, 255, 255, 0.88);
-	}
-	.showcase-foot {
-		margin-top: 20rpx;
-		padding: 0 32rpx;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 10rpx;
-	}
-	.showcase-dots {
-		display: flex;
-		align-items: center;
-		gap: 10rpx;
-	}
-	.showcase-dot {
-		width: 10rpx;
-		height: 10rpx;
-		border-radius: 50%;
-		background: #d8e5dc;
-		transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease;
-	}
-	.showcase-dot--on {
-		width: 32rpx;
-		border-radius: 999rpx;
-		background: $brand;
-	}
-	.showcase-foot-hint {
+	.showcase-card__date {
+		margin-top: 6rpx;
 		font-size: 22rpx;
 		color: $text-muted;
-	}
-
-	.showcase-preview {
-		position: fixed;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 1000000;
-		background: #0a100c;
-		opacity: 0;
-		transform: scale(1.02);
-		transition: opacity 0.28s ease, transform 0.28s ease;
-		display: flex;
-		flex-direction: column;
-	}
-	.showcase-preview--in {
-		opacity: 1;
-		transform: scale(1);
-	}
-	.showcase-preview__top {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: calc(16rpx + env(safe-area-inset-top)) 28rpx 16rpx;
-		z-index: 5;
-	}
-	.showcase-preview__close {
-		width: 72rpx;
-		height: 72rpx;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.1);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: background 0.2s;
-	}
-	.showcase-preview__close--on {
-		background: rgba(255, 255, 255, 0.18);
-	}
-	.showcase-preview__counter {
-		font-size: 26rpx;
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.75);
-		letter-spacing: 2rpx;
-	}
-	.showcase-preview__link {
-		padding: 12rpx 22rpx;
-		font-size: 24rpx;
-		font-weight: 600;
-		color: #a8e6b8;
-		background: rgba(24, 175, 56, 0.15);
-		border-radius: 999rpx;
-		border: 1rpx solid rgba(24, 175, 56, 0.35);
-	}
-	.showcase-preview__link--on {
-		opacity: 0.85;
-	}
-	.showcase-preview__swiper {
-		flex: 1;
-		width: 100%;
-		min-height: 0;
-	}
-	.showcase-preview__slide {
-		position: relative;
-		width: 100%;
-		height: 100%;
-	}
-	.showcase-preview__slide-fade {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		height: 45%;
-		background: linear-gradient(180deg, transparent 0%, #0a100c 100%);
-		pointer-events: none;
-	}
-	.showcase-preview__sheet {
-		flex-shrink: 0;
-		margin-top: -48rpx;
-		padding: 16rpx 32rpx calc(32rpx + env(safe-area-inset-bottom));
-		background: rgba(18, 28, 22, 0.92);
-		backdrop-filter: blur(20px);
-		border-radius: 40rpx 40rpx 0 0;
-		border-top: 1rpx solid rgba(255, 255, 255, 0.08);
-		z-index: 4;
-	}
-	.showcase-preview__sheet-handle {
-		width: 64rpx;
-		height: 8rpx;
-		margin: 0 auto 20rpx;
-		border-radius: 999rpx;
-		background: rgba(255, 255, 255, 0.2);
-	}
-	.showcase-preview__title {
-		display: block;
-		font-size: 36rpx;
-		font-weight: 700;
-		color: #fff;
-		line-height: 1.35;
-	}
-	.showcase-preview__meta {
-		display: block;
-		margin-top: 10rpx;
-		font-size: 26rpx;
-		color: rgba(255, 255, 255, 0.55);
-	}
-	.showcase-preview__desc {
-		display: block;
-		margin-top: 16rpx;
-		font-size: 26rpx;
-		line-height: 1.55;
-		color: rgba(255, 255, 255, 0.72);
-		max-height: 120rpx;
-		overflow: hidden;
-	}
-	.showcase-preview__actions {
-		margin-top: 28rpx;
-	}
-	.showcase-preview__btn {
-		height: 88rpx;
-		line-height: 88rpx;
-		text-align: center;
-		border-radius: 999rpx;
-		font-size: 30rpx;
-		font-weight: 600;
-		transition: transform 0.15s ease, opacity 0.15s ease;
-	}
-	.showcase-preview__btn--main {
-		color: #0a2e14;
-		background: linear-gradient(135deg, #c8f0a8 0%, #18af38 100%);
-		box-shadow: 0 12rpx 32rpx rgba(24, 175, 56, 0.35);
-	}
-	.showcase-preview__btn--on {
-		transform: scale(0.98);
-		opacity: 0.92;
-	}
-	.showcase-preview__swipe-tip {
-		display: block;
-		margin-top: 20rpx;
-		text-align: center;
-		font-size: 22rpx;
-		color: rgba(255, 255, 255, 0.35);
 	}
 
 	.content-panel {
