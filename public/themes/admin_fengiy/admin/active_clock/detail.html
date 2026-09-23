@@ -1,0 +1,92 @@
+<include file="public@header"/>
+<style>
+    .detail-table td:first-child { width: 140px; background: #f9f9f9; font-weight: bold; }
+    .detail-photo { max-width: 240px; max-height: 240px; object-fit: contain; border-radius: 4px; border: 1px solid #e3e3e3; cursor: pointer; }
+    .experience-share-box { white-space: pre-wrap; word-break: break-word; line-height: 1.7; color: #333; min-height: 48px; }
+    .experience-empty { color: #999; }
+</style>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <if condition="$from eq 'sign_record'">
+            <li><a href="{:url('sign_record')}">签到记录</a></li>
+            <else/>
+            <li><a href="{:url('index')}">打卡列表</a></li>
+        </if>
+        <li class="active"><a href="javascript:;">详情 #{$item.id}</a></li>
+    </ul>
+    <div class="margin-top-20">
+        <a class="btn btn-default" href="{$listUrl}">返回列表</a>
+    </div>
+
+    <h4 class="margin-top-20">活动打卡详情</h4>
+    <table class="table table-bordered detail-table margin-top-10">
+        <tr>
+            <td>记录 ID</td>
+            <td>{$item.id}</td>
+            <td>报名记录 ID</td>
+            <td>{$item.sign_id}</td>
+        </tr>
+        <tr>
+            <td>用户</td>
+            <td colspan="3">
+                <if condition="!empty($item['avatar'])">
+                    <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($item.avatar)}');">
+                        <img src="{:cmf_get_image_preview_url($item.avatar)}" style="width:40px;height:40px;border-radius:40px;vertical-align:middle;">
+                    </a>
+                </if>
+                {$item.nickname|default='—'}
+                <if condition="!empty($item['phone'])">（{$item.phone}）</if>
+                · 用户 ID：{$item.user_id}
+            </td>
+        </tr>
+        <tr>
+            <td>活动</td>
+            <td colspan="3">
+                <if condition="!empty($item['active_thumb'])">
+                    <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($item.active_thumb)}');">
+                        <img src="{:cmf_get_image_preview_url($item.active_thumb)}" style="width:40px;height:40px;border-radius:4px;vertical-align:middle;">
+                    </a>
+                </if>
+                {$item.name|default='—'}
+                · 活动 ID：{$item.active_id}
+            </td>
+        </tr>
+        <tr>
+            <td>打卡日期</td>
+            <td>{$item.date_time_fmt}</td>
+            <td>提交时间</td>
+            <td>{$item.create_time_fmt}</td>
+        </tr>
+        <tr>
+            <td>赠送积分</td>
+            <td colspan="3">{$item.send_point|default=0}</td>
+        </tr>
+        <tr>
+            <td>打卡照片</td>
+            <td colspan="3">
+                <if condition="!empty($item['image_url'])">
+                    <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($item.image_url)}');">
+                        <img class="detail-photo" src="{:cmf_get_image_preview_url($item.image_url)}" alt="打卡照片">
+                    </a>
+                    <else/>
+                    <span class="experience-empty">未上传</span>
+                </if>
+            </td>
+        </tr>
+        <tr>
+            <td>经验分享</td>
+            <td colspan="3">
+                <if condition="!empty($item['experience_share'])">
+                    <div class="experience-share-box">{$item.experience_share}</div>
+                    <else/>
+                    <span class="experience-empty">未填写</span>
+                </if>
+            </td>
+        </tr>
+    </table>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

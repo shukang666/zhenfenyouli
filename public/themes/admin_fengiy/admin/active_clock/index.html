@@ -41,6 +41,7 @@
                 <th>手机号</th>
                 <th>报名活动</th>
                 <th>图片</th>
+                <th width="72">经验分享</th>
                 <th>打卡日期</th>
                 <th width="200">{:lang('ACTIONS')}</th>
             </tr>
@@ -79,12 +80,17 @@
                             </a>
                         </if>
                     </td>
-
+                    <td>
+                        <if condition="!empty($vo['experience_share'])">
+                            <span class="label label-success">有</span>
+                            <else/>
+                            <span class="text-muted">—</span>
+                        </if>
+                    </td>
                     <td>{$vo.date_time |date="Y-m-d"}</td>
                     <td>
-<!--                        <a class="btn btn-xs btn-primary"-->
-<!--                           href="{:url('update',['id'=>$vo['id'] ])}">{:lang('EDIT')}</a>-->
-
+                        <a class="btn btn-xs btn-info"
+                           href="{:url('detail',['id'=>$vo['id']])}">详情</a>
                         <a class="btn btn-xs btn-danger js-ajax-delete"
                            href="{:url('delete',['id'=>$vo['id'] ])}">{:lang('DELETE')}</a>
                     </td>

@@ -86,6 +86,37 @@ class ActiveClockController extends ToolController
         return $this->fetch($tpl);
     }
 
+    /**
+     * 打卡详情（含经验分享、打卡图）
+     */
+    public function detail()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        if (empty($id)) {
+            $this->error('参数错误');
+        }
+        $item = ActiveClockModel::alias('a')
+            ->join('member b', 'a.user_id = b.id', 'left')
+            ->join('active c', 'a.active_id = c.id', 'left')
+            ->field('a.*,b.nickname,b.avatar,b.mobile as phone,c.name,c.thumb as active_thumb')
+            ->where('a.id', $id)
+            ->find();
+        if (empty($item)) {
+            $this->error('记录不存在');
+        }
+        $item['date_time_fmt'] = date('Y-m-d', $item['date_time']);
+        $item['create_time_fmt'] = date('Y-m-d H:i:s', $item['create_time']);
+        $from = $this->request->param('from', 'index', 'trim');
+        if ($from !== 'sign_record') {
+            $from = 'index';
+        }
+        $listUrl = $from === 'sign_record' ? url('sign_record') : url('index');
+        $this->assign('from', $from);
+        $this->assign('listUrl', (string)$listUrl);
+        $this->assign('item', $item);
+        return $this->fetch('detail');
+    }
+
     public function setWhere()
     {
         $name = $this->request->param('name', '', 'trim');
@@ -150,8 +181,8 @@ class ActiveClockController extends ToolController
             })->toArray();
 
         $filename = $filename . date('Y-m-d');
-        $head = ['ID', '用户信息', '手机号', '活动名称', '打卡日期',];//设置表头
-        $keys = ['id', 'nickname', 'phone', 'name', 'date_time',];//设置表头
+        $head = ['ID', '用户信息', '手机号', '活动名称', '打卡日期', '经验分享'];//设置表头
+        $keys = ['id', 'nickname', 'phone', 'name', 'date_time', 'experience_share'];//设置表头
         CommonModel::outData($filename, $list, $head, $keys);
         exit;
     }
