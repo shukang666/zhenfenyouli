@@ -150,7 +150,7 @@
 
 
 
-			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
+			<!-- 活动风采：叠卡滑动 + 点击预览 -->
 			<view class="showcase-section" v-if="showcaseList.length > 0">
 				<view class="section-head">
 					<view class="section-head__main">
@@ -162,25 +162,58 @@
 						<u-icon name="arrow-right" size="20" color="#18AF38"></u-icon>
 					</view>
 				</view>
-				<scroll-view scroll-x class="showcase-scroll" :show-scrollbar="false">
-					<view class="showcase-row">
-						<view class="showcase-card" v-for="item in showcaseList" :key="item.id"
-							hover-class="press-scale" :hover-stay-time="80"
-							@click="goShowcaseDetail(item.id)">
-							<view class="showcase-card__cover">
-								<u-image width="280" height="200" :src="item.cover" border-radius="20rpx" mode="aspectFill"></u-image>
-								<view class="showcase-card__badge" v-if="item.photo_count > 1">
-									<u-icon name="photo" size="18" color="#fff"></u-icon>
-									<text>{{ item.photo_count }}</text>
+
+				<view class="showcase-stack-area">
+					<view class="showcase-stack-inner">
+						<view
+							class="showcase-stack-card"
+							v-for="layer in showcaseStackLayers"
+							:key="layer.layerKey"
+							:class="layer.cardClass"
+						>
+							<view
+								class="showcase-stack-card__inner"
+								hover-class="press-scale"
+								:hover-stay-time="80"
+								:data-depth="layer.depth"
+								@click="onShowcaseCardTap"
+							>
+								<view class="showcase-stack-card__cover">
+									<u-image width="100%" height="100%" :src="layer.item.cover" border-radius="20rpx" mode="aspectFill"></u-image>
+									<view class="showcase-card__badge" v-if="layer.item.photo_count > 1">
+										<u-icon name="photo" size="18" color="#fff"></u-icon>
+										<text>{{ layer.item.photo_count }}</text>
+									</view>
 								</view>
-							</view>
-							<view class="showcase-card__body">
-								<view class="showcase-card__title u-line-2">{{ item.title }}</view>
-								<view class="showcase-card__date">{{ item.event_date_text }}</view>
+								<view class="showcase-stack-card__body">
+									<view class="showcase-stack-card__title u-line-2">{{ layer.item.title }}</view>
+									<view class="showcase-stack-card__date">{{ layer.item.event_date_text }}</view>
+								</view>
 							</view>
 						</view>
 					</view>
-				</scroll-view>
+					<swiper
+						v-if="showcaseList.length > 1"
+						class="showcase-gesture-swiper"
+						:current="showcaseIndex"
+						circular
+						@change="onShowcaseSwiperChange"
+					>
+						<swiper-item v-for="item in showcaseList" :key="item.id"></swiper-item>
+					</swiper>
+				</view>
+
+				<view class="showcase-stack-foot" v-if="showcaseList.length > 1">
+					<view class="showcase-dots">
+						<view
+							class="showcase-dot"
+							v-for="(item, idx) in showcaseList"
+							:key="item.id"
+							:class="{ 'showcase-dot--on': idx === showcaseIndex }"
+						></view>
+					</view>
+					<text class="showcase-stack-hint">左右滑动切换 · 点击卡片预览</text>
+				</view>
 			</view>
 
 
@@ -206,6 +239,50 @@
 				</view>
 			</view>
 		</z-paging>
+
+		<!-- 活动风采预览层（固定全屏，放在 z-paging 外） -->
+		<view
+			v-if="showcasePreviewShow && showcaseCurrentItem"
+			class="showcase-preview-mask"
+			@touchmove.stop.prevent="noop"
+		>
+			<view class="showcase-preview-close" @click="closeShowcasePreview">
+				<u-icon name="close" size="36" color="#fff"></u-icon>
+			</view>
+			<view class="showcase-preview-nav showcase-preview-nav--prev" @click.stop="showcasePreviewPrev">
+				<text class="showcase-preview-nav__icon">‹</text>
+			</view>
+			<view class="showcase-preview-nav showcase-preview-nav--next" @click.stop="showcasePreviewNext">
+				<text class="showcase-preview-nav__icon">›</text>
+			</view>
+			<view class="showcase-preview-panel" @click.stop>
+				<view class="showcase-preview-cover">
+					<u-image width="100%" height="420" :src="showcaseCurrentItem.cover" mode="aspectFill"></u-image>
+					<view class="showcase-card__badge showcase-preview-badge" v-if="showcaseCurrentItem.photo_count > 1">
+						<u-icon name="photo" size="20" color="#fff"></u-icon>
+						<text>{{ showcaseCurrentItem.photo_count }} 张</text>
+					</view>
+				</view>
+				<view class="showcase-preview-body">
+					<view class="showcase-preview-title">{{ showcaseCurrentItem.title }}</view>
+					<view class="showcase-preview-meta">{{ showcaseCurrentItem.event_date_text }}</view>
+					<view class="showcase-preview-desc" v-if="showcaseCurrentItem.description">
+						{{ showcaseCurrentItem.description }}
+					</view>
+					<view class="showcase-preview-index" v-if="showcaseList.length > 1">
+						{{ showcaseIndex + 1 }} / {{ showcaseList.length }}
+					</view>
+					<view class="showcase-preview-actions">
+						<view class="showcase-preview-btn showcase-preview-btn--ghost" hover-class="press-scale" @click="goShowcaseListFromPreview">
+							全部风采
+						</view>
+						<view class="showcase-preview-btn showcase-preview-btn--primary" hover-class="press-scale" @click="goShowcaseDetailFromPreview">
+							查看详情
+						</view>
+					</view>
+				</view>
+			</view>
+		</view>
 
 		<!-- 蒙层只用 view：cover-view 是原生层，离开首页后仍会盖住扫码签到页，导致教程关不掉、也点不了签到 -->
 		<block v-if="guideOnPage && showGuide && guideHole">
@@ -261,6 +338,8 @@ export default {
 				dataList: [],
 				active_list: [],
 				showcaseList: [],
+				showcaseIndex: 0,
+				showcasePreviewShow: false,
 				homeNotice: '',
 				// 问候模块数据
 				greetingHour: new Date().getHours(),
@@ -350,6 +429,31 @@ export default {
 					cols.push(list.slice(i, i + 2))
 				}
 				return cols
+			},
+			showcaseCurrentItem() {
+				const list = this.showcaseList || []
+				if (!list.length) return null
+				const idx = this.showcaseIndex % list.length
+				return list[idx] || list[0]
+			},
+			// 叠卡：depth 0 为顶卡，1、2 为后方层（先绘制后方）
+			showcaseStackLayers() {
+				const list = this.showcaseList || []
+				const n = list.length
+				if (!n) return []
+				const idx = ((this.showcaseIndex % n) + n) % n
+				const layerCount = Math.min(3, n)
+				const layers = []
+				for (let d = layerCount - 1; d >= 0; d--) {
+					const item = list[(idx + d) % n]
+					layers.push({
+						item,
+						depth: d,
+						layerKey: String(item.id) + '_' + String(d),
+						cardClass: 'showcase-stack-card--depth-' + d,
+					})
+				}
+				return layers
 			},
 			guideWinW() {
 				return uni.getSystemInfoSync().windowWidth
@@ -637,6 +741,44 @@ export default {
 			},
 			goShowcaseDetail(id) {
 				this.$u.route('/pages/activity/showcase-detail?id=' + id);
+			},
+			onShowcaseSwiperChange(e) {
+				const cur = e.detail && e.detail.current
+				if (typeof cur === 'number') {
+					this.showcaseIndex = cur
+				}
+			},
+			onShowcaseCardTap(e) {
+				const depth = parseInt(e.currentTarget.dataset.depth, 10)
+				if (depth !== 0) return
+				this.openShowcasePreview()
+			},
+			openShowcasePreview() {
+				if (!this.showcaseCurrentItem) return
+				this.showcasePreviewShow = true
+			},
+			closeShowcasePreview() {
+				this.showcasePreviewShow = false
+			},
+			showcasePreviewPrev() {
+				const n = this.showcaseList.length
+				if (n <= 1) return
+				this.showcaseIndex = (this.showcaseIndex - 1 + n) % n
+			},
+			showcasePreviewNext() {
+				const n = this.showcaseList.length
+				if (n <= 1) return
+				this.showcaseIndex = (this.showcaseIndex + 1) % n
+			},
+			goShowcaseDetailFromPreview() {
+				const item = this.showcaseCurrentItem
+				if (!item || !item.id) return
+				this.showcasePreviewShow = false
+				this.goShowcaseDetail(item.id)
+			},
+			goShowcaseListFromPreview() {
+				this.showcasePreviewShow = false
+				this.goShowcaseList()
 			},
 			// 拉首页走马灯通知（后台 home_notice 配置，留空则不显示）
 			async getHomeNotice() {
@@ -1289,30 +1431,116 @@ export default {
 		position: relative;
 		z-index: 1;
 		margin: 20rpx 30rpx 0;
-		padding: 24rpx 0 12rpx;
+		padding: 24rpx 0 20rpx;
 		background: $surface;
 		border-radius: $radius-lg;
 		box-shadow: $shadow-card;
 	}
-	.showcase-scroll {
-		white-space: nowrap;
-		padding-left: 24rpx;
-	}
-	.showcase-row {
-		display: flex;
-		padding-right: 24rpx;
-	}
-	.showcase-card {
-		flex-shrink: 0;
-		width: 280rpx;
-		margin-right: 16rpx;
-	}
-	.showcase-card__cover {
+	.showcase-stack-area {
 		position: relative;
-		width: 280rpx;
-		height: 200rpx;
-		border-radius: $radius-md;
+		margin-top: 8rpx;
+	}
+	.showcase-stack-inner {
+		position: relative;
+		height: 320rpx;
+		margin: 0 32rpx;
+	}
+	.showcase-stack-card {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 0;
+		transition: transform 0.32s ease, opacity 0.32s ease, filter 0.32s ease;
+		transform-origin: center top;
+	}
+	.showcase-stack-card--depth-0 {
+		z-index: 3;
+		transform: translateY(0) scale(1);
+	}
+	.showcase-stack-card--depth-1 {
+		z-index: 2;
+		transform: translateY(18rpx) scale(0.96);
+		opacity: 0.88;
+		filter: brightness(0.98);
+	}
+	.showcase-stack-card--depth-2 {
+		z-index: 1;
+		transform: translateY(36rpx) scale(0.92);
+		opacity: 0.72;
+		filter: brightness(0.96);
+	}
+	.showcase-stack-card__inner {
+		display: flex;
+		align-items: stretch;
+		background: #fff;
+		border-radius: 24rpx;
 		overflow: hidden;
+		box-shadow: 0 12rpx 40rpx rgba(24, 48, 32, 0.1);
+		border: 1rpx solid rgba(24, 175, 56, 0.08);
+		min-height: 240rpx;
+	}
+	.showcase-stack-card__cover {
+		position: relative;
+		width: 240rpx;
+		flex-shrink: 0;
+		min-height: 240rpx;
+	}
+	.showcase-stack-card__body {
+		flex: 1;
+		min-width: 0;
+		padding: 24rpx 20rpx 20rpx;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+	.showcase-stack-card__title {
+		font-size: 28rpx;
+		font-weight: 600;
+		color: $text;
+		line-height: 1.45;
+	}
+	.showcase-stack-card__date {
+		margin-top: 12rpx;
+		font-size: 24rpx;
+		color: $text-muted;
+	}
+	.showcase-gesture-swiper {
+		position: absolute;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 320rpx;
+		opacity: 0;
+		z-index: 10;
+	}
+	.showcase-stack-foot {
+		margin-top: 28rpx;
+		padding: 0 32rpx;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 12rpx;
+	}
+	.showcase-dots {
+		display: flex;
+		align-items: center;
+		gap: 10rpx;
+	}
+	.showcase-dot {
+		width: 10rpx;
+		height: 10rpx;
+		border-radius: 50%;
+		background: #d8e5dc;
+		transition: width 0.25s ease, background 0.25s ease;
+	}
+	.showcase-dot--on {
+		width: 28rpx;
+		border-radius: 999rpx;
+		background: $brand;
+	}
+	.showcase-stack-hint {
+		font-size: 22rpx;
+		color: $text-muted;
 	}
 	.showcase-card__badge {
 		position: absolute;
@@ -1327,20 +1555,128 @@ export default {
 		background: rgba(0, 0, 0, 0.42);
 		border-radius: 999rpx;
 	}
-	.showcase-card__body {
-		padding: 14rpx 4rpx 6rpx;
+	.showcase-preview-mask {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 1000000;
+		background: rgba(10, 20, 14, 0.82);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 40rpx 32rpx calc(40rpx + env(safe-area-inset-bottom));
+		box-sizing: border-box;
 	}
-	.showcase-card__title {
-		font-size: 26rpx;
-		font-weight: 600;
-		color: $text;
-		line-height: 1.45;
-		min-height: 74rpx;
+	.showcase-preview-close {
+		position: absolute;
+		top: calc(24rpx + env(safe-area-inset-top));
+		right: 32rpx;
+		z-index: 3;
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.12);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
-	.showcase-card__date {
-		margin-top: 6rpx;
+	.showcase-preview-nav {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 2;
+		width: 72rpx;
+		height: 120rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.showcase-preview-nav--prev {
+		left: 8rpx;
+	}
+	.showcase-preview-nav--next {
+		right: 8rpx;
+	}
+	.showcase-preview-nav__icon {
+		font-size: 64rpx;
+		font-weight: 300;
+		color: rgba(255, 255, 255, 0.85);
+		line-height: 1;
+	}
+	.showcase-preview-panel {
+		width: 100%;
+		max-width: 640rpx;
+		max-height: 88vh;
+		border-radius: 28rpx;
+		overflow: hidden;
+		background: #fff;
+		box-shadow: 0 24rpx 80rpx rgba(0, 0, 0, 0.35);
+	}
+	.showcase-preview-cover {
+		position: relative;
+		width: 100%;
+	}
+	.showcase-preview-badge {
+		right: 20rpx;
+		bottom: 20rpx;
+		padding: 8rpx 16rpx;
 		font-size: 22rpx;
-		color: $text-muted;
+	}
+	.showcase-preview-body {
+		padding: 28rpx 28rpx 32rpx;
+	}
+	.showcase-preview-title {
+		font-size: 34rpx;
+		font-weight: 700;
+		color: #1a2e22;
+		line-height: 1.35;
+	}
+	.showcase-preview-meta {
+		margin-top: 12rpx;
+		font-size: 26rpx;
+		color: #6b776e;
+	}
+	.showcase-preview-desc {
+		margin-top: 16rpx;
+		font-size: 26rpx;
+		line-height: 1.55;
+		color: #5a6b5e;
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+	}
+	.showcase-preview-index {
+		margin-top: 16rpx;
+		font-size: 24rpx;
+		color: #9aa89e;
+		text-align: center;
+	}
+	.showcase-preview-actions {
+		margin-top: 28rpx;
+		display: flex;
+		gap: 20rpx;
+	}
+	.showcase-preview-btn {
+		flex: 1;
+		height: 80rpx;
+		line-height: 80rpx;
+		text-align: center;
+		border-radius: 999rpx;
+		font-size: 28rpx;
+		font-weight: 600;
+	}
+	.showcase-preview-btn--ghost {
+		color: $brand;
+		background: $brand-soft;
+		border: 1rpx solid rgba(24, 175, 56, 0.2);
+	}
+	.showcase-preview-btn--primary {
+		color: #fff;
+		background: linear-gradient(135deg, #a4db88 0%, #18af38 100%);
+		box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.28);
 	}
 
 	.content-panel {
