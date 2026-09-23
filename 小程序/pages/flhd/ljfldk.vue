@@ -23,22 +23,10 @@
 
 		<!-- 新用户：先学指导 → 再考试，通过后才显示场景选择 -->
 		<view class="dk-block dk-block--learn" v-if="showLearnHub">
-			<text class="dk-block-t">{{ learnHubTitle }}</text>
-			<text class="dk-block-hint">{{ learnHubHint }}</text>
+			<text class="dk-block-t">分类学习</text>
+			<text class="dk-block-hint">学完全部分类指导后，方可参加下方考试</text>
 
-			<view v-if="needsExam" class="dk-exam-card">
-				<text class="dk-exam-desc">分类指导已学完，通过答题考试后即可选择场景打卡。</text>
-				<view
-					class="dk-scene-btn dk-scene-btn--primary dk-exam-btn"
-					hover-class="dk-scene-btn--press"
-					:hover-stay-time="80"
-					@click="goExam"
-				>
-					<text class="dk-scene-btn-t">去答题考试</text>
-				</view>
-			</view>
-
-			<view v-else class="dk-learn-wrap">
+			<view class="dk-learn-wrap">
 				<view class="dk-learn-progress" v-if="waste.waste_count">
 					<text class="dk-learn-progress-t">学习进度 {{ waste.user_count || 0 }}/{{ waste.waste_count }}</text>
 					<u-line-progress
@@ -49,23 +37,53 @@
 						height="12"
 					></u-line-progress>
 				</view>
-				<scroll-view scroll-y class="dk-learn-scroll" :show-scrollbar="false">
-					<view
-						class="dk-learn-item"
-						v-for="(item, index) in waste_list"
-						:key="item.id || index"
-						hover-class="dk-learn-item--press"
-						@click="goLearnDetail(item.id)"
+				<view class="dk-learn-scroll-wrap">
+					<scroll-view
+						scroll-y
+						class="dk-learn-scroll"
+						:style="{ height: learnScrollPx + 'px' }"
+						:show-scrollbar="false"
+						@scrolltolower="onLearnScrollBottom"
 					>
-						<u-image width="120" height="120" :src="item.thumb" border-radius="12"></u-image>
-						<view class="dk-learn-item-body">
-							<text class="dk-learn-item-name">{{ item.name }}</text>
-							<text class="dk-learn-item-desc u-line-2">{{ item.desc }}</text>
-							<text class="dk-learn-item-go">{{ item.is_study == 1 ? '继续学习 ›' : '开始学习 ›' }}</text>
+						<view
+							class="dk-learn-item"
+							v-for="(item, index) in waste_list"
+							:key="'waste-' + index"
+							hover-class="dk-learn-item--press"
+							@tap="goLearnDetail(index)"
+						>
+							<u-image width="120" height="120" :src="item.thumb" border-radius="12"></u-image>
+							<view class="dk-learn-item-body">
+								<text class="dk-learn-item-name">{{ item.name }}</text>
+								<text class="dk-learn-item-desc u-line-2">{{ item.desc }}</text>
+								<view class="dk-learn-item-act" @tap.stop="goLearnDetail(index)">
+									<text class="dk-learn-item-go">{{ item.is_study == 1 ? '继续学习' : '开始学习' }}</text>
+								</view>
+							</view>
 						</view>
+						<view class="dk-learn-empty" v-if="tutorialLoaded && !waste_list.length">暂无分类指导，请联系社区管理员</view>
+					</scroll-view>
+				</view>
+			</view>
+
+			<view class="dk-exam-block">
+				<text class="dk-block-t dk-exam-block-t">分类考试</text>
+				<view
+					class="dk-exam-card"
+					:class="{ 'dk-exam-card--locked': needsLearn, 'dk-exam-card--ready': !needsLearn && needsExam }"
+				>
+					<text class="dk-exam-desc" v-if="needsLearn">请先完成上方全部分类学习，再参加答题考试。</text>
+					<text class="dk-exam-desc" v-else>已通过学习，参加答题考试通过后即可选择场景打卡；也可暂不考试，稍后再来。</text>
+					<view
+						class="dk-scene-btn"
+						:class="needsLearn ? 'dk-scene-btn--disabled' : 'dk-scene-btn--primary'"
+						:hover-class="needsLearn ? '' : 'dk-scene-btn--press'"
+						:hover-stay-time="80"
+						@tap="onExamTap"
+					>
+						<text class="dk-scene-btn-t">{{ needsLearn ? '请先完成学习' : '去答题考试' }}</text>
 					</view>
-					<view class="dk-learn-empty" v-if="tutorialLoaded && !waste_list.length">暂无分类指导，请联系社区管理员</view>
-				</scroll-view>
+				</view>
 			</view>
 		</view>
 
@@ -151,6 +169,7 @@
 				wastePage: 1,
 				wasteTotal: 0,
 				tutorialLoaded: false,
+				learnScrollPx: 280,
 				scenes: [
 					{
 						key: 'home',
@@ -208,19 +227,18 @@
 				return !this.showSceneHub
 			},
 			needsLearn() {
+				if (this.learnAllFromWaste) return false
 				const u = this.userInfo || {}
 				return Number(u.is_learn) !== 1
+			},
+			learnAllFromWaste() {
+				const total = Number(this.waste.waste_count) || 0
+				const done = Number(this.waste.user_count) || 0
+				return total > 0 && done >= total
 			},
 			needsExam() {
 				const u = this.userInfo || {}
 				return Number(u.is_learn) === 1 && Number(u.is_answer) !== 1
-			},
-			learnHubTitle() {
-				return this.needsExam ? '分类考试' : '分类学习'
-			},
-			learnHubHint() {
-				if (this.needsExam) return '通过考试后即可真分打卡'
-				return '学完全部分类指导后，需参加一场考试'
 			},
 			learnPercent() {
 				const total = Number(this.waste.waste_count) || 0
@@ -231,14 +249,35 @@
 		},
 		onShow() {
 			this.loadCate()
+			if (!this.isLogin) {
+				this.refreshUser()
+				return
+			}
 			this.refreshUser().then(() => {
-				if (this.isLogin && this.showLearnHub) {
-					this.resetWasteList()
-					this.loadWasteList()
-				}
+				if (!this.showLearnHub) return
+				return this.reloadWasteList()
+			}).then(() => {
+				this.measureLearnScroll()
 			})
 		},
+		onReady() {
+			this.measureLearnScroll()
+		},
 		methods: {
+			measureLearnScroll() {
+				if (!this.showLearnHub) return
+				this.$nextTick(() => {
+					uni.createSelectorQuery()
+						.in(this)
+						.select('.dk-learn-scroll-wrap')
+						.boundingClientRect(rect => {
+							if (rect && rect.height > 80) {
+								this.learnScrollPx = Math.floor(rect.height)
+							}
+						})
+						.exec()
+				})
+			},
 			resetWasteList() {
 				this.waste_list = []
 				this.wastePage = 1
@@ -246,33 +285,55 @@
 				this.waste = {}
 				this.tutorialLoaded = false
 			},
-			loadWasteList() {
-				this.$u.api.get_waste_list({ page: this.wastePage }).then(res => {
+			reloadWasteList() {
+				this.wastePage = 1
+				return this.loadWasteList(true)
+			},
+			loadWasteList(replaceFirstPage) {
+				const page = this.wastePage
+				return this.$u.api.get_waste_list({ page }).then(res => {
 					this.tutorialLoaded = true
 					const data = res.data || {}
 					this.waste = data
 					const list = (data.list && data.list.data) || []
-					if (this.wastePage === 1) {
+					if (page === 1 || replaceFirstPage) {
 						this.waste_list = list
 					} else {
 						this.waste_list = this.waste_list.concat(list)
 					}
 					this.wasteTotal = (data.list && data.list.total) || 0
-					const total = Number(data.waste_count) || 0
-					const learned = Number(data.user_count) || 0
-					if (total > 0 && learned >= total) {
-						this.refreshUser()
+					if (this.learnAllFromWaste) {
+						this.syncLearnComplete()
 					}
+					this.measureLearnScroll()
 				}).catch(() => {
 					this.tutorialLoaded = true
 				})
 			},
-			goLearnDetail(id) {
-				if (!id) return
+			syncLearnComplete() {
+				return this.refreshUser()
+			},
+			onLearnScrollBottom() {
+				if (this.waste_list.length >= this.wasteTotal) return
+				this.wastePage++
+				this.loadWasteList()
+			},
+			goLearnDetail(index) {
+				const item = this.waste_list[index]
+				const id = item && (item.id || item.waste_id)
+				if (!id) {
+					return this.$u.toast('无法打开该指导')
+				}
 				this.$u.route('/pages/flhd/details?id=' + id)
 			},
+			onExamTap() {
+				if (this.needsLearn) {
+					return this.$u.toast('请先学完全部分类指导')
+				}
+				this.goExam()
+			},
 			goExam() {
-				this.$u.route('/pages/answer/examine?id=1')
+				uni.navigateTo({ url: '/pages/answer/examine?id=1' })
 			},
 			refreshUser() {
 				if (!this.isLogin) return Promise.resolve()
@@ -350,12 +411,6 @@
 			goChoice() {
 				this.$u.route('/pages/flhd/choice')
 			}
-		},
-		onReachBottom() {
-			if (!this.showLearnHub || this.needsExam) return
-			if (this.waste_list.length >= this.wasteTotal) return
-			this.wastePage++
-			this.loadWasteList()
 		}
 	}
 </script>
@@ -537,10 +592,14 @@
 	font-weight: 600;
 	color: #148a2e;
 }
-.dk-learn-scroll {
+.dk-learn-scroll-wrap {
 	flex: 1;
 	min-height: 0;
 	height: 0;
+}
+.dk-learn-scroll {
+	width: 100%;
+	box-sizing: border-box;
 }
 .dk-learn-item {
 	display: flex;
@@ -559,6 +618,8 @@
 	flex: 1;
 	min-width: 0;
 	margin-left: 16rpx;
+	display: flex;
+	flex-direction: column;
 }
 .dk-learn-item-name {
 	display: block;
@@ -574,12 +635,16 @@
 	color: #8a958c;
 }
 .dk-learn-item-go {
-	display: block;
-	margin-top: 12rpx;
 	font-size: 24rpx;
 	font-weight: 700;
 	color: #18af38;
-	text-align: right;
+}
+.dk-learn-item-act {
+	margin-top: 12rpx;
+	align-self: flex-end;
+	padding: 8rpx 20rpx;
+	border-radius: 999rpx;
+	background: rgba(24, 175, 56, 0.12);
 }
 .dk-learn-empty {
 	padding: 40rpx 20rpx;
@@ -587,26 +652,46 @@
 	font-size: 26rpx;
 	color: #8a958c;
 }
+.dk-exam-block {
+	flex-shrink: 0;
+	margin-top: 20rpx;
+}
+.dk-exam-block-t {
+	margin-top: 4rpx;
+}
 .dk-exam-card {
-	flex: 1;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	padding: 32rpx 24rpx;
+	align-items: stretch;
+	padding: 24rpx 22rpx;
 	border-radius: 20rpx;
 	background: #fff;
 	box-shadow: 0 6rpx 20rpx rgba(36, 48, 40, 0.06);
 }
-.dk-exam-desc {
-	font-size: 28rpx;
-	line-height: 1.6;
-	color: #555;
-	text-align: center;
+.dk-exam-card--locked {
+	opacity: 0.92;
+	background: #f5f7f5;
 }
-.dk-exam-btn {
-	margin-top: 32rpx;
-	min-width: 320rpx;
+.dk-exam-card--ready {
+	border: 2rpx solid rgba(24, 175, 56, 0.45);
+	box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.12);
+}
+.dk-exam-desc {
+	font-size: 26rpx;
+	line-height: 1.55;
+	color: #555;
+}
+.dk-exam-card .dk-scene-btn {
+	margin-top: 20rpx;
+	align-self: center;
+	min-width: 280rpx;
+}
+.dk-scene-btn--disabled {
+	background: #c5ccc7 !important;
+	box-shadow: none;
+}
+.dk-scene-btn--disabled .dk-scene-btn-t {
+	color: #fff;
 }
 .dk-block--hist {
 	flex-shrink: 0;
