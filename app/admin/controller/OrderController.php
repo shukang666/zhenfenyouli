@@ -23,6 +23,7 @@ use api\wxapp\model\ShopOrderModel;
 use api\wxapp\model\UserCouponModel;
 use app\admin\model\member\MemberModel;
 use app\admin\model\order\AfterSaleModel;
+use cmf\model\RoleUserModel;
 use app\user\model\ThirdPartyUserModel;
 use cmf\controller\AdminBaseController;
 use think\facade\Db;
@@ -200,7 +201,7 @@ class OrderController extends AdminBaseController
         $status = $this->request->param('status');
         $text = $this->request->param('text');
         $order_info = ShopOrderModel::find($id);
-        if ($this->admin_id != 1) {
+        if (!$this->canManageOrderRefund()) {
             $this->error('您没有权限');
         }
 
@@ -462,5 +463,16 @@ class OrderController extends AdminBaseController
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
         $objWriter->save('php://output');
         exit;
+    }
+
+    /** 订单退款处理：超级管理员（user_id=1 或 角色「超级管理员」） */
+    protected function canManageOrderRefund(): bool
+    {
+        $adminId = (int)$this->admin_id;
+        if ($adminId === 1) {
+            return true;
+        }
+        $roleIds = RoleUserModel::where('user_id', $adminId)->column('role_id');
+        return in_array(1, $roleIds, true);
     }
 }
