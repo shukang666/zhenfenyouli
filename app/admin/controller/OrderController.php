@@ -206,7 +206,8 @@ class OrderController extends AdminBaseController
             $this->error('您没有权限');
         }
 
-        $order_num = $order_info['pay_order_num'];
+        $pay_order_num = $order_info['pay_order_num'];
+        $order_num = $order_info['order_num'];
 
         if ($order_info['status'] == 12) {
             if ($status == 14) {
@@ -219,17 +220,17 @@ class OrderController extends AdminBaseController
 
                 if ($order_info['pay_type'] == 1) {
                     $RefundController = new RefundController();
-                    $re = $RefundController->pay_refund($order_num);
+                    $re = $RefundController->pay_refund($pay_order_num);
                     if ($re['code'] == 0) $this->error($re['msg']);
 
                 } elseif ($order_info['pay_type'] == 2) {
-                    AccountLogModel::add_account_log($order_info['user_id'], 1, 101, $order_info['balance_pay'], ['order_num' => $order_num]);
+                    AccountLogModel::add_account_log($order_info['user_id'], 1, 101, $order_info['balance_pay'], ['order_num' => $pay_order_num]);
                 } elseif ($order_info['pay_type'] == 3) {
-                    AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point_pay'], ['order_num' => $order_num]);
+                    AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point_pay'], ['order_num' => $pay_order_num]);
                 }
 
                 //退回已抵扣积分
-                if($order_info['point'] > 0) AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $order_num]);
+                if($order_info['point'] > 0) AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $pay_order_num]);
 
                 $data_i['status'] = 16;
                 $res = $order_info->save($data_i);
@@ -255,12 +256,12 @@ class OrderController extends AdminBaseController
             } elseif ($status == 22) {
                 if ($order_info['pay_type'] == 1) {
                     $RefundController = new RefundController();
-                    $re = $RefundController->pay_refund($order_num);
+                    $re = $RefundController->pay_refund($pay_order_num);
 
                     if ($re['code'] == 0) $this->error($re['msg']);
 
                 } elseif ($order_info['pay_type'] == 2) {
-                    AccountLogModel::add_account_log($order_info['user_id'], 1, 101, $order_info['balance_pay'], ['order_num' => $order_num]);
+                    AccountLogModel::add_account_log($order_info['user_id'], 1, 101, $order_info['balance_pay'], ['order_num' => $pay_order_num]);
                 }
                 if (!empty($order_info['coupon_id'])) {
                     $UserCouponModel = new UserCouponModel();
@@ -268,12 +269,15 @@ class OrderController extends AdminBaseController
                 }
             }
 
-            //退回已抵扣积分
-            if($order_info['point'] > 0) AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $order_num]);
-
-            ShopOrderModel::setSellCountOrStock('stock_inc', $order_num);
-            ShopOrderModel::setSellCountOrStock('sell_count_dec', $order_num);
-            $order_info->save(['status' => 24, 'return_price_time' => time()]);
+            //退回已抵扣积分（仅完成退款 status=22 时执行，避免同意退货等中间态误还库存）
+            if ((int)$status === 22) {
+                if ($order_info['point'] > 0) {
+                    AccountLogModel::add_account_log($order_info['user_id'], 2, 204, $order_info['point'], ['order_num' => $pay_order_num]);
+                }
+                ShopOrderModel::setSellCountOrStock('stock_inc', $order_num);
+                ShopOrderModel::setSellCountOrStock('sell_count_dec', $order_num);
+                $order_info->save(['status' => 24, 'return_price_time' => time()]);
+            }
             $this->success('操作成功');
         } else {
             $this->error('错误');
@@ -398,12 +402,13 @@ class OrderController extends AdminBaseController
      */
     protected function rollbackOrderPaymentAndStock($orderInfo): ?string
     {
-        $orderNum = $orderInfo['pay_order_num'];
+        $payOrderNum = $orderInfo['pay_order_num'];
+        $orderNum = $orderInfo['order_num'];
         $payType = (int)$orderInfo['pay_type'];
 
         if ($payType === 1 && (float)$orderInfo['price'] > 0) {
             $refundController = new RefundController();
-            $re = $refundController->pay_refund($orderNum);
+            $re = $refundController->pay_refund($payOrderNum);
             if (($re['code'] ?? 0) == 0) {
                 $msg = trim((string)($re['msg'] ?? ''));
                 return $msg !== '' ? $msg : '微信退款失败，请检查商户证书或订单是否已退过款';
@@ -414,7 +419,7 @@ class OrderController extends AdminBaseController
                 1,
                 101,
                 $orderInfo['balance_pay'],
-                ['order_num' => $orderNum, 'remark' => '后台退款并删除']
+                ['order_num' => $payOrderNum, 'remark' => '后台退款并删除']
             );
         } elseif ($payType === 3 && (float)$orderInfo['point_pay'] > 0) {
             AccountLogModel::add_account_log(
@@ -422,7 +427,7 @@ class OrderController extends AdminBaseController
                 2,
                 204,
                 $orderInfo['point_pay'],
-                ['order_num' => $orderNum, 'remark' => '后台退款并删除']
+                ['order_num' => $payOrderNum, 'remark' => '后台退款并删除']
             );
         }
 
@@ -432,7 +437,7 @@ class OrderController extends AdminBaseController
                 2,
                 204,
                 $orderInfo['point'],
-                ['order_num' => $orderNum, 'remark' => '后台退抵扣积分']
+                ['order_num' => $payOrderNum, 'remark' => '后台退抵扣积分']
             );
         }
 

@@ -116,7 +116,7 @@ class ShopOrderModel extends Model
      * sell_count_dec   销售额减
      * sell_count_inc   销售额加,
      *
-     * @param $order_num
+     * @param string $order_num 子订单号 shop_order.order_num（不是 pay_order_num）
      */
 
     public static function setSellCountOrStock($type, $order_num)
