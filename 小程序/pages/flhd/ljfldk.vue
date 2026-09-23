@@ -89,16 +89,16 @@
 
 		<view class="dk-block dk-block--scenes" v-if="showSceneHub">
 			<text class="dk-block-t">你在哪投放</text>
-			<text class="dk-block-hint">家庭、办公、沿街点卡片进入；亲子请选择种类</text>
+			<text class="dk-block-hint">点选场景进入，再选择垃圾类型并拍照打卡</text>
 			<view class="dk-scene-list">
 			<view
 				class="dk-scene-card"
 				v-for="item in scenes"
 				:key="item.key"
 				:class="'dk-scene-card--' + item.key"
-				:hover-class="item.layout === 'entry' ? 'dk-scene-card--press' : ''"
+				hover-class="dk-scene-card--press"
 				:hover-stay-time="80"
-				@click="onSceneCardTap(item)"
+				@click="navigateScene(item.key)"
 			>
 				<view class="dk-scene-cover-wrap">
 					<view class="dk-scene-cover" :class="'dk-scene-cover--' + item.key">
@@ -108,32 +108,9 @@
 				<view class="dk-scene-body">
 					<text class="dk-scene-name">{{ item.name }}</text>
 					<text class="dk-scene-desc">{{ item.desc }}</text>
-					<view
-						v-if="item.layout === 'chips'"
-						class="dk-scene-btn-row"
-					>
-						<view
-							class="dk-scene-btn"
-							v-for="(chip, ci) in item.chips"
-							:key="item.key + '-' + ci"
-							hover-class="dk-scene-btn--press"
-							:hover-stay-time="80"
-							@click.stop="goFromChip(item.key, ci)"
-						>
-							<text class="dk-scene-btn-t">{{ chip.label }}</text>
-						</view>
-					</view>
-					<view
-						v-else
-						class="dk-scene-actions"
-					>
-						<view
-							class="dk-scene-btn dk-scene-btn--primary"
-							hover-class="dk-scene-btn--press"
-							:hover-stay-time="80"
-							@click.stop="navigateScene(item.key)"
-						>
-							<text class="dk-scene-btn-t">立即真分</text>
+					<view class="dk-scene-actions">
+						<view class="dk-scene-btn dk-scene-btn--primary">
+							<text class="dk-scene-btn-t">进入打卡 ›</text>
 						</view>
 					</view>
 				</view>
@@ -158,12 +135,9 @@
 </template>
 
 <script>
-	import { resolveCateByLabel } from '@/common/clockScene.js'
-
 	export default {
 		data() {
 			return {
-				cate_list: [],
 				waste_list: [],
 				waste: {},
 				wastePage: 1,
@@ -182,9 +156,8 @@
 						key: 'qinzi',
 						name: '亲子',
 						desc: '家长带孩子一起学分类、动手投放',
-						layout: 'chips',
+						layout: 'entry',
 						icon: 'plus-people-fill',
-						chips: [{ label: '可回收' }, { label: '有害' }],
 					},
 					{
 						key: 'office',
@@ -199,7 +172,6 @@
 						desc: '路边、商铺门前的分类投放点',
 						layout: 'entry',
 						icon: 'map-fill',
-						chips: [{ label: '厨余垃圾' }],
 					},
 				],
 			}
@@ -248,7 +220,6 @@
 			},
 		},
 		onShow() {
-			this.loadCate()
 			if (!this.isLogin) {
 				this.refreshUser()
 				return
@@ -341,15 +312,6 @@
 					this.$u.vuex('userInfo', res.data || {})
 				}).catch(() => {})
 			},
-			loadCate() {
-				this.$u.api.get_select_list({ type: 2 }).then(res => {
-					this.cate_list = res.data || []
-				}).catch(() => {})
-			},
-			onSceneCardTap(item) {
-				if (!item || item.layout !== 'entry') return
-				this.navigateScene(item.key)
-			},
 			navigateScene(sceneKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.showSceneHub) {
@@ -358,51 +320,13 @@
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				const scene = this.scenes.find(s => s.key === sceneKey)
 				if (!scene) return
-				if (sceneKey === 'home') {
-					this.$u.route(
-						'/pages/flhd/add?scene_key=home&scene=' + encodeURIComponent(scene.name),
-					)
-					return
-				}
-				if (sceneKey === 'office') {
-					this.$u.route(
-						'/pages/flhd/add?scene_key=zhenfenjiao&scene=' +
-							encodeURIComponent(scene.name),
-					)
-					return
-				}
-				if (sceneKey === 'street') {
-					this.goFromChip('street', 0)
-				}
-			},
-			goFromChip(sceneKey, chipIndex) {
-				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				if (!this.showSceneHub) {
-					return this.$u.toast(this.needsExam ? '请先通过分类考试' : '请先学完分类指导')
-				}
-				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
-				const scene = this.scenes.find(s => s.key === sceneKey)
-				const chip = scene && scene.chips && scene.chips[chipIndex]
-				if (!scene || !chip) return
-				if (chip.zhenfenjiao || chip.label === '真分角') {
-					this.$u.route(
-						'/pages/flhd/add?scene_key=zhenfenjiao&scene=' +
-							encodeURIComponent('办公'),
-					)
-					return
-				}
-				const cate = resolveCateByLabel(this.cate_list, chip.label)
-				if (!cate || !cate.id) {
-					return this.$u.toast('暂未配置「' + chip.label + '」种类')
-				}
-				const q =
-					'scene_key=' +
-					encodeURIComponent(scene.key) +
-					'&scene=' +
-					encodeURIComponent(scene.name) +
-					'&cate_id=' +
-					cate.id
-				this.$u.route('/pages/flhd/add?' + q)
+				const apiKey = sceneKey === 'office' ? 'zhenfenjiao' : sceneKey
+				this.$u.route(
+					'/pages/flhd/add?scene_key=' +
+						encodeURIComponent(apiKey) +
+						'&scene=' +
+						encodeURIComponent(scene.name),
+				)
 			},
 			goMy() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
