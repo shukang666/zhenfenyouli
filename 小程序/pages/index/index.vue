@@ -179,6 +179,7 @@
 								<view class="showcase-card__date">{{ item.event_date_text }}</view>
 							</view>
 						</view>
+						<view class="showcase-row__tail" aria-hidden="true"></view>
 					</view>
 				</scroll-view>
 			</view>
@@ -1293,14 +1294,24 @@ export default {
 		background: $surface;
 		border-radius: $radius-lg;
 		box-shadow: $shadow-card;
+		overflow: hidden;
 	}
 	.showcase-scroll {
+		width: 100%;
 		white-space: nowrap;
-		padding-left: 24rpx;
+		box-sizing: border-box;
 	}
 	.showcase-row {
-		display: flex;
-		padding-right: 24rpx;
+		display: inline-flex;
+		flex-direction: row;
+		align-items: flex-start;
+		padding-left: 24rpx;
+		box-sizing: border-box;
+	}
+	.showcase-row__tail {
+		flex-shrink: 0;
+		width: 24rpx;
+		height: 1rpx;
 	}
 	.showcase-card {
 		flex-shrink: 0;
