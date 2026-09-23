@@ -168,11 +168,11 @@ class ForumController extends AuthController
                         ->whereBetweenTime('create_time', strtotime(date('Y-m-d')), time())
                         ->count();
                     if ($count > 1) {
-                        $this->success('发布成功');
+                        $this->respondType2ClockSuccess('发布成功');
                     }
                     $forumModel->where('id', $id)->update(['point' => $carbon]);
                     AccountLogModel::add_account_log($this->user_id, 2, 200, $carbon, ['from_uid' => $id]);
-                    $this->success("获得{$carbon}积分！");
+                    $this->respondType2ClockSuccess("获得{$carbon}积分！", ['point' => $carbon]);
                 }
             }
 //            if ($type == 6) {
@@ -205,9 +205,20 @@ class ForumController extends AuthController
             }
         }
 
+        if ($type == 2) {
+            $this->respondType2ClockSuccess('发布成功！', ['point' => $point ?? 0]);
+        }
         $data = [];
         $data['point'] = $point ?? 0;
         $this->success('发布成功！', $data);
+    }
+
+    /** 垃圾打卡成功：附带督导员邀请状态 */
+    private function respondType2ClockSuccess(string $msg, array $extra = []): void
+    {
+        $data = array_merge(['point' => 0], $extra);
+        $data['supervisor_invite'] = $this->buildSupervisorInvite((int)$this->user_id);
+        $this->success($msg, $data);
     }
 
     /** 解码打卡图片字段为 URL 数组(兼容数组/JSON字符串/未编码单串) */

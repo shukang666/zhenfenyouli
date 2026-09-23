@@ -21,6 +21,17 @@
 			</view>
 		</view>
 
+		<view class="dk-supervisor-banner" v-if="showSupervisorBanner">
+			<view class="dk-supervisor-banner-inner">
+				<text class="dk-supervisor-banner-t">累计打卡 {{ supervisorInvite.clock_days }} 天，欢迎申请督导员</text>
+				<text class="dk-supervisor-banner-d">参与点位巡检、桶边督导，共建分类社区</text>
+				<view class="dk-supervisor-banner-row">
+					<view class="dk-supervisor-banner-btn dk-supervisor-banner-btn--go" @tap="goSupervisorApply">去申请</view>
+					<view class="dk-supervisor-banner-btn dk-supervisor-banner-btn--later" @tap="dismissSupervisorBanner">稍后</view>
+				</view>
+			</view>
+		</view>
+
 		<!-- 新用户：先学指导 → 再考试，通过后才显示场景选择 -->
 		<view class="dk-block dk-block--learn" v-if="showLearnHub">
 			<text class="dk-block-t">分类学习</text>
@@ -135,9 +146,16 @@
 </template>
 
 <script>
+	import {
+		hideSupervisorBanner,
+		isSupervisorBannerHidden,
+		shouldShowSupervisorInvite,
+	} from '@/common/supervisorInvite.js'
+
 	export default {
 		data() {
 			return {
+				supervisorBannerLocalHide: false,
 				waste_list: [],
 				waste: {},
 				wastePage: 1,
@@ -218,8 +236,16 @@
 				if (total <= 0) return 0
 				return Math.min(100, Math.round((done / total) * 100))
 			},
+			supervisorInvite() {
+				return (this.userInfo && this.userInfo.supervisor_invite) || {}
+			},
+			showSupervisorBanner() {
+				if (this.supervisorBannerLocalHide || isSupervisorBannerHidden()) return false
+				return shouldShowSupervisorInvite(this.supervisorInvite)
+			},
 		},
 		onShow() {
+			this.supervisorBannerLocalHide = isSupervisorBannerHidden()
 			if (!this.isLogin) {
 				this.refreshUser()
 				return
@@ -334,7 +360,16 @@
 			},
 			goChoice() {
 				this.$u.route('/pages/flhd/choice')
-			}
+			},
+			goSupervisorApply() {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
+				this.$u.route('/pages/zzhd/wmbb')
+			},
+			dismissSupervisorBanner() {
+				this.supervisorBannerLocalHide = true
+				hideSupervisorBanner()
+			},
 		}
 	}
 </script>
@@ -478,6 +513,54 @@
 	width: 1rpx;
 	height: 44rpx;
 	background: #e8eee9;
+}
+.dk-supervisor-banner {
+	flex-shrink: 0;
+	margin-top: 12rpx;
+}
+.dk-supervisor-banner-inner {
+	padding: 22rpx 24rpx;
+	border-radius: 20rpx;
+	background: linear-gradient(135deg, #e6fffb 0%, #ffffff 55%, #f0f9ff 100%);
+	border: 1rpx solid rgba(8, 151, 156, 0.25);
+	box-shadow: 0 8rpx 24rpx rgba(8, 151, 156, 0.08);
+}
+.dk-supervisor-banner-t {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 800;
+	color: #006d75;
+}
+.dk-supervisor-banner-d {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	line-height: 1.45;
+	color: #5c6b6d;
+}
+.dk-supervisor-banner-row {
+	display: flex;
+	margin-top: 18rpx;
+}
+.dk-supervisor-banner-btn {
+	flex: 1;
+	margin-left: 16rpx;
+	padding: 14rpx 0;
+	border-radius: 999rpx;
+	text-align: center;
+	font-size: 26rpx;
+	font-weight: 700;
+}
+.dk-supervisor-banner-row .dk-supervisor-banner-btn:first-child {
+	margin-left: 0;
+}
+.dk-supervisor-banner-btn--go {
+	background: linear-gradient(141deg, #5cdbd3 0%, #08979c 100%);
+	color: #fff;
+}
+.dk-supervisor-banner-btn--later {
+	background: #eef2f1;
+	color: #666;
 }
 .dk-block {
 	margin-top: 16rpx;

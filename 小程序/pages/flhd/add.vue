@@ -94,6 +94,14 @@
 						<text class="clock-habit-kicker">本次打卡结束，养成好习惯</text>
 						<text class="clock-habit-text">{{ habitTip }}</text>
 					</view>
+					<view class="clock-supervisor-box" v-if="showSupervisorInvite">
+						<text class="clock-supervisor-kicker">邀请您成为督导员</text>
+						<text class="clock-supervisor-text">您已累计垃圾打卡 {{ supervisorInvite.clock_days }} 天，欢迎申请加入社区督导员，参与点位巡检与桶边督导。</text>
+						<view class="clock-supervisor-actions">
+							<view class="clock-supervisor-btn clock-supervisor-btn--primary" @tap="goSupervisorApply">去申请</view>
+							<view class="clock-supervisor-btn clock-supervisor-btn--ghost" @tap="dismissSupervisorInvite">稍后再说</view>
+						</view>
+					</view>
 					<view class="clock-success-btns">
 						<u-button type="success" hover-class="none" shape="circle" :custom-style="btnPrimary" @click="closeMask">
 							继续打卡
@@ -109,6 +117,10 @@
 <script>
 	import { uploadUrl } from '@/common/settings'
 	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
+	import {
+		hideSupervisorBanner,
+		shouldShowSupervisorInvite,
+	} from '@/common/supervisorInvite.js'
 	import {
 		ADD_PAGE_META,
 		clockSceneLabel,
@@ -138,6 +150,8 @@
 				mask_show: false,
 				msg: '',
 				habitTip: '',
+				supervisorInvite: null,
+				supervisorInviteDismissed: false,
 				btnPrimary: {
 					background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)',
 					border: 'none',
@@ -173,6 +187,10 @@
 				if (this.wizardStep === 1) return '选择垃圾类型'
 				if (this.wizardStep === 2) return '上传投放照片'
 				return '补充说明并提交'
+			},
+			showSupervisorInvite() {
+				if (this.supervisorInviteDismissed) return false
+				return shouldShowSupervisorInvite(this.supervisorInvite)
 			},
 		},
 		onLoad(option) {
@@ -293,7 +311,30 @@
 				})
 			},
 			postOne(payload) {
-				return this.$u.api.add_forum(payload).then(res => res.msg || '发布成功')
+				return this.$u.api.add_forum(payload).then(res => {
+					const data = res.data || {}
+					if (data.supervisor_invite) {
+						this.supervisorInvite = data.supervisor_invite
+						this.supervisorInviteDismissed = false
+					}
+					this.refreshUserInfo()
+					return res.msg || '发布成功'
+				})
+			},
+			refreshUserInfo() {
+				return this.$u.api.getUserInfo().then(res => {
+					this.$u.vuex('userInfo', res.data || {})
+				}).catch(() => {})
+			},
+			goSupervisorApply() {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
+				this.mask_show = false
+				this.$u.route('/pages/zzhd/wmbb')
+			},
+			dismissSupervisorInvite() {
+				this.supervisorInviteDismissed = true
+				hideSupervisorBanner()
 			},
 			closeMask() {
 				this.mask_show = false
@@ -564,6 +605,51 @@
 	font-size: 28rpx;
 	line-height: 1.55;
 	color: #444;
+}
+.clock-supervisor-box {
+	margin-top: 24rpx;
+	padding: 24rpx 20rpx;
+	border-radius: 16rpx;
+	background: linear-gradient(135deg, #e8f7fa 0%, #e0f2f5 100%);
+	text-align: left;
+	border: 1rpx solid rgba(54, 207, 201, 0.35);
+}
+.clock-supervisor-kicker {
+	display: block;
+	font-size: 26rpx;
+	font-weight: 800;
+	color: #08979c;
+}
+.clock-supervisor-text {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 26rpx;
+	line-height: 1.55;
+	color: #444;
+}
+.clock-supervisor-actions {
+	display: flex;
+	margin-top: 20rpx;
+}
+.clock-supervisor-actions .clock-supervisor-btn:first-child {
+	margin-left: 0;
+}
+.clock-supervisor-btn {
+	flex: 1;
+	margin-left: 16rpx;
+	padding: 18rpx 12rpx;
+	border-radius: 999rpx;
+	text-align: center;
+	font-size: 26rpx;
+	font-weight: 700;
+}
+.clock-supervisor-btn--primary {
+	background: linear-gradient(141deg, #5cdbd3 0%, #08979c 100%);
+	color: #fff;
+}
+.clock-supervisor-btn--ghost {
+	background: rgba(255, 255, 255, 0.85);
+	color: #666;
 }
 .clock-success-btns {
 	margin-top: 32rpx;

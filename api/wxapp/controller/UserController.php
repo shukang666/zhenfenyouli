@@ -92,6 +92,8 @@ class UserController extends AuthController
         }
         $user['clock_count'] = $clock_count ?? 0;
         $user['remaining_count'] = $user['continuous_check'] - $user['clock_count'];
+        $user['junk_clock_days'] = $this->countJunkClockDistinctDays((int)$user['id']);
+        $user['supervisor_invite'] = $this->buildSupervisorInvite((int)$user['id']);
 
         $this->success('获取成功', $user);
     }

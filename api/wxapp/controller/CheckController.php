@@ -56,8 +56,24 @@ class CheckController extends AuthController
         $this->checkUser();
         $params = $this->request->param();
 
+        if (!empty($this->user_info['is_supervisor'])) {
+            $this->error('您已是督导员，无需重复申请');
+        }
+
         // 督导员统一申请，不再区分督导员/指导员
         if (empty($params['id'])) {
+            $invite = $this->buildSupervisorInvite((int)$this->user_id);
+            if (empty($invite['can_apply'])) {
+                $need = (int)($invite['need_days'] ?? 7);
+                $cur = (int)($invite['clock_days'] ?? 0);
+                if ($cur < $need) {
+                    $this->error('累计垃圾打卡满' . $need . '天（不必连续）后可申请督导员，当前已打卡' . $cur . '天');
+                }
+                if ((int)($invite['check_status'] ?? 0) === 1) {
+                    $this->error('您的督导员申请正在审核中');
+                }
+                $this->error('当前暂不可提交督导员申请');
+            }
             if(!empty($params['sign_image'])){
                 $public = new PublicController();
                 $pdf_file = $public->pdf($params['sign_image']);
