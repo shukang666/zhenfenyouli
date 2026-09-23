@@ -257,16 +257,17 @@ class OrderTrialController extends AdminBaseController
 
         $row = 2;
         foreach ($list as $item) {
-            $sheet->setCellValue('A' . $row, $item['order_num']);
-            $sheet->setCellValue('B' . $row, $item['goods_name'] ?? '');
-            $sheet->setCellValue('C' . $row, $item['username']);
-            $sheet->setCellValue('D' . $row, $item['mobile']);
-            $sheet->setCellValue('E' . $row, $item['address']);
-            $sheet->setCellValue('F' . $row, ShopOrderModel::getPayName($item['pay_type']));
-            $sheet->setCellValue('G' . $row, ShopOrderModel::getStatusName($item['status']));
-            $sheet->setCellValue('H' . $row, $item['purchase_link'] ?? '');
-            $sheet->setCellValue('I' . $row, $item['remark'] ?? '');
-            $sheet->setCellValue('J' . $row, date('Y-m-d H:i', $item['create_time']));
+            $itemArr = is_array($item) ? $item : $item->toArray();
+            $sheet->setCellValue('A' . $row, $itemArr['order_num']);
+            $sheet->setCellValue('B' . $row, $this->formatTrialExportGoodsText($itemArr));
+            $sheet->setCellValue('C' . $row, $itemArr['username'] ?? '');
+            $sheet->setCellValue('D' . $row, $itemArr['phone'] ?? ($itemArr['mobile'] ?? ''));
+            $sheet->setCellValue('E' . $row, $itemArr['user_address'] ?? ($itemArr['address'] ?? ''));
+            $sheet->setCellValue('F' . $row, ShopOrderModel::getPayName($itemArr['pay_type']));
+            $sheet->setCellValue('G' . $row, $itemArr['status_name'] ?? ShopOrderModel::getStatusName($itemArr['status']));
+            $sheet->setCellValue('H' . $row, $itemArr['purchase_link'] ?? '');
+            $sheet->setCellValue('I' . $row, $itemArr['admin_remark'] ?? ($itemArr['remark'] ?? ''));
+            $sheet->setCellValue('J' . $row, date('Y-m-d H:i', $itemArr['create_time']));
             $row++;
         }
 
@@ -278,5 +279,27 @@ class OrderTrialController extends AdminBaseController
         $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
         exit;
+    }
+
+    /** 导出「商品」列：与列表一致，来自订单明细 goods_list */
+    private function formatTrialExportGoodsText(array $item): string
+    {
+        $lines = [];
+        foreach ($item['goods_list'] ?? [] as $g) {
+            $g = is_array($g) ? $g : (method_exists($g, 'toArray') ? $g->toArray() : []);
+            $name = trim((string)($g['goods_name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+            $line = $name;
+            if (!empty($g['sku_name'])) {
+                $line .= ' / ' . $g['sku_name'];
+            }
+            if (isset($g['count']) && (int)$g['count'] > 0) {
+                $line .= ' ×' . (int)$g['count'];
+            }
+            $lines[] = $line;
+        }
+        return implode("\n", $lines);
     }
 }
