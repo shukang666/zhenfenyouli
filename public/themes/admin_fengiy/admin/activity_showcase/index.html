@@ -6,6 +6,7 @@
         <li class="active"><a href="javascript:;">活动风采</a></li>
         <li><a href="{:url('admin/ActivityShowcase/add')}">+ 添加风采</a></li>
         <li><a href="{:url('admin/ActivityShowcase/import_temp')}" onclick="return confirm('将从 public/临时传活动风采 读取各活动文件夹并写入数据库，确定执行？');">从临时目录导入</a></li>
+        <li><a href="{:url('admin/ActivityShowcase/sync_showcase_oss')}" onclick="return confirm('将把 upload 目录下已有风采图片上传到 OSS，确定？');">同步图片到 OSS</a></li>
     </ul>
     <form method="get" class="search-form" style="padding:15px 0;">
         <div class="row">

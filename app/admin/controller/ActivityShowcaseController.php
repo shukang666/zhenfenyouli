@@ -186,4 +186,33 @@ class ActivityShowcaseController extends AdminBaseController
         $roleIds = RoleUserModel::where('user_id', $adminId)->column('role_id');
         return in_array(1, $roleIds, true);
     }
+
+    /**
+     * 将风采库中图片路径对应本地 upload 文件同步到 OSS（修复 oss.ausite.cn 404）
+     */
+    public function sync_showcase_oss()
+    {
+        if (!$this->canImportShowcaseFromTemp()) {
+            $this->error('仅超级管理员可执行');
+        }
+        require_once CMF_ROOT . 'data/import_showcase_from_temp.php';
+        $env = parse_ini_file(CMF_ROOT . '.env');
+        $pdo = new \PDO(
+            "mysql:host={$env['DATABASE_HOSTNAME']};port={$env['DATABASE_HOSTPORT']};dbname={$env['DATABASE_DATABASE']};charset=utf8mb4",
+            $env['DATABASE_USERNAME'],
+            $env['DATABASE_PASSWORD'],
+            [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+        );
+        $uploadRoot = CMF_ROOT . 'public/upload';
+        $storageCtx = showcase_import_get_storage_context($pdo);
+        $report = [
+            'oss_synced' => [],
+            'oss_missing_local' => [],
+            'oss_errors' => [],
+        ];
+        showcase_import_sync_showcase_assets_to_oss($uploadRoot, $pdo, $storageCtx, false, $report);
+        $this->assign('report', array_merge(['ok' => true, 'folders' => [], 'updated_content_only' => [], 'errors' => []], $report));
+        $this->assign('reportJson', json_encode($report, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        return $this->fetch('import_temp');
+    }
 }
