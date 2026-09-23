@@ -152,4 +152,27 @@ class ActivityShowcaseController extends AdminBaseController
         ]);
         $this->success('删除成功');
     }
+
+    /**
+     * 从 public/临时传活动风采 导入（需在服务器上已上传该目录）
+     */
+    public function import_temp()
+    {
+        $adminId = cmf_get_current_admin_id();
+        if ((int)$adminId !== 1) {
+            $this->error('仅超级管理员可执行导入');
+        }
+        require_once CMF_ROOT . 'data/import_showcase_from_temp.php';
+        $env = parse_ini_file(CMF_ROOT . '.env');
+        $pdo = new \PDO(
+            "mysql:host={$env['DATABASE_HOSTNAME']};port={$env['DATABASE_HOSTPORT']};dbname={$env['DATABASE_DATABASE']};charset=utf8mb4",
+            $env['DATABASE_USERNAME'],
+            $env['DATABASE_PASSWORD'],
+            [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+        );
+        $report = import_activity_showcase_from_temp(CMF_ROOT, $pdo, false);
+        $this->assign('report', $report);
+        $this->assign('reportJson', json_encode($report, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        return $this->fetch('import_temp');
+    }
 }

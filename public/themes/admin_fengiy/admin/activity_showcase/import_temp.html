@@ -1,0 +1,22 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('admin/ActivityShowcase/index')}">活动风采</a></li>
+        <li class="active"><a href="javascript:;">临时目录导入结果</a></li>
+    </ul>
+    <div class="margin-top-20">
+        <if condition="$report.ok">
+            <div class="alert alert-success">导入流程已执行完成。</div>
+        <else/>
+            <div class="alert alert-danger">导入未完成，请查看下方说明。</div>
+        </if>
+        <p class="text-muted">数据来源：<code>public/临时传活动风采/</code>（按活动名分子文件夹，文件夹内直接放图片）</p>
+        <pre style="background:#f7f7f7;padding:16px;border-radius:4px;max-height:70vh;overflow:auto;">{$reportJson}</pre>
+        <a class="btn btn-primary" href="{:url('admin/ActivityShowcase/index')}">返回列表</a>
+    </div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
