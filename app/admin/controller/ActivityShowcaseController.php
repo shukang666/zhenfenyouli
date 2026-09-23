@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use cmf\controller\AdminBaseController;
+use cmf\model\RoleUserModel;
 use think\facade\Db;
 
 /**
@@ -158,8 +159,7 @@ class ActivityShowcaseController extends AdminBaseController
      */
     public function import_temp()
     {
-        $adminId = cmf_get_current_admin_id();
-        if ((int)$adminId !== 1) {
+        if (!$this->canImportShowcaseFromTemp()) {
             $this->error('仅超级管理员可执行导入');
         }
         require_once CMF_ROOT . 'data/import_showcase_from_temp.php';
@@ -174,5 +174,16 @@ class ActivityShowcaseController extends AdminBaseController
         $this->assign('report', $report);
         $this->assign('reportJson', json_encode($report, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
         return $this->fetch('import_temp');
+    }
+
+    /** 与订单退款一致：user_id=1 或角色「超级管理员」(role_id=1) */
+    protected function canImportShowcaseFromTemp(): bool
+    {
+        $adminId = (int)cmf_get_current_admin_id();
+        if ($adminId === 1) {
+            return true;
+        }
+        $roleIds = RoleUserModel::where('user_id', $adminId)->column('role_id');
+        return in_array(1, $roleIds, true);
     }
 }
