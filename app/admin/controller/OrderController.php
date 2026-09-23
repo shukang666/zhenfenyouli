@@ -337,6 +337,112 @@ class OrderController extends AdminBaseController
         $this->success('删除成功');
     }
 
+    /**
+     * 退款并删除：支付/积分原路退回，软删除订单（列表不再展示）
+     */
+    public function refundAndDelete()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('非法请求');
+        }
+        if (!$this->canManageOrderRefund()) {
+            $this->error('您没有权限');
+        }
+
+        $id = (int)$this->request->param('id');
+        $orderInfo = ShopOrderModel::where('id', $id)->where('delete_time', 0)->find();
+        if (empty($orderInfo)) {
+            $this->error('订单不存在或已删除');
+        }
+
+        $status = (int)$orderInfo['status'];
+        if (in_array($status, [16, 24], true)) {
+            $this->error('订单已退款，请勿重复操作');
+        }
+        if ($status === 10) {
+            $this->error('订单已取消，请使用普通删除');
+        }
+        if ($status === 1) {
+            $this->error('待付款订单请让用户取消或仅做删除');
+        }
+
+        Db::startTrans();
+        try {
+            $err = $this->rollbackOrderPaymentAndStock($orderInfo);
+            if ($err !== null) {
+                Db::rollback();
+                $this->error($err);
+            }
+
+            ShopOrderModel::where('id', $id)->update([
+                'status'       => 16,
+                'delete_time'  => time(),
+                'refuse_time'  => 0,
+                'refuse_reason'=> '',
+            ]);
+
+            Db::commit();
+            $this->success('已退款，积分/支付已原路退回，订单已删除');
+        } catch (\Throwable $e) {
+            Db::rollback();
+            Log::error('refundAndDelete: ' . $e->getMessage());
+            $this->error('操作失败：' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 与 confirmRefund 一致：退微信/余额/积分、退抵扣积分、还券、加库存减销量
+     * @return string|null 失败原因
+     */
+    protected function rollbackOrderPaymentAndStock($orderInfo): ?string
+    {
+        $orderNum = $orderInfo['pay_order_num'];
+        $payType = (int)$orderInfo['pay_type'];
+
+        if ($payType === 1 && (float)$orderInfo['price'] > 0) {
+            $refundController = new RefundController();
+            $re = $refundController->pay_refund($orderNum);
+            if (($re['code'] ?? 0) == 0) {
+                return $re['msg'] ?? '微信退款失败';
+            }
+        } elseif ($payType === 2 && (float)$orderInfo['balance_pay'] > 0) {
+            AccountLogModel::add_account_log(
+                $orderInfo['user_id'],
+                1,
+                101,
+                $orderInfo['balance_pay'],
+                ['order_num' => $orderNum, 'remark' => '后台退款并删除']
+            );
+        } elseif ($payType === 3 && (float)$orderInfo['point_pay'] > 0) {
+            AccountLogModel::add_account_log(
+                $orderInfo['user_id'],
+                2,
+                204,
+                $orderInfo['point_pay'],
+                ['order_num' => $orderNum, 'remark' => '后台退款并删除']
+            );
+        }
+
+        if ((float)$orderInfo['point'] > 0) {
+            AccountLogModel::add_account_log(
+                $orderInfo['user_id'],
+                2,
+                204,
+                $orderInfo['point'],
+                ['order_num' => $orderNum, 'remark' => '后台退抵扣积分']
+            );
+        }
+
+        if (!empty($orderInfo['coupon_id'])) {
+            (new UserCouponModel())->where(['id' => $orderInfo['coupon_id']])->save(['used' => 0]);
+        }
+
+        ShopOrderModel::setSellCountOrStock('stock_inc', $orderNum);
+        ShopOrderModel::setSellCountOrStock('sell_count_dec', $orderNum);
+
+        return null;
+    }
+
     //导出：列表页设置 is_export=1 提交到 index，由 index 构建与列表一致的筛选条件后调用本方法
     public function export($map){
         //不限制时间

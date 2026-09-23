@@ -287,8 +287,15 @@
                                         <i class="layui-icon layui-icon-util"></i>
                                     </a>
                                 </if>
+                                <if condition="!in_array($item.status, array(1,10,16,24))">
+                                    <a class="layui-bg-orange layui-circle op-btn" lay-on="order-refund-delete"
+                                       data-toggle="tooltip" title="退款并删除（积分/支付原路退回）" data-id="{$item.id}">
+                                        <i class="layui-icon layui-icon-rmb"></i>
+                                    </a>
+                                </if>
                                 <a class="layui-bg-red-light layui-circle op-btn js-ajax-delete"
-                                   href="{:url('delete',array('id'=>$item['id']))}"> <i class="layui-icon layui-icon-delete"></i></a>
+                                   href="{:url('delete',array('id'=>$item['id']))}" data-toggle="tooltip" title="仅删除（不退款）">
+                                    <i class="layui-icon layui-icon-delete"></i></a>
 
 
                             </div>
@@ -399,6 +406,31 @@
                 }, function () {
 
                 });
+            },
+            'order-refund-delete': function () {
+                var orderid = $(this).attr('data-id');
+                layer.confirm(
+                    '确认退款并删除该订单？<br/>已支付的微信/余额/积分将原路退回，抵扣积分一并退还，并恢复库存。',
+                    {icon: 3, title: '退款并删除', btn: ['确认退款', '取消']},
+                    function (index) {
+                        layer.close(index);
+                        $.ajax({
+                            url: '{:url("order/refundAndDelete")}',
+                            type: 'POST',
+                            data: {id: orderid},
+                            success: function (res) {
+                                if (res.code === 1) {
+                                    layer.msg(res.msg, {icon: 1});
+                                    setTimeout(function () {
+                                        location.reload();
+                                    }, 800);
+                                } else {
+                                    layer.msg(res.msg || '操作失败', {icon: 7});
+                                }
+                            }
+                        });
+                    }
+                );
             },
         })
 
