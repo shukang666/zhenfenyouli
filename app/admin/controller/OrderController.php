@@ -26,6 +26,7 @@ use app\admin\model\order\AfterSaleModel;
 use cmf\model\RoleUserModel;
 use app\user\model\ThirdPartyUserModel;
 use cmf\controller\AdminBaseController;
+use think\exception\HttpResponseException;
 use think\facade\Db;
 use think\facade\Log;
 use think\Model;
@@ -371,7 +372,7 @@ class OrderController extends AdminBaseController
             $err = $this->rollbackOrderPaymentAndStock($orderInfo);
             if ($err !== null) {
                 Db::rollback();
-                $this->error($err);
+                $this->error($err !== '' ? $err : '退款失败，请稍后重试');
             }
 
             ShopOrderModel::where('id', $id)->update([
@@ -381,10 +382,13 @@ class OrderController extends AdminBaseController
 
             Db::commit();
             $this->success('已退款，积分/支付已原路退回，订单已删除');
+        } catch (HttpResponseException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             Db::rollback();
-            Log::error('refundAndDelete: ' . $e->getMessage());
-            $this->error('操作失败：' . $e->getMessage());
+            $detail = trim($e->getMessage());
+            Log::error('refundAndDelete id=' . $id . ': ' . $detail . ' @ ' . $e->getFile() . ':' . $e->getLine());
+            $this->error('操作失败：' . ($detail !== '' ? $detail : '系统异常，请查看后台日志'));
         }
     }
 
@@ -401,7 +405,8 @@ class OrderController extends AdminBaseController
             $refundController = new RefundController();
             $re = $refundController->pay_refund($orderNum);
             if (($re['code'] ?? 0) == 0) {
-                return $re['msg'] ?? '微信退款失败';
+                $msg = trim((string)($re['msg'] ?? ''));
+                return $msg !== '' ? $msg : '微信退款失败，请检查商户证书或订单是否已退过款';
             }
         } elseif ($payType === 2 && (float)$orderInfo['balance_pay'] > 0) {
             AccountLogModel::add_account_log(
