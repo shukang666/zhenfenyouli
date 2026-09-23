@@ -77,6 +77,7 @@ class ActivityShowcaseController extends AuthController
         $detail['photo_count'] = count($photos);
         $detail['event_date_text'] = $detail['event_date'] ? date('Y-m-d', $detail['event_date']) : '';
         $detail['content'] = $this->formatContent($detail['content'] ?? '');
+        $detail['content'] = $this->limitContentImages($detail['content'], 15);
         unset($detail['status']);
 
         $this->success('success', $detail);
@@ -100,12 +101,25 @@ class ActivityShowcaseController extends AuthController
         return $html;
     }
 
+    private function limitContentImages($html, $max = 15)
+    {
+        if ($html === '' || $html === null) {
+            return '';
+        }
+        $n = 0;
+        return preg_replace_callback('/<img\b[^>]*>/i', function ($m) use (&$n, $max) {
+            $n++;
+            return $n <= $max ? $m[0] : '';
+        }, (string)$html);
+    }
+
     private function parsePhotos($photos)
     {
         if (empty($photos)) {
             return [];
         }
-        return array_values(array_filter(array_map('trim', explode(',', $photos))));
+        $list = array_values(array_filter(array_map('trim', explode(',', $photos))));
+        return array_slice($list, 0, 15);
     }
 
     private function formatImage($image)

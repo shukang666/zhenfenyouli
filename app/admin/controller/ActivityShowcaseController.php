@@ -12,6 +12,8 @@ use think\facade\Db;
  */
 class ActivityShowcaseController extends AdminBaseController
 {
+    const MAX_PHOTOS = 15;
+
     /**
      * 风采列表
      */
@@ -67,10 +69,20 @@ class ActivityShowcaseController extends AdminBaseController
             if (empty($photos)) {
                 $this->error('请上传至少一张照片');
             }
+            if (count($photos) > self::MAX_PHOTOS) {
+                $photos = array_slice($photos, 0, self::MAX_PHOTOS);
+            }
 
             $content = (string)($data['content'] ?? '');
             if (trim(strip_tags(htmlspecialchars_decode($content))) === '') {
                 $this->error('请填写活动正文（富文本）');
+            }
+            require_once CMF_ROOT . 'data/import_showcase_from_temp.php';
+            $content = showcase_import_limit_content_images($content, self::MAX_PHOTOS);
+
+            $cover = trim($data['cover'] ?? '') ?: $photos[0];
+            if (!in_array($cover, $photos, true)) {
+                $cover = $photos[0];
             }
 
             $eventDate = trim($data['event_date'] ?? '');
@@ -78,7 +90,7 @@ class ActivityShowcaseController extends AdminBaseController
 
             $save = [
                 'title'       => trim($data['title']),
-                'cover'       => trim($data['cover'] ?? '') ?: $photos[0],
+                'cover'       => $cover,
                 'description' => trim($data['description'] ?? ''),
                 'content'     => $content,
                 'event_date'  => $eventTimestamp ?: time(),
@@ -211,6 +223,27 @@ class ActivityShowcaseController extends AdminBaseController
             'oss_errors' => [],
         ];
         showcase_import_sync_showcase_assets_to_oss($uploadRoot, $pdo, $storageCtx, false, $report);
+        $this->assign('report', array_merge(['ok' => true, 'folders' => [], 'updated_content_only' => [], 'errors' => []], $report));
+        $this->assign('reportJson', json_encode($report, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        return $this->fetch('import_temp');
+    }
+
+    /** 仅裁剪库内风采为最多 15 张图 */
+    public function trim_showcase_photos()
+    {
+        if (!$this->canImportShowcaseFromTemp()) {
+            $this->error('仅超级管理员可执行');
+        }
+        require_once CMF_ROOT . 'data/import_showcase_from_temp.php';
+        $env = parse_ini_file(CMF_ROOT . '.env');
+        $pdo = new \PDO(
+            "mysql:host={$env['DATABASE_HOSTNAME']};port={$env['DATABASE_HOSTPORT']};dbname={$env['DATABASE_DATABASE']};charset=utf8mb4",
+            $env['DATABASE_USERNAME'],
+            $env['DATABASE_PASSWORD'],
+            [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+        );
+        $report = ['trimmed_records' => [], 'errors' => []];
+        showcase_import_trim_all_in_db($pdo, false, $report);
         $this->assign('report', array_merge(['ok' => true, 'folders' => [], 'updated_content_only' => [], 'errors' => []], $report));
         $this->assign('reportJson', json_encode($report, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
         return $this->fetch('import_temp');
