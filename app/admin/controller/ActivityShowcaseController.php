@@ -67,6 +67,11 @@ class ActivityShowcaseController extends AdminBaseController
                 $this->error('请上传至少一张照片');
             }
 
+            $content = (string)($data['content'] ?? '');
+            if (trim(strip_tags(htmlspecialchars_decode($content))) === '') {
+                $this->error('请填写活动正文（富文本）');
+            }
+
             $eventDate = trim($data['event_date'] ?? '');
             $eventTimestamp = $eventDate ? strtotime($eventDate) : 0;
 
@@ -74,6 +79,7 @@ class ActivityShowcaseController extends AdminBaseController
                 'title'       => trim($data['title']),
                 'cover'       => trim($data['cover'] ?? '') ?: $photos[0],
                 'description' => trim($data['description'] ?? ''),
+                'content'     => $content,
                 'event_date'  => $eventTimestamp ?: time(),
                 'photos'      => implode(',', $photos),
                 'list_order'  => intval($data['list_order'] ?? 0),
@@ -97,6 +103,7 @@ class ActivityShowcaseController extends AdminBaseController
             'title'       => '',
             'cover'       => '',
             'description' => '',
+            'content'     => '',
             'event_date'  => date('Y-m-d'),
             'photos'      => [],
             'list_order'  => 0,

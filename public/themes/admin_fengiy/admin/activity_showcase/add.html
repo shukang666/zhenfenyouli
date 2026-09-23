@@ -68,9 +68,16 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-2 control-label">简介</label>
+            <label class="col-sm-2 control-label">列表摘要</label>
             <div class="col-md-8 col-sm-10">
-                <textarea class="form-control" name="description" rows="3" placeholder="可选，简要描述本次活动">{$data.description|default=''}</textarea>
+                <textarea class="form-control" name="description" rows="2" placeholder="选填，首页/列表卡片展示；不填则自动截取正文开头">{$data.description|default=''}</textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>活动正文</label>
+            <div class="col-md-8 col-sm-10">
+                <script type="text/plain" id="content" name="content">{$data.content|default=''}</script>
+                <p class="help-block">富文本，小程序详情页展示；可插入图片、分段与列表。</p>
             </div>
         </div>
         <div class="form-group">
@@ -136,6 +143,21 @@
     </form>
 </div>
 <script src="__STATIC__/js/admin.js"></script>
+<script type="text/javascript">
+    var editorURL = GV.WEB_ROOT;
+</script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="__STATIC__/js/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        editorcontent = new baidu.editor.ui.Editor();
+        editorcontent.render('content');
+        try {
+            editorcontent.sync();
+        } catch (err) {
+        }
+    });
+</script>
 <script>
 function doCoverUpload(){
     openUploadDialog('封面图上传', function (dialog, files) {

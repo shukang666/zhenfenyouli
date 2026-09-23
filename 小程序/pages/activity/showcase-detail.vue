@@ -14,7 +14,14 @@
 					<text class="dot">·</text>
 					<text>{{ detail.photo_count }}张照片</text>
 				</view>
-				<view class="detail-desc" v-if="detail.description">{{ detail.description }}</view>
+				<view class="detail-desc" v-if="detail.description && !detail.content">{{ detail.description }}</view>
+			</view>
+
+			<view class="rich-section" v-if="detail.content">
+				<view class="section-title">活动介绍</view>
+				<view class="detail-rich">
+					<u-parse :html="detail.content"></u-parse>
+				</view>
 			</view>
 
 			<view class="photo-section">
@@ -112,6 +119,21 @@ export default {
 	font-size: 28rpx;
 	color: #555;
 	line-height: 1.7;
+}
+
+.rich-section {
+	margin: 0 30rpx 20rpx;
+	padding: 28rpx;
+	background: #fff;
+	border-radius: 24rpx;
+	box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.06);
+}
+
+.detail-rich {
+	font-size: 28rpx;
+	color: #444;
+	line-height: 1.75;
+	word-break: break-word;
 }
 
 .photo-section {

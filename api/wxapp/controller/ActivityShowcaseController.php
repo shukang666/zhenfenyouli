@@ -25,7 +25,7 @@ class ActivityShowcaseController extends AuthController
         $total = Db::name('activity_showcase')->where($where)->count();
         $list = Db::name('activity_showcase')
             ->where($where)
-            ->field('id, title, cover, description, event_date, photos, view_count, create_time')
+            ->field('id, title, cover, description, content, event_date, photos, view_count, create_time')
             ->order('list_order asc, event_date desc, id desc')
             ->page($page, $limit)
             ->select()
@@ -36,7 +36,15 @@ class ActivityShowcaseController extends AuthController
             $item['cover'] = $this->formatImage($item['cover'] ?: ($photos[0] ?? ''));
             $item['photo_count'] = count($photos);
             $item['event_date_text'] = $item['event_date'] ? date('Y-m-d', $item['event_date']) : '';
-            unset($item['photos']);
+            if (empty($item['description'])) {
+                $plain = trim(strip_tags($this->formatContent($item['content'] ?? '')));
+                if ($plain !== '') {
+                    $item['description'] = mb_strlen($plain, 'UTF-8') > 80
+                        ? mb_substr($plain, 0, 80, 'UTF-8') . '…'
+                        : $plain;
+                }
+            }
+            unset($item['content'], $item['photos']);
         }
         unset($item);
 
@@ -68,9 +76,28 @@ class ActivityShowcaseController extends AuthController
         $detail['photos'] = array_map([$this, 'formatImage'], $photos);
         $detail['photo_count'] = count($photos);
         $detail['event_date_text'] = $detail['event_date'] ? date('Y-m-d', $detail['event_date']) : '';
+        $detail['content'] = $this->formatContent($detail['content'] ?? '');
         unset($detail['status']);
 
         $this->success('success', $detail);
+    }
+
+    /**
+     * 富文本：解码并补全图片地址
+     */
+    private function formatContent($content)
+    {
+        if ($content === '' || $content === null) {
+            return '';
+        }
+        $html = htmlspecialchars_decode((string)$content, ENT_QUOTES);
+        if (strpos($html, '&lt;') !== false && strpos($html, '<') === false) {
+            $html = htmlspecialchars_decode($html, ENT_QUOTES);
+        }
+        if (function_exists('cmf_replace_content_file_url')) {
+            $html = cmf_replace_content_file_url($html);
+        }
+        return $html;
     }
 
     private function parsePhotos($photos)

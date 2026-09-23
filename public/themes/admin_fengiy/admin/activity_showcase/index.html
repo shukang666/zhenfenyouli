@@ -34,6 +34,7 @@
                     <th>标题</th>
                     <th width="120">活动日期</th>
                     <th width="80">照片数</th>
+                    <th width="72">正文</th>
                     <th width="60">状态</th>
                     <th width="60">排序</th>
                     <th width="160">创建时间</th>
@@ -65,6 +66,12 @@
                         <php>
                             $photoCount = empty($vo['photos']) ? 0 : count(array_filter(explode(',', $vo['photos'])));
                             echo $photoCount;
+                        </php>
+                    </td>
+                    <td>
+                        <php>
+                            $hasContent = !empty(trim(strip_tags(htmlspecialchars_decode($vo['content'] ?? ''))));
+                            echo $hasContent ? '<span class="label label-success">有</span>' : '<span class="text-muted">无</span>';
                         </php>
                     </td>
                     <td>

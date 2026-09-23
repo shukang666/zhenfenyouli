@@ -84,3 +84,8 @@ UPDATE `cmf_clock_tutorial` SET `cate_key`='zhenfenjiao' WHERE `cate_key`='other
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active_clock' AND COLUMN_NAME = 'experience_share');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active_clock` ADD COLUMN `experience_share` varchar(500) NOT NULL DEFAULT '''' COMMENT ''打卡经验分享'' AFTER `image_url`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+-- 活动风采：正文富文本（UEditor）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_activity_showcase' AND COLUMN_NAME = 'content');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_activity_showcase` ADD COLUMN `content` mediumtext COMMENT ''活动正文富文本'' AFTER `description`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
