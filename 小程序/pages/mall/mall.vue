@@ -62,26 +62,57 @@
 				</view>
 			</view>
 
-			<!-- 地理产区：4 列网格，一屏可见 -->
+			<!-- 地理产区：可折叠，选完自动收起 -->
 			<view class="zone-panel" id="guide-mall-cate">
-				<view class="zone-panel__head">
-					<view class="zone-panel__title-wrap">
-						<view class="zone-panel__dot"></view>
-						<text class="zone-panel__title">地理产区</text>
-					</view>
-					<text class="zone-panel__hint">点选产区，查看当地特色好物</text>
-				</view>
-				<view class="zone-grid">
-					<view
-						class="zone-grid__item"
-						:class="{'zone-grid__item--on': cate_type === index}"
-						v-for="(item,index) in cate_list"
-						:key="item.id || index"
-						@click="cate_btn(index)"
-					>
-						<text class="zone-grid__text">{{ zoneShortName(item.cate_name) }}</text>
-					</view>
-				</view>
+				<u-collapse
+					ref="zoneCollapse"
+					:accordion="true"
+					:arrow="false"
+					:head-style="zoneCollapseHeadStyle"
+					:body-style="zoneCollapseBodyStyle"
+					:item-style="zoneCollapseItemStyle"
+				>
+					<u-collapse-item :open="zonePanelOpen" name="geo" @change="onZonePanelToggle">
+						<view slot="title-all" class="zone-panel__head">
+							<view class="zone-panel__head-main">
+								<view class="zone-panel__title-wrap">
+									<view class="zone-panel__dot"></view>
+									<text class="zone-panel__title">地理产区</text>
+								</view>
+								<text class="zone-panel__summary">{{ zonePanelSummary }}</text>
+							</view>
+							<u-icon
+								class="zone-panel__chevron"
+								:class="{ 'zone-panel__chevron--up': zonePanelOpen }"
+								name="arrow-down"
+								size="28"
+								color="#999"
+							></u-icon>
+						</view>
+						<view class="zone-panel__body">
+							<text class="zone-panel__hint">点地图大区，再选具体产区</text>
+							<mall-china-map :value="mapRegion" @change="onMapRegionChange" />
+							<scroll-view
+								v-if="regionZoneList.length"
+								scroll-x
+								class="zone-strip"
+								:show-scrollbar="false"
+							>
+								<view class="zone-strip__inner">
+									<view
+										class="zone-chip"
+										:class="{ 'zone-chip--on': cate_type === item.index }"
+										v-for="item in regionZoneList"
+										:key="item.id"
+										@click="cate_btn(item.index)"
+									>
+										<text>{{ zoneShortName(item.cate_name) }}</text>
+									</view>
+								</view>
+							</scroll-view>
+						</view>
+					</u-collapse-item>
+				</u-collapse>
 			</view>
 
 			<!-- 商品列表 -->
@@ -126,10 +157,13 @@
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
+	import MallChinaMap from '@/components/mall-china-map/mall-china-map.vue'
+	import { zonesInRegion, zoneShortName, matchZoneToRegion, regionLabel } from '@/common/mallGeoMap.js'
 	import careGesture from '@/common/care-gesture.mixin.js'
 	export default {
 		components: {
-			SkeletonScreen
+			SkeletonScreen,
+			MallChinaMap,
 		},
 		mixins: [careGesture],
 		data() {
@@ -138,16 +172,44 @@
 				coupon_list: [],
 				cate_list: [],
 				cate_type: 0,
+				mapRegion: 'all',
 				goods_list: [],
 				page: 1,
 				total: 0,
 				loadingGoods: false,
+				zonePanelOpen: true,
+				zoneCollapseHeadStyle: { padding: 0 },
+				zoneCollapseBodyStyle: { padding: 0 },
+				zoneCollapseItemStyle: { border: 'none' },
 			};
 		},
 		computed: {
+			zonePanelSummary() {
+				if (this.mapRegion === 'creative') {
+					return '综合文创'
+				}
+				if (this.cate_type <= 0) {
+					return '全国 · 全部产区'
+				}
+				const zone = this.currentZoneLabel
+				const region = this.mapRegion && this.mapRegion !== 'all' ? regionLabel(this.mapRegion) : ''
+				if (region && zone) {
+					return region + ' · ' + zone
+				}
+				return zone || '已选产区'
+			},
 			goodsSectionTitle() {
 				const name = this.cate_list[this.cate_type]?.cate_name || '全部'
 				return name === '全部' ? '全部好物' : name + ' · 特色好物'
+			},
+			regionZoneList() {
+				if (!this.mapRegion || this.mapRegion === 'all') return []
+				return zonesInRegion(this.cate_list, this.mapRegion)
+			},
+			currentZoneLabel() {
+				const item = this.cate_list[this.cate_type]
+				const name = item && item.cate_name ? item.cate_name : ''
+				return name ? zoneShortName(name) : ''
 			},
 		},
 		onLoad() {
@@ -159,28 +221,29 @@
 		},
 		methods: {
 			zoneShortName(name) {
-				const map = {
-					'全部': '全部',
-					'东北山地林区': '东北山地',
-					'东北平原黑土农区': '东北平原',
-					'辽西粗粮干果区': '辽西粗粮',
-					'辽东半岛冷水海鲜区': '辽东海鲜',
-					'黄淮海平原农区': '黄淮海',
-					'沂蒙丘陵农林区': '沂蒙丘陵',
-					'黄土高原粗粮区': '黄土高原',
-					'秦岭果蔬区': '秦岭果蔬',
-					'河套-河西走廊农区': '河西走廊',
-					'哈密盆地果蔬区': '哈密盆地',
-					'内蒙古、新疆草原牧区': '草原牧区',
-					'江南水产茶果区': '江南茶果',
-					'四川天府农区': '四川天府',
-					'云贵高原山珍区': '云贵山珍',
-					'闽粤海鲜区': '闽粤海鲜',
-					'海南热带水产鲜果区': '海南热带',
-					'青藏高原农区': '青藏高原',
-					'综合文创': '综合文创',
+				return zoneShortName(name)
+			},
+			onMapRegionChange(key) {
+				this.mapRegion = key
+				if (key === 'all') {
+					this.cate_btn(0)
+					return
 				}
-				return map[name] || name
+				const zones = zonesInRegion(this.cate_list, key)
+				if (zones.length) {
+					this.cate_btn(zones[0].index)
+				} else {
+					this.cate_btn(0)
+				}
+			},
+			syncMapFromCateIndex(index) {
+				if (index <= 0) {
+					this.mapRegion = 'all'
+					return
+				}
+				const name = this.cate_list[index]?.cate_name || ''
+				const region = matchZoneToRegion(name)
+				this.mapRegion = region ? region : 'all'
 			},
 			async loadAllData() {
 				const startTime = Date.now()
@@ -201,6 +264,7 @@
 					} else {
 						this.isLoading = false
 					}
+					this.$nextTick(() => this.refreshZoneCollapseHeight())
 				}
 			},
 			get_category() {
@@ -211,12 +275,35 @@
 					return this.get_goods_list()
 				})
 			},
+			onZonePanelToggle(e) {
+				this.zonePanelOpen = !!e.show
+				if (e.show) {
+					this.refreshZoneCollapseHeight()
+				}
+			},
+			refreshZoneCollapseHeight() {
+				this.$nextTick(() => {
+					const collapse = this.$refs.zoneCollapse
+					if (collapse && collapse.init) {
+						collapse.init()
+					}
+				})
+			},
+			collapseZonePanel() {
+				this.zonePanelOpen = false
+			},
 			cate_btn(index) {
-				if (this.cate_type === index) return
+				const changed = this.cate_type !== index
 				this.cate_type = index
-				this.page = 1
-				this.goods_list = []
-				this.get_goods_list()
+				this.syncMapFromCateIndex(index)
+				if (changed) {
+					this.page = 1
+					this.goods_list = []
+					this.get_goods_list()
+				}
+				this.$nextTick(() => {
+					this.collapseZonePanel()
+				})
 			},
 			get_goods_list() {
 				if (this.loadingGoods) return Promise.resolve()
@@ -301,19 +388,58 @@
 	.zone-panel {
 		background: #fff;
 		border-radius: 24rpx;
-		padding: 28rpx 24rpx 24rpx;
+		padding: 8rpx 24rpx 8rpx;
 		box-shadow: 0 8rpx 32rpx rgba(24, 175, 56, 0.12);
 		margin-bottom: 30rpx;
 	}
 
 	.zone-panel__head {
-		margin-bottom: 24rpx;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 20rpx 0;
+		width: 100%;
+	}
+
+	.zone-panel__head-main {
+		flex: 1;
+		min-width: 0;
+		padding-right: 16rpx;
 	}
 
 	.zone-panel__title-wrap {
 		display: flex;
 		align-items: center;
 		margin-bottom: 8rpx;
+	}
+
+	.zone-panel__summary {
+		display: block;
+		font-size: 24rpx;
+		color: #18af38;
+		padding-left: 20rpx;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.zone-panel__chevron {
+		flex-shrink: 0;
+		transition: transform 0.3s ease;
+		margin-right: 4rpx;
+	}
+
+	.zone-panel__chevron--up {
+		transform: rotate(180deg);
+	}
+
+	.zone-panel__body {
+		padding-bottom: 16rpx;
+	}
+
+	.zone-panel__hint {
+		display: block;
+		margin-bottom: 16rpx;
 	}
 
 	.zone-panel__dot {
@@ -336,40 +462,45 @@
 		padding-left: 20rpx;
 	}
 
-	.zone-grid {
-		display: flex;
-		flex-wrap: wrap;
-		margin: -8rpx;
+	.zone-panel .u-collapse-head {
+		padding: 0 !important;
 	}
 
-	.zone-grid__item {
-		width: 25%;
-		padding: 8rpx;
-		box-sizing: border-box;
+	.zone-panel .u-collapse-body {
+		transition: height 0.32s ease;
 	}
 
-	.zone-grid__item--on .zone-grid__text {
-		background: linear-gradient(135deg, #2fb74c 0%, #18AF38 100%);
-		color: #fff;
-		border-color: transparent;
-		font-weight: 600;
-		box-shadow: 0 6rpx 16rpx rgba(24, 175, 56, 0.28);
+	.zone-strip {
+		margin-top: 20rpx;
+		width: 100%;
+		white-space: nowrap;
 	}
 
-	.zone-grid__text {
-		display: flex;
+	.zone-strip__inner {
+		display: inline-flex;
+		padding: 4rpx 0 8rpx;
+		gap: 16rpx;
+	}
+
+	.zone-chip {
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 88rpx;
-		padding: 12rpx 8rpx;
-		background: #F5F9F6;
-		border: 2rpx solid #E8F0EA;
-		border-radius: 16rpx;
+		padding: 14rpx 28rpx;
+		border-radius: 999rpx;
+		background: #f5f9f6;
+		border: 2rpx solid #e8f0ea;
 		font-size: 24rpx;
-		line-height: 1.35;
 		color: #444;
-		text-align: center;
-		box-sizing: border-box;
+		flex-shrink: 0;
+	}
+
+	.zone-chip--on {
+		background: linear-gradient(135deg, #2fb74c 0%, #18af38 100%);
+		border-color: transparent;
+		color: #fff;
+		font-weight: 600;
+		box-shadow: 0 6rpx 16rpx rgba(24, 175, 56, 0.28);
 	}
 
 	.goods-section__head {

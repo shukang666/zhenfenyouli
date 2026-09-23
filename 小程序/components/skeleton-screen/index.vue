@@ -101,8 +101,9 @@
 			<view class="sk-coupon"></view>
 			<view class="sk-zone-panel">
 				<view class="sk-line sk-line--w40"></view>
-				<view class="sk-zone-grid">
-					<view class="sk-zone-item" v-for="i in 8" :key="i"></view>
+				<view class="sk-china-map"></view>
+				<view class="sk-zone-strip">
+					<view class="sk-zone-chip" v-for="i in 4" :key="'zc' + i"></view>
 				</view>
 			</view>
 			<view class="sk-goods-grid">
@@ -580,18 +581,24 @@ export default {
 	border-radius: 24rpx;
 	margin-bottom: 30rpx;
 }
-.sk-zone-grid {
-	display: flex;
-	flex-wrap: wrap;
-	margin: 20rpx -8rpx -8rpx;
+.sk-china-map {
+	@extend .sk-base;
+	height: 520rpx;
+	margin-top: 20rpx;
+	border-radius: 20rpx;
 }
-.sk-zone-item {
-	width: 25%;
-	padding: 8rpx;
-	box-sizing: border-box;
-	height: 88rpx;
-	background: rgba(255,255,255,0.5);
-	border-radius: 16rpx;
+.sk-zone-strip {
+	display: flex;
+	gap: 16rpx;
+	margin-top: 20rpx;
+	overflow: hidden;
+}
+.sk-zone-chip {
+	@extend .sk-base;
+	width: 140rpx;
+	height: 56rpx;
+	border-radius: 999rpx;
+	flex-shrink: 0;
 }
 .sk-goods-grid {
 	display: flex;
