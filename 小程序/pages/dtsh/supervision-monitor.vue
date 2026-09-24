@@ -198,12 +198,15 @@
 			<view class="u-m-t-30 u-p-24 check-group">
 				<view class="u-font-30 u-font-bold u-m-b-20">投放点检查</view>
 				<view class="u-font-28 u-m-b-16">投放点照片</view>
-				<view class="upload-area" @click="chooseImage('point_photo')">
-					<view v-if="!form.point_photo" class="upload-placeholder">
-						<u-icon name="camera" size="50" color="#ccc"></u-icon>
-						<view class="u-m-t-10 u-font-24 u-type-info">点击拍照或选择图片</view>
+				<view class="photo-multi">
+					<view v-for="(url, idx) in form.point_photo" :key="'point_' + idx" class="photo-multi-item">
+						<image :src="url" mode="aspectFill" class="photo-multi-img" @click="previewPhotos(form.point_photo, idx)"></image>
+						<view class="photo-multi-del" @click.stop="removePhoto('point_photo', idx)">×</view>
 					</view>
-					<image v-else :src="form.point_photo" mode="aspectFill" class="upload-image"></image>
+					<view class="photo-multi-add" @click="chooseImage('point_photo')">
+						<u-icon name="camera" size="40" color="#ccc"></u-icon>
+						<view class="u-m-t-6 u-font-22 u-type-info">添加</view>
+					</view>
 				</view>
 				<view class="u-font-28 u-m-b-16 u-m-t-20">是否合格</view>
 				<view class="u-flex">
@@ -215,12 +218,15 @@
 					</view>
 				</view>
 				<view class="u-font-28 u-m-b-16 u-m-t-20">整改后照片</view>
-				<view class="upload-area" @click="chooseImage('point_rectify_photo')">
-					<view v-if="!form.point_rectify_photo" class="upload-placeholder">
-						<u-icon name="camera" size="50" color="#ccc"></u-icon>
-						<view class="u-m-t-10 u-font-24 u-type-info">点击拍照或选择图片</view>
+				<view class="photo-multi">
+					<view v-for="(url, idx) in form.point_rectify_photo" :key="'pr_' + idx" class="photo-multi-item">
+						<image :src="url" mode="aspectFill" class="photo-multi-img" @click="previewPhotos(form.point_rectify_photo, idx)"></image>
+						<view class="photo-multi-del" @click.stop="removePhoto('point_rectify_photo', idx)">×</view>
 					</view>
-					<image v-else :src="form.point_rectify_photo" mode="aspectFill" class="upload-image"></image>
+					<view class="photo-multi-add" @click="chooseImage('point_rectify_photo')">
+						<u-icon name="camera" size="40" color="#ccc"></u-icon>
+						<view class="u-m-t-6 u-font-22 u-type-info">添加</view>
+					</view>
 				</view>
 			</view>
 
@@ -257,12 +263,15 @@
 			<!-- 其他照片 -->
 			<view class="u-m-t-30">
 				<view class="u-font-28 u-m-b-16">收运链条照片</view>
-				<view class="upload-area" @click="chooseImage('transport_photo')">
-					<view v-if="!form.transport_photo" class="upload-placeholder">
-						<u-icon name="camera" size="50" color="#ccc"></u-icon>
-						<view class="u-m-t-10 u-font-24 u-type-info">点击拍照或选择图片</view>
+				<view class="photo-multi">
+					<view v-for="(url, idx) in form.transport_photo" :key="'tp_' + idx" class="photo-multi-item">
+						<image :src="url" mode="aspectFill" class="photo-multi-img" @click="previewPhotos(form.transport_photo, idx)"></image>
+						<view class="photo-multi-del" @click.stop="removePhoto('transport_photo', idx)">×</view>
 					</view>
-					<image v-else :src="form.transport_photo" mode="aspectFill" class="upload-image"></image>
+					<view class="photo-multi-add" @click="chooseImage('transport_photo')">
+						<u-icon name="camera" size="40" color="#ccc"></u-icon>
+						<view class="u-m-t-6 u-font-22 u-type-info">添加</view>
+					</view>
 				</view>
 			</view>
 
@@ -361,13 +370,13 @@
 					inner_qualified: null,
 					need_rectify: null,
 					inner_rectify_photo: '',
-					point_photo: '',
+					point_photo: [],
 					point_qualified: null,
-					point_rectify_photo: '',
+					point_rectify_photo: [],
 					manage_photo: '',
 					manage_qualified: null,
 					manage_rectify_photo: '',
-					transport_photo: '',
+					transport_photo: [],
 					catering_photo: '',
 					accuracy_photo: '',
 					overall_evaluation: '',
@@ -375,6 +384,7 @@
 				communityList: [],          // 社区列表
 				showCommunityPicker: false,
 				uploadUrl,
+				multiPhotoFields: ['point_photo', 'point_rectify_photo', 'transport_photo'],
 			};
 		},
 		computed: {
@@ -426,20 +436,51 @@ canSubmit() {
 				this.form.check_date = e.detail.value;
 			},
 
+			isMultiPhotoField(field) {
+				return this.multiPhotoFields.indexOf(field) >= 0;
+			},
+
+			serializeMultiPhotos(arr) {
+				const urls = (arr || []).filter(u => u && String(u).trim());
+				if (!urls.length) return '';
+				if (urls.length === 1) return urls[0];
+				return JSON.stringify(urls);
+			},
+
 			// 选择图片并上传（field 为表单字段名）
 			chooseImage(field) {
+				const multi = this.isMultiPhotoField(field);
+				const current = multi ? (this.form[field] || []).length : 0;
+				const maxPick = multi ? Math.min(9, 9 - current) : 1;
+				if (multi && maxPick <= 0) {
+					uni.showToast({ title: '最多 9 张', icon: 'none' });
+					return;
+				}
 				uni.chooseImage({
-					count: 1,
+					count: maxPick,
 					sourceType: ['camera', 'album'],
 					success: (res) => {
-						const tempFilePath = res.tempFilePaths[0];
-						this.uploadImage(field, tempFilePath);
+						if (multi) {
+							res.tempFilePaths.forEach(p => this.uploadImage(field, p, true));
+						} else {
+							this.uploadImage(field, res.tempFilePaths[0], false);
+						}
 					}
 				});
 			},
 
+			removePhoto(field, index) {
+				if (!this.isMultiPhotoField(field) || !Array.isArray(this.form[field])) return;
+				this.form[field].splice(index, 1);
+			},
+
+			previewPhotos(urls, index) {
+				if (!urls || !urls.length) return;
+				uni.previewImage({ urls, current: urls[index] });
+			},
+
 			// 上传图片到服务器
-			uploadImage(field, filePath) {
+			uploadImage(field, filePath, appendMulti) {
 				uni.showLoading({ title: '上传中...' });
 				uni.uploadFile({
 					url: this.uploadUrl,
@@ -453,7 +494,14 @@ canSubmit() {
 						try {
 							const data = JSON.parse(uploadRes.data);
 							if (data.code == 1) {
-								this.form[field] = data.data.url;
+								if (appendMulti) {
+									if (!Array.isArray(this.form[field])) {
+										this.$set(this.form, field, []);
+									}
+									this.form[field].push(data.data.url);
+								} else {
+									this.form[field] = data.data.url;
+								}
 								uni.showToast({ title: '上传成功', icon: 'success' });
 							} else {
 								uni.showToast({ title: data.msg || '上传失败', icon: 'none' });
@@ -491,10 +539,12 @@ canSubmit() {
 					uni.showToast({ title: '请填写地址', icon: 'none' });
 					return;
 				}
-uni.showLoading
-				this.$u.api.postSupervisionMonitor({
-					...this.form
-				}).then(res => {
+				uni.showLoading({ title: '提交中...' });
+				const payload = { ...this.form };
+				this.multiPhotoFields.forEach(f => {
+					payload[f] = this.serializeMultiPhotos(payload[f]);
+				});
+				this.$u.api.postSupervisionMonitor(payload).then(res => {
 					uni.hideLoading();
 					uni.showToast({
 						title: res.msg || '已提交',
@@ -552,6 +602,51 @@ uni.showLoading
 }
 
 	/* ===== 照片上传区 ===== */
+	.photo-multi {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16rpx;
+	}
+
+	.photo-multi-item {
+		position: relative;
+		width: 200rpx;
+		height: 200rpx;
+		border-radius: 12rpx;
+		overflow: hidden;
+	}
+
+	.photo-multi-img {
+		width: 100%;
+		height: 100%;
+	}
+
+	.photo-multi-del {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 44rpx;
+		height: 44rpx;
+		line-height: 40rpx;
+		text-align: center;
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		font-size: 32rpx;
+		border-bottom-left-radius: 8rpx;
+	}
+
+	.photo-multi-add {
+		width: 200rpx;
+		height: 200rpx;
+		background: #f5f5f5;
+		border-radius: 12rpx;
+		border: 2rpx dashed #ddd;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.upload-area {
 		width: 100%;
 		height: 240rpx;

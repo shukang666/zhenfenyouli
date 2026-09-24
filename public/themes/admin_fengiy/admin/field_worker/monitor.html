@@ -305,6 +305,19 @@
             cursor: pointer;
             z-index: 2;
         }
+        .multi-upload-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+        .multi-grid { display: contents; }
+        .multi-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e8e8e8;
+        }
+        .multi-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .multi-item .delete-btn { position: absolute; top: 4px; right: 4px; }
+        .upload-area.add-tile { width: 100px; height: 100px; flex-shrink: 0; }
         .upload-area.uploading::after {
             content: '';
             position: absolute;
@@ -565,12 +578,13 @@
                     <div class="check-group-title">投放点检查</div>
                     <div class="form-group">
                         <label>投放点照片</label>
-                        <div class="upload-area" data-field="point_photo" onclick="triggerFile('point_photo')">
-                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
-                            <img class="upload-image" style="display:none;" />
-                            <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('point_photo')"><i class="fa fa-times"></i></span>
+                        <div class="multi-upload-row" data-multi-field="point_photo">
+                            <div class="multi-grid" id="grid_point_photo"></div>
+                            <div class="upload-area add-tile" onclick="triggerFile('point_photo')">
+                                <div class="upload-placeholder"><i class="fa fa-plus"></i><span>添加</span></div>
+                            </div>
                         </div>
-                        <input type="file" id="file_point_photo" class="hidden-file-input" accept="image/*" data-field="point_photo">
+                        <input type="file" id="file_point_photo" class="hidden-file-input" accept="image/*" multiple data-field="point_photo" data-multi="1">
                     </div>
                     <div class="form-group">
                         <label>是否合格</label>
@@ -581,12 +595,13 @@
                     </div>
                     <div class="form-group" style="margin-bottom:0;">
                         <label>整改后照片</label>
-                        <div class="upload-area" data-field="point_rectify_photo" onclick="triggerFile('point_rectify_photo')">
-                            <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
-                            <img class="upload-image" style="display:none;" />
-                            <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('point_rectify_photo')"><i class="fa fa-times"></i></span>
+                        <div class="multi-upload-row" data-multi-field="point_rectify_photo">
+                            <div class="multi-grid" id="grid_point_rectify_photo"></div>
+                            <div class="upload-area add-tile" onclick="triggerFile('point_rectify_photo')">
+                                <div class="upload-placeholder"><i class="fa fa-plus"></i><span>添加</span></div>
+                            </div>
                         </div>
-                        <input type="file" id="file_point_rectify_photo" class="hidden-file-input" accept="image/*" data-field="point_rectify_photo">
+                        <input type="file" id="file_point_rectify_photo" class="hidden-file-input" accept="image/*" multiple data-field="point_rectify_photo" data-multi="1">
                     </div>
                 </div>
 
@@ -623,12 +638,13 @@
                 <!-- 收运链条照片 -->
                 <div class="form-group" id="sec-transport">
                     <label>收运链条照片</label>
-                    <div class="upload-area" data-field="transport_photo" onclick="triggerFile('transport_photo')">
-                        <div class="upload-placeholder"><i class="fa fa-camera"></i><span>点击拍照或选择图片</span></div>
-                        <img class="upload-image" style="display:none;" />
-                        <span class="delete-btn" style="display:none;" onclick="event.stopPropagation(); removeImage('transport_photo')"><i class="fa fa-times"></i></span>
+                    <div class="multi-upload-row" data-multi-field="transport_photo">
+                        <div class="multi-grid" id="grid_transport_photo"></div>
+                        <div class="upload-area add-tile" onclick="triggerFile('transport_photo')">
+                            <div class="upload-placeholder"><i class="fa fa-plus"></i><span>添加</span></div>
+                        </div>
                     </div>
-                    <input type="file" id="file_transport_photo" class="hidden-file-input" accept="image/*" data-field="transport_photo">
+                    <input type="file" id="file_transport_photo" class="hidden-file-input" accept="image/*" multiple data-field="transport_photo" data-multi="1">
                 </div>
 
                 <!-- 准确率照片 -->
@@ -717,8 +733,49 @@ var uploadFields = ['door_photo', 'inner_photo', 'publicity_photo',
     'inner_rectify_photo', 'point_photo', 'point_rectify_photo',
     'manage_photo', 'manage_rectify_photo',
     'transport_photo', 'catering_photo', 'accuracy_photo'];
+var multiUploadFields = ['point_photo', 'point_rectify_photo', 'transport_photo'];
 var uploadedImages = {};
-uploadFields.forEach(function(f) { uploadedImages[f] = ''; });
+uploadFields.forEach(function(f) {
+    uploadedImages[f] = multiUploadFields.indexOf(f) >= 0 ? [] : '';
+});
+
+function isMultiUploadField(field) {
+    return multiUploadFields.indexOf(field) >= 0;
+}
+
+function previewUrlFromStore(path) {
+    if (!path) return '';
+    if (path.indexOf('http://') === 0 || path.indexOf('https://') === 0 || path.indexOf('//') === 0) {
+        return path;
+    }
+    var fp = String(path).replace(/^\/+/, '').replace(/^upload\//, '');
+    return ASSET_UPLOAD_BASE + fp;
+}
+
+function serializePhotoField(field) {
+    var v = uploadedImages[field];
+    if (isMultiUploadField(field)) {
+        if (!v || !v.length) return '';
+        if (v.length === 1) return v[0];
+        return JSON.stringify(v);
+    }
+    return v || '';
+}
+
+function renderMultiGrid(field) {
+    var $grid = $('#grid_' + field);
+    if (!$grid.length) return;
+    var list = uploadedImages[field] || [];
+    var html = '';
+    list.forEach(function(path, idx) {
+        var url = previewUrlFromStore(path);
+        html += '<div class="multi-item">' +
+            '<img src="' + url + '" alt="">' +
+            '<span class="delete-btn" onclick="removeMultiImage(\'' + field + '\',' + idx + ')"><i class="fa fa-times"></i></span>' +
+            '</div>';
+    });
+    $grid.html(html);
+}
 
 // ===== 是/否、单位类型选择状态（与小程序 form 初始 null 一致） =====
 var formState = {
@@ -801,9 +858,15 @@ function triggerFile(field) {
 
 $('.hidden-file-input').on('change', function() {
     var field = $(this).data('field');
-    var file = this.files[0];
-    if (!file) return;
-    uploadImage(field, file);
+    var files = this.files;
+    if (!files || !files.length) return;
+    if (isMultiUploadField(field)) {
+        for (var i = 0; i < files.length; i++) {
+            uploadImage(field, files[i]);
+        }
+    } else {
+        uploadImage(field, files[0]);
+    }
     this.value = '';
 });
 
@@ -811,7 +874,9 @@ function uploadImage(field, file) {
     var formData = new FormData();
     formData.append('file', file);
 
-    var $area = $('.upload-area[data-field="' + field + '"]');
+    var $area = isMultiUploadField(field)
+        ? $('.multi-upload-row[data-multi-field="' + field + '"] .upload-area.add-tile')
+        : $('.upload-area[data-field="' + field + '"]');
     $area.addClass('uploading');
 
     $.ajax({
@@ -826,10 +891,17 @@ function uploadImage(field, file) {
             if (res.code == 1) {
                 var previewUrl = resolveUploadPreviewUrl(res.data);
                 var storePath = (res.data && res.data.filepath) ? res.data.filepath : '';
-                uploadedImages[field] = storePath || previewUrl;
-                $area.find('.upload-placeholder').hide();
-                $area.find('.upload-image').attr('src', previewUrl).show();
-                $area.find('.delete-btn').show();
+                var stored = storePath || previewUrl;
+                if (isMultiUploadField(field)) {
+                    if (!Array.isArray(uploadedImages[field])) uploadedImages[field] = [];
+                    uploadedImages[field].push(stored);
+                    renderMultiGrid(field);
+                } else {
+                    uploadedImages[field] = stored;
+                    $area.find('.upload-placeholder').hide();
+                    $area.find('.upload-image').attr('src', previewUrl).show();
+                    $area.find('.delete-btn').show();
+                }
                 updateIndexFill();
             } else {
                 showToast(res.msg || '上传失败');
@@ -842,7 +914,20 @@ function uploadImage(field, file) {
     });
 }
 
+function removeMultiImage(field, index) {
+    if (!isMultiUploadField(field) || !Array.isArray(uploadedImages[field])) return;
+    uploadedImages[field].splice(index, 1);
+    renderMultiGrid(field);
+    updateIndexFill();
+}
+
 function removeImage(field) {
+    if (isMultiUploadField(field)) {
+        uploadedImages[field] = [];
+        renderMultiGrid(field);
+        updateIndexFill();
+        return;
+    }
     uploadedImages[field] = '';
     var $area = $('.upload-area[data-field="' + field + '"]');
     $area.find('.upload-image').hide().attr('src', '');
@@ -888,7 +973,7 @@ $('#inspectForm').on('submit', function(e) {
         overall_evaluation: $.trim($('#overall_evaluation').val())
     };
     // 11 项照片
-    uploadFields.forEach(function(f) { postData[f] = uploadedImages[f]; });
+    uploadFields.forEach(function(f) { postData[f] = serializePhotoField(f); });
 
     $.ajax({
         type: 'POST',
@@ -928,7 +1013,10 @@ function resetForm() {
 
 function isIndexFilled(key) {
     if (key.indexOf('photo:') === 0) {
-        return !!uploadedImages[key.slice(6)];
+        var pf = key.slice(6);
+        var val = uploadedImages[pf];
+        if (Array.isArray(val)) return val.length > 0;
+        return !!val;
     }
     if (key === 'community') {
         return !!$('#community_id').val();

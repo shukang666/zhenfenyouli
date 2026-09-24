@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use app\common\SupervisionMonitorPhotos;
 use think\facade\Db;
 
 /**
@@ -84,6 +85,10 @@ class SupervisionMonitorController extends AuthController
             'overall_evaluation'   => trim($this->request->param('overall_evaluation', '')),
             'create_time'          => time(),
         ];
+
+        foreach (SupervisionMonitorPhotos::MULTI_FIELDS as $multiField) {
+            $data[$multiField] = SupervisionMonitorPhotos::normalizeStoredValue($data[$multiField] ?? '');
+        }
 
         Db::name('supervision_monitor')->insert($data);
 

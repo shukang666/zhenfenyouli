@@ -91,10 +91,19 @@ class SupervisionMonitorController extends AdminBaseController
         ];
         $photos = [];
         foreach ($photo_fields as $field => $name) {
-            if (!empty($item[$field])) {
+            $storedUrls = \app\common\SupervisionMonitorPhotos::urlsFromStored($item[$field] ?? '');
+            if (empty($storedUrls)) {
+                continue;
+            }
+            $total = count($storedUrls);
+            foreach ($storedUrls as $idx => $path) {
+                $label = $name;
+                if ($total > 1) {
+                    $label .= '（' . ($idx + 1) . '/' . $total . '）';
+                }
                 $photos[] = [
-                    'name' => $name,
-                    'url'  => cmf_get_image_preview_url($item[$field]),
+                    'name' => $label,
+                    'url'  => cmf_get_image_preview_url($path),
                 ];
             }
         }

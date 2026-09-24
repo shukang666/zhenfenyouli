@@ -137,3 +137,13 @@ SELECT
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1);
+
+-- 督导监测：投放点/整改后/收运链条支持多图（历史单 URL 无需迁移）
+SET @__tbl := (SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_supervision_monitor');
+SET @__sql := IF(@__tbl > 0,
+  'ALTER TABLE `cmf_supervision_monitor`
+    MODIFY COLUMN `point_photo` text COMMENT ''投放点照片，单 URL 或 JSON 数组'',
+    MODIFY COLUMN `point_rectify_photo` text COMMENT ''投放点整改后，单 URL 或 JSON 数组'',
+    MODIFY COLUMN `transport_photo` text COMMENT ''收运链条照片，单 URL 或 JSON 数组''',
+  'SELECT 1');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;

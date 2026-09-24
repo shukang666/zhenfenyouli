@@ -4,6 +4,7 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
+use app\common\SupervisionMonitorPhotos;
 use cmf\controller\BaseController;
 use think\facade\Db;
 
@@ -541,6 +542,15 @@ class FieldWorkerController extends BaseController
             'transport_photo', 'catering_photo', 'accuracy_photo',
         ];
         foreach ($photoFields as $photoField) {
+            if (SupervisionMonitorPhotos::isMultiField($photoField)) {
+                $data[$photoField] = SupervisionMonitorPhotos::normalizeStoredValue(
+                    $data[$photoField],
+                    function ($p) {
+                        return $this->normalizeUploadRelativePath($p);
+                    }
+                );
+                continue;
+            }
             if (!empty($data[$photoField])) {
                 $data[$photoField] = $this->normalizeUploadRelativePath($data[$photoField]);
             }
