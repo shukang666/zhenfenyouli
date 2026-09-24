@@ -1,18 +1,7 @@
-<template>
-	<view class="home-scene-page"></view>
-</template>
-
 <script>
 export default {
-	data() {
-		return {}
-	}
+	onLoad() {
+		uni.redirectTo({ url: '/pages/activity/scene-clock-flow?hub=home' })
+	},
 }
 </script>
-
-<style lang="scss" scoped>
-.home-scene-page {
-	min-height: 100vh;
-	background: #f4f7f5;
-}
-</style>

@@ -89,3 +89,38 @@ PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_activity_showcase' AND COLUMN_NAME = 'content');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_activity_showcase` ADD COLUMN `content` mediumtext COMMENT ''活动正文富文本'' AFTER `description`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+-- 活动页场景分类引导（子场景 + 种类 + 处理指引/问卷）
+CREATE TABLE IF NOT EXISTS `cmf_clock_scene_guide` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `hub_key` varchar(20) NOT NULL DEFAULT '' COMMENT 'home/qinzi/office/street',
+  `sub_key` varchar(32) NOT NULL DEFAULT '' COMMENT '子场景键，空表示无',
+  `cate_label` varchar(32) NOT NULL DEFAULT '' COMMENT '可回收/厨余/有害/不可回收',
+  `handle_guide` text COMMENT '如何处理',
+  `dispose_time` varchar(255) NOT NULL DEFAULT '' COMMENT '建议投放时间',
+  `survey_question` varchar(255) NOT NULL DEFAULT '' COMMENT '问卷问题',
+  `preset_tips` text COMMENT '推荐技巧 JSON 或每行一条',
+  `learn_path` varchar(255) NOT NULL DEFAULT '/pages/flhd/list' COMMENT '学习更多跳转',
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `list_order` int(11) NOT NULL DEFAULT '0',
+  `update_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_hub_sub_cate` (`hub_key`,`sub_key`,`cate_label`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='场景分类引导配置';
+
+CREATE TABLE IF NOT EXISTS `cmf_clock_scene_survey_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `hub_key` varchar(20) NOT NULL DEFAULT '',
+  `sub_key` varchar(32) NOT NULL DEFAULT '',
+  `cate_label` varchar(32) NOT NULL DEFAULT '',
+  `user_choice` varchar(500) NOT NULL DEFAULT '',
+  `custom_tip` varchar(500) NOT NULL DEFAULT '',
+  `create_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_time` (`user_id`,`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='场景引导问卷记录';
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_forum' AND COLUMN_NAME = 'clock_sub_scene');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_forum` ADD COLUMN `clock_sub_scene` varchar(50) NOT NULL DEFAULT '''' COMMENT ''打卡子场景'' AFTER `clock_scene`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;

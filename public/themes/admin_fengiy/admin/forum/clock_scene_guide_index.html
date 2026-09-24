@@ -1,0 +1,56 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index',['type'=>2])}">垃圾打卡列表</a></li>
+        <li><a href="{:url('clock_tutorial_index')}">打卡教程</a></li>
+        <li class="active"><a href="{:url('clock_scene_guide_index')}">场景分类引导</a></li>
+    </ul>
+    <p class="margin-top-20 text-muted">活动页「场景快捷入口」内：选子场景 → 选种类 → 展示处理指引、投放时间与分类技巧问卷。未配置时小程序使用内置默认文案。</p>
+    <form class="well form-inline margin-top-15" method="get" action="{:url('clock_scene_guide_index')}">
+        <label>场景：</label>
+        <select name="hub_key" class="form-control">
+            <option value="">全部</option>
+            <foreach name="hubLabels" item="lab" key="hk">
+                <option value="{$hk}" <if condition="$hub_key eq $hk">selected</if>>{$lab}</option>
+            </foreach>
+        </select>
+        <button type="submit" class="btn btn-primary">筛选</button>
+    </form>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>场景</th>
+            <th>子场景</th>
+            <th>垃圾种类</th>
+            <th>处理指引（摘要）</th>
+            <th>状态</th>
+            <th>{:lang('ACTIONS')}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.hub_label}</td>
+                <td>{$vo.sub_label}</td>
+                <td>{$vo.cate_label}</td>
+                <td>{:mb_substr(strip_tags($vo.handle_guide),0,40)}...</td>
+                <td>
+                    <if condition="$vo.status eq 1">
+                        <span class="label label-success">启用</span>
+                        <else/>
+                        <span class="label label-default">停用</span>
+                    </if>
+                </td>
+                <td>
+                    <a class="btn btn-xs btn-primary" href="{:url('clock_scene_guide_update',['id'=>$vo.id])}">编辑</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

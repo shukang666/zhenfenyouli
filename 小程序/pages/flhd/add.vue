@@ -1,7 +1,7 @@
 <template>
 	<view :class="['clock-wiz', pageTheme]" v-if="!setting.app_test">
 		<view class="clock-wiz-hero">
-			<text class="clock-wiz-kicker">{{ sceneLabel ? '本次场景 · ' + sceneLabel : '践行真分' }}</text>
+			<text class="clock-wiz-kicker">{{ kickerText }}</text>
 			<text class="clock-wiz-title">{{ stepTitle }}</text>
 			<view class="clock-wiz-steps">
 				<view
@@ -136,12 +136,14 @@
 				stepLabels: ['选类型', '拍照片', '写内容'],
 				sceneKey: '',
 				sceneName: '',
+				subSceneKey: '',
 				form: {
 					type: 2,
 					cate_id: 0,
 					content: '',
 					image: [],
 					clock_scene: '',
+					clock_sub_scene: '',
 				},
 				cate_list: [],
 				cate_index: 0,
@@ -166,6 +168,11 @@
 		computed: {
 			sceneLabel() {
 				return clockSceneLabel(this.sceneKey, this.sceneName)
+			},
+			kickerText() {
+				if (this.sceneName) return '本次场景 · ' + this.sceneName
+				if (this.sceneLabel) return '本次场景 · ' + this.sceneLabel
+				return '践行真分'
 			},
 			pageMeta() {
 				let key = this.sceneKey
@@ -197,8 +204,10 @@
 			const cateId = option.cate_id ? parseInt(option.cate_id, 10) : 0
 			this.sceneKey = option.scene_key ? String(option.scene_key) : 'home'
 			this.sceneName = option.scene ? decodeURIComponent(option.scene) : ''
+			this.subSceneKey = option.sub_scene ? decodeURIComponent(option.sub_scene) : ''
 			this.pendingCateId = cateId
 			this.form.clock_scene = this.resolveClockScene(this.sceneKey)
+			this.form.clock_sub_scene = this.subSceneKey
 			this.get_select_list()
 			uni.setNavigationBarTitle({ title: (this.sceneLabel || '垃圾分类') + '打卡' })
 		},

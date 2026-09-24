@@ -11,6 +11,8 @@ const order = {
     // 发布
     add_forum: (params = {}) => uni.$u.post('/wxapp/forum/add_forum', params),
     get_clock_tutorial: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_tutorial', params),
+    get_clock_scene_guide: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_scene_guide', params),
+    submit_clock_scene_survey: (params = {}) => uni.$u.post('/wxapp/forum/submit_clock_scene_survey', params),
     // 删除发布
     del_forum: (params = {}) => uni.$u.post('/wxapp/forum/del_forum', params),
     // 评论列表

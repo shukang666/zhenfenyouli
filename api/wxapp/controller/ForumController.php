@@ -8,6 +8,8 @@ use app\admin\model\active\ActiveUserModel;
 use app\admin\model\basic\CollectModel;
 use app\admin\model\basic\NewsModel;
 use app\admin\model\basic\SelectModel;
+use app\admin\model\forum\ClockSceneGuideModel;
+use app\admin\model\forum\ClockSceneSurveyLogModel;
 use app\admin\model\forum\ClockTutorialModel;
 use app\admin\model\forum\ForumCateModel;
 use app\admin\model\forum\ForumCommentModel;
@@ -63,6 +65,60 @@ class ForumController extends AuthController
         $this->success('请求成功', $map);
     }
 
+    /**
+     * 场景分类引导（家庭/亲子/办公/沿街 → 子场景 → 种类）
+     */
+    public function get_clock_scene_guide()
+    {
+        $hub = ClockSceneGuideModel::normalizeHub($this->request->param('hub_key', ''));
+        $subKey = trim((string)$this->request->param('sub_key', ''));
+        $cateLabel = trim((string)$this->request->param('cate_label', ''));
+        if ($hub === '') {
+            $this->error('场景参数无效');
+        }
+        if ($cateLabel !== '') {
+            $one = ClockSceneGuideModel::findOne($hub, $subKey, $cateLabel);
+            $this->success('请求成功', $one);
+            return;
+        }
+        $query = ClockSceneGuideModel::where('hub_key', $hub)->where('status', 1);
+        if ($subKey !== '') {
+            $query->where('sub_key', $subKey);
+        }
+        $list = $query->order('list_order asc,id asc')->select();
+        $out = [];
+        foreach ($list as $row) {
+            $out[] = ClockSceneGuideModel::formatRow($row->toArray());
+        }
+        $this->success('请求成功', $out);
+    }
+
+    /**
+     * 场景引导小问卷（可选登录）
+     */
+    public function submit_clock_scene_survey()
+    {
+        $hub = ClockSceneGuideModel::normalizeHub($this->request->param('hub_key', ''));
+        if ($hub === '') {
+            $this->error('场景参数无效');
+        }
+        $userId = !empty($this->user_id) ? (int)$this->user_id : 0;
+        $choice = trim((string)$this->request->param('user_choice', ''));
+        $custom = trim((string)$this->request->param('custom_tip', ''));
+        if ($choice === '' && $custom === '') {
+            $this->error('请选择或填写您的方法');
+        }
+        ClockSceneSurveyLogModel::insert([
+            'user_id'      => $userId,
+            'hub_key'      => $hub,
+            'sub_key'      => mb_substr(trim((string)$this->request->param('sub_key', '')), 0, 32),
+            'cate_label'   => mb_substr(trim((string)$this->request->param('cate_label', '')), 0, 32),
+            'user_choice'  => mb_substr($choice, 0, 500),
+            'custom_tip'   => mb_substr($custom, 0, 500),
+            'create_time'  => time(),
+        ]);
+        $this->success('感谢分享');
+    }
 
     /**
      * 添加帖子
@@ -108,6 +164,9 @@ class ForumController extends AuthController
                 $scene = '';
             }
             $params['clock_scene'] = mb_substr($scene, 0, 50);
+        }
+        if ($type == 2 && isset($params['clock_sub_scene'])) {
+            $params['clock_sub_scene'] = mb_substr(trim((string)$params['clock_sub_scene']), 0, 50);
         }
 
         if (!empty($params['image'])) {

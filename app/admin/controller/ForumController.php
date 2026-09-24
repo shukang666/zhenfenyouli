@@ -6,6 +6,7 @@ use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\basic\SelectModel;
 use app\admin\model\forum\ForumCateModel;
+use app\admin\model\forum\ClockSceneGuideModel;
 use app\admin\model\forum\ClockTutorialModel;
 use app\admin\model\forum\ForumDeleteLogModel;
 use app\admin\model\forum\ForumHandleModel;
@@ -396,6 +397,84 @@ class ForumController extends ToolController
         }
         ClockTutorialModel::where('id', $id)->update($save);
         $this->success('保存成功', url('clock_tutorial_index'));
+    }
+
+    /** 场景分类引导（活动页场景入口） */
+    public function clock_scene_guide_index()
+    {
+        $hub = ClockSceneGuideModel::normalizeHub($this->request->param('hub_key', ''));
+        $query = ClockSceneGuideModel::order('hub_key asc,sub_key asc,list_order asc,id asc');
+        if ($hub !== '') {
+            $query->where('hub_key', $hub);
+        }
+        $list = $query->select();
+        $hubLabels = ClockSceneGuideModel::hubLabels();
+        $subLabels = ClockSceneGuideModel::subLabels();
+        $list->each(function ($item) use ($hubLabels, $subLabels) {
+            $item['hub_label'] = $hubLabels[$item['hub_key']] ?? $item['hub_key'];
+            $sk = $item['sub_key'] ?? '';
+            $item['sub_label'] = $subLabels[$sk] ?? ($sk ?: '—');
+            return $item;
+        });
+        return $this->fetch('clock_scene_guide_index', [
+            'list'      => $list,
+            'hub_key'   => $hub,
+            'hubLabels' => $hubLabels,
+        ]);
+    }
+
+    public function clock_scene_guide_update()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        $item = ClockSceneGuideModel::where('id', $id)->find();
+        if (empty($item)) {
+            $this->error('记录不存在');
+        }
+        $hubLabels = ClockSceneGuideModel::hubLabels();
+        $subLabels = ClockSceneGuideModel::subLabels();
+        $item['hub_label'] = $hubLabels[$item['hub_key']] ?? $item['hub_key'];
+        $sk = $item['sub_key'] ?? '';
+        $item['sub_label'] = $subLabels[$sk] ?? ($sk ?: '—');
+        $tips = trim((string)($item['preset_tips'] ?? ''));
+        if ($tips !== '' && $tips[0] === '[') {
+            $decoded = json_decode($tips, true);
+            if (is_array($decoded)) {
+                $item['preset_tips_text'] = implode("\n", $decoded);
+            }
+        }
+        if (empty($item['preset_tips_text'])) {
+            $lines = ClockSceneGuideModel::linesToArray($tips);
+            $item['preset_tips_text'] = implode("\n", $lines);
+        }
+        return $this->fetch('clock_scene_guide_update', ['item' => $item]);
+    }
+
+    public function clock_scene_guide_update_post()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('非法请求');
+        }
+        $id = $this->request->param('id', 0, 'intval');
+        $item = ClockSceneGuideModel::where('id', $id)->find();
+        if (empty($item)) {
+            $this->error('记录不存在');
+        }
+        $tipsText = (string)$this->request->param('preset_tips_text', '');
+        $tipsLines = ClockSceneGuideModel::linesToArray($tipsText);
+        $save = [
+            'handle_guide'    => (string)$this->request->param('handle_guide', ''),
+            'dispose_time'    => trim((string)$this->request->param('dispose_time', '')),
+            'survey_question' => trim((string)$this->request->param('survey_question', '')),
+            'preset_tips'     => json_encode($tipsLines, JSON_UNESCAPED_UNICODE),
+            'learn_path'      => trim((string)$this->request->param('learn_path', '/pages/flhd/list')),
+            'status'          => (int)$this->request->param('status', 1),
+            'update_time'     => time(),
+        ];
+        if (trim($save['handle_guide']) === '') {
+            $this->error('请填写处理指引');
+        }
+        ClockSceneGuideModel::where('id', $id)->update($save);
+        $this->success('保存成功', url('clock_scene_guide_index'));
     }
 
     public function index3()

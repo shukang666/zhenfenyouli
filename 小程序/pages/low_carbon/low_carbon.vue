@@ -871,7 +871,7 @@ export default {
 
     // 家庭场景（占位页，后续补活动与打卡引导）
     gotoHomeScene() {
-      this.$u.route("/pages/activity/home-scene");
+      this.$u.route("/pages/activity/scene-clock-flow?hub=home");
     },
 
     gotoDtshPage(url) {
@@ -880,17 +880,16 @@ export default {
 
     // 小手拉大手
     gotoXsdld() {
-      this.$u.route("/pages/activity/xsdld");
+      this.$u.route("/pages/activity/scene-clock-flow?hub=qinzi");
     },
 
     // 办公场景（占位页，后续再补内容）
     gotoOfficeBuilding() {
-      this.$u.route("/pages/activity/office-building");
+      this.$u.route("/pages/activity/scene-clock-flow?hub=office");
     },
 
-    // 沿街商铺（占位页，后续再补内容）
     gotoStreetShop() {
-      this.$u.route("/pages/activity/street-shop");
+      this.$u.route("/pages/activity/scene-clock-flow?hub=street");
     },
 
     // 我和七贤岭入口

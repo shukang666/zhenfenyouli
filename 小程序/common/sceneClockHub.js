@@ -1,0 +1,232 @@
+/**
+ * 活动页场景快捷入口 → 子场景 → 垃圾种类 → 引导问卷
+ * 运营文案可在后台「场景分类引导」覆盖；此处为默认兜底。
+ */
+
+export const HUB_META = {
+	home: {
+		title: '家庭场景',
+		sceneKey: 'home',
+		theme: 'scf--home',
+		subs: [
+			{
+				key: 'after_meal',
+				name: '餐后清理',
+				emoji: '🍽️',
+				desc: '碗筷、剩菜与包装物',
+				cates: ['可回收', '厨余'],
+			},
+			{
+				key: 'room_clean',
+				name: '居室扫除',
+				emoji: '🧹',
+				desc: '灰尘、旧物与清洁用品',
+				cates: ['可回收', '不可回收', '有害'],
+			},
+			{
+				key: 'express',
+				name: '拆取快递',
+				emoji: '📦',
+				desc: '纸箱、填充物与胶带',
+				cates: ['可回收', '不可回收'],
+			},
+			{
+				key: 'daily',
+				name: '日常整理',
+				emoji: '🏠',
+				desc: '混合生活垃圾整理',
+				cates: ['可回收', '不可回收', '厨余', '有害'],
+			},
+		],
+	},
+	qinzi: {
+		title: '亲子场景',
+		sceneKey: 'qinzi',
+		theme: 'scf--qinzi',
+		subs: null,
+		cates: ['可回收', '有害'],
+	},
+	office: {
+		title: '办公场景',
+		sceneKey: 'zhenfenjiao',
+		theme: 'scf--office',
+		subs: [
+			{
+				key: 'zhenfenjiao',
+				name: '真分角',
+				emoji: '🏢',
+				desc: '办公大厦集中分类投放点',
+				cates: ['可回收', '不可回收', '有害', '厨余'],
+			},
+		],
+	},
+	street: {
+		title: '沿街商铺',
+		sceneKey: 'street',
+		theme: 'scf--street',
+		subs: null,
+		cates: ['厨余'],
+	},
+}
+
+/** 默认引导（后台无配置时使用） */
+export const DEFAULT_GUIDE = {
+	'home|after_meal|可回收': {
+		handle_guide: '清空残留、压扁纸盒；干净塑料与金属可投可回收。油污重的餐盒归其他/不可回收。',
+		dispose_time: '建议餐后 1 小时内整理，避免厨余在室温下久放。',
+		survey_question: '您餐后一般怎么处理剩余食物与包装？',
+		preset_tips: ['剩菜先沥水再投厨余', '外卖盒冲洗后投可回收', '一次性筷子归其他垃圾', '汤料袋挤净再分类'],
+	},
+	'home|after_meal|厨余': {
+		handle_guide: '剩饭菜、果皮、茶叶渣等投厨余；大骨头、贝壳类按当地要求可能归其他。',
+		dispose_time: '每日收餐前清理一次，夏季尽量当日投放。',
+		survey_question: '厨余您会先做哪些处理？',
+		preset_tips: ['使用沥水篮减少汤汁', '骨头与软质厨余分开放', '过期食品去包装再投', '小份烹饪减少浪费'],
+	},
+	'home|room_clean|可回收': {
+		handle_guide: '旧书报、干净纸箱、塑料瓶罐等保持干燥整洁后投放。',
+		dispose_time: '扫除结束后集中投放，避免潮湿污染。',
+		survey_question: '扫除时可回收物您怎么收集？',
+		preset_tips: ['纸箱拆平捆扎', '塑料瓶压扁省空间', '旧衣物单独装袋', '玻璃制品包裹防割伤'],
+	},
+	'home|room_clean|不可回收': {
+		handle_guide: '污染纸张、尘土、破碎陶瓷、一次性口罩等投其他/不可回收。',
+		dispose_time: '与可回收分袋，当日或次日投放。',
+		survey_question: '哪些扫除垃圾最难分类？',
+		preset_tips: ['脏抹布归其他', '烟灰不要投厨余', '大件联系预约收运', '电池单独投有害'],
+	},
+	'home|room_clean|有害': {
+		handle_guide: '过期药品、废电池、废灯管等保持原包装或密封后投有害桶。',
+		dispose_time: '发现即收集，勿长期存放家中。',
+		survey_question: '有害垃圾您一般存放在哪？',
+		preset_tips: ['药品保留原盒', '电池统一小盒收集', '灯管防破碎包装', '定期送社区回收点'],
+	},
+	'home|express|可回收': {
+		handle_guide: '纸箱拆开压平，塑料袋、气泡膜洗净后可投可回收（以本地要求为准）。',
+		dispose_time: '拆包后当天整理，避免纸箱占通道。',
+		survey_question: '快递包装您通常怎么处理？',
+		preset_tips: ['纸箱压平回收', '胶带撕下再投纸类', '填充物分类收集', '复用快递袋再投递'],
+	},
+	'home|express|不可回收': {
+		handle_guide: '严重污染的包装、复合材质快递袋等多归其他/不可回收。',
+		dispose_time: '与干净纸箱分开放置。',
+		survey_question: '哪些快递材料您会投其他垃圾？',
+		preset_tips: ['污损纸箱归其他', '防伪贴随袋丢弃', '泡沫块按本地要求', '减少过度包装购物'],
+	},
+	'home|daily|可回收': {
+		handle_guide: '纸张、塑料、金属、织物等保持清洁干燥。',
+		dispose_time: '随产随分，建议每晚整理一次。',
+		survey_question: '日常整理时如何养成回收习惯？',
+		preset_tips: ['门口设分类小桶', '贴标签提醒家人', '购物少买难回收品', '定期清空避免堆积'],
+	},
+	'home|daily|不可回收': {
+		handle_guide: '受污染、难分离的混合垃圾投其他/不可回收。',
+		dispose_time: '与厨余、可回收分袋投放。',
+		survey_question: '您怎么避免混投？',
+		preset_tips: ['不确定时查分类指南', '湿垃圾不投可回收', '大件不混投桶内', '问物业或督导员'],
+	},
+	'home|daily|厨余': {
+		handle_guide: '剩菜剩饭、瓜皮果核、茶叶渣等；注意沥水。',
+		dispose_time: '建议每日固定时段投放。',
+		survey_question: '日常厨余如何减少异味？',
+		preset_tips: ['加盖投放', '滤干汤汁', '及时清理桶壁', '用小桶先收集再倒'],
+	},
+	'home|daily|有害': {
+		handle_guide: '电池、灯管、药品等单独密封，勿与其他垃圾混合。',
+		dispose_time: '凑满一小袋再集中投放。',
+		survey_question: '有害垃圾您多久清理一次？',
+		preset_tips: ['固定抽屉存放', '儿童够不着', '不随意丢弃', '参与社区回收日'],
+	},
+	'qinzi||可回收': {
+		handle_guide: '和孩子一起识别纸张、塑料、金属等，保持干燥干净。',
+		dispose_time: '亲子活动后即时整理，强化记忆。',
+		survey_question: '您会用什么方式教孩子认可回收物？',
+		preset_tips: ['贴图分类游戏', '购物时讲包装', '手工利用旧纸盒', '打卡记录小成就'],
+	},
+	'qinzi||有害': {
+		handle_guide: '教孩子识别电池、药品等，强调不能乱丢、不能入口。',
+		dispose_time: '发现即放入有害收集盒。',
+		survey_question: '如何向孩子解释有害垃圾？',
+		preset_tips: ['用“危险小卫士”比喻', '家庭有害专用盒', '亲子一起送回收点', '读绘本学分类'],
+	},
+	'office|zhenfenjiao|可回收': {
+		handle_guide: '办公纸张、快递箱、饮料瓶等投入真分角可回收格口。',
+		dispose_time: '下班前或午休后集中投放。',
+		survey_question: '办公可回收您怎么提醒同事？',
+		preset_tips: ['工位旁放小回收筐', '打印双面减纸', '会议水瓶装桶', '标签注明真分角位置'],
+	},
+	'office|zhenfenjiao|不可回收': {
+		handle_guide: '污染纸张、防尘口罩、复合材质等投其他格口。',
+		dispose_time: '与可回收分袋，勿压在最底层。',
+		survey_question: '办公其他垃圾常见有哪些？',
+		preset_tips: ['擦手纸归其他', '碳粉盒按说明处理', '外卖盒去残汤', '大件联系物业'],
+	},
+	'office|zhenfenjiao|有害': {
+		handle_guide: '废电池、废灯管、部分办公耗材投有害格口。',
+		dispose_time: '集中后由物业或专人收运。',
+		survey_question: '办公有害垃圾如何管理？',
+		preset_tips: ['前台设回收盒', '换电池统一收集', '灯管防碎包装', '不混入其他桶'],
+	},
+	'office|zhenfenjiao|厨余': {
+		handle_guide: '茶叶渣、剩果、便餐剩余等投厨余格口，注意沥水。',
+		dispose_time: '午餐后及时投放，避免异味。',
+		survey_question: '办公厨余您怎么处理？',
+		preset_tips: ['茶叶沥干再投', '外卖剩餐分装', '真分角桶盖常闭', '自带餐减少包装'],
+	},
+	'street||厨余': {
+		handle_guide: '剩餐、果皮、菜叶等投厨余桶；油水较大先沥水。',
+		dispose_time: '营业结束或高峰后 1 小时内清理。',
+		survey_question: '商铺厨余您如何减少违规投放？',
+		preset_tips: ['桶边备沥水筛', '油脂不直倒下水道', '与可回收分区域存放', '记录每日投放量'],
+	},
+}
+
+export function guideKey(hub, subKey, cateLabel) {
+	return `${hub}|${subKey || ''}|${cateLabel}`
+}
+
+export function getHub(hubKey) {
+	return HUB_META[hubKey] || null
+}
+
+export function getDefaultGuide(hub, subKey, cateLabel) {
+	const k = guideKey(hub, subKey, cateLabel)
+	const row = DEFAULT_GUIDE[k]
+	if (!row) {
+		return {
+			handle_guide: '请按当地分类标准，保持垃圾干燥、清洁后投放至对应桶/点。',
+			dispose_time: '建议每日固定时段投放，避免过夜堆积。',
+			survey_question: '您在这个场景下有什么分类心得？',
+			preset_tips: ['先分大类再细分', '不确定时问督导员', '拍照打卡巩固习惯', '减少一次性用品'],
+		}
+	}
+	const tips = row.preset_tips || []
+	return {
+		handle_guide: row.handle_guide,
+		dispose_time: row.dispose_time,
+		survey_question: row.survey_question || '您平时怎么分类？',
+		preset_tips: tips,
+		learn_path: row.learn_path || '/pages/flhd/list',
+	}
+}
+
+export function mergeGuide(apiRow, hub, subKey, cateLabel) {
+	const def = getDefaultGuide(hub, subKey, cateLabel)
+	if (!apiRow) return def
+	let tips = apiRow.preset_tips
+	if (typeof tips === 'string') {
+		try {
+			tips = JSON.parse(tips)
+		} catch (e) {
+			tips = tips.split('\n').map(s => s.trim()).filter(Boolean)
+		}
+	}
+	if (!Array.isArray(tips) || !tips.length) tips = def.preset_tips
+	return {
+		handle_guide: apiRow.handle_guide || def.handle_guide,
+		dispose_time: apiRow.dispose_time || def.dispose_time,
+		survey_question: apiRow.survey_question || def.survey_question,
+		preset_tips: tips,
+		learn_path: apiRow.learn_path || def.learn_path || '/pages/flhd/list',
+	}
+}
