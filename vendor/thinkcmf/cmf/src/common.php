@@ -866,6 +866,20 @@ function cmf_get_public_site_root()
     if ($isHttps) {
         $base = preg_replace('#^http://#i', 'https://', $base);
     }
+    // 本机/其它域名进后台时，upload 跟当前访问域（避免 site_url 指生产而本地 public/upload 有图仍 404）
+    if (PHP_SAPI !== 'cli') {
+        $requestDomain = rtrim(cmf_get_domain(), '/');
+        if ($requestDomain !== '' && $base !== '') {
+            $baseHost = parse_url($base, PHP_URL_HOST);
+            $reqHost  = parse_url($requestDomain, PHP_URL_HOST);
+            if ($baseHost && $reqHost && strcasecmp((string)$baseHost, (string)$reqHost) !== 0) {
+                $base = $requestDomain;
+                if ($isHttps) {
+                    $base = preg_replace('#^http://#i', 'https://', $base);
+                }
+            }
+        }
+    }
     return $base;
 }
 
@@ -905,7 +919,10 @@ function doGetAssetUrl($file, $style = '')
         if (strpos($file, '/upload/') === 0) {
             return cmf_get_public_site_root() . $file;
         }
-        return $file;
+        if (preg_match('#^/(xcxkf052/|dz\d+/|kf\d+/)#', $file)) {
+            return cmf_get_public_site_root() . '/upload' . $file;
+        }
+        return rtrim(cmf_get_public_site_root(), '/') . $file;
     }
     $storage = Storage::instance();
     return cmf_normalize_public_file_url($storage->getUrl($file, $style));
@@ -947,10 +964,10 @@ function cmf_get_image_url($file, $style = '')
         if (strpos($file, '/upload/') === 0) {
             return cmf_get_public_site_root() . $file;
         }
-        if (preg_match('#^/(xcxkf052/|dz\d+/)#', $file)) {
+        if (preg_match('#^/(xcxkf052/|dz\d+/|kf\d+/)#', $file)) {
             return cmf_get_public_site_root() . '/upload' . $file;
         }
-        return cmf_get_domain() . $file;
+        return rtrim(cmf_get_public_site_root(), '/') . $file;
     } else {
 //        $storage = cmf_get_option('storage');
 //        if (empty($storage['type'])) {
@@ -973,26 +990,8 @@ function cmf_get_image_url($file, $style = '')
  */
 function cmf_get_image_preview_url($file, $style = '')
 {
-    if (empty($file)) {
-        return '';
-    }
-
-    if (strpos($file, "http") === 0) {
-        return $file;
-    } else if (strpos($file, "/") === 0) {
-        return $file;
-    } else {
-//        $storage = cmf_get_option('storage');
-//        if (empty($storage['type'])) {
-//            $storage['type'] = 'Local';
-//        }
-//        if ($storage['type'] != 'Local') {
-//            $watermark = cmf_get_plugin_config($storage['type']);
-//            $style     = empty($style) ? $watermark['styles_watermark'] : $style;
-//        }
-        $storage = Storage::instance();
-        return $storage->getPreviewUrl($file, $style);
-    }
+    // 与 cmf_get_image_url 一致（后台列表/表单大量用 preview_url，旧实现会漏 /upload/ 或裸域名路径）
+    return cmf_get_image_url($file, $style);
 }
 
 /**
