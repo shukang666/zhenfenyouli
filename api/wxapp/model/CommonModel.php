@@ -364,15 +364,66 @@ class CommonModel extends Model
         return chr(rand(97, 122)) . chr(rand(97, 122)) . rand(1000, 9999);
     }
 
+    /** 云存储（OSS）是否已配置可用 */
+    public static function isRemoteStorageReady(): bool
+    {
+        $storageOpt = cmf_get_option('storage');
+        $type       = isset($storageOpt['type']) ? (string)$storageOpt['type'] : 'Local';
+        if ($type === 'Local' || $type === '') {
+            return false;
+        }
+        $cfg = cmf_get_plugin_config($type);
+        if ($type === 'Oss') {
+            $ak = trim((string)($cfg['accessKey'] ?? ''));
+            $sk = trim((string)($cfg['secretKey'] ?? ''));
+            $bucket = trim((string)($cfg['bucket'] ?? ''));
+            return $ak !== '' && $sk !== '' && $bucket !== '';
+        }
+        return true;
+    }
+
     /**
-     * 上传到阿里云
+     * 上传到云存储；本地存储时写入 public/upload 并保留文件
      */
     static function uploadAliOss($local_file_path, $ali_file_path): bool
     {
+        if (!self::isRemoteStorageReady()) {
+            $uploadRoot = (defined('WEB_ROOT') ? WEB_ROOT : app()->getRootPath() . 'public/') . 'upload/';
+            $src        = $local_file_path;
+            if (!is_file($src)) {
+                $try = app()->getRootPath() . 'public/' . ltrim(str_replace('\\', '/', $local_file_path), './');
+                if (is_file($try)) {
+                    $src = $try;
+                }
+            }
+            $dest = $uploadRoot . str_replace('\\', '/', ltrim($ali_file_path, '/'));
+            $dir  = dirname($dest);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            if (is_file($src)) {
+                if (realpath($src) !== realpath($dest)) {
+                    if (!@rename($src, $dest)) {
+                        copy($src, $dest);
+                    }
+                }
+                if (is_file($src) && realpath($src) !== realpath($dest)) {
+                    @unlink($src);
+                }
+            }
+            return is_file($dest);
+        }
 
-        $storage = cmf_get_option('storage');
-        $storage = new Storage($storage['type'], $storage['storages'][$storage['type']]);
-        $storage->upload($ali_file_path, $local_file_path);
+        $storageOpt = cmf_get_option('storage');
+        $storage    = new Storage($storageOpt['type'], $storageOpt['storages'][$storageOpt['type']]);
+        $absLocal   = $local_file_path;
+        if (!is_file($absLocal)) {
+            $try = app()->getRootPath() . 'public/' . ltrim(str_replace('\\', '/', $local_file_path), './');
+            if (is_file($try)) {
+                $absLocal = $try;
+            }
+        }
+        $storage->upload($ali_file_path, $absLocal);
         if (file_exists($local_file_path)) {
             unlink($local_file_path);
         }

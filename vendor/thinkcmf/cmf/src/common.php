@@ -854,13 +854,26 @@ function cmf_get_asset_url($file, $style = '')
 function doGetAssetUrl($file, $style = '')
 {
     if (strpos($file, "http") === 0) {
-        return $file;
-    } else if (strpos($file, "/") === 0) {
-        return $file;
-    } else {
-        $storage = Storage::instance();
-        return $storage->getUrl($file, $style);
+        // 旧乙方 OSS 域名已下线，转为本地 upload 相对路径再拼站域名
+        if (strpos($file, 'oss.ausite.cn') !== false) {
+            $file = preg_replace('#^https?://[^/]+/#', '', $file);
+            $file = preg_replace('/\?.*$/', '', $file);
+            $file = ltrim($file, '/');
+            if (strpos($file, 'upload/') === 0) {
+                $file = substr($file, 7);
+            }
+        } else {
+            return $file;
+        }
     }
+    if (strpos($file, "/") === 0) {
+        if (strpos($file, '/upload/') === 0) {
+            return cmf_get_domain() . $file;
+        }
+        return $file;
+    }
+    $storage = Storage::instance();
+    return $storage->getUrl($file, $style);
 }
 
 function get_true_asset_url($file)
@@ -885,7 +898,16 @@ function cmf_get_image_url($file, $style = '')
     }
 
     if (strpos($file, "http") === 0) {
-        return $file;
+        if (strpos($file, 'oss.ausite.cn') !== false) {
+            $file = preg_replace('#^https?://[^/]+/#', '', $file);
+            $file = preg_replace('/\?.*$/', '', $file);
+            $file = ltrim($file, '/');
+            if (strpos($file, 'upload/') === 0) {
+                $file = substr($file, 7);
+            }
+        } else {
+            return $file;
+        }
     } else if (strpos($file, "/") === 0) {
         return cmf_get_domain() . $file;
     } else {

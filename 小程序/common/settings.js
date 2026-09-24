@@ -15,7 +15,7 @@ module.exports = {
 	staticUploadBase: 'https://admin.circular-economy.cn/upload/',
 	// H5授权登陆Url
 	// loginUrl: 'https://xcxkf052.aubye.com/api/common/public/h5_login',
-	// 图片上传 filetype(默认image,其他video，audio，file)
+	// 上传接口完整地址（uni.uploadFile / u-upload 直接用，勿再拼 /wxapp/public/upload_asset）
 	uploadUrl: 'https://admin.circular-economy.cn/api/wxapp/public/upload_asset',
 	// 微信分享卡片封面（5:4）
 	shareCoverUrl: 'https://admin.circular-economy.cn/static/images/share.png',

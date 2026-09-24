@@ -442,7 +442,7 @@ canSubmit() {
 			uploadImage(field, filePath) {
 				uni.showLoading({ title: '上传中...' });
 				uni.uploadFile({
-					url: this.uploadUrl + '/wxapp/public/upload_asset',
+					url: this.uploadUrl,
 					filePath: filePath,
 					name: 'file',
 					formData: {

@@ -548,6 +548,11 @@ class PublicController extends AuthController
             if ($result === false) {
                 $this->error($uploader->getError());
             } else {
+                if (!empty($result['filepath'])) {
+                    $result['url'] = cmf_get_image_url($result['filepath']);
+                } elseif (!empty($result['url'])) {
+                    $result['url'] = cmf_get_asset_url($result['url']);
+                }
                 unset($result['name']);
                 unset($result['id']);
                 unset($result['preview_url']);

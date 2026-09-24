@@ -25,7 +25,7 @@ class QrInit
         $pluginClass  = cmf_get_plugin_class($storage['type']);
         $this->plugin = new $pluginClass();
         $this->config = $this->plugin->getConfig();//获取仓库信息
-        $dz           = $this->config['dir'];
+        $dz           = !empty($this->config['dir']) ? trim($this->config['dir'], '/') : 'xcxkf052';
 
 
         $dz_dir  = "upload/$dz/code/";//本地地址
@@ -43,10 +43,12 @@ class QrInit
         if ($colour == 'red') QRcode::png($params, $pathname, 1, 10, 4, true, 0xFFFFFF, 0x000000);
         if ($colour == 'green') QRcode::png($params, $pathname, 1, 10, 4, true, 0xFFFFFF, 0x000000);
 
-        //上传Oss储存
-        $storage = new Storage($storage['type'], $storage['storages'][$storage['type']]);
-        $storage->upload($pathname2, $pathname);//第一个上传云空间地址路径  //第二个本地绝对路径
-        $this->delete_image($pathname);//删除本地图片
+        $localAbs = app()->getRootPath() . 'public/' . str_replace('\\', '/', $pathname);
+        if (CommonModel::isRemoteStorageReady()) {
+            $storage = new Storage($storage['type'], $storage['storages'][$storage['type']]);
+            $storage->upload($pathname2, $localAbs);
+            $this->delete_image($localAbs);
+        }
 
         return cmf_get_asset_url($pathname2);
     }
@@ -74,7 +76,7 @@ class QrInit
         $pluginClass  = cmf_get_plugin_class($storage['type']);
         $this->plugin = new $pluginClass();
         $this->config = $this->plugin->getConfig();//获取仓库信息
-        $dz           = $this->config['dir'];
+        $dz           = !empty($this->config['dir']) ? trim($this->config['dir'], '/') : 'xcxkf052';
         $date         = date('Ymd');
         $qr_path      = 'wxqrcode';//将处理图片存放的文件夹
 
@@ -129,13 +131,17 @@ class QrInit
         $img->text($text, $font, 20, '#130c0e', [130, 1020])->save($images_path);//生成文字
 
 
-        //上传Oss储存
-        $storage = new Storage($storage['type'], $storage['storages'][$storage['type']]);
-        $storage->upload($rel_path, $images_path);//第一个上传云空间地址路径  //第二个本地绝对路径
+        if (CommonModel::isRemoteStorageReady()) {
+            $storage = new Storage($storage['type'], $storage['storages'][$storage['type']]);
+            $storage->upload($rel_path, $images_path);
+            $this->delete_image($images_path);
+        }
 
         $this->delete_image($new_pathname);//删除二维码照片
         $this->delete_image($new_path);//删除压缩后二维码图片
-        $this->delete_image($images_path); //删除背景图
+        if (CommonModel::isRemoteStorageReady()) {
+            // 已上云，$images_path 已在上面删除
+        }
         $this->delete_image($guest_acquisition_poster); //删除推广图
         $this->delete_image($avatar_url); //删除头像
         $this->delete_image($new_avatar); //删除压缩后头像
@@ -155,7 +161,7 @@ class QrInit
         $pluginClass  = cmf_get_plugin_class($storage['type']);
         $this->plugin = new $pluginClass();
         $this->config = $this->plugin->getConfig();//获取仓库信息
-        $dz           = $this->config['dir'];
+        $dz           = !empty($this->config['dir']) ? trim($this->config['dir'], '/') : 'xcxkf052';
         $date         = date('Ymd');
         $qr_path      = 'qrcode';//将处理图片存放的文件夹
 
@@ -190,11 +196,12 @@ class QrInit
         $img = Image::open($images_path);
         $img->water($new_path, [170,745])->save($images_path);//背景图+小程序码(已压缩大小)
 
-        //上传Oss储存
-        $storage = new Storage($storage['type'], $storage['storages'][$storage['type']]);
-        $storage->upload($rel_path, $images_path);//第一个上传云空间地址路径  //第二个本地绝对路径
+        if (CommonModel::isRemoteStorageReady()) {
+            $storage = new Storage($storage['type'], $storage['storages'][$storage['type']]);
+            $storage->upload($rel_path, $images_path);
+            $this->delete_image($images_path);
+        }
         $this->delete_image($new_pathname);//删除二维码照片
-        $this->delete_image($images_path);//删除复制图片
 
         return $rel_path;
     }
