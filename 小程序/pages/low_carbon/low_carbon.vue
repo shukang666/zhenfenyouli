@@ -65,27 +65,62 @@
       </swiper>
     </view>
 
-    <!-- 常去入口：轮播下方三列快捷卡片（七贤岭见下方独立主推位） -->
+    <!-- 垃圾分类工作台：独立主推位（与场景快捷入口分离） -->
+    <view class="fb-dtsh-spotlight" id="guide-fb-dtsh-hub">
+      <view
+        class="fb-dtsh-spotlight-card"
+        hover-class="fb-dtsh-spotlight-press"
+        :hover-stay-time="80"
+        @click="gotoFlhd"
+      >
+        <view class="fb-dtsh-spotlight-glow fb-dtsh-spotlight-glow--a"></view>
+        <view class="fb-dtsh-spotlight-glow fb-dtsh-spotlight-glow--b"></view>
+        <view class="fb-dtsh-spotlight-inner">
+          <view class="fb-dtsh-spotlight-copy">
+            <view class="fb-dtsh-spotlight-badge-row">
+              <text class="fb-dtsh-spotlight-badge">核心</text>
+              <text class="fb-dtsh-spotlight-kicker">分类治理</text>
+            </view>
+            <view class="fb-dtsh-spotlight-title-row">
+              <text class="fb-dtsh-spotlight-emoji">♻️</text>
+              <text class="fb-dtsh-spotlight-title">垃圾分类工作台</text>
+            </view>
+            <text class="fb-dtsh-spotlight-desc">学习分类、拍照打卡、督导监测一站搞定</text>
+            <view class="fb-dtsh-spotlight-tags">
+              <text class="fb-dtsh-spotlight-tag">学习打卡</text>
+              <text class="fb-dtsh-spotlight-tag">督导巡检</text>
+              <text class="fb-dtsh-spotlight-tag">积分排行</text>
+            </view>
+          </view>
+          <view class="fb-dtsh-spotlight-cta">
+            <text class="fb-dtsh-spotlight-cta-label">进入工作台</text>
+            <text class="fb-dtsh-spotlight-cta-arrow">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 场景快捷入口：家庭 · 亲子 · 办公 -->
     <view class="fb-entry-stage" id="guide-fb-entry">
       <view class="fb-entry-kicker">
         <view class="fb-entry-kicker-dot"></view>
-        <text class="fb-entry-kicker-text">快捷入口</text>
+        <text class="fb-entry-kicker-text">场景快捷入口</text>
       </view>
       <view class="fb-entry-row fb-entry-row--triple">
         <view
-          class="fb-entry-card fb-entry-lgfl"
+          class="fb-entry-card fb-entry-home"
           hover-class="fb-press"
           :hover-stay-time="80"
-          @click="gotoFlhd"
+          @click="gotoHomeScene"
         >
-          <text class="fb-entry-mark">01 工作台</text>
+          <text class="fb-entry-mark">01 家庭</text>
           <view class="fb-entry-main">
-            <text class="fb-entry-emoji">♻️</text>
+            <text class="fb-entry-emoji">🏠</text>
             <view class="fb-entry-text">
-              <text class="fb-entry-title">垃圾分类工作台</text>
-              <text class="fb-entry-sub">学习分类 · 拍照打卡</text>
+              <text class="fb-entry-title">家庭场景</text>
+              <text class="fb-entry-sub">厨房客厅日常投放</text>
             </view>
-            <view class="fb-entry-go">
+            <view class="fb-entry-go fb-entry-go--dark">
               <text class="fb-entry-arrow">›</text>
             </view>
           </view>
@@ -96,12 +131,12 @@
           :hover-stay-time="80"
           @click="gotoXsdld"
         >
-          <text class="fb-entry-mark">02 亲子同行</text>
+          <text class="fb-entry-mark">02 亲子</text>
           <view class="fb-entry-main">
             <text class="fb-entry-emoji">🤝</text>
             <view class="fb-entry-text">
-              <text class="fb-entry-title">小手拉大手</text>
-              <text class="fb-entry-sub">家长与孩子同行</text>
+              <text class="fb-entry-title">亲子场景</text>
+              <text class="fb-entry-sub">家长带孩子学分类</text>
             </view>
             <view class="fb-entry-go">
               <text class="fb-entry-arrow">›</text>
@@ -114,12 +149,12 @@
           :hover-stay-time="80"
           @click="gotoOfficeBuilding"
         >
-          <text class="fb-entry-mark">03 楼宇减碳</text>
+          <text class="fb-entry-mark">03 办公</text>
           <view class="fb-entry-main">
             <text class="fb-entry-emoji">🏢</text>
             <view class="fb-entry-text">
-              <text class="fb-entry-title">办公楼宇</text>
-              <text class="fb-entry-sub">绿色办公 · 源头分类</text>
+              <text class="fb-entry-title">办公场景</text>
+              <text class="fb-entry-sub">大厦真分角投放</text>
             </view>
             <view class="fb-entry-go">
               <text class="fb-entry-arrow">›</text>
@@ -811,9 +846,14 @@ export default {
       );
     },
 
-    // 垃圾分类入口 → 低碳生活二级页面（含垃圾分类、自治活动、社交活动）
+    // 垃圾分类工作台 → 低碳生活二级页（督导、打卡等）
     gotoFlhd() {
       this.$u.route("/pages/dtsh/dtsh");
+    },
+
+    // 家庭场景（占位页，后续补活动与打卡引导）
+    gotoHomeScene() {
+      this.$u.route("/pages/activity/home-scene");
     },
 
     gotoDtshPage(url) {
@@ -1303,8 +1343,9 @@ export default {
   overflow: hidden;
   color: #fff;
 }
-.fb-entry-lgfl {
-  background: linear-gradient(145deg, #5aa8ff 0%, #1877f2 100%);
+.fb-entry-home {
+  background: linear-gradient(145deg, #f8ecd0 0%, #e8c56a 55%, #d4a832 100%);
+  box-shadow: 0 6rpx 18rpx rgba(120, 90, 20, 0.14);
 }
 .fb-entry-xsd {
   background: linear-gradient(145deg, #f5a89e 0%, #e85d7a 55%, #d94f6a 100%);
@@ -1312,7 +1353,7 @@ export default {
 .fb-entry-office {
   background: linear-gradient(145deg, #8b9dc3 0%, #5c6b8a 55%, #4a5568 100%);
 }
-.fb-entry-lgfl::after,
+.fb-entry-home::after,
 .fb-entry-xsd::after,
 .fb-entry-office::after {
   content: "";
@@ -1325,10 +1366,15 @@ export default {
   background: rgba(255, 255, 255, 0.14);
   pointer-events: none;
 }
-.fb-entry-lgfl .fb-entry-title,
-.fb-entry-lgfl .fb-entry-sub,
-.fb-entry-lgfl .fb-entry-arrow,
-.fb-entry-lgfl .fb-entry-mark,
+.fb-entry-home .fb-entry-title,
+.fb-entry-home .fb-entry-sub,
+.fb-entry-home .fb-entry-arrow,
+.fb-entry-home .fb-entry-mark {
+  color: #4a3d14;
+}
+.fb-entry-home .fb-entry-go--dark {
+  background: rgba(74, 61, 20, 0.12);
+}
 .fb-entry-xsd .fb-entry-title,
 .fb-entry-xsd .fb-entry-sub,
 .fb-entry-xsd .fb-entry-arrow,
@@ -1338,6 +1384,150 @@ export default {
 .fb-entry-office .fb-entry-arrow,
 .fb-entry-office .fb-entry-mark {
   color: #fff;
+}
+
+/* ===== 垃圾分类工作台 · 活动页独立主推位 ===== */
+.fb-dtsh-spotlight {
+  padding: 12rpx 20rpx 8rpx;
+}
+.fb-dtsh-spotlight-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20rpx;
+  padding: 28rpx 24rpx 26rpx;
+  background: linear-gradient(
+    128deg,
+    #0a3d6e 0%,
+    #1565b8 38%,
+    #1a8fd4 72%,
+    #5ec8ff 100%
+  );
+  box-shadow: 0 12rpx 32rpx rgba(10, 61, 110, 0.26),
+    0 2rpx 0 rgba(255, 255, 255, 0.14) inset;
+}
+.fb-dtsh-spotlight-press {
+  opacity: 0.92;
+  transform: scale(0.992);
+}
+.fb-dtsh-spotlight-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.14);
+}
+.fb-dtsh-spotlight-glow--a {
+  width: 200rpx;
+  height: 200rpx;
+  top: -72rpx;
+  right: -48rpx;
+}
+.fb-dtsh-spotlight-glow--b {
+  width: 140rpx;
+  height: 140rpx;
+  bottom: -56rpx;
+  left: -32rpx;
+  background: rgba(255, 255, 255, 0.08);
+}
+.fb-dtsh-spotlight-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+.fb-dtsh-spotlight-copy {
+  flex: 1;
+  min-width: 0;
+}
+.fb-dtsh-spotlight-badge-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 10rpx;
+}
+.fb-dtsh-spotlight-badge {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #0a3d6e;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  letter-spacing: 2rpx;
+}
+.fb-dtsh-spotlight-kicker {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: 1rpx;
+}
+.fb-dtsh-spotlight-title-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 6rpx;
+}
+.fb-dtsh-spotlight-emoji {
+  font-size: 40rpx;
+  line-height: 1;
+}
+.fb-dtsh-spotlight-title {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1rpx;
+}
+.fb-dtsh-spotlight-desc {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.45;
+  margin-bottom: 14rpx;
+}
+.fb-dtsh-spotlight-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+.fb-dtsh-spotlight-tag {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.12);
+}
+.fb-dtsh-spotlight-cta {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2rpx solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+.fb-dtsh-spotlight-cta-label {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  text-align: center;
+  padding: 0 6rpx;
+}
+.fb-dtsh-spotlight-cta-arrow {
+  font-size: 36rpx;
+  font-weight: 300;
+  color: #fff;
+  line-height: 1;
+  margin-top: -4rpx;
 }
 
 /* ===== 我和七贤岭 · 活动页独立主推位 ===== */

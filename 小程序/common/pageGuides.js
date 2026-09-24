@@ -24,10 +24,16 @@ export const PAGE_GUIDES = {
 				desc: '按活动名称或地点查找，不用在列表里慢慢翻。'
 			},
 			{
+				selector: '#guide-fb-dtsh-hub',
+				prefer: 'below',
+				title: '垃圾分类工作台',
+				desc: '打卡、督导、积分等核心能力集中在这里，点「进入工作台」。'
+			},
+			{
 				selector: '#guide-fb-entry',
 				prefer: 'below',
-				title: '快捷入口',
-				desc: '垃圾分类工作台、小手拉大手、办公楼宇等常用入口，点卡片进入。'
+				title: '场景快捷入口',
+				desc: '按家庭、亲子、办公三种生活场景进入，后续会扩展各场景专属内容。'
 			},
 			{
 				selector: '#guide-fb-qxl',

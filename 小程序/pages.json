@@ -287,7 +287,13 @@
 				{
 					"path": "office-building",
 					"style": {
-						"navigationBarTitleText": "办公楼宇"
+						"navigationBarTitleText": "办公场景"
+					}
+				},
+				{
+					"path": "home-scene",
+					"style": {
+						"navigationBarTitleText": "家庭场景"
 					}
 				},
 				{
