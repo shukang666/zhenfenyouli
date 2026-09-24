@@ -2,4 +2,5 @@
 .cursor
 .codebuddy
 
-./public
+# 用户上传文件（体积大，勿提交；勿写 ./public，Git 不认该写法）
+/public/upload/

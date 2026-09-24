@@ -2,12 +2,12 @@
     <view class="u-p-30">
         <view class="">
             <u-image width="100%" height="330rpx"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250515/69c005b81e1c8a35677a63b478139729.png?watermark"></u-image>
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/69c005b81e1c8a35677a63b478139729.png"></u-image>
         </view>
         <view class="u-type-white-bg u-p-30 u-rela" style="margin-top: -100rpx;z-index: 1;border-radius: 10rpx;">
             <view class="u-flex u-row-center" style="margin-top: -60rpx;z-index: 1;">
                 <u-image width="376" height="78"
-                    src="https://oss.ausite.cn/xcxkf052/admin/20250515/e34a943fbfe4de3ac703bb0816d598d6.png?watermark"></u-image>
+                    src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/e34a943fbfe4de3ac703bb0816d598d6.png"></u-image>
             </view>
             <view class="u-flex u-col-top u-m-t-30">
                 <view class="u-shrink-no">
@@ -23,11 +23,11 @@
                 </view>
                 <view class="" v-if="answer_status==1">
                     <u-image width="128" height="128"
-                        src="https://oss.ausite.cn/xcxkf052/admin/20250515/f752343199326c1e4e669b3da339c85d.png?watermark"></u-image>
+                        src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/f752343199326c1e4e669b3da339c85d.png"></u-image>
                 </view>
                 <view class="" v-if="answer_status==2">
                     <u-image width="128" height="128"
-                        src="https://oss.ausite.cn/xcxkf052/admin/20250515/8bee399a643027ecd5c604d1b69c616c.png?watermark"></u-image>
+                        src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/8bee399a643027ecd5c604d1b69c616c.png"></u-image>
                 </view>
             </view>
             <view class="u-m-t-50" v-if="answer_status==0">
@@ -47,7 +47,7 @@
             <view class="u-m-t-50" v-if="answer_status==2">
                 <view class="u-flex u-row-center">
                     <u-image width="164" height="164"
-                        src="https://oss.ausite.cn/xcxkf052/admin/20250515/fca076eebbadcbba03fd6f9a12e89316.png?watermark"></u-image>
+                        src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/fca076eebbadcbba03fd6f9a12e89316.png"></u-image>
                 </view>
                 <view class="u-text-center u-font-24">
                     涨知识啦
@@ -73,13 +73,13 @@
                 <view class="">
                     <view class="u-flex u-row-center">
                         <u-image width="540" height="87"
-                            src="https://oss.ausite.cn/xcxkf052/admin/20250515/1f421a47405e005f417777a7fc8779f7.png?watermark"></u-image>
+                            src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/1f421a47405e005f417777a7fc8779f7.png"></u-image>
                     </view>
                     <view class="u-w-540 u-radius-10 u-type-white-bg u-text-center">
                         <u-gap height="100"></u-gap>
                         <view class="u-flex u-row-center">
                             <u-image width="200" height="200"
-                                src="https://oss.ausite.cn/xcxkf052/admin/20250516/f788a225dbb9a6bdff4d8a312e9fad3a.png?watermark"></u-image>
+                                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250516/f788a225dbb9a6bdff4d8a312e9fad3a.png"></u-image>
                         </view>
                         <view class="u-font-42 u-font-bold">
                             {{score}}分
@@ -100,13 +100,13 @@
                 <view class="">
                     <view class="u-flex u-row-center">
                         <u-image width="540" height="87"
-                            src="https://oss.ausite.cn/xcxkf052/admin/20250515/0b56d1d84a8ce4646db26dc6801ffac3.png?watermark"></u-image>
+                            src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/0b56d1d84a8ce4646db26dc6801ffac3.png"></u-image>
                     </view>
                     <view class="u-w-540 u-radius-10 u-type-white-bg u-text-center">
                         <u-gap height="100"></u-gap>
                         <view class="u-flex u-row-center">
                             <u-image width="200" height="200"
-                                src="https://oss.ausite.cn/xcxkf052/admin/20250516/26e0df0c97fcd40c195728a3e6a7560c.png?watermark"></u-image>
+                                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250516/26e0df0c97fcd40c195728a3e6a7560c.png"></u-image>
                         </view>
                         <view class="u-font-32 u-font-bold u-p-30">
                             恭喜已经激活垃圾分类打卡等功能，可以开启垃圾打卡环保之旅

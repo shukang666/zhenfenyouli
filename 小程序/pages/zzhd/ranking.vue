@@ -1,6 +1,6 @@
 <template>
 	<view class="">
-		<u-image width="100%" height="300" src="https://oss.ausite.cn/xcxkf052/admin/20250514/663647304b90b1365fa10e743f44d60a.jpg?watermark"></u-image>
+		<u-image width="100%" height="300" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250514/663647304b90b1365fa10e743f44d60a.jpg"></u-image>
 		<view class="u-p-30 u-type-white-bg u-radius-10 u-rela" style="margin-top: -60rpx; z-index: 9;">
 			<block v-if="accuracy_list.length">
 				<view class="u-flex u-row-between u-col-bottom">

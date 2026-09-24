@@ -209,8 +209,17 @@ class Upload
 
         $uploadPath = WEB_ROOT . 'upload/';
 
+        $storageSetting = cmf_get_option('storage');
+        $storageType = isset($storageSetting['type']) ? $storageSetting['type'] : 'Local';
         $alioss_config = cmf_get_plugin_config('Oss');
-        $base_dir = !empty($alioss_config)?$alioss_config['dir'].'/':'';
+        if ($storageType === 'Oss' && !empty($alioss_config['dir'])) {
+            $base_dir = rtrim($alioss_config['dir'], '/') . '/';
+        } elseif (!empty($alioss_config['dir'])) {
+            // 本地存储仍沿用原目录前缀，避免历史相对路径失效
+            $base_dir = rtrim($alioss_config['dir'], '/') . '/';
+        } else {
+            $base_dir = 'xcxkf052/';
+        }
 
         $fileSaveName    = $base_dir.(empty($app) ? '' : $app . '/') . $strDate . '/' . md5(uniqid()) . "." . $strFileExtension;
         $strSaveFilePath = $uploadPath . $fileSaveName; //TODO 测试 windows 下

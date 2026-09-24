@@ -200,7 +200,7 @@ class ActivityShowcaseController extends AdminBaseController
     }
 
     /**
-     * 将风采库中图片路径对应本地 upload 文件同步到 OSS（修复 oss.ausite.cn 404）
+     * 将风采库图片同步到云存储（仅 storage=Oss 时有效；本地存储可忽略）
      */
     public function sync_showcase_oss()
     {

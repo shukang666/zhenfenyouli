@@ -33,13 +33,13 @@
             <view class="u-flex u-row-between u-shrink-no u-m-l-30">
                 <view class="u-shrink-no">
                     <u-icon
-                        name="https://oss.ausite.cn/xcxkf052/admin/20250611/63089d98cac3cae570a8579657102419.png?watermark"
+                        name="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250611/63089d98cac3cae570a8579657102419.png"
                         size="50" label-size="20" label-pos="bottom" label="服务电话"
                         @click="makePhoneCall(Info.shop_info.mobile)"></u-icon>
                 </view>
                 <view class="u-m-l-30 u-shrink-no">
                     <u-icon
-                        name="https://oss.ausite.cn/xcxkf052/admin/20250610/84e2b2be6e16a76dc62f6f5d8756d953.png?watermark"
+                        name="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/84e2b2be6e16a76dc62f6f5d8756d953.png"
                         size="50" label-size="20" label-pos="bottom" label="导航"
                         @click="openLocation(Info.shop_info.lat,Info.shop_info.lng,Info.shop_info.address)"></u-icon>
                 </view>

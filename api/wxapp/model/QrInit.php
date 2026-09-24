@@ -103,8 +103,7 @@ class QrInit
         $this->curl_file_get_contents($guest, $guest_acquisition_poster);//下载推广图
 
         //头像
-        $avatar     = 'https://oss.ausite.cn/dz000/default/20230602/8fb025339dcafcb3e2f9e34f862e1976.png';
-        $avatar     = cmf_get_asset_url($avatar);//获客海报背景图
+        $avatar     = cmf_get_asset_url('dz000/default/20230602/8fb025339dcafcb3e2f9e34f862e1976.png');
         $avatar_url = $path_public . cmf_random_string(45) . '.png';
         $this->curl_file_get_contents($avatar, $avatar_url);//下载头像
         $new_avatar = $path_public . cmf_random_string(45) . '.png';

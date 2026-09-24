@@ -9,7 +9,7 @@
                 <view class="u-type-white-bg u-radius-10 u-p-30 u-m-t-30">
                     <view class="u-flex u-border-bottom u-p-b-30">
                         <u-image width="50" height="50"
-                            src="https://oss.ausite.cn/xcxkf052/admin/20250610/f1ebcb3105f3b204b4f2c24f2e1272d8.png?watermark"></u-image>
+                            src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/f1ebcb3105f3b204b4f2c24f2e1272d8.png"></u-image>
                         <view class="u-m-l-10">
                             {{item.name}}
                         </view>

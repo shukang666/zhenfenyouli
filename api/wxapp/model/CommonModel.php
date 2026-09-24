@@ -598,7 +598,7 @@ class CommonModel extends Model
         $data_n['sn'] = $sn;
         $data_n['nickname'] = '微信用户_' . $userId;
 //        $data_n['true_name'] = '微信用户_'.$userId;
-        $data_n['avatar'] = 'https://oss.ausite.cn/dz1111/avatar.png';
+        $data_n['avatar'] = 'dz1111/avatar.png';
 
         $MemberModel = new MemberModel();
         $MemberModel->where(['id' => $userId])->save($data_n);

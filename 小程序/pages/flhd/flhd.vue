@@ -1,7 +1,7 @@
 <template>
 	<view class="u-p-30">
 		<view class="u-type-white-bg u-radius-10" @click="navigator('/pages/flhd/ljfldk',1)">
-			<u-image width="100%" height="326" src="https://oss.ausite.cn/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png?watermark"></u-image>
+			<u-image width="100%" height="326" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png"></u-image>
 			<view class="u-p-20 u-flex u-row-between">
 				<view class="">
 					<view class="u-font-bold u-font-32">
@@ -19,12 +19,12 @@
 		</view>
 		<view class="u-m-t-50">
 			<view class="u-flex u-row-center">
-				<u-image width="447" height="28" src="https://oss.ausite.cn/xcxkf052/admin/20250512/8912eace6b085bd4b6225c5c8ae185ff.png?watermark"></u-image>
+				<u-image width="447" height="28" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/8912eace6b085bd4b6225c5c8ae185ff.png"></u-image>
 			</view>
 			<view class="u-m-t-30 u-flex">
 				<view class="u-w-218 u-type-white-bg u-radius-10 u-p-tb-30 u-text-center" @click="navigator('/pages/flhd/list',2)">
 					<view class="u-flex u-row-center">
-						<u-image width="80" height="80" src="https://oss.ausite.cn/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png?watermark"></u-image>
+						<u-image width="80" height="80" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png"></u-image>
 					</view>
 					<view class="u-m-t-30 u-font-bold">
 						垃圾分类指导

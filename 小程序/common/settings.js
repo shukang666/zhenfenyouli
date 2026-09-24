@@ -11,6 +11,8 @@ module.exports = {
 	devUrl: 'https://admin.circular-economy.cn/api',
 	// 线上环境接口Url
 	prodUrl: 'https://admin.circular-economy.cn/api',
+	// 静态资源（public/upload，原 oss.ausite.cn 已迁移）
+	staticUploadBase: 'https://admin.circular-economy.cn/upload/',
 	// H5授权登陆Url
 	// loginUrl: 'https://xcxkf052.aubye.com/api/common/public/h5_login',
 	// 图片上传 filetype(默认image,其他video，audio，file)

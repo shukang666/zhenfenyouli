@@ -38,7 +38,7 @@
 				</view>
 				<view class="">
 					<u-icon
-						name="https://oss.ausite.cn/xcxkf052/admin/20250610/84e2b2be6e16a76dc62f6f5d8756d953.png?watermark"
+						name="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/84e2b2be6e16a76dc62f6f5d8756d953.png"
 						size="50"
 						@click="openLocation(goods[0].shop_info.lat,goods[0].shop_info.lng,goods[0].shop_info.address)"></u-icon>
 				</view>

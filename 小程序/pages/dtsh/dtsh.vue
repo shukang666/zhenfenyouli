@@ -12,7 +12,7 @@
 			<u-image width="100%" height="360" :src="dtshBanner" mode="aspectFill" border-radius="16"></u-image>
 		</view> -->
 		<!-- <view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
-			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/11f9c0ccaefaeb375e7cea7000914a8b.png?watermark"></u-image>
+			<u-image width="160" height="160" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/11f9c0ccaefaeb375e7cea7000914a8b.png"></u-image>
 			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
 				<view class="u-font-bold">
 					分类活动
@@ -28,7 +28,7 @@
 			</view>
 		</view>
 		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex">
-			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/91648750a6ffb2b270e7bb5e6cfbd4c8c.png?watermark"></u-image>
+			<u-image width="160" height="160" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/91648750a6ffb2b270e7bb5e6cfbd4c8c.png"></u-image>
 			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
 				<view class="u-font-bold">
 					自治活动
@@ -44,7 +44,7 @@
 			</view>
 		</view>
 		<view class="u-p-20 u-type-white-bg u-radius-6 u-m-t-30 u-flex" v-if="!setting.app_test">
-			<u-image width="160" height="160" src="https://oss.ausite.cn/xcxkf052/admin/20250512/cf50f2ff1cc358f5fb5ecfaa6b51a4e2.png?watermark"></u-image>
+			<u-image width="160" height="160" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/cf50f2ff1cc358f5fb5ecfaa6b51a4e2.png"></u-image>
 			<view class="u-flex-1 u-m-l-20 u-flex u-row-between u-col-top u-flex-col u-h-160">
 				<view class="u-font-bold">
 					社交活动

@@ -25,7 +25,7 @@
 						<u-button type="success" shape="circle" size="mini" @click="forum_id = item.id, popup_show = true">立即处理</u-button>
 					</view>
 					<view class="" v-if="item.status==2">
-						<u-image width="100" height="100" src="https://oss.ausite.cn/xcxkf052/admin/20250515/79bccb4b03e46c6019872696dce5ca29.png?watermark"></u-image>
+						<u-image width="100" height="100" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/79bccb4b03e46c6019872696dce5ca29.png"></u-image>
 					</view>
 				</view>
 				<view class="u-m-t-20 u-font-bold u-font-26">
@@ -95,7 +95,7 @@
 		<!-- <view class="" style="position: fixed;right: 30rpx;bottom: 10%;z-index: 1;"
             @click="$u.route('/pages/zzhd/dwxj/add?type='+type)">
             <u-image width="100" height="100"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250514/b080e0cca2b8055339bf87e066485ce4.png?watermark"></u-image>
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250514/b080e0cca2b8055339bf87e066485ce4.png"></u-image>
         </view> -->
 		<view v-if="forum_list.length == 0" class="u-p-30">
 			<u-empty text="暂无数据" mode="list"></u-empty>
@@ -117,7 +117,7 @@
 					<view class="">
 						<cl-upload v-model="image" :action="uploadUrl" @onSuccess="onSuccess" fileType="image">
 							<template v-slot:addImg>
-								<u-image width="138" height="138" src="https://oss.ausite.cn/xcxkf052/admin/20250512/9ff646dc41e88127a05c7f0ebde61896.png?watermark"></u-image>
+								<u-image width="138" height="138" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/9ff646dc41e88127a05c7f0ebde61896.png"></u-image>
 							</template>
 						</cl-upload>
 					</view>

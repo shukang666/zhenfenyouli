@@ -27,21 +27,21 @@
 			</view>
 			<view class="u-type-white-bg u-radius-10 u-p-20">
 				<view class="u-flex u-row-between">
-					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/8c9d75f326df69f47e92f609090fc0f6.png?watermark"
+					<u-image width="314" height="123" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/8c9d75f326df69f47e92f609090fc0f6.png"
 						@click="$u.route('/pages/sxjk/sxjk')"></u-image>
-					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/b2067dad50db00339fec1bd39423168c.png?watermark" @click="$u.toast('功能开发中')"
+					<u-image width="314" height="123" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/b2067dad50db00339fec1bd39423168c.png" @click="$u.toast('功能开发中')"
 						v-if="!setting.app_test"></u-image>
 				</view>
 				<view class="u-flex u-row-between u-m-t-20">
-					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/cec0fddb04741996404e1d791be2ee9d.png?watermark"
+					<u-image width="314" height="123" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/cec0fddb04741996404e1d791be2ee9d.png"
 						@click="$u.route('/pages/sxjcgj/sxjcgj')"></u-image>
-					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/aba1eaaf62ee9821200689817e12d60f.png?watermark" @click="$u.toast('功能开发中')"
+					<u-image width="314" height="123" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/aba1eaaf62ee9821200689817e12d60f.png" @click="$u.toast('功能开发中')"
 						v-if="!setting.app_test"></u-image>
 				</view>
 				<view class="u-flex u-row-between u-m-t-20">
-					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/32c529525baa3d53fcc4b12f5a289299.png?watermark"
+					<u-image width="314" height="123" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/32c529525baa3d53fcc4b12f5a289299.png"
 						@click="$u.route('/pages/healthcare/add?id=0')"></u-image>
-					<u-image width="314" height="123" src="https://oss.ausite.cn/xcxkf052/admin/20250509/f4babaa3267896ff8e4737c9ffa4ce3c.png?watermark" @click="openChannelsLive(setting.video_id)"
+					<u-image width="314" height="123" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/f4babaa3267896ff8e4737c9ffa4ce3c.png" @click="openChannelsLive(setting.video_id)"
 						v-if="setting.app_test != 1"></u-image>
 				</view>
 			</view>

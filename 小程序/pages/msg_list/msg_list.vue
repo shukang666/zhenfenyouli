@@ -2,7 +2,7 @@
     <view class="u-p-30">
         <view class="u-flex u-rela u-p-tb-30 u-border-bottom" @click="$u.route('/pages/msg_list/system')">
             <u-image width="80" height="80"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250610/40edfdea00cbf3a787137969d0576688.png?watermark"></u-image>
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/40edfdea00cbf3a787137969d0576688.png"></u-image>
             <view class="u-m-l-20">
                 <view class="">
                     系统消息
@@ -15,7 +15,7 @@
         </view>
         <view class="u-flex u-rela u-p-tb-30 u-border-bottom" @click="$u.route('/pages/msg_list/interaction')">
             <u-image width="80" height="80"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250610/4c1e107c4a5f141df56bfdef4214376e.png?watermark"></u-image>
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/4c1e107c4a5f141df56bfdef4214376e.png"></u-image>
             <view class="u-m-l-20">
                 <view class="">
                     互动消息

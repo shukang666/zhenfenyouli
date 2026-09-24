@@ -98,15 +98,15 @@
 			</view>
 
 			<view class="me-shop" v-if="userInfo.shop_status==0">
-				<u-image width="100%" height="130" src="https://oss.ausite.cn/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png?watermark"
+				<u-image width="100%" height="130" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
 					@click="navigator('/pages/settled/settled')"></u-image>
 			</view>
 			<view class="me-shop" v-if="userInfo.shop_status==1||userInfo.shop_status==3">
-				<u-image width="100%" height="130" src="https://oss.ausite.cn/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png?watermark"
+				<u-image width="100%" height="130" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
 					@click="navigator('/pages/settled/state')"></u-image>
 			</view>
 			<view class="me-shop" v-if="userInfo.shop_status==2">
-				<u-image width="100%" height="130" src="https://oss.ausite.cn/xcxkf052/admin/20250610/3d7904797608c5d73cf85b06a2043fda.png?watermark"
+				<u-image width="100%" height="130" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/3d7904797608c5d73cf85b06a2043fda.png"
 					@click="navigator('/pages/store/store')"></u-image>
 			</view>
 
@@ -151,13 +151,13 @@
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/flhd/list')">
 						<view class="me-grid__icon">
-							<u-icon name="https://oss.ausite.cn/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png?watermark" :size="50"></u-icon>
+							<u-icon name="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">垃圾分类指导</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/answer/examine?id=1')">
 						<view class="me-grid__icon">
-							<u-icon name="https://oss.ausite.cn/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png?watermark" :size="50"></u-icon>
+							<u-icon name="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">答题考试</text>
 					</view>

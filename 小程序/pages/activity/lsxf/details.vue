@@ -30,7 +30,7 @@
 					<view class="">
 						<cl-upload v-model="image" :action="uploadUrl" @onSuccess="onSuccess" fileType="image">
 							<template v-slot:addImg>
-								<u-image width="138" height="138" src="https://oss.ausite.cn/xcxkf052/admin/20250512/9ff646dc41e88127a05c7f0ebde61896.png?watermark"></u-image>
+								<u-image width="138" height="138" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/9ff646dc41e88127a05c7f0ebde61896.png"></u-image>
 							</template>
 						</cl-upload>
 					</view>

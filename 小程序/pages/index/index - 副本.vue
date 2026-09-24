@@ -13,16 +13,16 @@
             @click="adLink($event,swiper_list)"></u-swiper>
         <view class="u-flex u-row-between u-m-t-30">
             <u-image width="157" height="160"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250509/c8ca1e5c0043e1828a6641eb0fe51818.png?watermark"
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/c8ca1e5c0043e1828a6641eb0fe51818.png"
                 @click="switchTab('/pages/low_carbon/low_carbon')"></u-image>
             <u-image width="157" height="160"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250509/8477a04f91cff5567b2e79c18825d3c7.png?watermark"
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/8477a04f91cff5567b2e79c18825d3c7.png"
                 @click="switchTab('/pages/health/health')"></u-image>
             <u-image width="157" height="160"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250509/62509808194abfc7bf235a9d24948203.png?watermark"
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/62509808194abfc7bf235a9d24948203.png"
                 @click="switchTab('/pages/mall/mall')"></u-image>
             <u-image width="157" height="160"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250509/ba3f9579228e8e9c116e62240b43f073.png?watermark"
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/ba3f9579228e8e9c116e62240b43f073.png"
                 @click="navigator('/pages/sjhd/sjhd')"></u-image>
         </view>
         <view class="u-m-t-30">
@@ -65,7 +65,7 @@
         </view>
         <view class="u-m-t-30" @click="$u.route('/pages/dtsh/dtsh')" v-if="setting.is_waste">
             <u-image width="100%" height="240"
-                src="https://oss.ausite.cn/xcxkf052/admin/20250606/68d14d845f207d15e52bdc15d735c387.png?watermark"></u-image>
+                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250606/68d14d845f207d15e52bdc15d735c387.png"></u-image>
         </view>
         <!--  -->
         <view class="u-type-white-bg u-radius-10 u-m-t-30 u-p-lr-20" @click="wj_btn(item)"
