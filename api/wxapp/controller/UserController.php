@@ -95,6 +95,10 @@ class UserController extends AuthController
         $user['junk_clock_days'] = $this->countJunkClockDistinctDays((int)$user['id']);
         $user['supervisor_invite'] = $this->buildSupervisorInvite((int)$user['id']);
 
+        if (!empty($user['avatar'])) {
+            $user['avatar'] = cmf_get_asset_url($user['avatar']);
+        }
+
         $this->success('获取成功', $user);
     }
 

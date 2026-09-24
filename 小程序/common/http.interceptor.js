@@ -9,6 +9,7 @@ import {
 	invalidCode,
 } from '@/common/settings'
 import { beginHttpLoading } from '@/common/http.loading.js'
+import { deepResolveAssetUrls } from '@/utils/common.js'
 
 
 // 这里的vm，就是我们在vue文件里面的this，所以我们能在这里获取vuex的变量，比如存放在里面的token变量
@@ -39,9 +40,9 @@ const install = (Vue, vm) => {
 	// 响应拦截，判断状态码是否通过
 	Vue.prototype.$u.http.interceptor.response = (res) => {
 		if (res[codeName] == successCode) {
-			// res为服务端返回值，可能有code，result等字段
-			// 这里对res进行返回，将会在this.$u.post(url).then(res => {})的then回调中的res的到
-			// 如果配置了originalData为true，请留意这里的返回值
+			if (res.data != null) {
+				res.data = deepResolveAssetUrls(res.data)
+			}
 			return res
 		} else if (res[codeName] == invalidCode) {
 			// token失效，这里跳转登录

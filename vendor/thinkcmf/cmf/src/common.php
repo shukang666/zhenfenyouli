@@ -851,6 +851,41 @@ function cmf_get_asset_url($file, $style = '')
     }
 }
 
+/**
+ * 站点对外根 URL（无尾斜杠），用于本地 /upload 资源
+ */
+function cmf_get_public_site_root()
+{
+    $site = cmf_get_option('site_info');
+    $base = !empty($site['site_url']) ? rtrim((string)$site['site_url'], '/') : rtrim(cmf_get_domain(), '/');
+    if ($base === '' || $base === 'http://' || $base === 'https://') {
+        $base = 'https://admin.circular-economy.cn';
+    }
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+    if ($isHttps) {
+        $base = preg_replace('#^http://#i', 'https://', $base);
+    }
+    return $base;
+}
+
+/** 修正缺 /upload/ 的本站绝对地址（OSS 迁移后常见） */
+function cmf_normalize_public_file_url($url)
+{
+    if (!is_string($url) || $url === '') {
+        return $url;
+    }
+    if (strpos($url, 'oss.ausite.cn') !== false) {
+        return cmf_get_asset_url($url);
+    }
+    if (preg_match('#^https?://[^/]+/(upload/)?(xcxkf052/|dz\d+/|kf\d+/)#i', $url, $m)) {
+        if (empty($m[1])) {
+            return preg_replace('#^(https?://[^/]+)/((?:xcxkf052|dz\d+|kf\d+)/)#i', '$1/upload/$2', $url);
+        }
+    }
+    return $url;
+}
+
 function doGetAssetUrl($file, $style = '')
 {
     if (strpos($file, "http") === 0) {
@@ -863,17 +898,17 @@ function doGetAssetUrl($file, $style = '')
                 $file = substr($file, 7);
             }
         } else {
-            return $file;
+            return cmf_normalize_public_file_url($file);
         }
     }
     if (strpos($file, "/") === 0) {
         if (strpos($file, '/upload/') === 0) {
-            return cmf_get_domain() . $file;
+            return cmf_get_public_site_root() . $file;
         }
         return $file;
     }
     $storage = Storage::instance();
-    return $storage->getUrl($file, $style);
+    return cmf_normalize_public_file_url($storage->getUrl($file, $style));
 }
 
 function get_true_asset_url($file)
@@ -906,9 +941,15 @@ function cmf_get_image_url($file, $style = '')
                 $file = substr($file, 7);
             }
         } else {
-            return $file;
+            return cmf_normalize_public_file_url($file);
         }
     } else if (strpos($file, "/") === 0) {
+        if (strpos($file, '/upload/') === 0) {
+            return cmf_get_public_site_root() . $file;
+        }
+        if (preg_match('#^/(xcxkf052/|dz\d+/)#', $file)) {
+            return cmf_get_public_site_root() . '/upload' . $file;
+        }
         return cmf_get_domain() . $file;
     } else {
 //        $storage = cmf_get_option('storage');
@@ -920,7 +961,7 @@ function cmf_get_image_url($file, $style = '')
 //            $style     = empty($style) ? $watermark['styles_watermark'] : $style;
 //        }
         $storage = Storage::instance();
-        return $storage->getImageUrl($file, $style);
+        return cmf_normalize_public_file_url($storage->getImageUrl($file, $style));
     }
 }
 

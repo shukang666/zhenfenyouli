@@ -1,4 +1,54 @@
 // 全局公共方法
+import { staticUploadBase } from '@/common/settings'
+
+const ASSET_UPLOAD_BASE = staticUploadBase || 'https://admin.circular-economy.cn/upload/'
+const ASSET_SITE_ORIGIN = ASSET_UPLOAD_BASE.replace(/\/upload\/?$/i, '')
+
+function shouldFixAssetString(s) {
+	if (typeof s !== 'string' || !s) return false
+	const t = s.trim()
+	if (t[0] === '{' || t[0] === '[') return false
+	if (/^https?:\/\/[^/]+\/(upload\/)?(xcxkf052\/|dz\d+\/|kf\d+\/)/i.test(t) && t.indexOf('/upload/') === -1) return true
+	if (/^(xcxkf052\/|dz\d+\/|kf\d+\/)/i.test(t)) return true
+	if (t.indexOf('/upload/') === 0) return true
+	return false
+}
+
+/** 补全 / 修正接口返回的图片地址（缺 /upload/ 或相对路径） */
+function resolveAssetUrl(url) {
+	if (!url) return ''
+	if (typeof url !== 'string') return ''
+	url = url.trim()
+	if (/^https?:\/\//i.test(url)) {
+		if (/^https?:\/\/[^/]+\/(upload\/)?(xcxkf052\/|dz\d+\/|kf\d+\/)/i.test(url) && url.indexOf('/upload/') === -1) {
+			return url.replace(/^(https?:\/\/[^/]+)\/((?:xcxkf052|dz\d+|kf\d+)\/)/i, '$1/upload/$2')
+		}
+		return url
+	}
+	if (url.indexOf('/upload/') === 0) {
+		return ASSET_SITE_ORIGIN + url
+	}
+	return ASSET_UPLOAD_BASE + url.replace(/^\/+/, '').replace(/^upload\//, '')
+}
+
+function deepResolveAssetUrls(value) {
+	if (value == null) return value
+	if (typeof value === 'string') {
+		return shouldFixAssetString(value) ? resolveAssetUrl(value) : value
+	}
+	if (Array.isArray(value)) {
+		return value.map(deepResolveAssetUrls)
+	}
+	if (typeof value === 'object') {
+		const next = {}
+		for (const key of Object.keys(value)) {
+			next[key] = deepResolveAssetUrls(value[key])
+		}
+		return next
+	}
+	return value
+}
+
 // 此处第二个参数vm，也就是页面使用的this
 const install = (Vue, vm) => {
 	// 检查登录状态
@@ -349,6 +399,7 @@ const install = (Vue, vm) => {
 		let index = path[1].indexOf('/');
 		return path[1].substring(index + 1);
 	}
+
 	// function cutImgUrl(url) {
 	// 	let path = url.split("//");
 	// 	let start = path[1].indexOf('/', path[1].indexOf('/') + 1);
@@ -611,6 +662,8 @@ const install = (Vue, vm) => {
 		formatTextArea,
 		getCaption,
 		cutImgUrl,
+		resolveAssetUrl,
+		deepResolveAssetUrls,
 		sortArr,
 		sortByKey,
 		uniqueByKey,
@@ -629,6 +682,8 @@ const install = (Vue, vm) => {
 	}
 	// 将各个定义的方法，统一放进对象挂载到vm.$u.func(因为vm就是this，也即this.$u.func)下
 }
+export { deepResolveAssetUrls }
+
 export default {
 	install
 }
