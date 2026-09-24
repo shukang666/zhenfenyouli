@@ -100,13 +100,13 @@
       </view>
     </view>
 
-    <!-- 场景快捷入口：家庭 · 亲子 · 办公 -->
+    <!-- 场景快捷入口：家庭 · 亲子 · 办公 · 沿街商铺 -->
     <view class="fb-entry-stage" id="guide-fb-entry">
       <view class="fb-entry-kicker">
         <view class="fb-entry-kicker-dot"></view>
         <text class="fb-entry-kicker-text">场景快捷入口</text>
       </view>
-      <view class="fb-entry-row fb-entry-row--triple">
+      <view class="fb-entry-row">
         <view
           class="fb-entry-card fb-entry-home"
           hover-class="fb-press"
@@ -155,6 +155,24 @@
             <view class="fb-entry-text">
               <text class="fb-entry-title">办公场景</text>
               <text class="fb-entry-sub">大厦真分角投放</text>
+            </view>
+            <view class="fb-entry-go">
+              <text class="fb-entry-arrow">›</text>
+            </view>
+          </view>
+        </view>
+        <view
+          class="fb-entry-card fb-entry-street"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoStreetShop"
+        >
+          <text class="fb-entry-mark">04 沿街</text>
+          <view class="fb-entry-main">
+            <text class="fb-entry-emoji">🏪</text>
+            <view class="fb-entry-text">
+              <text class="fb-entry-title">沿街商铺</text>
+              <text class="fb-entry-sub">路边门店分类投放</text>
             </view>
             <view class="fb-entry-go">
               <text class="fb-entry-arrow">›</text>
@@ -865,9 +883,14 @@ export default {
       this.$u.route("/pages/activity/xsdld");
     },
 
-    // 办公楼宇（占位页，后续再补内容）
+    // 办公场景（占位页，后续再补内容）
     gotoOfficeBuilding() {
       this.$u.route("/pages/activity/office-building");
+    },
+
+    // 沿街商铺（占位页，后续再补内容）
+    gotoStreetShop() {
+      this.$u.route("/pages/activity/street-shop");
     },
 
     // 我和七贤岭入口
@@ -1353,9 +1376,13 @@ export default {
 .fb-entry-office {
   background: linear-gradient(145deg, #8b9dc3 0%, #5c6b8a 55%, #4a5568 100%);
 }
+.fb-entry-street {
+  background: linear-gradient(145deg, #6fcf88 0%, #38b86a 55%, #1f9d52 100%);
+}
 .fb-entry-home::after,
 .fb-entry-xsd::after,
-.fb-entry-office::after {
+.fb-entry-office::after,
+.fb-entry-street::after {
   content: "";
   position: absolute;
   top: -24rpx;
@@ -1382,7 +1409,11 @@ export default {
 .fb-entry-office .fb-entry-title,
 .fb-entry-office .fb-entry-sub,
 .fb-entry-office .fb-entry-arrow,
-.fb-entry-office .fb-entry-mark {
+.fb-entry-office .fb-entry-mark,
+.fb-entry-street .fb-entry-title,
+.fb-entry-street .fb-entry-sub,
+.fb-entry-street .fb-entry-arrow,
+.fb-entry-street .fb-entry-mark {
   color: #fff;
 }
 

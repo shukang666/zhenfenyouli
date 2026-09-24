@@ -33,7 +33,7 @@ export const PAGE_GUIDES = {
 				selector: '#guide-fb-entry',
 				prefer: 'below',
 				title: '场景快捷入口',
-				desc: '按家庭、亲子、办公三种生活场景进入，后续会扩展各场景专属内容。'
+				desc: '家庭、亲子、办公、沿街商铺四种场景，点卡片进入对应专题（内容陆续完善）。'
 			},
 			{
 				selector: '#guide-fb-qxl',

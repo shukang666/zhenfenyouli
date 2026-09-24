@@ -297,6 +297,12 @@
 					}
 				},
 				{
+					"path": "street-shop",
+					"style": {
+						"navigationBarTitleText": "沿街商铺"
+					}
+				},
+				{
 					"path": "qxl-learn-exam",
 					"style": {
 						"navigationBarTitleText": "七贤岭学考",
