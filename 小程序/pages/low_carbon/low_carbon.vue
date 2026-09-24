@@ -65,13 +65,13 @@
       </swiper>
     </view>
 
-    <!-- 常去入口：轮播下方 2×2 快捷卡片 -->
+    <!-- 常去入口：轮播下方三列快捷卡片（七贤岭见下方独立主推位） -->
     <view class="fb-entry-stage" id="guide-fb-entry">
       <view class="fb-entry-kicker">
         <view class="fb-entry-kicker-dot"></view>
         <text class="fb-entry-kicker-text">快捷入口</text>
       </view>
-      <view class="fb-entry-row">
+      <view class="fb-entry-row fb-entry-row--triple">
         <view
           class="fb-entry-card fb-entry-lgfl"
           hover-class="fb-press"
@@ -126,22 +126,40 @@
             </view>
           </view>
         </view>
-        <view
-          class="fb-entry-card fb-entry-qxl"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoQxl"
-        >
-          <text class="fb-entry-mark">04 山野社区</text>
-          <view class="fb-entry-main">
-            <text class="fb-entry-emoji">⛰️</text>
-            <view class="fb-entry-text">
-              <text class="fb-entry-title">我和七贤岭</text>
-              <text class="fb-entry-sub">发现 · 玩 · 记录 · 守护</text>
+      </view>
+    </view>
+
+    <!-- 我和七贤岭：独立主推位（非快捷入口，后续可扩展专题能力） -->
+    <view class="fb-qxl-spotlight" id="guide-fb-qxl">
+      <view
+        class="fb-qxl-spotlight-card"
+        hover-class="fb-qxl-spotlight-press"
+        :hover-stay-time="80"
+        @click="gotoQxl"
+      >
+        <view class="fb-qxl-spotlight-glow fb-qxl-spotlight-glow--a"></view>
+        <view class="fb-qxl-spotlight-glow fb-qxl-spotlight-glow--b"></view>
+        <view class="fb-qxl-spotlight-inner">
+          <view class="fb-qxl-spotlight-copy">
+            <view class="fb-qxl-spotlight-badge-row">
+              <text class="fb-qxl-spotlight-badge">专题</text>
+              <text class="fb-qxl-spotlight-kicker">山野社区</text>
             </view>
-            <view class="fb-entry-go">
-              <text class="fb-entry-arrow">›</text>
+            <view class="fb-qxl-spotlight-title-row">
+              <text class="fb-qxl-spotlight-emoji">⛰️</text>
+              <text class="fb-qxl-spotlight-title">我和七贤岭</text>
             </view>
+            <text class="fb-qxl-spotlight-desc">一起守护这片绿水青山</text>
+            <view class="fb-qxl-spotlight-tags">
+              <text class="fb-qxl-spotlight-tag">认识</text>
+              <text class="fb-qxl-spotlight-tag">探索</text>
+              <text class="fb-qxl-spotlight-tag">记录</text>
+              <text class="fb-qxl-spotlight-tag">守护</text>
+            </view>
+          </view>
+          <view class="fb-qxl-spotlight-cta">
+            <text class="fb-qxl-spotlight-cta-label">进入专题</text>
+            <text class="fb-qxl-spotlight-cta-arrow">›</text>
           </view>
         </view>
       </view>
@@ -1294,13 +1312,9 @@ export default {
 .fb-entry-office {
   background: linear-gradient(145deg, #8b9dc3 0%, #5c6b8a 55%, #4a5568 100%);
 }
-.fb-entry-qxl {
-  background: linear-gradient(145deg, #45d06a 0%, #28a745 100%);
-}
 .fb-entry-lgfl::after,
 .fb-entry-xsd::after,
-.fb-entry-office::after,
-.fb-entry-qxl::after {
+.fb-entry-office::after {
   content: "";
   position: absolute;
   top: -24rpx;
@@ -1322,12 +1336,151 @@ export default {
 .fb-entry-office .fb-entry-title,
 .fb-entry-office .fb-entry-sub,
 .fb-entry-office .fb-entry-arrow,
-.fb-entry-office .fb-entry-mark,
-.fb-entry-qxl .fb-entry-title,
-.fb-entry-qxl .fb-entry-sub,
-.fb-entry-qxl .fb-entry-arrow,
-.fb-entry-qxl .fb-entry-mark {
+.fb-entry-office .fb-entry-mark {
   color: #fff;
+}
+
+/* ===== 我和七贤岭 · 活动页独立主推位 ===== */
+.fb-qxl-spotlight {
+  padding: 8rpx 20rpx 16rpx;
+}
+.fb-qxl-spotlight-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20rpx;
+  padding: 28rpx 24rpx 26rpx;
+  background: linear-gradient(
+    128deg,
+    #0d4d3a 0%,
+    #157a52 42%,
+    #1fa864 78%,
+    #3dd68c 100%
+  );
+  box-shadow: 0 12rpx 32rpx rgba(13, 77, 58, 0.28),
+    0 2rpx 0 rgba(255, 255, 255, 0.12) inset;
+}
+.fb-qxl-spotlight-press {
+  opacity: 0.92;
+  transform: scale(0.992);
+}
+.fb-qxl-spotlight-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.12);
+}
+.fb-qxl-spotlight-glow--a {
+  width: 200rpx;
+  height: 200rpx;
+  top: -72rpx;
+  right: -48rpx;
+}
+.fb-qxl-spotlight-glow--b {
+  width: 140rpx;
+  height: 140rpx;
+  bottom: -56rpx;
+  left: -32rpx;
+  background: rgba(255, 255, 255, 0.08);
+}
+.fb-qxl-spotlight-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+.fb-qxl-spotlight-copy {
+  flex: 1;
+  min-width: 0;
+}
+.fb-qxl-spotlight-badge-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 10rpx;
+}
+.fb-qxl-spotlight-badge {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #0d4d3a;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  letter-spacing: 2rpx;
+}
+.fb-qxl-spotlight-kicker {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: 1rpx;
+}
+.fb-qxl-spotlight-title-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 6rpx;
+}
+.fb-qxl-spotlight-emoji {
+  font-size: 40rpx;
+  line-height: 1;
+}
+.fb-qxl-spotlight-title {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1rpx;
+}
+.fb-qxl-spotlight-desc {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.45;
+  margin-bottom: 14rpx;
+}
+.fb-qxl-spotlight-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8rpx;
+}
+.fb-qxl-spotlight-tag {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.95);
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+}
+.fb-qxl-spotlight-cta {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2rpx solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.12);
+}
+.fb-qxl-spotlight-cta-label {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  text-align: center;
+}
+.fb-qxl-spotlight-cta-arrow {
+  font-size: 36rpx;
+  font-weight: 300;
+  color: #fff;
+  line-height: 1;
+  margin-top: -4rpx;
 }
 .fb-entry-mark {
   font-size: 16rpx;

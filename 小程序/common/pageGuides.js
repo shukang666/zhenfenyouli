@@ -27,7 +27,13 @@ export const PAGE_GUIDES = {
 				selector: '#guide-fb-entry',
 				prefer: 'below',
 				title: '快捷入口',
-				desc: '垃圾分类工作台、亲子活动、楼宇减碳、七贤岭等，点卡片进入。'
+				desc: '垃圾分类工作台、小手拉大手、办公楼宇等常用入口，点卡片进入。'
+			},
+			{
+				selector: '#guide-fb-qxl',
+				prefer: 'below',
+				title: '我和七贤岭',
+				desc: '专题主推位：认识、探索、记录、守护七贤岭，点「进入专题」打开。'
 			},
 			{
 				selector: '#guide-fb-light-task',
