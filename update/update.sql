@@ -124,3 +124,16 @@ CREATE TABLE IF NOT EXISTS `cmf_clock_scene_survey_log` (
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_forum' AND COLUMN_NAME = 'clock_sub_scene');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_forum` ADD COLUMN `clock_sub_scene` varchar(50) NOT NULL DEFAULT '''' COMMENT ''打卡子场景'' AFTER `clock_scene`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+-- 后台菜单：场景分类引导（挂在与「打卡教程」相同父级下）
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
+        SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1
+    )), 0) + 1,
+    'admin','Forum','clock_scene_guide_index','','场景分类引导','','活动页场景入口引导文案'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1);
