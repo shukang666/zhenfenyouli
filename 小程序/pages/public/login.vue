@@ -20,6 +20,9 @@
 				<u-icon name="phone" custom-prefix="custom-icon" color="#FFF" size="38"></u-icon>
 				<text class="u-m-l-8">手机号快捷登录</text>
 			</u-button>
+			<view class="u-m-t-30">
+				<u-button shape="circle" plain hover-class="none" @click="skipLogin">暂不登录，先逛逛</u-button>
+			</view>
 		</view>
 
 		<!-- 工作账号登录弹窗（仅APP端显示） -->
@@ -71,7 +74,20 @@ export default {
 	onLoad() {
 		this.getCode(); //获取code
 	},
+	onBackPress() {
+		this.skipLogin()
+		return true
+	},
 	methods: {
+		// 审核要求：登录环节须允许取消/返回，不强制授权
+		skipLogin() {
+			const pages = getCurrentPages()
+			if (pages.length > 1) {
+				uni.navigateBack({ delta: 1 })
+				return
+			}
+			uni.switchTab({ url: '/pages/index/index' })
+		},
 		//获取code
 		async getCode() {
 			const code = await this.getLoginCode();
@@ -148,6 +164,9 @@ export default {
 				this.$u.vuex('isLogin', true);
 				uni.removeStorageSync('vcode'); //从缓存移除vcode
 			uni.hideLoading();
+			this.$u.api.getUserInfo().then(r => {
+				if (r && r.data) this.$u.vuex('userInfo', r.data)
+			}).catch(() => {})
 			this.goAfterLogin()
 			}).catch(res => {
 				uni.hideLoading();
@@ -157,12 +176,17 @@ export default {
 		},
 		//授权获取手机号
 		getPhoneNumber(e) {
-			const encryptedData = e.detail.encryptedData
-			const iv = e.detail.iv
-			if (e.detail.errMsg == "getPhoneNumber:ok") {
+			const detail = e.detail || {}
+			const encryptedData = detail.encryptedData
+			const iv = detail.iv
+			const errMsg = detail.errMsg || ''
+			if (errMsg === 'getPhoneNumber:ok') {
 				this.mobileLogin(encryptedData, iv)
-			} else {
-				this.$u.toast('请点击允许授权')
+				return
+			}
+			// 用户点「不允许」或关闭授权弹窗：不拦截，可继续浏览
+			if (/cancel|deny|fail/i.test(errMsg)) {
+				return
 			}
 		},
 		//授权获取code

@@ -45,6 +45,7 @@ class UserController extends AuthController
     public function get_user_info()
     {
         $this->checkUser();
+        CommonModel::ensureDefaultMemberCommunity($this->user_id);
         $memberModel = new MemberModel();
         $CommunityModel = new CommunityModel();
         $AnswerModel = new AnswerModel();

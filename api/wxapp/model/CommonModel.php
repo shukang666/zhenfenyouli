@@ -64,14 +64,43 @@ class CommonModel extends Model
         return $user;
     }
 
+    /** 未选小区时默认：环海社区 - 君海阁（cmf_member_community_parent / member_community） */
+    const DEFAULT_MEMBER_COMMUNITY_PARENT_ID = 11;
+    const DEFAULT_MEMBER_COMMUNITY_ID = 17;
+
     /**
-     * 根据openid获取用户user_info
+     * 新用户或未设置小区时写入默认小区
+     */
+    public static function ensureDefaultMemberCommunity($memberId)
+    {
+        $memberId = intval($memberId);
+        if ($memberId <= 0) {
+            return;
+        }
+        $Model = new MemberModel();
+        $row = $Model->where('id', $memberId)->field('community_id')->find();
+        if (empty($row) || !empty($row['community_id'])) {
+            return;
+        }
+        $Model->where('id', $memberId)->update([
+            'community_id'         => self::DEFAULT_MEMBER_COMMUNITY_ID,
+            'community_parent_id'  => self::DEFAULT_MEMBER_COMMUNITY_PARENT_ID,
+        ]);
+    }
+
+    /**
+     * 根据openid获取用户user_info（登录态）
      */
     static public function getUserByOpenid($openid)
     {
-        $user = self::getUserInfoByOpenid($openid, 'openid,id,true_name,nickname,mobile,avatar');
-        if (empty($user)) return [];
-        return $user;
+        $fields = 'openid,id,true_name,nickname,mobile,avatar,community_id,community_parent_id';
+        $user = self::getUserInfoByOpenid($openid, $fields);
+        if (empty($user)) {
+            return [];
+        }
+        self::ensureDefaultMemberCommunity($user['id']);
+        $user = self::getUserInfoByOpenid($openid, $fields);
+        return $user ?: [];
     }
 
 

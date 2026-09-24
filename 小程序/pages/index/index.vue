@@ -468,14 +468,6 @@ export default {
 				this.getUserInfoForGrowth()
 				this.getSignStatus()
 			}
-			this.$nextTick(() => {
-				if (this.isLogin && !this.userInfo.community_id) {
-					uni.navigateTo({
-						url: '/pages/member/info',
-						fail: () => {}
-					})
-				}
-			})
 		},
 		onHide() {
 			this.pauseGuideOverlay()

@@ -130,7 +130,7 @@
 			"pages": [{
 					"path": "info",
 					"style": {
-						"navigationBarTitleText": "完善信息"
+						"navigationBarTitleText": "个人资料"
 					}
 				},
 				{

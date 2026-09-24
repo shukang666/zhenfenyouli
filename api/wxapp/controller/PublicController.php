@@ -254,6 +254,7 @@ class PublicController extends AuthController
             if (empty($user_data)) {
                 CommonModel::updateUserSn($userId);
             }
+            CommonModel::ensureDefaultMemberCommunity($userId);
         }
 
         return $userId;
@@ -360,6 +361,7 @@ class PublicController extends AuthController
 
         if (!empty($is)) {
             $MemberModel->where($map)->save(['openid' => $openid, 'unionid' => $unionid]);
+            CommonModel::ensureDefaultMemberCommunity($is['id']);
         } else {
             //添加
             $userId = $this->addUser($openid, $vcode, $unionid);
