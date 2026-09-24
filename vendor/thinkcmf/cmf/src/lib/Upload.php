@@ -324,6 +324,18 @@ class Upload
         if (empty($storage['type'])) {
             $storage['type'] = 'Local';
         }
+        // 已改本地存储或 OSS 密钥未配置时，禁止走云存储（否则报 access key id is empty）
+        if ($storage['type'] !== 'Local') {
+            $remotePluginCfg = cmf_get_plugin_config($storage['type']);
+            if ($storage['type'] === 'Oss') {
+                $ossAk = isset($remotePluginCfg['accessKey']) ? trim((string)$remotePluginCfg['accessKey']) : '';
+                $ossSk = isset($remotePluginCfg['secretKey']) ? trim((string)$remotePluginCfg['secretKey']) : '';
+                $ossBucket = isset($remotePluginCfg['bucket']) ? trim((string)$remotePluginCfg['bucket']) : '';
+                if ($ossAk === '' || $ossSk === '' || $ossBucket === '') {
+                    $storage['type'] = 'Local';
+                }
+            }
+        }
 
         $needUploadToRemoteStorage = false;//是否要上传到云存储
         if ($objAsset && $storage['type'] == 'Local') {
@@ -394,12 +406,14 @@ class Upload
             }
         }
 
+        $localUrl = cmf_get_image_url($arrInfo["file_path"]);
+
         return [
             'filepath'    => $arrInfo["file_path"],
             "name"        => $arrInfo["filename"],
             'id'          => $strId,
-            'preview_url' => cmf_get_root() . '/upload/' . $arrInfo["file_path"],
-            'url'         => cmf_get_root() . '/upload/' . $arrInfo["file_path"],
+            'preview_url' => $localUrl,
+            'url'         => $localUrl,
         ];
     }
 

@@ -445,6 +445,12 @@ class FieldWorkerController extends BaseController
             $this->error($uploader->getError());
         }
 
+        if (!empty($result['filepath'])) {
+            $result['url'] = cmf_get_image_url($result['filepath']);
+        } elseif (!empty($result['url']) && strpos($result['url'], 'http') !== 0) {
+            $result['url'] = cmf_get_domain() . (strpos($result['url'], '/') === 0 ? '' : '/') . ltrim($result['url'], '/');
+        }
+
         unset($result['name'], $result['id'], $result['preview_url']);
         // 注意：BaseController::success($msg, $url, $data)，数据必须放第三参数
         $this->success('上传成功!', '', $result);
