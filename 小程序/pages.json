@@ -299,7 +299,11 @@
 				{
 					"path": "scene-clock-flow",
 					"style": {
-						"navigationBarTitleText": "场景分类"
+						"navigationBarTitleText": "场景分类",
+						"componentPlaceholder": {
+							"u-button": "view",
+							"u-input": "view"
+						}
 					}
 				},
 				{

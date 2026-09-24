@@ -51,8 +51,8 @@
 					<text class="scf-cate-go">选择 ›</text>
 				</view>
 			</view>
-			<view class="scf-foot" v-if="hasSubStep">
-				<u-button type="default" hover-class="none" :custom-style="btnGhost" @click="flowStep = 'sub'">上一步</u-button>
+			<view class="scf-foot scf-foot--single" v-if="hasSubStep">
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'sub'">上一步</view>
 			</view>
 		</view>
 
@@ -70,8 +70,8 @@
 				</view>
 			</view>
 			<view class="scf-foot">
-				<u-button type="default" hover-class="none" :custom-style="btnGhost" @click="flowStep = 'cate'">上一步</u-button>
-				<u-button type="success" hover-class="none" :custom-style="btnPrimary" @click="flowStep = 'survey'">下一步</u-button>
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'cate'">上一步</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="flowStep = 'survey'">下一步</view>
 			</view>
 		</view>
 
@@ -80,7 +80,7 @@
 			<text class="scf-hint">{{ guide.survey_question }}</text>
 			<view class="scf-tip-list">
 				<view
-					v-for="(tip, idx) in guide.preset_tips"
+					v-for="(tip, idx) in presetTips"
 					:key="idx"
 					class="scf-tip-chip"
 					:class="{ 'scf-tip-chip--on': userChoice === tip }"
@@ -91,11 +91,16 @@
 			</view>
 			<view class="scf-custom">
 				<text class="scf-custom-label">或写下您的分类小技巧</text>
-				<u-input v-model="customTip" type="textarea" height="120" placeholder="选填，分享您的经验" />
+				<textarea
+					class="scf-textarea"
+					v-model="customTip"
+					placeholder="选填，分享您的经验"
+					maxlength="200"
+				/>
 			</view>
 			<view class="scf-foot">
-				<u-button type="default" hover-class="none" :custom-style="btnGhost" @click="flowStep = 'guide'">上一步</u-button>
-				<u-button type="success" hover-class="none" :custom-style="btnPrimary" @click="goLearnStep">下一步</u-button>
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'guide'">上一步</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="goLearnStep">下一步</view>
 			</view>
 		</view>
 
@@ -105,13 +110,13 @@
 				<text class="scf-learn-title">是否想学习更多分类技巧？</text>
 				<text class="scf-learn-desc">系统学习分类知识，打卡更有把握</text>
 				<view class="scf-learn-actions">
-					<u-button type="success" hover-class="none" :custom-style="btnPrimary" @click="goLearn">去学习</u-button>
-					<u-button type="primary" hover-class="none" :custom-style="btnBlue" @click="goClock">去拍照打卡</u-button>
+					<view class="scf-btn scf-btn--primary scf-btn--block" hover-class="scf-card--press" @tap="goLearn">去学习</view>
+					<view class="scf-btn scf-btn--blue scf-btn--block" hover-class="scf-card--press" @tap="goClock">去拍照打卡</view>
 				</view>
 				<view class="scf-learn-skip" @tap="finishOnly">稍后再说</view>
 			</view>
-			<view class="scf-foot">
-				<u-button type="default" hover-class="none" :custom-style="btnGhost" @click="flowStep = 'survey'">上一步</u-button>
+			<view class="scf-foot scf-foot--single">
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'survey'">上一步</view>
 			</view>
 		</view>
 	</view>
@@ -141,22 +146,13 @@
 				},
 				userChoice: '',
 				customTip: '',
-				btnPrimary: {
-					background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)',
-					border: 'none',
-				},
-				btnBlue: {
-					background: 'linear-gradient(141deg, #5aa8ff 0%, #1877f2 100%)',
-					border: 'none',
-				},
-				btnGhost: {
-					background: '#f0f2f1',
-					color: '#555',
-					border: 'none',
-				},
 			}
 		},
 		computed: {
+			presetTips() {
+				const tips = this.guide && this.guide.preset_tips
+				return Array.isArray(tips) ? tips : []
+			},
 			hubTheme() {
 				return (this.hub && this.hub.theme) || 'scf--home'
 			},
@@ -242,7 +238,8 @@
 					cate_label: this.cateLabel,
 				}).then(res => {
 					const row = res.data
-					if (row && (row.handle_guide || (row.preset_tips && row.preset_tips.length))) {
+					if (!row || typeof row !== 'object') return
+					if (row.handle_guide || (row.preset_tips && row.preset_tips.length)) {
 						this.guide = mergeGuide(row, this.hubKey, this.subKey, this.cateLabel)
 					}
 				}).catch(() => {})
@@ -525,7 +522,38 @@
 	gap: 16rpx;
 	justify-content: space-between;
 }
-.scf-foot .u-btn {
+.scf-foot--single .scf-btn {
 	flex: 1;
+}
+.scf-btn {
+	flex: 1;
+	text-align: center;
+	padding: 22rpx 16rpx;
+	border-radius: 14rpx;
+	font-size: 28rpx;
+	font-weight: 600;
+}
+.scf-btn--block {
+	flex: none;
+	width: 100%;
+}
+.scf-btn--primary {
+	color: #fff;
+	background: linear-gradient(141deg, #a4db88 0%, #18af38 100%);
+}
+.scf-btn--blue {
+	color: #fff;
+	background: linear-gradient(141deg, #5aa8ff 0%, #1877f2 100%);
+}
+.scf-btn--ghost {
+	color: #555;
+	background: #f0f2f1;
+}
+.scf-textarea {
+	width: 100%;
+	min-height: 160rpx;
+	font-size: 26rpx;
+	color: #243028;
+	line-height: 1.5;
 }
 </style>
