@@ -700,6 +700,18 @@
 
 <script src="__STATIC__/js/jquery.js"></script>
 <script>
+var ASSET_UPLOAD_BASE = {$asset_upload_base_json|raw|default='""'};
+function resolveUploadPreviewUrl(data) {
+    if (!data) return '';
+    var url = data.url || '';
+    if (url && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0 || url.indexOf('//') === 0)) {
+        return url;
+    }
+    var fp = (data.filepath || url || '').replace(/^\/+/, '').replace(/^upload\//, '');
+    if (!fp) return '';
+    return ASSET_UPLOAD_BASE + fp;
+}
+
 // ===== 照片字段（与小程序 form 一致，共 11 项） =====
 var uploadFields = ['door_photo', 'inner_photo', 'publicity_photo',
     'inner_rectify_photo', 'point_photo', 'point_rectify_photo',
@@ -812,10 +824,11 @@ function uploadImage(field, file) {
         success: function(res) {
             $area.removeClass('uploading');
             if (res.code == 1) {
-                var url = res.data.url;
-                uploadedImages[field] = url;
+                var previewUrl = resolveUploadPreviewUrl(res.data);
+                var storePath = (res.data && res.data.filepath) ? res.data.filepath : '';
+                uploadedImages[field] = storePath || previewUrl;
                 $area.find('.upload-placeholder').hide();
-                $area.find('.upload-image').attr('src', url).show();
+                $area.find('.upload-image').attr('src', previewUrl).show();
                 $area.find('.delete-btn').show();
                 updateIndexFill();
             } else {

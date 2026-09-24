@@ -258,6 +258,7 @@ class FieldWorkerController extends BaseController
 
         $this->assignWorker();
         $this->assign('lastCommunityId', $lastCommunityId);
+        $this->assign('asset_upload_base_json', json_encode($this->getPublicUploadBase() . '/', JSON_UNESCAPED_SLASHES));
         return $this->fetch('field_worker/monitor');
     }
 
@@ -445,11 +446,9 @@ class FieldWorkerController extends BaseController
             $this->error($uploader->getError());
         }
 
-        if (!empty($result['filepath'])) {
-            $result['url'] = cmf_get_image_url($result['filepath']);
-        } elseif (!empty($result['url']) && strpos($result['url'], 'http') !== 0) {
-            $result['url'] = cmf_get_domain() . (strpos($result['url'], '/') === 0 ? '' : '/') . ltrim($result['url'], '/');
-        }
+        $rel = $this->normalizeUploadRelativePath($result['filepath'] ?? ($result['url'] ?? ''));
+        $result['filepath'] = $rel;
+        $result['url']        = $this->publicUploadUrl($rel);
 
         unset($result['name'], $result['id'], $result['preview_url']);
         // 注意：BaseController::success($msg, $url, $data)，数据必须放第三参数
@@ -536,6 +535,17 @@ class FieldWorkerController extends BaseController
             'create_time'          => time(),
         ];
 
+        $photoFields = [
+            'door_photo', 'inner_photo', 'publicity_photo', 'inner_rectify_photo',
+            'point_photo', 'point_rectify_photo', 'manage_photo', 'manage_rectify_photo',
+            'transport_photo', 'catering_photo', 'accuracy_photo',
+        ];
+        foreach ($photoFields as $photoField) {
+            if (!empty($data[$photoField])) {
+                $data[$photoField] = $this->normalizeUploadRelativePath($data[$photoField]);
+            }
+        }
+
         Db::name('supervision_monitor')->insert($data);
 
         $this->success('已提交');
@@ -564,7 +574,17 @@ class FieldWorkerController extends BaseController
             ->field('id, community_name, unit_name, check_date, door_photo, inner_photo, publicity_photo')
             ->order('id desc')
             ->limit($offset, $limit)
-            ->select();
+            ->select()
+            ->toArray();
+
+        foreach ($list as &$row) {
+            foreach (['door_photo', 'inner_photo', 'publicity_photo'] as $photoField) {
+                if (!empty($row[$photoField])) {
+                    $row[$photoField] = $this->publicUploadUrl($row[$photoField]);
+                }
+            }
+        }
+        unset($row);
 
         // 注意：BaseController::success($msg, $url, $data)，数据必须放第三参数
         $this->success('ok', '', [
@@ -692,5 +712,52 @@ class FieldWorkerController extends BaseController
             return $result->toArray();
         }
         return array_values((array) $result);
+    }
+
+    /** 站点对外 upload 根（含 /upload，无尾斜杠） */
+    protected function getPublicUploadBase(): string
+    {
+        $site = cmf_get_option('site_info');
+        $base = !empty($site['site_url']) ? rtrim((string)$site['site_url'], '/') : rtrim(cmf_get_domain(), '/');
+        if ($this->request->isSsl()) {
+            $base = preg_replace('#^http://#i', 'https://', $base);
+        }
+        return $base . '/upload';
+    }
+
+    /** 相对 upload 路径 → 可浏览器访问的完整 URL（Pad 回显用） */
+    protected function publicUploadUrl($filePath): string
+    {
+        if ($filePath === null || $filePath === '') {
+            return '';
+        }
+        $filePath = str_replace('\\', '/', trim((string)$filePath));
+        if (strpos($filePath, 'http://') === 0 || strpos($filePath, 'https://') === 0) {
+            return cmf_get_asset_url($filePath);
+        }
+        $rel = $this->normalizeUploadRelativePath($filePath);
+        if ($rel === '') {
+            return '';
+        }
+        return $this->getPublicUploadBase() . '/' . $rel;
+    }
+
+    /** 统一为库内相对路径 xcxkf052/... */
+    protected function normalizeUploadRelativePath($urlOrPath): string
+    {
+        if ($urlOrPath === null || $urlOrPath === '') {
+            return '';
+        }
+        $p = str_replace('\\', '/', trim((string)$urlOrPath));
+        if (preg_match('#^https?://[^/]+/(?:upload/)?(.+)$#i', $p, $m)) {
+            return ltrim($m[1], '/');
+        }
+        if (strpos($p, '/upload/') === 0) {
+            return ltrim(substr($p, 8), '/');
+        }
+        if (strpos($p, 'upload/') === 0) {
+            return ltrim(substr($p, 7), '/');
+        }
+        return ltrim($p, '/');
     }
 }
