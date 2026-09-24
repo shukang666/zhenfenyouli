@@ -106,7 +106,7 @@
 						<u-button type="success" hover-class="none" shape="circle" :custom-style="btnPrimary" @click="closeMask">
 							继续打卡
 						</u-button>
-						<u-button type="default" hover-class="none" shape="circle" @click="navigateBack">返回</u-button>
+						<u-button type="default" hover-class="none" shape="circle" @click="goActivityTab">返回活动</u-button>
 					</view>
 				</view>
 			</view>
@@ -349,9 +349,9 @@
 				this.mask_show = false
 				this.resetAfterSubmit()
 			},
-			navigateBack() {
+			goActivityTab() {
 				this.mask_show = false
-				uni.navigateBack()
+				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
 			},
 		},
 	}

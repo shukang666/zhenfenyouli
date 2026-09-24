@@ -96,8 +96,8 @@
 					</view>
 				</view>
 			</view>
-
-			<view class="me-shop" v-if="userInfo.shop_status==0">
+<!-- 下面暂时注释，应对审核 -->
+			<!-- <view class="me-shop" v-if="userInfo.shop_status==0">
 				<u-image width="100%" height="130" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
 					@click="navigator('/pages/settled/settled')"></u-image>
 			</view>
@@ -108,7 +108,7 @@
 			<view class="me-shop" v-if="userInfo.shop_status==2">
 				<u-image width="100%" height="130" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/3d7904797608c5d73cf85b06a2043fda.png"
 					@click="navigator('/pages/store/store')"></u-image>
-			</view>
+			</view> -->
 
 			<view class="me-card" id="guide-me-service">
 				<text class="me-card__title">我的服务</text>
