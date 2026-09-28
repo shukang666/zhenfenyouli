@@ -23,14 +23,13 @@ class VolunteerSupervisionController extends AuthController
             ->where('supervision_date', $today)
             ->find();
 
-        // 当前是否处于高峰时段
-        $inPeak = $this->isInPeakHour();
+        $config = cmf_get_option('set_config');
+        $rewardPoint = max(0, intval($config['supervision_point'] ?? 100));
 
         $this->success('获取成功', [
             'today_signed' => !empty($record),
             'record'       => $record ?: null,
-            'in_peak_hour' => $inPeak,
-            'peak_periods' => $this->getPeakPeriods(),
+            'reward_point' => $rewardPoint,
         ]);
     }
 
@@ -80,11 +79,6 @@ class VolunteerSupervisionController extends AuthController
             $this->error('请填写督导内容');
         }
 
-        // 高峰时段校验
-        if (!$this->isInPeakHour()) {
-            $this->error('当前不是督导高峰时间段，请在配置的时段内签到');
-        }
-
         // 当天是否已签到
         $today = date('Y-m-d');
         $exist = Db::name('volunteer_supervision')
@@ -119,42 +113,4 @@ class VolunteerSupervisionController extends AuthController
         $this->success('督导签到已提交，请等待审核', ['point' => $point, 'id' => intval($id)]);
     }
 
-    /**
-     * 获取高峰时段配置
-     */
-    private function getPeakPeriods()
-    {
-        $config = cmf_get_option('set_config');
-        $raw = $config['supervision_peak_periods'] ?? '';
-        if (is_array($raw)) {
-            $periods = $raw;
-        } else {
-            $periods = json_decode($raw, true);
-        }
-        if (empty($periods) || (!is_array($periods))) {
-            $periods = ['am' => ['07:30', '09:30'], 'pm' => ['16:30', '18:30']];
-        }
-        return $periods;
-    }
-
-    /**
-     * 判断当前是否在高峰时段
-     */
-    private function isInPeakHour()
-    {
-        $periods = $this->getPeakPeriods();
-        $nowTime = date('H:i');
-
-        if (!empty($periods['am']) && is_array($periods['am']) && count($periods['am']) >= 2) {
-            if ($nowTime >= $periods['am'][0] && $nowTime <= $periods['am'][1]) {
-                return true;
-            }
-        }
-        if (!empty($periods['pm']) && is_array($periods['pm']) && count($periods['pm']) >= 2) {
-            if ($nowTime >= $periods['pm'][0] && $nowTime <= $periods['pm'][1]) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

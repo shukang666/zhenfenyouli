@@ -1,90 +1,157 @@
 <template>
-	<view class="u-p-30">
-		<u-navbar title-color="#fff" title="志愿督导" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false" :custom-back="customBack">
+	<view class="page-wrap u-p-30">
+		<u-navbar title-color="#fff" title="桶边督导" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false" :custom-back="customBack">
 		</u-navbar>
-		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(to bottom,#2fb74c,#EFF9F1);">
-		</view>
+		<view class="page-bg u-abso"></view>
 
-		<!-- 今日状态卡片 -->
-		<view class="u-p-40 u-type-white-bg u-radius-6 u-m-t-30">
-			<view class="u-text-center u-font-32 u-font-bold u-m-b-20">志愿督导签到</view>
-			<view class="u-font-24 u-type-info u-text-center">
-				当前时段：{{peakText}}
-			</view>
-			<view class="u-m-t-20 u-text-center" v-if="todaySigned">
-				<view class="u-font-28" style="color:#18AF38;">今日已签到 ✓</view>
-				<view class="u-font-24 u-type-info u-m-t-10" v-if="todayRecord">积分 +{{todayRecord.point || 0}}</view>
-			</view>
-			<view class="u-m-t-20 u-text-center" v-else-if="!inPeakHour">
-				<view class="u-font-28 u-type-error">当前不在高峰时段</view>
-			</view>
-			<view class="u-m-t-20 u-text-center" v-else>
-				<view class="u-font-28" style="color:#18AF38;">可签到</view>
-			</view>
-		</view>
-
-		<!-- 签到表单 -->
-		<view class="u-p-40 u-type-white-bg u-radius-6 u-m-t-30" v-if="!todaySigned && inPeakHour">
-			<view class="u-font-28 u-m-b-16">督导小区</view>
-			<view class="select-row" @click="openCommunityPicker">
-				<text v-if="form.community_name" class="u-font-28">{{form.community_name}}</text>
-				<text v-else class="u-font-28 u-type-info">请选择督导小区</text>
-				<u-icon name="arrow-right" color="#ccc"></u-icon>
-			</view>
-
-			<view class="u-font-28 u-m-b-16 u-m-t-30">督导点位</view>
-			<view class="select-row" @click="showPoint = true">
-				<text v-if="form.point_name" class="u-font-28">{{form.point_name}}</text>
-				<text v-else class="u-font-28 u-type-info">请选择督导点位（可选）</text>
-				<u-icon name="arrow-right" color="#ccc"></u-icon>
-			</view>
-
-			<view class="u-font-28 u-m-b-16 u-m-t-30">督导照片</view>
-			<view class="upload-area" @click="chooseImage">
-				<view v-if="!form.image" class="upload-placeholder">
-					<u-icon name="camera" size="60" color="#ccc"></u-icon>
-					<view class="u-m-t-10 u-font-24 u-type-info">点击拍照或选择图片</view>
+		<!-- 顶栏：随时督导 + 点位 + 督导员 -->
+		<view class="header-card u-m-t-20">
+			<view class="header-row u-flex u-row-between u-col-center">
+				<view class="time-badge">随时督导</view>
+				<view class="header-point u-flex u-col-center" @click="openLocationPicker">
+					<u-icon name="map-fill" size="32" color="#18AF38" class="u-m-r-8"></u-icon>
+					<text class="point-text u-line-1">{{ locationLabel }}</text>
+					<u-icon name="arrow-down" size="24" color="#999" class="u-m-l-8"></u-icon>
 				</view>
-				<image v-else :src="form.image" mode="aspectFill" class="upload-image"></image>
+				<view class="supervisor-name u-line-1">{{ supervisorLabel }}</view>
+			</view>
+		</view>
+
+		<!-- 今日已完成 -->
+		<view class="card u-m-t-24" v-if="todaySigned">
+			<view class="u-text-center u-font-32 u-font-bold">今日督导已完成</view>
+			<view class="u-font-28 u-m-t-20 u-text-center" style="color:#18AF38;">感谢你的桶边督导 ✓</view>
+			<view class="u-font-24 u-type-info u-m-t-10 u-text-center" v-if="todayRecord && todayRecord.point > 0">审核通过后可获 {{ todayRecord.point }} 积分</view>
+		</view>
+
+		<block v-else>
+			<!-- 标准动作（展示） -->
+			<view class="card u-m-t-24">
+				<view class="section-title u-m-b-24">标准动作</view>
+				<view class="action-grid">
+					<view class="action-item" v-for="(item, idx) in standardActions" :key="idx">
+						<view class="action-icon u-flex u-col-center u-row-center">
+							<u-icon :name="item.icon" size="36" color="#18AF38"></u-icon>
+						</view>
+						<text class="action-label">{{ item.label }}</text>
+					</view>
+				</view>
 			</view>
 
-			<view class="u-font-28 u-m-b-16 u-m-t-30">督导内容</view>
-			<textarea
-				class="remark-textarea"
-				v-model="form.content"
-				placeholder="请描述本次督导内容（必填）"
-				placeholder-style="color:#ccc;font-size:24rpx;"
-				maxlength="500"
-			></textarea>
+			<!-- 督导记录 -->
+			<view class="card u-m-t-24">
+				<view class="section-title u-m-b-24">督导记录</view>
 
-			<view class="u-m-t-40 u-m-b-40">
+				<view class="form-row u-flex u-row-between u-col-center">
+					<text class="form-label">引导居民人次</text>
+					<view class="stepper u-flex u-col-center">
+						<view class="stepper-btn" @click="adjustCount('guide_count', -1)">−</view>
+						<text class="stepper-num">{{ form.guide_count }}</text>
+						<view class="stepper-btn" @click="adjustCount('guide_count', 1)">+</view>
+					</view>
+				</view>
+
+				<view class="form-row u-flex u-row-between u-col-center">
+					<text class="form-label">纠正错投次数</text>
+					<view class="stepper u-flex u-col-center">
+						<view class="stepper-btn" @click="adjustCount('correct_count', -1)">−</view>
+						<text class="stepper-num">{{ form.correct_count }}</text>
+						<view class="stepper-btn" @click="adjustCount('correct_count', 1)">+</view>
+					</view>
+				</view>
+
+				<view class="form-row">
+					<text class="form-label u-m-b-16">桶内纯净度</text>
+					<view class="seg-group u-flex">
+						<view
+							v-for="opt in purityOptions"
+							:key="opt.value"
+							class="seg-item"
+							:class="{ active: form.bin_purity === opt.value }"
+							@click="form.bin_purity = opt.value"
+						>{{ opt.label }}</view>
+					</view>
+				</view>
+
+				<view class="form-row">
+					<text class="form-label u-m-b-16">设施状态</text>
+					<view class="seg-group u-flex">
+						<view
+							class="seg-item"
+							:class="{ active: form.facility_status === 'normal' }"
+							@click="setFacilityStatus('normal')"
+						>正常</view>
+						<view
+							class="seg-item seg-item-warn"
+							:class="{ active: form.facility_status === 'abnormal' }"
+							@click="setFacilityStatus('abnormal')"
+						>异常</view>
+					</view>
+					<view class="field-hint" v-if="form.facility_status === 'abnormal'">
+						设施异常可
+						<text class="link-text" @click="goProblemReport">前往问题反馈</text>
+						上报
+					</view>
+				</view>
+
+				<view class="form-row">
+					<text class="form-label u-m-b-16">桶位卫生</text>
+					<view class="seg-group u-flex">
+						<view
+							v-for="opt in hygieneOptions"
+							:key="opt.value"
+							class="seg-item"
+							:class="{ active: form.bin_hygiene === opt.value }"
+							@click="form.bin_hygiene = opt.value"
+						>{{ opt.label }}</view>
+					</view>
+				</view>
+
+				<view class="form-row">
+					<text class="form-label u-m-b-16">现场照片</text>
+					<view class="upload-area" @click="chooseImage">
+						<view v-if="!form.image" class="upload-placeholder">
+							<u-icon name="camera" size="56" color="#ccc"></u-icon>
+							<view class="u-m-t-10 u-font-24 u-type-info">点击拍照或选择图片</view>
+						</view>
+						<image v-else :src="form.image" mode="aspectFill" class="upload-image"></image>
+					</view>
+				</view>
+			</view>
+
+			<view class="report-banner u-flex u-row-between u-col-center" @click="goProblemReport">
+				<text class="report-banner-text">发现问题？一键上报</text>
+				<u-icon name="arrow-right" size="28" color="#e65100"></u-icon>
+			</view>
+
+			<view class="u-m-t-30 u-m-b-16">
 				<u-button
 					type="primary"
 					shape="circle"
 					hover-class="none"
-					:disabled="!form.community_id || !form.image || !form.content"
+					:disabled="!canSubmit"
 					@click="submit"
-					:customStyle="{ background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)', height: '90rpx', fontSize: '32rpx' }"
-				>提交签到</u-button>
+					:customStyle="{ background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)', height: '96rpx', fontSize: '32rpx' }"
+				>完成督导并提交</u-button>
+				<view class="reward-hint u-text-center u-m-t-16">完成后可获得 {{ rewardPoint }} 积分（审核通过后发放）</view>
 			</view>
-		</view>
+		</block>
 
-		<!-- 我的历史记录 -->
-		<view class="u-type-white-bg u-radius-6 u-m-t-30 u-p-30">
-			<view class="u-font-30 u-font-bold u-m-b-20">我的督导记录</view>
-			<view v-if="historyList.length == 0" class="u-p-30">
+		<view class="card u-m-t-24 u-m-b-20">
+			<view class="section-title u-m-b-20">我的督导记录</view>
+			<view v-if="historyList.length == 0" class="u-p-20">
 				<u-empty text="暂无记录" mode="list"></u-empty>
 			</view>
-			<view v-for="(item, idx) in historyList" :key="idx" class="history-item u-m-b-20">
+			<view v-for="(item, idx) in historyList" :key="idx" class="history-item u-m-b-16">
 				<view class="u-flex u-row-between">
-					<view class="u-font-28">{{item.community_name}}</view>
-					<view class="u-font-24 u-type-info">{{item.supervision_date}}</view>
+					<view class="u-font-28 u-line-1 u-flex-1">{{ item.point_name || item.community_name }}</view>
+					<view class="u-font-24 u-type-info u-m-l-16">{{ item.supervision_date }}</view>
 				</view>
-				<view class="u-font-24 u-type-info u-m-t-10" v-if="item.point > 0">积分 +{{item.point}}</view>
+				<view class="u-font-24 u-type-info u-m-t-8" v-if="item.point > 0">积分 +{{ item.point }}</view>
 			</view>
 		</view>
 
-		<!-- 小区选择（模糊搜索） -->
+		<!-- 小区选择 -->
 		<view v-if="showCommunityDropdown" class="community-dropdown-mask" @click="showCommunityDropdown = false">
 			<view class="community-dropdown" @click.stop>
 				<view class="u-font-28 u-font-bold u-m-b-16">选择督导小区</view>
@@ -109,7 +176,6 @@
 				</scroll-view>
 			</view>
 		</view>
-		<!-- 点位选择 -->
 		<u-select v-model="showPoint" label-name="label" value-name="value" :list="pointList" @confirm="confirmPoint"></u-select>
 
 		<u-gap height="40"></u-gap>
@@ -124,17 +190,36 @@
 				uploadUrl,
 				todaySigned: false,
 				todayRecord: null,
-				inPeakHour: false,
-				peakPeriods: { am: ['07:30', '09:30'], pm: ['16:30', '18:30'] },
-				peakText: '',
+				rewardPoint: 100,
+				checkRole: null,
 				form: {
 					community_id: 0,
 					community_name: '',
 					point_id: 0,
 					point_name: '',
 					image: '',
-					content: '',
+					guide_count: 0,
+					correct_count: 0,
+					bin_purity: 'good',
+					facility_status: 'normal',
+					bin_hygiene: 'tidy',
 				},
+				standardActions: [
+					{ icon: 'eye', label: '观察投放行为' },
+					{ icon: 'grid', label: '错投现场分拣' },
+					{ icon: 'arrow-upward', label: '引导正确投放' },
+					{ icon: 'chat', label: '柔性劝导' },
+				],
+				purityOptions: [
+					{ label: '好', value: 'good' },
+					{ label: '中', value: 'medium' },
+					{ label: '差', value: 'poor' },
+				],
+				hygieneOptions: [
+					{ label: '整洁', value: 'tidy' },
+					{ label: '一般', value: 'average' },
+					{ label: '较差', value: 'poor' },
+				],
 				showPoint: false,
 				showCommunityDropdown: false,
 				communityKeyword: '',
@@ -145,17 +230,36 @@
 				communitySearchTimer: null,
 				pointList: [],
 				historyList: [],
+				pendingOpenPoint: false,
 			};
 		},
 		computed: {
 			communityNoMore() {
 				return this.communityPage >= this.communityLastPage;
 			},
+			locationLabel() {
+				if (this.form.point_name) return this.form.point_name;
+				if (this.form.community_name) return this.form.community_name + '（请选择点位）';
+				return '选择点位';
+			},
+			supervisorLabel() {
+				if (this.checkRole && this.checkRole.role_name) {
+					return '督导员' + this.checkRole.role_name;
+				}
+				const name = (this.userInfo && (this.userInfo.nickname || this.userInfo.user_nickname)) || '';
+				return name ? '督导员' + name : '督导员';
+			},
+			canSubmit() {
+				return this.form.community_id && this.form.point_id && this.form.image;
+			},
+			isVolunteerApproved() {
+				return this.checkRole && this.checkRole.is_approved;
+			},
 		},
 		onLoad() {
-			this.peakText = this.formatPeakText(this.peakPeriods);
 			this.loadToday();
 			this.loadHistory();
+			this.loadCheckRole();
 		},
 		onShow() {
 			this.loadToday();
@@ -165,28 +269,39 @@
 			customBack() {
 				uni.navigateBack({
 					fail() {
-						uni.switchTab({
-							url: '/pages/index/index'
-						})
+						uni.switchTab({ url: '/pages/index/index' });
 					}
-				})
+				});
+			},
+			loadCheckRole() {
+				if (!this.isLogin) return;
+				this.$u.api.getCheckRole().then(res => {
+					this.checkRole = res.data || null;
+				}).catch(() => {});
 			},
 			loadToday() {
-				// 使用 isLogin 状态判断（不自动跳转登录页），让用户可以看到页面内容，提交签到时才检查登录
 				if (!this.isLogin) return;
 				this.$u.api.getVolunteerToday().then(res => {
 					this.todaySigned = res.data.today_signed;
 					this.todayRecord = res.data.record;
-					this.inPeakHour = res.data.in_peak_hour;
-					this.peakPeriods = res.data.peak_periods || this.peakPeriods;
-					this.peakText = this.formatPeakText(this.peakPeriods);
+					if (res.data.reward_point != null) {
+						this.rewardPoint = res.data.reward_point;
+					}
 				}).catch(() => {});
 			},
-			formatPeakText(periods) {
-				let parts = [];
-				if (periods.am && periods.am.length >= 2) parts.push(`${periods.am[0]}-${periods.am[1]}`);
-				if (periods.pm && periods.pm.length >= 2) parts.push(`${periods.pm[0]}-${periods.pm[1]}`);
-				return parts.length > 0 ? parts.join('、') : '未配置';
+			openLocationPicker() {
+				if (!this.form.community_id) {
+					this.pendingOpenPoint = true;
+					this.openCommunityPicker();
+					return;
+				}
+				if (!this.pointList.length) {
+					this.loadPointList(this.form.community_id, () => {
+						this.showPoint = true;
+					});
+					return;
+				}
+				this.showPoint = true;
 			},
 			openCommunityPicker() {
 				this.showCommunityDropdown = true;
@@ -198,8 +313,7 @@
 			loadCommunityList(keyword, isReset = false) {
 				if (this.communityLoading) return;
 				this.communityLoading = true;
-				const page = isReset ? 1 : this.communityPage;
-				this.$u.api.search_community({ keyword, page, page_size: 20 }).then(res => {
+				this.$u.api.search_community({ keyword, page: isReset ? 1 : this.communityPage, page_size: 20 }).then(res => {
 					const data = res.data || {};
 					const list = data.data || [];
 					if (isReset) {
@@ -232,27 +346,51 @@
 				this.form.point_id = 0;
 				this.form.point_name = '';
 				this.showCommunityDropdown = false;
-				this.loadPointList(item.id);
+				this.loadPointList(item.id, () => {
+					if (this.pendingOpenPoint) {
+						this.pendingOpenPoint = false;
+						this.showPoint = true;
+					}
+				});
 			},
-			loadPointList(communityId) {
+			loadPointList(communityId, done) {
 				this.$u.api.get_community_cate_list({ community_id: communityId }).then(res => {
-					this.pointList = (res.data || []).map(item => ({
-						label: item.name,
-						value: item.id,
+					this.pointList = (res.data || []).map(row => ({
+						label: row.name,
+						value: row.id,
 					}));
-				}).catch(() => {});
-			},
-		loadHistory() {
-				// 使用 isLogin 状态判断（不自动跳转登录页）
-				if (!this.isLogin) return;
-				this.$u.api.getVolunteerMyList({ page: 1, page_size: 10 }).then(res => {
-					this.historyList = res.data.data || [];
-				}).catch(() => {});
+					if (typeof done === 'function') done();
+				}).catch(() => {
+					if (typeof done === 'function') done();
+				});
 			},
 			confirmPoint(e) {
 				const item = e[0];
 				this.form.point_id = item.value;
 				this.form.point_name = item.label;
+			},
+			adjustCount(field, delta) {
+				const next = Math.max(0, (this.form[field] || 0) + delta);
+				this.form[field] = next;
+			},
+			setFacilityStatus(val) {
+				this.form.facility_status = val;
+				if (val === 'abnormal') {
+					uni.showModal({
+						title: '设施异常',
+						content: '可前往「问题反馈」上报设施问题，是否现在去反馈？',
+						confirmText: '去反馈',
+						cancelText: '稍后',
+						success: (res) => {
+							if (res.confirm) this.goProblemReport();
+						},
+					});
+				}
+			},
+			goProblemReport() {
+				if (!this.$u.func.checkLogin()) return;
+				const approved = this.isVolunteerApproved ? 1 : 0;
+				this.$u.route(`/pages/dtsh/report?location_type=1&can_submit=${approved}`);
 			},
 			chooseImage() {
 				uni.chooseImage({
@@ -260,7 +398,7 @@
 					sourceType: ['camera', 'album'],
 					success: (res) => {
 						this.uploadImage(res.tempFilePaths[0]);
-					}
+					},
 				});
 			},
 			uploadImage(filePath) {
@@ -287,22 +425,39 @@
 					fail: () => {
 						uni.hideLoading();
 						uni.showToast({ title: '上传失败', icon: 'none' });
-					}
+					},
 				});
 			},
+			buildContent() {
+				const purityMap = { good: '好', medium: '中', poor: '差' };
+				const hygieneMap = { tidy: '整洁', average: '一般', poor: '较差' };
+				const facilityMap = { normal: '正常', abnormal: '异常' };
+				const lines = [
+					`引导居民人次：${this.form.guide_count}`,
+					`纠正错投次数：${this.form.correct_count}`,
+					`桶内纯净度：${purityMap[this.form.bin_purity] || this.form.bin_purity}`,
+					`设施状态：${facilityMap[this.form.facility_status] || this.form.facility_status}`,
+					`桶位卫生：${hygieneMap[this.form.bin_hygiene] || this.form.bin_hygiene}`,
+				];
+				if (this.form.facility_status === 'abnormal') {
+					lines.push('（设施异常，建议同步问题反馈）');
+				}
+				return lines.join('\n');
+			},
 			submit() {
-				// 点击提交签到时才检查登录
 				if (!this.$u.func.checkLogin()) return;
 				if (!this.form.community_id) {
-					uni.showToast({ title: '请选择督导小区', icon: 'none' });
+					uni.showToast({ title: '请先选择督导小区', icon: 'none' });
+					this.openCommunityPicker();
+					return;
+				}
+				if (!this.form.point_id) {
+					uni.showToast({ title: '请选择督导点位', icon: 'none' });
+					this.openLocationPicker();
 					return;
 				}
 				if (!this.form.image) {
-					uni.showToast({ title: '请上传督导照片', icon: 'none' });
-					return;
-				}
-				if (!this.form.content) {
-					uni.showToast({ title: '请填写督导内容', icon: 'none' });
+					uni.showToast({ title: '请上传现场照片', icon: 'none' });
 					return;
 				}
 				uni.showLoading({ title: '提交中...' });
@@ -312,13 +467,13 @@
 					point_id: this.form.point_id,
 					point_name: this.form.point_name,
 					image: this.form.image,
-					content: this.form.content,
+					content: this.buildContent(),
 				}).then(res => {
 					uni.hideLoading();
 					uni.showToast({
-						title: res.msg || '督导签到成功',
+						title: res.msg || '督导提交成功',
 						icon: 'none',
-						duration: 2000
+						duration: 2000,
 					});
 					setTimeout(() => {
 						this.loadToday();
@@ -337,54 +492,198 @@
 					point_id: 0,
 					point_name: '',
 					image: '',
-					content: '',
+					guide_count: 0,
+					correct_count: 0,
+					bin_purity: 'good',
+					facility_status: 'normal',
+					bin_hygiene: 'tidy',
 				};
+				this.pointList = [];
 			},
-		}
-	}
+			loadHistory() {
+				if (!this.isLogin) return;
+				this.$u.api.getVolunteerMyList({ page: 1, page_size: 10 }).then(res => {
+					this.historyList = res.data.data || [];
+				}).catch(() => {});
+			},
+		},
+	};
 </script>
 
 <style lang="scss">
-.select-row {
+.page-wrap {
+	min-height: 100vh;
+	padding-bottom: 40rpx;
+}
+.page-bg {
+	z-index: -1;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 552rpx;
+	background: linear-gradient(to bottom, #2fb74c, #eff9f1);
+}
+.header-card,
+.card {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 28rpx 32rpx;
+	box-shadow: 0 4rpx 24rpx rgba(24, 175, 56, 0.06);
+}
+.header-row {
+	gap: 12rpx;
+}
+.time-badge {
+	flex-shrink: 0;
+	font-size: 22rpx;
+	color: #18af38;
+	background: #e8f8ec;
+	padding: 8rpx 16rpx;
+	border-radius: 8rpx;
+	font-weight: 600;
+}
+.header-point {
+	flex: 1;
+	min-width: 0;
+	justify-content: center;
+}
+.point-text {
+	font-size: 26rpx;
+	color: #333;
+	max-width: 320rpx;
+}
+.supervisor-name {
+	flex-shrink: 0;
+	max-width: 180rpx;
+	font-size: 22rpx;
+	color: #666;
+	text-align: right;
+}
+.section-title {
+	font-size: 30rpx;
+	font-weight: bold;
+	color: #333;
+}
+.action-grid {
 	display: flex;
-	align-items: center;
+	flex-wrap: wrap;
 	justify-content: space-between;
-	padding: 20rpx 0;
-	border-bottom: 1rpx solid #eee;
+}
+.action-item {
+	width: 48%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 24rpx;
+}
+.action-icon {
+	width: 88rpx;
+	height: 88rpx;
+	border-radius: 50%;
+	background: #eef9f0;
+	margin-bottom: 12rpx;
+}
+.action-label {
+	font-size: 22rpx;
+	color: #555;
+	text-align: center;
+	line-height: 1.4;
+}
+.form-row {
+	padding: 24rpx 0;
+	border-bottom: 1rpx solid #f0f0f0;
+	&:last-child {
+		border-bottom: none;
+	}
+}
+.form-label {
+	font-size: 28rpx;
+	color: #333;
+}
+.stepper-btn {
+	width: 56rpx;
+	height: 56rpx;
+	line-height: 52rpx;
+	text-align: center;
+	border: 1rpx solid #ddd;
+	border-radius: 8rpx;
+	font-size: 32rpx;
+	color: #666;
+}
+.stepper-num {
+	min-width: 64rpx;
+	text-align: center;
+	font-size: 32rpx;
+	font-weight: bold;
+	margin: 0 16rpx;
+}
+.seg-group {
+	flex-wrap: wrap;
+	gap: 16rpx;
+}
+.seg-item {
+	padding: 12rpx 28rpx;
+	font-size: 26rpx;
+	color: #666;
+	background: #f5f5f5;
+	border-radius: 8rpx;
+	border: 2rpx solid transparent;
+	&.active {
+		color: #18af38;
+		background: #e8f8ec;
+		border-color: #18af38;
+		font-weight: 600;
+	}
+}
+.seg-item-warn.active {
+	color: #e65100;
+	background: #fff3e0;
+	border-color: #ff9800;
+}
+.field-hint {
+	margin-top: 12rpx;
+	font-size: 22rpx;
+	color: #999;
+}
+.link-text {
+	color: #18af38;
+	text-decoration: underline;
 }
 .upload-area {
 	width: 100%;
-	height: 360rpx;
+	height: 280rpx;
 	background: #f5f5f5;
 	border-radius: 12rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	border: 2rpx dashed #ddd;
-	position: relative;
 	overflow: hidden;
-	.upload-placeholder {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-	.upload-image {
-		width: 100%;
-		height: 360rpx;
-		border-radius: 12rpx;
-	}
 }
-.remark-textarea {
+.upload-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.upload-image {
 	width: 100%;
-	min-height: 200rpx;
-	background: #f5f5f5;
+	height: 280rpx;
+}
+.report-banner {
+	margin-top: 24rpx;
+	padding: 24rpx 28rpx;
+	background: linear-gradient(90deg, #fff8e1, #fff);
 	border-radius: 12rpx;
-	padding: 20rpx;
+	border: 1rpx solid #ffe0b2;
+}
+.report-banner-text {
 	font-size: 26rpx;
-	color: #333;
-	border: 2rpx solid #eee;
-	box-sizing: border-box;
+	color: #e65100;
+	font-weight: 500;
+}
+.reward-hint {
+	font-size: 22rpx;
+	color: #999;
 }
 .history-item {
 	padding: 20rpx;
