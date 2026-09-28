@@ -27,13 +27,23 @@
 			</view>
 		</view>
 
-		<!-- 首次：设置真分点（仅家庭/亲子） -->
+		<!-- 首次：设置分类打卡点（仅家庭/亲子） -->
 		<view class="scf-body" v-if="flowStep === 'setup'">
-			<view class="scf-panel scf-setup-guide">
-				<text class="scf-office-tip-title">什么是真分点？</text>
-				<text class="scf-info-text">真分点是您在家里（或亲子活动处）固定用来投放某一类垃圾的位置，例如「厨房厨余桶」「玄关可回收箱」。每个点位只对应一种垃圾类型，方便养成「分好再投」的习惯。</text>
-				<text class="scf-info-text scf-setup-guide-p">请至少设置 1 个点位：填写名称、选择垃圾类型，并拍一张点位照片（能看到桶/袋/标签即可）。保存后点卡片即可按指引打卡。</text>
+			<view class="scf-intro">
+				<text class="scf-intro-lead">{{ introDisplayLead }}</text>
+				<text class="scf-intro-summary">{{ introDisplaySummary }}</text>
+				<view class="scf-intro-toggle" hover-class="scf-card--press" @tap="introExpanded = !introExpanded">
+					<text class="scf-intro-toggle-t">{{ introExpanded ? '收起说明' : '政策背景 · 七贤岭做法 · 小程序愿景' }}</text>
+					<text class="scf-intro-chevron">{{ introExpanded ? '▲' : '▼' }}</text>
+				</view>
+				<view class="scf-intro-detail" v-if="introExpanded">
+					<view class="scf-intro-block" v-for="block in introBlocks" :key="block.id">
+						<text class="scf-intro-block-title">{{ block.title }}</text>
+						<text class="scf-intro-block-body">{{ block.body }}</text>
+					</view>
+				</view>
 			</view>
+			<text class="scf-setup-action">{{ setupActionHint }}</text>
 			<view class="scf-setup-list">
 				<view class="scf-setup-block" v-for="(row, idx) in setupRows" :key="idx">
 					<view class="scf-point-card scf-point-card--preview">
@@ -64,21 +74,31 @@
 					</view>
 				</view>
 			</view>
-			<view class="scf-setup-add" @tap="addSetupRow">+ 再添加一个真分点</view>
+			<view class="scf-setup-add" @tap="addSetupRow">+ 再添加一个打卡点</view>
 			<view class="scf-foot scf-foot--single">
 				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">保存并开始打卡</view>
 			</view>
 		</view>
 
-		<!-- 真分点列表（打卡入口） -->
+		<!-- 打卡点列表（打卡入口） -->
 		<view class="scf-body" v-if="flowStep === 'points'">
-			<view class="scf-panel scf-office-tip scf-points-intro" v-if="isCommunityHub">
-				<text class="scf-office-tip-title">{{ communityPointsTitle }}</text>
-				<text class="scf-info-text">{{ communityPointsDesc }}</text>
+			<view class="scf-intro" :class="{ 'scf-intro--compact': isCommunityHub }">
+				<text class="scf-intro-lead">{{ introDisplayLead }}</text>
+				<text class="scf-intro-summary">{{ introDisplaySummary }}</text>
+				<view class="scf-intro-toggle" hover-class="scf-card--press" @tap="introExpanded = !introExpanded">
+					<text class="scf-intro-toggle-t">{{ introExpanded ? '收起说明' : '政策背景 · 七贤岭做法 · 小程序愿景' }}</text>
+					<text class="scf-intro-chevron">{{ introExpanded ? '▲' : '▼' }}</text>
+				</view>
+				<view class="scf-intro-detail" v-if="introExpanded">
+					<view class="scf-intro-block" v-for="block in introBlocks" :key="block.id">
+						<text class="scf-intro-block-title">{{ block.title }}</text>
+						<text class="scf-intro-block-body">{{ block.body }}</text>
+					</view>
+				</view>
 			</view>
 			<view class="scf-points-head">
-				<text class="scf-hint scf-hint--inline">{{ isCommunityHub ? '选择回收点打卡' : '选择要打卡的真分点' }}</text>
-				<text class="scf-manage-link" v-if="!isCommunityHub" @tap="enterManage">管理真分点</text>
+				<text class="scf-hint scf-hint--inline">{{ pointsStepHint }}</text>
+				<text class="scf-manage-link" v-if="!isCommunityHub" @tap="enterManage">管理打卡点</text>
 			</view>
 			<view class="scf-point-grid">
 				<view
@@ -118,13 +138,13 @@
 				</view>
 			</view>
 			<view class="scf-foot scf-foot--single" v-if="!points.length && !isCommunityHub">
-				<view class="scf-btn scf-btn--primary" @tap="goSetupStep">去设置真分点</view>
+				<view class="scf-btn scf-btn--primary" @tap="goSetupStep">去设置分类打卡点</view>
 			</view>
 		</view>
 
-		<!-- 管理真分点 -->
+		<!-- 管理打卡点 -->
 		<view class="scf-body" v-if="flowStep === 'manage'">
-			<text class="scf-hint">修改名称、种类或点位照片；删除后不影响历史打卡记录。</text>
+			<text class="scf-hint">可修改名称、垃圾类型或照片；删除后不影响历史打卡记录。</text>
 			<view class="scf-point-grid">
 				<view class="scf-setup-block" v-for="(p, mIdx) in points" :key="p.id">
 					<view class="scf-point-card scf-point-card--preview">
@@ -308,6 +328,16 @@
 	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
 	import { getHub, mergeGuide } from '@/common/sceneClockHub.js'
 	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind, SECTION_HINTS } from '@/common/clockScene.js'
+	import {
+		getStepTitles,
+		getIntroLead,
+		getIntroSummary,
+		getIntroBlocks,
+		getSetupActionHint,
+		getCommunityEmptyTitle,
+		getCommunityPointsDesc,
+		HOME_POINT_LABEL_SHORT,
+	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
 		data() {
@@ -342,9 +372,38 @@
 				clockSuccessMsg: '',
 				clockHabitTip: '',
 				uploadUrl,
+				introExpanded: false,
 			}
 		},
 		computed: {
+			introBlocks() {
+				return getIntroBlocks(this.hubKey)
+			},
+			setupActionHint() {
+				return getSetupActionHint(this.hubKey)
+			},
+			introDisplayLead() {
+				if (this.flowStep === 'points' && this.isCommunityHub) {
+					return this.isStreetHub ? '到商铺集中分类点打卡' : '到大楼集中分类点打卡'
+				}
+				return getIntroLead(this.hubKey)
+			},
+			introDisplaySummary() {
+				if (this.flowStep === 'points' && this.isCommunityHub) {
+					return getCommunityPointsDesc(this.isStreetHub)
+				}
+				if (this.flowStep === 'points' && !this.isCommunityHub) {
+					if (this.points.length) {
+						return '下面是你在家设置的「' + HOME_POINT_LABEL_SHORT + '」。点选一处，按指引分步拍照即可完成本次打卡。'
+					}
+					return getIntroSummary(this.hubKey)
+				}
+				return getIntroSummary(this.hubKey)
+			},
+			pointsStepHint() {
+				if (this.isCommunityHub) return '选择集中分类点'
+				return '选择本次打卡位置'
+			},
 			clockPhotoIntro() {
 				const sk = this.hub && this.hub.sceneKey ? this.hub.sceneKey : this.hubKey
 				const cateLine = buildSceneCateSubtitle(sk, this.activeCateName)
@@ -393,22 +452,13 @@
 				return this.isOfficeHub || this.isStreetHub
 			},
 			communityEmptyTitle() {
-				if (this.isStreetHub) return '暂未配置商铺回收点'
-				if (this.isOfficeHub) return '暂未配置真分角回收点'
-				return '暂未配置回收点'
+				return getCommunityEmptyTitle(this.isStreetHub, this.isOfficeHub)
 			},
 			communityEmptyDesc() {
-				return '社区工作人员将根据您的商铺/单位性质人工配置统一回收点，配置完成后即可在此选择点位打卡。如有疑问请联系社区。'
-			},
-			communityPointsTitle() {
-				if (this.isStreetHub) return '请前往统一回收点打卡'
-				return '请前往大楼真分角打卡'
+				return '社区工作人员将根据您的商铺/单位情况配置集中分类点，配置完成后即可在此选择并打卡。如有疑问请联系社区。'
 			},
 			communityPointsDesc() {
-				if (this.isStreetHub) {
-					return '以下为社区根据您的商铺情况配置的集中回收点，每个点位对应一种垃圾类型，请选择后拍照打卡。'
-				}
-				return '以下为社区配置的办公真分角投放点，无需自行设置，请选择点位后打卡。'
+				return getCommunityPointsDesc(this.isStreetHub)
 			},
 			presetTips() {
 				const tips = this.guide && this.guide.preset_tips
@@ -421,16 +471,7 @@
 				return (this.cateList || []).map(c => c.name)
 			},
 			stepTitle() {
-				const map = {
-					hub_empty: '等待配置',
-					setup: '设置真分点',
-					points: '选择真分点',
-					manage: '管理真分点',
-					cate: '选择垃圾种类',
-					guide: '分类指引',
-					survey: '分享分类技巧',
-					learn: '拍照打卡',
-				}
+				const map = getStepTitles()
 				return map[this.flowStep] || this.hub.title
 			},
 			visibleStepLabels() {
@@ -442,7 +483,7 @@
 				const i = order.indexOf(this.flowStep)
 				return i >= 0 ? i : 0
 			},
-			/** 同类型垃圾多个真分点合并展示 */
+			/** 同类型垃圾多个打卡点合并展示 */
 			pointGroups() {
 				const list = this.points || []
 				const map = {}
@@ -494,7 +535,7 @@
 				return this.$u.api.getUserInfo().then(res => {
 					this.$u.vuex('userInfo', res.data || {})
 					if (Number(res.data.is_answer) !== 1) {
-						this.$u.toast('请先完成真分介绍与测验')
+						this.$u.toast('请先完成分类介绍与测验')
 						setTimeout(() => this.$u.route('/pages/flhd/ljfldk'), 500)
 						return false
 					}
@@ -637,7 +678,7 @@
 			async saveSetup() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				const rows = this.setupRows.filter(r => r.point_name && String(r.point_name).trim())
-				if (!rows.length) return this.$u.toast('请至少添加一个真分点')
+				if (!rows.length) return this.$u.toast('请至少添加一个分类打卡点')
 				try {
 					for (const row of rows) {
 						const cate = this.cateList[row.cate_index]
@@ -718,7 +759,7 @@
 				if (!pointId) return
 				uni.showModal({
 					title: '提示',
-					content: '确定删除该真分点？',
+					content: '确定删除该打卡点？',
 					success: async (res) => {
 						if (!res.confirm) return
 						await this.$u.api.delete_clock_scene_point({ id: pointId })
@@ -1097,11 +1138,83 @@
 	color: #6a756c;
 	min-height: 72rpx;
 }
-.scf-setup-guide {
-	margin-bottom: 16rpx;
+.scf-intro {
+	background: #fff;
+	border-radius: 20rpx;
+	padding: 28rpx 28rpx 24rpx;
+	margin-bottom: 20rpx;
+	box-shadow: 0 6rpx 28rpx rgba(20, 40, 28, 0.06);
+	border-left: 6rpx solid #18af38;
 }
-.scf-setup-guide-p {
-	margin-top: 12rpx;
+.scf-intro--compact {
+	border-left-color: #2b8bb8;
+}
+.scf-intro-lead {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #142018;
+	line-height: 1.4;
+}
+.scf-intro-summary {
+	display: block;
+	margin-top: 14rpx;
+	font-size: 26rpx;
+	color: #5a665e;
+	line-height: 1.65;
+}
+.scf-intro-toggle {
+	margin-top: 20rpx;
+	padding-top: 18rpx;
+	border-top: 1rpx solid #eef0ee;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.scf-intro-toggle-t {
+	font-size: 24rpx;
+	color: #18af38;
+	font-weight: 600;
+}
+.scf-intro--compact .scf-intro-toggle-t {
+	color: #156a90;
+}
+.scf-intro-chevron {
+	font-size: 20rpx;
+	color: #9aa59d;
+	margin-left: 12rpx;
+}
+.scf-intro-detail {
+	margin-top: 20rpx;
+}
+.scf-intro-block {
+	padding: 18rpx 0;
+	border-bottom: 1rpx solid #f0f2f0;
+	&:last-child {
+		border-bottom: none;
+		padding-bottom: 0;
+	}
+}
+.scf-intro-block-title {
+	display: block;
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #243028;
+	margin-bottom: 8rpx;
+}
+.scf-intro-block-body {
+	display: block;
+	font-size: 24rpx;
+	color: #6a756c;
+	line-height: 1.65;
+}
+.scf-setup-action {
+	display: block;
+	font-size: 26rpx;
+	color: #4a564e;
+	line-height: 1.6;
+	margin-bottom: 20rpx;
+	padding: 0 4rpx;
 }
 .scf-setup-block {
 	margin-bottom: 20rpx;
