@@ -37,31 +37,9 @@
 		</view>
 
 		<block v-else>
-			<!-- 标准动作（展示） -->
-			<view class="card u-m-t-24">
-				<view class="section-title u-m-b-24">标准动作</view>
-				<view class="action-row u-flex u-row-between">
-					<view class="action-item" v-for="(item, idx) in standardActions" :key="idx">
-						<view class="action-icon u-flex u-col-center u-row-center">
-							<u-icon :name="item.icon" size="36" color="#18AF38"></u-icon>
-						</view>
-						<text class="action-label">{{ item.label }}</text>
-					</view>
-				</view>
-			</view>
-
 			<!-- 督导记录 -->
 			<view class="card u-m-t-24">
 				<view class="section-title u-m-b-24">督导记录</view>
-
-				<view class="form-row u-flex u-row-between u-col-center">
-					<text class="form-label">引导居民人次</text>
-					<view class="stepper u-flex u-col-center">
-						<view class="stepper-btn" @click="adjustCount('guide_count', -1)">−</view>
-						<text class="stepper-num">{{ form.guide_count }}</text>
-						<view class="stepper-btn" @click="adjustCount('guide_count', 1)">+</view>
-					</view>
-				</view>
 
 				<view class="form-row u-flex u-row-between u-col-center">
 					<text class="form-label">纠正错投次数</text>
@@ -210,18 +188,11 @@
 					point_id: 0,
 					point_name: '',
 					image: '',
-					guide_count: 0,
 					correct_count: 0,
 					bin_purity: 'good',
 					facility_status: 'normal',
 					bin_hygiene: 'tidy',
 				},
-				standardActions: [
-					{ icon: 'eye', label: '观察投放行为' },
-					{ icon: 'grid', label: '错投现场分拣' },
-					{ icon: 'arrow-upward', label: '引导正确投放' },
-					{ icon: 'chat', label: '柔性劝导' },
-				],
 				purityOptions: [
 					{ label: '好', value: 'good' },
 					{ label: '中', value: 'medium' },
@@ -437,7 +408,6 @@
 				const hygieneMap = { tidy: '整洁', average: '一般', poor: '较差' };
 				const facilityMap = { normal: '正常', abnormal: '异常' };
 				const lines = [
-					`引导居民人次：${this.form.guide_count}`,
 					`纠正错投次数：${this.form.correct_count}`,
 					`桶内纯净度：${purityMap[this.form.bin_purity] || this.form.bin_purity}`,
 					`设施状态：${facilityMap[this.form.facility_status] || this.form.facility_status}`,
@@ -496,7 +466,6 @@
 					point_id: 0,
 					point_name: '',
 					image: '',
-					guide_count: 0,
 					correct_count: 0,
 					bin_purity: 'good',
 					facility_status: 'normal',
@@ -587,35 +556,10 @@
 	font-size: 28rpx;
 	color: #999;
 }
-.action-row {
-	width: 100%;
-}
 .section-title {
 	font-size: 30rpx;
 	font-weight: bold;
 	color: #333;
-}
-.action-item {
-	flex: 1;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 0 4rpx;
-}
-.action-icon {
-	width: 72rpx;
-	height: 72rpx;
-	border-radius: 50%;
-	background: #eef9f0;
-	margin-bottom: 10rpx;
-}
-.action-label {
-	font-size: 20rpx;
-	color: #555;
-	text-align: center;
-	line-height: 1.35;
-	width: 100%;
 }
 .form-row {
 	padding: 24rpx 0;

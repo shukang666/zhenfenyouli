@@ -213,27 +213,48 @@
 				<view class="scf-cate-hero scf-cate-hero--compact" :class="'scf-cate-hero--' + cateTone(activeCateName)">
 					<text class="scf-cate-hero-name">{{ activeCateName }}</text>
 				</view>
-				<text class="scf-clock-desc">{{ clockPhotoHint }}</text>
+				<text class="scf-clock-desc">{{ clockPhotoIntro }}</text>
 
-				<view class="scf-photo-grid">
-					<view
-						v-for="(url, imgIdx) in clockImages"
-						:key="'img_' + imgIdx"
-						class="scf-photo-item"
-					>
-						<image class="scf-photo-img" :src="url" mode="aspectFill" @tap="previewClockImages(imgIdx)"></image>
-						<view class="scf-photo-del" @tap.stop="removeClockImage(imgIdx)">×</view>
-					</view>
-					<view
-						v-if="clockImages.length < 9"
-						class="scf-photo-add"
-						hover-class="scf-card--press"
-						@tap="chooseClockImages"
-					>
-						<text class="scf-photo-add-icon">📷</text>
-						<text class="scf-photo-add-t">添加照片</text>
-					</view>
+				<view class="scf-clock-photo-head u-flex u-row-between u-col-center">
+					<text class="scf-clock-photo-title">记录一次完整投放</text>
+					<text class="scf-clock-photo-progress">{{ clockSlotFilledCount }}/3</text>
 				</view>
+
+				<view class="scf-slot-row">
+					<block v-for="(slot, sIdx) in clockPhotoSlotMeta" :key="slot.key">
+						<view v-if="sIdx > 0" class="scf-slot-arrow">›</view>
+						<view class="scf-slot">
+							<view class="scf-slot-head">
+								<text class="scf-slot-step">{{ sIdx + 1 }}</text>
+								<text class="scf-slot-title">{{ slot.title }}</text>
+							</view>
+							<text class="scf-slot-hint">{{ slot.hint }}</text>
+							<view
+								class="scf-slot-box"
+								:class="{ 'scf-slot-box--done': !!clockSlotUrls[sIdx] }"
+								hover-class="scf-card--press"
+								@tap="onClockSlotTap(sIdx)"
+							>
+								<image
+									v-if="clockSlotUrls[sIdx]"
+									class="scf-slot-img"
+									:src="clockSlotUrls[sIdx]"
+									mode="aspectFill"
+								></image>
+								<view v-else class="scf-slot-placeholder">
+									<text class="scf-slot-emoji">{{ slot.emoji }}</text>
+									<text class="scf-slot-add-t">点击拍摄</text>
+								</view>
+								<view
+									v-if="clockSlotUrls[sIdx]"
+									class="scf-photo-del scf-slot-del"
+									@tap.stop="clearClockSlot(sIdx)"
+								>×</view>
+							</view>
+						</view>
+					</block>
+				</view>
+				<text class="scf-clock-photo-foot">{{ clockPhotoFootnote }}</text>
 
 				<view class="scf-clock-note">
 					<text class="scf-clock-note-label">补充说明（选填）</text>
@@ -314,7 +335,7 @@
 				},
 				userChoice: '',
 				customTip: '',
-				clockImages: [],
+				clockSlotUrls: ['', '', ''],
 				clockContent: '',
 				clockSubmitting: false,
 				clockSuccessShow: false,
@@ -324,9 +345,39 @@
 			}
 		},
 		computed: {
-			clockPhotoHint() {
+			clockPhotoIntro() {
 				const sk = this.hub && this.hub.sceneKey ? this.hub.sceneKey : this.hubKey
-				return buildSceneCateSubtitle(sk, this.activeCateName) || '请拍摄清晰照片，展示垃圾内容与分类是否正确'
+				const cateLine = buildSceneCateSubtitle(sk, this.activeCateName)
+				if (this.isCommunityHub) {
+					return (cateLine ? cateLine + '。' : '') + '按下面三步各拍一张，帮社区确认您投对了类型。'
+				}
+				return (cateLine ? cateLine + '。' : '') + '用三张照片讲清楚：从分类前到进桶，比随手拍一张更有说服力。'
+			},
+			clockPhotoFootnote() {
+				if (this.isCommunityHub) {
+					return '三步都拍全再提交；看不清垃圾或桶口可能影响审核。'
+				}
+				return '建议连拍三步再提交；中间「分好类」可拍袋口、标签或分拣过程。'
+			},
+			clockPhotoSlotMeta() {
+				if (this.isCommunityHub) {
+					return [
+						{ key: 'before', title: '投放前', hint: '垃圾内容清晰', emoji: '📦' },
+						{ key: 'aim', title: '对准桶口', hint: '颜色/标识可见', emoji: '🎯' },
+						{ key: 'after', title: '投放后', hint: '桶内或点位全貌', emoji: '✅' },
+					]
+				}
+				return [
+					{ key: 'before', title: '分类前', hint: '待处理的垃圾', emoji: '🗑️' },
+					{ key: 'sorted', title: '分好类', hint: '袋/盒已分清楚', emoji: '♻️' },
+					{ key: 'after', title: '进桶后', hint: '投入对应桶内', emoji: '✅' },
+				]
+			},
+			clockSlotFilledCount() {
+				return (this.clockSlotUrls || []).filter(u => !!String(u || '').trim()).length
+			},
+			clockImages() {
+				return (this.clockSlotUrls || []).filter(u => !!String(u || '').trim())
 			},
 			clockNotePlaceholder() {
 				if (this.pointName) return '可补充「' + this.pointName + '」投放说明'
@@ -733,7 +784,7 @@
 					user_choice: this.userChoice,
 					custom_tip: this.customTip,
 				}).catch(() => {})
-				this.clockImages = []
+				this.resetClockSlots()
 				this.clockContent = ''
 				this.flowStep = 'learn'
 			},
@@ -748,18 +799,28 @@
 				if (k === 'qinzi' || k === 'street') return k
 				return 'home'
 			},
-			chooseClockImages() {
-				const remain = 9 - this.clockImages.length
-				if (remain <= 0) return this.$u.toast('最多 9 张')
+			resetClockSlots() {
+				this.clockSlotUrls = ['', '', '']
+			},
+			onClockSlotTap(slotIdx) {
+				const url = this.clockSlotUrls[slotIdx]
+				if (url) {
+					this.previewClockImages(slotIdx)
+					return
+				}
+				this.chooseClockSlot(slotIdx)
+			},
+			chooseClockSlot(slotIdx) {
 				uni.chooseImage({
-					count: remain,
+					count: 1,
 					sourceType: ['camera', 'album'],
 					success: (res) => {
-						(res.tempFilePaths || []).forEach(p => this.uploadClockImage(p))
+						const path = (res.tempFilePaths || [])[0]
+						if (path) this.uploadClockSlotImage(slotIdx, path)
 					},
 				})
 			},
-			uploadClockImage(filePath) {
+			uploadClockSlotImage(slotIdx, filePath) {
 				uni.showLoading({ title: '上传中…' })
 				uni.uploadFile({
 					url: this.uploadUrl,
@@ -770,7 +831,7 @@
 						try {
 							const data = JSON.parse(res.data)
 							if (data.code == 1 && data.data && data.data.url) {
-								this.clockImages.push(data.data.url)
+								this.$set(this.clockSlotUrls, slotIdx, data.data.url)
 							} else {
 								this.$u.toast(data.msg || '上传失败')
 							}
@@ -782,23 +843,35 @@
 					complete: () => uni.hideLoading(),
 				})
 			},
-			removeClockImage(idx) {
-				this.clockImages.splice(idx, 1)
+			clearClockSlot(slotIdx) {
+				this.$set(this.clockSlotUrls, slotIdx, '')
 			},
 			previewClockImages(index) {
-				if (!this.clockImages.length) return
-				uni.previewImage({ urls: this.clockImages, current: this.clockImages[index] })
+				const urls = this.clockImages
+				if (!urls.length) return
+				const current = this.clockSlotUrls[index] || urls[0]
+				uni.previewImage({ urls, current })
+			},
+			missingClockSlotLabel() {
+				const meta = this.clockPhotoSlotMeta
+				for (let i = 0; i < meta.length; i++) {
+					if (!String(this.clockSlotUrls[i] || '').trim()) {
+						return meta[i].title
+					}
+				}
+				return ''
 			},
 			submitClock() {
 				if (this.clockSubmitting) return
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类')
-				if (!this.clockImages.length) return this.$u.toast('请先添加照片')
+				const missing = this.missingClockSlotLabel()
+				if (missing) return this.$u.toast('请拍摄「' + missing + '」照片')
 				const that = this
 				uni.showModal({
 					title: '提示',
-					content: '照片需拍清楚垃圾内容并保持分类正确，错误分类可能影响积分。',
+					content: '三步照片需对应真实投放过程，分类错误或不符可能影响积分。',
 					success(res) {
 						if (!res.confirm) return
 						that.doSubmitClock()
@@ -830,7 +903,7 @@
 			},
 			clockSuccessContinue() {
 				this.clockSuccessShow = false
-				this.clockImages = []
+				this.resetClockSlots()
 				this.clockContent = ''
 				this.flowStep = 'points'
 			},
@@ -1301,21 +1374,101 @@
 	line-height: 1.55;
 	margin-bottom: 20rpx;
 }
-.scf-photo-grid {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 16rpx;
+.scf-clock-photo-head {
+	margin-bottom: 16rpx;
 }
-.scf-photo-item {
+.scf-clock-photo-title {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #243028;
+}
+.scf-clock-photo-progress {
+	font-size: 24rpx;
+	color: #18af38;
+	font-weight: 600;
+}
+.scf-slot-row {
+	display: flex;
+	align-items: flex-start;
+}
+.scf-slot-arrow {
+	flex-shrink: 0;
+	width: 20rpx;
+	margin-top: 108rpx;
+	font-size: 26rpx;
+	color: #b8c4bc;
+	line-height: 1;
+	text-align: center;
+}
+.scf-slot {
+	flex: 1;
+	min-width: 0;
+}
+.scf-slot-head {
+	display: flex;
+	align-items: center;
+	gap: 8rpx;
+	margin-bottom: 6rpx;
+}
+.scf-slot-step {
+	width: 32rpx;
+	height: 32rpx;
+	line-height: 32rpx;
+	text-align: center;
+	border-radius: 50%;
+	background: #e8f5eb;
+	color: #18af38;
+	font-size: 20rpx;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+.scf-slot-title {
+	font-size: 24rpx;
+	font-weight: 700;
+	color: #243028;
+}
+.scf-slot-hint {
+	display: block;
+	font-size: 20rpx;
+	color: #8a958c;
+	line-height: 1.35;
+	min-height: 54rpx;
+	margin-bottom: 10rpx;
+}
+.scf-slot-box {
 	position: relative;
-	width: 200rpx;
+	width: 100%;
 	height: 200rpx;
 	border-radius: 16rpx;
+	border: 2rpx dashed #c5d0c8;
+	background: #f7faf8;
 	overflow: hidden;
+	box-sizing: border-box;
 }
-.scf-photo-img {
+.scf-slot-box--done {
+	border-style: solid;
+	border-color: #a8ddb8;
+}
+.scf-slot-img {
 	width: 100%;
 	height: 100%;
+}
+.scf-slot-placeholder {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 8rpx;
+}
+.scf-slot-emoji {
+	font-size: 40rpx;
+	line-height: 1.1;
+}
+.scf-slot-add-t {
+	margin-top: 10rpx;
+	font-size: 20rpx;
+	color: #18af38;
 }
 .scf-photo-del {
 	position: absolute;
@@ -1328,26 +1481,17 @@
 	background: rgba(0, 0, 0, 0.55);
 	color: #fff;
 	font-size: 32rpx;
+	z-index: 2;
 }
-.scf-photo-add {
-	width: 200rpx;
-	height: 200rpx;
-	border-radius: 16rpx;
-	border: 2rpx dashed #c5d0c8;
-	background: #f7faf8;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+.scf-slot-del {
+	border-radius: 0 0 0 12rpx;
 }
-.scf-photo-add-icon {
-	font-size: 48rpx;
-	line-height: 1;
-}
-.scf-photo-add-t {
-	margin-top: 8rpx;
-	font-size: 24rpx;
-	color: #18af38;
+.scf-clock-photo-foot {
+	display: block;
+	margin-top: 16rpx;
+	font-size: 22rpx;
+	color: #8a958c;
+	line-height: 1.5;
 }
 .scf-clock-note {
 	margin-top: 24rpx;
