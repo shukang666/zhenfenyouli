@@ -4,16 +4,28 @@
 		</u-navbar>
 		<view class="page-bg u-abso"></view>
 
-		<!-- 顶栏：随时督导 + 点位 + 督导员 -->
+		<!-- 顶栏：随时督导 + 先小区后点位 -->
 		<view class="header-card u-m-t-20">
-			<view class="header-row u-flex u-row-between u-col-center">
+			<view class="header-top u-flex u-row-between u-col-center u-m-b-8">
 				<view class="time-badge">随时督导</view>
-				<view class="header-point u-flex u-col-center" @click="openLocationPicker">
-					<u-icon name="map-fill" size="32" color="#18AF38" class="u-m-r-8"></u-icon>
-					<text class="point-text u-line-1">{{ locationLabel }}</text>
-					<u-icon name="arrow-down" size="24" color="#999" class="u-m-l-8"></u-icon>
-				</view>
 				<view class="supervisor-name u-line-1">{{ supervisorLabel }}</view>
+			</view>
+			<view class="select-row" @click="openCommunityPicker">
+				<text class="select-label">督导小区</text>
+				<view class="select-value u-flex u-col-center u-flex-1 u-row-right">
+					<text v-if="form.community_name" class="select-text u-line-1">{{ form.community_name }}</text>
+					<text v-else class="select-placeholder">请选择小区</text>
+					<u-icon name="arrow-right" size="24" color="#ccc" class="u-m-l-8"></u-icon>
+				</view>
+			</view>
+			<view class="select-row select-row-last" :class="{ 'select-row-disabled': !form.community_id }" @click="openPointPicker">
+				<text class="select-label">督导点位</text>
+				<view class="select-value u-flex u-col-center u-flex-1 u-row-right">
+					<u-icon name="map-fill" size="28" color="#18AF38" class="u-m-r-8"></u-icon>
+					<text v-if="form.point_name" class="select-text u-line-1">{{ form.point_name }}</text>
+					<text v-else class="select-placeholder">{{ form.community_id ? '请选择点位' : '请先选择小区' }}</text>
+					<u-icon name="arrow-right" size="24" color="#ccc" class="u-m-l-8"></u-icon>
+				</view>
 			</view>
 		</view>
 
@@ -28,7 +40,7 @@
 			<!-- 标准动作（展示） -->
 			<view class="card u-m-t-24">
 				<view class="section-title u-m-b-24">标准动作</view>
-				<view class="action-grid">
+				<view class="action-row u-flex u-row-between">
 					<view class="action-item" v-for="(item, idx) in standardActions" :key="idx">
 						<view class="action-icon u-flex u-col-center u-row-center">
 							<u-icon :name="item.icon" size="36" color="#18AF38"></u-icon>
@@ -230,17 +242,11 @@
 				communitySearchTimer: null,
 				pointList: [],
 				historyList: [],
-				pendingOpenPoint: false,
 			};
 		},
 		computed: {
 			communityNoMore() {
 				return this.communityPage >= this.communityLastPage;
-			},
-			locationLabel() {
-				if (this.form.point_name) return this.form.point_name;
-				if (this.form.community_name) return this.form.community_name + '（请选择点位）';
-				return '选择点位';
 			},
 			supervisorLabel() {
 				if (this.checkRole && this.checkRole.role_name) {
@@ -289,14 +295,17 @@
 					}
 				}).catch(() => {});
 			},
-			openLocationPicker() {
+			openPointPicker() {
 				if (!this.form.community_id) {
-					this.pendingOpenPoint = true;
-					this.openCommunityPicker();
+					uni.showToast({ title: '请先选择督导小区', icon: 'none' });
 					return;
 				}
 				if (!this.pointList.length) {
 					this.loadPointList(this.form.community_id, () => {
+						if (!this.pointList.length) {
+							uni.showToast({ title: '该小区暂无点位', icon: 'none' });
+							return;
+						}
 						this.showPoint = true;
 					});
 					return;
@@ -346,12 +355,7 @@
 				this.form.point_id = 0;
 				this.form.point_name = '';
 				this.showCommunityDropdown = false;
-				this.loadPointList(item.id, () => {
-					if (this.pendingOpenPoint) {
-						this.pendingOpenPoint = false;
-						this.showPoint = true;
-					}
-				});
+				this.loadPointList(item.id);
 			},
 			loadPointList(communityId, done) {
 				this.$u.api.get_community_cate_list({ community_id: communityId }).then(res => {
@@ -453,7 +457,7 @@
 				}
 				if (!this.form.point_id) {
 					uni.showToast({ title: '请选择督导点位', icon: 'none' });
-					this.openLocationPicker();
+					this.openPointPicker();
 					return;
 				}
 				if (!this.form.image) {
@@ -530,8 +534,8 @@
 	padding: 28rpx 32rpx;
 	box-shadow: 0 4rpx 24rpx rgba(24, 175, 56, 0.06);
 }
-.header-row {
-	gap: 12rpx;
+.header-top {
+	margin-bottom: 4rpx;
 }
 .time-badge {
 	flex-shrink: 0;
@@ -542,52 +546,76 @@
 	border-radius: 8rpx;
 	font-weight: 600;
 }
-.header-point {
+.supervisor-name {
 	flex: 1;
 	min-width: 0;
-	justify-content: center;
-}
-.point-text {
-	font-size: 26rpx;
-	color: #333;
-	max-width: 320rpx;
-}
-.supervisor-name {
-	flex-shrink: 0;
-	max-width: 180rpx;
+	margin-left: 16rpx;
 	font-size: 22rpx;
 	color: #666;
 	text-align: right;
+}
+.select-row {
+	display: flex;
+	align-items: center;
+	padding: 22rpx 0;
+	border-bottom: 1rpx solid #f0f0f0;
+}
+.select-row-last {
+	border-bottom: none;
+	padding-bottom: 4rpx;
+}
+.select-row-disabled .select-placeholder {
+	color: #ccc;
+}
+.select-label {
+	flex-shrink: 0;
+	width: 150rpx;
+	font-size: 28rpx;
+	color: #333;
+}
+.select-value {
+	min-width: 0;
+	justify-content: flex-end;
+}
+.select-text {
+	font-size: 28rpx;
+	color: #333;
+	max-width: 400rpx;
+	text-align: right;
+}
+.select-placeholder {
+	font-size: 28rpx;
+	color: #999;
+}
+.action-row {
+	width: 100%;
 }
 .section-title {
 	font-size: 30rpx;
 	font-weight: bold;
 	color: #333;
 }
-.action-grid {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-between;
-}
 .action-item {
-	width: 48%;
+	flex: 1;
+	min-width: 0;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	margin-bottom: 24rpx;
+	padding: 0 4rpx;
 }
 .action-icon {
-	width: 88rpx;
-	height: 88rpx;
+	width: 72rpx;
+	height: 72rpx;
 	border-radius: 50%;
 	background: #eef9f0;
-	margin-bottom: 12rpx;
+	margin-bottom: 10rpx;
 }
 .action-label {
-	font-size: 22rpx;
+	font-size: 20rpx;
 	color: #555;
 	text-align: center;
-	line-height: 1.4;
+	line-height: 1.35;
+	width: 100%;
 }
 .form-row {
 	padding: 24rpx 0;
