@@ -82,20 +82,39 @@
 			</view>
 			<view class="scf-point-grid">
 				<view
-					v-for="p in points"
-					:key="p.id"
-					class="scf-point-card"
-					hover-class="scf-card--press"
-					@tap="pickPointById(p.id)"
+					v-for="group in pointGroups"
+					:key="'g-' + group.key"
+					class="scf-point-card scf-point-card--cluster"
 				>
-					<image v-if="p.point_image" class="scf-point-photo" :src="p.point_image" mode="aspectFill"></image>
-					<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(p.cate_name)">
+					<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(group.cate_name)">
 						<text class="scf-cate-hero-kicker">垃圾分类</text>
-						<text class="scf-cate-hero-name">{{ p.cate_name }}</text>
+						<text class="scf-cate-hero-name">{{ group.cate_name }}</text>
+						<text class="scf-cate-hero-count" v-if="group.items.length > 1">{{ group.items.length }} 个点位</text>
 					</view>
-					<text class="scf-cate-desc-lines">{{ cateHintByName(p.cate_name) }}</text>
-					<text class="scf-point-name">{{ p.point_name }}</text>
-					<text class="scf-point-go">去打卡 ›</text>
+					<text class="scf-cate-desc-lines">{{ cateHintByName(group.cate_name) }}</text>
+					<view class="scf-cluster-list">
+						<view
+							class="scf-cluster-item"
+							v-for="p in group.items"
+							:key="p.id"
+							hover-class="scf-card--press"
+							@tap="pickPointById(p.id)"
+						>
+							<image
+								v-if="p.point_image"
+								class="scf-cluster-thumb"
+								:src="p.point_image"
+								mode="aspectFill"
+							></image>
+							<view v-else class="scf-cluster-thumb scf-cluster-thumb--empty">
+								<text class="scf-cluster-thumb-t">点位</text>
+							</view>
+							<view class="scf-cluster-item-body">
+								<text class="scf-cluster-item-name">{{ p.point_name }}</text>
+								<text class="scf-point-go">去打卡 ›</text>
+							</view>
+						</view>
+					</view>
 				</view>
 			</view>
 			<view class="scf-foot scf-foot--single" v-if="!points.length && !isCommunityHub">
@@ -371,6 +390,26 @@
 				const order = ['guide', 'survey', 'learn']
 				const i = order.indexOf(this.flowStep)
 				return i >= 0 ? i : 0
+			},
+			/** 同类型垃圾多个真分点合并展示 */
+			pointGroups() {
+				const list = this.points || []
+				const map = {}
+				const keys = []
+				list.forEach(p => {
+					const key = p.cate_id ? 'id-' + p.cate_id : 'n-' + (p.cate_name || '')
+					if (!map[key]) {
+						map[key] = {
+							key,
+							cate_id: p.cate_id,
+							cate_name: p.cate_name || '',
+							items: [],
+						}
+						keys.push(key)
+					}
+					map[key].items.push(p)
+				})
+				return keys.map(k => map[k])
 			},
 		},
 		onLoad(option) {
@@ -905,6 +944,58 @@
 	border-radius: 18rpx;
 	padding: 20rpx;
 	box-shadow: 0 8rpx 24rpx rgba(20, 40, 28, 0.08);
+}
+.scf-point-card--cluster {
+	padding-bottom: 12rpx;
+}
+.scf-cate-hero-count {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 22rpx;
+	opacity: 0.9;
+}
+.scf-cluster-list {
+	margin-top: 16rpx;
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
+}
+.scf-cluster-item {
+	display: flex;
+	align-items: center;
+	padding: 14rpx 16rpx;
+	border-radius: 14rpx;
+	background: #f5f8f6;
+}
+.scf-cluster-thumb {
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 12rpx;
+	flex-shrink: 0;
+	background: #e8eee9;
+}
+.scf-cluster-thumb--empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.scf-cluster-thumb-t {
+	font-size: 22rpx;
+	color: #8a958c;
+}
+.scf-cluster-item-body {
+	flex: 1;
+	min-width: 0;
+	margin-left: 16rpx;
+}
+.scf-cluster-item-name {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #243028;
+}
+.scf-cluster-item .scf-point-go {
+	margin-top: 8rpx;
 }
 .scf-point-card--preview {
 	margin-bottom: 12rpx;
