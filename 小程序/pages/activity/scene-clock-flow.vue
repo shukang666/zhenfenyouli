@@ -240,7 +240,11 @@
 				</view>
 
 				<view class="scf-slot-row">
-					<block v-for="(slot, sIdx) in clockPhotoSlotMeta" :key="slot.key">
+					<view
+						v-for="(slot, sIdx) in clockPhotoSlotMeta"
+						:key="slot.key"
+						class="scf-slot-wrap"
+					>
 						<view v-if="sIdx > 0" class="scf-slot-arrow">›</view>
 						<view class="scf-slot">
 							<view class="scf-slot-head">
@@ -271,7 +275,7 @@
 								>×</view>
 							</view>
 						</view>
-					</block>
+					</view>
 				</view>
 				<text class="scf-clock-photo-foot">{{ clockPhotoFootnote }}</text>
 
@@ -1483,6 +1487,12 @@
 	font-weight: 600;
 }
 .scf-slot-row {
+	display: flex;
+	align-items: flex-start;
+}
+.scf-slot-wrap {
+	flex: 1;
+	min-width: 0;
 	display: flex;
 	align-items: flex-start;
 }

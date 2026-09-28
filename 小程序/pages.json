@@ -299,11 +299,7 @@
 				{
 					"path": "scene-clock-flow",
 					"style": {
-						"navigationBarTitleText": "场景分类",
-						"componentPlaceholder": {
-							"u-button": "view",
-							"u-input": "view"
-						}
+						"navigationBarTitleText": "场景分类"
 					}
 				},
 				{
@@ -655,8 +651,20 @@
 			"pages": [{
 				"path": "dtsh",
 				"style": {
-					"navigationBarTitleText": "垃圾分类打卡",
-					"navigationStyle": "custom"
+					"navigationBarTitleText": "垃圾分类工作台",
+					"navigationStyle": "custom",
+					"componentPlaceholder": {
+						"u-navbar": "view",
+						"u-avatar": "view",
+						"u-icon": "view",
+						"u-button": "view",
+						"u-tabs": "view",
+						"u-empty": "view",
+						"u-tag": "view",
+						"u-gap": "view",
+						"page-guide": "view",
+						"new-user-guide": "view"
+					}
 				}
 			}, {
 				"path": "report",
