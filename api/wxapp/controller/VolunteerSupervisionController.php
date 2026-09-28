@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use api\wxapp\model\CommonModel;
 use think\facade\Db;
 
 /**
@@ -26,6 +27,11 @@ class VolunteerSupervisionController extends AuthController
         $config = cmf_get_option('set_config');
         $rewardPoint = max(0, intval($config['supervision_point'] ?? 100));
 
+        if (!empty($record) && !empty($record['image'])) {
+            $record['image_urls'] = CommonModel::getArrImageFullUrl($record['image']);
+            $record['image']      = implode(',', $record['image_urls']);
+        }
+
         $this->success('获取成功', [
             'today_signed' => !empty($record),
             'record'       => $record ?: null,
@@ -46,7 +52,8 @@ class VolunteerSupervisionController extends AuthController
             ->paginate(15)
             ->each(function ($item) {
                 if (!empty($item['image'])) {
-                    $item['image'] = cmf_get_asset_url($item['image']);
+                    $item['image_urls'] = CommonModel::getArrImageFullUrl($item['image']);
+                    $item['image']      = implode(',', $item['image_urls']);
                 }
                 return $item;
             });
@@ -66,14 +73,19 @@ class VolunteerSupervisionController extends AuthController
         $communityName = trim($this->request->param('community_name', ''));
         $pointId       = intval($this->request->param('point_id', 0));
         $pointName     = trim($this->request->param('point_name', ''));
-        $image         = trim($this->request->param('image', ''));
+        $imageParam    = $this->request->param('image', '');
+        $image         = CommonModel::getStringImageUrl($imageParam);
         $content       = trim($this->request->param('content', ''));
 
         if (empty($communityId)) {
             $this->error('请选择督导小区');
         }
-        if (empty($image)) {
+        if ($image === '') {
             $this->error('请上传督导照片');
+        }
+        $imageCount = count(array_filter(explode(',', $image)));
+        if ($imageCount > 9) {
+            $this->error('现场照片最多 9 张');
         }
         if (empty($content)) {
             $this->error('请填写督导内容');

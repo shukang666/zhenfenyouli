@@ -48,9 +48,12 @@
                 <td>{$vo.point_real_name|default=$vo.point_name|default='--'}</td>
                 <td>
                     <notempty name="$vo.image">
-                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image)}');">
-                            <img src="{:cmf_get_image_preview_url($vo.image)}" style="width:60px;height:60px;border-radius:4px;">
-                        </a>
+                        <php>$__vs_imgs = array_filter(explode(',', $vo['image']));</php>
+                        <foreach name="__vs_imgs" item="vs_img">
+                            <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vs_img)}');" style="display:inline-block;margin:2px;">
+                                <img src="{:cmf_get_image_preview_url($vs_img)}" style="width:60px;height:60px;border-radius:4px;object-fit:cover;">
+                            </a>
+                        </foreach>
                     </notempty>
                 </td>
                 <td style="max-width:200px;word-break:break-all;">{$vo.content|default='--'}</td>
