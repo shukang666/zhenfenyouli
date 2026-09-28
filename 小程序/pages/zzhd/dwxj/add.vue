@@ -2,7 +2,10 @@
 	<view class="add-page" v-if="!setting.app_test">
 		<view class="add-hero">
 			<text class="add-hero-title">{{ pageTitle }}</text>
-			<text class="add-hero-sub">选点位 · 写说明 · 拍齐三张照片</text>
+			<text class="add-hero-sub">{{ pageSubTitle }}</text>
+			<view class="add-tip-bar">
+				<text class="add-tip-text">照片是证明您已到场工作的留证，请先完成现场巡检/督导，再填写记录。</text>
+			</view>
 			<view class="add-steps u-flex u-row-between">
 				<view class="add-step" v-for="(s, i) in stepLabels" :key="i">
 					<view class="add-step-dot">{{ i + 1 }}</view>
@@ -15,18 +18,18 @@
 			<u-form :model="form" ref="uForm" :error-type="['toast']">
 				<view class="add-card">
 					<view class="add-card-head">
-						<text class="add-card-title">基本信息</text>
+						<text class="add-card-title">工作记录</text>
 					</view>
-					<u-form-item label="上报点位" prop="cate_name" label-width="160" :border-bottom="true">
-						<u-input v-model="form.cate_name" placeholder="点击选择点位" type="select" @click="cate_show = true" />
+					<u-form-item label="巡检点位" prop="cate_name" label-width="160" :border-bottom="true">
+						<u-input v-model="form.cate_name" placeholder="选择本次工作的点位" type="select" @click="cate_show = true" />
 					</u-form-item>
-					<u-form-item label="上报内容" prop="content" label-width="160" label-position="top" :border-bottom="false">
+					<u-form-item label="工作情况" prop="content" label-width="160" label-position="top" :border-bottom="false">
 						<u-input
 							v-model="form.content"
 							type="textarea"
 							height="200"
 							maxlength="-1"
-							placeholder="请描述本次巡检情况，如桶况、引导情况等"
+							:placeholder="contentPlaceholder"
 						/>
 					</u-form-item>
 				</view>
@@ -34,8 +37,8 @@
 
 			<view class="add-card add-photo-card">
 				<view class="add-card-head">
-					<text class="add-card-title">现场三照</text>
-					<text class="add-card-sub">点击添加，拍后可点图放大</text>
+					<text class="add-card-title">现场留证</text>
+					<text class="add-card-sub">补充图片，证明您已完成上述工作（可点图放大）</text>
 				</view>
 				<view class="photo-row u-flex u-row-between">
 					<view class="photo-col" v-for="sec in photoSections" :key="sec.key">
@@ -48,14 +51,10 @@
 								@click.stop="previewPhotos(sec.key)"
 							></image>
 							<view v-else class="photo-slot-empty">
-								<u-icon name="camera-fill" size="44" color="#18AF38"></u-icon>
-								<text class="photo-slot-add">添加</text>
+								<u-icon name="plus" size="40" color="#18AF38"></u-icon>
+								<text class="photo-slot-add">留证</text>
 							</view>
-							<view
-								v-if="form[sec.key]"
-								class="photo-del"
-								@click.stop="clearPhoto(sec.key)"
-							>
+							<view v-if="form[sec.key]" class="photo-del" @click.stop="clearPhoto(sec.key)">
 								<u-icon name="close" size="24" color="#fff"></u-icon>
 							</view>
 						</view>
@@ -81,7 +80,7 @@
 				<view class="u-text-center">
 					<image src="https://admin.circular-economy.cn/static/images/wenxintishi.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
 					<view class="u-m-t-30">
-						<view class="u-m-b-30">请在倒计时结束后打卡</view>
+						<view class="u-m-b-30">请在倒计时结束后再提交记录</view>
 						<u-count-down
 							:timestamp="remaining_seconds"
 							:show-border="true"
@@ -101,8 +100,8 @@
 		</u-mask>
 
 		<view class="add-footer">
-			<view class="add-submit-btn" hover-class="add-submit-btn--press" @click="submit">确认提交</view>
-			<view class="add-record-link" @click="$u.route('/pages/zzhd/dwxj/record?type=' + form.type)">发布记录</view>
+			<view class="add-submit-btn" hover-class="add-submit-btn--press" @click="submit">提交工作记录</view>
+			<view class="add-record-link" @click="$u.route('/pages/zzhd/dwxj/record?type=' + form.type)">历史记录</view>
 		</view>
 	</view>
 </template>
@@ -122,7 +121,6 @@
 					image_two: '',
 					image_three: '',
 				},
-				/** 列表展示用完整 URL，提交仍用 form 内 filepath */
 				photoShowUrl: {
 					image_one: '',
 					image_two: '',
@@ -131,12 +129,12 @@
 				rules: {
 					content: [{
 						required: true,
-						message: '请输入上报内容',
+						message: '请填写工作情况',
 						trigger: ['change', 'blur'],
 					}],
 					cate_name: [{
 						required: true,
-						message: '请选择点位',
+						message: '请选择巡检点位',
 						trigger: ['change', 'blur'],
 					}],
 				},
@@ -146,17 +144,27 @@
 				tipShow: false,
 				point: 0,
 				remaining_seconds: 0,
-				stepLabels: ['选点位', '写说明', '拍三照'],
+				stepLabels: ['选点位', '写记录', '留证'],
 				photoSections: [
-					{ key: 'image_one', title: '点位照片' },
-					{ key: 'image_two', title: '投放指南' },
-					{ key: 'image_three', title: '垃圾桶照片' },
+					{ key: 'image_one', title: '点位环境' },
+					{ key: 'image_two', title: '分类指引' },
+					{ key: 'image_three', title: '桶位情况' },
 				],
 			}
 		},
 		computed: {
 			pageTitle() {
-				return String(this.form.type) === '4' ? '桶边督导上报' : '点位巡检上报'
+				return String(this.form.type) === '4' ? '桶边督导记录' : '巡检工作记录'
+			},
+			pageSubTitle() {
+				return String(this.form.type) === '4'
+					? '先在桶边完成督导，再在此登记'
+					: '先在现场完成巡检，再在此登记'
+			},
+			contentPlaceholder() {
+				return String(this.form.type) === '4'
+					? '请写本次督导做了什么：引导了几位居民、桶况如何、有无异常等'
+					: '请写本次巡检做了什么：查看了哪些桶、有无错投、是否做了引导等'
 			},
 		},
 		onLoad(option) {
@@ -173,8 +181,7 @@
 				const path = this.form[key]
 				if (!path) return ''
 				if (/^https?:\/\//i.test(path)) return path
-				const base = this.imgUrl || ''
-				return base + path
+				return (this.imgUrl || '') + path
 			},
 			onPhotoSlotTap(key) {
 				if (this.form[key]) {
@@ -236,10 +243,9 @@
 				const keys = ['image_one', 'image_two', 'image_three']
 				const urls = keys.filter(k => this.form[k]).map(k => this.photoPreviewUrl(k))
 				if (!urls.length) return
-				const current = this.photoPreviewUrl(currentKey)
 				uni.previewImage({
 					urls,
-					current: current || urls[0],
+					current: this.photoPreviewUrl(currentKey) || urls[0],
 				})
 			},
 			confirm(e) {
@@ -286,7 +292,7 @@
 	padding-bottom: calc(220rpx + env(safe-area-inset-bottom));
 }
 .add-hero {
-	padding: 32rpx 32rpx 40rpx;
+	padding: 32rpx 32rpx 36rpx;
 	background: linear-gradient(160deg, #2fb74c 0%, #1a9a3e 50%, #d8eedc 100%);
 }
 .add-hero-title {
@@ -298,13 +304,25 @@
 .add-hero-sub {
 	display: block;
 	margin-top: 10rpx;
-	font-size: 26rpx;
-	color: rgba(255, 255, 255, 0.9);
+	font-size: 28rpx;
+	color: rgba(255, 255, 255, 0.95);
+	line-height: 1.45;
+}
+.add-tip-bar {
+	margin-top: 20rpx;
+	padding: 16rpx 20rpx;
+	background: rgba(255, 255, 255, 0.25);
+	border-radius: 12rpx;
+}
+.add-tip-text {
+	font-size: 24rpx;
+	color: #fff;
+	line-height: 1.55;
 }
 .add-steps {
-	margin-top: 28rpx;
+	margin-top: 20rpx;
 	padding: 20rpx 16rpx;
-	background: rgba(255, 255, 255, 0.22);
+	background: rgba(255, 255, 255, 0.2);
 	border-radius: 16rpx;
 }
 .add-step {
@@ -330,7 +348,7 @@
 	color: #fff;
 }
 .add-body {
-	margin-top: -24rpx;
+	margin-top: -20rpx;
 	padding: 0 24rpx;
 	position: relative;
 	z-index: 2;
@@ -357,6 +375,7 @@
 	margin-top: 6rpx;
 	font-size: 24rpx;
 	color: #9aa59d;
+	line-height: 1.45;
 }
 .add-photo-card .add-card-head {
 	margin-bottom: 20rpx;

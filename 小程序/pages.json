@@ -690,7 +690,7 @@
 		}, {
 			"path": "volunteer-sign",
 			"style": {
-				"navigationBarTitleText": "桶边督导",
+				"navigationBarTitleText": "志愿督导签到",
 				"navigationStyle": "custom"
 			}
 		}, {

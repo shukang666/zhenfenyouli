@@ -78,9 +78,9 @@
 						>异常</view>
 					</view>
 					<view class="field-hint" v-if="form.facility_status === 'abnormal'">
-						设施异常可
-						<text class="link-text" @click="goProblemReport">前往问题反馈</text>
-						上报
+						如需社区协助，可
+						<text class="link-text" @click="goProblemReport">到问题反馈</text>
+						说一声
 					</view>
 				</view>
 
@@ -98,30 +98,14 @@
 				</view>
 
 				<view class="form-row">
-					<view class="u-flex u-row-between u-col-center u-m-b-16">
-						<text class="form-label">现场照片</text>
-						<text class="photo-count-hint">{{ form.images.length }}/{{ maxSceneImages }}</text>
-					</view>
-					<view class="photo-grid">
-						<view
-							v-for="(url, imgIdx) in form.images"
-							:key="'scene_' + imgIdx"
-							class="photo-item"
-						>
-							<image class="photo-item-img" :src="url" mode="aspectFill" @click="previewSceneImages(imgIdx)"></image>
-							<view class="photo-item-del" @click.stop="removeSceneImage(imgIdx)">×</view>
+					<text class="form-label u-m-b-16">现场照片</text>
+					<view class="upload-area" @click="chooseImage">
+						<view v-if="!form.image" class="upload-placeholder">
+							<u-icon name="camera" size="56" color="#ccc"></u-icon>
+							<view class="u-m-t-10 u-font-24 u-type-info">点击拍照或选择图片</view>
 						</view>
-						<view
-							v-if="form.images.length < maxSceneImages"
-							class="photo-add"
-							hover-class="none"
-							@click="chooseSceneImages"
-						>
-							<u-icon name="camera" size="48" color="#ccc"></u-icon>
-							<text class="photo-add-t">添加</text>
-						</view>
+						<image v-else :src="form.image" mode="aspectFill" class="upload-image"></image>
 					</view>
-					<text class="field-hint">可拍桶边、设施等多张，最多 {{ maxSceneImages }} 张</text>
 				</view>
 			</view>
 
@@ -198,13 +182,12 @@
 				todayRecord: null,
 				rewardPoint: 100,
 				checkRole: null,
-				maxSceneImages: 9,
 				form: {
 					community_id: 0,
 					community_name: '',
 					point_id: 0,
 					point_name: '',
-					images: [],
+					image: '',
 					correct_count: 0,
 					bin_purity: 'good',
 					facility_status: 'normal',
@@ -244,7 +227,7 @@
 				return name ? '督导员' + name : '督导员';
 			},
 			canSubmit() {
-				return this.form.community_id && this.form.point_id && this.form.images.length > 0;
+				return this.form.community_id && this.form.point_id && this.form.image;
 			},
 			isVolunteerApproved() {
 				return this.checkRole && this.checkRole.is_approved;
@@ -369,10 +352,10 @@
 				this.form.facility_status = val;
 				if (val === 'abnormal') {
 					uni.showModal({
-						title: '设施异常',
-						content: '可前往「问题反馈」上报设施问题，是否现在去反馈？',
-						confirmText: '去反馈',
-						cancelText: '稍后',
+						title: '需要跟社区反映一下吗',
+						content: '设施若不太顺手，可以在「问题反馈」里简单说明，方便社区跟进。现在方便去填吗？',
+						confirmText: '好的，去看看',
+						cancelText: '先不了',
 						success: (res) => {
 							if (res.confirm) this.goProblemReport();
 						},
@@ -384,21 +367,16 @@
 				const approved = this.isVolunteerApproved ? 1 : 0;
 				this.$u.route(`/pages/dtsh/report?location_type=1&can_submit=${approved}`);
 			},
-			chooseSceneImages() {
-				const remain = this.maxSceneImages - this.form.images.length;
-				if (remain <= 0) {
-					uni.showToast({ title: '最多 ' + this.maxSceneImages + ' 张', icon: 'none' });
-					return;
-				}
+			chooseImage() {
 				uni.chooseImage({
-					count: remain,
+					count: 1,
 					sourceType: ['camera', 'album'],
 					success: (res) => {
-						(res.tempFilePaths || []).forEach((path) => this.uploadSceneImage(path));
+						this.uploadImage(res.tempFilePaths[0]);
 					},
 				});
 			},
-			uploadSceneImage(filePath) {
+			uploadImage(filePath) {
 				uni.showLoading({ title: '上传中...' });
 				uni.uploadFile({
 					url: this.uploadUrl,
@@ -406,10 +384,12 @@
 					name: 'file',
 					formData: { filetype: 'image' },
 					success: (uploadRes) => {
+						uni.hideLoading();
 						try {
 							const data = JSON.parse(uploadRes.data);
-							if (data.code == 1 && data.data && data.data.url) {
-								this.form.images.push(data.data.url);
+							if (data.code == 1) {
+								this.form.image = data.data.url;
+								uni.showToast({ title: '上传成功', icon: 'success' });
 							} else {
 								uni.showToast({ title: data.msg || '上传失败', icon: 'none' });
 							}
@@ -417,18 +397,10 @@
 							uni.showToast({ title: '上传失败', icon: 'none' });
 						}
 					},
-					fail: () => uni.showToast({ title: '上传失败', icon: 'none' }),
-					complete: () => uni.hideLoading(),
-				});
-			},
-			removeSceneImage(idx) {
-				this.form.images.splice(idx, 1);
-			},
-			previewSceneImages(index) {
-				if (!this.form.images.length) return;
-				uni.previewImage({
-					urls: this.form.images,
-					current: this.form.images[index],
+					fail: () => {
+						uni.hideLoading();
+						uni.showToast({ title: '上传失败', icon: 'none' });
+					},
 				});
 			},
 			buildContent() {
@@ -442,7 +414,7 @@
 					`桶位卫生：${hygieneMap[this.form.bin_hygiene] || this.form.bin_hygiene}`,
 				];
 				if (this.form.facility_status === 'abnormal') {
-					lines.push('（设施异常，建议同步问题反馈）');
+					lines.push('（如有需要，可在问题反馈中跟社区说一声）');
 				}
 				return lines.join('\n');
 			},
@@ -458,7 +430,7 @@
 					this.openPointPicker();
 					return;
 				}
-				if (!this.form.images.length) {
+				if (!this.form.image) {
 					uni.showToast({ title: '请上传现场照片', icon: 'none' });
 					return;
 				}
@@ -468,7 +440,7 @@
 					community_name: this.form.community_name,
 					point_id: this.form.point_id,
 					point_name: this.form.point_name,
-					image: this.form.images,
+					image: this.form.image,
 					content: this.buildContent(),
 				}).then(res => {
 					uni.hideLoading();
@@ -493,7 +465,7 @@
 					community_name: '',
 					point_id: 0,
 					point_name: '',
-					images: [],
+					image: '',
 					correct_count: 0,
 					bin_purity: 'good',
 					facility_status: 'normal',
@@ -649,53 +621,25 @@
 	color: #18af38;
 	text-decoration: underline;
 }
-.photo-count-hint {
-	font-size: 24rpx;
-	color: #999;
-}
-.photo-grid {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 16rpx;
-}
-.photo-item {
-	position: relative;
-	width: 200rpx;
-	height: 200rpx;
+.upload-area {
+	width: 100%;
+	height: 280rpx;
+	background: #f5f5f5;
 	border-radius: 12rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2rpx dashed #ddd;
 	overflow: hidden;
 }
-.photo-item-img {
-	width: 100%;
-	height: 100%;
-}
-.photo-item-del {
-	position: absolute;
-	top: 0;
-	right: 0;
-	width: 44rpx;
-	height: 44rpx;
-	line-height: 40rpx;
-	text-align: center;
-	background: rgba(0, 0, 0, 0.55);
-	color: #fff;
-	font-size: 32rpx;
-}
-.photo-add {
-	width: 200rpx;
-	height: 200rpx;
-	border-radius: 12rpx;
-	border: 2rpx dashed #ddd;
-	background: #f5f5f5;
+.upload-placeholder {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
 }
-.photo-add-t {
-	margin-top: 8rpx;
-	font-size: 24rpx;
-	color: #18af38;
+.upload-image {
+	width: 100%;
+	height: 280rpx;
 }
 .report-banner {
 	margin-top: 24rpx;
