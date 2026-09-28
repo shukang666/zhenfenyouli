@@ -54,7 +54,7 @@ export default {
 			this.careGesture.startTime = Date.now()
 		},
 
-		// 触摸移动
+		// 触摸移动（节流 setData，避免滚动时每一帧都触发渲染导致卡顿）
 		onCareTouchMove(e) {
 			if (!this.careGesture.isInTop) return
 
@@ -69,11 +69,19 @@ export default {
 			}
 			// 只在下拉时触发
 			if (diff > 10) {
+				const nextHeight = Math.min(diff * 0.5, 200)
+				const nextOpacity = Math.min(nextHeight / 100, 1)
+				if (
+					Math.abs(nextHeight - this.carePullHeight) < 3 &&
+					this.showCareHint
+				) {
+					return
+				}
 				this.careGesture.pullDistance = diff
-				this.carePullHeight = Math.min(diff * 0.5, 200)
-				this.careHintOpacity = Math.min(this.carePullHeight / 100, 1)
-				this.showCareHint = true
-			} else {
+				this.carePullHeight = nextHeight
+				this.careHintOpacity = nextOpacity
+				if (!this.showCareHint) this.showCareHint = true
+			} else if (this.showCareHint || this.carePullHeight > 0) {
 				this.resetCarePull()
 			}
 		},
@@ -92,10 +100,15 @@ export default {
 
 		// 重置下拉状态
 		resetCarePull() {
+			if (!this.showCareHint && this.carePullHeight === 0 && this.careHintOpacity === 0) {
+				return
+			}
 			this.carePullHeight = 0
 			this.careHintOpacity = 0
 			this.careGesture.pullDistance = 0
-			setTimeout(() => {
+			if (this._careHideTimer) clearTimeout(this._careHideTimer)
+			this._careHideTimer = setTimeout(() => {
+				this._careHideTimer = null
 				this.showCareHint = false
 			}, 200)
 		},

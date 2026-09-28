@@ -239,6 +239,7 @@
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	import careGesture from '@/common/care-gesture.mixin.js'
+	import { shouldTabRefresh } from '@/common/tab-refresh.js'
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 	export default {
 	components: { SkeletonScreen },
@@ -256,8 +257,12 @@
 			this.updateTabBarSelected(4)
 			if (checkCommunity(this)) return
 			if (this.isLogin) {
-				this.getUserInfo()
-				this.get_new_badge_list()
+				if (shouldTabRefresh('user-profile')) {
+					this.getUserInfo()
+					this.get_new_badge_list()
+				} else {
+					this.isLoading = false
+				}
 			} else {
 				this.isLoading = false
 			}

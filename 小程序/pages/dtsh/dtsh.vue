@@ -80,7 +80,7 @@
 					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #a8e6cf 0%, #38c172 100%);">
 						<u-icon name="clock" size="44" color="#fff"></u-icon>
 					</view>
-					<text class="u-font-24 u-m-t-8">志愿督导</text>
+					<text class="u-font-24 u-m-t-8">高峰督导</text>
 				</view>
 				<view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerMonitor">
 					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #90caf9 0%, #1976d2 100%);">
@@ -92,7 +92,7 @@
 					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">
 						<u-icon name="eye" size="44" color="#fff"></u-icon>
 					</view>
-					<text class="u-font-24 u-m-t-8">督导巡查</text>
+					<text class="u-font-24 u-m-t-8">点位巡查</text>
 				</view>
 				<!-- <view class="vol-grid-item u-flex u-col-center u-row-center u-flex-col" @click="goVolunteerReport(2)">
 					<view class="vol-grid-icon u-flex u-col-center u-row-center" style="background: linear-gradient(135deg, #ffd3a5 0%, #fd794f 100%);">

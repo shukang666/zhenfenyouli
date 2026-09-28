@@ -94,7 +94,7 @@
           </view>
           <view class="fb-dtsh-spotlight-cta">
             <text class="fb-dtsh-spotlight-cta-label">进入工作台</text>
-            <text class="fb-dtsh-spotlight-cta-arrow">›</text>
+            <!-- <text class="fb-dtsh-spotlight-cta-arrow">›</text> -->
           </view>
         </view>
       </view>
@@ -212,7 +212,7 @@
           </view>
           <view class="fb-qxl-spotlight-cta">
             <text class="fb-qxl-spotlight-cta-label">进入专题</text>
-            <text class="fb-qxl-spotlight-cta-arrow">›</text>
+            <!-- <text class="fb-qxl-spotlight-cta-arrow">›</text> -->
           </view>
         </view>
       </view>

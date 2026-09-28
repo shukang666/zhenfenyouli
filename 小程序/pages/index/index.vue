@@ -101,7 +101,7 @@
 						hover-class="press-scale" :hover-stay-time="80"
 						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
 						<view class="active-card-cover">
-							<u-image width="500" height="260" :src="item.thumb" border-radius="20rpx 20rpx 0 0"></u-image>
+							<u-image width="500" height="260" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
 						</view>
 						<view class="active-card-body">
 							<view class="active-card-title u-line-2">{{item.name}}</view>
@@ -168,7 +168,7 @@
 							hover-class="press-scale" :hover-stay-time="80"
 							@click="goShowcaseDetail(item.id)">
 							<view class="showcase-card__cover">
-								<u-image width="280" height="200" :src="item.cover" border-radius="20rpx" mode="aspectFill"></u-image>
+								<u-image width="280" height="200" :src="item.cover" :lazy-load="true" border-radius="20rpx" mode="aspectFill"></u-image>
 								<view class="showcase-card__badge" v-if="item.photo_count > 1">
 									<u-icon name="photo" size="18" color="#fff"></u-icon>
 									<text>{{ item.photo_count }}</text>
@@ -249,6 +249,7 @@
 import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 import NewUserGuide from '@/components/new-user-guide/new-user-guide.vue'
 import careGesture from '@/common/care-gesture.mixin.js'
+import { shouldTabRefresh } from '@/common/tab-refresh.js'
 export default {
 	components: {
 		SkeletonScreen,
@@ -463,8 +464,8 @@ export default {
 			uni.$on('pause-new-user-guide', this.pauseGuideOverlay)
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(0)
-			// 已登录则刷新用户成长数据
-			if (this.isLogin) {
+			// 已登录则刷新用户成长数据（节流，避免 Tab 切换频繁请求）
+			if (this.isLogin && shouldTabRefresh('index-user-growth')) {
 				this.getUserInfoForGrowth()
 				this.getSignStatus()
 			}

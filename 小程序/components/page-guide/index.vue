@@ -303,6 +303,12 @@ export default {
 			const dy = t.clientY - this._sy
 			if (Math.abs(dx) > 5 || Math.abs(dy) > 5) this._moved = true
 			const next = this.clampRB(this._ox - dx, this._oy - dy)
+			if (
+				Math.abs(next.r - this.mascotRight) < 2 &&
+				Math.abs(next.b - this.mascotBottom) < 2
+			) {
+				return
+			}
 			this.mascotRight = next.r
 			this.mascotBottom = next.b
 		},
@@ -529,7 +535,6 @@ export default {
 	position: relative;
 	width: 112rpx;
 	height: 112rpx;
-	animation: pgBreathe 2.6s ease-in-out infinite;
 }
 .pg-body {
 	position: relative;

@@ -5,67 +5,50 @@
         },
         onLaunch: function() {
             // this.$u.wx.wxOauth()
+            this.findSetting(true)
             // #ifdef MP-WEIXIN
-            setTimeout(() => {
-                const tabs = [
-                    '/pages/low_carbon/low_carbon',
-                    '/pages/health/health',
-                    '/pages/mall/mall',
-                    '/pages/user/index'
-                ]
-                tabs.forEach((url) => {
-                    try {
-                        if (typeof uni.preloadPage === 'function') {
-                            uni.preloadPage({ url })
-                        }
-                    } catch (e) {}
-                })
-            }, 200)
-            // #endif
-        },
-        onShow: function(options) {
-            this.findSetting()
-            const path = (options && options.path) || ''
-            if (/details-new/.test(path)) {
-                uni.$emit('pause-new-user-guide')
-            }
-            // #ifdef MP-WEIXIN
-            //小程序更新
+            // 小程序更新（仅注册一次，避免每次 onShow 重复绑定导致卡顿与重复弹窗）
             if (uni.getUpdateManager) {
-                const updateManager = uni.getUpdateManager();
-                updateManager.onCheckForUpdate(function(res) {
-                    // 请求完新版本信息的回调
-                    console.log(res.hasUpdate);
-                });
-                updateManager.onUpdateReady(function(res) {
+                const updateManager = uni.getUpdateManager()
+                updateManager.onCheckForUpdate(function() {})
+                updateManager.onUpdateReady(function() {
                     uni.showModal({
                         title: '更新提示',
                         content: '新版本已经准备好，是否重启应用？',
                         success(res) {
                             if (res.confirm) {
-                                // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
-                                updateManager.applyUpdate();
+                                updateManager.applyUpdate()
                             }
                         }
-                    });
-                });
-                updateManager.onUpdateFailed(function(res) {
-                    // 新的版本下载失败
+                    })
+                })
+                updateManager.onUpdateFailed(function() {
                     uni.showModal({
                         title: '已经有新版本了哟~',
                         content: '新版本已经上线啦~，请您删除当前小程序，重新搜索打开哟~',
                         showCancel: false
-                    });
-                });
+                    })
+                })
             }
             // #endif
         },
+        onShow: function(options) {
+            this.findSetting(false)
+            const path = (options && options.path) || ''
+            if (/details-new/.test(path)) {
+                uni.$emit('pause-new-user-guide')
+            }
+        },
         onHide: function() {},
         methods: {
-            findSetting() {
+            findSetting(force) {
+                const now = Date.now()
+                const last = this._settingFetchedAt || 0
+                if (!force && last && now - last < 120000) return
+                this._settingFetchedAt = now
                 this.$u.api.findSetting().then(res => {
                     this.$u.vuex('setting', res.data)
-                })
+                }).catch(() => {})
             },
         }
     }
