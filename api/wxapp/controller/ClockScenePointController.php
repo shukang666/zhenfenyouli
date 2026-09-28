@@ -31,7 +31,8 @@ class ClockScenePointController extends AuthController
             ->select()
             ->toArray();
         foreach ($list as &$item) {
-            $img = trim((string)($item['point_image'] ?? ''));
+            $img = $this->normalizePointImageStored(trim((string)($item['point_image'] ?? '')));
+            $item['point_image_raw'] = $img;
             $item['point_image'] = $img === '' ? '' : cmf_get_asset_url($img);
         }
         unset($item);
@@ -57,9 +58,9 @@ class ClockScenePointController extends AuthController
         if (!$cate) {
             $this->error('请选择垃圾种类');
         }
-        $pointImage = trim((string)$this->request->param('point_image', ''));
+        $pointImage = $this->normalizePointImageStored(trim((string)$this->request->param('point_image', '')));
         if ($pointImage !== '' && mb_strlen($pointImage) > 255) {
-            $this->error('点位照片路径无效');
+            $this->error('点位照片路径过长，请重新上传');
         }
         $id = intval($this->request->param('id', 0));
         $now = time();
@@ -156,5 +157,23 @@ class ClockScenePointController extends AuthController
             ->field('id,name')
             ->find();
         return $row ?: null;
+    }
+
+    /** 库内只存相对路径；兼容误存完整 URL */
+    private function normalizePointImageStored(string $raw): string
+    {
+        if ($raw === '') {
+            return '';
+        }
+        if (stripos($raw, 'http://') === 0 || stripos($raw, 'https://') === 0) {
+            $path = preg_replace('#^https?://[^/]+/#i', '', $raw);
+            $path = preg_replace('/\?.*$/', '', $path);
+            $path = ltrim($path, '/');
+            if (strpos($path, 'upload/') === 0) {
+                $path = substr($path, 7);
+            }
+            return $path;
+        }
+        return ltrim($raw, '/');
     }
 }

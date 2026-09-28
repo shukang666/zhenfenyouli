@@ -1,24 +1,8 @@
 <template>
 	<view class="dk-hub dk-hub--page" v-if="!setting.app_test">
 		<view class="dk-banner">
-			<text class="dk-banner-title">今天是否践行真分</text>
-		</view>
-
-		<view class="dk-stats" v-if="isLogin">
-			<view class="dk-stat">
-				<text class="dk-stat-num">{{ userInfo.point || 0 }}</text>
-				<text class="dk-stat-lab">我的积分</text>
-			</view>
-			<view class="dk-stat-line"></view>
-			<view class="dk-stat">
-				<text class="dk-stat-num">{{ streak }}</text>
-				<text class="dk-stat-lab">连续打卡天数</text>
-			</view>
-			<view class="dk-stat-line"></view>
-			<view class="dk-stat">
-				<text class="dk-stat-num">{{ remainText }}</text>
-				<text class="dk-stat-lab">距环保达人</text>
-			</view>
+			<text class="dk-banner-title">已经打卡 {{ clockTotalDays }} 天</text>
+			<text class="dk-banner-sub" v-if="!isLogin">登录后同步您的打卡天数</text>
 		</view>
 
 		<view class="dk-supervisor-banner" v-if="showSupervisorBanner">
@@ -173,13 +157,10 @@
 			sceneIconSize() {
 				return 76
 			},
-			streak() {
+			clockTotalDays() {
 				const u = this.userInfo || {}
-				return u.clock_days || u.continuous_days || u.clock_count || 0
-			},
-			remainText() {
-				const n = (this.userInfo && this.userInfo.remaining_count) || 0
-				return n > 0 ? n + '天' : '已达成'
+				const n = Number(u.clock_total_days ?? u.junk_clock_days ?? 0)
+				return n >= 0 ? n : 0
 			},
 			/** 已通过分类测验，展示打卡入口 */
 			showSceneHub() {
@@ -205,11 +186,8 @@
 		onShow() {
 			this.supervisorBannerLocalHide = isSupervisorBannerHidden()
 			this.introAcknowledged = isIntroAcknowledged()
-			if (!this.isLogin) {
-				this.refreshUser()
-				return
-			}
 			this.refreshUser().then(() => {
+				if (!this.isLogin) return
 				if (this.showLearnHub) {
 					this.loadIntroSections()
 				}
@@ -334,11 +312,17 @@
 }
 .dk-banner-title {
 	display: block;
-	font-size: 56rpx;
+	font-size: 48rpx;
 	font-weight: 800;
 	color: #fff;
-	letter-spacing: 8rpx;
+	letter-spacing: 4rpx;
 	text-shadow: 0 4rpx 16rpx rgba(12, 90, 36, 0.22);
+}
+.dk-banner-sub {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 24rpx;
+	color: rgba(255, 255, 255, 0.88);
 }
 .dk-hero {
 	padding: 36rpx 32rpx 32rpx;

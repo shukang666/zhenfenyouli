@@ -94,6 +94,8 @@ class UserController extends AuthController
         $user['clock_count'] = $clock_count ?? 0;
         $user['remaining_count'] = $user['continuous_check'] - $user['clock_count'];
         $user['junk_clock_days'] = $this->countJunkClockDistinctDays((int)$user['id']);
+        /** 垃圾打卡累计自然日（不必连续），践行真分 hub 顶栏展示 */
+        $user['clock_total_days'] = (int)$user['junk_clock_days'];
         $user['supervisor_invite'] = $this->buildSupervisorInvite((int)$user['id']);
 
         if (!empty($user['avatar'])) {

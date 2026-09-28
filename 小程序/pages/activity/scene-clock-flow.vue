@@ -468,23 +468,18 @@
 				this.setupRows.push({ point_name: '', cate_index: 0, point_image: '', point_image_url: '' })
 			},
 			chooseSetupPhoto(idx) {
-				this.pickAndUploadPointPhoto(path => {
-					this.setupRows[idx].point_image = path
-					this.setupRows[idx].point_image_url = this.toDisplayUrl(path)
+				this.pickAndUploadPointPhoto((savePath, showUrl) => {
+					this.$set(this.setupRows[idx], 'point_image', savePath)
+					this.$set(this.setupRows[idx], 'point_image_url', showUrl)
 				})
 			},
 			chooseManagePhoto(mIdx) {
-				this.pickAndUploadPointPhoto(path => {
+				this.pickAndUploadPointPhoto((savePath, showUrl) => {
 					const p = this.points[mIdx]
 					if (!p) return
-					this.$set(p, '_edit_image', path)
-					this.$set(p, '_edit_image_url', this.toDisplayUrl(path))
+					this.$set(p, '_edit_image', savePath)
+					this.$set(p, '_edit_image_url', showUrl)
 				})
-			},
-			toDisplayUrl(path) {
-				if (!path) return ''
-				if (String(path).indexOf('http') === 0) return path
-				return path
 			},
 			pickAndUploadPointPhoto(onDone) {
 				uni.chooseImage({
@@ -502,11 +497,16 @@
 							success: (up) => {
 								try {
 									const data = JSON.parse(up.data)
-									if (data.code == 1 && data.data && data.data.url) {
-										onDone(data.data.url)
-									} else {
-										this.$u.toast(data.msg || '上传失败')
+									if (data.code != 1 || !data.data) {
+										return this.$u.toast(data.msg || '上传失败')
 									}
+									const d = data.data
+									const savePath = d.filepath || d.url || ''
+									const showUrl = d.url || d.filepath || ''
+									if (!savePath) {
+										return this.$u.toast('上传失败')
+									}
+									onDone(savePath, showUrl)
 								} catch (e) {
 									this.$u.toast('上传失败')
 								}
@@ -554,12 +554,14 @@
 						break
 					}
 				}
+				const raw = p.point_image_raw || ''
+				const display = p.point_image || ''
 				return {
 					...p,
 					_edit_name: p.point_name,
 					_edit_cate_index: idx,
-					_edit_image: p.point_image || '',
-					_edit_image_url: p.point_image || '',
+					_edit_image: raw,
+					_edit_image_url: display,
 				}
 			},
 			onManageNameInput(idx, e) {
