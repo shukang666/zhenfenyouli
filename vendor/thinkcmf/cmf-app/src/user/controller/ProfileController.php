@@ -75,14 +75,7 @@ class ProfileController extends UserBaseController
                 $this->error($validate->getError());
             }
             $editData = new UserModel();
-            if ($editData->editData($data, [
-                'user_nickname',
-                'sex',
-                'birthday',
-                'user_url',
-                'signature',
-                'more'
-            ])) {
+            if ($editData->editData($data)) {
                 $this->success(lang('EDIT_SUCCESS'), "user/profile/center");
             } else {
                 $this->error(lang('NO_NEW_INFORMATION'));
@@ -202,11 +195,11 @@ class ProfileController extends UserBaseController
             UserModel::where("id", $userId)->update(["avatar" => $avatar]);
             session('user.avatar', $avatar);
 
-            $this->success(lang('Upload successful'), null, ['file' => $avatar]);
+            $this->success("上传成功", null, ['file' => $avatar]);
         } else {
             return json_encode([
                 'code' => 1,
-                "msg"  => lang('Upload successful'),
+                "msg"  => "上传成功",
                 "data" => ['file' => $avatar],
                 "url"  => ''
             ]);
@@ -223,7 +216,7 @@ class ProfileController extends UserBaseController
             $x = $this->request->param('x', 0, 'intval');
             $y = $this->request->param('y', 0, 'intval');
 
-            $avatarPath = WEB_ROOT . 'upload/' . $avatar;
+            $avatarPath = WEB_ROOT . "upload/" . $avatar;
 
             $avatarImg = Image::open($avatarPath);
             $avatarImg->crop($w, $h, $x, $y)->save($avatarPath);
@@ -234,11 +227,11 @@ class ProfileController extends UserBaseController
                 $result  = $storage->upload($avatar, $avatarPath, 'image');
 
                 $userId = cmf_get_current_user_id();
-                UserModel::where('id', $userId)->update(['avatar' => $avatar]);
+                UserModel::where("id", $userId)->update(["avatar" => $avatar]);
                 session('user.avatar', $avatar);
-                $this->success(lang('EDIT_SUCCESS'));
+                $this->success("头像更新成功！");
             } else {
-                $this->error(lang('EDIT_FAILED'));
+                $this->error("头像保存失败！");
             }
 
         }
@@ -290,7 +283,7 @@ class ProfileController extends UserBaseController
                     $this->error('未受理的请求');
             }
         } else {
-            $this->error(lang('illegal request'));
+            $this->error("请求错误");
         }
     }
 
@@ -330,7 +323,7 @@ class ProfileController extends UserBaseController
                     $this->error('未受理的请求');
             }
         } else {
-            $this->error(lang('illegal request'));
+            $this->error("请求错误");
         }
     }
 

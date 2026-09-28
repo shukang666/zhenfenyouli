@@ -225,14 +225,17 @@ class UserModel extends Model
         return 1;
     }
 
-    public function editData($user,$field = [])
+    public function editData($user)
     {
         $userId = cmf_get_current_user_id();
 
         if (isset($user['birthday'])) {
             $user['birthday'] = strtotime($user['birthday']);
         }
-        if (self::update($user,['id'=>$userId],$field)) {
+
+        $field = 'user_nickname,sex,birthday,user_url,signature,more';
+
+        if ($this->where('id', $userId)->update($user)) {
             $userInfo = $this->where('id', $userId)->find();
             cmf_update_current_user($userInfo->toArray());
             return 1;

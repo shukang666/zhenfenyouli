@@ -5,7 +5,6 @@ namespace AlibabaCloud\OutboundBot\V20191226;
 use AlibabaCloud\Client\Resolver\ApiResolver;
 
 /**
- * @method ApplyNumberDistrictInfoParsingResult applyNumberDistrictInfoParsingResult(array $options = [])
  * @method AssignJobs assignJobs(array $options = [])
  * @method CancelJobs cancelJobs(array $options = [])
  * @method ChangeResourceGroup changeResourceGroup(array $options = [])
@@ -15,19 +14,14 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method CreateDownloadUrl createDownloadUrl(array $options = [])
  * @method CreateGlobalQuestion createGlobalQuestion(array $options = [])
  * @method CreateInstance createInstance(array $options = [])
- * @method CreateInstanceBindNumber createInstanceBindNumber(array $options = [])
  * @method CreateIntent createIntent(array $options = [])
  * @method CreateJobDataParsingTask createJobDataParsingTask(array $options = [])
  * @method CreateJobGroup createJobGroup(array $options = [])
  * @method CreateJobGroupExportTask createJobGroupExportTask(array $options = [])
- * @method CreateNumberDistrictInfoDownloadUrl createNumberDistrictInfoDownloadUrl(array $options = [])
- * @method CreateNumberDistrictInfoParsingTask createNumberDistrictInfoParsingTask(array $options = [])
  * @method CreateOutboundCallNumber createOutboundCallNumber(array $options = [])
  * @method CreateScript createScript(array $options = [])
  * @method CreateScriptWaveform createScriptWaveform(array $options = [])
  * @method CreateTag createTag(array $options = [])
- * @method CreateTaskExportTask createTaskExportTask(array $options = [])
- * @method DeleteAllNumberDistrictInfo deleteAllNumberDistrictInfo(array $options = [])
  * @method DeleteContactBlockList deleteContactBlockList(array $options = [])
  * @method DeleteContactWhiteList deleteContactWhiteList(array $options = [])
  * @method DeleteDialogueFlow deleteDialogueFlow(array $options = [])
@@ -37,7 +31,6 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DeleteJobGroup deleteJobGroup(array $options = [])
  * @method DeleteOutboundCallNumber deleteOutboundCallNumber(array $options = [])
  * @method DeleteScript deleteScript(array $options = [])
- * @method DeleteScriptRecording deleteScriptRecording(array $options = [])
  * @method DeleteScriptWaveform deleteScriptWaveform(array $options = [])
  * @method DescribeDialogueNodeStatistics describeDialogueNodeStatistics(array $options = [])
  * @method DescribeDsReports describeDsReports(array $options = [])
@@ -50,20 +43,15 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DescribeJobDataParsingTaskProgress describeJobDataParsingTaskProgress(array $options = [])
  * @method DescribeJobGroup describeJobGroup(array $options = [])
  * @method DescribeJobGroupExportTaskProgress describeJobGroupExportTaskProgress(array $options = [])
- * @method DescribeNumberDistrictInfoStatus describeNumberDistrictInfoStatus(array $options = [])
  * @method DescribeScript describeScript(array $options = [])
  * @method DescribeScriptVoiceConfig describeScriptVoiceConfig(array $options = [])
  * @method DescribeTagHitsSummary describeTagHitsSummary(array $options = [])
- * @method DescribeTenantBindNumber describeTenantBindNumber(array $options = [])
  * @method DescribeTTSConfig describeTTSConfig(array $options = [])
  * @method DescribeTTSDemo describeTTSDemo(array $options = [])
  * @method Dialogue dialogue(array $options = [])
- * @method DismissNumberDistrictInfoParsingResult dismissNumberDistrictInfoParsingResult(array $options = [])
  * @method DownloadRecording downloadRecording(array $options = [])
- * @method DownloadScriptRecording downloadScriptRecording(array $options = [])
  * @method DuplicateScript duplicateScript(array $options = [])
  * @method ExportScript exportScript(array $options = [])
- * @method GenerateUploadUrl generateUploadUrl(array $options = [])
  * @method GetAfterAnswerDelayPlayback getAfterAnswerDelayPlayback(array $options = [])
  * @method GetAsrServerInfo getAsrServerInfo(array $options = [])
  * @method GetBaseStrategyPeriod getBaseStrategyPeriod(array $options = [])
@@ -73,15 +61,13 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method GetCurrentConcurrency getCurrentConcurrency(array $options = [])
  * @method GetEffectiveDays getEffectiveDays(array $options = [])
  * @method GetEmptyNumberNoMoreCallsInfo getEmptyNumberNoMoreCallsInfo(array $options = [])
+ * @method GetInstanceConfig getInstanceConfig(array $options = [])
  * @method GetMaxAttemptsPerDay getMaxAttemptsPerDay(array $options = [])
- * @method GetNumberDistrictInfoTemplateDownloadUrl getNumberDistrictInfoTemplateDownloadUrl(array $options = [])
  * @method GetSummaryInfo getSummaryInfo(array $options = [])
  * @method GetTaskByUuid getTaskByUuid(array $options = [])
  * @method GetVersion getVersion(array $options = [])
  * @method ImportScript importScript(array $options = [])
  * @method InflightTaskTimeout inflightTaskTimeout(array $options = [])
- * @method ListAllTenantBindNumberBinding listAllTenantBindNumberBinding(array $options = [])
- * @method ListChatbotInstances listChatbotInstances(array $options = [])
  * @method ListDialogueFlows listDialogueFlows(array $options = [])
  * @method ListDownloadTasks listDownloadTasks(array $options = [])
  * @method ListGlobalQuestions listGlobalQuestions(array $options = [])
@@ -95,7 +81,6 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method ListResourceTags listResourceTags(array $options = [])
  * @method ListSchedulerInstances listSchedulerInstances(array $options = [])
  * @method ListScriptPublishHistories listScriptPublishHistories(array $options = [])
- * @method ListScriptRecording listScriptRecording(array $options = [])
  * @method ListScripts listScripts(array $options = [])
  * @method ListScriptVoiceConfigs listScriptVoiceConfigs(array $options = [])
  * @method ListTagResources listTagResources(array $options = [])
@@ -139,7 +124,6 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method TaskPreparing taskPreparing(array $options = [])
  * @method TerminateCall terminateCall(array $options = [])
  * @method UntagResources untagResources(array $options = [])
- * @method UploadScriptRecording uploadScriptRecording(array $options = [])
  * @method WithdrawScriptReview withdrawScriptReview(array $options = [])
  */
 class OutboundBotApiResolver extends ApiResolver
@@ -156,14 +140,9 @@ class Rpc extends \AlibabaCloud\Client\Resolver\Rpc
 
     /** @var string */
     public $method = 'POST';
-}
 
-/**
- * @method string getVersionId()
- * @method $this withVersionId($value)
- */
-class ApplyNumberDistrictInfoParsingResult extends Rpc
-{
+    /** @var string */
+    public $serviceCode = 'outboundbot';
 }
 
 /**
@@ -311,29 +290,21 @@ class CreateBatchJobs extends Rpc
 }
 
 /**
- * @method string getRecallStrategyJson()
- * @method $this withRecallStrategyJson($value)
  * @method string getDescription()
  * @method $this withDescription($value)
  * @method string getScriptId()
  * @method $this withScriptId($value)
+ * @method array getCallingNumber()
+ * @method string getInstanceId()
+ * @method $this withInstanceId($value)
  * @method string getFilterStatus()
  * @method $this withFilterStatus($value)
  * @method string getStrategyJson()
  * @method $this withStrategyJson($value)
- * @method string getRingingDuration()
- * @method $this withRingingDuration($value)
- * @method string getPriority()
- * @method $this withPriority($value)
- * @method array getCallingNumber()
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
  * @method string getName()
  * @method $this withName($value)
  * @method string getSourceGroupId()
  * @method $this withSourceGroupId($value)
- * @method string getMinConcurrency()
- * @method $this withMinConcurrency($value)
  */
 class CreateBatchRepeatJob extends Rpc
 {
@@ -440,16 +411,6 @@ class CreateInstance extends Rpc
 }
 
 /**
- * @method string getInstanceList()
- * @method $this withInstanceList($value)
- * @method string getNumber()
- * @method $this withNumber($value)
- */
-class CreateInstanceBindNumber extends Rpc
-{
-}
-
-/**
  * @method string getUtterances()
  * @method $this withUtterances($value)
  * @method string getKeywords()
@@ -478,27 +439,19 @@ class CreateJobDataParsingTask extends Rpc
 }
 
 /**
- * @method string getRecallStrategyJson()
- * @method $this withRecallStrategyJson($value)
+ * @method string getJobGroupDescription()
+ * @method $this withJobGroupDescription($value)
  * @method string getJobGroupName()
  * @method $this withJobGroupName($value)
  * @method string getScriptId()
  * @method $this withScriptId($value)
- * @method string getStrategyJson()
- * @method $this withStrategyJson($value)
- * @method string getRingingDuration()
- * @method $this withRingingDuration($value)
- * @method string getScenarioId()
- * @method $this withScenarioId($value)
- * @method string getPriority()
- * @method $this withPriority($value)
- * @method string getJobGroupDescription()
- * @method $this withJobGroupDescription($value)
  * @method array getCallingNumber()
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
- * @method string getMinConcurrency()
- * @method $this withMinConcurrency($value)
+ * @method string getStrategyJson()
+ * @method $this withStrategyJson($value)
+ * @method string getScenarioId()
+ * @method $this withScenarioId($value)
  */
 class CreateJobGroup extends Rpc
 {
@@ -546,24 +499,6 @@ class CreateJobGroupExportTask extends Rpc
 }
 
 /**
- * @method string getVersionId()
- * @method $this withVersionId($value)
- */
-class CreateNumberDistrictInfoDownloadUrl extends Rpc
-{
-}
-
-/**
- * @method string getFileSize()
- * @method $this withFileSize($value)
- * @method string getFilePath()
- * @method $this withFilePath($value)
- */
-class CreateNumberDistrictInfoParsingTask extends Rpc
-{
-}
-
-/**
  * @method string getRateLimitCount()
  * @method $this withRateLimitCount($value)
  * @method string getNumber()
@@ -586,25 +521,15 @@ class CreateOutboundCallNumber extends Rpc
  * @method $this withScriptName($value)
  * @method string getScene()
  * @method $this withScene($value)
- * @method array getScriptWaveform()
- * @method string getAsrConfig()
- * @method $this withAsrConfig($value)
- * @method string getMiniPlaybackConfigListJsonString()
- * @method $this withMiniPlaybackConfigListJsonString($value)
- * @method string getEmotionEnable()
- * @method $this withEmotionEnable($value)
- * @method string getNewBargeInEnable()
- * @method $this withNewBargeInEnable($value)
- * @method string getMiniPlaybackEnable()
- * @method $this withMiniPlaybackEnable($value)
  * @method string getChatbotId()
  * @method $this withChatbotId($value)
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
+ * @method array getScriptWaveform()
+ * @method string getAsrConfig()
+ * @method $this withAsrConfig($value)
  * @method string getScriptDescription()
  * @method $this withScriptDescription($value)
- * @method string getLongWaitEnable()
- * @method $this withLongWaitEnable($value)
  * @method array getScriptContent()
  */
 class CreateScript extends Rpc
@@ -668,71 +593,6 @@ class CreateScriptWaveform extends Rpc
  * @method $this withInstanceId($value)
  */
 class CreateTag extends Rpc
-{
-}
-
-/**
- * @method string getHasAnswered()
- * @method $this withHasAnswered($value)
- * @method string getActualTimeLte()
- * @method $this withActualTimeLte($value)
- * @method string getOtherId()
- * @method $this withOtherId($value)
- * @method string getTaskCreateTimeLte()
- * @method $this withTaskCreateTimeLte($value)
- * @method string getJobId()
- * @method $this withJobId($value)
- * @method string getTaskCreateTimeGte()
- * @method $this withTaskCreateTimeGte($value)
- * @method string getCalledNumber()
- * @method $this withCalledNumber($value)
- * @method string getUserIdMatch()
- * @method $this withUserIdMatch($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
- * @method string getScriptNameQuery()
- * @method $this withScriptNameQuery($value)
- * @method string getPageIndex()
- * @method $this withPageIndex($value)
- * @method string getSortOrder()
- * @method $this withSortOrder($value)
- * @method string getTaskStatusStringList()
- * @method $this withTaskStatusStringList($value)
- * @method string getJobGroupNameQuery()
- * @method $this withJobGroupNameQuery($value)
- * @method string getTaskId()
- * @method $this withTaskId($value)
- * @method string getHasHangUpByRejection()
- * @method $this withHasHangUpByRejection($value)
- * @method string getHasReachedEndOfFlow()
- * @method $this withHasReachedEndOfFlow($value)
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- * @method string getRecordingDurationGte()
- * @method $this withRecordingDurationGte($value)
- * @method string getCallDurationLte()
- * @method $this withCallDurationLte($value)
- * @method string getJobGroupId()
- * @method $this withJobGroupId($value)
- * @method string getSortBy()
- * @method $this withSortBy($value)
- * @method string getJobStatusStringList()
- * @method $this withJobStatusStringList($value)
- * @method string getActualTimeGte()
- * @method $this withActualTimeGte($value)
- * @method string getCallDurationGte()
- * @method $this withCallDurationGte($value)
- * @method string getRecordingDurationLte()
- * @method $this withRecordingDurationLte($value)
- */
-class CreateTaskExportTask extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
-}
-
-class DeleteAllNumberDistrictInfo extends Rpc
 {
 }
 
@@ -835,18 +695,6 @@ class DeleteScript extends Rpc
 }
 
 /**
- * @method string getUuidsJson()
- * @method $this withUuidsJson($value)
- * @method string getScriptId()
- * @method $this withScriptId($value)
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- */
-class DeleteScriptRecording extends Rpc
-{
-}
-
-/**
  * @method string getScriptWaveformId()
  * @method $this withScriptWaveformId($value)
  * @method string getScriptId()
@@ -939,8 +787,6 @@ class DescribeIntentStatistics extends Rpc
  * @method $this withJobId($value)
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
- * @method string getWithScript()
- * @method $this withWithScript($value)
  */
 class DescribeJob extends Rpc
 {
@@ -992,10 +838,6 @@ class DescribeJobGroupExportTaskProgress extends Rpc
 {
 }
 
-class DescribeNumberDistrictInfoStatus extends Rpc
-{
-}
-
 /**
  * @method string getScriptId()
  * @method $this withScriptId($value)
@@ -1029,14 +871,6 @@ class DescribeTagHitsSummary extends Rpc
 }
 
 /**
- * @method string getNumber()
- * @method $this withNumber($value)
- */
-class DescribeTenantBindNumber extends Rpc
-{
-}
-
-/**
  * @method string getScriptId()
  * @method $this withScriptId($value)
  * @method string getInstanceId()
@@ -1059,8 +893,6 @@ class DescribeTTSConfig extends Rpc
  * @method $this withText($value)
  * @method string getSpeechRate()
  * @method $this withSpeechRate($value)
- * @method string getPitchRate()
- * @method $this withPitchRate($value)
  */
 class DescribeTTSDemo extends Rpc
 {
@@ -1069,8 +901,6 @@ class DescribeTTSDemo extends Rpc
 /**
  * @method string getCallId()
  * @method $this withCallId($value)
- * @method string getScriptId()
- * @method $this withScriptId($value)
  * @method string getInstanceOwnerId()
  * @method $this withInstanceOwnerId($value)
  * @method string getCalledNumber()
@@ -1097,34 +927,12 @@ class Dialogue extends Rpc
 }
 
 /**
- * @method string getVersionId()
- * @method $this withVersionId($value)
- */
-class DismissNumberDistrictInfoParsingResult extends Rpc
-{
-}
-
-/**
- * @method string getNeedVoiceSliceRecording()
- * @method $this withNeedVoiceSliceRecording($value)
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
  * @method string getTaskId()
  * @method $this withTaskId($value)
  */
 class DownloadRecording extends Rpc
-{
-}
-
-/**
- * @method string getUuid()
- * @method $this withUuid($value)
- * @method string getScriptId()
- * @method $this withScriptId($value)
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- */
-class DownloadScriptRecording extends Rpc
 {
 }
 
@@ -1147,16 +955,6 @@ class DuplicateScript extends Rpc
  * @method $this withInstanceId($value)
  */
 class ExportScript extends Rpc
-{
-}
-
-/**
- * @method string getFileName()
- * @method $this withFileName($value)
- * @method string getKey()
- * @method $this withKey($value)
- */
-class GenerateUploadUrl extends Rpc
 {
 }
 
@@ -1251,16 +1049,20 @@ class GetEmptyNumberNoMoreCallsInfo extends Rpc
 }
 
 /**
+ * @method string getInstanceId()
+ * @method $this withInstanceId($value)
+ */
+class GetInstanceConfig extends Rpc
+{
+}
+
+/**
  * @method string getStrategyLevel()
  * @method $this withStrategyLevel($value)
  * @method string getEntryId()
  * @method $this withEntryId($value)
  */
 class GetMaxAttemptsPerDay extends Rpc
-{
-}
-
-class GetNumberDistrictInfoTemplateDownloadUrl extends Rpc
 {
 }
 
@@ -1324,24 +1126,6 @@ class ImportScript extends Rpc
  * @method $this withTaskId($value)
  */
 class InflightTaskTimeout extends Rpc
-{
-}
-
-/**
- * @method string getTenant()
- * @method $this withTenant($value)
- */
-class ListAllTenantBindNumberBinding extends Rpc
-{
-}
-
-/**
- * @method string getPageNumber()
- * @method $this withPageNumber($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
- */
-class ListChatbotInstances extends Rpc
 {
 }
 
@@ -1549,26 +1333,6 @@ class ListScriptPublishHistories extends Rpc
 }
 
 /**
- * @method string getUuidsJson()
- * @method $this withUuidsJson($value)
- * @method string getStatesJson()
- * @method $this withStatesJson($value)
- * @method string getPageNumber()
- * @method $this withPageNumber($value)
- * @method string getScriptId()
- * @method $this withScriptId($value)
- * @method string getSearch()
- * @method $this withSearch($value)
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
- */
-class ListScriptRecording extends Rpc
-{
-}
-
-/**
  * @method string getPageNumber()
  * @method $this withPageNumber($value)
  * @method string getInstanceId()
@@ -1656,9 +1420,9 @@ class ListTags extends Rpc
  * @method $this withDescription($value)
  * @method string getJobFilePath()
  * @method $this withJobFilePath($value)
+ * @method array getCallingNumber()
  * @method string getScriptId()
  * @method $this withScriptId($value)
- * @method array getCallingNumber()
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
  * @method string getSubmitted()
@@ -1800,31 +1564,21 @@ class ModifyIntent extends Rpc
 }
 
 /**
- * @method string getRecallStrategyJson()
- * @method $this withRecallStrategyJson($value)
  * @method string getDescription()
  * @method $this withDescription($value)
+ * @method array getCallingNumber()
  * @method string getScriptId()
  * @method $this withScriptId($value)
- * @method string getStrategyJson()
- * @method $this withStrategyJson($value)
- * @method string getRingingDuration()
- * @method $this withRingingDuration($value)
- * @method string getScenarioId()
- * @method $this withScenarioId($value)
- * @method string getJobGroupStatus()
- * @method $this withJobGroupStatus($value)
- * @method string getPriority()
- * @method $this withPriority($value)
- * @method array getCallingNumber()
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
+ * @method string getStrategyJson()
+ * @method $this withStrategyJson($value)
  * @method string getJobGroupId()
  * @method $this withJobGroupId($value)
  * @method string getName()
  * @method $this withName($value)
- * @method string getMinConcurrency()
- * @method $this withMinConcurrency($value)
+ * @method string getScenarioId()
+ * @method $this withScenarioId($value)
  */
 class ModifyJobGroup extends Rpc
 {
@@ -1875,24 +1629,14 @@ class ModifyOutboundCallNumber extends Rpc
  * @method array getScriptWaveform()
  * @method string getAsrConfig()
  * @method $this withAsrConfig($value)
- * @method string getMiniPlaybackConfigListJsonString()
- * @method $this withMiniPlaybackConfigListJsonString($value)
- * @method string getEmotionEnable()
- * @method $this withEmotionEnable($value)
- * @method string getNlsConfig()
- * @method $this withNlsConfig($value)
- * @method string getNewBargeInEnable()
- * @method $this withNewBargeInEnable($value)
- * @method string getMiniPlaybackEnable()
- * @method $this withMiniPlaybackEnable($value)
+ * @method string getMiniPlaybackEnabled()
+ * @method $this withMiniPlaybackEnabled($value)
  * @method string getChatbotId()
  * @method $this withChatbotId($value)
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
  * @method string getScriptDescription()
  * @method $this withScriptDescription($value)
- * @method string getLongWaitEnable()
- * @method $this withLongWaitEnable($value)
  * @method array getScriptContent()
  */
 class ModifyScript extends Rpc
@@ -1962,16 +1706,12 @@ class ModifyTagGroups extends Rpc
 /**
  * @method string getVoice()
  * @method $this withVoice($value)
- * @method string getNlsServiceType()
- * @method $this withNlsServiceType($value)
  * @method string getVolume()
  * @method $this withVolume($value)
  * @method string getScriptId()
  * @method $this withScriptId($value)
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
- * @method string getAppKey()
- * @method $this withAppKey($value)
  * @method string getSpeechRate()
  * @method $this withSpeechRate($value)
  */
@@ -2034,8 +1774,6 @@ class QueryJobs extends Rpc
  * @method $this withHasReachedEndOfFlowFilter($value)
  * @method string getHasAnsweredFilter()
  * @method $this withHasAnsweredFilter($value)
- * @method string getTaskStatusFilter()
- * @method $this withTaskStatusFilter($value)
  * @method string getPageNumber()
  * @method $this withPageNumber($value)
  * @method string getQueryText()
@@ -2312,8 +2050,6 @@ class SaveMaxAttemptsPerDay extends Rpc
  * @method $this withUserIdMatch($value)
  * @method string getPageSize()
  * @method $this withPageSize($value)
- * @method string getScriptNameQuery()
- * @method $this withScriptNameQuery($value)
  * @method string getPageIndex()
  * @method $this withPageIndex($value)
  * @method string getSortOrder()
@@ -2353,9 +2089,9 @@ class SearchTask extends Rpc
 /**
  * @method string getJobJson()
  * @method $this withJobJson($value)
+ * @method array getCallingNumber()
  * @method string getScriptId()
  * @method $this withScriptId($value)
- * @method array getCallingNumber()
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
  * @method string getJobGroupId()
@@ -2613,22 +2349,6 @@ class UntagResources extends Rpc
 
 		return $this;
     }
-}
-
-/**
- * @method string getContent()
- * @method $this withContent($value)
- * @method string getScriptId()
- * @method $this withScriptId($value)
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- * @method string getFileName()
- * @method $this withFileName($value)
- * @method string getFileId()
- * @method $this withFileId($value)
- */
-class UploadScriptRecording extends Rpc
-{
 }
 
 /**

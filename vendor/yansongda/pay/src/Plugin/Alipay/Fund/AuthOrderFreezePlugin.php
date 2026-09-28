@@ -9,14 +9,11 @@ use Yansongda\Pay\Contract\PluginInterface;
 use Yansongda\Pay\Logger;
 use Yansongda\Pay\Rocket;
 
-/**
- * @see https://opendocs.alipay.com/open/02fkb9
- */
 class AuthOrderFreezePlugin implements PluginInterface
 {
     public function assembly(Rocket $rocket, Closure $next): Rocket
     {
-        Logger::debug('[alipay][AuthOrderFreezePlugin] 插件开始装载', ['rocket' => $rocket]);
+        Logger::info('[alipay][AuthOrderFreezePlugin] 插件开始装载', ['rocket' => $rocket]);
 
         $rocket->mergePayload([
             'method' => 'alipay.fund.auth.order.freeze',

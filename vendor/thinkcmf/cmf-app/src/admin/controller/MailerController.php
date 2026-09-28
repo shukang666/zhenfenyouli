@@ -60,7 +60,7 @@ class MailerController extends AdminBaseController
 
             cmf_set_option('smtp_setting', $post);
 
-            $this->success(lang('EDIT_SUCCESS'));
+            $this->success("保存成功！");
         }
     }
 
@@ -83,7 +83,7 @@ class MailerController extends AdminBaseController
         $templateKey         = $this->request->param('template_key');
 
         if (empty($templateKey) || !in_array($templateKey, $allowedTemplateKeys)) {
-            $this->error(lang('illegal request'));
+            $this->error('非法请求！');
         }
 
         $template = cmf_get_option('email_template_' . $templateKey);
@@ -111,7 +111,7 @@ class MailerController extends AdminBaseController
             $templateKey         = $this->request->param('template_key');
 
             if (empty($templateKey) || !in_array($templateKey, $allowedTemplateKeys)) {
-                $this->error(lang('illegal request'));
+                $this->error('非法请求！');
             }
 
             $data = $this->request->param();
@@ -120,7 +120,7 @@ class MailerController extends AdminBaseController
 
             cmf_set_option('email_template_' . $templateKey, $data);
 
-            $this->success(lang('EDIT_SUCCESS'));
+            $this->success("保存成功！");
         }
     }
 

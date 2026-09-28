@@ -9,14 +9,11 @@ use Yansongda\Pay\Contract\PluginInterface;
 use Yansongda\Pay\Logger;
 use Yansongda\Pay\Rocket;
 
-/**
- * @see https://opendocs.alipay.com/open/02byuq?scene=common
- */
 class AccountQueryPlugin implements PluginInterface
 {
     public function assembly(Rocket $rocket, Closure $next): Rocket
     {
-        Logger::debug('[alipay][AccountQueryPlugin] 插件开始装载', ['rocket' => $rocket]);
+        Logger::info('[alipay][AccountQueryPlugin] 插件开始装载', ['rocket' => $rocket]);
 
         $rocket->mergePayload([
             'method' => 'alipay.fund.account.query',

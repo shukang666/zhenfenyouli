@@ -15,19 +15,27 @@ use think\facade\Lang;
 
 class HomeLangListener
 {
+    protected static $run = false;
+
     // 行为扩展的执行入口必须是run
     public function handle()
     {
-        $app       = app();
-        $langSet   = $app->lang->getLangSet();
-        $langFiles = [];
+        if (self::$run) {
+            return;
+        }
+        self::$run = true;
+
+        $app     = app();
+        $langSet = $app->lang->getLangSet();
+
 
         // 加载应用前台语言包
-        $apps = cmf_scan_dir($app->getAppPath() . '*', GLOB_ONLYDIR);
+        $apps = cmf_scan_dir(APP_PATH . '*', GLOB_ONLYDIR);
         foreach ($apps as $appName) {
-            $langFiles[] = $app->getAppPath() . $appName . DIRECTORY_SEPARATOR . 'lang' . DIRECTORY_SEPARATOR . $langSet . DIRECTORY_SEPARATOR . 'home.php';
+            $app->lang->load([
+                APP_PATH . $appName . DIRECTORY_SEPARATOR . 'lang' . DIRECTORY_SEPARATOR . $langSet . DIRECTORY_SEPARATOR . 'home.php',
+            ]);
         }
 
-        $app->lang->load($langFiles);
     }
 }

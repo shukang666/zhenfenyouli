@@ -4,55 +4,66 @@ declare(strict_types=1);
 
 namespace Yansongda\Pay\Contract;
 
-use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Yansongda\Pay\Exception\ContainerException;
-use Yansongda\Pay\Exception\InvalidParamsException;
-use Yansongda\Pay\Exception\ServiceNotFoundException;
 use Yansongda\Supports\Collection;
 
 interface ProviderInterface
 {
     /**
-     * @return null|array|Collection|MessageInterface
+     * pay.
      *
-     * @throws ContainerException
-     * @throws InvalidParamsException
-     * @throws ServiceNotFoundException
+     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
+     * @throws \Yansongda\Pay\Exception\ContainerException
+     * @throws \Yansongda\Pay\Exception\InvalidParamsException
+     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     *
+     * @return \Psr\Http\Message\MessageInterface|\Yansongda\Supports\Collection|array|null
      */
     public function pay(array $plugins, array $params);
 
     /**
-     * @param array|string $order
+     * Quick road - Query an order.
      *
-     * @return array|Collection
+     * @param string|array $order
+     *
+     * @return array|\Yansongda\Supports\Collection
      */
     public function find($order);
 
     /**
-     * @param array|string $order
+     * Quick road - Cancel an order.
      *
-     * @return array|Collection|void
+     * @param string|array $order
+     *
+     * @return array|\Yansongda\Supports\Collection|void
      */
     public function cancel($order);
 
     /**
-     * @param array|string $order
+     * Quick road - Close an order.
      *
-     * @return array|Collection|void
+     * @param string|array $order
+     *
+     * @return array|\Yansongda\Supports\Collection|void
      */
     public function close($order);
 
     /**
-     * @return array|Collection
+     * Quick road - Refund an order.
+     *
+     * @return array|\Yansongda\Supports\Collection
      */
     public function refund(array $order);
 
     /**
-     * @param null|array|ServerRequestInterface $contents
+     * Verify a request.
+     *
+     * @param array|\Psr\Http\Message\ServerRequestInterface|null $contents
      */
     public function callback($contents = null, ?array $params = null): Collection;
 
+    /**
+     * Echo success to server.
+     */
     public function success(): ResponseInterface;
 }

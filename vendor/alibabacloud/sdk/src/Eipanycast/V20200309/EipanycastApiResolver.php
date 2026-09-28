@@ -15,7 +15,6 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method ModifyAnycastEipAddressSpec modifyAnycastEipAddressSpec(array $options = [])
  * @method ReleaseAnycastEipAddress releaseAnycastEipAddress(array $options = [])
  * @method UnassociateAnycastEipAddress unassociateAnycastEipAddress(array $options = [])
- * @method UpdateAnycastEipAddressAssociations updateAnycastEipAddressAssociations(array $options = [])
  */
 class EipanycastApiResolver extends ApiResolver
 {
@@ -59,18 +58,12 @@ class AllocateAnycastEipAddress extends Rpc
 /**
  * @method string getDryRun()
  * @method $this withDryRun($value)
- * @method string getAssociationMode()
- * @method $this withAssociationMode($value)
  * @method string getClientToken()
  * @method $this withClientToken($value)
- * @method string getPopLocations()
- * @method $this withPopLocations($value)
  * @method string getBindInstanceType()
  * @method $this withBindInstanceType($value)
  * @method string getBindInstanceRegionId()
  * @method $this withBindInstanceRegionId($value)
- * @method string getPrivateIpAddress()
- * @method $this withPrivateIpAddress($value)
  * @method string getAnycastId()
  * @method $this withAnycastId($value)
  * @method string getBindInstanceId()
@@ -81,8 +74,6 @@ class AssociateAnycastEipAddress extends Rpc
 }
 
 /**
- * @method string getIp()
- * @method $this withIp($value)
  * @method string getAnycastId()
  * @method $this withAnycastId($value)
  * @method string getBindInstanceId()
@@ -109,16 +100,14 @@ class DescribeAnycastServerRegions extends Rpc
 }
 
 /**
- * @method string getNextToken()
- * @method $this withNextToken($value)
- * @method string getInstanceChargeType()
- * @method $this withInstanceChargeType($value)
  * @method string getBusinessStatus()
  * @method $this withBusinessStatus($value)
  * @method string getServiceLocation()
  * @method $this withServiceLocation($value)
  * @method string getAnycastEipAddress()
  * @method $this withAnycastEipAddress($value)
+ * @method string getNextToken()
+ * @method $this withNextToken($value)
  * @method string getInternetChargeType()
  * @method $this withInternetChargeType($value)
  * @method string getAnycastId()
@@ -128,6 +117,8 @@ class DescribeAnycastServerRegions extends Rpc
  * @method array getBindInstanceIds()
  * @method string getMaxResults()
  * @method $this withMaxResults($value)
+ * @method string getInstanceChargeType()
+ * @method $this withInstanceChargeType($value)
  * @method string getStatus()
  * @method $this withStatus($value)
  */
@@ -191,33 +182,11 @@ class ReleaseAnycastEipAddress extends Rpc
  * @method $this withBindInstanceType($value)
  * @method string getBindInstanceRegionId()
  * @method $this withBindInstanceRegionId($value)
- * @method string getPrivateIpAddress()
- * @method $this withPrivateIpAddress($value)
  * @method string getAnycastId()
  * @method $this withAnycastId($value)
  * @method string getBindInstanceId()
  * @method $this withBindInstanceId($value)
  */
 class UnassociateAnycastEipAddress extends Rpc
-{
-}
-
-/**
- * @method string getDryRun()
- * @method $this withDryRun($value)
- * @method string getAssociationMode()
- * @method $this withAssociationMode($value)
- * @method string getClientToken()
- * @method $this withClientToken($value)
- * @method string getPopLocationDeleteList()
- * @method $this withPopLocationDeleteList($value)
- * @method string getAnycastId()
- * @method $this withAnycastId($value)
- * @method string getPopLocationAddList()
- * @method $this withPopLocationAddList($value)
- * @method string getBindInstanceId()
- * @method $this withBindInstanceId($value)
- */
-class UpdateAnycastEipAddressAssociations extends Rpc
 {
 }

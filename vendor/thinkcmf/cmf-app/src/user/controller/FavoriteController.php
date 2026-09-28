@@ -53,7 +53,7 @@ class FavoriteController extends UserBaseController
     public function add()
     {
         if (!$this->request->isPost()) {
-            $this->error(lang('illegal request'));
+            $this->error('非法请求！');
         }
         $data   = $this->request->param();
         $result = $this->validate($data, 'Favorite');
@@ -92,7 +92,7 @@ class FavoriteController extends UserBaseController
             'create_time' => time()
         ]);
 
-        $this->success(lang('Collection succeeded'));
+        $this->success('收藏成功');
 
     }
 }

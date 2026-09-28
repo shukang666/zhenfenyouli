@@ -10,7 +10,6 @@
 // +----------------------------------------------------------------------
 namespace app\admin\model;
 
-use app\admin\logic\PluginLogic;
 use think\Model;
 
 class PluginModel extends Model
@@ -49,13 +48,10 @@ class PluginModel extends Model
                     //TODO 加入到日志中
                     continue;
                 }
-                
-                $classObj            = new \ReflectionClass($class);
-                $defaultProperties   = $classObj->getDefaultProperties();
-                $info                = isset($defaultProperties['info']) ? $defaultProperties['info'] : [];
-                $plugins[$pluginDir] = $info;
+                $obj                 = new $class;
+                $plugins[$pluginDir] = $obj->info;
 
-                if (!isset($info['type']) || $info['type'] == 1) {//只获取普通插件
+                if (!isset($obj->info['type']) || $obj->info['type'] == 1) {//只获取普通插件
                     if ($plugins[$pluginDir]) {
                         $plugins[$pluginDir]['status'] = 3;//未安装
                     }
@@ -120,8 +116,39 @@ class PluginModel extends Model
         if (empty($findPlugin)) {
             return -1; //插件不存在;
         }
+        $class = cmf_get_plugin_class($findPlugin['name']);
 
-        return PluginLogic::uninstall($findPlugin['name']);
+        HookPluginModel::startTrans();
+        try {
+            $this->where('name', $findPlugin['name'])->delete();
+            HookPluginModel::where('plugin', $findPlugin['name'])->delete();
+
+            if (class_exists($class)) {
+                $plugin = new $class;
+
+                $uninstallSuccess = $plugin->uninstall();
+                if (!$uninstallSuccess) {
+                    HookPluginModel::rollback();
+                    return -2;
+                }
+            }
+
+            // 删除后台菜单
+            AdminMenuModel::where([
+                'app' => "plugin/{$findPlugin['name']}",
+            ])->delete();
+
+            // 删除权限规则
+            AuthRuleModel::where('app', "plugin/{$findPlugin['name']}")->delete();
+
+            HookPluginModel::commit();
+        } catch (\Exception $e) {
+            HookPluginModel::rollback();
+            return false;
+        }
+
+        return true;
+
     }
 
 }

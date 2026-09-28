@@ -6,13 +6,14 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
 
 /**
  * @method ActivateLicense activateLicense(array $options = [])
- * @method AutoRenewInstance autoRenewInstance(array $options = [])
+ * @method BindImagePackage bindImagePackage(array $options = [])
+ * @method CreateCommodity createCommodity(array $options = [])
  * @method CreateOrder createOrder(array $options = [])
- * @method CrossAccountVerifyToken crossAccountVerifyToken(array $options = [])
- * @method DescribeApiMetering describeApiMetering(array $options = [])
+ * @method CreateRate createRate(array $options = [])
+ * @method DeleteCommodity deleteCommodity(array $options = [])
+ * @method DescribeCommodities describeCommodities(array $options = [])
+ * @method DescribeCommodity describeCommodity(array $options = [])
  * @method DescribeCurrentNodeInfo describeCurrentNodeInfo(array $options = [])
- * @method DescribeDistributionProducts describeDistributionProducts(array $options = [])
- * @method DescribeDistributionProductsLink describeDistributionProductsLink(array $options = [])
  * @method DescribeInstance describeInstance(array $options = [])
  * @method DescribeInstances describeInstances(array $options = [])
  * @method DescribeLicense describeLicense(array $options = [])
@@ -25,11 +26,17 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DescribeProjectMessages describeProjectMessages(array $options = [])
  * @method DescribeProjectNodes describeProjectNodes(array $options = [])
  * @method DescribeProjectOperateLogs describeProjectOperateLogs(array $options = [])
+ * @method DescribeRate describeRate(array $options = [])
  * @method FinishCurrentProjectNode finishCurrentProjectNode(array $options = [])
+ * @method NotifyContractEvent notifyContractEvent(array $options = [])
  * @method PauseProject pauseProject(array $options = [])
  * @method PushMeteringData pushMeteringData(array $options = [])
+ * @method QueryMarketCategories queryMarketCategories(array $options = [])
+ * @method QueryMarketImages queryMarketImages(array $options = [])
  * @method ResumeProject resumeProject(array $options = [])
  * @method RollbackCurrentProjectNode rollbackCurrentProjectNode(array $options = [])
+ * @method UpdateCommodity updateCommodity(array $options = [])
+ * @method UploadCommodityFile uploadCommodityFile(array $options = [])
  */
 class MarketApiResolver extends ApiResolver
 {
@@ -45,9 +52,6 @@ class Rpc extends \AlibabaCloud\Client\Resolver\Rpc
 
     /** @var string */
     public $method = 'POST';
-
-    /** @var string */
-    public $serviceCode = 'yunmarket';
 }
 
 /**
@@ -61,13 +65,21 @@ class ActivateLicense extends Rpc
 }
 
 /**
- * @method string getType()
- * @method string getOwnerId()
- * @method string getAutoRenewDuration()
- * @method string getAutoRenewCycle()
- * @method string getOrderBizId()
+ * @method string getEcsInstanceId()
+ * @method $this withEcsInstanceId($value)
+ * @method string getImagePackageInstanceId()
+ * @method $this withImagePackageInstanceId($value)
  */
-class AutoRenewInstance extends Rpc
+class BindImagePackage extends Rpc
+{
+}
+
+/**
+ * @method string getApplicationId()
+ * @method $this withApplicationId($value)
+ * @method string getContent()
+ */
+class CreateCommodity extends Rpc
 {
 
     /**
@@ -75,62 +87,10 @@ class AutoRenewInstance extends Rpc
      *
      * @return $this
      */
-    public function withType($value)
+    public function withContent($value)
     {
-        $this->data['Type'] = $value;
-        $this->options['form_params']['Type'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOwnerId($value)
-    {
-        $this->data['OwnerId'] = $value;
-        $this->options['form_params']['OwnerId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAutoRenewDuration($value)
-    {
-        $this->data['AutoRenewDuration'] = $value;
-        $this->options['form_params']['AutoRenewDuration'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAutoRenewCycle($value)
-    {
-        $this->data['AutoRenewCycle'] = $value;
-        $this->options['form_params']['AutoRenewCycle'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOrderBizId($value)
-    {
-        $this->data['OrderBizId'] = $value;
-        $this->options['form_params']['OrderBizId'] = $value;
+        $this->data['Content'] = $value;
+        $this->options['form_params']['Content'] = $value;
 
         return $this;
     }
@@ -155,77 +115,73 @@ class CreateOrder extends Rpc
 }
 
 /**
- * @method string getToken()
+ * @method string getOrderId()
+ * @method $this withOrderId($value)
+ * @method string getContent()
+ * @method $this withContent($value)
+ * @method string getScore()
+ * @method $this withScore($value)
+ * @method string getRequestId()
+ * @method $this withRequestId($value)
  */
-class CrossAccountVerifyToken extends Rpc
+class CreateRate extends Rpc
 {
-
-    /** @var string */
-    public $scheme = 'https';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withToken($value)
-    {
-        $this->data['Token'] = $value;
-        $this->options['form_params']['Token'] = $value;
-
-        return $this;
-    }
 }
 
 /**
- * @method string getProductCode()
- * @method string getType()
- * @method string getPageNum()
+ * @method string getCommodityId()
+ * @method $this withCommodityId($value)
  */
-class DescribeApiMetering extends Rpc
+class DeleteCommodity extends Rpc
+{
+}
+
+/**
+ * @method string getCommodityGmtModifiedTo()
+ * @method $this withCommodityGmtModifiedTo($value)
+ * @method string getCommodityGmtModifiedFrom()
+ * @method $this withCommodityGmtModifiedFrom($value)
+ * @method string getCommodityId()
+ * @method $this withCommodityId($value)
+ * @method string getCommodityGmtPublishFrom()
+ * @method $this withCommodityGmtPublishFrom($value)
+ * @method string getCommodityStatuses()
+ * @method $this withCommodityStatuses($value)
+ * @method string getPageNumber()
+ * @method $this withPageNumber($value)
+ * @method string getCommodityGmtCreatedFrom()
+ * @method $this withCommodityGmtCreatedFrom($value)
+ * @method string getCommodityIds()
+ * @method $this withCommodityIds($value)
+ * @method string getCommodityGmtCreatedTo()
+ * @method $this withCommodityGmtCreatedTo($value)
+ * @method string getPageSize()
+ * @method $this withPageSize($value)
+ * @method string getCommodityGmtPublishTo()
+ * @method $this withCommodityGmtPublishTo($value)
+ * @method string getCommodityAuditStatuses()
+ * @method $this withCommodityAuditStatuses($value)
+ * @method string getProperties()
+ * @method $this withProperties($value)
+ * @method string getCommodityCategoryIds()
+ * @method $this withCommodityCategoryIds($value)
+ */
+class DescribeCommodities extends Rpc
 {
 
     /** @var string */
     public $method = 'GET';
+}
 
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductCode($value)
-    {
-        $this->data['ProductCode'] = $value;
-        $this->options['query']['productCode'] = $value;
+/**
+ * @method string getCommodityId()
+ * @method $this withCommodityId($value)
+ */
+class DescribeCommodity extends Rpc
+{
 
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withType($value)
-    {
-        $this->data['Type'] = $value;
-        $this->options['query']['type'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPageNum($value)
-    {
-        $this->data['PageNum'] = $value;
-        $this->options['query']['pageNum'] = $value;
-
-        return $this;
-    }
+    /** @var string */
+    public $method = 'GET';
 }
 
 /**
@@ -233,48 +189,6 @@ class DescribeApiMetering extends Rpc
  * @method $this withInstanceId($value)
  */
 class DescribeCurrentNodeInfo extends Rpc
-{
-}
-
-/**
- * @method string getPageNumber()
- * @method $this withPageNumber($value)
- * @method array getFilter()
- * @method string getPageSize()
- * @method $this withPageSize($value)
- */
-class DescribeDistributionProducts extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
-
-    /**
-     * @param array $filter
-     *
-     * @return $this
-     */
-	public function withFilter(array $filter)
-	{
-	    $this->data['Filter'] = $filter;
-		foreach ($filter as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Filter.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Filter.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
-    }
-}
-
-/**
- * @method string getCodes()
- * @method $this withCodes($value)
- */
-class DescribeDistributionProductsLink extends Rpc
 {
 }
 
@@ -291,10 +205,6 @@ class DescribeInstance extends Rpc
 }
 
 /**
- * @method string getCodes()
- * @method $this withCodes($value)
- * @method string getExceptCodes()
- * @method $this withExceptCodes($value)
  * @method string getPageNumber()
  * @method $this withPageNumber($value)
  * @method string getProductType()
@@ -345,13 +255,13 @@ class DescribeProduct extends Rpc
 }
 
 /**
+ * @method array getFilter()
  * @method string getSearchTerm()
  * @method $this withSearchTerm($value)
- * @method string getPageNumber()
- * @method $this withPageNumber($value)
- * @method array getFilter()
  * @method string getPageSize()
  * @method $this withPageSize($value)
+ * @method string getPageNumber()
+ * @method $this withPageNumber($value)
  */
 class DescribeProducts extends Rpc
 {
@@ -420,12 +330,20 @@ class DescribeProjectOperateLogs extends Rpc
 }
 
 /**
+ * @method string getOrderId()
+ * @method $this withOrderId($value)
+ */
+class DescribeRate extends Rpc
+{
+}
+
+/**
  * @method string getTemplateForm()
  * @method $this withTemplateForm($value)
- * @method string getRemark()
- * @method $this withRemark($value)
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
+ * @method string getRemark()
+ * @method $this withRemark($value)
  * @method string getNodeId()
  * @method $this withNodeId($value)
  */
@@ -434,10 +352,20 @@ class FinishCurrentProjectNode extends Rpc
 }
 
 /**
- * @method string getRemark()
- * @method $this withRemark($value)
+ * @method string getEventMessage()
+ * @method $this withEventMessage($value)
+ * @method string getEventType()
+ * @method $this withEventType($value)
+ */
+class NotifyContractEvent extends Rpc
+{
+}
+
+/**
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
+ * @method string getRemark()
+ * @method $this withRemark($value)
  * @method string getNodeId()
  * @method $this withNodeId($value)
  */
@@ -453,11 +381,23 @@ class PushMeteringData extends Rpc
 {
 }
 
+class QueryMarketCategories extends Rpc
+{
+}
+
 /**
- * @method string getRemark()
- * @method $this withRemark($value)
+ * @method string getParam()
+ * @method $this withParam($value)
+ */
+class QueryMarketImages extends Rpc
+{
+}
+
+/**
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
+ * @method string getRemark()
+ * @method $this withRemark($value)
  * @method string getNodeId()
  * @method $this withNodeId($value)
  */
@@ -466,13 +406,35 @@ class ResumeProject extends Rpc
 }
 
 /**
- * @method string getRemark()
- * @method $this withRemark($value)
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
+ * @method string getRemark()
+ * @method $this withRemark($value)
  * @method string getNodeId()
  * @method $this withNodeId($value)
  */
 class RollbackCurrentProjectNode extends Rpc
+{
+}
+
+/**
+ * @method string getCommodityId()
+ * @method $this withCommodityId($value)
+ * @method string getContent()
+ * @method $this withContent($value)
+ */
+class UpdateCommodity extends Rpc
+{
+}
+
+/**
+ * @method string getFileResourceType()
+ * @method $this withFileResourceType($value)
+ * @method string getFileResource()
+ * @method $this withFileResource($value)
+ * @method string getFileContentType()
+ * @method $this withFileContentType($value)
+ */
+class UploadCommodityFile extends Rpc
 {
 }

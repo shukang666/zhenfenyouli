@@ -16,13 +16,13 @@ require __DIR__ . '/../vendor/autoload.php';
 
 error_reporting(-1);
 
-echo "> Echo server\n";
+echo "> Random server\n";
 
 // Server options specified or random
 $options = array_merge([
     'port'          => 8000,
     'timeout'       => 200,
-    'filter'        => ['text', 'binary', 'ping', 'pong', 'close'],
+    'filter'        => ['text', 'binary', 'ping', 'pong'],
 ], getopt('', ['port:', 'timeout:', 'debug']));
 
 // If debug mode and logger is available
@@ -32,7 +32,7 @@ if (isset($options['debug']) && class_exists('WebSocket\EchoLog')) {
     echo "> Using logger\n";
 }
 
-// Initiate server.
+// Setting timeout to 200 seconds to make time for all tests and manual runs.
 try {
     $server = new Server($options);
 } catch (ConnectionException $e) {

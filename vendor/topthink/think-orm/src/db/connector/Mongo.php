@@ -27,9 +27,10 @@ use MongoDB\Driver\WriteConcern;
 use think\db\BaseQuery;
 use think\db\builder\Mongo as Builder;
 use think\db\Connection;
-use think\db\exception\DbEventException;
 use think\db\exception\DbException as Exception;
 use think\db\Mongo as Query;
+use function implode;
+use function is_array;
 
 /**
  * Mongo数据库驱动
@@ -258,7 +259,7 @@ class Mongo extends Connection
         $this->queryStartTime = microtime(true);
 
         if ($session = $this->getSession()) {
-            $this->cursor = $this->mongo->executeQuery($namespace, $mongoQuery, [
+            $this->cursor = $this->mongo->executeQuery($namespace, $query, [
                 'readPreference' => is_null($readPreference) ? new ReadPreference(ReadPreference::RP_PRIMARY) : $readPreference,
                 'session'        => $session,
             ]);
@@ -877,15 +878,15 @@ class Mongo extends Connection
      */
     public function select(BaseQuery $query): array
     {
-        try {
-            $this->db->trigger('before_select', $query);
-        } catch (DbEventException $e) {
-            return [];
+        $resultSet = $this->db->trigger('before_select', $query);
+
+        if (!$resultSet) {
+            $resultSet = $this->mongoQuery($query, function ($query) {
+                return $this->builder->select($query);
+            });
         }
 
-        return $this->mongoQuery($query, function ($query) {
-            return $this->builder->select($query);
-        });
+        return $resultSet;
     }
 
     /**
@@ -903,18 +904,18 @@ class Mongo extends Connection
     public function find(BaseQuery $query): array
     {
         // 事件回调
-        try {
-            $this->db->trigger('before_find', $query);
-        } catch (DbEventException $e) {
-            return [];
+        $result = $this->db->trigger('before_find', $query);
+
+        if (!$result) {
+            // 执行查询
+            $resultSet = $this->mongoQuery($query, function ($query) {
+                return $this->builder->select($query, true);
+            });
+
+            $result = $resultSet[0] ?? [];
         }
 
-        // 执行查询
-        $resultSet = $this->mongoQuery($query, function ($query) {
-            return $this->builder->select($query, true);
-        });
-
-        return $resultSet[0] ?? [];
+        return $result;
     }
 
     /**

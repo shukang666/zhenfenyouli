@@ -4,28 +4,24 @@ declare(strict_types=1);
 
 namespace Yansongda\Pay\Plugin\Wechat\Pay\Common;
 
-use Yansongda\Pay\Direction\OriginResponseDirection;
-use Yansongda\Pay\Exception\ContainerException;
 use Yansongda\Pay\Exception\Exception;
 use Yansongda\Pay\Exception\InvalidParamsException;
-use Yansongda\Pay\Exception\ServiceNotFoundException;
+use Yansongda\Pay\Parser\OriginResponseParser;
 use Yansongda\Pay\Pay;
 use Yansongda\Pay\Plugin\Wechat\GeneralPlugin;
 use Yansongda\Pay\Rocket;
 use Yansongda\Supports\Collection;
 
-use function Yansongda\Pay\get_wechat_config;
-
 class ClosePlugin extends GeneralPlugin
 {
     /**
-     * @throws InvalidParamsException
+     * @throws \Yansongda\Pay\Exception\InvalidParamsException
      */
     protected function getUri(Rocket $rocket): string
     {
         $payload = $rocket->getPayload();
 
-        if (!$payload->has('out_trade_no')) {
+        if (is_null($payload->get('out_trade_no'))) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
 
@@ -35,13 +31,13 @@ class ClosePlugin extends GeneralPlugin
     }
 
     /**
-     * @throws InvalidParamsException
+     * @throws \Yansongda\Pay\Exception\InvalidParamsException
      */
     protected function getPartnerUri(Rocket $rocket): string
     {
         $payload = $rocket->getPayload();
 
-        if (!$payload->has('out_trade_no')) {
+        if (is_null($payload->get('out_trade_no'))) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
 
@@ -51,23 +47,24 @@ class ClosePlugin extends GeneralPlugin
     }
 
     /**
-     * @throws ContainerException
-     * @throws ServiceNotFoundException
+     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
+     * @throws \Yansongda\Pay\Exception\ContainerException
+     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
      */
     protected function doSomething(Rocket $rocket): void
     {
-        $rocket->setDirection(OriginResponseDirection::class);
+        $rocket->setDirection(OriginResponseParser::class);
 
         $config = get_wechat_config($rocket->getParams());
 
         $body = [
-            'mchid' => $config['mch_id'] ?? '',
+            'mchid' => $config->get('mch_id', ''),
         ];
 
-        if (Pay::MODE_SERVICE == ($config['mode'] ?? null)) {
+        if (Pay::MODE_SERVICE == $config->get('mode')) {
             $body = [
-                'sp_mchid' => $config['mch_id'] ?? '',
-                'sub_mchid' => $rocket->getPayload()->get('sub_mchid', $config['sub_mch_id'] ?? ''),
+                'sp_mchid' => $config->get('mch_id', ''),
+                'sub_mchid' => $rocket->getPayload()->get('sub_mchid', $config->get('sub_mch_id', '')),
             ];
         }
 

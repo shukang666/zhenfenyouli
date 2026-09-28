@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | WeChatDeveloper
 // +----------------------------------------------------------------------
-// | 版权所有 2014~2025 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2014~2023 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -92,13 +92,13 @@ class BasicWePay
 
     /**
      * 获取微信支付通知
-     * @param string|array $xml
+     * @param string $xml
      * @return array
      * @throws \WeChat\Exceptions\InvalidResponseException
      */
     public function getNotify($xml = '')
     {
-        $data = is_array($xml) ? $xml : Tools::xml2arr(empty($xml) ? Tools::getRawInput() : $xml);
+        $data = Tools::xml2arr(empty($xml) ? Tools::getRawInput() : $xml);
         if (isset($data['sign']) && $this->getPaySign($data) === $data['sign']) {
             return $data;
         }
@@ -153,12 +153,14 @@ class BasicWePay
      * 数组直接转xml数据输出
      * @param array $data
      * @param bool $isReturn
-     * @return string|void
+     * @return string
      */
     public function toXml(array $data, $isReturn = false)
     {
         $xml = Tools::arr2xml($data);
-        if ($isReturn) return $xml;
+        if ($isReturn) {
+            return $xml;
+        }
         echo $xml;
     }
 

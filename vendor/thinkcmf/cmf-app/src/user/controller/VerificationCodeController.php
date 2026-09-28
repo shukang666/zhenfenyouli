@@ -18,12 +18,12 @@ class VerificationCodeController extends HomeBaseController
     public function send()
     {
         if (!$this->request->isPost()) {
-            $this->error(lang('illegal request'));
+            $this->error('非法请求！');
         }
         $validate = new \think\Validate();
         $validate->rule([
             'username' => 'require',
-//            'captcha'  => 'require',
+            'captcha'  => 'require',
         ]);
         $validate->message([
             'username.require' => '请输入手机号或邮箱!',
@@ -35,29 +35,18 @@ class VerificationCodeController extends HomeBaseController
             $this->error($validate->getError());
         }
 
-        $result = hook_one("check_third_party_captcha");
+        $captchaId = empty($data['captcha_id']) ? '' : $data['captcha_id'];
+        if (!cmf_captcha_check($data['captcha'], $captchaId, false)) {
+            $this->error('图片验证码错误!');
+        }
 
-        if ($result) {
-            if (is_string($result)) {
-                $this->error($result);
-            }
-        } else {
-            if (empty($data['captcha'])) {
-                $this->error('图片验证码不能为空!');
-            }
-            $captchaId = empty($data['captcha_id']) ? '' : $data['captcha_id'];
-            if (!cmf_captcha_check($data['captcha'], $captchaId, false)) {
-                $this->error('图片验证码错误!');
-            }
+        $registerCaptcha = session('register_captcha');
 
-            $registerCaptcha = session('register_captcha');
+        session('register_captcha', $data['captcha']);
 
-            session('register_captcha', $data['captcha']);
-
-            if ($registerCaptcha == $data['captcha']) {
-                cmf_captcha_check($data['captcha'], $captchaId, true);
-                $this->error('请输入新图片验证码!');
-            }
+        if ($registerCaptcha == $data['captcha']) {
+            cmf_captcha_check($data['captcha'], $captchaId, true);
+            $this->error('请输入新图片验证码!');
         }
 
         $accountType = '';
@@ -93,12 +82,8 @@ class VerificationCodeController extends HomeBaseController
 
             $emailTemplate = cmf_get_option('email_template_verification_code');
 
-            $user    = cmf_get_current_user();
-            if ($user === false) {
-                $username = $data['username'];
-            } else {
-                $username = empty($user['user_nickname']) ? $user['user_login'] : $user['user_nickname'];
-            }
+            $user     = cmf_get_current_user();
+            $username = empty($user['user_nickname']) ? $user['user_login'] : $user['user_nickname'];
 
             $message = htmlspecialchars_decode($emailTemplate['template']);
             $message = $this->view->display($message, ['code' => $code, 'username' => $username]);

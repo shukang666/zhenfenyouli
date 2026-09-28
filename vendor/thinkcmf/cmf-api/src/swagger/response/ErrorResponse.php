@@ -1,6 +1,6 @@
 <?php
 
-namespace api\swagger\response;
+namespace api\swagger\reponse;
 
 use OpenApi\Annotations as OA;
 

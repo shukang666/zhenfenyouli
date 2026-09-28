@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | WeChatDeveloper
 // +----------------------------------------------------------------------
-// | 版权所有 2014~2025 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2014~2023 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -42,12 +42,9 @@ class Transfers extends BasicWePay
             foreach ($body['transfer_detail_list'] as &$item) if (isset($item['user_name'])) {
                 $item['user_name'] = $this->rsaEncode($item['user_name']);
             }
-            if (empty($body['total_num'])) {
-                $body['total_num'] = count($body['transfer_detail_list']);
-            }
-            if (empty($body['total_amount'])) {
-                $body['total_amount'] = array_sum(array_column($body['transfer_detail_list'], 'transfer_amount'));
-            }
+        }
+        if (empty($body['total_num'])) {
+            $body['total_num'] = count($body['transfer_detail_list']);
         }
         return $this->doRequest('POST', '/v3/transfer/batches', json_encode($body, JSON_UNESCAPED_UNICODE), true);
     }

@@ -4,25 +4,22 @@ declare(strict_types=1);
 
 namespace Yansongda\Pay\Plugin\Wechat\Fund\Transfer;
 
-use Yansongda\Pay\Direction\OriginResponseDirection;
 use Yansongda\Pay\Exception\Exception;
 use Yansongda\Pay\Exception\InvalidParamsException;
+use Yansongda\Pay\Parser\OriginResponseParser;
 use Yansongda\Pay\Plugin\Wechat\GeneralPlugin;
 use Yansongda\Pay\Rocket;
 
-/**
- * @see https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_11.shtml
- */
 class DownloadReceiptPlugin extends GeneralPlugin
 {
     /**
-     * @throws InvalidParamsException
+     * @throws \Yansongda\Pay\Exception\InvalidParamsException
      */
     protected function getUri(Rocket $rocket): string
     {
         $payload = $rocket->getPayload();
 
-        if (!$payload->has('download_url')) {
+        if (is_null($payload->get('download_url'))) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
 
@@ -36,7 +33,7 @@ class DownloadReceiptPlugin extends GeneralPlugin
 
     protected function doSomething(Rocket $rocket): void
     {
-        $rocket->setDirection(OriginResponseDirection::class);
+        $rocket->setDirection(OriginResponseParser::class);
 
         $rocket->setPayload(null);
     }

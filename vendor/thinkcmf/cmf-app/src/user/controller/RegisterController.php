@@ -44,7 +44,7 @@ class RegisterController extends HomeBaseController
     {
         if ($this->request->isPost()) {
             $rules = [
-//                'captcha'  => 'require',
+                'captcha'  => 'require',
                 'code'     => 'require',
                 'password' => 'require|min:6|max:32',
 
@@ -61,7 +61,8 @@ class RegisterController extends HomeBaseController
                 'code.require'     => '验证码不能为空',
                 'password.require' => '密码不能为空',
                 'password.max'     => '密码不能超过32个字符',
-                'password.min'     => '密码不能小于6个字符'
+                'password.min'     => '密码不能小于6个字符',
+                'captcha.require'  => '验证码不能为空',
             ]);
 
             $data = $this->request->post();
@@ -69,31 +70,16 @@ class RegisterController extends HomeBaseController
                 $this->error($validate->getError());
             }
 
+            $captchaId = empty($data['_captcha_id']) ? '' : $data['_captcha_id'];
+            if (!cmf_captcha_check($data['captcha'], $captchaId)) {
+                $this->error('验证码错误');
+            }
 
             if (!$isOpenRegistration) {
-
-                $result = hook_one("check_third_party_captcha");
-
-                if ($result) {
-                    if (is_string($result)) {
-                        $this->error($result);
-                    }
-                } else {
-                    if(empty($data['captcha'])){
-                        $this->error('验证码不能为空!');
-                    }
-                    $captchaId = empty($data['_captcha_id']) ? '' : $data['_captcha_id'];
-
-                    if (!cmf_captcha_check($data['captcha'], $captchaId)) {
-                        $this->error('验证码错误');
-                    }
-                }
-
                 $errMsg = cmf_check_verification_code($data['username'], $data['code']);
                 if (!empty($errMsg)) {
                     $this->error($errMsg);
                 }
-
             }
 
             $register          = new UserModel();
@@ -124,7 +110,7 @@ class RegisterController extends HomeBaseController
             }
 
         } else {
-            $this->error(lang('illegal request'));
+            $this->error("请求错误");
         }
 
     }

@@ -9,9 +9,6 @@ use Yansongda\Pay\Exception\InvalidParamsException;
 use Yansongda\Pay\Plugin\Wechat\GeneralPlugin;
 use Yansongda\Pay\Rocket;
 
-/**
- * @see https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_3.shtml
- */
 class QueryBatchDetailIdPlugin extends GeneralPlugin
 {
     protected function getMethod(): string
@@ -25,13 +22,13 @@ class QueryBatchDetailIdPlugin extends GeneralPlugin
     }
 
     /**
-     * @throws InvalidParamsException
+     * @throws \Yansongda\Pay\Exception\InvalidParamsException
      */
     protected function getUri(Rocket $rocket): string
     {
         $payload = $rocket->getPayload();
 
-        if (!$payload->has('batch_id') || !$payload->get('detail_id')) {
+        if (is_null($payload->get('batch_id')) || is_null($payload->get('detail_id'))) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
 
@@ -41,14 +38,11 @@ class QueryBatchDetailIdPlugin extends GeneralPlugin
             $payload->get('detail_id');
     }
 
-    /**
-     * @throws InvalidParamsException
-     */
     protected function getPartnerUri(Rocket $rocket): string
     {
         $payload = $rocket->getPayload();
 
-        if (!$payload->has('batch_id') || !$payload->has('detail_id')) {
+        if (is_null($payload->get('batch_id')) || is_null($payload->get('detail_id'))) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
 

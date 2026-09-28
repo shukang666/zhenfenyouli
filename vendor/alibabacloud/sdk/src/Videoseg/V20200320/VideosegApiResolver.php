@@ -24,27 +24,17 @@ class Rpc extends \AlibabaCloud\Client\Resolver\Rpc
 
     /** @var string */
     public $method = 'POST';
+
+    /** @var string */
+    public $serviceCode = 'videoseg';
 }
 
 /**
- * @method string getJobId()
  * @method string getAsync()
+ * @method string getJobId()
  */
 class GetAsyncJobResult extends Rpc
 {
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJobId($value)
-    {
-        $this->data['JobId'] = $value;
-        $this->options['form_params']['JobId'] = $value;
-
-        return $this;
-    }
 
     /**
      * @param string $value
@@ -55,6 +45,19 @@ class GetAsyncJobResult extends Rpc
     {
         $this->data['Async'] = $value;
         $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withJobId($value)
+    {
+        $this->data['JobId'] = $value;
+        $this->options['form_params']['JobId'] = $value;
 
         return $this;
     }

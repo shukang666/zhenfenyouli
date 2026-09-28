@@ -31,7 +31,7 @@ class LoginController extends HomeBaseController
                 $redirect = base64_decode($redirect);
             }
         }
-        if (!empty($redirect)) {
+        if(!empty($redirect)){
             session('login_http_referer', $redirect);
         }
         if (cmf_is_user_login()) { //已经登录时直接跳到首页
@@ -119,10 +119,11 @@ class LoginController extends HomeBaseController
      */
     public function passwordReset()
     {
+
         if ($this->request->isPost()) {
             $validate = new \think\Validate();
             $validate->rule([
-                //'captcha'           => 'require',
+                'captcha'           => 'require',
                 'verification_code' => 'require',
                 'password'          => 'require|min:6|max:32',
             ]);
@@ -139,27 +140,15 @@ class LoginController extends HomeBaseController
                 $this->error($validate->getError());
             }
 
-            $result = hook_one("check_third_party_captcha");
-
-            if ($result) {
-                if (is_string($result)) {
-                    $this->error($result);
-                }
-            } else {
-                if(empty($data['captcha'])){
-                    $this->error('验证码不能为空!');
-                }
-                $captchaId = empty($data['_captcha_id']) ? '' : $data['_captcha_id'];
-                if (!cmf_captcha_check($data['captcha'], $captchaId)) {
-                    $this->error('验证码错误');
-                }
-
-                $errMsg = cmf_check_verification_code($data['username'], $data['verification_code']);
-                if (!empty($errMsg)) {
-                    $this->error($errMsg);
-                }
+            $captchaId = empty($data['_captcha_id']) ? '' : $data['_captcha_id'];
+            if (!cmf_captcha_check($data['captcha'], $captchaId)) {
+                $this->error('验证码错误');
             }
 
+            $errMsg = cmf_check_verification_code($data['username'], $data['verification_code']);
+            if (!empty($errMsg)) {
+                $this->error($errMsg);
+            }
 
             $userModel = new UserModel();
             if (Validate::is($data['username'], 'email')) {
@@ -187,7 +176,7 @@ class LoginController extends HomeBaseController
             }
 
         } else {
-            $this->error(lang('illegal request'));
+            $this->error("请求错误");
         }
     }
 

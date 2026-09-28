@@ -82,7 +82,7 @@ class RouteController extends AdminBaseController
             }
             $routeModel->save($data);
 
-            $this->success(lang('ADD_SUCCESS'), url("Route/index", ['id' => $routeModel->id]));
+            $this->success("添加成功！", url("Route/index", ['id' => $routeModel->id]));
         }
     }
 
@@ -131,7 +131,7 @@ class RouteController extends AdminBaseController
             }
             $routeModel->where('id', $data['id'])->update($data);
 
-            $this->success(lang('EDIT_SUCCESS'), url("Route/index"));
+            $this->success("保存成功！", url("Route/index"));
         }
     }
 
@@ -154,7 +154,7 @@ class RouteController extends AdminBaseController
             $id = $this->request->param('id', 0, 'intval');
             RouteModel::destroy($id);
 
-            $this->success(lang('DELETE_SUCCESS'));
+            $this->success("删除成功！");
         }
     }
 
@@ -180,7 +180,7 @@ class RouteController extends AdminBaseController
             $data['id']     = $id;
             $routeModel     = new RouteModel();
 
-            $routeModel->where('id', $data['id'])->update($data);
+            $routeModel->save($data);
             $this->success("禁用成功！");
         }
     }
@@ -207,7 +207,7 @@ class RouteController extends AdminBaseController
             $data['id']     = $id;
             $routeModel     = new RouteModel();
 
-            $routeModel->where('id', $data['id'])->update($data);
+            $routeModel->save($data);
             $this->success("启用成功！");
         }
     }
@@ -229,7 +229,7 @@ class RouteController extends AdminBaseController
     {
         $routeModel = new RouteModel();
         parent::listOrders($routeModel);
-        $this->success(lang('Sort update successful'));
+        $this->success("排序更新成功！");
     }
 
     /**

@@ -27,7 +27,7 @@ class HookController extends AdminBaseController
      * @adminMenu(
      *     'name'   => '钩子管理',
      *     'parent' => 'admin/Plugin/default',
-     *     'display'=> false,
+     *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10000,
      *     'icon'   => '',
@@ -47,7 +47,7 @@ class HookController extends AdminBaseController
      * 钩子插件管理
      * @adminMenu(
      *     'name'   => '钩子插件管理',
-     *     'parent' => 'admin/Plugin/default',
+     *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10000,
@@ -75,7 +75,7 @@ class HookController extends AdminBaseController
      * 钩子插件排序
      * @adminMenu(
      *     'name'   => '钩子插件排序',
-     *     'parent' => 'plugins',
+     *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10000,
@@ -89,14 +89,14 @@ class HookController extends AdminBaseController
         $hookPluginModel = new HookPluginModel();
         parent::listOrders($hookPluginModel);
 
-        $this->success(lang('Sort update successful'));
+        $this->success("排序更新成功！");
     }
 
     /**
      * 同步钩子
      * @adminMenu(
      *     'name'   => '同步钩子',
-     *     'parent' => 'admin/Dev/index',
+     *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10000,
@@ -107,7 +107,8 @@ class HookController extends AdminBaseController
      */
     public function sync()
     {
-        $apps = cmf_scan_dir($this->app->getAppPath() . '*', GLOB_ONLYDIR);
+
+        $apps = cmf_scan_dir(APP_PATH . '*', GLOB_ONLYDIR);
 
         array_push($apps, 'cmf', 'admin', 'user', 'swoole');
 

@@ -9,20 +9,16 @@ use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
-use Yansongda\Supports\Traits\Accessable;
-use Yansongda\Supports\Traits\Arrayable;
-use Yansongda\Supports\Traits\Serializable;
+use Serializable;
 
-class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable
+class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSerializable, Serializable
 {
-    use Serializable;
-    use Accessable;
-    use Arrayable;
-
     /**
      * The collection data.
+     *
+     * @var array
      */
-    protected array $items = [];
+    protected $items = [];
 
     /**
      * set data.
@@ -34,6 +30,50 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
         foreach ($this->getArrayableItems($items) as $key => $value) {
             $this->set($key, $value);
         }
+    }
+
+    /**
+     * To string.
+     */
+    public function __toString(): string
+    {
+        return $this->toJson();
+    }
+
+    /**
+     * Get a data by key.
+     *
+     * @return mixed
+     */
+    public function __get(string $key)
+    {
+        return $this->get($key);
+    }
+
+    /**
+     * Assigns a value to the specified data.
+     *
+     * @param mixed $value
+     */
+    public function __set(string $key, $value)
+    {
+        $this->set($key, $value);
+    }
+
+    /**
+     * Whether or not an data exists by key.
+     */
+    public function __isset(string $key): bool
+    {
+        return $this->has($key);
+    }
+
+    /**
+     * Unsets an data by key.
+     */
+    public function __unset(string $key)
+    {
+        $this->forget($key);
     }
 
     /**
@@ -86,8 +126,10 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      * Get all items except for those with the specified keys.
      *
      * @param mixed $keys
+     *
+     * @return static
      */
-    public function except($keys): self
+    public function except($keys): Collection
     {
         $keys = is_array($keys) ? $keys : func_get_args();
 
@@ -156,7 +198,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      * @param string|int|null $key
      * @param mixed           $value
      */
-    public function add($key, $value): void
+    public function add($key, $value)
     {
         Arr::set($this->items, $key, $value);
     }
@@ -167,7 +209,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      * @param string|int|null $key
      * @param mixed           $value
      */
-    public function set($key, $value): void
+    public function set($key, $value)
     {
         Arr::set($this->items, $key, $value);
     }
@@ -190,7 +232,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      *
      * @param string|int $key
      */
-    public function forget($key): void
+    public function forget($key)
     {
         Arr::forget($this->items, $key);
     }
@@ -218,8 +260,6 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 
     /**
      * Get and remove the last item from the collection.
-     *
-     * @return mixed
      */
     public function pop()
     {
@@ -254,10 +294,8 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     /**
      * Get and remove an item from the collection.
      *
-     * @param mixed $default
-     * @param mixed $key
-     *
-     * @return mixed
+     * @param mixed|null $default
+     * @param mixed      $key
      */
     public function pull($key, $default = null)
     {
@@ -432,6 +470,33 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     }
 
     /**
+     * (PHP 5 &gt;= 5.4.0)<br/>
+     * Specify data which should be serialized to JSON.
+     *
+     * @see http://php.net/manual/en/jsonserializable.jsonserialize.php
+     *
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     *               which is a value of any type other than a resource
+     */
+    public function jsonSerialize()
+    {
+        return $this->items;
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * String representation of object.
+     *
+     * @see http://php.net/manual/en/serializable.serialize.php
+     *
+     * @return string the string representation of the object or null
+     */
+    public function serialize(): string
+    {
+        return serialize($this->items);
+    }
+
+    /**
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Retrieve an external iterator.
      *
@@ -440,7 +505,6 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      * @return ArrayIterator An instance of an object implementing <b>Iterator</b> or
      *                       <b>ArrayIterator</b>
      */
-    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->items);
@@ -457,10 +521,44 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      *             <p>
      *             The return value is cast to an integer
      */
-    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->items);
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * Constructs the object.
+     *
+     * @see  http://php.net/manual/en/serializable.unserialize.php
+     *
+     * @param string $serialized <p>
+     *                           The string representation of the object.
+     *                           </p>
+     *
+     * @return mixed|void
+     */
+    public function unserialize($serialized)
+    {
+        return $this->items = unserialize($serialized);
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Whether a offset exists.
+     *
+     * @see http://php.net/manual/en/arrayaccess.offsetexists.php
+     *
+     * @param mixed $offset <p>
+     *                      An offset to check for.
+     *                      </p>
+     *
+     * @return bool true on success or false on failure.
+     *              The return value will be casted to boolean if non-boolean was returned
+     */
+    public function offsetExists($offset)
+    {
+        return $this->has($offset);
     }
 
     /**
@@ -473,12 +571,46 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      *                      The offset to unset.
      *                      </p>
      */
-    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         if ($this->offsetExists($offset)) {
             $this->forget($offset);
         }
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Offset to retrieve.
+     *
+     * @see http://php.net/manual/en/arrayaccess.offsetget.php
+     *
+     * @param mixed $offset <p>
+     *                      The offset to retrieve.
+     *                      </p>
+     *
+     * @return mixed Can return all value types
+     */
+    public function offsetGet($offset)
+    {
+        return $this->offsetExists($offset) ? $this->get($offset) : null;
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Offset to set.
+     *
+     * @see http://php.net/manual/en/arrayaccess.offsetset.php
+     *
+     * @param mixed $offset <p>
+     *                      The offset to assign the value to.
+     *                      </p>
+     * @param mixed $value  <p>
+     *                      The value to set.
+     *                      </p>
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->set($offset, $value);
     }
 
     /**

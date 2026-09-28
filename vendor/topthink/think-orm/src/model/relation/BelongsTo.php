@@ -14,6 +14,7 @@ namespace think\model\relation;
 
 use Closure;
 use think\db\BaseQuery as Query;
+use think\helper\Str;
 use think\Model;
 
 /**
@@ -72,8 +73,6 @@ class BelongsTo extends OneToOne
             }
 
             $relationModel->setParent(clone $this->parent);
-        } else {
-            $relationModel = $this->getDefaultModel();
         }
 
         return $relationModel;
@@ -183,10 +182,9 @@ class BelongsTo extends OneToOne
 
         $fields     = $this->getRelationQueryFields($fields, $model);
         $softDelete = $this->query->getOptions('soft_delete');
-        $query      = $query ?: $this->parent->db();
+        $query      = $query ?: $this->parent->db()->alias($model);
 
-        return $query->alias($model)
-            ->field($fields)
+        return $query->field($fields)
             ->join([$table => $relation], $model . '.' . $this->foreignKey . '=' . $relation . '.' . $this->localKey, $joinType ?: $this->joinType)
             ->when($softDelete, function ($query) use ($softDelete, $relation) {
                 $query->where($relation . strstr($softDelete[0], '.'), '=' == $softDelete[1][0] ? $softDelete[1][1] : null);
@@ -228,19 +226,19 @@ class BelongsTo extends OneToOne
             foreach ($resultSet as $result) {
                 // 关联模型
                 if (!isset($data[$result->$foreignKey])) {
-                    $relationModel = $this->getDefaultModel();
+                    $relationModel = null;
                 } else {
                     $relationModel = $data[$result->$foreignKey];
                     $relationModel->setParent(clone $result);
                     $relationModel->exists(true);
                 }
 
-                // 设置关联属性
-                $result->setRelation($relation, $relationModel);
                 if (!empty($this->bindAttr)) {
                     // 绑定关联属性
                     $this->bindAttr($result, $relationModel);
-                    $result->hidden([$relation], true);
+                } else {
+                    // 设置关联属性
+                    $result->setRelation($relation, $relationModel);
                 }
             }
         }
@@ -269,20 +267,19 @@ class BelongsTo extends OneToOne
 
         // 关联模型
         if (!isset($data[$result->$foreignKey])) {
-            $relationModel = $this->getDefaultModel();
+            $relationModel = null;
         } else {
             $relationModel = $data[$result->$foreignKey];
             $relationModel->setParent(clone $result);
             $relationModel->exists(true);
         }
 
-        // 设置关联属性
-        $result->setRelation($relation, $relationModel);
-
         if (!empty($this->bindAttr)) {
             // 绑定关联属性
             $this->bindAttr($result, $relationModel);
-            $result->hidden([$relation], true);
+        } else {
+            // 设置关联属性
+            $result->setRelation($relation, $relationModel);
         }
     }
 

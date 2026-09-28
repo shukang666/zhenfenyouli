@@ -17,16 +17,9 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method CreateInstance createInstance(array $options = [])
  * @method CreateResellerUserQuota createResellerUserQuota(array $options = [])
  * @method CreateResourcePackage createResourcePackage(array $options = [])
- * @method CreateSavingsPlansInstance createSavingsPlansInstance(array $options = [])
  * @method DeleteCostUnit deleteCostUnit(array $options = [])
- * @method DescribeCostBudgetsSummary describeCostBudgetsSummary(array $options = [])
- * @method DescribeInstanceAmortizedCostByAmortizationPeriod describeInstanceAmortizedCostByAmortizationPeriod(array $options = [])
- * @method DescribeInstanceAmortizedCostByAmortizationPeriodDate describeInstanceAmortizedCostByAmortizationPeriodDate(array $options = [])
- * @method DescribeInstanceAmortizedCostByConsumePeriod describeInstanceAmortizedCostByConsumePeriod(array $options = [])
  * @method DescribeInstanceBill describeInstanceBill(array $options = [])
  * @method DescribePricingModule describePricingModule(array $options = [])
- * @method DescribeProductAmortizedCostByAmortizationPeriod describeProductAmortizedCostByAmortizationPeriod(array $options = [])
- * @method DescribeProductAmortizedCostByConsumePeriod describeProductAmortizedCostByConsumePeriod(array $options = [])
  * @method DescribeResourceCoverageDetail describeResourceCoverageDetail(array $options = [])
  * @method DescribeResourceCoverageTotal describeResourceCoverageTotal(array $options = [])
  * @method DescribeResourcePackageProduct describeResourcePackageProduct(array $options = [])
@@ -38,14 +31,12 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DescribeSavingsPlansUsageTotal describeSavingsPlansUsageTotal(array $options = [])
  * @method DescribeSplitItemBill describeSplitItemBill(array $options = [])
  * @method EnableBillGeneration enableBillGeneration(array $options = [])
- * @method GetAccountRelation getAccountRelation(array $options = [])
  * @method GetCustomerAccountInfo getCustomerAccountInfo(array $options = [])
  * @method GetCustomerList getCustomerList(array $options = [])
  * @method GetOrderDetail getOrderDetail(array $options = [])
  * @method GetPayAsYouGoPrice getPayAsYouGoPrice(array $options = [])
  * @method GetResourcePackagePrice getResourcePackagePrice(array $options = [])
  * @method GetSubscriptionPrice getSubscriptionPrice(array $options = [])
- * @method InquiryPriceRefundInstance inquiryPriceRefundInstance(array $options = [])
  * @method ModifyAccountRelation modifyAccountRelation(array $options = [])
  * @method ModifyCostUnit modifyCostUnit(array $options = [])
  * @method ModifyInstance modifyInstance(array $options = [])
@@ -58,7 +49,6 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method QueryBillOverview queryBillOverview(array $options = [])
  * @method QueryBillToOSSSubscription queryBillToOSSSubscription(array $options = [])
  * @method QueryCashCoupons queryCashCoupons(array $options = [])
- * @method QueryCommodityList queryCommodityList(array $options = [])
  * @method QueryCostUnit queryCostUnit(array $options = [])
  * @method QueryCostUnitResource queryCostUnitResource(array $options = [])
  * @method QueryCustomerAddressList queryCustomerAddressList(array $options = [])
@@ -69,26 +59,23 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method QueryInstanceByTag queryInstanceByTag(array $options = [])
  * @method QueryInstanceGaapCost queryInstanceGaapCost(array $options = [])
  * @method QueryInvoicingCustomerList queryInvoicingCustomerList(array $options = [])
+ * @method QueryMonthlyBill queryMonthlyBill(array $options = [])
+ * @method QueryMonthlyInstanceConsumption queryMonthlyInstanceConsumption(array $options = [])
  * @method QueryOrders queryOrders(array $options = [])
  * @method QueryPermissionList queryPermissionList(array $options = [])
  * @method QueryPrepaidCards queryPrepaidCards(array $options = [])
- * @method QueryPriceEntityList queryPriceEntityList(array $options = [])
  * @method QueryProductList queryProductList(array $options = [])
  * @method QueryRedeem queryRedeem(array $options = [])
  * @method QueryRelationList queryRelationList(array $options = [])
  * @method QueryResellerAvailableQuota queryResellerAvailableQuota(array $options = [])
- * @method QueryResellerUserAlarmThreshold queryResellerUserAlarmThreshold(array $options = [])
  * @method QueryResourcePackageInstances queryResourcePackageInstances(array $options = [])
  * @method QueryRIUtilizationDetail queryRIUtilizationDetail(array $options = [])
  * @method QuerySavingsPlansDeductLog querySavingsPlansDeductLog(array $options = [])
- * @method QuerySavingsPlansDiscount querySavingsPlansDiscount(array $options = [])
  * @method QuerySavingsPlansInstance querySavingsPlansInstance(array $options = [])
  * @method QuerySettleBill querySettleBill(array $options = [])
- * @method QuerySkuPriceList querySkuPriceList(array $options = [])
+ * @method QuerySettlementBill querySettlementBill(array $options = [])
  * @method QuerySplitItemBill querySplitItemBill(array $options = [])
  * @method QueryUserOmsData queryUserOmsData(array $options = [])
- * @method RefundInstance refundInstance(array $options = [])
- * @method ReleaseInstance releaseInstance(array $options = [])
  * @method RelieveAccountRelation relieveAccountRelation(array $options = [])
  * @method RenewInstance renewInstance(array $options = [])
  * @method RenewResourcePackage renewResourcePackage(array $options = [])
@@ -119,9 +106,6 @@ class Rpc extends \AlibabaCloud\Client\Resolver\Rpc
 
     /** @var string */
     public $method = 'POST';
-
-    /** @var string */
-    public $serviceCode = 'bssopenapi';
 }
 
 /**
@@ -297,8 +281,6 @@ class ChangeResellerConsumeAmount extends Rpc
  * @method string getRequestId()
  * @method $this withRequestId($value)
  * @method array getPermissionCodes()
- * @method string getRelationId()
- * @method $this withRelationId($value)
  */
 class ConfirmRelation extends Rpc
 {
@@ -411,9 +393,9 @@ class CreateCostUnit extends Rpc
  * @method $this withProductType($value)
  * @method string getRenewPeriod()
  * @method $this withRenewPeriod($value)
+ * @method array getParameter()
  * @method string getRenewalStatus()
  * @method $this withRenewalStatus($value)
- * @method array getParameter()
  */
 class CreateInstance extends Rpc
 {
@@ -474,34 +456,6 @@ class CreateResourcePackage extends Rpc
 }
 
 /**
- * @method string getSpecification()
- * @method $this withSpecification($value)
- * @method string getPoolValue()
- * @method $this withPoolValue($value)
- * @method string getCommodityCode()
- * @method $this withCommodityCode($value)
- * @method string getType()
- * @method $this withType($value)
- * @method string getEffectiveDate()
- * @method $this withEffectiveDate($value)
- * @method string getDuration()
- * @method $this withDuration($value)
- * @method string getSpecType()
- * @method $this withSpecType($value)
- * @method string getExtendMap()
- * @method $this withExtendMap($value)
- * @method string getPayMode()
- * @method $this withPayMode($value)
- * @method string getRegion()
- * @method $this withRegion($value)
- * @method string getPricingCycle()
- * @method $this withPricingCycle($value)
- */
-class CreateSavingsPlansInstance extends Rpc
-{
-}
-
-/**
  * @method string getUnitId()
  * @method $this withUnitId($value)
  * @method string getOwnerUid()
@@ -509,538 +463,6 @@ class CreateSavingsPlansInstance extends Rpc
  */
 class DeleteCostUnit extends Rpc
 {
-}
-
-/**
- * @method string getBudgetStatus()
- * @method $this withBudgetStatus($value)
- * @method string getBudgetType()
- * @method $this withBudgetType($value)
- * @method string getNextToken()
- * @method $this withNextToken($value)
- * @method string getMaxResults()
- * @method $this withMaxResults($value)
- * @method string getBudgetName()
- * @method $this withBudgetName($value)
- */
-class DescribeCostBudgetsSummary extends Rpc
-{
-}
-
-/**
- * @method string getProductDetail()
- * @method string getProductCode()
- * @method array getBillOwnerIdList()
- * @method string getSubscriptionType()
- * @method string getBillingCycle()
- * @method string getCostUnitCode()
- * @method array getConsumePeriodFilter()
- * @method string getNextToken()
- * @method array getBillUserIdList()
- * @method array getInstanceIdList()
- * @method string getMaxResults()
- */
-class DescribeInstanceAmortizedCostByAmortizationPeriod extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductDetail($value)
-    {
-        $this->data['ProductDetail'] = $value;
-        $this->options['form_params']['ProductDetail'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductCode($value)
-    {
-        $this->data['ProductCode'] = $value;
-        $this->options['form_params']['ProductCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billOwnerIdList
-     *
-     * @return $this
-     */
-	public function withBillOwnerIdList(array $billOwnerIdList)
-	{
-	    $this->data['BillOwnerIdList'] = $billOwnerIdList;
-		foreach ($billOwnerIdList as $i => $iValue) {
-			$this->options['form_params']['BillOwnerIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSubscriptionType($value)
-    {
-        $this->data['SubscriptionType'] = $value;
-        $this->options['form_params']['SubscriptionType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBillingCycle($value)
-    {
-        $this->data['BillingCycle'] = $value;
-        $this->options['form_params']['BillingCycle'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCostUnitCode($value)
-    {
-        $this->data['CostUnitCode'] = $value;
-        $this->options['form_params']['CostUnitCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $consumePeriodFilter
-     *
-     * @return $this
-     */
-	public function withConsumePeriodFilter(array $consumePeriodFilter)
-	{
-	    $this->data['ConsumePeriodFilter'] = $consumePeriodFilter;
-		foreach ($consumePeriodFilter as $i => $iValue) {
-			$this->options['form_params']['ConsumePeriodFilter.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNextToken($value)
-    {
-        $this->data['NextToken'] = $value;
-        $this->options['form_params']['NextToken'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billUserIdList
-     *
-     * @return $this
-     */
-	public function withBillUserIdList(array $billUserIdList)
-	{
-	    $this->data['BillUserIdList'] = $billUserIdList;
-		foreach ($billUserIdList as $i => $iValue) {
-			$this->options['form_params']['BillUserIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param array $instanceIdList
-     *
-     * @return $this
-     */
-	public function withInstanceIdList(array $instanceIdList)
-	{
-	    $this->data['InstanceIdList'] = $instanceIdList;
-		foreach ($instanceIdList as $i => $iValue) {
-			$this->options['form_params']['InstanceIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMaxResults($value)
-    {
-        $this->data['MaxResults'] = $value;
-        $this->options['form_params']['MaxResults'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getProductCode()
- * @method string getAmortizationDateStart()
- * @method string getSubscriptionType()
- * @method string getCostUnitCode()
- * @method string getNextToken()
- * @method array getBillUserIdList()
- * @method string getProductDetail()
- * @method array getBillOwnerIdList()
- * @method string getBillingCycle()
- * @method string getAmortizationDateEnd()
- * @method array getInstanceIdList()
- * @method string getMaxResults()
- */
-class DescribeInstanceAmortizedCostByAmortizationPeriodDate extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductCode($value)
-    {
-        $this->data['ProductCode'] = $value;
-        $this->options['form_params']['ProductCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAmortizationDateStart($value)
-    {
-        $this->data['AmortizationDateStart'] = $value;
-        $this->options['form_params']['AmortizationDateStart'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSubscriptionType($value)
-    {
-        $this->data['SubscriptionType'] = $value;
-        $this->options['form_params']['SubscriptionType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCostUnitCode($value)
-    {
-        $this->data['CostUnitCode'] = $value;
-        $this->options['form_params']['CostUnitCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNextToken($value)
-    {
-        $this->data['NextToken'] = $value;
-        $this->options['form_params']['NextToken'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billUserIdList
-     *
-     * @return $this
-     */
-	public function withBillUserIdList(array $billUserIdList)
-	{
-	    $this->data['BillUserIdList'] = $billUserIdList;
-		foreach ($billUserIdList as $i => $iValue) {
-			$this->options['form_params']['BillUserIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductDetail($value)
-    {
-        $this->data['ProductDetail'] = $value;
-        $this->options['form_params']['ProductDetail'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billOwnerIdList
-     *
-     * @return $this
-     */
-	public function withBillOwnerIdList(array $billOwnerIdList)
-	{
-	    $this->data['BillOwnerIdList'] = $billOwnerIdList;
-		foreach ($billOwnerIdList as $i => $iValue) {
-			$this->options['form_params']['BillOwnerIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBillingCycle($value)
-    {
-        $this->data['BillingCycle'] = $value;
-        $this->options['form_params']['BillingCycle'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAmortizationDateEnd($value)
-    {
-        $this->data['AmortizationDateEnd'] = $value;
-        $this->options['form_params']['AmortizationDateEnd'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $instanceIdList
-     *
-     * @return $this
-     */
-	public function withInstanceIdList(array $instanceIdList)
-	{
-	    $this->data['InstanceIdList'] = $instanceIdList;
-		foreach ($instanceIdList as $i => $iValue) {
-			$this->options['form_params']['InstanceIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMaxResults($value)
-    {
-        $this->data['MaxResults'] = $value;
-        $this->options['form_params']['MaxResults'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getProductDetail()
- * @method string getProductCode()
- * @method array getBillOwnerIdList()
- * @method string getSubscriptionType()
- * @method string getBillingCycle()
- * @method string getCostUnitCode()
- * @method array getAmortizationPeriodFilter()
- * @method string getNextToken()
- * @method array getBillUserIdList()
- * @method array getInstanceIdList()
- * @method string getMaxResults()
- */
-class DescribeInstanceAmortizedCostByConsumePeriod extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductDetail($value)
-    {
-        $this->data['ProductDetail'] = $value;
-        $this->options['form_params']['ProductDetail'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductCode($value)
-    {
-        $this->data['ProductCode'] = $value;
-        $this->options['form_params']['ProductCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billOwnerIdList
-     *
-     * @return $this
-     */
-	public function withBillOwnerIdList(array $billOwnerIdList)
-	{
-	    $this->data['BillOwnerIdList'] = $billOwnerIdList;
-		foreach ($billOwnerIdList as $i => $iValue) {
-			$this->options['form_params']['BillOwnerIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSubscriptionType($value)
-    {
-        $this->data['SubscriptionType'] = $value;
-        $this->options['form_params']['SubscriptionType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBillingCycle($value)
-    {
-        $this->data['BillingCycle'] = $value;
-        $this->options['form_params']['BillingCycle'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCostUnitCode($value)
-    {
-        $this->data['CostUnitCode'] = $value;
-        $this->options['form_params']['CostUnitCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $amortizationPeriodFilter
-     *
-     * @return $this
-     */
-	public function withAmortizationPeriodFilter(array $amortizationPeriodFilter)
-	{
-	    $this->data['AmortizationPeriodFilter'] = $amortizationPeriodFilter;
-		foreach ($amortizationPeriodFilter as $i => $iValue) {
-			$this->options['form_params']['AmortizationPeriodFilter.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNextToken($value)
-    {
-        $this->data['NextToken'] = $value;
-        $this->options['form_params']['NextToken'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billUserIdList
-     *
-     * @return $this
-     */
-	public function withBillUserIdList(array $billUserIdList)
-	{
-	    $this->data['BillUserIdList'] = $billUserIdList;
-		foreach ($billUserIdList as $i => $iValue) {
-			$this->options['form_params']['BillUserIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param array $instanceIdList
-     *
-     * @return $this
-     */
-	public function withInstanceIdList(array $instanceIdList)
-	{
-	    $this->data['InstanceIdList'] = $instanceIdList;
-		foreach ($instanceIdList as $i => $iValue) {
-			$this->options['form_params']['InstanceIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMaxResults($value)
-    {
-        $this->data['MaxResults'] = $value;
-        $this->options['form_params']['MaxResults'] = $value;
-
-        return $this;
-    }
 }
 
 /**
@@ -1087,310 +509,6 @@ class DescribeInstanceBill extends Rpc
  */
 class DescribePricingModule extends Rpc
 {
-}
-
-/**
- * @method string getProductDetail()
- * @method string getProductCode()
- * @method array getBillOwnerIdList()
- * @method string getSubscriptionType()
- * @method string getBillingCycle()
- * @method string getCostUnitCode()
- * @method array getConsumePeriodFilter()
- * @method string getNextToken()
- * @method array getBillUserIdList()
- * @method string getMaxResults()
- */
-class DescribeProductAmortizedCostByAmortizationPeriod extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductDetail($value)
-    {
-        $this->data['ProductDetail'] = $value;
-        $this->options['form_params']['ProductDetail'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductCode($value)
-    {
-        $this->data['ProductCode'] = $value;
-        $this->options['form_params']['ProductCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billOwnerIdList
-     *
-     * @return $this
-     */
-	public function withBillOwnerIdList(array $billOwnerIdList)
-	{
-	    $this->data['BillOwnerIdList'] = $billOwnerIdList;
-		foreach ($billOwnerIdList as $i => $iValue) {
-			$this->options['form_params']['BillOwnerIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSubscriptionType($value)
-    {
-        $this->data['SubscriptionType'] = $value;
-        $this->options['form_params']['SubscriptionType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBillingCycle($value)
-    {
-        $this->data['BillingCycle'] = $value;
-        $this->options['form_params']['BillingCycle'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCostUnitCode($value)
-    {
-        $this->data['CostUnitCode'] = $value;
-        $this->options['form_params']['CostUnitCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $consumePeriodFilter
-     *
-     * @return $this
-     */
-	public function withConsumePeriodFilter(array $consumePeriodFilter)
-	{
-	    $this->data['ConsumePeriodFilter'] = $consumePeriodFilter;
-		foreach ($consumePeriodFilter as $i => $iValue) {
-			$this->options['form_params']['ConsumePeriodFilter.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNextToken($value)
-    {
-        $this->data['NextToken'] = $value;
-        $this->options['form_params']['NextToken'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billUserIdList
-     *
-     * @return $this
-     */
-	public function withBillUserIdList(array $billUserIdList)
-	{
-	    $this->data['BillUserIdList'] = $billUserIdList;
-		foreach ($billUserIdList as $i => $iValue) {
-			$this->options['form_params']['BillUserIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMaxResults($value)
-    {
-        $this->data['MaxResults'] = $value;
-        $this->options['form_params']['MaxResults'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getProductDetail()
- * @method string getProductCode()
- * @method array getBillOwnerIdList()
- * @method string getSubscriptionType()
- * @method string getBillingCycle()
- * @method string getCostUnitCode()
- * @method array getAmortizationPeriodFilter()
- * @method string getNextToken()
- * @method array getBillUserIdList()
- * @method string getMaxResults()
- */
-class DescribeProductAmortizedCostByConsumePeriod extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductDetail($value)
-    {
-        $this->data['ProductDetail'] = $value;
-        $this->options['form_params']['ProductDetail'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProductCode($value)
-    {
-        $this->data['ProductCode'] = $value;
-        $this->options['form_params']['ProductCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billOwnerIdList
-     *
-     * @return $this
-     */
-	public function withBillOwnerIdList(array $billOwnerIdList)
-	{
-	    $this->data['BillOwnerIdList'] = $billOwnerIdList;
-		foreach ($billOwnerIdList as $i => $iValue) {
-			$this->options['form_params']['BillOwnerIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSubscriptionType($value)
-    {
-        $this->data['SubscriptionType'] = $value;
-        $this->options['form_params']['SubscriptionType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBillingCycle($value)
-    {
-        $this->data['BillingCycle'] = $value;
-        $this->options['form_params']['BillingCycle'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCostUnitCode($value)
-    {
-        $this->data['CostUnitCode'] = $value;
-        $this->options['form_params']['CostUnitCode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $amortizationPeriodFilter
-     *
-     * @return $this
-     */
-	public function withAmortizationPeriodFilter(array $amortizationPeriodFilter)
-	{
-	    $this->data['AmortizationPeriodFilter'] = $amortizationPeriodFilter;
-		foreach ($amortizationPeriodFilter as $i => $iValue) {
-			$this->options['form_params']['AmortizationPeriodFilter.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNextToken($value)
-    {
-        $this->data['NextToken'] = $value;
-        $this->options['form_params']['NextToken'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param array $billUserIdList
-     *
-     * @return $this
-     */
-	public function withBillUserIdList(array $billUserIdList)
-	{
-	    $this->data['BillUserIdList'] = $billUserIdList;
-		foreach ($billUserIdList as $i => $iValue) {
-			$this->options['form_params']['BillUserIdList.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMaxResults($value)
-    {
-        $this->data['MaxResults'] = $value;
-        $this->options['form_params']['MaxResults'] = $value;
-
-        return $this;
-    }
 }
 
 /**
@@ -1599,19 +717,6 @@ class EnableBillGeneration extends Rpc
 }
 
 /**
- * @method string getRequestId()
- * @method $this withRequestId($value)
- * @method string getRelationId()
- * @method $this withRelationId($value)
- */
-class GetAccountRelation extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
-}
-
-/**
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
  */
@@ -1751,54 +856,23 @@ class GetSubscriptionPrice extends Rpc
 }
 
 /**
- * @method string getProductCode()
- * @method $this withProductCode($value)
- * @method string getClientToken()
- * @method $this withClientToken($value)
- * @method string getProductType()
- * @method $this withProductType($value)
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- */
-class InquiryPriceRefundInstance extends Rpc
-{
-}
-
-/**
  * @method string getChildNick()
  * @method $this withChildNick($value)
- * @method string getParentUserId()
- * @method $this withParentUserId($value)
- * @method string getRelationId()
- * @method $this withRelationId($value)
- * @method array getRoleCodes()
  * @method string getRelationOperation()
  * @method $this withRelationOperation($value)
  * @method string getRelationType()
  * @method $this withRelationType($value)
+ * @method string getParentUserId()
+ * @method $this withParentUserId($value)
  * @method string getChildUserId()
  * @method $this withChildUserId($value)
  * @method string getRequestId()
  * @method $this withRequestId($value)
  * @method array getPermissionCodes()
+ * @method array getRoleCodes()
  */
 class ModifyAccountRelation extends Rpc
 {
-
-    /**
-     * @param array $roleCodes
-     *
-     * @return $this
-     */
-	public function withRoleCodes(array $roleCodes)
-	{
-	    $this->data['RoleCodes'] = $roleCodes;
-		foreach ($roleCodes as $i => $iValue) {
-			$this->options['query']['RoleCodes.' . ($i + 1)] = $iValue;
-		}
-
-		return $this;
-    }
 
     /**
      * @param array $permissionCodes
@@ -1810,6 +884,21 @@ class ModifyAccountRelation extends Rpc
 	    $this->data['PermissionCodes'] = $permissionCodes;
 		foreach ($permissionCodes as $i => $iValue) {
 			$this->options['query']['PermissionCodes.' . ($i + 1)] = $iValue;
+		}
+
+		return $this;
+    }
+
+    /**
+     * @param array $roleCodes
+     *
+     * @return $this
+     */
+	public function withRoleCodes(array $roleCodes)
+	{
+	    $this->data['RoleCodes'] = $roleCodes;
+		foreach ($roleCodes as $i => $iValue) {
+			$this->options['query']['RoleCodes.' . ($i + 1)] = $iValue;
 		}
 
 		return $this;
@@ -1942,24 +1031,18 @@ class QueryAccountTransactionDetails extends Rpc
 /**
  * @method string getPageNum()
  * @method $this withPageNum($value)
- * @method string getTransactionType()
- * @method $this withTransactionType($value)
  * @method string getCreateTimeEnd()
  * @method $this withCreateTimeEnd($value)
  * @method string getRecordID()
  * @method $this withRecordID($value)
  * @method string getPageSize()
  * @method $this withPageSize($value)
- * @method string getTransactionChannel()
- * @method $this withTransactionChannel($value)
  * @method string getTransactionChannelSN()
  * @method $this withTransactionChannelSN($value)
  * @method string getCreateTimeStart()
  * @method $this withCreateTimeStart($value)
  * @method string getTransactionNumber()
  * @method $this withTransactionNumber($value)
- * @method string getTransactionFlow()
- * @method $this withTransactionFlow($value)
  */
 class QueryAccountTransactions extends Rpc
 {
@@ -2055,17 +1138,6 @@ class QueryBillToOSSSubscription extends Rpc
  */
 class QueryCashCoupons extends Rpc
 {
-}
-
-/**
- * @method string getProductCode()
- * @method $this withProductCode($value)
- */
-class QueryCommodityList extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
 }
 
 /**
@@ -2218,9 +1290,9 @@ class QueryInstanceBill extends Rpc
 
 /**
  * @method array getResourceId()
+ * @method array getTag()
  * @method string getResourceType()
  * @method $this withResourceType($value)
- * @method array getTag()
  */
 class QueryInstanceByTag extends Rpc
 {
@@ -2288,6 +1360,34 @@ class QueryInvoicingCustomerList extends Rpc
 }
 
 /**
+ * @method string getBillingCycle()
+ * @method $this withBillingCycle($value)
+ */
+class QueryMonthlyBill extends Rpc
+{
+}
+
+/**
+ * @method string getProductCode()
+ * @method $this withProductCode($value)
+ * @method string getSubscriptionType()
+ * @method $this withSubscriptionType($value)
+ * @method string getBillingCycle()
+ * @method $this withBillingCycle($value)
+ * @method string getOwnerId()
+ * @method $this withOwnerId($value)
+ * @method string getPageNum()
+ * @method $this withPageNum($value)
+ * @method string getProductType()
+ * @method $this withProductType($value)
+ * @method string getPageSize()
+ * @method $this withPageSize($value)
+ */
+class QueryMonthlyInstanceConsumption extends Rpc
+{
+}
+
+/**
  * @method string getProductCode()
  * @method $this withProductCode($value)
  * @method string getSubscriptionType()
@@ -2331,17 +1431,6 @@ class QueryPermissionList extends Rpc
  */
 class QueryPrepaidCards extends Rpc
 {
-}
-
-/**
- * @method string getCommodityCode()
- * @method $this withCommodityCode($value)
- */
-class QueryPriceEntityList extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
 }
 
 /**
@@ -2414,16 +1503,6 @@ class QueryResellerAvailableQuota extends Rpc
 }
 
 /**
- * @method string getAlarmType()
- * @method $this withAlarmType($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- */
-class QueryResellerUserAlarmThreshold extends Rpc
-{
-}
-
-/**
  * @method string getExpiryTimeEnd()
  * @method $this withExpiryTimeEnd($value)
  * @method string getProductCode()
@@ -2434,8 +1513,6 @@ class QueryResellerUserAlarmThreshold extends Rpc
  * @method $this withExpiryTimeStart($value)
  * @method string getPageNum()
  * @method $this withPageNum($value)
- * @method string getIncludePartner()
- * @method $this withIncludePartner($value)
  * @method string getPageSize()
  * @method $this withPageSize($value)
  */
@@ -2486,35 +1563,6 @@ class QuerySavingsPlansDeductLog extends Rpc
 }
 
 /**
- * @method string getCommodityCode()
- * @method $this withCommodityCode($value)
- * @method string getLocale()
- * @method $this withLocale($value)
- * @method string getPageNum()
- * @method $this withPageNum($value)
- * @method string getCycle()
- * @method $this withCycle($value)
- * @method string getSpec()
- * @method $this withSpec($value)
- * @method string getModuleCode()
- * @method $this withModuleCode($value)
- * @method string getPayMode()
- * @method $this withPayMode($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
- * @method string getSpnType()
- * @method $this withSpnType($value)
- * @method string getRegion()
- * @method $this withRegion($value)
- */
-class QuerySavingsPlansDiscount extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
-}
-
-/**
  * @method string getEndTime()
  * @method $this withEndTime($value)
  * @method string getStartTime()
@@ -2528,8 +1576,6 @@ class QuerySavingsPlansDiscount extends Rpc
  * @method string getPageSize()
  * @method $this withPageSize($value)
  * @method array getTag()
- * @method string getStatus()
- * @method $this withStatus($value)
  */
 class QuerySavingsPlansInstance extends Rpc
 {
@@ -2586,22 +1632,31 @@ class QuerySettleBill extends Rpc
 }
 
 /**
- * @method string getNextPageToken()
- * @method $this withNextPageToken($value)
- * @method string getCommodityCode()
- * @method $this withCommodityCode($value)
- * @method string getPriceFactorConditionMap()
- * @method $this withPriceFactorConditionMap($value)
- * @method string getPriceEntityCode()
- * @method $this withPriceEntityCode($value)
+ * @method string getProductCode()
+ * @method $this withProductCode($value)
+ * @method string getIsHideZeroCharge()
+ * @method $this withIsHideZeroCharge($value)
+ * @method string getSubscriptionType()
+ * @method $this withSubscriptionType($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
+ * @method string getBillingCycle()
+ * @method $this withBillingCycle($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
+ * @method string getOwnerId()
+ * @method $this withOwnerId($value)
+ * @method string getPageNum()
+ * @method $this withPageNum($value)
+ * @method string getType()
+ * @method $this withType($value)
+ * @method string getProductType()
+ * @method $this withProductType($value)
  * @method string getPageSize()
  * @method $this withPageSize($value)
  */
-class QuerySkuPriceList extends Rpc
+class QuerySettlementBill extends Rpc
 {
-
-    /** @var string */
-    public $method = 'GET';
 }
 
 /**
@@ -2647,42 +1702,6 @@ class QueryUserOmsData extends Rpc
 }
 
 /**
- * @method string getProductCode()
- * @method $this withProductCode($value)
- * @method string getClientToken()
- * @method $this withClientToken($value)
- * @method string getImmediatelyRelease()
- * @method $this withImmediatelyRelease($value)
- * @method string getProductType()
- * @method $this withProductType($value)
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- */
-class RefundInstance extends Rpc
-{
-}
-
-/**
- * @method string getProductCode()
- * @method $this withProductCode($value)
- * @method string getSubscriptionType()
- * @method $this withSubscriptionType($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getProductType()
- * @method $this withProductType($value)
- * @method string getInstanceIds()
- * @method $this withInstanceIds($value)
- * @method string getRegion()
- * @method $this withRegion($value)
- * @method string getRenewStatus()
- * @method $this withRenewStatus($value)
- */
-class ReleaseInstance extends Rpc
-{
-}
-
-/**
  * @method string getRelationType()
  * @method $this withRelationType($value)
  * @method string getParentUserId()
@@ -2691,8 +1710,6 @@ class ReleaseInstance extends Rpc
  * @method $this withChildUserId($value)
  * @method string getRequestId()
  * @method $this withRequestId($value)
- * @method string getRelationId()
- * @method $this withRelationId($value)
  */
 class RelieveAccountRelation extends Rpc
 {
@@ -2859,8 +1876,6 @@ class SetResellerUserQuota extends Rpc
 }
 
 /**
- * @method string getStopMode()
- * @method $this withStopMode($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
  * @method string getBusinessType()
@@ -2879,12 +1894,8 @@ class SetResellerUserStatus extends Rpc
  * @method $this withSubscribeType($value)
  * @method string getSubscribeBucket()
  * @method $this withSubscribeBucket($value)
- * @method string getBucketPath()
- * @method $this withBucketPath($value)
  * @method string getBeginBillingCycle()
  * @method $this withBeginBillingCycle($value)
- * @method string getRowLimitPerFile()
- * @method $this withRowLimitPerFile($value)
  * @method string getMultAccountRelSubscribe()
  * @method $this withMultAccountRelSubscribe($value)
  */
@@ -2894,9 +1905,9 @@ class SubscribeBillToOSS extends Rpc
 
 /**
  * @method array getResourceId()
+ * @method array getTag()
  * @method string getResourceType()
  * @method $this withResourceType($value)
- * @method array getTag()
  */
 class TagResources extends Rpc
 {
@@ -2951,9 +1962,9 @@ class UnsubscribeBillToOSS extends Rpc
  * @method string getAll()
  * @method $this withAll($value)
  * @method array getResourceId()
+ * @method array getTagKey()
  * @method string getResourceType()
  * @method $this withResourceType($value)
- * @method array getTagKey()
  */
 class UntagResources extends Rpc
 {

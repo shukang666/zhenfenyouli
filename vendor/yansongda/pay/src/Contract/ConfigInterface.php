@@ -18,5 +18,5 @@ interface ConfigInterface
     /**
      * @param mixed $value
      */
-    public function set(string $key, $value): void;
+    public function set(string $key, $value);
 }

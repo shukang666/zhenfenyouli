@@ -8,16 +8,14 @@ use Yansongda\Pay\Exception\Exception;
 use Yansongda\Pay\Exception\InvalidParamsException;
 use Yansongda\Pay\Rocket;
 
-/**
- * @see https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter5_1_11.shtml
- */
 class QueryPlugin extends \Yansongda\Pay\Plugin\Wechat\Pay\Common\QueryPlugin
 {
     protected function getUri(Rocket $rocket): string
     {
         $payload = $rocket->getPayload();
 
-        if (!$payload->has('combine_out_trade_no') && !$payload->has('transaction_id')) {
+        if (is_null($payload->get('combine_out_trade_no')) &&
+            is_null($payload->get('transaction_id'))) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
 

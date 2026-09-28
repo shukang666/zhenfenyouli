@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2021 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2019 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -10,7 +10,7 @@
 // +----------------------------------------------------------------------
 declare (strict_types=1);
 
-namespace cmf\console\command;
+namespace think\console\command;
 
 use think\console\Command;
 use think\console\input\Option;
@@ -26,24 +26,18 @@ class VendorPublish extends Command
 
     public function handle()
     {
+
         $force = $this->input->getOption('force');
 
         if (is_file($path = $this->app->getRootPath() . 'vendor/composer/installed.json')) {
             $packages = json_decode(@file_get_contents($path), true);
-            // Compatibility with Composer 2.0
-            if (isset($packages['packages'])) {
-                $packages = $packages['packages'];
-            }
+
             foreach ($packages as $package) {
                 //配置
                 $configDir = $this->app->getConfigPath();
 
                 if (!empty($package['extra']['think']['config'])) {
 
-                    $ignorePackages = ['topthink/think-captcha', 'topthink/think-trace'];
-                    if (in_array($package['name'], $ignorePackages)) {
-                        continue;
-                    }
                     $installPath = $this->app->getRootPath() . 'vendor/' . $package['name'] . DIRECTORY_SEPARATOR;
 
                     foreach ((array)$package['extra']['think']['config'] as $name => $file) {
@@ -62,13 +56,9 @@ class VendorPublish extends Command
                         }
 
                         try {
-                            $dir = dirname($target);
-                            if (!file_exists($dir)) {
-                                mkdir($dir, 0755, true);
-                            }
                             copy($source, $target);
                         } catch (\Exception $e) {
-                            $this->output->info($target);
+                            //$this->output->info($e->getTraceAsString() . "\n" . $e->getMessage());
                         }
                     }
                 }

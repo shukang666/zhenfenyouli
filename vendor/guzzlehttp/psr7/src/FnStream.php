@@ -7,18 +7,17 @@ namespace GuzzleHttp\Psr7;
 use Psr\Http\Message\StreamInterface;
 
 /**
- * Compose stream implementations based on a hash of callables.
+ * Compose stream implementations based on a hash of functions.
  *
  * Allows for easy testing and extension of a provided stream without needing
  * to create a concrete class for a simple extension point.
  */
-#[\AllowDynamicProperties]
 final class FnStream implements StreamInterface
 {
     private const SLOTS = [
         '__toString', 'close', 'detach', 'rewind',
         'getSize', 'tell', 'eof', 'isSeekable', 'seek', 'isWritable', 'write',
-        'isReadable', 'read', 'getContents', 'getMetadata',
+        'isReadable', 'read', 'getContents', 'getMetadata'
     ];
 
     /** @var array<string, callable> */
@@ -31,9 +30,9 @@ final class FnStream implements StreamInterface
     {
         $this->methods = $methods;
 
-        // Create the callables on the class
+        // Create the functions on the class
         foreach ($methods as $name => $fn) {
-            $this->{'_fn_'.$name} = $fn;
+            $this->{'_fn_' . $name} = $fn;
         }
     }
 
@@ -45,7 +44,7 @@ final class FnStream implements StreamInterface
     public function __get(string $name): void
     {
         throw new \BadMethodCallException(str_replace('_fn_', '', $name)
-            .'() is not implemented in the FnStream');
+            . '() is not implemented in the FnStream');
     }
 
     /**
@@ -54,7 +53,7 @@ final class FnStream implements StreamInterface
     public function __destruct()
     {
         if (isset($this->_fn_close)) {
-            ($this->_fn_close)();
+            call_user_func($this->_fn_close);
         }
     }
 
@@ -73,7 +72,7 @@ final class FnStream implements StreamInterface
      * specific method calls.
      *
      * @param StreamInterface         $stream  Stream to decorate
-     * @param array<string, callable> $methods Hash of method name to a callable
+     * @param array<string, callable> $methods Hash of method name to a closure
      *
      * @return FnStream
      */
@@ -93,133 +92,83 @@ final class FnStream implements StreamInterface
     public function __toString(): string
     {
         try {
-            /** @var string */
-            return ($this->_fn___toString)();
+            return call_user_func($this->_fn___toString);
         } catch (\Throwable $e) {
             if (\PHP_VERSION_ID >= 70400) {
                 throw $e;
             }
             trigger_error(sprintf('%s::__toString exception: %s', self::class, (string) $e), E_USER_ERROR);
-
             return '';
         }
     }
 
     public function close(): void
     {
-        ($this->_fn_close)();
+        call_user_func($this->_fn_close);
     }
 
     public function detach()
     {
-        return ($this->_fn_detach)();
+        return call_user_func($this->_fn_detach);
     }
 
     public function getSize(): ?int
     {
-        return ($this->_fn_getSize)();
+        return call_user_func($this->_fn_getSize);
     }
 
     public function tell(): int
     {
-        return ($this->_fn_tell)();
+        return call_user_func($this->_fn_tell);
     }
 
     public function eof(): bool
     {
-        return ($this->_fn_eof)();
+        return call_user_func($this->_fn_eof);
     }
 
     public function isSeekable(): bool
     {
-        return ($this->_fn_isSeekable)();
+        return call_user_func($this->_fn_isSeekable);
     }
 
     public function rewind(): void
     {
-        ($this->_fn_rewind)();
+        call_user_func($this->_fn_rewind);
     }
 
     public function seek($offset, $whence = SEEK_SET): void
     {
-        if (!\is_int($offset)) {
-            \trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing %s to StreamInterface::seek() is deprecated; guzzlehttp/psr7 3.0 requires int for $offset.',
-                \get_debug_type($offset)
-            );
-        }
-
-        if (!\is_int($whence)) {
-            \trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing %s to StreamInterface::seek() is deprecated; guzzlehttp/psr7 3.0 requires int for $whence.',
-                \get_debug_type($whence)
-            );
-        }
-
-        ($this->_fn_seek)($offset, $whence);
+        call_user_func($this->_fn_seek, $offset, $whence);
     }
 
     public function isWritable(): bool
     {
-        return ($this->_fn_isWritable)();
+        return call_user_func($this->_fn_isWritable);
     }
 
     public function write($string): int
     {
-        if (!\is_string($string)) {
-            \trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing %s to StreamInterface::write() is deprecated; guzzlehttp/psr7 3.0 requires string for $string.',
-                \get_debug_type($string)
-            );
-        }
-
-        return ($this->_fn_write)($string);
+        return call_user_func($this->_fn_write, $string);
     }
 
     public function isReadable(): bool
     {
-        return ($this->_fn_isReadable)();
+        return call_user_func($this->_fn_isReadable);
     }
 
     public function read($length): string
     {
-        if (!\is_int($length)) {
-            \trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing %s to StreamInterface::read() is deprecated; guzzlehttp/psr7 3.0 requires int for $length.',
-                \get_debug_type($length)
-            );
-        }
-
-        return ($this->_fn_read)($length);
+        return call_user_func($this->_fn_read, $length);
     }
 
     public function getContents(): string
     {
-        return ($this->_fn_getContents)();
+        return call_user_func($this->_fn_getContents);
     }
 
-    /**
-     * @return mixed
-     */
     public function getMetadata($key = null)
     {
-        if ($key !== null && !\is_string($key)) {
-            \trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing %s to StreamInterface::getMetadata() is deprecated; guzzlehttp/psr7 3.0 requires string|null for $key.',
-                \get_debug_type($key)
-            );
-        }
-
-        return ($this->_fn_getMetadata)($key);
+        return call_user_func($this->_fn_getMetadata, $key);
     }
 }

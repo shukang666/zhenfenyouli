@@ -6,12 +6,20 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
 
 /**
  * @method CreateAsyncPredict createAsyncPredict(array $options = [])
- * @method FindUserReport4Alinlp findUserReport4Alinlp(array $options = [])
+ * @method CreateDataset createDataset(array $options = [])
+ * @method CreateDatasetRecord createDatasetRecord(array $options = [])
+ * @method CreateModel createModel(array $options = [])
+ * @method CreateProject createProject(array $options = [])
+ * @method DeleteModel deleteModel(array $options = [])
+ * @method DeployModel deployModel(array $options = [])
  * @method GetAsyncPredict getAsyncPredict(array $options = [])
+ * @method GetModel getModel(array $options = [])
  * @method GetPredictResult getPredictResult(array $options = [])
- * @method GetPredictResultHigh getPredictResultHigh(array $options = [])
+ * @method ListDataset listDataset(array $options = [])
+ * @method ListModels listModels(array $options = [])
+ * @method RunContactReview runContactReview(array $options = [])
  * @method RunPreTrainService runPreTrainService(array $options = [])
- * @method RunPreTrainServiceNew runPreTrainServiceNew(array $options = [])
+ * @method RunSmartCallService runSmartCallService(array $options = [])
  */
 class NlpAutomlApiResolver extends ApiResolver
 {
@@ -27,6 +35,9 @@ class Rpc extends \AlibabaCloud\Client\Resolver\Rpc
 
     /** @var string */
     public $method = 'POST';
+
+    /** @var string */
+    public $serviceCode = 'nlpautoml';
 }
 
 /**
@@ -36,10 +47,8 @@ class Rpc extends \AlibabaCloud\Client\Resolver\Rpc
  * @method string getFetchContent()
  * @method string getContent()
  * @method string getFileContent()
- * @method string getServiceName()
  * @method string getProduct()
  * @method string getModelId()
- * @method string getServiceVersion()
  * @method string getFileUrl()
  * @method string getModelVersion()
  */
@@ -129,19 +138,6 @@ class CreateAsyncPredict extends Rpc
      *
      * @return $this
      */
-    public function withServiceName($value)
-    {
-        $this->data['ServiceName'] = $value;
-        $this->options['form_params']['ServiceName'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withProduct($value)
     {
         $this->data['Product'] = $value;
@@ -159,19 +155,6 @@ class CreateAsyncPredict extends Rpc
     {
         $this->data['ModelId'] = $value;
         $this->options['form_params']['ModelId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withServiceVersion($value)
-    {
-        $this->data['ServiceVersion'] = $value;
-        $this->options['form_params']['ServiceVersion'] = $value;
 
         return $this;
     }
@@ -204,13 +187,11 @@ class CreateAsyncPredict extends Rpc
 }
 
 /**
- * @method string getCustomerUserParentId()
- * @method string getEndTime()
- * @method string getBeginTime()
- * @method string getType()
- * @method string getModelType()
+ * @method string getProduct()
+ * @method string getDatasetName()
+ * @method string getProjectId()
  */
-class FindUserReport4Alinlp extends Rpc
+class CreateDataset extends Rpc
 {
 
     /**
@@ -218,10 +199,10 @@ class FindUserReport4Alinlp extends Rpc
      *
      * @return $this
      */
-    public function withCustomerUserParentId($value)
+    public function withProduct($value)
     {
-        $this->data['CustomerUserParentId'] = $value;
-        $this->options['form_params']['CustomerUserParentId'] = $value;
+        $this->data['Product'] = $value;
+        $this->options['form_params']['Product'] = $value;
 
         return $this;
     }
@@ -231,10 +212,10 @@ class FindUserReport4Alinlp extends Rpc
      *
      * @return $this
      */
-    public function withEndTime($value)
+    public function withDatasetName($value)
     {
-        $this->data['EndTime'] = $value;
-        $this->options['form_params']['EndTime'] = $value;
+        $this->data['DatasetName'] = $value;
+        $this->options['form_params']['DatasetName'] = $value;
 
         return $this;
     }
@@ -244,10 +225,32 @@ class FindUserReport4Alinlp extends Rpc
      *
      * @return $this
      */
-    public function withBeginTime($value)
+    public function withProjectId($value)
     {
-        $this->data['BeginTime'] = $value;
-        $this->options['form_params']['BeginTime'] = $value;
+        $this->data['ProjectId'] = $value;
+        $this->options['form_params']['ProjectId'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getDatasetRecord()
+ * @method string getDatasetId()
+ * @method string getProjectId()
+ */
+class CreateDatasetRecord extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withDatasetRecord($value)
+    {
+        $this->data['DatasetRecord'] = $value;
+        $this->options['form_params']['DatasetRecord'] = $value;
 
         return $this;
     }
@@ -257,10 +260,89 @@ class FindUserReport4Alinlp extends Rpc
      *
      * @return $this
      */
-    public function withType($value)
+    public function withDatasetId($value)
     {
-        $this->data['Type'] = $value;
-        $this->options['form_params']['Type'] = $value;
+        $this->data['DatasetId'] = $value;
+        $this->options['form_params']['DatasetId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectId($value)
+    {
+        $this->data['ProjectId'] = $value;
+        $this->options['form_params']['ProjectId'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getIsIncrementalTrain()
+ * @method string getModelName()
+ * @method string getDatasetIdList()
+ * @method string getTestDatasetIdList()
+ * @method string getModelType()
+ * @method string getProjectId()
+ * @method string getProduct()
+ * @method string getModelId()
+ */
+class CreateModel extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withIsIncrementalTrain($value)
+    {
+        $this->data['IsIncrementalTrain'] = $value;
+        $this->options['form_params']['IsIncrementalTrain'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withModelName($value)
+    {
+        $this->data['ModelName'] = $value;
+        $this->options['form_params']['ModelName'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withDatasetIdList($value)
+    {
+        $this->data['DatasetIdList'] = $value;
+        $this->options['form_params']['DatasetIdList'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withTestDatasetIdList($value)
+    {
+        $this->data['TestDatasetIdList'] = $value;
+        $this->options['form_params']['TestDatasetIdList'] = $value;
 
         return $this;
     }
@@ -277,6 +359,231 @@ class FindUserReport4Alinlp extends Rpc
 
         return $this;
     }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectId($value)
+    {
+        $this->data['ProjectId'] = $value;
+        $this->options['form_params']['ProjectId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProduct($value)
+    {
+        $this->data['Product'] = $value;
+        $this->options['form_params']['Product'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withModelId($value)
+    {
+        $this->data['ModelId'] = $value;
+        $this->options['form_params']['ModelId'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getProjectName()
+ * @method string getProduct()
+ * @method string getProjectDescription()
+ * @method string getProjectType()
+ */
+class CreateProject extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectName($value)
+    {
+        $this->data['ProjectName'] = $value;
+        $this->options['form_params']['ProjectName'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProduct($value)
+    {
+        $this->data['Product'] = $value;
+        $this->options['form_params']['Product'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectDescription($value)
+    {
+        $this->data['ProjectDescription'] = $value;
+        $this->options['form_params']['ProjectDescription'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectType($value)
+    {
+        $this->data['ProjectType'] = $value;
+        $this->options['form_params']['ProjectType'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getProduct()
+ * @method string getModelId()
+ * @method string getProjectId()
+ */
+class DeleteModel extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProduct($value)
+    {
+        $this->data['Product'] = $value;
+        $this->options['form_params']['Product'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withModelId($value)
+    {
+        $this->data['ModelId'] = $value;
+        $this->options['form_params']['ModelId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectId($value)
+    {
+        $this->data['ProjectId'] = $value;
+        $this->options['form_params']['ProjectId'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getProduct()
+ * @method string getModelId()
+ * @method string getOptType()
+ * @method string getProjectId()
+ * @method string getModelVersion()
+ */
+class DeployModel extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProduct($value)
+    {
+        $this->data['Product'] = $value;
+        $this->options['form_params']['Product'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withModelId($value)
+    {
+        $this->data['ModelId'] = $value;
+        $this->options['form_params']['ModelId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withOptType($value)
+    {
+        $this->data['OptType'] = $value;
+        $this->options['form_params']['OptType'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectId($value)
+    {
+        $this->data['ProjectId'] = $value;
+        $this->options['form_params']['ProjectId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withModelVersion($value)
+    {
+        $this->data['ModelVersion'] = $value;
+        $this->options['form_params']['ModelVersion'] = $value;
+
+        return $this;
+    }
 }
 
 /**
@@ -290,6 +597,68 @@ class GetAsyncPredict extends Rpc
 
     /** @var string */
     public $method = 'GET';
+}
+
+/**
+ * @method string getProduct()
+ * @method string getModelId()
+ * @method string getProjectId()
+ * @method string getModelVersion()
+ */
+class GetModel extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProduct($value)
+    {
+        $this->data['Product'] = $value;
+        $this->options['form_params']['Product'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withModelId($value)
+    {
+        $this->data['ModelId'] = $value;
+        $this->options['form_params']['ModelId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectId($value)
+    {
+        $this->data['ProjectId'] = $value;
+        $this->options['form_params']['ProjectId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withModelVersion($value)
+    {
+        $this->data['ModelVersion'] = $value;
+        $this->options['form_params']['ModelVersion'] = $value;
+
+        return $this;
+    }
 }
 
 /**
@@ -383,28 +752,13 @@ class GetPredictResult extends Rpc
 }
 
 /**
- * @method string getTopK()
  * @method string getProduct()
- * @method string getModelId()
- * @method string getDetailTag()
- * @method string getContent()
- * @method string getModelVersion()
+ * @method string getPageNumber()
+ * @method string getPageSize()
+ * @method string getProjectId()
  */
-class GetPredictResultHigh extends Rpc
+class ListDataset extends Rpc
 {
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTopK($value)
-    {
-        $this->data['TopK'] = $value;
-        $this->options['form_params']['TopK'] = $value;
-
-        return $this;
-    }
 
     /**
      * @param string $value
@@ -424,10 +778,10 @@ class GetPredictResultHigh extends Rpc
      *
      * @return $this
      */
-    public function withModelId($value)
+    public function withPageNumber($value)
     {
-        $this->data['ModelId'] = $value;
-        $this->options['form_params']['ModelId'] = $value;
+        $this->data['PageNumber'] = $value;
+        $this->options['form_params']['PageNumber'] = $value;
 
         return $this;
     }
@@ -437,10 +791,10 @@ class GetPredictResultHigh extends Rpc
      *
      * @return $this
      */
-    public function withDetailTag($value)
+    public function withPageSize($value)
     {
-        $this->data['DetailTag'] = $value;
-        $this->options['form_params']['DetailTag'] = $value;
+        $this->data['PageSize'] = $value;
+        $this->options['form_params']['PageSize'] = $value;
 
         return $this;
     }
@@ -450,10 +804,33 @@ class GetPredictResultHigh extends Rpc
      *
      * @return $this
      */
-    public function withContent($value)
+    public function withProjectId($value)
     {
-        $this->data['Content'] = $value;
-        $this->options['form_params']['Content'] = $value;
+        $this->data['ProjectId'] = $value;
+        $this->options['form_params']['ProjectId'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getProduct()
+ * @method string getPageNumber()
+ * @method string getPageSize()
+ * @method string getProjectId()
+ */
+class ListModels extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProduct($value)
+    {
+        $this->data['Product'] = $value;
+        $this->options['form_params']['Product'] = $value;
 
         return $this;
     }
@@ -463,10 +840,84 @@ class GetPredictResultHigh extends Rpc
      *
      * @return $this
      */
-    public function withModelVersion($value)
+    public function withPageNumber($value)
     {
-        $this->data['ModelVersion'] = $value;
-        $this->options['form_params']['ModelVersion'] = $value;
+        $this->data['PageNumber'] = $value;
+        $this->options['form_params']['PageNumber'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withPageSize($value)
+    {
+        $this->data['PageSize'] = $value;
+        $this->options['form_params']['PageSize'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProjectId($value)
+    {
+        $this->data['ProjectId'] = $value;
+        $this->options['form_params']['ProjectId'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getProduct()
+ * @method string getContactScene()
+ * @method string getContactPath()
+ */
+class RunContactReview extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProduct($value)
+    {
+        $this->data['Product'] = $value;
+        $this->options['form_params']['Product'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withContactScene($value)
+    {
+        $this->data['ContactScene'] = $value;
+        $this->options['form_params']['ContactScene'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withContactPath($value)
+    {
+        $this->data['ContactPath'] = $value;
+        $this->options['form_params']['ContactPath'] = $value;
 
         return $this;
     }
@@ -536,11 +987,12 @@ class RunPreTrainService extends Rpc
 
 /**
  * @method string getProduct()
- * @method string getPredictContent()
- * @method string getServiceVersion()
+ * @method string getSessionId()
+ * @method string getRobotId()
+ * @method string getParamContent()
  * @method string getServiceName()
  */
-class RunPreTrainServiceNew extends Rpc
+class RunSmartCallService extends Rpc
 {
 
     /**
@@ -561,10 +1013,10 @@ class RunPreTrainServiceNew extends Rpc
      *
      * @return $this
      */
-    public function withPredictContent($value)
+    public function withSessionId($value)
     {
-        $this->data['PredictContent'] = $value;
-        $this->options['form_params']['PredictContent'] = $value;
+        $this->data['SessionId'] = $value;
+        $this->options['form_params']['SessionId'] = $value;
 
         return $this;
     }
@@ -574,10 +1026,23 @@ class RunPreTrainServiceNew extends Rpc
      *
      * @return $this
      */
-    public function withServiceVersion($value)
+    public function withRobotId($value)
     {
-        $this->data['ServiceVersion'] = $value;
-        $this->options['form_params']['ServiceVersion'] = $value;
+        $this->data['RobotId'] = $value;
+        $this->options['form_params']['RobotId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withParamContent($value)
+    {
+        $this->data['ParamContent'] = $value;
+        $this->options['form_params']['ParamContent'] = $value;
 
         return $this;
     }

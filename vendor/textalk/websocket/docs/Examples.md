@@ -65,13 +65,10 @@ php examples/echoserver.php --debug //  Use runtime debugging
 ```
 
 These strings can be sent as message to trigger server to perform actions;
-* `auth` -  Server will respond with auth header if provided by client
-* `close` -  Server will close current connection
-* `exit` - Server will close all active connections
-* `headers` - Server will respond with all headers provided by client
+* `exit` - Server will initiate close procedure
 * `ping` - Server will send a ping message
-* `pong` - Server will send a pong message
-* `stop` - Server will stop listening
+* `headers` - Server will respond with all headers provided by client
+* `auth` -  Server will respond with auth header if provided by client
 * For other sent strings, server will respond with the same strings
 
 ## The `random` client

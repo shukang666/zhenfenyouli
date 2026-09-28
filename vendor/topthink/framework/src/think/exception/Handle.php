@@ -19,6 +19,7 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\Request;
 use think\Response;
+use think\validate\ValidateRule;
 use Throwable;
 
 /**
@@ -165,6 +166,8 @@ class Handle
                     'source'  => $this->getSourceCode($nextException),
                 ];
             } while ($nextException = $nextException->getPrevious());
+
+
             $data = [
                 'code'    => $this->getCode($exception),
                 'message' => $this->getMessage($exception),
@@ -176,7 +179,8 @@ class Handle
                     'Files'               => $this->app->request->file(),
                     'Cookies'             => $this->app->request->cookie(),
                     'Session'             => $this->app->exists('session') ? $this->app->session->all() : [],
-                    'Server/Request Data' => $this->app->request->server(),
+//                    'Server/Request Data' => $this->app->request->server(),
+                    'Server/Request Data' => $this->changeToUtf8($this->app->request->server()),
                 ],
             ];
         } else {
@@ -328,5 +332,20 @@ class Handle
         $const = get_defined_constants(true);
 
         return $const['user'] ?? [];
+    }
+
+
+    /**
+     * 将中文转为utf-8编码
+     * @access protected
+     * @param $data array
+     * @return array   转化后的数组
+     */
+    protected function changeToUtf8(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            $data[$key] =  mb_convert_encoding($value, "UTF-8","GBK, GBK2312");
+        }
+        return $data;
     }
 }

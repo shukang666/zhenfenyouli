@@ -15,8 +15,10 @@ class Pipeline
 {
     /**
      * The container implementation.
+     *
+     * @var \Psr\Container\ContainerInterface
      */
-    protected ContainerInterface $container;
+    protected $container;
 
     /**
      * The object being passed through the pipeline.
@@ -27,13 +29,17 @@ class Pipeline
 
     /**
      * The array of class pipes.
+     *
+     * @var array
      */
-    protected array $pipes = [];
+    protected $pipes = [];
 
     /**
      * The method to call on each pipe.
+     *
+     * @var string
      */
-    protected string $method = 'handle';
+    protected $method = 'handle';
 
     public function __construct(ContainerInterface $container)
     {

@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | WeChatDeveloper
 // +----------------------------------------------------------------------
-// | 版权所有 2014~2025 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2014~2023 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -42,14 +42,13 @@ class Cert extends BasicWePay
     public function download()
     {
         try {
-            $certs = [];
+            $aes = new DecryptAes($this->config['mch_v3_key']);
             $result = $this->doRequest('GET', '/v3/certificates');
-            $decrypt = new DecryptAes($this->config['mch_v3_key']);
+            $certs = [];
             foreach ($result['data'] as $vo) {
                 $certs[$vo['serial_no']] = [
                     'expire'  => strtotime($vo['expire_time']),
-                    'serial'  => $vo['serial_no'],
-                    'content' => $decrypt->decryptToString(
+                    'content' => $aes->decryptToString(
                         $vo['encrypt_certificate']['associated_data'],
                         $vo['encrypt_certificate']['nonce'],
                         $vo['encrypt_certificate']['ciphertext']

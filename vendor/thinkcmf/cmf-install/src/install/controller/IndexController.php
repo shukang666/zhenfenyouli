@@ -17,7 +17,6 @@ use app\user\logic\UserActionLogic;
 use cmf\controller\BaseController;
 use think\facade\Db;
 use think\facade\Lang;
-use think\migration\Migrate;
 
 require_once __DIR__ . '/../common.php';
 
@@ -130,7 +129,7 @@ class IndexController extends BaseController
             $err++;
         }
 
-        if (class_exists('SplFileInfo')) {
+        if (extension_loaded('fileinfo')) {
             $data['fileinfo'] = '<i class="fa fa-check correct"></i> 已开启';
         } else {
             $data['fileinfo'] = '<i class="fa fa-remove error"></i> 未开启';
@@ -155,26 +154,22 @@ class IndexController extends BaseController
             $data['show_always_populate_raw_post_data_tip'] = true;
             $err++;
         } else {
+
             $data['always_populate_raw_post_data'] = '<i class="fa fa-check correct"></i> 已关闭';
         }
 
         $folders    = [
-            CMF_ROOT . 'api' . DIRECTORY_SEPARATOR,
-            CMF_ROOT . 'app' . DIRECTORY_SEPARATOR,
-            CMF_ROOT . 'data' . DIRECTORY_SEPARATOR,
-            WEB_ROOT . 'plugins' . DIRECTORY_SEPARATOR,
-            WEB_ROOT . 'themes' . DIRECTORY_SEPARATOR,
-            WEB_ROOT . 'themes/admin_simpleboot3' . DIRECTORY_SEPARATOR,
-            WEB_ROOT . 'upload' . DIRECTORY_SEPARATOR,
+            realpath(CMF_ROOT . 'data') . DIRECTORY_SEPARATOR,
+            realpath('./plugins') . DIRECTORY_SEPARATOR,
+            realpath('./themes') . DIRECTORY_SEPARATOR,
+            realpath('./upload') . DIRECTORY_SEPARATOR,
+
         ];
         $newFolders = [];
         foreach ($folders as $dir) {
-            if (empty($dir)) {
-                continue;
-            }
             $testDir = $dir;
             sp_dir_create($testDir);
-            if (cmf_test_write($testDir)) {
+            if (sp_testwrite($testDir)) {
                 $newFolders[$dir]['w'] = true;
             } else {
                 $newFolders[$dir]['w'] = false;
@@ -282,18 +277,21 @@ class IndexController extends BaseController
         $sqlIndex = $this->request->param('sql_index', 0, 'intval');
 
         $this->updateDbConfig($dbConfig);
-        $db = Db::connect('install_db', true);
+        $db = Db::connect('install_db');
+
         if ($sqlIndex >= count($sql)) {
             $installError = session('install.error');
             $this->success("安装完成!", '', ['done' => 1, 'error' => $installError]);
         }
 
         $sqlToExec = $sql[$sqlIndex] . ';';
-        $result    = sp_execute_sql($db, $sqlToExec);
+
+        $result = sp_execute_sql($db, $sqlToExec);
 
         if (!empty($result['error'])) {
             $installError = session('install.error');
             $installError = empty($installError) ? 0 : $installError;
+
             session('install.error', $installError + 1);
             $this->error($result['message'], '', [
                 'sql'       => $sqlToExec,
@@ -315,32 +313,11 @@ class IndexController extends BaseController
 
         $result = sp_create_db_config($dbConfig);
 
-        cmf_clear_cache();
-
         if ($result) {
             $this->success("数据配置文件写入成功!");
         } else {
             $this->error("数据配置文件写入失败!");
         }
-    }
-
-    public function migrate()
-    {
-        // run the migrations
-        $migrate = new Migrate();
-        $migrate->migrate();
-
-        $apps = cmf_scan_dir(app()->getAppPath() . '*', GLOB_ONLYDIR);
-        foreach ($apps as $app) {
-            $migrate = new Migrate($app);
-            $path    = $migrate->getPath();
-            if (!is_dir($path)) {
-                continue;
-            }
-            $migrate->migrate();
-        }
-
-        $this->success("数据库迁移完成!");
     }
 
     public function setSite()
@@ -386,8 +363,6 @@ class IndexController extends BaseController
     public function installAppMenus()
     {
         $apps = cmf_scan_dir(CMF_ROOT . 'app/*', GLOB_ONLYDIR);
-        array_push($apps, 'admin', 'user');
-        $apps = array_unique($apps);
         foreach ($apps as $app) {
             // 导入后台菜单
             MenuLogic::importMenus($app);
@@ -399,7 +374,6 @@ class IndexController extends BaseController
     public function installAppHooks()
     {
         $apps = cmf_scan_dir(CMF_ROOT . 'app/*', GLOB_ONLYDIR);
-        array_push($apps, 'admin', 'user');
         foreach ($apps as $app) {
 
             // 导入应用钩子
@@ -413,7 +387,6 @@ class IndexController extends BaseController
     public function installAppUserActions()
     {
         $apps = cmf_scan_dir(CMF_ROOT . 'app/*', GLOB_ONLYDIR);
-        array_push($apps, 'admin', 'user');
         foreach ($apps as $app) {
             // 导入应用用户行为
             UserActionLogic::importUserActions($app);
@@ -488,9 +461,6 @@ class IndexController extends BaseController
     {
         $oldDbConfig                              = config('database');
         $oldDbConfig['connections']['install_db'] = $dbConfig;
-        if (cmf_is_cli()) {
-            $oldDbConfig['connections']['install_db']['break_reconnect'] = true;
-        }
         config($oldDbConfig, 'database');
     }
 

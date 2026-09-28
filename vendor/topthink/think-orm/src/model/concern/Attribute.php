@@ -251,17 +251,6 @@ trait Attribute
     }
 
     /**
-     * 刷新对象原始数据（为当前数据）
-     * @access public
-     * @return $this
-     */
-    public function refreshOrigin()
-    {
-        $this->origin = $this->data;
-        return $this;
-    }
-
-    /**
      * 获取对象原始数据 如果不存在指定字段返回null
      * @access public
      * @param  string $name 字段名 留空获取全部
@@ -382,11 +371,6 @@ trait Attribute
         } elseif (isset($this->type[$name])) {
             // 类型转换
             $value = $this->writeTransform($value, $this->type[$name]);
-        } elseif ($this->isRelationAttr($name)) {
-            $this->relation[$name] = $value;
-        } elseif ((array_key_exists($name, $this->origin) || empty($this->origin)) && is_object($value) && method_exists($value, '__toString')) {
-            // 对象类型
-            $value = $value->__toString();
         }
 
         // 设置数据对象属性
@@ -447,7 +431,6 @@ trait Attribute
                 break;
             case 'array':
                 $value = (array) $value;
-                // no break
             case 'json':
                 $option = !empty($param) ? (int) $param : JSON_UNESCAPED_UNICODE;
                 $value  = json_encode($value, $option);
@@ -513,9 +496,7 @@ trait Attribute
                 $value = $this->getJsonValue($fieldName, $value);
             } else {
                 $closure = $this->withAttr[$fieldName];
-                if ($closure instanceof \Closure) {
-                    $value = $closure($value, $this->data);
-                }
+                $value   = $closure($value, $this->data);
             }
         } elseif (method_exists($this, $method)) {
             if ($relation) {
@@ -548,10 +529,6 @@ trait Attribute
      */
     protected function getJsonValue($name, $value)
     {
-        if (is_null($value)) {
-            return $value;
-        }
-
         foreach ($this->withAttr[$name] as $key => $closure) {
             if ($this->jsonAssoc) {
                 $value[$key] = $closure($value[$key], $value);
@@ -654,11 +631,11 @@ trait Attribute
      * @param  callable     $callback   闭包获取器
      * @return $this
      */
-    public function withAttr($name, callable $callback = null)
+    public function withAttribute($name, callable $callback = null)
     {
         if (is_array($name)) {
             foreach ($name as $key => $val) {
-                $this->withAttr($key, $val);
+                $this->withAttribute($key, $val);
             }
         } else {
             $name = $this->getRealFieldName($name);

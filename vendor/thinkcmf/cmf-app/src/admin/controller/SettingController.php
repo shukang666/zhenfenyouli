@@ -69,7 +69,7 @@ class SettingController extends AdminBaseController
         }
 
         if (APP_DEBUG && false) { // TODO 没确定要不要可以设置默认应用
-            $apps = cmf_scan_dir($this->app->getAppPath() . '*', GLOB_ONLYDIR);
+            $apps = cmf_scan_dir(APP_PATH . '*', GLOB_ONLYDIR);
             $apps = array_diff($apps, $noNeedDirs);
             $this->assign('apps', $apps);
         }
@@ -143,7 +143,7 @@ class SettingController extends AdminBaseController
 
             cmf_set_option('admin_settings', $adminSettings);
 
-            $this->success(lang('EDIT_SUCCESS'), '');
+            $this->success("保存成功！", '');
 
         }
     }
@@ -258,7 +258,7 @@ class SettingController extends AdminBaseController
             $uploadSetting = $this->request->post();
 
             cmf_set_option('upload_setting', $uploadSetting);
-            $this->success(lang('EDIT_SUCCESS'));
+            $this->success('保存成功！');
         }
 
     }

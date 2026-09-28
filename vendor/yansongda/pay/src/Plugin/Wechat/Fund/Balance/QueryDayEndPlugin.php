@@ -21,13 +21,13 @@ class QueryDayEndPlugin extends GeneralPlugin
     }
 
     /**
-     * @throws InvalidParamsException
+     * @throws \Yansongda\Pay\Exception\InvalidParamsException
      */
     protected function getUri(Rocket $rocket): string
     {
         $payload = $rocket->getPayload();
 
-        if (!$payload->has('account_type') || !$payload->has('date')) {
+        if (is_null($payload->get('account_type')) || is_null($payload->get('date'))) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
 

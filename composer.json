@@ -48,8 +48,7 @@
         "yansongda/pay": "~3.0",
         "phpoffice/phpexcel": "^1.8",
         "textalk/websocket": "^1.5",
-        "einhasad/mpdf-light": "^8.2",
-        "qcloud/cos-sdk-v5": "^2.6"
+        "mpdf/mpdf":"^8.2"
 
 
     },
@@ -73,9 +72,7 @@
     },
     "config": {
         "preferred-install": "dist",
-        "vendor-dir": "vendor",
-        "process-timeout": 1200,
-        "secure-http": true
+        "vendor-dir": "vendor"
     },
     "scripts": {
         "post-autoload-dump": [
@@ -84,9 +81,5 @@
         ]
     },
     "repositories": {
-        "packagist": {
-            "type": "composer",
-            "url": "https://mirrors.cloud.tencent.com/composer/"
-        }
     }
 }

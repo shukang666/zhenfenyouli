@@ -14,7 +14,8 @@ make test
 
 ## Continuous integration
 
-GitHub Actions are run on PHP versions `7.4`, `8.0`, `8.1` and `8.2`.
+GitHub Actions are run on PHP versions
+`7.2`, `7.3`, `7.4` and `8.0`.
 
 Code coverage by [Coveralls](https://coveralls.io/github/Textalk/websocket-php).
 

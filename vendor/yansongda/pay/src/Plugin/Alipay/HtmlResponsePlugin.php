@@ -18,7 +18,7 @@ class HtmlResponsePlugin implements PluginInterface
         /* @var Rocket $rocket */
         $rocket = $next($rocket);
 
-        Logger::debug('[alipay][HtmlResponsePlugin] 插件开始装载', ['rocket' => $rocket]);
+        Logger::info('[alipay][HtmlResponsePlugin] 插件开始装载', ['rocket' => $rocket]);
 
         $radar = $rocket->getRadar();
 
@@ -37,8 +37,7 @@ class HtmlResponsePlugin implements PluginInterface
     {
         $url = $endpoint.(false === strpos($endpoint, '?') ? '?' : '&').$payload->query();
 
-        $content = sprintf(
-            '<!DOCTYPE html>
+        $content = sprintf('<!DOCTYPE html>
                     <html lang="en">
                         <head>
                             <meta charset="UTF-8" />
@@ -49,8 +48,7 @@ class HtmlResponsePlugin implements PluginInterface
                         <body>
                             Redirecting to %1$s.
                         </body>
-                    </html>',
-            htmlspecialchars($url, ENT_QUOTES)
+                    </html>', htmlspecialchars($url, ENT_QUOTES)
         );
 
         return new Response(302, ['Location' => $url], $content);

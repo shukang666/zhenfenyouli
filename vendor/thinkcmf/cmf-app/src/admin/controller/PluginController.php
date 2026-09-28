@@ -11,7 +11,6 @@
 namespace app\admin\controller;
 
 use app\admin\logic\PluginLogic;
-use app\admin\model\HookModel;
 use cmf\controller\AdminBaseController;
 use app\admin\model\PluginModel;
 use app\admin\model\HookPluginModel;
@@ -23,13 +22,13 @@ use think\Validate;
  * Class PluginController
  * @package app\admin\controller
  * @adminMenuRoot(
- *     'name'   =>'应用中心',
+ *     'name'   =>'插件中心',
  *     'action' =>'default',
  *     'parent' =>'',
  *     'display'=> true,
  *     'order'  => 20,
  *     'icon'   =>'cloud',
- *     'remark' =>'应用中心'
+ *     'remark' =>'插件中心'
  * )
  */
 class PluginController extends AdminBaseController
@@ -38,15 +37,15 @@ class PluginController extends AdminBaseController
     protected $pluginModel;
 
     /**
-     * 插件管理
+     * 插件列表
      * @adminMenu(
-     *     'name'   => '插件管理',
+     *     'name'   => '插件列表',
      *     'parent' => 'admin/Plugin/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10000,
      *     'icon'   => '',
-     *     'remark' => '插件管理',
+     *     'remark' => '插件列表',
      *     'param'  => ''
      * )
      */
@@ -259,8 +258,7 @@ class PluginController extends AdminBaseController
 
             $pluginModel = PluginModel::where('id', $id)->find();
             $pluginModel->save(['config' => json_encode($config)]);
-            cmf_clear_cache();
-            $this->success(lang('EDIT_SUCCESS'), '');
+            $this->success('保存成功', '');
         }
     }
 
@@ -311,7 +309,7 @@ class PluginController extends AdminBaseController
                 $this->error($result);
             }
 
-            $this->success(lang('Installed successfully'));
+            $this->success('安装成功!');
         }
     }
 
@@ -337,7 +335,7 @@ class PluginController extends AdminBaseController
             if ($result !== true) {
                 $this->error($result);
             }
-            $this->success(lang('Updated successfully'));
+            $this->success('更新成功!');
         }
     }
 
@@ -363,46 +361,14 @@ class PluginController extends AdminBaseController
             $result = $pluginModel->uninstall($id);
 
             if ($result !== true) {
-                $this->error(lang('Uninstall failed'));
+                $this->error('卸载失败!');
             }
 
             Cache::clear('init_hook_plugins');
             Cache::clear('admin_menus');// 删除后台菜单缓存
 
-            $this->success(lang('Uninstall successful'));
+            $this->success('卸载成功!');
         }
-    }
-
-    /**
-     * 插件钩子
-     * @adminMenu(
-     *     'name'   => '插件钩子',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> true,
-     *     'order'  => 10000,
-     *     'icon'   => '',
-     *     'remark' => '插件钩子',
-     *     'param'  => ''
-     * )
-     */
-    public function hooks()
-    {
-        $id = $this->request->param('id', 0, 'intval');
-
-        $pluginModel = new PluginModel();
-        $plugin      = $pluginModel->find($id);
-
-        if (empty($plugin)) {
-            $this->error('插件未安装!');
-        }
-
-        $hooksArr = HookPluginModel::where('plugin', $plugin['name'])->column('hook');
-        $hooks    = HookModel::where('hook', 'in', $hooksArr)->select();
-
-        $this->assign('hooks', $hooks);
-
-        return $this->fetch();
     }
 
 

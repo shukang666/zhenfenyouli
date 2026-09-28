@@ -8,35 +8,47 @@ use ArrayAccess;
 use JsonSerializable as JsonSerializableInterface;
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
-use Yansongda\Pay\Contract\DirectionInterface;
-use Yansongda\Pay\Contract\PackerInterface;
+use Serializable as SerializableInterface;
 use Yansongda\Supports\Collection;
 use Yansongda\Supports\Traits\Accessable;
 use Yansongda\Supports\Traits\Arrayable;
 use Yansongda\Supports\Traits\Serializable;
 
-class Rocket implements JsonSerializableInterface, ArrayAccess
+class Rocket implements JsonSerializableInterface, SerializableInterface, ArrayAccess
 {
     use Accessable;
     use Arrayable;
     use Serializable;
 
-    private ?RequestInterface $radar = null;
-
-    private array $params = [];
-
-    private ?Collection $payload = null;
-
-    private string $packer = PackerInterface::class;
-
-    private string $direction = DirectionInterface::class;
+    /**
+     * @var \Psr\Http\Message\RequestInterface|null
+     */
+    private $radar = null;
 
     /**
-     * @var null|array|Collection|MessageInterface
+     * @var array
      */
-    private $destination;
+    private $params = [];
 
-    private ?MessageInterface $destinationOrigin = null;
+    /**
+     * @var \Yansongda\Supports\Collection|null
+     */
+    private $payload = null;
+
+    /**
+     * @var string|null
+     */
+    private $direction = null;
+
+    /**
+     * @var \Yansongda\Supports\Collection|\Psr\Http\Message\MessageInterface|array|null
+     */
+    private $destination = null;
+
+    /**
+     * @var \Psr\Http\Message\MessageInterface|null
+     */
+    private $destinationOrigin = null;
 
     public function getRadar(): ?RequestInterface
     {
@@ -92,24 +104,12 @@ class Rocket implements JsonSerializableInterface, ArrayAccess
         return $this;
     }
 
-    public function getPacker(): string
-    {
-        return $this->packer;
-    }
-
-    public function setPacker(string $packer): Rocket
-    {
-        $this->packer = $packer;
-
-        return $this;
-    }
-
-    public function getDirection(): string
+    public function getDirection(): ?string
     {
         return $this->direction;
     }
 
-    public function setDirection(string $direction): Rocket
+    public function setDirection(?string $direction): Rocket
     {
         $this->direction = $direction;
 
@@ -117,7 +117,7 @@ class Rocket implements JsonSerializableInterface, ArrayAccess
     }
 
     /**
-     * @return null|array|Collection|MessageInterface
+     * @return \Psr\Http\Message\MessageInterface|\Yansongda\Supports\Collection|array|null
      */
     public function getDestination()
     {
@@ -125,7 +125,7 @@ class Rocket implements JsonSerializableInterface, ArrayAccess
     }
 
     /**
-     * @param null|array|Collection|MessageInterface $destination
+     * @param \Psr\Http\Message\MessageInterface|\Yansongda\Supports\Collection|array|null $destination
      */
     public function setDestination($destination): Rocket
     {

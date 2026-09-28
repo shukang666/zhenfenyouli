@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Yansongda\Pay\Plugin\Wechat\Pay\Common;
 
-use Yansongda\Pay\Exception\ContainerException;
-use Yansongda\Pay\Exception\ServiceNotFoundException;
 use Yansongda\Pay\Pay;
 use Yansongda\Pay\Plugin\Wechat\GeneralPlugin;
 use Yansongda\Pay\Rocket;
-
-use function Yansongda\Pay\get_wechat_config;
+use Yansongda\Supports\Config;
 
 class PrepayPlugin extends GeneralPlugin
 {
@@ -25,8 +22,9 @@ class PrepayPlugin extends GeneralPlugin
     }
 
     /**
-     * @throws ContainerException
-     * @throws ServiceNotFoundException
+     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
+     * @throws \Yansongda\Pay\Exception\ContainerException
+     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
      */
     protected function doSomething(Rocket $rocket): void
     {
@@ -35,36 +33,28 @@ class PrepayPlugin extends GeneralPlugin
         $wechatId = $this->getWechatId($config, $rocket);
 
         if (!$rocket->getPayload()->has('notify_url')) {
-            $wechatId['notify_url'] = $config['notify_url'] ?? null;
+            $wechatId['notify_url'] = $config->get('notify_url');
         }
 
         $rocket->mergePayload($wechatId);
     }
 
-    protected function getWechatId(array $config, Rocket $rocket): array
+    protected function getWechatId(Config $config, Rocket $rocket): array
     {
         $payload = $rocket->getPayload();
-        $configKey = $this->getConfigKey($rocket->getParams());
 
-        $result = [
-            'appid' => $config[$configKey] ?? '',
-            'mchid' => $config['mch_id'] ?? '',
-        ];
-
-        if (Pay::MODE_SERVICE === ($config['mode'] ?? null)) {
-            $result = [
-                'sp_appid' => $config[$configKey] ?? '',
-                'sp_mchid' => $config['mch_id'] ?? '',
-                'sub_mchid' => $payload->get('sub_mchid', $config['sub_mch_id'] ?? null),
+        if (Pay::MODE_SERVICE == $config->get('mode')) {
+            return [
+                'sp_appid' => $config->get('mp_app_id', ''),
+                'sp_mchid' => $config->get('mch_id', ''),
+                'sub_appid' => $payload->get('sub_appid', $config->get('sub_mp_app_id')),
+                'sub_mchid' => $payload->get('sub_mchid', $config->get('sub_mch_id')),
             ];
-
-            $subAppId = $payload->get('sub_appid', $config['sub_'.$configKey] ?? null);
-
-            if (!empty($subAppId)) {
-                $result['sub_appid'] = $subAppId;
-            }
         }
 
-        return $result;
+        return [
+            'appid' => $config->get('mp_app_id', ''),
+            'mchid' => $config->get('mch_id', ''),
+        ];
     }
 }

@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Yansongda\Pay;
 
 use Yansongda\Pay\Contract\EventDispatcherInterface;
-use Yansongda\Pay\Exception\ContainerException;
 use Yansongda\Pay\Exception\InvalidConfigException;
-use Yansongda\Pay\Exception\ServiceNotFoundException;
 
 /**
  * @method static Event\Event dispatch(object $event)
@@ -15,9 +13,10 @@ use Yansongda\Pay\Exception\ServiceNotFoundException;
 class Event
 {
     /**
-     * @throws ContainerException
-     * @throws ServiceNotFoundException
-     * @throws InvalidConfigException
+     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
+     * @throws \Yansongda\Pay\Exception\ContainerException
+     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @throws \Yansongda\Pay\Exception\InvalidConfigException
      */
     public static function __callStatic(string $method, array $args): void
     {

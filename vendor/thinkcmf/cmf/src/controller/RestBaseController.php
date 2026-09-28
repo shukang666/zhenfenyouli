@@ -39,7 +39,7 @@ class RestBaseController
     //用户类型
     protected $userType;
 
-    protected $allowedDeviceTypes = ['mobile', 'android', 'iphone', 'ipad', 'web', 'pc', 'mac', 'wxapp', 'ios'];
+    protected $allowedDeviceTypes = ['mobile', 'android', 'iphone', 'ipad', 'web', 'pc', 'mac', 'wxapp'];
 
     /**
      * @var \think\Request Request实例
@@ -68,7 +68,7 @@ class RestBaseController
 
 //        $this->request->root(cmf_get_root() . '/');
 
-        $this->apiVersion = $this->request->header('XX-Api-Version', '1.1.0');
+        $this->apiVersion = $this->request->header('XX-Api-Version');
 
         // 用户验证初始化
         $this->_initUser();
@@ -93,10 +93,7 @@ class RestBaseController
 
     private function _initUser()
     {
-        $token = $this->request->header('Authorization', '');
-        if (substr($token, 0, 7) === 'Bearer ') {
-            $token = substr($token, 7);
-        }
+        $token = $this->request->header('Authorization');
         if (empty($token)) {
             $token = $this->request->header('XX-Token');
         }
@@ -252,9 +249,11 @@ class RestBaseController
             'data' => $data,
         ];
 
-        $type     = $this->getResponseType();
-        $response = Response::create($result, $type)->header($header);
-
+        $type                                   = $this->getResponseType();
+        $header['Access-Control-Allow-Origin']  = '*';
+        $header['Access-Control-Allow-Headers'] = 'X-Requested-With,Content-Type,XX-Device-Type,XX-Token,Authorization,XX-Api-Version,XX-Wxapp-AppId';
+        $header['Access-Control-Allow-Methods'] = 'GET,POST,PATCH,PUT,DELETE,OPTIONS';
+        $response                               = Response::create($result, $type)->header($header);
         throw new HttpResponseException($response);
     }
 
@@ -279,9 +278,11 @@ class RestBaseController
             'data' => $data,
         ];
 
-        $type     = $this->getResponseType();
-        $response = Response::create($result, $type)->header($header);
-
+        $type                                   = $this->getResponseType();
+        $header['Access-Control-Allow-Origin']  = '*';
+        $header['Access-Control-Allow-Headers'] = 'X-Requested-With,Content-Type,XX-Device-Type,XX-Token,Authorization,XX-Api-Version,XX-Wxapp-AppId';
+        $header['Access-Control-Allow-Methods'] = 'GET,POST,PATCH,PUT,DELETE,OPTIONS';
+        $response                               = Response::create($result, $type)->header($header);
         throw new HttpResponseException($response);
     }
 
@@ -305,27 +306,9 @@ class RestBaseController
             $this->error(['code' => 10001, 'msg' => '用户未登录']);
         }
         return $this->userId;
+
+
     }
 
-    /**
-     * 获取API路由路径
-     * @return string 如demo/articles,demo/artilces/:id
-     */
-    public function getRoutePath()
-    {
-        $rule = $this->request->rule();
-
-        if (empty($rule->getRule())) {
-            $app        = $this->app->http->getName();
-            $controller = cmf_parse_name($this->request->controller());
-            $action     = $this->request->action(false);
-            $routePath  = "$app/$controller/$action";
-        } else {
-            $routePath = preg_replace("/<(.+)>/", ':$1', $rule['rule']);
-            $routePath = str_replace('$', '', $routePath);
-        }
-
-        return $routePath;
-    }
 
 }

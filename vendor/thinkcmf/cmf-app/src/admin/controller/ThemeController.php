@@ -61,7 +61,7 @@ class ThemeController extends AdminBaseController
      */
     public function install()
     {
-        $themesDirs = cmf_scan_dir(WEB_ROOT . "themes/*", GLOB_ONLYDIR);
+        $themesDirs = cmf_scan_dir("themes/*", GLOB_ONLYDIR);
 
         $themeModel = new ThemeModel();
 
@@ -71,14 +71,12 @@ class ThemeController extends AdminBaseController
 
         $themes = [];
         foreach ($themesDirs as $dir) {
-            if (!preg_match("/^admin_/", $dir)) {
-                $manifest = WEB_ROOT . "themes/$dir/manifest.json";
-                if (file_exists_case($manifest)) {
-                    $manifest       = file_get_contents($manifest);
-                    $theme          = json_decode($manifest, true);
-                    $theme['theme'] = $dir;
-                    array_push($themes, $theme);
-                }
+            $manifest = "themes/$dir/manifest.json";
+            if (file_exists_case($manifest)) {
+                $manifest       = file_get_contents($manifest);
+                $theme          = json_decode($manifest, true);
+                $theme['theme'] = $dir;
+                array_push($themes, $theme);
             }
         }
         $this->assign('themes', $themes);
@@ -103,8 +101,8 @@ class ThemeController extends AdminBaseController
     {
         if ($this->request->isPost()) {
             $theme = $this->request->param('theme');
-            if (config('template.cmf_default_theme') == $theme) {
-                $this->error(lang('NOT_ALLOWED_UNINSTALL_THEME_ERROR'));
+            if ($theme == "simpleboot3" || config('template.cmf_default_theme') == $theme) {
+                $this->error("官方自带模板或当前使用中的模板不可以卸载");
             }
 
             $themeModel = new ThemeModel();
@@ -113,7 +111,7 @@ class ThemeController extends AdminBaseController
                 ThemeFileModel::where('theme', $theme)->delete();
             });
 
-            $this->success(lang('Uninstall successful'), url('Theme/index'));
+            $this->success("卸载成功", url("Theme/index"));
 
         }
     }
@@ -145,7 +143,7 @@ class ThemeController extends AdminBaseController
             if ($result === false) {
                 $this->error('模板不存在!');
             }
-            $this->success(lang('Installed successfully'), url('Theme/index'));
+            $this->success("安装成功", url("Theme/index"));
         }
     }
 
@@ -176,7 +174,7 @@ class ThemeController extends AdminBaseController
             if ($result === false) {
                 $this->error('模板不存在!');
             }
-            $this->success(lang('Updated successfully'));
+            $this->success("更新成功");
         }
     }
 
@@ -199,7 +197,7 @@ class ThemeController extends AdminBaseController
             $theme = $this->request->param('theme');
 
             if ($theme == config('template.cmf_default_theme')) {
-                $this->error('模板已启用', url('Theme/index'));
+                $this->error('模板已启用', url("theme/index"));
             }
 
             $themeModel = new ThemeModel();
@@ -216,7 +214,7 @@ class ThemeController extends AdminBaseController
             }
             session('cmf_default_theme', $theme);
 
-            $this->success('模板启用成功', url('Theme/index'));
+            $this->success("模板启用成功", url("Theme/index"));
         }
     }
 
@@ -259,10 +257,8 @@ class ThemeController extends AdminBaseController
         $tab    = $this->request->param('tab', 'widget');
         $fileId = $this->request->param('file_id', 0, 'intval');
         if (empty($fileId)) {
-            $file = $this->request->param('file');
-            $this->assign('fileName', $file);
+            $file  = $this->request->param('file');
             $theme = $this->request->param('theme');
-            $this->assign('theme', $theme);
             $files = ThemeFileModel::where('theme', $theme)
                 ->where(function ($query) use ($file) {
                     $query->where('is_public', 1)->whereOr('file', $file);
@@ -275,8 +271,6 @@ class ThemeController extends AdminBaseController
                 ->where(function ($query) use ($fileId) {
                     $query->where('id', $fileId)->whereOr('is_public', 1);
                 })->order('list_order ASC')->select();
-            $this->assign('fileName', $file['file']);
-            $this->assign('theme', $file['theme']);
         }
 
         $tpl     = 'file_widget_setting';
@@ -284,35 +278,35 @@ class ThemeController extends AdminBaseController
         if (!empty($file)) {
             $hasFile = true;
             $fileId  = $file['id'];
-        }
-        $hasPublicVar = false;
-        $hasWidget    = false;
-        foreach ($files as $key => $mFile) {
-            $hasFile = true;
-            if (!empty($mFile['is_public']) && !empty($mFile['more']['vars'])) {
-                $hasPublicVar = true;
+
+            $hasPublicVar = false;
+            $hasWidget    = false;
+            foreach ($files as $key => $mFile) {
+                if (!empty($mFile['is_public']) && !empty($mFile['more']['vars'])) {
+                    $hasPublicVar = true;
+                }
+
+                if (!empty($mFile['more']['widgets'])) {
+                    $hasWidget = true;
+                }
+
+                $files[$key] = $mFile;
             }
 
-            if (!empty($mFile['more']['widgets'])) {
-                $hasWidget = true;
+            $this->assign('tab', $tab);
+            $this->assign('files', $files);
+            $this->assign('file', $file);
+            $this->assign('file_id', $fileId);
+            $this->assign('has_public_var', $hasPublicVar);
+            $this->assign('has_widget', $hasWidget);
+
+            if ($tab == 'var') {
+                $tpl = 'file_var_setting';
+            } else if ($tab == 'public_var') {
+                $tpl = 'file_public_var_setting';
             }
 
-            $files[$key] = $mFile;
         }
-
-        $this->assign('tab', $tab);
-        $this->assign('files', $files);
-        $this->assign('file', $file);
-        $this->assign('file_id', $fileId);
-        $this->assign('has_public_var', $hasPublicVar);
-        $this->assign('has_widget', $hasWidget);
-
-        if ($tab == 'var') {
-            $tpl = 'file_var_setting';
-        } else if ($tab == 'public_var') {
-            $tpl = 'file_public_var_setting';
-        }
-
         $this->assign('has_file', $hasFile);
         return $this->fetch($tpl);
     }
@@ -333,11 +327,9 @@ class ThemeController extends AdminBaseController
     public function fileArrayData()
     {
         $tab        = $this->request->param('tab', 'widget');
-        $varName    = $this->request->param('var', '');
+        $varName    = $this->request->param('var');
         $widgetName = $this->request->param('widget', '');
         $fileId     = $this->request->param('file_id', 0, 'intval');
-        $widgetId   = $this->request->param('widget_id', ''); //自由控件编辑
-        $blockName  = $this->request->param('block_name', '');//自由控件编辑
         $file       = ThemeFileModel::where('id', $fileId)->find();
         $oldMore    = $file['more'];
 
@@ -376,30 +368,12 @@ class ThemeController extends AdminBaseController
             }
         }
 
-        if ($tab == 'block_widget' && isset($oldMore['widgets_blocks'][$blockName]['widgets'][$widgetId])) {
-            $widget = $file->fillBlockWidgetValue($blockName, $widgetId);
-
-            if (!empty($widget['vars'][$varName])) {
-                $mVar = $widget['vars'][$varName];
-                if (is_array($mVar['value'])) {
-                    $items = $mVar['value'];
-                }
-
-                if (isset($mVar['item'])) {
-                    $item = $mVar['item'];
-                }
-            }
-        }
-
         $this->assign('tab', $tab);
         $this->assign('var', $varName);
         $this->assign('widget', $widgetName);
         $this->assign('file_id', $fileId);
         $this->assign('array_items', $items);
         $this->assign('array_item', $item);
-
-        $this->assign('block_name', $blockName);
-        $this->assign('widget_id', $widgetId);
 
         return $this->fetch('file_array_data');
     }
@@ -410,7 +384,7 @@ class ThemeController extends AdminBaseController
      *     'name'   => '模板文件数组数据添加编辑',
      *     'parent' => 'index',
      *     'display'=> false,
-     *     'hasView'=> true,
+     *     'hasView'=> false,
      *     'order'  => 10000,
      *     'icon'   => '',
      *     'remark' => '模板文件数组数据添加编辑',
@@ -423,8 +397,6 @@ class ThemeController extends AdminBaseController
         $varName    = $this->request->param('var');
         $widgetName = $this->request->param('widget', '');
         $fileId     = $this->request->param('file_id', 0, 'intval');
-        $widgetId   = $this->request->param('widget_id', ''); //自由控件编辑
-        $blockName  = $this->request->param('block_name', '');//自由控件编辑
         $itemIndex  = $this->request->param('item_index', '');
 
         $file = ThemeFileModel::where('id', $fileId)->find();
@@ -449,6 +421,7 @@ class ThemeController extends AdminBaseController
         }
 
         if ($tab == 'widget') {
+
             if (empty($widgetName)) {
                 $this->error('未指定控件!');
             }
@@ -479,20 +452,6 @@ class ThemeController extends AdminBaseController
             }
         }
 
-        if ($tab == 'block_widget' && isset($oldMore['widgets_blocks'][$blockName]['widgets'][$widgetId])) {
-            $widget = $file->fillBlockWidgetValue($blockName, $widgetId);
-            if (!empty($widget['vars'][$varName])) {
-                $mVar = $widget['vars'][$varName];
-                if (is_array($mVar['value'])) {
-                    $items = $mVar['value'];
-                }
-
-                if (isset($mVar['item'])) {
-                    $item = $mVar['item'];
-                }
-            }
-        }
-
         if ($itemIndex !== '') {
             $itemIndex = intval($itemIndex);
             if (!isset($items[$itemIndex])) {
@@ -514,9 +473,6 @@ class ThemeController extends AdminBaseController
         $this->assign('array_item', $item);
         $this->assign('item_index', $itemIndex);
 
-        $this->assign('block_name', $blockName);
-        $this->assign('widget_id', $widgetId);
-
         return $this->fetch('file_array_data_edit');
     }
 
@@ -536,13 +492,11 @@ class ThemeController extends AdminBaseController
     public function fileArrayDataEditPost()
     {
         if (!$this->request->isPost()) {
-            $this->error(lang('illegal request'));
+            $this->error('非法请求！');
         }
         $tab        = $this->request->param('tab', 'widget');
         $varName    = $this->request->param('var');
         $widgetName = $this->request->param('widget', '');
-        $widgetId   = $this->request->param('widget_id', ''); //自由控件编辑
-        $blockName  = $this->request->param('block_name', '');//自由控件编辑
         $fileId     = $this->request->param('file_id', 0, 'intval');
         $itemIndex  = $this->request->param('item_index', '');
 
@@ -641,54 +595,10 @@ class ThemeController extends AdminBaseController
                 }
             }
 
-            if ($tab == 'block_widget') {
-                $widget = $file->fillBlockWidgetValue($blockName, $widgetId);
-                if (!empty($widget['vars']) && is_array($widget['vars'])) {
-                    if (isset($widget['vars'][$varName])) {
-                        $widgetVar = $widget['vars'][$varName];
-                        if ($widgetVar['type'] == 'array') {
-                            $messages = [];
-                            $rules    = [];
-
-                            foreach ($widgetVar['item'] as $widgetArrayVarItemKey => $widgetArrayVarItem) {
-                                if (!empty($widgetArrayVarItem['rule'])) {
-                                    $rules[$widgetArrayVarItemKey] = $this->_parseRules($widgetArrayVarItem['rule']);
-                                }
-
-                                if (!empty($widgetArrayVarItem['message'])) {
-                                    foreach ($widgetArrayVarItem['message'] as $rule => $msg) {
-                                        $messages[$widgetArrayVarItemKey . '.' . $rule] = $msg;
-                                    }
-                                }
-                            }
-
-                            $validate = new Validate($rules, $messages);
-                            $result   = $validate->check($post['item']);
-                            if (!$result) {
-                                $this->error($validate->getError());
-                            }
-
-                            if ($itemIndex === '') {
-                                if (!empty($widgetVar['value']) && is_array($widgetVar['value'])) {
-                                    array_push($more['widgets_blocks'][$blockName]['widgets'][$widgetId]['vars'][$varName], $post['item']);
-                                } else {
-                                    $more['widgets_blocks'][$blockName]['widgets'][$widgetId]['vars'][$varName] = [$post['item']];
-                                }
-                            } else {
-                                if (!empty($widgetVar['value']) && is_array($widgetVar['value']) && isset($widgetVar['value'][$itemIndex])) {
-                                    $more['widgets_blocks'][$blockName]['widgets'][$widgetId]['vars'][$varName][$itemIndex] = $post['item'];
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-
             $more = json_encode($more);
             ThemeFileModel::where('id', $fileId)->update(['more' => $more]);
-            cmf_clear_cache();
-            $this->success(lang('EDIT_SUCCESS'), url('Theme/fileArrayData', ['tab' => $tab, 'var' => $varName, 'file_id' => $fileId, 'widget' => $widgetName, 'widget_id' => $widgetId, 'block_name' => $blockName]));
+
+            $this->success("保存成功！", url('theme/fileArrayData', ['tab' => $tab, 'var' => $varName, 'file_id' => $fileId, 'widget' => $widgetName]));
 
         }
 
@@ -710,14 +620,12 @@ class ThemeController extends AdminBaseController
     public function fileArrayDataDelete()
     {
         if (!$this->request->isPost()) {
-            $this->error(lang('illegal request'));
+            $this->error('非法请求！');
         }
         $tab        = $this->request->param('tab', 'widget');
         $varName    = $this->request->param('var');
         $widgetName = $this->request->param('widget', '');
         $fileId     = $this->request->param('file_id', 0, 'intval');
-        $widgetId   = $this->request->param('widget_id', ''); //自由控件编辑
-        $blockName  = $this->request->param('block_name', '');//自由控件编辑
         $itemIndex  = $this->request->param('item_index', '');
 
         if ($itemIndex === '') {
@@ -761,27 +669,10 @@ class ThemeController extends AdminBaseController
             }
         }
 
-        if ($tab == 'block_widget') {
-            $widget = $file->fillBlockWidgetValue($blockName, $widgetId);
-            if (!empty($widget['vars']) && is_array($widget['vars'])) {
-                if (isset($widget['vars'][$varName])) {
-                    $widgetVar = $widget['vars'][$varName];
-                    if ($widgetVar['type'] == 'array') {
-                        if ($itemIndex !== '') {
-                            if (!empty($widgetVar['value']) && is_array($widgetVar['value']) && isset($widgetVar['value'][$itemIndex])) {
-                                array_splice($more['widgets_blocks'][$blockName]['widgets'][$widgetId]['vars'][$varName], $itemIndex, 1);
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-
         $more = json_encode($more);
         ThemeFileModel::where('id', $fileId)->update(['more' => $more]);
-        cmf_clear_cache();
-        $this->success(lang('DELETE_SUCCESS'), url('Theme/fileArrayData', ['tab' => $tab, 'var' => $varName, 'file_id' => $fileId, 'widget' => $widgetName, 'widget_id' => $widgetId, 'block_name' => $blockName]));
+
+        $this->success("删除成功！", url('theme/fileArrayData', ['tab' => $tab, 'var' => $varName, 'file_id' => $fileId, 'widget' => $widgetName]));
     }
 
     /**
@@ -891,8 +782,7 @@ class ThemeController extends AdminBaseController
                     ThemeFileModel::where('id', $id)->update(['more' => $more]);
                 }
             }
-            cmf_clear_cache();
-            $this->success(lang('EDIT_SUCCESS'), '');
+            $this->success("保存成功！", '');
         }
     }
 
@@ -1069,236 +959,5 @@ class ThemeController extends AdminBaseController
             return $content;
         }
     }
-
-    /**
-     * 自由模板控件排序
-     * @adminMenu(
-     *     'name'   => '自由模板控件排序',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  => 10000,
-     *     'icon'   => '',
-     *     'remark' => '自由模板控件排序',
-     *     'param'  => ''
-     * )
-     */
-    public function widgetsSort()
-    {
-        $files = $this->request->param();
-//        $this->success('', '', $files);
-        $widgets = [];
-
-        foreach ($files as $fileId => $widgetsBlocks) {
-            $fileId     = str_replace('file', '', $fileId);
-            $file       = ThemeFileModel::where('id', $fileId)->find();
-            $configMore = $file['more'];
-            if (!empty($configMore['widgets_blocks'])) {
-                foreach ($configMore['widgets_blocks'] as $widgetsBlockName => $widgetsBlock) {
-                    if (!empty($configMore['widgets_blocks'][$widgetsBlockName]['widgets'])) {
-                        foreach ($configMore['widgets_blocks'][$widgetsBlockName]['widgets'] as $widgetId => $widget) {
-                            $widgets[$widgetId] = $widget;
-                        }
-                    }
-                }
-            }
-        }
-
-        foreach ($files as $fileId => $widgetsBlocks) {
-            $fileId     = str_replace('file', '', $fileId);
-            $file       = ThemeFileModel::where('id', $fileId)->find();
-            $configMore = $file['more'];
-
-            foreach ($widgetsBlocks as $widgetsBlockName => $widgetIds) {
-                $mWidgets = [];
-                foreach ($widgetIds as $widgetIdInfo) {
-                    $widgetId = $widgetIdInfo['widget_id'];
-
-                    if (!empty($widgets[$widgetId])) {
-                        $mWidgets[$widgetId] = $widgets[$widgetId];
-                    }
-                }
-                $configMore['widgets_blocks'][$widgetsBlockName]['widgets'] = $mWidgets;
-            }
-
-            if (!empty($configMore['widgets_blocks'])) {
-                foreach ($configMore['widgets_blocks'] as $widgetsBlockName => $widgetsBlock) {
-                    if (!isset($widgetsBlocks[$widgetsBlockName])) {
-                        $configMore['widgets_blocks'][$widgetsBlockName]['widgets'] = [];
-                    }
-                }
-            }
-
-            $configMore['edited_by_designer'] = 1;
-            $more                             = json_encode($configMore);
-            ThemeFileModel::where('id', $fileId)->update(['more' => $more]);
-        }
-        cmf_clear_cache();
-        $this->success('', '', $configMore);
-    }
-
-    /**
-     * 模板自由控件设置
-     * @adminMenu(
-     *     'name'   => '模板自由控件设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> true,
-     *     'order'  => 10000,
-     *     'icon'   => '',
-     *     'remark' => '模板自由控件设置',
-     *     'param'  => ''
-     * )
-     */
-    public function widgetSetting()
-    {
-        $widgetId  = $this->request->param('widget_id', '');
-        $blockName = $this->request->param('block_name', '');
-        $fileId    = $this->request->param('file_id', 0, 'intval');
-
-        $file = ThemeFileModel::where('id', $fileId)->find();
-
-        $oldMore = $file['more'];
-        $items   = [];
-        $item    = [];
-
-        $widgetWithValue = $oldMore['widgets_blocks'][$blockName]['widgets'][$widgetId];
-        $theme           = $file['theme'];
-        $widgetManifest  = file_get_contents(WEB_ROOT . "themes/$theme/public/widgets/{$widgetWithValue['name']}/manifest.json");
-        $widget          = json_decode($widgetManifest, true);
-
-        $defaultCss = [
-            "margin-top"    => [
-                "title" => "上边距",
-                "value" => "0",
-                "type"  => "text",
-                "tip"   => "支持单位,如px(像素),em(字符),rem;例子:10px,2em,1rem",
-            ],
-            "margin-bottom" => [
-                "title" => "下边距",
-                "value" => "15px",
-                "type"  => "text",
-                "tip"   => "支持单位,如px(像素),em(字符),rem;例子:10px,2em,1rem",
-            ],
-            "margin-left"   => [
-                "title" => "左边距",
-                "value" => "0",
-                "type"  => "text",
-                "tip"   => "支持单位,如px(像素),em(字符),rem;例子:10px,2em,1rem",
-            ],
-            "margin-right"  => [
-                "title" => "右边距",
-                "value" => "0",
-                "type"  => "text",
-                "tip"   => "支持单位,如px(像素),em(字符),rem;例子:10px,2em,1rem",
-            ],
-        ];
-        if (empty($widget['css'])) {
-            $widget['css'] = $defaultCss;
-        } else {
-            $widget['css'] = array_merge($defaultCss, $widget['css']);
-        }
-
-        foreach ($widgetWithValue as $key => $value) {
-            if ($key == 'vars') {
-                foreach ($value as $varName => $varValue) {
-                    if (isset($widget['vars'][$varName])) {
-                        if (isset($value[$varName . '_text_'])) {
-                            $widget['vars'][$varName]['valueText'] = $value[$varName . '_text_'];
-                        }
-
-                        if (in_array($widget['vars'][$varName]['type'], ['rich_text'])) {
-                            $varValue = cmf_replace_content_file_url(htmlspecialchars_decode($varValue));
-                        }
-
-                        $widget['vars'][$varName]['value'] = $varValue;
-                    }
-                }
-            } else if ($key == 'css') {
-                foreach ($value as $varName => $varValue) {
-                    if (isset($widget['css'][$varName])) {
-                        $widget['css'][$varName]['value'] = $varValue;
-                    }
-                }
-            } else {
-                $widget[$key] = $value;
-            }
-        }
-
-
-        $this->assign('widget_id', $widgetId);
-        $this->assign('file_id', $fileId);
-        $this->assign('block_name', $blockName);
-        $this->assign('widget', $widget);
-        $this->assign('tab', 'block_widget');
-
-        return $this->fetch();
-    }
-
-    /**
-     * 模板自由控件设置提交保存
-     * @adminMenu(
-     *     'name'   => '模板自由控件设置提交保存',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  => 10000,
-     *     'icon'   => '',
-     *     'remark' => '模板自由控件设置提交保存',
-     *     'param'  => ''
-     * )
-     */
-    public function widgetSettingPost()
-    {
-        $widgetId  = $this->request->param('widget_id', '');
-        $blockName = $this->request->param('block_name', '');
-        $fileId    = $this->request->param('file_id', 0, 'intval');
-        $widget    = $this->request->param('widget/a');
-        $vars      = empty($widget['vars']) ? [] : $widget['vars'];
-        $cssVars   = empty($widget['css']) ? [] : $widget['css'];
-
-        $file      = ThemeFileModel::where('id', $fileId)->find();
-        $oldMore   = $file['more'];
-        $items     = [];
-        $item      = [];
-        $oldWidget = $oldMore['widgets_blocks'][$blockName]['widgets'][$widgetId];
-
-        $theme          = $file['theme'];
-        $widgetManifest = file_get_contents(WEB_ROOT . "themes/$theme/public/widgets/{$oldWidget['name']}/manifest.json");
-        $widgetInFile   = json_decode($widgetManifest, true);
-
-        foreach ($vars as $varName => $varValue) {
-            if (isset($widgetInFile['vars'][$varName])) {
-                if (isset($vars[$varName . '_text_'])) {
-                    $oldWidget['vars'][$varName . '_text_'] = $vars[$varName . '_text_'];
-                }
-                if (in_array($widgetInFile['vars'][$varName]['type'], ['rich_text'])) {
-                    $varValue = htmlspecialchars(cmf_replace_content_file_url(htmlspecialchars_decode($varValue), true));
-
-                    $oldWidget['vars'][$varName . '_type_'] = $widgetInFile['vars'][$varName]['type'];
-                }
-                $oldWidget['vars'][$varName] = $varValue;
-            }
-        }
-
-        foreach ($cssVars as $varName => $varValue) {
-            if (isset($widgetInFile['css'][$varName]) || in_array($varName, ['margin-top', 'margin-bottom', 'margin-left', 'margin-right'])) {
-                $oldWidget['css'][$varName] = $varValue;
-            }
-        }
-
-        $oldWidget['display'] = isset($widget['display']) && !empty($widget['display']) ? 1 : 0;
-        if (isset($widget['title'])) {
-            $oldWidget['title'] = $widget['title'];
-        }
-
-        $oldMore['widgets_blocks'][$blockName]['widgets'][$widgetId] = $oldWidget;
-
-        $more = json_encode($oldMore);
-        ThemeFileModel::where('id', $fileId)->update(['more' => $more]);
-        cmf_clear_cache();
-        $this->success(lang('EDIT_SUCCESS'));
-    }
-
 
 }

@@ -22,7 +22,6 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DetectFace detectFace(array $options = [])
  * @method FileAsyncScan fileAsyncScan(array $options = [])
  * @method FileAsyncScanResults fileAsyncScanResults(array $options = [])
- * @method FileAsyncScanV2 fileAsyncScanV2(array $options = [])
  * @method GetAddVideoDnaResults getAddVideoDnaResults(array $options = [])
  * @method GetFaces getFaces(array $options = [])
  * @method GetGroups getGroups(array $options = [])
@@ -86,6 +85,9 @@ class Roa extends \AlibabaCloud\Client\Resolver\Roa
 
     /** @var string */
     public $method = 'POST';
+
+    /** @var string */
+    public $serviceCode = 'green';
 }
 
 /**
@@ -460,12 +462,6 @@ class FileAsyncScanResults extends Roa
 
         return $this;
     }
-}
-
-class FileAsyncScanV2 extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/green/file/asyncscanv2';
 }
 
 /**

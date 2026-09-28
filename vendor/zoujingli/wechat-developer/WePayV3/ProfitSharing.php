@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | WeChatDeveloper
 // +----------------------------------------------------------------------
-// | 版权所有 2014~2025 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2014~2023 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -31,11 +31,12 @@ class ProfitSharing extends BasicWePay
      * @return array
      * @throws \WeChat\Exceptions\InvalidResponseException
      */
-    public function create(array $options)
+    public function create($options)
     {
         $options['appid'] = $this->config['appid'];
         return $this->doRequest('POST', '/v3/profitsharing/orders', json_encode($options, JSON_UNESCAPED_UNICODE), true);
     }
+
 
     /**
      * 查询分账结果
@@ -56,7 +57,7 @@ class ProfitSharing extends BasicWePay
      * @return array
      * @throws \WeChat\Exceptions\InvalidResponseException
      */
-    public function unfreeze(array $options)
+    public function unfreeze($options)
     {
         return $this->doRequest('POST', '/v3/profitsharing/orders/unfreeze', json_encode($options, JSON_UNESCAPED_UNICODE), true);
     }
@@ -77,15 +78,11 @@ class ProfitSharing extends BasicWePay
      * 添加分账接收方
      * @param array $options
      * @return array
-     * @throws \WeChat\Exceptions\InvalidDecryptException
      * @throws \WeChat\Exceptions\InvalidResponseException
      */
-    public function addReceiver(array $options)
+    public function addReceiver($options)
     {
         $options['appid'] = $this->config['appid'];
-        if (isset($options['name'])) {
-            $options['name'] = $this->rsaEncode($options['name']);
-        }
         return $this->doRequest('POST', "/v3/profitsharing/receivers/add", json_encode($options, JSON_UNESCAPED_UNICODE), true);
     }
 
@@ -95,21 +92,9 @@ class ProfitSharing extends BasicWePay
      * @return array
      * @throws \WeChat\Exceptions\InvalidResponseException
      */
-    public function deleteReceiver(array $options)
+    public function deleteReceiver($options)
     {
         $options['appid'] = $this->config['appid'];
         return $this->doRequest('POST', "/v3/profitsharing/receivers/delete", json_encode($options, JSON_UNESCAPED_UNICODE), true);
-    }
-
-    /**
-     * 请求分账回退
-     * @param array $options
-     * @return array
-     * @throws \WeChat\Exceptions\InvalidResponseException
-     */
-    public function backspace(array $options)
-    {
-        $options['appid'] = $this->config['appid'];
-        return $this->doRequest('POST', "/v3/profitsharing/return-orders", json_encode($options, JSON_UNESCAPED_UNICODE), true);
     }
 }

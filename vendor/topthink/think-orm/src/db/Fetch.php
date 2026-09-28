@@ -309,7 +309,7 @@ class Fetch
                 $this->query->setOption('soft_delete', null);
                 $this->query->setOption('data', [$field => $condition]);
                 // 生成删除SQL语句
-                $sql = $this->builder->update($this->query);
+                $sql = $this->builder->delete($this->query);
                 return $this->fetch($sql);
             }
         }
@@ -421,8 +421,10 @@ class Fetch
 
         if (!empty($options['group'])) {
             // 支持GROUP
-            $subSql = $this->query->field('count(' . $field . ') AS think_count')->buildSql();
-            $query  = $this->query->newQuery()->table([$subSql => '_group_count_']);
+            $bind   = $this->query->getBind();
+            $subSql = $this->query->options($options)->field('count(' . $field . ') AS think_count')->bind($bind)->buildSql();
+
+            $query = $this->query->newQuery()->table([$subSql => '_group_count_']);
 
             return $query->fetchsql()->aggregate('COUNT', '*');
         } else {

@@ -34,6 +34,13 @@
         "return": "stream"
     },
     {
+        "function": "get_resource_type",
+        "params": [
+            "@mock-stream"
+        ],
+        "return": "stream"
+    },
+    {
         "function": "fclose",
         "params": [
             "@mock-stream"

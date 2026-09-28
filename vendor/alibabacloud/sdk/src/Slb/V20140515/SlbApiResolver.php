@@ -22,7 +22,6 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method CreateTLSCipherPolicy createTLSCipherPolicy(array $options = [])
  * @method CreateVServerGroup createVServerGroup(array $options = [])
  * @method DeleteAccessControlList deleteAccessControlList(array $options = [])
- * @method DeleteAccessLogsDownloadAttribute deleteAccessLogsDownloadAttribute(array $options = [])
  * @method DeleteCACertificate deleteCACertificate(array $options = [])
  * @method DeleteDomainExtension deleteDomainExtension(array $options = [])
  * @method DeleteLoadBalancer deleteLoadBalancer(array $options = [])
@@ -34,13 +33,11 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DeleteVServerGroup deleteVServerGroup(array $options = [])
  * @method DescribeAccessControlListAttribute describeAccessControlListAttribute(array $options = [])
  * @method DescribeAccessControlLists describeAccessControlLists(array $options = [])
- * @method DescribeAccessLogsDownloadAttribute describeAccessLogsDownloadAttribute(array $options = [])
  * @method DescribeAvailableResource describeAvailableResource(array $options = [])
  * @method DescribeCACertificates describeCACertificates(array $options = [])
  * @method DescribeDomainExtensionAttribute describeDomainExtensionAttribute(array $options = [])
  * @method DescribeDomainExtensions describeDomainExtensions(array $options = [])
  * @method DescribeHealthStatus describeHealthStatus(array $options = [])
- * @method DescribeHighDefinationMonitor describeHighDefinationMonitor(array $options = [])
  * @method DescribeListenerAccessControlAttribute describeListenerAccessControlAttribute(array $options = [])
  * @method DescribeLoadBalancerAttribute describeLoadBalancerAttribute(array $options = [])
  * @method DescribeLoadBalancerHTTPListenerAttribute describeLoadBalancerHTTPListenerAttribute(array $options = [])
@@ -59,23 +56,18 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DescribeVServerGroupAttribute describeVServerGroupAttribute(array $options = [])
  * @method DescribeVServerGroups describeVServerGroups(array $options = [])
  * @method DescribeZones describeZones(array $options = [])
- * @method EnableHighDefinationMonitor enableHighDefinationMonitor(array $options = [])
  * @method ListTagResources listTagResources(array $options = [])
  * @method ListTLSCipherPolicies listTLSCipherPolicies(array $options = [])
- * @method ModifyHighDefinationMonitor modifyHighDefinationMonitor(array $options = [])
- * @method ModifyLoadBalancerInstanceChargeType modifyLoadBalancerInstanceChargeType(array $options = [])
  * @method ModifyLoadBalancerInstanceSpec modifyLoadBalancerInstanceSpec(array $options = [])
  * @method ModifyLoadBalancerInternetSpec modifyLoadBalancerInternetSpec(array $options = [])
  * @method ModifyLoadBalancerPayType modifyLoadBalancerPayType(array $options = [])
  * @method ModifyVServerGroupBackendServers modifyVServerGroupBackendServers(array $options = [])
- * @method MoveResourceGroup moveResourceGroup(array $options = [])
  * @method RemoveAccessControlListEntry removeAccessControlListEntry(array $options = [])
  * @method RemoveBackendServers removeBackendServers(array $options = [])
  * @method RemoveListenerWhiteListItem removeListenerWhiteListItem(array $options = [])
  * @method RemoveTags removeTags(array $options = [])
  * @method RemoveVServerGroupBackendServers removeVServerGroupBackendServers(array $options = [])
  * @method SetAccessControlListAttribute setAccessControlListAttribute(array $options = [])
- * @method SetAccessLogsDownloadAttribute setAccessLogsDownloadAttribute(array $options = [])
  * @method SetBackendServers setBackendServers(array $options = [])
  * @method SetCACertificateName setCACertificateName(array $options = [])
  * @method SetDomainExtensionAttribute setDomainExtensionAttribute(array $options = [])
@@ -300,7 +292,6 @@ class AddVServerGroupBackendServers extends Rpc
  * @method $this withAddressIPVersion($value)
  * @method string getResourceGroupId()
  * @method $this withResourceGroupId($value)
- * @method array getTag()
  * @method string getResourceOwnerAccount()
  * @method $this withResourceOwnerAccount($value)
  * @method string getOwnerAccount()
@@ -324,26 +315,6 @@ class CreateAccessControlList extends Rpc
         $this->options['query']['access_key_id'] = $value;
 
         return $this;
-    }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
     }
 }
 
@@ -434,15 +405,14 @@ class CreateDomainExtension extends Rpc
  * @method $this withMasterZoneId($value)
  * @method string getResourceGroupId()
  * @method $this withResourceGroupId($value)
+ * @method string getSpecType()
+ * @method $this withSpecType($value)
  * @method string getLoadBalancerName()
  * @method $this withLoadBalancerName($value)
  * @method string getSlaveZoneId()
  * @method $this withSlaveZoneId($value)
- * @method array getTag()
  * @method string getLoadBalancerSpec()
  * @method $this withLoadBalancerSpec($value)
- * @method string getAutoRenewPeriod()
- * @method $this withAutoRenewPeriod($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
  * @method string getTags()
@@ -451,8 +421,6 @@ class CreateDomainExtension extends Rpc
  * @method $this withVSwitchId($value)
  * @method string getEnableVpcVipFlow()
  * @method $this withEnableVpcVipFlow($value)
- * @method string getAutoRenew()
- * @method $this withAutoRenew($value)
  * @method string getInternetChargeType()
  * @method $this withInternetChargeType($value)
  * @method string getPricingCycle()
@@ -470,8 +438,6 @@ class CreateDomainExtension extends Rpc
  * @method $this withDuration($value)
  * @method string getAddressType()
  * @method $this withAddressType($value)
- * @method string getInstanceChargeType()
- * @method $this withInstanceChargeType($value)
  * @method string getDeleteProtection()
  * @method $this withDeleteProtection($value)
  * @method string getAutoPay()
@@ -486,8 +452,6 @@ class CreateDomainExtension extends Rpc
  * @method $this withOwnerAccount($value)
  * @method string getModificationProtectionStatus()
  * @method $this withModificationProtectionStatus($value)
- * @method string getInstanceListenerType()
- * @method $this withInstanceListenerType($value)
  * @method string getVpcId()
  * @method $this withVpcId($value)
  * @method string getPayType()
@@ -497,26 +461,6 @@ class CreateDomainExtension extends Rpc
  */
 class CreateLoadBalancer extends Rpc
 {
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
-    }
 
     /**
      * @param string $value
@@ -552,7 +496,6 @@ class CreateLoadBalancer extends Rpc
  * @method $this withHealthCheck($value)
  * @method string getVpcIds()
  * @method $this withVpcIds($value)
- * @method array getTag()
  * @method string getVServerGroupId()
  * @method $this withVServerGroupId($value)
  * @method string getAclId()
@@ -635,26 +578,6 @@ class CreateLoadBalancerHTTPListener extends Rpc
         $this->options['query']['XForwardedFor_SLBPORT'] = $value;
 
         return $this;
-    }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
     }
 
     /**
@@ -742,7 +665,6 @@ class CreateLoadBalancerHTTPListener extends Rpc
  * @method $this withHealthCheck($value)
  * @method string getVpcIds()
  * @method $this withVpcIds($value)
- * @method array getTag()
  * @method string getVServerGroupId()
  * @method $this withVServerGroupId($value)
  * @method string getAclId()
@@ -862,26 +784,6 @@ class CreateLoadBalancerHTTPSListener extends Rpc
         $this->options['query']['XForwardedFor_SLBPORT'] = $value;
 
         return $this;
-    }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
     }
 
     /**
@@ -1061,8 +963,6 @@ class CreateLoadBalancerHTTPSListener extends Rpc
  * @method $this withHealthCheckURI($value)
  * @method string getAclStatus()
  * @method $this withAclStatus($value)
- * @method string getFullNatEnabled()
- * @method $this withFullNatEnabled($value)
  * @method string getHealthCheckTcpFastCloseEnabled()
  * @method $this withHealthCheckTcpFastCloseEnabled($value)
  * @method string getAclType()
@@ -1075,7 +975,6 @@ class CreateLoadBalancerHTTPSListener extends Rpc
  * @method $this withPersistenceTimeout($value)
  * @method string getVpcIds()
  * @method $this withVpcIds($value)
- * @method array getTag()
  * @method string getMasterSlaveModeEnabled()
  * @method $this withMasterSlaveModeEnabled($value)
  * @method string getVServerGroupId()
@@ -1144,26 +1043,6 @@ class CreateLoadBalancerTCPListener extends Rpc
 {
 
     /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
-    }
-
-    /**
      * @param array $portRange
      *
      * @return $this
@@ -1217,8 +1096,6 @@ class CreateLoadBalancerTCPListener extends Rpc
  * @method $this withHealthCheckURI($value)
  * @method string getAclStatus()
  * @method $this withAclStatus($value)
- * @method string getFullNatEnabled()
- * @method $this withFullNatEnabled($value)
  * @method string getAclType()
  * @method $this withAclType($value)
  * @method string getFailoverStrategy()
@@ -1227,7 +1104,6 @@ class CreateLoadBalancerTCPListener extends Rpc
  * @method $this withPersistenceTimeout($value)
  * @method string getVpcIds()
  * @method $this withVpcIds($value)
- * @method array getTag()
  * @method string getMasterSlaveModeEnabled()
  * @method $this withMasterSlaveModeEnabled($value)
  * @method string getVServerGroupId()
@@ -1298,26 +1174,6 @@ class CreateLoadBalancerTCPListener extends Rpc
  */
 class CreateLoadBalancerUDPListener extends Rpc
 {
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
-    }
 
     /**
      * @param array $portRange
@@ -1398,7 +1254,6 @@ class CreateLoadBalancerUDPListener extends Rpc
  * @method $this withResourceOwnerId($value)
  * @method string getMasterSlaveBackendServers()
  * @method $this withMasterSlaveBackendServers($value)
- * @method array getTag()
  * @method string getResourceOwnerAccount()
  * @method $this withResourceOwnerAccount($value)
  * @method string getOwnerAccount()
@@ -1426,26 +1281,6 @@ class CreateMasterSlaveServerGroup extends Rpc
         $this->options['query']['access_key_id'] = $value;
 
         return $this;
-    }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
     }
 }
 
@@ -1555,7 +1390,6 @@ class CreateTLSCipherPolicy extends Rpc
  * @method $this withResourceOwnerId($value)
  * @method string getBackendServers()
  * @method $this withBackendServers($value)
- * @method array getTag()
  * @method string getResourceOwnerAccount()
  * @method $this withResourceOwnerAccount($value)
  * @method string getOwnerAccount()
@@ -1584,26 +1418,6 @@ class CreateVServerGroup extends Rpc
 
         return $this;
     }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
-    }
 }
 
 /**
@@ -1622,40 +1436,6 @@ class CreateVServerGroup extends Rpc
  * @method $this withTags($value)
  */
 class DeleteAccessControlList extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAccessKeyId($value)
-    {
-        $this->data['AccessKeyId'] = $value;
-        $this->options['query']['access_key_id'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAccessKeyId()
- * @method string getResourceOwnerId()
- * @method $this withResourceOwnerId($value)
- * @method string getLogsDownloadAttributes()
- * @method $this withLogsDownloadAttributes($value)
- * @method string getResourceOwnerAccount()
- * @method $this withResourceOwnerAccount($value)
- * @method string getOwnerAccount()
- * @method $this withOwnerAccount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getTags()
- * @method $this withTags($value)
- * @method string getLoadBalancerId()
- * @method $this withLoadBalancerId($value)
- */
-class DeleteAccessLogsDownloadAttribute extends Rpc
 {
 
     /**
@@ -1738,8 +1518,6 @@ class DeleteDomainExtension extends Rpc
  * @method string getAccessKeyId()
  * @method string getResourceOwnerId()
  * @method $this withResourceOwnerId($value)
- * @method string getEnableEipReserve()
- * @method $this withEnableEipReserve($value)
  * @method string getResourceOwnerAccount()
  * @method $this withResourceOwnerAccount($value)
  * @method string getOwnerAccount()
@@ -1966,8 +1744,6 @@ class DeleteVServerGroup extends Rpc
  * @method string getAccessKeyId()
  * @method string getResourceOwnerId()
  * @method $this withResourceOwnerId($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
  * @method string getAclId()
  * @method $this withAclId($value)
  * @method string getResourceOwnerAccount()
@@ -1980,8 +1756,6 @@ class DeleteVServerGroup extends Rpc
  * @method $this withOwnerId($value)
  * @method string getTags()
  * @method $this withTags($value)
- * @method string getPage()
- * @method $this withPage($value)
  */
 class DescribeAccessControlListAttribute extends Rpc
 {
@@ -2058,44 +1832,6 @@ class DescribeAccessControlLists extends Rpc
 		}
 
 		return $this;
-    }
-}
-
-/**
- * @method string getAccessKeyId()
- * @method string getResourceOwnerId()
- * @method $this withResourceOwnerId($value)
- * @method string getPageNumber()
- * @method $this withPageNumber($value)
- * @method string getLogType()
- * @method $this withLogType($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
- * @method string getResourceOwnerAccount()
- * @method $this withResourceOwnerAccount($value)
- * @method string getOwnerAccount()
- * @method $this withOwnerAccount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getTags()
- * @method $this withTags($value)
- * @method string getLoadBalancerId()
- * @method $this withLoadBalancerId($value)
- */
-class DescribeAccessLogsDownloadAttribute extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAccessKeyId($value)
-    {
-        $this->data['AccessKeyId'] = $value;
-        $this->options['query']['access_key_id'] = $value;
-
-        return $this;
     }
 }
 
@@ -2292,36 +2028,6 @@ class DescribeHealthStatus extends Rpc
  * @method string getAccessKeyId()
  * @method string getResourceOwnerId()
  * @method $this withResourceOwnerId($value)
- * @method string getResourceOwnerAccount()
- * @method $this withResourceOwnerAccount($value)
- * @method string getOwnerAccount()
- * @method $this withOwnerAccount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getTags()
- * @method $this withTags($value)
- */
-class DescribeHighDefinationMonitor extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAccessKeyId($value)
-    {
-        $this->data['AccessKeyId'] = $value;
-        $this->options['query']['access_key_id'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAccessKeyId()
- * @method string getResourceOwnerId()
- * @method $this withResourceOwnerId($value)
  * @method string getListenerPort()
  * @method $this withListenerPort($value)
  * @method string getResourceOwnerAccount()
@@ -2459,13 +2165,8 @@ class DescribeLoadBalancerHTTPSListenerAttribute extends Rpc
 /**
  * @method string getResourceOwnerId()
  * @method $this withResourceOwnerId($value)
- * @method string getDescription()
- * @method $this withDescription($value)
  * @method string getNextToken()
  * @method $this withNextToken($value)
- * @method array getTag()
- * @method string getListenerPort()
- * @method $this withListenerPort($value)
  * @method string getResourceOwnerAccount()
  * @method $this withResourceOwnerAccount($value)
  * @method string getOwnerAccount()
@@ -2480,26 +2181,6 @@ class DescribeLoadBalancerHTTPSListenerAttribute extends Rpc
  */
 class DescribeLoadBalancerListeners extends Rpc
 {
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
-    }
 
     /**
      * @param array $loadBalancerId
@@ -2556,8 +2237,6 @@ class DescribeLoadBalancerListeners extends Rpc
  * @method $this withPageSize($value)
  * @method string getAddressType()
  * @method $this withAddressType($value)
- * @method string getInstanceChargeType()
- * @method $this withInstanceChargeType($value)
  * @method string getFuzzy()
  * @method $this withFuzzy($value)
  * @method string getBusinessStatus()
@@ -2720,9 +2399,6 @@ class DescribeMasterSlaveServerGroupAttribute extends Rpc
  * @method $this withResourceOwnerId($value)
  * @method string getIncludeListener()
  * @method $this withIncludeListener($value)
- * @method string getDescription()
- * @method $this withDescription($value)
- * @method array getTag()
  * @method string getResourceOwnerAccount()
  * @method $this withResourceOwnerAccount($value)
  * @method string getOwnerAccount()
@@ -2748,26 +2424,6 @@ class DescribeMasterSlaveServerGroups extends Rpc
         $this->options['query']['access_key_id'] = $value;
 
         return $this;
-    }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
     }
 }
 
@@ -3002,11 +2658,8 @@ class DescribeVServerGroupAttribute extends Rpc
  * @method $this withResourceOwnerId($value)
  * @method string getIncludeListener()
  * @method $this withIncludeListener($value)
- * @method string getDescription()
- * @method $this withDescription($value)
  * @method string getIncludeRule()
  * @method $this withIncludeRule($value)
- * @method array getTag()
  * @method string getResourceOwnerAccount()
  * @method $this withResourceOwnerAccount($value)
  * @method string getOwnerAccount()
@@ -3033,26 +2686,6 @@ class DescribeVServerGroups extends Rpc
 
         return $this;
     }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
-    }
 }
 
 /**
@@ -3069,40 +2702,6 @@ class DescribeVServerGroups extends Rpc
  * @method $this withTags($value)
  */
 class DescribeZones extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAccessKeyId($value)
-    {
-        $this->data['AccessKeyId'] = $value;
-        $this->options['query']['access_key_id'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAccessKeyId()
- * @method string getResourceOwnerId()
- * @method $this withResourceOwnerId($value)
- * @method string getLogProject()
- * @method $this withLogProject($value)
- * @method string getResourceOwnerAccount()
- * @method $this withResourceOwnerAccount($value)
- * @method string getOwnerAccount()
- * @method $this withOwnerAccount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getTags()
- * @method $this withTags($value)
- * @method string getLogStore()
- * @method $this withLogStore($value)
- */
-class EnableHighDefinationMonitor extends Rpc
 {
 
     /**
@@ -3224,48 +2823,6 @@ class ListTLSCipherPolicies extends Rpc
 
         return $this;
     }
-}
-
-/**
- * @method string getResourceOwnerId()
- * @method $this withResourceOwnerId($value)
- * @method string getLogProject()
- * @method $this withLogProject($value)
- * @method string getResourceOwnerAccount()
- * @method $this withResourceOwnerAccount($value)
- * @method string getOwnerAccount()
- * @method $this withOwnerAccount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getLogStore()
- * @method $this withLogStore($value)
- */
-class ModifyHighDefinationMonitor extends Rpc
-{
-}
-
-/**
- * @method string getResourceOwnerId()
- * @method $this withResourceOwnerId($value)
- * @method string getInstanceChargeType()
- * @method $this withInstanceChargeType($value)
- * @method string getLoadBalancerSpec()
- * @method $this withLoadBalancerSpec($value)
- * @method string getResourceOwnerAccount()
- * @method $this withResourceOwnerAccount($value)
- * @method string getBandwidth()
- * @method $this withBandwidth($value)
- * @method string getOwnerAccount()
- * @method $this withOwnerAccount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getLoadBalancerId()
- * @method $this withLoadBalancerId($value)
- * @method string getInternetChargeType()
- * @method $this withInternetChargeType($value)
- */
-class ModifyLoadBalancerInstanceChargeType extends Rpc
-{
 }
 
 /**
@@ -3404,44 +2961,6 @@ class ModifyLoadBalancerPayType extends Rpc
  * @method $this withOldBackendServers($value)
  */
 class ModifyVServerGroupBackendServers extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAccessKeyId($value)
-    {
-        $this->data['AccessKeyId'] = $value;
-        $this->options['query']['access_key_id'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAccessKeyId()
- * @method string getResourceOwnerId()
- * @method $this withResourceOwnerId($value)
- * @method string getResourceGroupId()
- * @method $this withResourceGroupId($value)
- * @method string getResourceId()
- * @method $this withResourceId($value)
- * @method string getResourceOwnerAccount()
- * @method $this withResourceOwnerAccount($value)
- * @method string getOwnerAccount()
- * @method $this withOwnerAccount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getResourceType()
- * @method $this withResourceType($value)
- * @method string getTags()
- * @method $this withTags($value)
- * @method string getNewResourceGroupId()
- * @method $this withNewResourceGroupId($value)
- */
-class MoveResourceGroup extends Rpc
 {
 
     /**
@@ -3648,40 +3167,6 @@ class RemoveVServerGroupBackendServers extends Rpc
  * @method $this withTags($value)
  */
 class SetAccessControlListAttribute extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAccessKeyId($value)
-    {
-        $this->data['AccessKeyId'] = $value;
-        $this->options['query']['access_key_id'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAccessKeyId()
- * @method string getResourceOwnerId()
- * @method $this withResourceOwnerId($value)
- * @method string getLogsDownloadAttributes()
- * @method $this withLogsDownloadAttributes($value)
- * @method string getResourceOwnerAccount()
- * @method $this withResourceOwnerAccount($value)
- * @method string getOwnerAccount()
- * @method $this withOwnerAccount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getTags()
- * @method $this withTags($value)
- * @method string getLoadBalancerId()
- * @method $this withLoadBalancerId($value)
- */
-class SetAccessLogsDownloadAttribute extends Rpc
 {
 
     /**
@@ -4477,8 +3962,6 @@ class SetLoadBalancerStatus extends Rpc
  * @method $this withHealthCheckURI($value)
  * @method string getAclStatus()
  * @method $this withAclStatus($value)
- * @method string getFullNatEnabled()
- * @method $this withFullNatEnabled($value)
  * @method string getHealthCheckTcpFastCloseEnabled()
  * @method $this withHealthCheckTcpFastCloseEnabled($value)
  * @method string getAclType()
@@ -4508,8 +3991,6 @@ class SetLoadBalancerStatus extends Rpc
  * @method $this withSynProxy($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getProxyProtocolVpcIdEnabled()
- * @method $this withProxyProtocolVpcIdEnabled($value)
  * @method string getTags()
  * @method $this withTags($value)
  * @method string getLoadBalancerId()
@@ -4606,8 +4087,6 @@ class SetLoadBalancerTCPListenerAttribute extends Rpc
  * @method $this withHealthCheckURI($value)
  * @method string getAclStatus()
  * @method $this withAclStatus($value)
- * @method string getFullNatEnabled()
- * @method $this withFullNatEnabled($value)
  * @method string getAclType()
  * @method $this withAclType($value)
  * @method string getMasterSlaveServerGroup()
@@ -4631,8 +4110,6 @@ class SetLoadBalancerTCPListenerAttribute extends Rpc
  * @method $this withHealthCheckDomain($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getProxyProtocolVpcIdEnabled()
- * @method $this withProxyProtocolVpcIdEnabled($value)
  * @method string getTags()
  * @method $this withTags($value)
  * @method string getLoadBalancerId()
@@ -5163,7 +4640,6 @@ class UntagResources extends Rpc
  * @method $this withResourceGroupId($value)
  * @method string getCACertificateName()
  * @method $this withCACertificateName($value)
- * @method array getTag()
  * @method string getCACertificate()
  * @method $this withCACertificate($value)
  * @method string getResourceOwnerAccount()
@@ -5190,26 +4666,6 @@ class UploadCACertificate extends Rpc
 
         return $this;
     }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
-    }
 }
 
 /**
@@ -5226,7 +4682,6 @@ class UploadCACertificate extends Rpc
  * @method $this withPrivateKey($value)
  * @method string getResourceGroupId()
  * @method $this withResourceGroupId($value)
- * @method array getTag()
  * @method string getResourceOwnerAccount()
  * @method $this withResourceOwnerAccount($value)
  * @method string getOwnerAccount()
@@ -5256,25 +4711,5 @@ class UploadServerCertificate extends Rpc
         $this->options['query']['access_key_id'] = $value;
 
         return $this;
-    }
-
-    /**
-     * @param array $tag
-     *
-     * @return $this
-     */
-	public function withTag(array $tag)
-	{
-	    $this->data['Tag'] = $tag;
-		foreach ($tag as $depth1 => $depth1Value) {
-			if(isset($depth1Value['Value'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Value'] = $depth1Value['Value'];
-			}
-			if(isset($depth1Value['Key'])){
-				$this->options['query']['Tag.' . ($depth1 + 1) . '.Key'] = $depth1Value['Key'];
-			}
-		}
-
-		return $this;
     }
 }

@@ -51,6 +51,7 @@ class MainController extends AdminBaseController
                 $dashboardWidgets[$widgetName] = $widget;
             }
 
+
         }
 
         $dashboardWidgetPlugins = [];
@@ -93,7 +94,7 @@ class MainController extends AdminBaseController
 
         cmf_set_option('admin_dashboard_widgets', $dashboardWidgets, true);
 
-        $this->success(lang('Updated successfully'));
+        $this->success('更新成功!');
 
     }
 

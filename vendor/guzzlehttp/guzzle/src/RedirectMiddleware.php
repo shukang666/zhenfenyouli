@@ -3,7 +3,6 @@
 namespace GuzzleHttp;
 
 use GuzzleHttp\Exception\BadResponseException;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\RequestInterface;
@@ -14,7 +13,7 @@ use Psr\Http\Message\UriInterface;
  * Request redirect middleware.
  *
  * Apply this middleware like other middleware using
- * {@see Middleware::redirect()}.
+ * {@see \GuzzleHttp\Middleware::redirect()}.
  *
  * @final
  */
@@ -28,10 +27,10 @@ class RedirectMiddleware
      * @var array
      */
     public static $defaultSettings = [
-        'max' => 5,
-        'protocols' => ['http', 'https'],
-        'strict' => false,
-        'referer' => false,
+        'max'             => 5,
+        'protocols'       => ['http', 'https'],
+        'strict'          => false,
+        'referer'         => false,
         'track_redirects' => false,
     ];
 
@@ -89,14 +88,6 @@ class RedirectMiddleware
         $this->guardMax($request, $response, $options);
         $nextRequest = $this->modifyRequest($request, $options, $response);
 
-        // If authorization is handled by curl, unset it if URI is cross-origin.
-        if (Psr7\UriComparator::isCrossOrigin($request->getUri(), $nextRequest->getUri()) && defined('\CURLOPT_HTTPAUTH')) {
-            unset(
-                $options['curl'][\CURLOPT_HTTPAUTH],
-                $options['curl'][\CURLOPT_USERPWD]
-            );
-        }
-
         if (isset($options['allow_redirects']['on_redirect'])) {
             ($options['allow_redirects']['on_redirect'])(
                 $request,
@@ -104,10 +95,6 @@ class RedirectMiddleware
                 $nextRequest->getUri()
             );
         }
-
-        // The caller's delay applies once, before the initial request, not
-        // before each followed redirect.
-        unset($options['delay']);
 
         $promise = $this($nextRequest, $options);
 
@@ -145,7 +132,7 @@ class RedirectMiddleware
     }
 
     /**
-     * Check for too many redirects.
+     * Check for too many redirects
      *
      * @throws TooManyRedirectsException Too many redirects.
      */
@@ -171,68 +158,49 @@ class RedirectMiddleware
         // not forcing RFC compliance, but rather emulating what all browsers
         // would do.
         $statusCode = $response->getStatusCode();
-        if ($statusCode == 303
-            || ($statusCode <= 302 && !$options['allow_redirects']['strict'])
+        if ($statusCode == 303 ||
+            ($statusCode <= 302 && !$options['allow_redirects']['strict'])
         ) {
+            $safeMethods = ['GET', 'HEAD', 'OPTIONS'];
             $requestMethod = $request->getMethod();
 
-            if ($requestMethod !== 'QUERY' || !\in_array($statusCode, [301, 302], true)) {
-                $modify['method'] = \in_array($requestMethod, ['GET', 'HEAD', 'OPTIONS'], true) ? $requestMethod : 'GET';
-                $modify['body'] = '';
-                $modify['remove_headers'] = ['Content-Length', 'Transfer-Encoding'];
-            }
+            $modify['method'] = in_array($requestMethod, $safeMethods) ? $requestMethod : 'GET';
+            $modify['body'] = '';
         }
 
-        $uri = self::redirectUri($request, $response, $protocols);
-        $idnOptions = Utils::normalizeIdnConversionOption($options['idn_conversion'] ?? null);
-        if ($idnOptions !== null) {
+        $uri = $this->redirectUri($request, $response, $protocols);
+        if (isset($options['idn_conversion']) && ($options['idn_conversion'] !== false)) {
+            $idnOptions = ($options['idn_conversion'] === true) ? \IDNA_DEFAULT : $options['idn_conversion'];
             $uri = Utils::idnUriConvert($uri, $idnOptions);
         }
 
         $modify['uri'] = $uri;
-
-        // The body only needs to be rewound when the next request reuses it.
-        if (!isset($modify['body'])) {
-            try {
-                Psr7\Message::rewindBody($request);
-            } catch (\RuntimeException $e) {
-                throw new RequestException(
-                    'Redirect failed because the request body could not be rewound: '.$e->getMessage(),
-                    $request,
-                    $response,
-                    $e
-                );
-            }
-        }
+        Psr7\Message::rewindBody($request);
 
         // Add the Referer header if it is told to do so and only
         // add the header if we are not redirecting from https to http.
         if ($options['allow_redirects']['referer']
             && $modify['uri']->getScheme() === $request->getUri()->getScheme()
         ) {
-            $uri = $request->getUri()->withUserInfo('')->withFragment('');
+            $uri = $request->getUri()->withUserInfo('');
             $modify['set_headers']['Referer'] = (string) $uri;
         } else {
             $modify['remove_headers'][] = 'Referer';
         }
 
-        // Remove Authorization and Cookie headers if URI is cross-origin.
-        if (Psr7\UriComparator::isCrossOrigin($request->getUri(), $modify['uri'])) {
+        // Remove Authorization header if host is different.
+        if ($request->getUri()->getHost() !== $modify['uri']->getHost()) {
             $modify['remove_headers'][] = 'Authorization';
-            $modify['remove_headers'][] = 'Cookie';
         }
 
         return Psr7\Utils::modifyRequest($request, $modify);
     }
 
     /**
-     * Set the appropriate URL on the request based on the location header.
+     * Set the appropriate URL on the request based on the location header
      */
-    private static function redirectUri(
-        RequestInterface $request,
-        ResponseInterface $response,
-        array $protocols
-    ): UriInterface {
+    private function redirectUri(RequestInterface $request, ResponseInterface $response, array $protocols): UriInterface
+    {
         $location = Psr7\UriResolver::resolve(
             $request->getUri(),
             new Psr7\Uri($response->getHeaderLine('Location'))

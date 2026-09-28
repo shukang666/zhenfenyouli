@@ -9,6 +9,8 @@ use Throwable;
 class ServiceException extends Exception
 {
     /**
+     * Bootstrap.
+     *
      * @param mixed $extra
      */
     public function __construct(string $message = 'Service Error', int $code = self::SERVICE_ERROR, $extra = null, Throwable $previous = null)

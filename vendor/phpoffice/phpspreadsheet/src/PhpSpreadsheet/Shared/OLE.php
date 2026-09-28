@@ -110,15 +110,15 @@ class OLE
      *
      * @acces public
      *
-     * @param string $filename
+     * @param string $file
      *
      * @return bool true on success, PEAR_Error on failure
      */
-    public function read($filename)
+    public function read($file)
     {
-        $fh = @fopen($filename, 'rb');
-        if ($fh === false) {
-            throw new ReaderException("Can't open file $filename");
+        $fh = fopen($file, 'rb');
+        if (!$fh) {
+            throw new ReaderException("Can't open file $file");
         }
         $this->_file_handle = $fh;
 
@@ -239,24 +239,19 @@ class OLE
             $path .= '&blockId=' . $blockIdOrPps;
         }
 
-        $resource = fopen($path, 'rb');
-        if ($resource === false) {
-            throw new Exception("Unable to open stream $path");
-        }
-
-        return $resource;
+        return fopen($path, 'rb');
     }
 
     /**
      * Reads a signed char.
      *
-     * @param resource $fileHandle file handle
+     * @param resource $fh file handle
      *
      * @return int
      */
-    private static function readInt1($fileHandle)
+    private static function readInt1($fh)
     {
-        [, $tmp] = unpack('c', fread($fileHandle, 1) ?: '') ?: [0, 0];
+        [, $tmp] = unpack('c', fread($fh, 1));
 
         return $tmp;
     }
@@ -264,34 +259,27 @@ class OLE
     /**
      * Reads an unsigned short (2 octets).
      *
-     * @param resource $fileHandle file handle
+     * @param resource $fh file handle
      *
      * @return int
      */
-    private static function readInt2($fileHandle)
+    private static function readInt2($fh)
     {
-        [, $tmp] = unpack('v', fread($fileHandle, 2) ?: '') ?: [0, 0];
+        [, $tmp] = unpack('v', fread($fh, 2));
 
         return $tmp;
     }
 
-    private const SIGNED_4OCTET_LIMIT = 2147483648;
-
-    private const SIGNED_4OCTET_SUBTRACT = 2 * self::SIGNED_4OCTET_LIMIT;
-
     /**
-     * Reads long (4 octets), interpreted as if signed on 32-bit system.
+     * Reads an unsigned long (4 octets).
      *
-     * @param resource $fileHandle file handle
+     * @param resource $fh file handle
      *
      * @return int
      */
-    private static function readInt4($fileHandle)
+    private static function readInt4($fh)
     {
-        [, $tmp] = unpack('V', fread($fileHandle, 4) ?: '') ?: [0, 0];
-        if ($tmp >= self::SIGNED_4OCTET_LIMIT) {
-            $tmp -= self::SIGNED_4OCTET_SUBTRACT;
-        }
+        [, $tmp] = unpack('V', fread($fh, 4));
 
         return $tmp;
     }
@@ -309,7 +297,7 @@ class OLE
         $fh = $this->getStream($blockId);
         for ($pos = 0; true; $pos += 128) {
             fseek($fh, $pos, SEEK_SET);
-            $nameUtf16 = (string) fread($fh, 64);
+            $nameUtf16 = fread($fh, 64);
             $nameLength = self::readInt2($fh);
             $nameUtf16 = substr($nameUtf16, 0, $nameLength - 2);
             // Simple conversion from UTF-16LE to ISO-8859-1
@@ -339,15 +327,15 @@ class OLE
             $pps->NextPps = self::readInt4($fh);
             $pps->DirPps = self::readInt4($fh);
             fseek($fh, 20, SEEK_CUR);
-            $pps->Time1st = self::OLE2LocalDate((string) fread($fh, 8));
-            $pps->Time2nd = self::OLE2LocalDate((string) fread($fh, 8));
+            $pps->Time1st = self::OLE2LocalDate(fread($fh, 8));
+            $pps->Time2nd = self::OLE2LocalDate(fread($fh, 8));
             $pps->startBlock = self::readInt4($fh);
             $pps->Size = self::readInt4($fh);
             $pps->No = count($this->_list);
             $this->_list[] = $pps;
 
             // check if the PPS tree (starting from root) is complete
-            if (isset($this->root) && $this->ppsTreeComplete($this->root->No)) { //* @phpstan-ignore-line
+            if (isset($this->root) && $this->ppsTreeComplete($this->root->No)) {
                 break;
             }
         }
@@ -358,7 +346,7 @@ class OLE
             if ($pps->Type == self::OLE_PPS_TYPE_DIR || $pps->Type == self::OLE_PPS_TYPE_ROOT) {
                 $nos = [$pps->DirPps];
                 $pps->children = [];
-                while (!empty($nos)) {
+                while ($nos) {
                     $no = array_pop($nos);
                     if ($no != -1) {
                         $childPps = $this->_list[$no];
@@ -457,7 +445,7 @@ class OLE
             return '';
         }
         $fh = $this->getStream($this->_list[$index]);
-        $data = (string) stream_get_contents($fh, $length, $position);
+        $data = stream_get_contents($fh, $length, $position);
         fclose($fh);
 
         return $data;
@@ -514,6 +502,9 @@ class OLE
         }
         $dateTime = Date::dateTimeFromTimestamp("$date");
 
+        // factor used for separating numbers into 4 bytes parts
+        $factor = 2 ** 32;
+
         // days from 1-1-1601 until the beggining of UNIX era
         $days = 134774;
         // calculate seconds
@@ -521,15 +512,22 @@ class OLE
         // multiply just to make MS happy
         $big_date *= 10000000;
 
+        $high_part = floor($big_date / $factor);
+        // lower 4 bytes
+        $low_part = floor((($big_date / $factor) - $high_part) * $factor);
+
         // Make HEX string
         $res = '';
 
-        $factor = 2 ** 56;
-        while ($factor >= 1) {
-            $hex = (int) floor($big_date / $factor);
-            $res = pack('c', $hex) . $res;
-            $big_date = fmod($big_date, $factor);
-            $factor /= 256;
+        for ($i = 0; $i < 4; ++$i) {
+            $hex = $low_part % 0x100;
+            $res .= pack('c', $hex);
+            $low_part /= 0x100;
+        }
+        for ($i = 0; $i < 4; ++$i) {
+            $hex = $high_part % 0x100;
+            $res .= pack('c', $hex);
+            $high_part /= 0x100;
         }
 
         return $res;
@@ -549,7 +547,7 @@ class OLE
         }
 
         // convert to units of 100 ns since 1601:
-        $unpackedTimestamp = unpack('v4', $oleTimestamp) ?: [];
+        $unpackedTimestamp = unpack('v4', $oleTimestamp);
         $timestampHigh = (float) $unpackedTimestamp[4] * 65536 + (float) $unpackedTimestamp[3];
         $timestampLow = (float) $unpackedTimestamp[2] * 65536 + (float) $unpackedTimestamp[1];
 

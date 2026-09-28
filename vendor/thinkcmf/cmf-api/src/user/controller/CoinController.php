@@ -8,7 +8,7 @@
 // +----------------------------------------------------------------------
 // | Author: Powerless < wzxaini9@gmail.com>
 // +----------------------------------------------------------------------
-namespace api\user\controller;
+namespace app\user\controller;
 
 use api\user\model\UserScoreLogModel;
 use cmf\controller\RestUserBaseController;

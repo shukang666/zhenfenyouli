@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Yansongda\Pay\Contract;
 
-use Yansongda\Pay\Exception\ContainerException;
+use Yansongda\Pay\Pay;
 
 interface ServiceProviderInterface
 {
     /**
-     * @param mixed $data
-     *
-     * @throws ContainerException
+     * register the service.
      */
-    public function register($data = null): void;
+    public function register(Pay $pay, ?array $data = null): void;
 }

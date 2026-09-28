@@ -14,75 +14,49 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method CreateApplication createApplication(array $options = [])
  * @method CreateApplicationScalingRule createApplicationScalingRule(array $options = [])
  * @method CreateConfigMap createConfigMap(array $options = [])
- * @method CreateGreyTagRoute createGreyTagRoute(array $options = [])
  * @method CreateIngress createIngress(array $options = [])
- * @method CreateJob createJob(array $options = [])
  * @method CreateNamespace createNamespace(array $options = [])
- * @method CreateSecret createSecret(array $options = [])
  * @method DeleteApplication deleteApplication(array $options = [])
  * @method DeleteApplicationScalingRule deleteApplicationScalingRule(array $options = [])
  * @method DeleteConfigMap deleteConfigMap(array $options = [])
- * @method DeleteGreyTagRoute deleteGreyTagRoute(array $options = [])
- * @method DeleteHistoryJob deleteHistoryJob(array $options = [])
  * @method DeleteIngress deleteIngress(array $options = [])
- * @method DeleteJob deleteJob(array $options = [])
  * @method DeleteNamespace deleteNamespace(array $options = [])
- * @method DeleteSecret deleteSecret(array $options = [])
  * @method DeployApplication deployApplication(array $options = [])
  * @method DescribeApplicationConfig describeApplicationConfig(array $options = [])
  * @method DescribeApplicationGroups describeApplicationGroups(array $options = [])
  * @method DescribeApplicationImage describeApplicationImage(array $options = [])
  * @method DescribeApplicationInstances describeApplicationInstances(array $options = [])
- * @method DescribeApplicationScalingRule describeApplicationScalingRule(array $options = [])
  * @method DescribeApplicationScalingRules describeApplicationScalingRules(array $options = [])
  * @method DescribeApplicationSlbs describeApplicationSlbs(array $options = [])
  * @method DescribeApplicationStatus describeApplicationStatus(array $options = [])
- * @method DescribeAppServiceDetail describeAppServiceDetail(array $options = [])
  * @method DescribeChangeOrder describeChangeOrder(array $options = [])
  * @method DescribeComponents describeComponents(array $options = [])
  * @method DescribeConfigMap describeConfigMap(array $options = [])
- * @method DescribeConfigurationPrice describeConfigurationPrice(array $options = [])
  * @method DescribeEdasContainers describeEdasContainers(array $options = [])
- * @method DescribeGreyTagRoute describeGreyTagRoute(array $options = [])
  * @method DescribeIngress describeIngress(array $options = [])
  * @method DescribeInstanceLog describeInstanceLog(array $options = [])
  * @method DescribeInstanceSpecifications describeInstanceSpecifications(array $options = [])
- * @method DescribeJob describeJob(array $options = [])
- * @method DescribeJobHistory describeJobHistory(array $options = [])
- * @method DescribeJobStatus describeJobStatus(array $options = [])
  * @method DescribeNamespace describeNamespace(array $options = [])
  * @method DescribeNamespaceList describeNamespaceList(array $options = [])
  * @method DescribeNamespaceResources describeNamespaceResources(array $options = [])
  * @method DescribeNamespaces describeNamespaces(array $options = [])
  * @method DescribePipeline describePipeline(array $options = [])
  * @method DescribeRegions describeRegions(array $options = [])
- * @method DescribeSecret describeSecret(array $options = [])
  * @method DisableApplicationScalingRule disableApplicationScalingRule(array $options = [])
  * @method EnableApplicationScalingRule enableApplicationScalingRule(array $options = [])
- * @method ExecJob execJob(array $options = [])
- * @method GetArmsTopNMetric getArmsTopNMetric(array $options = [])
- * @method GetAvailabilityMetric getAvailabilityMetric(array $options = [])
- * @method GetChangeOrderMetric getChangeOrderMetric(array $options = [])
- * @method GetScaleAppMetric getScaleAppMetric(array $options = [])
- * @method GetWarningEventMetric getWarningEventMetric(array $options = [])
  * @method ListAppEvents listAppEvents(array $options = [])
  * @method ListApplications listApplications(array $options = [])
- * @method ListAppServicesPage listAppServicesPage(array $options = [])
  * @method ListAppVersions listAppVersions(array $options = [])
  * @method ListChangeOrders listChangeOrders(array $options = [])
  * @method ListConsumedServices listConsumedServices(array $options = [])
- * @method ListGreyTagRoute listGreyTagRoute(array $options = [])
  * @method ListIngresses listIngresses(array $options = [])
- * @method ListJobs listJobs(array $options = [])
  * @method ListLogConfigs listLogConfigs(array $options = [])
  * @method ListNamespaceChangeOrders listNamespaceChangeOrders(array $options = [])
  * @method ListNamespacedConfigMaps listNamespacedConfigMaps(array $options = [])
  * @method ListPublishedServices listPublishedServices(array $options = [])
- * @method ListSecrets listSecrets(array $options = [])
  * @method ListTagResources listTagResources(array $options = [])
  * @method OpenSaeService openSaeService(array $options = [])
  * @method QueryResourceStatics queryResourceStatics(array $options = [])
- * @method ReduceApplicationCapacityByInstanceIds reduceApplicationCapacityByInstanceIds(array $options = [])
  * @method RescaleApplication rescaleApplication(array $options = [])
  * @method RescaleApplicationVertically rescaleApplicationVertically(array $options = [])
  * @method RestartApplication restartApplication(array $options = [])
@@ -90,21 +64,15 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method RollbackApplication rollbackApplication(array $options = [])
  * @method StartApplication startApplication(array $options = [])
  * @method StopApplication stopApplication(array $options = [])
- * @method SuspendJob suspendJob(array $options = [])
  * @method TagResources tagResources(array $options = [])
  * @method UnbindSlb unbindSlb(array $options = [])
  * @method UntagResources untagResources(array $options = [])
- * @method UpdateApplicationDescription updateApplicationDescription(array $options = [])
  * @method UpdateApplicationScalingRule updateApplicationScalingRule(array $options = [])
- * @method UpdateApplicationVswitches updateApplicationVswitches(array $options = [])
  * @method UpdateAppSecurityGroup updateAppSecurityGroup(array $options = [])
  * @method UpdateConfigMap updateConfigMap(array $options = [])
- * @method UpdateGreyTagRoute updateGreyTagRoute(array $options = [])
  * @method UpdateIngress updateIngress(array $options = [])
- * @method UpdateJob updateJob(array $options = [])
  * @method UpdateNamespace updateNamespace(array $options = [])
  * @method UpdateNamespaceVpc updateNamespaceVpc(array $options = [])
- * @method UpdateSecret updateSecret(array $options = [])
  */
 class SaeApiResolver extends ApiResolver
 {
@@ -175,7 +143,6 @@ class AbortChangeOrder extends Roa
 /**
  * @method string getAppIds()
  * @method string getNamespaceId()
- * @method string getVersion()
  */
 class BatchStartApplications extends Roa
 {
@@ -210,25 +177,11 @@ class BatchStartApplications extends Roa
 
         return $this;
     }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withVersion($value)
-    {
-        $this->data['Version'] = $value;
-        $this->options['query']['Version'] = $value;
-
-        return $this;
-    }
 }
 
 /**
  * @method string getAppIds()
  * @method string getNamespaceId()
- * @method string getVersion()
  */
 class BatchStopApplications extends Roa
 {
@@ -260,19 +213,6 @@ class BatchStopApplications extends Roa
     {
         $this->data['NamespaceId'] = $value;
         $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withVersion($value)
-    {
-        $this->data['Version'] = $value;
-        $this->options['query']['Version'] = $value;
 
         return $this;
     }
@@ -397,68 +337,46 @@ class ConfirmPipelineBatch extends Roa
 
 /**
  * @method string getNasId()
- * @method string getJarStartArgs()
- * @method string getOssAkSecret()
- * @method string getNasConfigs()
- * @method string getMountHost()
- * @method string getAutoConfig()
- * @method string getEnvs()
- * @method string getPhpPECLExtensions()
- * @method string getPhpArmsConfigLocation()
- * @method string getProgrammingLanguage()
- * @method string getCustomHostAlias()
- * @method string getDeploy()
- * @method string getJarStartOptions()
- * @method string getAppName()
- * @method string getNamespaceId()
- * @method string getPurchaseEip()
- * @method string getSaeVersion()
- * @method string getPvtzDiscoverySvc()
- * @method string getConfigMapMountDesc()
- * @method string getOssMountDescs()
- * @method string getImagePullSecrets()
- * @method string getPreStop()
- * @method string getPython()
- * @method string getCpu()
- * @method string getVSwitchId()
- * @method string getEnableEbpf()
- * @method string getPackageType()
- * @method string getPostStart()
- * @method string getPhpExtensions()
- * @method string getAssociateEip()
- * @method string getAppSource()
  * @method string getWebContainer()
+ * @method string getJarStartArgs()
  * @method string getMemory()
  * @method string getSlsConfigs()
- * @method string getKafkaConfigs()
  * @method string getCommandArgs()
  * @method string getAcrAssumeRoleArn()
  * @method string getReadiness()
  * @method string getTimezone()
- * @method string getOssAkId()
+ * @method string getMountHost()
+ * @method string getAutoConfig()
  * @method string getLiveness()
  * @method string getSecurityGroupId()
+ * @method string getEnvs()
+ * @method string getPhpArmsConfigLocation()
  * @method string getPackageVersion()
  * @method string getTomcatConfig()
+ * @method string getCustomHostAlias()
+ * @method string getDeploy()
  * @method string getWarStartOptions()
- * @method string getPackageRuntimeCustomBuild()
+ * @method string getJarStartOptions()
  * @method string getEdasContainerVersion()
+ * @method string getAppName()
+ * @method string getNamespaceId()
  * @method string getPackageUrl()
  * @method string getTerminationGracePeriodSeconds()
+ * @method string getConfigMapMountDesc()
  * @method string getPhpConfig()
- * @method string getEnableImageAccl()
- * @method string getMicroRegistration()
+ * @method string getPreStop()
  * @method string getReplicas()
+ * @method string getCpu()
  * @method string getCommand()
  * @method string getMountDesc()
+ * @method string getVSwitchId()
  * @method string getJdk()
  * @method string getAppDescription()
- * @method string getAcrInstanceId()
  * @method string getVpcId()
  * @method string getImageUrl()
- * @method string getPhp()
- * @method string getPythonModules()
+ * @method string getPackageType()
  * @method string getPhpConfigLocation()
+ * @method string getPostStart()
  */
 class CreateApplication extends Roa
 {
@@ -486,400 +404,23 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
-    public function withJarStartArgs($value)
-    {
-        $this->data['JarStartArgs'] = $value;
-        $this->options['query']['JarStartArgs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssAkSecret($value)
-    {
-        $this->data['OssAkSecret'] = $value;
-        $this->options['form_params']['OssAkSecret'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNasConfigs($value)
-    {
-        $this->data['NasConfigs'] = $value;
-        $this->options['query']['NasConfigs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMountHost($value)
-    {
-        $this->data['MountHost'] = $value;
-        $this->options['query']['MountHost'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAutoConfig($value)
-    {
-        $this->data['AutoConfig'] = $value;
-        $this->options['query']['AutoConfig'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnvs($value)
-    {
-        $this->data['Envs'] = $value;
-        $this->options['query']['Envs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpPECLExtensions($value)
-    {
-        $this->data['PhpPECLExtensions'] = $value;
-        $this->options['form_params']['PhpPECLExtensions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpArmsConfigLocation($value)
-    {
-        $this->data['PhpArmsConfigLocation'] = $value;
-        $this->options['query']['PhpArmsConfigLocation'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProgrammingLanguage($value)
-    {
-        $this->data['ProgrammingLanguage'] = $value;
-        $this->options['query']['ProgrammingLanguage'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCustomHostAlias($value)
-    {
-        $this->data['CustomHostAlias'] = $value;
-        $this->options['query']['CustomHostAlias'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withDeploy($value)
-    {
-        $this->data['Deploy'] = $value;
-        $this->options['query']['Deploy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJarStartOptions($value)
-    {
-        $this->data['JarStartOptions'] = $value;
-        $this->options['query']['JarStartOptions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppName($value)
-    {
-        $this->data['AppName'] = $value;
-        $this->options['query']['AppName'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNamespaceId($value)
-    {
-        $this->data['NamespaceId'] = $value;
-        $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPurchaseEip($value)
-    {
-        $this->data['PurchaseEip'] = $value;
-        $this->options['query']['PurchaseEip'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSaeVersion($value)
-    {
-        $this->data['SaeVersion'] = $value;
-        $this->options['query']['SaeVersion'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPvtzDiscoverySvc($value)
-    {
-        $this->data['PvtzDiscoverySvc'] = $value;
-        $this->options['query']['PvtzDiscoverySvc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withConfigMapMountDesc($value)
-    {
-        $this->data['ConfigMapMountDesc'] = $value;
-        $this->options['form_params']['ConfigMapMountDesc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssMountDescs($value)
-    {
-        $this->data['OssMountDescs'] = $value;
-        $this->options['form_params']['OssMountDescs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withImagePullSecrets($value)
-    {
-        $this->data['ImagePullSecrets'] = $value;
-        $this->options['query']['ImagePullSecrets'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPreStop($value)
-    {
-        $this->data['PreStop'] = $value;
-        $this->options['query']['PreStop'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPython($value)
-    {
-        $this->data['Python'] = $value;
-        $this->options['query']['Python'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpu($value)
-    {
-        $this->data['Cpu'] = $value;
-        $this->options['query']['Cpu'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withVSwitchId($value)
-    {
-        $this->data['VSwitchId'] = $value;
-        $this->options['query']['VSwitchId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnableEbpf($value)
-    {
-        $this->data['EnableEbpf'] = $value;
-        $this->options['query']['EnableEbpf'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageType($value)
-    {
-        $this->data['PackageType'] = $value;
-        $this->options['query']['PackageType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPostStart($value)
-    {
-        $this->data['PostStart'] = $value;
-        $this->options['query']['PostStart'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpExtensions($value)
-    {
-        $this->data['PhpExtensions'] = $value;
-        $this->options['form_params']['PhpExtensions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAssociateEip($value)
-    {
-        $this->data['AssociateEip'] = $value;
-        $this->options['form_params']['AssociateEip'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppSource($value)
-    {
-        $this->data['AppSource'] = $value;
-        $this->options['query']['AppSource'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withWebContainer($value)
     {
         $this->data['WebContainer'] = $value;
         $this->options['query']['WebContainer'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withJarStartArgs($value)
+    {
+        $this->data['JarStartArgs'] = $value;
+        $this->options['query']['JarStartArgs'] = $value;
 
         return $this;
     }
@@ -906,19 +447,6 @@ class CreateApplication extends Roa
     {
         $this->data['SlsConfigs'] = $value;
         $this->options['query']['SlsConfigs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withKafkaConfigs($value)
-    {
-        $this->data['KafkaConfigs'] = $value;
-        $this->options['query']['KafkaConfigs'] = $value;
 
         return $this;
     }
@@ -980,10 +508,23 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
-    public function withOssAkId($value)
+    public function withMountHost($value)
     {
-        $this->data['OssAkId'] = $value;
-        $this->options['form_params']['OssAkId'] = $value;
+        $this->data['MountHost'] = $value;
+        $this->options['query']['MountHost'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAutoConfig($value)
+    {
+        $this->data['AutoConfig'] = $value;
+        $this->options['query']['AutoConfig'] = $value;
 
         return $this;
     }
@@ -1019,6 +560,32 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
+    public function withEnvs($value)
+    {
+        $this->data['Envs'] = $value;
+        $this->options['query']['Envs'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withPhpArmsConfigLocation($value)
+    {
+        $this->data['PhpArmsConfigLocation'] = $value;
+        $this->options['query']['PhpArmsConfigLocation'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
     public function withPackageVersion($value)
     {
         $this->data['PackageVersion'] = $value;
@@ -1045,6 +612,32 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
+    public function withCustomHostAlias($value)
+    {
+        $this->data['CustomHostAlias'] = $value;
+        $this->options['query']['CustomHostAlias'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withDeploy($value)
+    {
+        $this->data['Deploy'] = $value;
+        $this->options['query']['Deploy'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
     public function withWarStartOptions($value)
     {
         $this->data['WarStartOptions'] = $value;
@@ -1058,10 +651,10 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
-    public function withPackageRuntimeCustomBuild($value)
+    public function withJarStartOptions($value)
     {
-        $this->data['PackageRuntimeCustomBuild'] = $value;
-        $this->options['form_params']['PackageRuntimeCustomBuild'] = $value;
+        $this->data['JarStartOptions'] = $value;
+        $this->options['query']['JarStartOptions'] = $value;
 
         return $this;
     }
@@ -1075,6 +668,32 @@ class CreateApplication extends Roa
     {
         $this->data['EdasContainerVersion'] = $value;
         $this->options['query']['EdasContainerVersion'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAppName($value)
+    {
+        $this->data['AppName'] = $value;
+        $this->options['query']['AppName'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withNamespaceId($value)
+    {
+        $this->data['NamespaceId'] = $value;
+        $this->options['query']['NamespaceId'] = $value;
 
         return $this;
     }
@@ -1110,6 +729,19 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
+    public function withConfigMapMountDesc($value)
+    {
+        $this->data['ConfigMapMountDesc'] = $value;
+        $this->options['form_params']['ConfigMapMountDesc'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
     public function withPhpConfig($value)
     {
         $this->data['PhpConfig'] = $value;
@@ -1123,23 +755,10 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
-    public function withEnableImageAccl($value)
+    public function withPreStop($value)
     {
-        $this->data['EnableImageAccl'] = $value;
-        $this->options['form_params']['EnableImageAccl'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMicroRegistration($value)
-    {
-        $this->data['MicroRegistration'] = $value;
-        $this->options['query']['MicroRegistration'] = $value;
+        $this->data['PreStop'] = $value;
+        $this->options['query']['PreStop'] = $value;
 
         return $this;
     }
@@ -1153,6 +772,19 @@ class CreateApplication extends Roa
     {
         $this->data['Replicas'] = $value;
         $this->options['query']['Replicas'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withCpu($value)
+    {
+        $this->data['Cpu'] = $value;
+        $this->options['query']['Cpu'] = $value;
 
         return $this;
     }
@@ -1188,6 +820,19 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
+    public function withVSwitchId($value)
+    {
+        $this->data['VSwitchId'] = $value;
+        $this->options['query']['VSwitchId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
     public function withJdk($value)
     {
         $this->data['Jdk'] = $value;
@@ -1205,19 +850,6 @@ class CreateApplication extends Roa
     {
         $this->data['AppDescription'] = $value;
         $this->options['query']['AppDescription'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAcrInstanceId($value)
-    {
-        $this->data['AcrInstanceId'] = $value;
-        $this->options['form_params']['AcrInstanceId'] = $value;
 
         return $this;
     }
@@ -1253,23 +885,10 @@ class CreateApplication extends Roa
      *
      * @return $this
      */
-    public function withPhp($value)
+    public function withPackageType($value)
     {
-        $this->data['Php'] = $value;
-        $this->options['form_params']['Php'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPythonModules($value)
-    {
-        $this->data['PythonModules'] = $value;
-        $this->options['query']['PythonModules'] = $value;
+        $this->data['PackageType'] = $value;
+        $this->options['query']['PackageType'] = $value;
 
         return $this;
     }
@@ -1286,16 +905,27 @@ class CreateApplication extends Roa
 
         return $this;
     }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withPostStart($value)
+    {
+        $this->data['PostStart'] = $value;
+        $this->options['query']['PostStart'] = $value;
+
+        return $this;
+    }
 }
 
 /**
  * @method string getScalingRuleName()
  * @method string getMinReadyInstances()
- * @method string getScalingRuleEnable()
  * @method string getScalingRuleTimer()
  * @method string getScalingRuleMetric()
  * @method string getAppId()
- * @method string getMinReadyInstanceRatio()
  * @method string getScalingRuleType()
  */
 class CreateApplicationScalingRule extends Roa
@@ -1337,19 +967,6 @@ class CreateApplicationScalingRule extends Roa
      *
      * @return $this
      */
-    public function withScalingRuleEnable($value)
-    {
-        $this->data['ScalingRuleEnable'] = $value;
-        $this->options['query']['ScalingRuleEnable'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withScalingRuleTimer($value)
     {
         $this->data['ScalingRuleTimer'] = $value;
@@ -1380,19 +997,6 @@ class CreateApplicationScalingRule extends Roa
     {
         $this->data['AppId'] = $value;
         $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMinReadyInstanceRatio($value)
-    {
-        $this->data['MinReadyInstanceRatio'] = $value;
-        $this->options['query']['MinReadyInstanceRatio'] = $value;
 
         return $this;
     }
@@ -1479,110 +1083,12 @@ class CreateConfigMap extends Roa
 }
 
 /**
- * @method string getAppId()
- * @method string getName()
- * @method string getDescription()
- * @method string getDubboRules()
- * @method string getAlbRules()
- * @method string getScRules()
- */
-class CreateGreyTagRoute extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/tagroute/greyTagRoute';
-
-    /** @var string */
-    public $method = 'POST';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withName($value)
-    {
-        $this->data['Name'] = $value;
-        $this->options['query']['Name'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withDescription($value)
-    {
-        $this->data['Description'] = $value;
-        $this->options['query']['Description'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withDubboRules($value)
-    {
-        $this->data['DubboRules'] = $value;
-        $this->options['query']['DubboRules'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAlbRules($value)
-    {
-        $this->data['AlbRules'] = $value;
-        $this->options['query']['AlbRules'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withScRules($value)
-    {
-        $this->data['ScRules'] = $value;
-        $this->options['query']['ScRules'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getListenerPort()
  * @method string getSlbId()
  * @method string getNamespaceId()
  * @method string getDescription()
- * @method string getLoadBalanceType()
  * @method string getRules()
  * @method string getCertId()
- * @method string getCertIds()
- * @method string getListenerProtocol()
  * @method string getDefaultRule()
  */
 class CreateIngress extends Roa
@@ -1650,19 +1156,6 @@ class CreateIngress extends Roa
      *
      * @return $this
      */
-    public function withLoadBalanceType($value)
-    {
-        $this->data['LoadBalanceType'] = $value;
-        $this->options['query']['LoadBalanceType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withRules($value)
     {
         $this->data['Rules'] = $value;
@@ -1689,32 +1182,6 @@ class CreateIngress extends Roa
      *
      * @return $this
      */
-    public function withCertIds($value)
-    {
-        $this->data['CertIds'] = $value;
-        $this->options['query']['CertIds'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withListenerProtocol($value)
-    {
-        $this->data['ListenerProtocol'] = $value;
-        $this->options['query']['ListenerProtocol'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withDefaultRule($value)
     {
         $this->data['DefaultRule'] = $value;
@@ -1725,904 +1192,9 @@ class CreateIngress extends Roa
 }
 
 /**
- * @method string getNasId()
- * @method string getJarStartArgs()
- * @method string getConcurrencyPolicy()
- * @method string getTriggerConfig()
- * @method string getOssAkSecret()
- * @method string getMountHost()
- * @method string getAutoConfig()
- * @method string getEnvs()
- * @method string getPhpPECLExtensions()
- * @method string getPhpArmsConfigLocation()
- * @method string getProgrammingLanguage()
- * @method string getCustomHostAlias()
- * @method string getDeploy()
- * @method string getJarStartOptions()
- * @method string getAppName()
- * @method string getNamespaceId()
- * @method string getSlice()
- * @method string getConfigMapMountDesc()
- * @method string getOssMountDescs()
- * @method string getImagePullSecrets()
- * @method string getPreStop()
- * @method string getPython()
- * @method string getCpu()
- * @method string getBackoffLimit()
- * @method string getVSwitchId()
- * @method string getPackageType()
- * @method string getPostStart()
- * @method string getPhpExtensions()
- * @method string getAssociateEip()
- * @method string getWebContainer()
- * @method string getMemory()
- * @method string getSlsConfigs()
- * @method string getCommandArgs()
- * @method string getAcrAssumeRoleArn()
- * @method string getReadiness()
- * @method string getTimezone()
- * @method string getOssAkId()
- * @method string getLiveness()
- * @method string getSecurityGroupId()
- * @method string getPackageVersion()
- * @method string getTomcatConfig()
- * @method string getTimeout()
- * @method string getWarStartOptions()
- * @method string getPackageRuntimeCustomBuild()
- * @method string getEdasContainerVersion()
- * @method string getPackageUrl()
- * @method string getTerminationGracePeriodSeconds()
- * @method string getPhpConfig()
- * @method string getSliceEnvs()
- * @method string getEnableImageAccl()
- * @method string getReplicas()
- * @method string getWorkload()
- * @method string getCommand()
- * @method string getMountDesc()
- * @method string getJdk()
- * @method string getAppDescription()
- * @method string getAcrInstanceId()
- * @method string getVpcId()
- * @method string getImageUrl()
- * @method string getPhp()
- * @method string getRefAppId()
- * @method string getPythonModules()
- * @method string getPhpConfigLocation()
- */
-class CreateJob extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/createJob';
-
-    /** @var string */
-    public $method = 'POST';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNasId($value)
-    {
-        $this->data['NasId'] = $value;
-        $this->options['query']['NasId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJarStartArgs($value)
-    {
-        $this->data['JarStartArgs'] = $value;
-        $this->options['query']['JarStartArgs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withConcurrencyPolicy($value)
-    {
-        $this->data['ConcurrencyPolicy'] = $value;
-        $this->options['query']['ConcurrencyPolicy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTriggerConfig($value)
-    {
-        $this->data['TriggerConfig'] = $value;
-        $this->options['query']['TriggerConfig'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssAkSecret($value)
-    {
-        $this->data['OssAkSecret'] = $value;
-        $this->options['form_params']['OssAkSecret'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMountHost($value)
-    {
-        $this->data['MountHost'] = $value;
-        $this->options['query']['MountHost'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAutoConfig($value)
-    {
-        $this->data['AutoConfig'] = $value;
-        $this->options['query']['AutoConfig'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnvs($value)
-    {
-        $this->data['Envs'] = $value;
-        $this->options['query']['Envs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpPECLExtensions($value)
-    {
-        $this->data['PhpPECLExtensions'] = $value;
-        $this->options['form_params']['PhpPECLExtensions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpArmsConfigLocation($value)
-    {
-        $this->data['PhpArmsConfigLocation'] = $value;
-        $this->options['query']['PhpArmsConfigLocation'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProgrammingLanguage($value)
-    {
-        $this->data['ProgrammingLanguage'] = $value;
-        $this->options['query']['ProgrammingLanguage'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCustomHostAlias($value)
-    {
-        $this->data['CustomHostAlias'] = $value;
-        $this->options['query']['CustomHostAlias'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withDeploy($value)
-    {
-        $this->data['Deploy'] = $value;
-        $this->options['query']['Deploy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJarStartOptions($value)
-    {
-        $this->data['JarStartOptions'] = $value;
-        $this->options['query']['JarStartOptions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppName($value)
-    {
-        $this->data['AppName'] = $value;
-        $this->options['query']['AppName'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNamespaceId($value)
-    {
-        $this->data['NamespaceId'] = $value;
-        $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSlice($value)
-    {
-        $this->data['Slice'] = $value;
-        $this->options['query']['Slice'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withConfigMapMountDesc($value)
-    {
-        $this->data['ConfigMapMountDesc'] = $value;
-        $this->options['form_params']['ConfigMapMountDesc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssMountDescs($value)
-    {
-        $this->data['OssMountDescs'] = $value;
-        $this->options['form_params']['OssMountDescs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withImagePullSecrets($value)
-    {
-        $this->data['ImagePullSecrets'] = $value;
-        $this->options['query']['ImagePullSecrets'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPreStop($value)
-    {
-        $this->data['PreStop'] = $value;
-        $this->options['query']['PreStop'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPython($value)
-    {
-        $this->data['Python'] = $value;
-        $this->options['query']['Python'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpu($value)
-    {
-        $this->data['Cpu'] = $value;
-        $this->options['query']['Cpu'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBackoffLimit($value)
-    {
-        $this->data['BackoffLimit'] = $value;
-        $this->options['query']['BackoffLimit'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withVSwitchId($value)
-    {
-        $this->data['VSwitchId'] = $value;
-        $this->options['query']['VSwitchId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageType($value)
-    {
-        $this->data['PackageType'] = $value;
-        $this->options['query']['PackageType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPostStart($value)
-    {
-        $this->data['PostStart'] = $value;
-        $this->options['query']['PostStart'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpExtensions($value)
-    {
-        $this->data['PhpExtensions'] = $value;
-        $this->options['form_params']['PhpExtensions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAssociateEip($value)
-    {
-        $this->data['AssociateEip'] = $value;
-        $this->options['form_params']['AssociateEip'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWebContainer($value)
-    {
-        $this->data['WebContainer'] = $value;
-        $this->options['query']['WebContainer'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMemory($value)
-    {
-        $this->data['Memory'] = $value;
-        $this->options['query']['Memory'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSlsConfigs($value)
-    {
-        $this->data['SlsConfigs'] = $value;
-        $this->options['query']['SlsConfigs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCommandArgs($value)
-    {
-        $this->data['CommandArgs'] = $value;
-        $this->options['query']['CommandArgs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAcrAssumeRoleArn($value)
-    {
-        $this->data['AcrAssumeRoleArn'] = $value;
-        $this->options['query']['AcrAssumeRoleArn'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReadiness($value)
-    {
-        $this->data['Readiness'] = $value;
-        $this->options['query']['Readiness'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTimezone($value)
-    {
-        $this->data['Timezone'] = $value;
-        $this->options['query']['Timezone'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssAkId($value)
-    {
-        $this->data['OssAkId'] = $value;
-        $this->options['form_params']['OssAkId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withLiveness($value)
-    {
-        $this->data['Liveness'] = $value;
-        $this->options['query']['Liveness'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSecurityGroupId($value)
-    {
-        $this->data['SecurityGroupId'] = $value;
-        $this->options['query']['SecurityGroupId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageVersion($value)
-    {
-        $this->data['PackageVersion'] = $value;
-        $this->options['query']['PackageVersion'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTomcatConfig($value)
-    {
-        $this->data['TomcatConfig'] = $value;
-        $this->options['query']['TomcatConfig'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTimeout($value)
-    {
-        $this->data['Timeout'] = $value;
-        $this->options['query']['Timeout'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWarStartOptions($value)
-    {
-        $this->data['WarStartOptions'] = $value;
-        $this->options['query']['WarStartOptions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageRuntimeCustomBuild($value)
-    {
-        $this->data['PackageRuntimeCustomBuild'] = $value;
-        $this->options['form_params']['PackageRuntimeCustomBuild'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEdasContainerVersion($value)
-    {
-        $this->data['EdasContainerVersion'] = $value;
-        $this->options['query']['EdasContainerVersion'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageUrl($value)
-    {
-        $this->data['PackageUrl'] = $value;
-        $this->options['query']['PackageUrl'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTerminationGracePeriodSeconds($value)
-    {
-        $this->data['TerminationGracePeriodSeconds'] = $value;
-        $this->options['query']['TerminationGracePeriodSeconds'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpConfig($value)
-    {
-        $this->data['PhpConfig'] = $value;
-        $this->options['form_params']['PhpConfig'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSliceEnvs($value)
-    {
-        $this->data['SliceEnvs'] = $value;
-        $this->options['query']['SliceEnvs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnableImageAccl($value)
-    {
-        $this->data['EnableImageAccl'] = $value;
-        $this->options['form_params']['EnableImageAccl'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReplicas($value)
-    {
-        $this->data['Replicas'] = $value;
-        $this->options['query']['Replicas'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWorkload($value)
-    {
-        $this->data['Workload'] = $value;
-        $this->options['query']['Workload'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCommand($value)
-    {
-        $this->data['Command'] = $value;
-        $this->options['query']['Command'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMountDesc($value)
-    {
-        $this->data['MountDesc'] = $value;
-        $this->options['query']['MountDesc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJdk($value)
-    {
-        $this->data['Jdk'] = $value;
-        $this->options['query']['Jdk'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppDescription($value)
-    {
-        $this->data['AppDescription'] = $value;
-        $this->options['query']['AppDescription'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAcrInstanceId($value)
-    {
-        $this->data['AcrInstanceId'] = $value;
-        $this->options['form_params']['AcrInstanceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withVpcId($value)
-    {
-        $this->data['VpcId'] = $value;
-        $this->options['query']['VpcId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withImageUrl($value)
-    {
-        $this->data['ImageUrl'] = $value;
-        $this->options['query']['ImageUrl'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhp($value)
-    {
-        $this->data['Php'] = $value;
-        $this->options['form_params']['Php'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withRefAppId($value)
-    {
-        $this->data['RefAppId'] = $value;
-        $this->options['query']['RefAppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPythonModules($value)
-    {
-        $this->data['PythonModules'] = $value;
-        $this->options['query']['PythonModules'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpConfigLocation($value)
-    {
-        $this->data['PhpConfigLocation'] = $value;
-        $this->options['query']['PhpConfigLocation'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getNamespaceName()
  * @method string getNamespaceDescription()
- * @method string getEnableMicroRegistration()
  * @method string getNamespaceId()
- * @method string getNameSpaceShortId()
  */
 class CreateNamespace extends Roa
 {
@@ -2663,103 +1235,10 @@ class CreateNamespace extends Roa
      *
      * @return $this
      */
-    public function withEnableMicroRegistration($value)
-    {
-        $this->data['EnableMicroRegistration'] = $value;
-        $this->options['query']['EnableMicroRegistration'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withNamespaceId($value)
     {
         $this->data['NamespaceId'] = $value;
         $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNameSpaceShortId($value)
-    {
-        $this->data['NameSpaceShortId'] = $value;
-        $this->options['query']['NameSpaceShortId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getSecretType()
- * @method string getNamespaceId()
- * @method string getSecretData()
- * @method string getSecretName()
- */
-class CreateSecret extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/secret/secret';
-
-    /** @var string */
-    public $method = 'POST';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSecretType($value)
-    {
-        $this->data['SecretType'] = $value;
-        $this->options['query']['SecretType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNamespaceId($value)
-    {
-        $this->data['NamespaceId'] = $value;
-        $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSecretData($value)
-    {
-        $this->data['SecretData'] = $value;
-        $this->options['query']['SecretData'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSecretName($value)
-    {
-        $this->data['SecretName'] = $value;
-        $this->options['query']['SecretName'] = $value;
 
         return $this;
     }
@@ -2855,70 +1334,6 @@ class DeleteConfigMap extends Roa
 }
 
 /**
- * @method string getGreyTagRouteId()
- */
-class DeleteGreyTagRoute extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/tagroute/greyTagRoute';
-
-    /** @var string */
-    public $method = 'DELETE';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withGreyTagRouteId($value)
-    {
-        $this->data['GreyTagRouteId'] = $value;
-        $this->options['query']['GreyTagRouteId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getJobId()
- * @method string getAppId()
- */
-class DeleteHistoryJob extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/deleteHistoryJob';
-
-    /** @var string */
-    public $method = 'DELETE';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJobId($value)
-    {
-        $this->data['JobId'] = $value;
-        $this->options['query']['JobId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getIngressId()
  */
 class DeleteIngress extends Roa
@@ -2944,33 +1359,7 @@ class DeleteIngress extends Roa
 }
 
 /**
- * @method string getAppId()
- */
-class DeleteJob extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/deleteJob';
-
-    /** @var string */
-    public $method = 'DELETE';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getNamespaceId()
- * @method string getNameSpaceShortId()
  */
 class DeleteNamespace extends Roa
 {
@@ -2992,123 +1381,45 @@ class DeleteNamespace extends Roa
 
         return $this;
     }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNameSpaceShortId($value)
-    {
-        $this->data['NameSpaceShortId'] = $value;
-        $this->options['query']['NameSpaceShortId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getNamespaceId()
- * @method string getSecretId()
- */
-class DeleteSecret extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/secret/secret';
-
-    /** @var string */
-    public $method = 'DELETE';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNamespaceId($value)
-    {
-        $this->data['NamespaceId'] = $value;
-        $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSecretId($value)
-    {
-        $this->data['SecretId'] = $value;
-        $this->options['query']['SecretId'] = $value;
-
-        return $this;
-    }
 }
 
 /**
  * @method string getNasId()
- * @method string getJarStartArgs()
- * @method string getOssAkSecret()
- * @method string getNasConfigs()
- * @method string getMountHost()
- * @method string getBatchWaitTime()
- * @method string getEnvs()
- * @method string getPhpPECLExtensions()
- * @method string getPhpArmsConfigLocation()
- * @method string getCustomHostAlias()
- * @method string getDeploy()
- * @method string getJarStartOptions()
- * @method string getPvtzDiscoverySvc()
- * @method string getConfigMapMountDesc()
- * @method string getOssMountDescs()
- * @method string getImagePullSecrets()
- * @method string getPreStop()
- * @method string getPython()
- * @method string getCpu()
- * @method string getUpdateStrategy()
- * @method string getVSwitchId()
- * @method string getChangeOrderDesc()
- * @method string getMinReadyInstanceRatio()
- * @method string getAutoEnableApplicationScalingRule()
- * @method string getPackageType()
- * @method string getPostStart()
- * @method string getPhpExtensions()
- * @method string getAssociateEip()
  * @method string getWebContainer()
+ * @method string getJarStartArgs()
  * @method string getEnableAhas()
  * @method string getSlsConfigs()
- * @method string getKafkaConfigs()
- * @method string getMemory()
  * @method string getCommandArgs()
  * @method string getAcrAssumeRoleArn()
  * @method string getReadiness()
  * @method string getTimezone()
- * @method string getOssAkId()
+ * @method string getMountHost()
+ * @method string getBatchWaitTime()
  * @method string getLiveness()
- * @method string getSecurityGroupId()
+ * @method string getEnvs()
+ * @method string getPhpArmsConfigLocation()
  * @method string getPackageVersion()
  * @method string getTomcatConfig()
+ * @method string getCustomHostAlias()
  * @method string getWarStartOptions()
- * @method string getPackageRuntimeCustomBuild()
+ * @method string getJarStartOptions()
  * @method string getEdasContainerVersion()
  * @method string getPackageUrl()
  * @method string getTerminationGracePeriodSeconds()
+ * @method string getConfigMapMountDesc()
  * @method string getPhpConfig()
- * @method string getEnableImageAccl()
- * @method string getMicroRegistration()
- * @method string getEnableGreyTagRoute()
- * @method string getReplicas()
+ * @method string getPreStop()
  * @method string getCommand()
+ * @method string getUpdateStrategy()
  * @method string getMountDesc()
  * @method string getJdk()
  * @method string getMinReadyInstances()
- * @method string getAcrInstanceId()
+ * @method string getChangeOrderDesc()
  * @method string getAppId()
  * @method string getImageUrl()
- * @method string getPhp()
- * @method string getPythonModules()
+ * @method string getAutoEnableApplicationScalingRule()
  * @method string getPhpConfigLocation()
+ * @method string getPostStart()
  */
 class DeployApplication extends Roa
 {
@@ -3136,361 +1447,23 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
-    public function withJarStartArgs($value)
-    {
-        $this->data['JarStartArgs'] = $value;
-        $this->options['query']['JarStartArgs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssAkSecret($value)
-    {
-        $this->data['OssAkSecret'] = $value;
-        $this->options['form_params']['OssAkSecret'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNasConfigs($value)
-    {
-        $this->data['NasConfigs'] = $value;
-        $this->options['query']['NasConfigs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMountHost($value)
-    {
-        $this->data['MountHost'] = $value;
-        $this->options['query']['MountHost'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBatchWaitTime($value)
-    {
-        $this->data['BatchWaitTime'] = $value;
-        $this->options['query']['BatchWaitTime'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnvs($value)
-    {
-        $this->data['Envs'] = $value;
-        $this->options['query']['Envs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpPECLExtensions($value)
-    {
-        $this->data['PhpPECLExtensions'] = $value;
-        $this->options['form_params']['PhpPECLExtensions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpArmsConfigLocation($value)
-    {
-        $this->data['PhpArmsConfigLocation'] = $value;
-        $this->options['query']['PhpArmsConfigLocation'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCustomHostAlias($value)
-    {
-        $this->data['CustomHostAlias'] = $value;
-        $this->options['query']['CustomHostAlias'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withDeploy($value)
-    {
-        $this->data['Deploy'] = $value;
-        $this->options['query']['Deploy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJarStartOptions($value)
-    {
-        $this->data['JarStartOptions'] = $value;
-        $this->options['query']['JarStartOptions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPvtzDiscoverySvc($value)
-    {
-        $this->data['PvtzDiscoverySvc'] = $value;
-        $this->options['query']['PvtzDiscoverySvc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withConfigMapMountDesc($value)
-    {
-        $this->data['ConfigMapMountDesc'] = $value;
-        $this->options['form_params']['ConfigMapMountDesc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssMountDescs($value)
-    {
-        $this->data['OssMountDescs'] = $value;
-        $this->options['form_params']['OssMountDescs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withImagePullSecrets($value)
-    {
-        $this->data['ImagePullSecrets'] = $value;
-        $this->options['query']['ImagePullSecrets'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPreStop($value)
-    {
-        $this->data['PreStop'] = $value;
-        $this->options['query']['PreStop'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPython($value)
-    {
-        $this->data['Python'] = $value;
-        $this->options['query']['Python'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpu($value)
-    {
-        $this->data['Cpu'] = $value;
-        $this->options['query']['Cpu'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withUpdateStrategy($value)
-    {
-        $this->data['UpdateStrategy'] = $value;
-        $this->options['query']['UpdateStrategy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withVSwitchId($value)
-    {
-        $this->data['VSwitchId'] = $value;
-        $this->options['query']['VSwitchId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withChangeOrderDesc($value)
-    {
-        $this->data['ChangeOrderDesc'] = $value;
-        $this->options['query']['ChangeOrderDesc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMinReadyInstanceRatio($value)
-    {
-        $this->data['MinReadyInstanceRatio'] = $value;
-        $this->options['query']['MinReadyInstanceRatio'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAutoEnableApplicationScalingRule($value)
-    {
-        $this->data['AutoEnableApplicationScalingRule'] = $value;
-        $this->options['query']['AutoEnableApplicationScalingRule'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageType($value)
-    {
-        $this->data['PackageType'] = $value;
-        $this->options['query']['PackageType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPostStart($value)
-    {
-        $this->data['PostStart'] = $value;
-        $this->options['query']['PostStart'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpExtensions($value)
-    {
-        $this->data['PhpExtensions'] = $value;
-        $this->options['form_params']['PhpExtensions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAssociateEip($value)
-    {
-        $this->data['AssociateEip'] = $value;
-        $this->options['form_params']['AssociateEip'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withWebContainer($value)
     {
         $this->data['WebContainer'] = $value;
         $this->options['query']['WebContainer'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withJarStartArgs($value)
+    {
+        $this->data['JarStartArgs'] = $value;
+        $this->options['query']['JarStartArgs'] = $value;
 
         return $this;
     }
@@ -3517,32 +1490,6 @@ class DeployApplication extends Roa
     {
         $this->data['SlsConfigs'] = $value;
         $this->options['query']['SlsConfigs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withKafkaConfigs($value)
-    {
-        $this->data['KafkaConfigs'] = $value;
-        $this->options['query']['KafkaConfigs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMemory($value)
-    {
-        $this->data['Memory'] = $value;
-        $this->options['query']['Memory'] = $value;
 
         return $this;
     }
@@ -3604,10 +1551,23 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
-    public function withOssAkId($value)
+    public function withMountHost($value)
     {
-        $this->data['OssAkId'] = $value;
-        $this->options['form_params']['OssAkId'] = $value;
+        $this->data['MountHost'] = $value;
+        $this->options['query']['MountHost'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withBatchWaitTime($value)
+    {
+        $this->data['BatchWaitTime'] = $value;
+        $this->options['query']['BatchWaitTime'] = $value;
 
         return $this;
     }
@@ -3630,10 +1590,23 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
-    public function withSecurityGroupId($value)
+    public function withEnvs($value)
     {
-        $this->data['SecurityGroupId'] = $value;
-        $this->options['query']['SecurityGroupId'] = $value;
+        $this->data['Envs'] = $value;
+        $this->options['query']['Envs'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withPhpArmsConfigLocation($value)
+    {
+        $this->data['PhpArmsConfigLocation'] = $value;
+        $this->options['query']['PhpArmsConfigLocation'] = $value;
 
         return $this;
     }
@@ -3669,6 +1642,19 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
+    public function withCustomHostAlias($value)
+    {
+        $this->data['CustomHostAlias'] = $value;
+        $this->options['query']['CustomHostAlias'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
     public function withWarStartOptions($value)
     {
         $this->data['WarStartOptions'] = $value;
@@ -3682,10 +1668,10 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
-    public function withPackageRuntimeCustomBuild($value)
+    public function withJarStartOptions($value)
     {
-        $this->data['PackageRuntimeCustomBuild'] = $value;
-        $this->options['form_params']['PackageRuntimeCustomBuild'] = $value;
+        $this->data['JarStartOptions'] = $value;
+        $this->options['query']['JarStartOptions'] = $value;
 
         return $this;
     }
@@ -3734,6 +1720,19 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
+    public function withConfigMapMountDesc($value)
+    {
+        $this->data['ConfigMapMountDesc'] = $value;
+        $this->options['form_params']['ConfigMapMountDesc'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
     public function withPhpConfig($value)
     {
         $this->data['PhpConfig'] = $value;
@@ -3747,49 +1746,10 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
-    public function withEnableImageAccl($value)
+    public function withPreStop($value)
     {
-        $this->data['EnableImageAccl'] = $value;
-        $this->options['form_params']['EnableImageAccl'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMicroRegistration($value)
-    {
-        $this->data['MicroRegistration'] = $value;
-        $this->options['query']['MicroRegistration'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnableGreyTagRoute($value)
-    {
-        $this->data['EnableGreyTagRoute'] = $value;
-        $this->options['query']['EnableGreyTagRoute'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReplicas($value)
-    {
-        $this->data['Replicas'] = $value;
-        $this->options['query']['Replicas'] = $value;
+        $this->data['PreStop'] = $value;
+        $this->options['query']['PreStop'] = $value;
 
         return $this;
     }
@@ -3803,6 +1763,19 @@ class DeployApplication extends Roa
     {
         $this->data['Command'] = $value;
         $this->options['query']['Command'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withUpdateStrategy($value)
+    {
+        $this->data['UpdateStrategy'] = $value;
+        $this->options['query']['UpdateStrategy'] = $value;
 
         return $this;
     }
@@ -3851,10 +1824,10 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
-    public function withAcrInstanceId($value)
+    public function withChangeOrderDesc($value)
     {
-        $this->data['AcrInstanceId'] = $value;
-        $this->options['form_params']['AcrInstanceId'] = $value;
+        $this->data['ChangeOrderDesc'] = $value;
+        $this->options['query']['ChangeOrderDesc'] = $value;
 
         return $this;
     }
@@ -3890,23 +1863,10 @@ class DeployApplication extends Roa
      *
      * @return $this
      */
-    public function withPhp($value)
+    public function withAutoEnableApplicationScalingRule($value)
     {
-        $this->data['Php'] = $value;
-        $this->options['form_params']['Php'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPythonModules($value)
-    {
-        $this->data['PythonModules'] = $value;
-        $this->options['query']['PythonModules'] = $value;
+        $this->data['AutoEnableApplicationScalingRule'] = $value;
+        $this->options['query']['AutoEnableApplicationScalingRule'] = $value;
 
         return $this;
     }
@@ -3920,6 +1880,19 @@ class DeployApplication extends Roa
     {
         $this->data['PhpConfigLocation'] = $value;
         $this->options['query']['PhpConfigLocation'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withPostStart($value)
+    {
+        $this->data['PostStart'] = $value;
+        $this->options['query']['PostStart'] = $value;
 
         return $this;
     }
@@ -4048,30 +2021,15 @@ class DescribeApplicationImage extends Roa
 }
 
 /**
- * @method string getJobId()
  * @method string getAppId()
  * @method string getGroupId()
  * @method string getPageSize()
  * @method string getCurrentPage()
- * @method string getReverse()
  */
 class DescribeApplicationInstances extends Roa
 {
     /** @var string */
     public $pathPattern = '/pop/v1/sam/app/describeApplicationInstances';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJobId($value)
-    {
-        $this->data['JobId'] = $value;
-        $this->options['query']['JobId'] = $value;
-
-        return $this;
-    }
 
     /**
      * @param string $value
@@ -4121,55 +2079,6 @@ class DescribeApplicationInstances extends Roa
     {
         $this->data['CurrentPage'] = $value;
         $this->options['query']['CurrentPage'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReverse($value)
-    {
-        $this->data['Reverse'] = $value;
-        $this->options['query']['Reverse'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getScalingRuleName()
- * @method string getAppId()
- */
-class DescribeApplicationScalingRule extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/scale/applicationScalingRule';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withScalingRuleName($value)
-    {
-        $this->data['ScalingRuleName'] = $value;
-        $this->options['query']['ScalingRuleName'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
 
         return $this;
     }
@@ -4236,84 +2145,6 @@ class DescribeApplicationStatus extends Roa
     {
         $this->data['AppId'] = $value;
         $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getServiceType()
- * @method string getAppId()
- * @method string getServiceVersion()
- * @method string getServiceName()
- * @method string getServiceGroup()
- */
-class DescribeAppServiceDetail extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/service/describeAppServiceDetail';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withServiceType($value)
-    {
-        $this->data['ServiceType'] = $value;
-        $this->options['query']['ServiceType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withServiceVersion($value)
-    {
-        $this->data['ServiceVersion'] = $value;
-        $this->options['query']['ServiceVersion'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withServiceName($value)
-    {
-        $this->data['ServiceName'] = $value;
-        $this->options['query']['ServiceName'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withServiceGroup($value)
-    {
-        $this->data['ServiceGroup'] = $value;
-        $this->options['query']['ServiceGroup'] = $value;
 
         return $this;
     }
@@ -4399,82 +2230,10 @@ class DescribeConfigMap extends Roa
     }
 }
 
-/**
- * @method string getMemory()
- * @method string getCpu()
- * @method string getWorkload()
- */
-class DescribeConfigurationPrice extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/paas/configurationPrice';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMemory($value)
-    {
-        $this->data['Memory'] = $value;
-        $this->options['query']['Memory'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpu($value)
-    {
-        $this->data['Cpu'] = $value;
-        $this->options['query']['Cpu'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWorkload($value)
-    {
-        $this->data['Workload'] = $value;
-        $this->options['query']['Workload'] = $value;
-
-        return $this;
-    }
-}
-
 class DescribeEdasContainers extends Roa
 {
     /** @var string */
     public $pathPattern = '/pop/v1/sam/resource/edasContainers';
-}
-
-/**
- * @method string getGreyTagRouteId()
- */
-class DescribeGreyTagRoute extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/tagroute/greyTagRoute';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withGreyTagRouteId($value)
-    {
-        $this->data['GreyTagRouteId'] = $value;
-        $this->options['query']['GreyTagRouteId'] = $value;
-
-        return $this;
-    }
 }
 
 /**
@@ -4528,158 +2287,7 @@ class DescribeInstanceSpecifications extends Roa
 }
 
 /**
- * @method string getJobId()
- * @method string getVersionId()
- * @method string getAppId()
- */
-class DescribeJob extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/describeJob';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJobId($value)
-    {
-        $this->data['JobId'] = $value;
-        $this->options['query']['JobId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withVersionId($value)
-    {
-        $this->data['VersionId'] = $value;
-        $this->options['query']['VersionId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAppId()
- * @method string getPageSize()
- * @method string getCurrentPage()
- * @method string getState()
- */
-class DescribeJobHistory extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/describeJobHistory';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPageSize($value)
-    {
-        $this->data['PageSize'] = $value;
-        $this->options['query']['PageSize'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCurrentPage($value)
-    {
-        $this->data['CurrentPage'] = $value;
-        $this->options['query']['CurrentPage'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withState($value)
-    {
-        $this->data['State'] = $value;
-        $this->options['query']['State'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getJobId()
- * @method string getAppId()
- */
-class DescribeJobStatus extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/describeJobStatus';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJobId($value)
-    {
-        $this->data['JobId'] = $value;
-        $this->options['query']['JobId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getNamespaceId()
- * @method string getNameSpaceShortId()
  */
 class DescribeNamespace extends Roa
 {
@@ -4695,19 +2303,6 @@ class DescribeNamespace extends Roa
     {
         $this->data['NamespaceId'] = $value;
         $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNameSpaceShortId($value)
-    {
-        $this->data['NameSpaceShortId'] = $value;
-        $this->options['query']['NameSpaceShortId'] = $value;
 
         return $this;
     }
@@ -4751,7 +2346,6 @@ class DescribeNamespaceList extends Roa
 
 /**
  * @method string getNamespaceId()
- * @method string getNameSpaceShortId()
  */
 class DescribeNamespaceResources extends Roa
 {
@@ -4767,19 +2361,6 @@ class DescribeNamespaceResources extends Roa
     {
         $this->data['NamespaceId'] = $value;
         $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNameSpaceShortId($value)
-    {
-        $this->data['NameSpaceShortId'] = $value;
-        $this->options['query']['NameSpaceShortId'] = $value;
 
         return $this;
     }
@@ -4847,42 +2428,6 @@ class DescribeRegions extends Roa
 {
     /** @var string */
     public $pathPattern = '/pop/v1/paas/regionConfig';
-}
-
-/**
- * @method string getNamespaceId()
- * @method string getSecretId()
- */
-class DescribeSecret extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/secret/secret';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNamespaceId($value)
-    {
-        $this->data['NamespaceId'] = $value;
-        $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSecretId($value)
-    {
-        $this->data['SecretId'] = $value;
-        $this->options['query']['SecretId'] = $value;
-
-        return $this;
-    }
 }
 
 /**
@@ -4958,502 +2503,6 @@ class EnableApplicationScalingRule extends Roa
     {
         $this->data['AppId'] = $value;
         $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getEventId()
- * @method string getJarStartOptions()
- * @method string getJarStartArgs()
- * @method string getCommandArgs()
- * @method string getReplicas()
- * @method string getAppId()
- * @method string getEnvs()
- * @method string getTime()
- * @method string getCommand()
- * @method string getWarStartOptions()
- */
-class ExecJob extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/execJob';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEventId($value)
-    {
-        $this->data['EventId'] = $value;
-        $this->options['query']['EventId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJarStartOptions($value)
-    {
-        $this->data['JarStartOptions'] = $value;
-        $this->options['query']['JarStartOptions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJarStartArgs($value)
-    {
-        $this->data['JarStartArgs'] = $value;
-        $this->options['query']['JarStartArgs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCommandArgs($value)
-    {
-        $this->data['CommandArgs'] = $value;
-        $this->options['query']['CommandArgs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReplicas($value)
-    {
-        $this->data['Replicas'] = $value;
-        $this->options['query']['Replicas'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnvs($value)
-    {
-        $this->data['Envs'] = $value;
-        $this->options['query']['Envs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTime($value)
-    {
-        $this->data['Time'] = $value;
-        $this->options['query']['Time'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCommand($value)
-    {
-        $this->data['Command'] = $value;
-        $this->options['query']['Command'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWarStartOptions($value)
-    {
-        $this->data['WarStartOptions'] = $value;
-        $this->options['query']['WarStartOptions'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAppSource()
- * @method string getCpuStrategy()
- * @method string getLimit()
- * @method string getOrderBy()
- * @method string getEndTime()
- * @method string getStartTime()
- */
-class GetArmsTopNMetric extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/getArmsTopNMetric';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppSource($value)
-    {
-        $this->data['AppSource'] = $value;
-        $this->options['query']['AppSource'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpuStrategy($value)
-    {
-        $this->data['CpuStrategy'] = $value;
-        $this->options['query']['CpuStrategy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withLimit($value)
-    {
-        $this->data['Limit'] = $value;
-        $this->options['query']['Limit'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOrderBy($value)
-    {
-        $this->data['OrderBy'] = $value;
-        $this->options['query']['OrderBy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEndTime($value)
-    {
-        $this->data['EndTime'] = $value;
-        $this->options['query']['EndTime'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withStartTime($value)
-    {
-        $this->data['StartTime'] = $value;
-        $this->options['query']['StartTime'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAppSource()
- * @method string getCpuStrategy()
- * @method string getLimit()
- */
-class GetAvailabilityMetric extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/getAvailabilityMetric';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppSource($value)
-    {
-        $this->data['AppSource'] = $value;
-        $this->options['query']['AppSource'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpuStrategy($value)
-    {
-        $this->data['CpuStrategy'] = $value;
-        $this->options['query']['CpuStrategy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withLimit($value)
-    {
-        $this->data['Limit'] = $value;
-        $this->options['query']['Limit'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAppSource()
- * @method string getCreateTime()
- * @method string getCpuStrategy()
- * @method string getLimit()
- * @method string getOrderBy()
- */
-class GetChangeOrderMetric extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/getChangeOrderMetric';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppSource($value)
-    {
-        $this->data['AppSource'] = $value;
-        $this->options['query']['AppSource'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCreateTime($value)
-    {
-        $this->data['CreateTime'] = $value;
-        $this->options['query']['CreateTime'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpuStrategy($value)
-    {
-        $this->data['CpuStrategy'] = $value;
-        $this->options['query']['CpuStrategy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withLimit($value)
-    {
-        $this->data['Limit'] = $value;
-        $this->options['query']['Limit'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOrderBy($value)
-    {
-        $this->data['OrderBy'] = $value;
-        $this->options['query']['OrderBy'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAppSource()
- * @method string getCpuStrategy()
- * @method string getLimit()
- */
-class GetScaleAppMetric extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/getScaleAppMetric';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppSource($value)
-    {
-        $this->data['AppSource'] = $value;
-        $this->options['query']['AppSource'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpuStrategy($value)
-    {
-        $this->data['CpuStrategy'] = $value;
-        $this->options['query']['CpuStrategy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withLimit($value)
-    {
-        $this->data['Limit'] = $value;
-        $this->options['query']['Limit'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAppSource()
- * @method string getCpuStrategy()
- * @method string getLimit()
- * @method string getEndTime()
- * @method string getStartTime()
- */
-class GetWarningEventMetric extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/getWarningEventMetric';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppSource($value)
-    {
-        $this->data['AppSource'] = $value;
-        $this->options['query']['AppSource'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCpuStrategy($value)
-    {
-        $this->data['CpuStrategy'] = $value;
-        $this->options['query']['CpuStrategy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withLimit($value)
-    {
-        $this->data['Limit'] = $value;
-        $this->options['query']['Limit'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEndTime($value)
-    {
-        $this->data['EndTime'] = $value;
-        $this->options['query']['EndTime'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withStartTime($value)
-    {
-        $this->data['StartTime'] = $value;
-        $this->options['query']['StartTime'] = $value;
 
         return $this;
     }
@@ -5580,34 +2629,16 @@ class ListAppEvents extends Roa
 }
 
 /**
- * @method string getAppSource()
  * @method string getAppName()
  * @method string getNamespaceId()
  * @method string getPageSize()
- * @method string getOrderBy()
  * @method string getCurrentPage()
- * @method string getFieldValue()
- * @method string getReverse()
- * @method string getFieldType()
  * @method string getTags()
  */
 class ListApplications extends Roa
 {
     /** @var string */
     public $pathPattern = '/pop/v1/sam/app/listApplications';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppSource($value)
-    {
-        $this->data['AppSource'] = $value;
-        $this->options['query']['AppSource'] = $value;
-
-        return $this;
-    }
 
     /**
      * @param string $value
@@ -5653,19 +2684,6 @@ class ListApplications extends Roa
      *
      * @return $this
      */
-    public function withOrderBy($value)
-    {
-        $this->data['OrderBy'] = $value;
-        $this->options['query']['OrderBy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withCurrentPage($value)
     {
         $this->data['CurrentPage'] = $value;
@@ -5679,113 +2697,10 @@ class ListApplications extends Roa
      *
      * @return $this
      */
-    public function withFieldValue($value)
-    {
-        $this->data['FieldValue'] = $value;
-        $this->options['query']['FieldValue'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReverse($value)
-    {
-        $this->data['Reverse'] = $value;
-        $this->options['query']['Reverse'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withFieldType($value)
-    {
-        $this->data['FieldType'] = $value;
-        $this->options['query']['FieldType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withTags($value)
     {
         $this->data['Tags'] = $value;
         $this->options['query']['Tags'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getServiceType()
- * @method string getAppId()
- * @method string getPageSize()
- * @method string getPageNumber()
- */
-class ListAppServicesPage extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/service/listAppServicesPage';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withServiceType($value)
-    {
-        $this->data['ServiceType'] = $value;
-        $this->options['query']['ServiceType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPageSize($value)
-    {
-        $this->data['PageSize'] = $value;
-        $this->options['query']['PageSize'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPageNumber($value)
-    {
-        $this->data['PageNumber'] = $value;
-        $this->options['query']['PageNumber'] = $value;
 
         return $this;
     }
@@ -5928,28 +2843,6 @@ class ListConsumedServices extends Roa
 }
 
 /**
- * @method string getAppId()
- */
-class ListGreyTagRoute extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/tagroute/greyTagRouteList';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getNamespaceId()
  * @method string getAppId()
  */
@@ -5980,154 +2873,6 @@ class ListIngresses extends Roa
     {
         $this->data['AppId'] = $value;
         $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getAppName()
- * @method string getNamespaceId()
- * @method string getPageSize()
- * @method string getOrderBy()
- * @method string getWorkload()
- * @method string getCurrentPage()
- * @method string getFieldValue()
- * @method string getReverse()
- * @method string getFieldType()
- * @method string getTags()
- */
-class ListJobs extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/listJobs';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppName($value)
-    {
-        $this->data['AppName'] = $value;
-        $this->options['query']['AppName'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNamespaceId($value)
-    {
-        $this->data['NamespaceId'] = $value;
-        $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPageSize($value)
-    {
-        $this->data['PageSize'] = $value;
-        $this->options['query']['PageSize'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOrderBy($value)
-    {
-        $this->data['OrderBy'] = $value;
-        $this->options['query']['OrderBy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWorkload($value)
-    {
-        $this->data['Workload'] = $value;
-        $this->options['query']['Workload'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCurrentPage($value)
-    {
-        $this->data['CurrentPage'] = $value;
-        $this->options['query']['CurrentPage'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withFieldValue($value)
-    {
-        $this->data['FieldValue'] = $value;
-        $this->options['query']['FieldValue'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReverse($value)
-    {
-        $this->data['Reverse'] = $value;
-        $this->options['query']['Reverse'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withFieldType($value)
-    {
-        $this->data['FieldType'] = $value;
-        $this->options['query']['FieldType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTags($value)
-    {
-        $this->data['Tags'] = $value;
-        $this->options['query']['Tags'] = $value;
 
         return $this;
     }
@@ -6320,28 +3065,6 @@ class ListPublishedServices extends Roa
 }
 
 /**
- * @method string getNamespaceId()
- */
-class ListSecrets extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/secret/secrets';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNamespaceId($value)
-    {
-        $this->data['NamespaceId'] = $value;
-        $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getNextToken()
  * @method string getResourceType()
  * @method string getResourceIds()
@@ -6437,50 +3160,9 @@ class QueryResourceStatics extends Roa
 }
 
 /**
- * @method string getInstanceIds()
- * @method string getAppId()
- */
-class ReduceApplicationCapacityByInstanceIds extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/app/ScaleInApplicationWithInstanceIds';
-
-    /** @var string */
-    public $method = 'PUT';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withInstanceIds($value)
-    {
-        $this->data['InstanceIds'] = $value;
-        $this->options['query']['InstanceIds'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getMinReadyInstances()
  * @method string getReplicas()
  * @method string getAppId()
- * @method string getMinReadyInstanceRatio()
- * @method string getAutoEnableApplicationScalingRule()
  */
 class RescaleApplication extends Roa
 {
@@ -6525,32 +3207,6 @@ class RescaleApplication extends Roa
     {
         $this->data['AppId'] = $value;
         $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMinReadyInstanceRatio($value)
-    {
-        $this->data['MinReadyInstanceRatio'] = $value;
-        $this->options['query']['MinReadyInstanceRatio'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAutoEnableApplicationScalingRule($value)
-    {
-        $this->data['AutoEnableApplicationScalingRule'] = $value;
-        $this->options['query']['AutoEnableApplicationScalingRule'] = $value;
 
         return $this;
     }
@@ -6612,8 +3268,6 @@ class RescaleApplicationVertically extends Roa
 /**
  * @method string getMinReadyInstances()
  * @method string getAppId()
- * @method string getMinReadyInstanceRatio()
- * @method string getAutoEnableApplicationScalingRule()
  */
 class RestartApplication extends Roa
 {
@@ -6645,32 +3299,6 @@ class RestartApplication extends Roa
     {
         $this->data['AppId'] = $value;
         $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMinReadyInstanceRatio($value)
-    {
-        $this->data['MinReadyInstanceRatio'] = $value;
-        $this->options['query']['MinReadyInstanceRatio'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAutoEnableApplicationScalingRule($value)
-    {
-        $this->data['AutoEnableApplicationScalingRule'] = $value;
-        $this->options['query']['AutoEnableApplicationScalingRule'] = $value;
 
         return $this;
     }
@@ -6720,7 +3348,6 @@ class RestartInstances extends Roa
  * @method string getVersionId()
  * @method string getAppId()
  * @method string getBatchWaitTime()
- * @method string getMinReadyInstanceRatio()
  * @method string getAutoEnableApplicationScalingRule()
  * @method string getUpdateStrategy()
  */
@@ -6789,19 +3416,6 @@ class RollbackApplication extends Roa
      *
      * @return $this
      */
-    public function withMinReadyInstanceRatio($value)
-    {
-        $this->data['MinReadyInstanceRatio'] = $value;
-        $this->options['query']['MinReadyInstanceRatio'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withAutoEnableApplicationScalingRule($value)
     {
         $this->data['AutoEnableApplicationScalingRule'] = $value;
@@ -6859,42 +3473,6 @@ class StopApplication extends Roa
 
     /** @var string */
     public $method = 'PUT';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getSuspend()
- * @method string getAppId()
- */
-class SuspendJob extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/suspendJob';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSuspend($value)
-    {
-        $this->data['Suspend'] = $value;
-        $this->options['query']['Suspend'] = $value;
-
-        return $this;
-    }
 
     /**
      * @param string $value
@@ -7084,51 +3662,11 @@ class UntagResources extends Roa
 }
 
 /**
- * @method string getAppDescription()
- * @method string getAppId()
- */
-class UpdateApplicationDescription extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/app/updateAppDescription';
-
-    /** @var string */
-    public $method = 'PUT';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppDescription($value)
-    {
-        $this->data['AppDescription'] = $value;
-        $this->options['query']['AppDescription'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getScalingRuleName()
  * @method string getMinReadyInstances()
  * @method string getScalingRuleTimer()
  * @method string getScalingRuleMetric()
  * @method string getAppId()
- * @method string getMinReadyInstanceRatio()
  */
 class UpdateApplicationScalingRule extends Roa
 {
@@ -7186,58 +3724,6 @@ class UpdateApplicationScalingRule extends Roa
     {
         $this->data['ScalingRuleMetric'] = $value;
         $this->options['query']['ScalingRuleMetric'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMinReadyInstanceRatio($value)
-    {
-        $this->data['MinReadyInstanceRatio'] = $value;
-        $this->options['query']['MinReadyInstanceRatio'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getVSwitchId()
- * @method string getAppId()
- */
-class UpdateApplicationVswitches extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/app/updateAppVswitches';
-
-    /** @var string */
-    public $method = 'PUT';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withVSwitchId($value)
-    {
-        $this->data['VSwitchId'] = $value;
-        $this->options['query']['VSwitchId'] = $value;
 
         return $this;
     }
@@ -7329,7 +3815,7 @@ class UpdateConfigMap extends Roa
     public function withDescription($value)
     {
         $this->data['Description'] = $value;
-        $this->options['query']['Description'] = $value;
+        $this->options['form_params']['Description'] = $value;
 
         return $this;
     }
@@ -7349,95 +3835,11 @@ class UpdateConfigMap extends Roa
 }
 
 /**
- * @method string getGreyTagRouteId()
- * @method string getDescription()
- * @method string getDubboRules()
- * @method string getAlbRules()
- * @method string getScRules()
- */
-class UpdateGreyTagRoute extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/tagroute/greyTagRoute';
-
-    /** @var string */
-    public $method = 'PUT';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withGreyTagRouteId($value)
-    {
-        $this->data['GreyTagRouteId'] = $value;
-        $this->options['query']['GreyTagRouteId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withDescription($value)
-    {
-        $this->data['Description'] = $value;
-        $this->options['query']['Description'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withDubboRules($value)
-    {
-        $this->data['DubboRules'] = $value;
-        $this->options['query']['DubboRules'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAlbRules($value)
-    {
-        $this->data['AlbRules'] = $value;
-        $this->options['query']['AlbRules'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withScRules($value)
-    {
-        $this->data['ScRules'] = $value;
-        $this->options['query']['ScRules'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getIngressId()
  * @method string getListenerPort()
  * @method string getDescription()
- * @method string getLoadBalanceType()
  * @method string getRules()
  * @method string getCertId()
- * @method string getCertIds()
- * @method string getListenerProtocol()
  * @method string getDefaultRule()
  */
 class UpdateIngress extends Roa
@@ -7492,19 +3894,6 @@ class UpdateIngress extends Roa
      *
      * @return $this
      */
-    public function withLoadBalanceType($value)
-    {
-        $this->data['LoadBalanceType'] = $value;
-        $this->options['query']['LoadBalanceType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withRules($value)
     {
         $this->data['Rules'] = $value;
@@ -7531,32 +3920,6 @@ class UpdateIngress extends Roa
      *
      * @return $this
      */
-    public function withCertIds($value)
-    {
-        $this->data['CertIds'] = $value;
-        $this->options['query']['CertIds'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withListenerProtocol($value)
-    {
-        $this->data['ListenerProtocol'] = $value;
-        $this->options['query']['ListenerProtocol'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withDefaultRule($value)
     {
         $this->data['DefaultRule'] = $value;
@@ -7567,848 +3930,9 @@ class UpdateIngress extends Roa
 }
 
 /**
- * @method string getNasId()
- * @method string getJarStartArgs()
- * @method string getConcurrencyPolicy()
- * @method string getTriggerConfig()
- * @method string getOssAkSecret()
- * @method string getMountHost()
- * @method string getBatchWaitTime()
- * @method string getEnvs()
- * @method string getPhpPECLExtensions()
- * @method string getPhpArmsConfigLocation()
- * @method string getProgrammingLanguage()
- * @method string getCustomHostAlias()
- * @method string getJarStartOptions()
- * @method string getSlice()
- * @method string getConfigMapMountDesc()
- * @method string getOssMountDescs()
- * @method string getImagePullSecrets()
- * @method string getPreStop()
- * @method string getPython()
- * @method string getBackoffLimit()
- * @method string getUpdateStrategy()
- * @method string getChangeOrderDesc()
- * @method string getAutoEnableApplicationScalingRule()
- * @method string getPostStart()
- * @method string getPhpExtensions()
- * @method string getAssociateEip()
- * @method string getWebContainer()
- * @method string getEnableAhas()
- * @method string getSlsConfigs()
- * @method string getCommandArgs()
- * @method string getAcrAssumeRoleArn()
- * @method string getReadiness()
- * @method string getTimezone()
- * @method string getOssAkId()
- * @method string getLiveness()
- * @method string getPackageVersion()
- * @method string getTomcatConfig()
- * @method string getTimeout()
- * @method string getWarStartOptions()
- * @method string getPackageRuntimeCustomBuild()
- * @method string getEdasContainerVersion()
- * @method string getPackageUrl()
- * @method string getTerminationGracePeriodSeconds()
- * @method string getPhpConfig()
- * @method string getSliceEnvs()
- * @method string getEnableImageAccl()
- * @method string getEnableGreyTagRoute()
- * @method string getReplicas()
- * @method string getCommand()
- * @method string getMountDesc()
- * @method string getJdk()
- * @method string getMinReadyInstances()
- * @method string getAcrInstanceId()
- * @method string getAppId()
- * @method string getImageUrl()
- * @method string getPhp()
- * @method string getRefAppId()
- * @method string getPythonModules()
- * @method string getPhpConfigLocation()
- */
-class UpdateJob extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/job/updateJob';
-
-    /** @var string */
-    public $method = 'POST';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNasId($value)
-    {
-        $this->data['NasId'] = $value;
-        $this->options['query']['NasId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJarStartArgs($value)
-    {
-        $this->data['JarStartArgs'] = $value;
-        $this->options['query']['JarStartArgs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withConcurrencyPolicy($value)
-    {
-        $this->data['ConcurrencyPolicy'] = $value;
-        $this->options['query']['ConcurrencyPolicy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTriggerConfig($value)
-    {
-        $this->data['TriggerConfig'] = $value;
-        $this->options['query']['TriggerConfig'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssAkSecret($value)
-    {
-        $this->data['OssAkSecret'] = $value;
-        $this->options['form_params']['OssAkSecret'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMountHost($value)
-    {
-        $this->data['MountHost'] = $value;
-        $this->options['query']['MountHost'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBatchWaitTime($value)
-    {
-        $this->data['BatchWaitTime'] = $value;
-        $this->options['query']['BatchWaitTime'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnvs($value)
-    {
-        $this->data['Envs'] = $value;
-        $this->options['query']['Envs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpPECLExtensions($value)
-    {
-        $this->data['PhpPECLExtensions'] = $value;
-        $this->options['form_params']['PhpPECLExtensions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpArmsConfigLocation($value)
-    {
-        $this->data['PhpArmsConfigLocation'] = $value;
-        $this->options['query']['PhpArmsConfigLocation'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withProgrammingLanguage($value)
-    {
-        $this->data['ProgrammingLanguage'] = $value;
-        $this->options['query']['ProgrammingLanguage'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCustomHostAlias($value)
-    {
-        $this->data['CustomHostAlias'] = $value;
-        $this->options['query']['CustomHostAlias'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJarStartOptions($value)
-    {
-        $this->data['JarStartOptions'] = $value;
-        $this->options['query']['JarStartOptions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSlice($value)
-    {
-        $this->data['Slice'] = $value;
-        $this->options['query']['Slice'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withConfigMapMountDesc($value)
-    {
-        $this->data['ConfigMapMountDesc'] = $value;
-        $this->options['form_params']['ConfigMapMountDesc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssMountDescs($value)
-    {
-        $this->data['OssMountDescs'] = $value;
-        $this->options['form_params']['OssMountDescs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withImagePullSecrets($value)
-    {
-        $this->data['ImagePullSecrets'] = $value;
-        $this->options['query']['ImagePullSecrets'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPreStop($value)
-    {
-        $this->data['PreStop'] = $value;
-        $this->options['query']['PreStop'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPython($value)
-    {
-        $this->data['Python'] = $value;
-        $this->options['query']['Python'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withBackoffLimit($value)
-    {
-        $this->data['BackoffLimit'] = $value;
-        $this->options['query']['BackoffLimit'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withUpdateStrategy($value)
-    {
-        $this->data['UpdateStrategy'] = $value;
-        $this->options['query']['UpdateStrategy'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withChangeOrderDesc($value)
-    {
-        $this->data['ChangeOrderDesc'] = $value;
-        $this->options['query']['ChangeOrderDesc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAutoEnableApplicationScalingRule($value)
-    {
-        $this->data['AutoEnableApplicationScalingRule'] = $value;
-        $this->options['query']['AutoEnableApplicationScalingRule'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPostStart($value)
-    {
-        $this->data['PostStart'] = $value;
-        $this->options['query']['PostStart'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpExtensions($value)
-    {
-        $this->data['PhpExtensions'] = $value;
-        $this->options['form_params']['PhpExtensions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAssociateEip($value)
-    {
-        $this->data['AssociateEip'] = $value;
-        $this->options['form_params']['AssociateEip'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWebContainer($value)
-    {
-        $this->data['WebContainer'] = $value;
-        $this->options['query']['WebContainer'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnableAhas($value)
-    {
-        $this->data['EnableAhas'] = $value;
-        $this->options['query']['EnableAhas'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSlsConfigs($value)
-    {
-        $this->data['SlsConfigs'] = $value;
-        $this->options['query']['SlsConfigs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCommandArgs($value)
-    {
-        $this->data['CommandArgs'] = $value;
-        $this->options['query']['CommandArgs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAcrAssumeRoleArn($value)
-    {
-        $this->data['AcrAssumeRoleArn'] = $value;
-        $this->options['query']['AcrAssumeRoleArn'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReadiness($value)
-    {
-        $this->data['Readiness'] = $value;
-        $this->options['query']['Readiness'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTimezone($value)
-    {
-        $this->data['Timezone'] = $value;
-        $this->options['query']['Timezone'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOssAkId($value)
-    {
-        $this->data['OssAkId'] = $value;
-        $this->options['form_params']['OssAkId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withLiveness($value)
-    {
-        $this->data['Liveness'] = $value;
-        $this->options['query']['Liveness'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageVersion($value)
-    {
-        $this->data['PackageVersion'] = $value;
-        $this->options['query']['PackageVersion'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTomcatConfig($value)
-    {
-        $this->data['TomcatConfig'] = $value;
-        $this->options['query']['TomcatConfig'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTimeout($value)
-    {
-        $this->data['Timeout'] = $value;
-        $this->options['query']['Timeout'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWarStartOptions($value)
-    {
-        $this->data['WarStartOptions'] = $value;
-        $this->options['query']['WarStartOptions'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageRuntimeCustomBuild($value)
-    {
-        $this->data['PackageRuntimeCustomBuild'] = $value;
-        $this->options['form_params']['PackageRuntimeCustomBuild'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEdasContainerVersion($value)
-    {
-        $this->data['EdasContainerVersion'] = $value;
-        $this->options['query']['EdasContainerVersion'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPackageUrl($value)
-    {
-        $this->data['PackageUrl'] = $value;
-        $this->options['query']['PackageUrl'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withTerminationGracePeriodSeconds($value)
-    {
-        $this->data['TerminationGracePeriodSeconds'] = $value;
-        $this->options['query']['TerminationGracePeriodSeconds'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpConfig($value)
-    {
-        $this->data['PhpConfig'] = $value;
-        $this->options['form_params']['PhpConfig'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSliceEnvs($value)
-    {
-        $this->data['SliceEnvs'] = $value;
-        $this->options['query']['SliceEnvs'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnableImageAccl($value)
-    {
-        $this->data['EnableImageAccl'] = $value;
-        $this->options['form_params']['EnableImageAccl'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withEnableGreyTagRoute($value)
-    {
-        $this->data['EnableGreyTagRoute'] = $value;
-        $this->options['query']['EnableGreyTagRoute'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withReplicas($value)
-    {
-        $this->data['Replicas'] = $value;
-        $this->options['query']['Replicas'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withCommand($value)
-    {
-        $this->data['Command'] = $value;
-        $this->options['query']['Command'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMountDesc($value)
-    {
-        $this->data['MountDesc'] = $value;
-        $this->options['query']['MountDesc'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withJdk($value)
-    {
-        $this->data['Jdk'] = $value;
-        $this->options['query']['Jdk'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withMinReadyInstances($value)
-    {
-        $this->data['MinReadyInstances'] = $value;
-        $this->options['query']['MinReadyInstances'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAcrInstanceId($value)
-    {
-        $this->data['AcrInstanceId'] = $value;
-        $this->options['form_params']['AcrInstanceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withAppId($value)
-    {
-        $this->data['AppId'] = $value;
-        $this->options['query']['AppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withImageUrl($value)
-    {
-        $this->data['ImageUrl'] = $value;
-        $this->options['query']['ImageUrl'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhp($value)
-    {
-        $this->data['Php'] = $value;
-        $this->options['form_params']['Php'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withRefAppId($value)
-    {
-        $this->data['RefAppId'] = $value;
-        $this->options['query']['RefAppId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPythonModules($value)
-    {
-        $this->data['PythonModules'] = $value;
-        $this->options['query']['PythonModules'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withPhpConfigLocation($value)
-    {
-        $this->data['PhpConfigLocation'] = $value;
-        $this->options['query']['PhpConfigLocation'] = $value;
-
-        return $this;
-    }
-}
-
-/**
  * @method string getNamespaceName()
  * @method string getNamespaceDescription()
- * @method string getEnableMicroRegistration()
  * @method string getNamespaceId()
- * @method string getNameSpaceShortId()
  */
 class UpdateNamespace extends Roa
 {
@@ -8449,36 +3973,10 @@ class UpdateNamespace extends Roa
      *
      * @return $this
      */
-    public function withEnableMicroRegistration($value)
-    {
-        $this->data['EnableMicroRegistration'] = $value;
-        $this->options['query']['EnableMicroRegistration'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withNamespaceId($value)
     {
         $this->data['NamespaceId'] = $value;
         $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNameSpaceShortId($value)
-    {
-        $this->data['NameSpaceShortId'] = $value;
-        $this->options['query']['NameSpaceShortId'] = $value;
 
         return $this;
     }
@@ -8487,7 +3985,6 @@ class UpdateNamespace extends Roa
 /**
  * @method string getNamespaceId()
  * @method string getVpcId()
- * @method string getNameSpaceShortId()
  */
 class UpdateNamespaceVpc extends Roa
 {
@@ -8519,72 +4016,6 @@ class UpdateNamespaceVpc extends Roa
     {
         $this->data['VpcId'] = $value;
         $this->options['query']['VpcId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNameSpaceShortId($value)
-    {
-        $this->data['NameSpaceShortId'] = $value;
-        $this->options['query']['NameSpaceShortId'] = $value;
-
-        return $this;
-    }
-}
-
-/**
- * @method string getNamespaceId()
- * @method string getSecretId()
- * @method string getSecretData()
- */
-class UpdateSecret extends Roa
-{
-    /** @var string */
-    public $pathPattern = '/pop/v1/sam/secret/secret';
-
-    /** @var string */
-    public $method = 'PUT';
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withNamespaceId($value)
-    {
-        $this->data['NamespaceId'] = $value;
-        $this->options['query']['NamespaceId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSecretId($value)
-    {
-        $this->data['SecretId'] = $value;
-        $this->options['query']['SecretId'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withSecretData($value)
-    {
-        $this->data['SecretData'] = $value;
-        $this->options['query']['SecretData'] = $value;
 
         return $this;
     }

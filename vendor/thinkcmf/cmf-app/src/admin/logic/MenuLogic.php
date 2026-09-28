@@ -35,17 +35,10 @@ class MenuLogic
         $annotationManager                            = Annotations::getManager();
         $annotationManager->registry['adminMenu']     = 'app\admin\annotation\AdminMenuAnnotation';
         $annotationManager->registry['adminMenuRoot'] = 'app\admin\annotation\AdminMenuRootAnnotation';
-        $registry                                     = config('annotation.registry');
-
-        if (empty($registry)) {
-            $registry = ['date', 'email'];
-        }
-
-        foreach ($registry as $key => $value) {
-            if (is_numeric($key)) {
+        $registry                                     = config('registry');
+        if ($registry) {
+            foreach ($registry as $value) {
                 $annotationManager->registry[$value] = false;
-            } else {
-                $annotationManager->registry[$key] = $value;
             }
         }
 
@@ -54,13 +47,10 @@ class MenuLogic
             $filePatten         = CMF_ROOT . "vendor/thinkcmf/cmf-app/src/{$app}/controller/*Controller.php";
             $coreAppControllers = cmf_scan_dir($filePatten);
 
-            $filePatten          = CMF_ROOT . "vendor/thinkcmf/cmf-appstore/src/controller/*Controller.php";
-            $appStoreControllers = cmf_scan_dir($filePatten);
-
             $filePatten  = APP_PATH . $app . '/controller/*Controller.php';
             $controllers = cmf_scan_dir($filePatten);
 
-            $controllers = array_merge($coreAppControllers, $appStoreControllers, $controllers);
+            $controllers = array_merge($coreAppControllers, $controllers);
         } else if ($app == 'user') {
             $filePatten         = CMF_ROOT . "vendor/thinkcmf/cmf-app/src/{$app}/controller/Admin*Controller.php";
             $coreAppControllers = cmf_scan_dir($filePatten);

@@ -8,14 +8,19 @@ use Throwable;
 
 class InvalidResponseException extends Exception
 {
-    public ?Throwable $exception = null;
+    /**
+     * @var \Throwable|null
+     */
+    public $exception = null;
 
     /**
      * @var mixed
      */
-    public $response;
+    public $response = null;
 
     /**
+     * Bootstrap.
+     *
      * @param mixed $extra
      */
     public function __construct(
@@ -23,8 +28,8 @@ class InvalidResponseException extends Exception
         string $message = 'Provider response Error',
         $extra = null,
         ?Throwable $exception = null,
-        Throwable $previous = null
-    ) {
+        Throwable $previous = null)
+    {
         $this->response = $extra;
         $this->exception = $exception;
 

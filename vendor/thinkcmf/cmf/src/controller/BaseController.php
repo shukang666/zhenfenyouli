@@ -81,11 +81,7 @@ class BaseController
                 $this->beforeAction($options) :
                 $this->beforeAction($method, $options);
         }
-        $lastTime    = session('last_time');
-        $currentTime = time();
-        if (empty($lastTime) || $lastTime + 60 < $currentTime) {
-            session('last_time', $currentTime);
-        }
+
     }
 
     // 初始化
@@ -122,7 +118,7 @@ class BaseController
      */
     protected function display($content = '', $vars = [], $config = [])
     {
-        return Response::create($content, 'view')->assign($vars)->isContent(true);
+        return Response::create($content, 'view')->assign($vars)->config($config)->isContent(true);
     }
 
     /**
@@ -216,7 +212,7 @@ class BaseController
             }
 
             $pk  = Db::name($modelName)->getPk(); //获取主键名称
-            $ids = $this->request->post('list_orders/a');
+            $ids = $this->request->post("list_orders/a");
 
             if (!empty($ids)) {
                 foreach ($ids as $key => $r) {
@@ -245,8 +241,8 @@ class BaseController
     {
         $type = $this->getResponseType();
         if (is_null($url)) {
-            if (isset($_SERVER['HTTP_REFERER'])) {
-                $url = $_SERVER['HTTP_REFERER'];
+            if (isset($_SERVER["HTTP_REFERER"])) {
+                $url = $_SERVER["HTTP_REFERER"];
             } else {
                 if ($type == 'html') {
                     $url = 'javascript:history.back(-1);';

@@ -19,6 +19,7 @@ use think\db\Raw;
 use think\Model;
 use think\model\Pivot;
 use think\model\Relation;
+use think\Paginator;
 
 /**
  * 多对多关联类
@@ -120,6 +121,31 @@ class BelongsToMany extends Relation
     }
 
     /**
+     * 合成中间表模型
+     * @access protected
+     * @param  array|Collection|Paginator $models
+     */
+    protected function hydratePivot(iterable $models)
+    {
+        foreach ($models as $model) {
+            $pivot = [];
+
+            foreach ($model->getData() as $key => $val) {
+                if (strpos($key, '__')) {
+                    [$name, $attr] = explode('__', $key, 2);
+
+                    if ('pivot' == $name) {
+                        $pivot[$attr] = $val;
+                        unset($model->$key);
+                    }
+                }
+            }
+
+            $model->setRelation($this->pivotDataName, $this->newPivot($pivot));
+        }
+    }
+
+    /**
      * 延迟获取关联数据
      * @access public
      * @param  array    $subRelation 子关联名
@@ -132,38 +158,62 @@ class BelongsToMany extends Relation
             $closure($this->getClosureType($closure));
         }
 
-        return $this->relation($subRelation)
+        $result = $this->relation($subRelation)
             ->select()
             ->setParent(clone $this->parent);
+
+        $this->hydratePivot($result);
+
+        return $result;
     }
 
     /**
-     * 组装Pivot模型
+     * 重载select方法
      * @access public
-     * @param  Model    $result 模型对象
-     * @return array
+     * @param  mixed $data
+     * @return Collection
      */
-    protected function matchPivot(Model $result): array
+    public function select($data = null): Collection
     {
-        $pivot = [];
-        foreach ($result->getData() as $key => $val) {
-            if (strpos($key, '__')) {
-                [$name, $attr] = explode('__', $key, 2);
+        $this->baseQuery();
+        $result = $this->query->select($data);
+        $this->hydratePivot($result);
 
-                if ('pivot' == $name) {
-                    $pivot[$attr] = $val;
-                    unset($result->$key);
-                }
-            }
+        return $result;
+    }
+
+    /**
+     * 重载paginate方法
+     * @access public
+     * @param  int|array $listRows
+     * @param  int|bool  $simple
+     * @return Paginator
+     */
+    public function paginate($listRows = null, $simple = false): Paginator
+    {
+        $this->baseQuery();
+        $result = $this->query->paginate($listRows, $simple);
+        $this->hydratePivot($result);
+
+        return $result;
+    }
+
+    /**
+     * 重载find方法
+     * @access public
+     * @param  mixed $data
+     * @return Model
+     */
+    public function find($data = null)
+    {
+        $this->baseQuery();
+        $result = $this->query->find($data);
+
+        if ($result && !$result->isEmpty()) {
+            $this->hydratePivot([$result]);
         }
 
-        $pivotData = $this->pivot->newInstance($pivot, [
-            [$this->localKey, '=', $this->parent->getKey(), null],
-            [$this->foreignKey, '=', $result->getKey(), null],
-        ]);
-
-        $result->setRelation($this->pivotDataName, $pivotData);
-        return $pivot;
+        return $result;
     }
 
     /**
@@ -346,11 +396,6 @@ class BelongsToMany extends Relation
             $closure($this->getClosureType($closure));
         }
 
-        $withLimit = $this->query->getOptions('limit');
-        if ($withLimit) {
-            $this->query->removeOption('limit');
-        }
-
         // 预载入关联查询 支持嵌套预载入
         $list = $this->belongsToManyQuery($this->foreignKey, $this->localKey, $where)
             ->with($subRelation)
@@ -358,14 +403,25 @@ class BelongsToMany extends Relation
             ->select();
 
         // 组装模型数据
-        $data      = [];
+        $data = [];
         foreach ($list as $set) {
-            $pivot = $this->matchPivot($set);
-            $key   = $pivot[$this->localKey];
+            $pivot = [];
+            foreach ($set->getData() as $key => $val) {
+                if (strpos($key, '__')) {
+                    [$name, $attr] = explode('__', $key, 2);
+                    if ('pivot' == $name) {
+                        $pivot[$attr] = $val;
+                        unset($set->$key);
+                    }
+                }
+            }
+            $key = $pivot[$this->localKey];
 
-            if ($withLimit && isset($data[$key]) && count($data[$key]) >= $withLimit) {
+            if ($this->withLimit && isset($data[$key]) && count($data[$key]) >= $this->withLimit) {
                 continue;
             }
+
+            $set->setRelation($this->pivotDataName, $this->newPivot($pivot));
 
             $data[$key][] = $set;
         }
@@ -387,12 +443,11 @@ class BelongsToMany extends Relation
         if (empty($this->baseQuery)) {
             $tableName = $this->query->getTable();
             $table     = $this->pivot->db()->getTable();
+            $fields    = $this->getQueryFields($tableName);
 
-            if ($this->withoutField) {
-                $this->query->withoutField($this->withoutField);
+            if ($this->withLimit) {
+                $this->query->limit($this->withLimit);
             }
-
-            $fields = $this->getQueryFields($tableName);
 
             $this->query
                 ->field($fields)
@@ -612,10 +667,6 @@ class BelongsToMany extends Relation
         if (empty($this->baseQuery)) {
             $foreignKey = $this->foreignKey;
             $localKey   = $this->localKey;
-
-            $this->query->filter(function ($result, $options) {
-                $this->matchPivot($result);
-            });
 
             // 关联查询
             if (null === $this->parent->getKey()) {

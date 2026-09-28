@@ -18,18 +18,14 @@ use think\Model;
 /**
  * 数据软删除
  * @mixin Model
- * @method $this withTrashed()
- * @method $this onlyTrashed()
  */
 trait SoftDelete
 {
-
-    public function db($scope = []): Query
-    {
-        $query = parent::db($scope);
-        $this->withNoTrashed($query);
-        return $query;
-    }
+    /**
+     * 是否包含软删除数据
+     * @var bool
+     */
+    protected $withTrashed = false;
 
     /**
      * 判断当前实例是否被软删除
@@ -47,18 +43,47 @@ trait SoftDelete
         return false;
     }
 
-    public function scopeWithTrashed(Query $query)
+    /**
+     * 查询软删除数据
+     * @access public
+     * @return Query
+     */
+    public static function withTrashed(): Query
     {
-        $query->removeOption('soft_delete');
+        $model = new static();
+
+        return $model->withTrashedData(true)->db();
     }
 
-    public function scopeOnlyTrashed(Query $query)
+    /**
+     * 是否包含软删除数据
+     * @access protected
+     * @param  bool $withTrashed 是否包含软删除数据
+     * @return $this
+     */
+    protected function withTrashedData(bool $withTrashed)
     {
-        $field = $this->getDeleteTimeField(true);
+        $this->withTrashed = $withTrashed;
+        return $this;
+    }
+
+    /**
+     * 只查询软删除数据
+     * @access public
+     * @return Query
+     */
+    public static function onlyTrashed(): Query
+    {
+        $model = new static();
+        $field = $model->getDeleteTimeField(true);
 
         if ($field) {
-            $query->useSoftDelete($field, $this->getWithTrashedExp());
+            return $model
+                ->db()
+                ->useSoftDelete($field, $model->getWithTrashedExp());
         }
+
+        return $model->db();
     }
 
     /**
@@ -87,9 +112,9 @@ trait SoftDelete
 
         if ($name && !$force) {
             // 软删除
-            $this->set($name, $this->autoWriteTimestamp());
+            $this->set($name, $this->autoWriteTimestamp($name));
 
-            $this->exists()->withEvent(false)->save();
+            $result = $this->exists()->withEvent(false)->save();
 
             $this->withEvent(true);
         } else {
@@ -97,7 +122,7 @@ trait SoftDelete
             $where = $this->getWhere();
 
             // 删除当前模型数据
-            $this->db()
+            $result = $this->db()
                 ->where($where)
                 ->removeOption('soft_delete')
                 ->delete();
@@ -120,30 +145,20 @@ trait SoftDelete
     /**
      * 删除记录
      * @access public
-     * @param mixed $data 主键列表 支持闭包查询条件
-     * @param bool $force 是否强制删除
+     * @param  mixed $data 主键列表 支持闭包查询条件
+     * @param  bool  $force 是否强制删除
      * @return bool
      */
     public static function destroy($data, bool $force = false): bool
     {
-        // 传入空值（包括空字符串和空数组）的时候不会做任何的数据删除操作，但传入0则是有效的
-        if (empty($data) && 0 !== $data) {
-            return false;
-        }
-        $model = (new static());
-
-        $query = $model->db(false);
-
-        // 仅当强制删除时包含软删除数据
-        if ($force) {
-            $query->removeOption('soft_delete');
-        }
+        // 包含软删除数据
+        $query = (new static())->withTrashedData(true)->db(false);
 
         if (is_array($data) && key($data) !== 0) {
             $query->where($data);
             $data = null;
         } elseif ($data instanceof \Closure) {
-            call_user_func_array($data, [&$query]);
+            call_user_func_array($data, [ & $query]);
             $data = null;
         } elseif (is_null($data)) {
             return false;
@@ -152,7 +167,6 @@ trait SoftDelete
         $resultSet = $query->select($data);
 
         foreach ($resultSet as $result) {
-            /** @var Model $result */
             $result->force($force)->delete();
         }
 
@@ -162,7 +176,7 @@ trait SoftDelete
     /**
      * 恢复被软删除的记录
      * @access public
-     * @param array $where 更新条件
+     * @param  array $where 更新条件
      * @return bool
      */
     public function restore($where = []): bool
@@ -194,7 +208,7 @@ trait SoftDelete
     /**
      * 获取软删除字段
      * @access protected
-     * @param bool $read 是否查询操作 写操作的时候会自动去掉表别名
+     * @param  bool  $read 是否查询操作 写操作的时候会自动去掉表别名
      * @return string|false
      */
     protected function getDeleteTimeField(bool $read = false)
@@ -220,7 +234,7 @@ trait SoftDelete
     /**
      * 查询的时候默认排除软删除数据
      * @access protected
-     * @param Query $query
+     * @param  Query  $query
      * @return void
      */
     protected function withNoTrashed(Query $query): void

@@ -9,19 +9,16 @@ use Yansongda\Pay\Exception\InvalidParamsException;
 use Yansongda\Pay\Plugin\Wechat\GeneralPlugin;
 use Yansongda\Pay\Rocket;
 
-/**
- * @see https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_7.shtml
- */
 class CreateBillReceiptPlugin extends GeneralPlugin
 {
     /**
-     * @throws InvalidParamsException
+     * @throws \Yansongda\Pay\Exception\InvalidParamsException
      */
     protected function doSomething(Rocket $rocket): void
     {
         $payload = $rocket->getPayload();
 
-        if (!$payload->has('out_batch_no')) {
+        if (is_null($payload->get('out_batch_no'))) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
     }

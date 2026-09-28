@@ -4,23 +4,26 @@ declare(strict_types=1);
 
 namespace Yansongda\Pay\Service;
 
+use Yansongda\Pay\Contract\ParserInterface;
 use Yansongda\Pay\Contract\ServiceProviderInterface;
-use Yansongda\Pay\Exception\ContainerException;
+use Yansongda\Pay\Parser\CollectionParser;
 use Yansongda\Pay\Pay;
 use Yansongda\Pay\Provider\Wechat;
 
 class WechatServiceProvider implements ServiceProviderInterface
 {
     /**
-     * @param mixed $data
-     *
-     * @throws ContainerException
+     * @throws \Yansongda\Pay\Exception\ContainerException
      */
-    public function register($data = null): void
+    public function register(Pay $pay, ?array $data = null): void
     {
-        $service = new Wechat();
+        $service = function () {
+            Pay::set(ParserInterface::class, CollectionParser::class);
 
-        Pay::set(Wechat::class, $service);
-        Pay::set('wechat', $service);
+            return new Wechat();
+        };
+
+        $pay::set(Wechat::class, $service);
+        $pay::set('wechat', $service);
     }
 }
