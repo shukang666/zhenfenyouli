@@ -150,27 +150,85 @@
 			</view>
 		</view>
 
-		<!-- 学习 / 打卡 -->
+		<!-- 拍照打卡（原跳转 add 页，现页内完成） -->
 		<view class="scf-body" v-if="flowStep === 'learn'">
-			<view class="scf-learn-card">
-				<text class="scf-learn-title">是否想学习更多分类技巧？</text>
-				<text class="scf-learn-desc">系统学习分类知识，打卡更有把握</text>
-				<view class="scf-learn-actions">
-					<view class="scf-btn scf-btn--primary scf-btn--block" hover-class="scf-card--press" @tap="goLearn">去学习</view>
-					<view class="scf-btn scf-btn--blue scf-btn--block" hover-class="scf-card--press" @tap="goClock">去拍照打卡</view>
+			<view class="scf-clock-card">
+				<view class="scf-cate-hero scf-cate-hero--compact" :class="'scf-cate-hero--' + cateTone(activeCateName)">
+					<text class="scf-cate-hero-name">{{ activeCateName }}</text>
 				</view>
-				<view class="scf-learn-skip" @tap="finishOnly">稍后再说</view>
+				<text class="scf-clock-desc">{{ clockPhotoHint }}</text>
+
+				<view class="scf-photo-grid">
+					<view
+						v-for="(url, imgIdx) in clockImages"
+						:key="'img_' + imgIdx"
+						class="scf-photo-item"
+					>
+						<image class="scf-photo-img" :src="url" mode="aspectFill" @tap="previewClockImages(imgIdx)"></image>
+						<view class="scf-photo-del" @tap.stop="removeClockImage(imgIdx)">×</view>
+					</view>
+					<view
+						v-if="clockImages.length < 9"
+						class="scf-photo-add"
+						hover-class="scf-card--press"
+						@tap="chooseClockImages"
+					>
+						<text class="scf-photo-add-icon">📷</text>
+						<text class="scf-photo-add-t">添加照片</text>
+					</view>
+				</view>
+
+				<view class="scf-clock-note">
+					<text class="scf-clock-note-label">补充说明（选填）</text>
+					<textarea
+						class="scf-textarea scf-clock-textarea"
+						v-model="clockContent"
+						:placeholder="clockNotePlaceholder"
+						maxlength="500"
+					/>
+				</view>
+
+				<view
+					class="scf-btn scf-btn--primary scf-btn--block scf-clock-submit"
+					:class="{ 'scf-clock-submit--disabled': clockSubmitting }"
+					hover-class="scf-card--press"
+					@tap="submitClock"
+				>{{ clockSubmitting ? '提交中…' : '确认提交打卡' }}</view>
+
+				<view class="scf-learn-link" hover-class="scf-card--press" @tap="goLearn">
+					<text>还想学分类知识？</text>
+					<text class="scf-learn-link-go">去学习 ›</text>
+				</view>
 			</view>
 			<view class="scf-foot scf-foot--single">
 				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'survey'">上一步</view>
+			</view>
+		</view>
+
+		<!-- 打卡成功 -->
+		<view class="scf-success-mask" v-if="clockSuccessShow" @tap="goActivityTab">
+			<view class="scf-success-dialog" @tap.stop="">
+				<text class="scf-success-emoji">✓</text>
+				<text class="scf-success-title">{{ clockSuccessMsg || '打卡成功' }}</text>
+				<text class="scf-success-sub">请不要忘记正确投递哦~</text>
+				<view class="scf-habit-box" v-if="clockHabitTip">
+					<text class="scf-habit-kicker">养成好习惯</text>
+					<text class="scf-habit-text">{{ clockHabitTip }}</text>
+				</view>
+				<view class="scf-success-actions">
+					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">继续打卡</view>
+					<view class="scf-btn scf-btn--ghost scf-btn--block scf-success-back" @tap="goActivityTab">返回活动</view>
+				</view>
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
+	import { uploadUrl } from '@/common/settings'
+	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
 	import { getHub, mergeGuide } from '@/common/sceneClockHub.js'
-	import { guideCateLabelFromName, resolveCateKind } from '@/common/clockScene.js'
+	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind } from '@/common/clockScene.js'
 
 	export default {
 		data() {
@@ -197,9 +255,24 @@
 				},
 				userChoice: '',
 				customTip: '',
+				clockImages: [],
+				clockContent: '',
+				clockSubmitting: false,
+				clockSuccessShow: false,
+				clockSuccessMsg: '',
+				clockHabitTip: '',
+				uploadUrl,
 			}
 		},
 		computed: {
+			clockPhotoHint() {
+				const sk = this.hub && this.hub.sceneKey ? this.hub.sceneKey : this.hubKey
+				return buildSceneCateSubtitle(sk, this.activeCateName) || '请拍摄清晰照片，展示垃圾内容与分类是否正确'
+			},
+			clockNotePlaceholder() {
+				if (this.pointName) return '可补充「' + this.pointName + '」投放说明'
+				return '可补充投放位置或心得（选填）'
+			},
 			isOfficeHub() {
 				return this.hubKey === 'office'
 			},
@@ -246,13 +319,13 @@
 					cate: '选择垃圾种类',
 					guide: '分类指引',
 					survey: '分享分类技巧',
-					learn: '继续学习',
+					learn: '拍照打卡',
 				}
 				return map[this.flowStep] || this.hub.title
 			},
 			visibleStepLabels() {
 				if (['setup', 'points', 'manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
-				return ['指引', '小技巧', '打卡']
+				return ['指引', '小技巧', '拍照']
 			},
 			stepIndex() {
 				const order = ['guide', 'survey', 'learn']
@@ -472,35 +545,113 @@
 					user_choice: this.userChoice,
 					custom_tip: this.customTip,
 				}).catch(() => {})
+				this.clockImages = []
+				this.clockContent = ''
 				this.flowStep = 'learn'
 			},
 			goLearn() {
 				const path = this.guide.learn_path || '/pages/dtsh/knowledge'
 				this.$u.route(path)
 			},
-			goClock() {
+			resolveClockScene() {
+				const k = this.hub && this.hub.sceneKey ? String(this.hub.sceneKey) : ''
+				if (k === 'home') return 'home'
+				if (k === 'zhenfenjiao' || this.hubKey === 'office') return 'zhenfenjiao'
+				if (k === 'qinzi' || k === 'street') return k
+				return 'home'
+			},
+			chooseClockImages() {
+				const remain = 9 - this.clockImages.length
+				if (remain <= 0) return this.$u.toast('最多 9 张')
+				uni.chooseImage({
+					count: remain,
+					sourceType: ['camera', 'album'],
+					success: (res) => {
+						(res.tempFilePaths || []).forEach(p => this.uploadClockImage(p))
+					},
+				})
+			},
+			uploadClockImage(filePath) {
+				uni.showLoading({ title: '上传中…' })
+				uni.uploadFile({
+					url: this.uploadUrl,
+					filePath,
+					name: 'file',
+					formData: { filetype: 'image' },
+					success: (res) => {
+						try {
+							const data = JSON.parse(res.data)
+							if (data.code == 1 && data.data && data.data.url) {
+								this.clockImages.push(data.data.url)
+							} else {
+								this.$u.toast(data.msg || '上传失败')
+							}
+						} catch (e) {
+							this.$u.toast('上传失败')
+						}
+					},
+					fail: () => this.$u.toast('上传失败'),
+					complete: () => uni.hideLoading(),
+				})
+			},
+			removeClockImage(idx) {
+				this.clockImages.splice(idx, 1)
+			},
+			previewClockImages(index) {
+				if (!this.clockImages.length) return
+				uni.previewImage({ urls: this.clockImages, current: this.clockImages[index] })
+			},
+			submitClock() {
+				if (this.clockSubmitting) return
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类')
-				const sceneKey = this.hub.sceneKey
-				const sceneName = this.isCommunityHub
-					? (this.isOfficeHub ? '真分角' : '沿街回收点')
-					: (this.pointName || this.hub.title)
-				let url =
-					'/pages/flhd/add?scene_key=' +
-					encodeURIComponent(sceneKey) +
-					'&scene=' +
-					encodeURIComponent(sceneName) +
-					'&cate_id=' +
-					this.cateId +
-					'&lock_cate=1'
-				if (this.pointId) {
-					url += '&clock_point_id=' + this.pointId + '&point_name=' + encodeURIComponent(this.pointName)
-				}
-				this.$u.route(url)
+				if (!this.clockImages.length) return this.$u.toast('请先添加照片')
+				const that = this
+				uni.showModal({
+					title: '提示',
+					content: '照片需拍清楚垃圾内容并保持分类正确，错误分类可能影响积分。',
+					success(res) {
+						if (!res.confirm) return
+						that.doSubmitClock()
+					},
+				})
+			},
+			doSubmitClock() {
+				this.clockSubmitting = true
+				this.$u.api.add_forum({
+					type: 2,
+					cate_id: this.cateId,
+					content: this.clockContent,
+					image: this.clockImages,
+					clock_scene: this.resolveClockScene(),
+					clock_sub_scene: '',
+					clock_point_id: this.pointId || 0,
+				}).then(res => {
+					this.clockSuccessMsg = res.msg || '打卡成功'
+					this.clockHabitTip = pickRandomHabitTip()
+					this.clockSuccessShow = true
+					this.$u.api.getUserInfo().then(r => {
+						this.$u.vuex('userInfo', r.data || {})
+					}).catch(() => {})
+				}).catch(e => {
+					this.$u.toast((e && e.msg) || '提交失败')
+				}).finally(() => {
+					this.clockSubmitting = false
+				})
+			},
+			clockSuccessContinue() {
+				this.clockSuccessShow = false
+				this.clockImages = []
+				this.clockContent = ''
+				this.flowStep = 'points'
+			},
+			goActivityTab() {
+				this.clockSuccessShow = false
+				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
 			},
 			finishOnly() {
-				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
+				this.goActivityTab()
 			},
 		},
 	}
@@ -822,34 +973,185 @@
 	color: #7a857c;
 	margin-bottom: 8rpx;
 }
-.scf-learn-card {
+.scf-cate-hero--compact {
+	padding: 16rpx 20rpx;
+	margin-bottom: 16rpx;
+}
+.scf-cate-hero--compact .scf-cate-hero-name {
+	font-size: 36rpx;
+	margin-top: 0;
+}
+.scf-clock-card {
 	background: #fff;
 	border-radius: 20rpx;
-	padding: 32rpx 24rpx;
-	text-align: center;
+	padding: 24rpx;
 	box-shadow: 0 8rpx 24rpx rgba(20, 40, 28, 0.08);
 }
-.scf-learn-title {
+.scf-clock-desc {
+	display: block;
+	font-size: 26rpx;
+	color: #6a756c;
+	line-height: 1.55;
+	margin-bottom: 20rpx;
+}
+.scf-photo-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16rpx;
+}
+.scf-photo-item {
+	position: relative;
+	width: 200rpx;
+	height: 200rpx;
+	border-radius: 16rpx;
+	overflow: hidden;
+}
+.scf-photo-img {
+	width: 100%;
+	height: 100%;
+}
+.scf-photo-del {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 44rpx;
+	height: 44rpx;
+	line-height: 40rpx;
+	text-align: center;
+	background: rgba(0, 0, 0, 0.55);
+	color: #fff;
 	font-size: 32rpx;
+}
+.scf-photo-add {
+	width: 200rpx;
+	height: 200rpx;
+	border-radius: 16rpx;
+	border: 2rpx dashed #c5d0c8;
+	background: #f7faf8;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+.scf-photo-add-icon {
+	font-size: 48rpx;
+	line-height: 1;
+}
+.scf-photo-add-t {
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	color: #18af38;
+}
+.scf-clock-note {
+	margin-top: 24rpx;
+}
+.scf-clock-note-label {
+	display: block;
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #243028;
+	margin-bottom: 10rpx;
+}
+.scf-clock-textarea {
+	min-height: 160rpx;
+	background: #f5f7f6;
+	border-radius: 12rpx;
+	padding: 16rpx;
+	box-sizing: border-box;
+}
+.scf-clock-submit {
+	margin-top: 28rpx;
+}
+.scf-clock-submit--disabled {
+	opacity: 0.65;
+}
+.scf-learn-link {
+	margin-top: 24rpx;
+	padding-top: 20rpx;
+	border-top: 1rpx solid #eef0ee;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8rpx;
+	font-size: 26rpx;
+	color: #7a857c;
+}
+.scf-learn-link-go {
+	color: #18af38;
+	font-weight: 600;
+}
+.scf-success-mask {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 999;
+	background: rgba(0, 0, 0, 0.52);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 40rpx;
+}
+.scf-success-dialog {
+	width: 100%;
+	max-width: 600rpx;
+	background: #fff;
+	border-radius: 24rpx;
+	padding: 40rpx 32rpx 32rpx;
+	text-align: center;
+}
+.scf-success-emoji {
+	display: block;
+	width: 96rpx;
+	height: 96rpx;
+	line-height: 96rpx;
+	margin: 0 auto 16rpx;
+	border-radius: 50%;
+	background: rgba(24, 175, 56, 0.12);
+	color: #18af38;
+	font-size: 48rpx;
+	font-weight: 800;
+}
+.scf-success-title {
+	font-size: 36rpx;
 	font-weight: 800;
 	color: #142018;
 }
-.scf-learn-desc {
+.scf-success-sub {
 	display: block;
-	margin-top: 12rpx;
+	margin-top: 10rpx;
 	font-size: 26rpx;
 	color: #6a756c;
 }
-.scf-learn-actions {
+.scf-habit-box {
+	margin-top: 20rpx;
+	padding: 16rpx;
+	background: #f5faf6;
+	border-radius: 12rpx;
+	text-align: left;
+}
+.scf-habit-kicker {
+	display: block;
+	font-size: 22rpx;
+	color: #18af38;
+	font-weight: 600;
+}
+.scf-habit-text {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 26rpx;
+	color: #4a564e;
+	line-height: 1.5;
+}
+.scf-success-actions {
 	margin-top: 28rpx;
 	display: flex;
 	flex-direction: column;
 	gap: 16rpx;
 }
-.scf-learn-skip {
-	margin-top: 24rpx;
-	font-size: 26rpx;
-	color: #8a958c;
+.scf-success-back {
+	margin-top: 0;
 }
 .scf-foot {
 	margin-top: 28rpx;
