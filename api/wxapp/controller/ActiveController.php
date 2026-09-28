@@ -291,7 +291,7 @@ class ActiveController extends AuthController
             $item['waste_count'] = $wasteModel->where($where)->count();
             $list = $wasteModel
                 ->where($where)
-                ->order('id asc')
+                ->order('create_time desc,id desc')
                 ->hidden(['content'])
                 ->paginate($this->page_size)->each(function ($item) use ($wasteUserModel) {
                     $item['is_study'] = $wasteUserModel

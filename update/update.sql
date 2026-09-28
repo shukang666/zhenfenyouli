@@ -182,3 +182,5 @@ SELECT
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_point_index' LIMIT 1);
+
+-- 分类学习 cmf_waste：追加真分说明/为什么/怎么做/收获 四条（可重复执行见 data/seed_waste_zhenfen_guides.php）；小程序 get_waste_list 按 create_time desc 展示
