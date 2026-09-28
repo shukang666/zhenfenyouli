@@ -57,7 +57,7 @@
 					:key="p.id"
 					class="scf-point-card"
 					hover-class="scf-card--press"
-					@tap="pickPoint(p)"
+					@tap="pickPointById(p.id)"
 				>
 					<text class="scf-point-name">{{ p.point_name }}</text>
 					<text class="scf-point-cate">{{ p.cate_name }}</text>
@@ -73,14 +73,20 @@
 		<view class="scf-body" v-if="flowStep === 'manage'">
 			<text class="scf-hint">修改名称或种类；删除后不影响历史打卡记录。</text>
 			<view class="scf-point-grid">
-				<view class="scf-manage-card" v-for="p in points" :key="'m' + p.id">
-					<input class="scf-setup-input" v-model="p._edit_name" placeholder="点位名称" maxlength="16" />
-					<picker mode="selector" :range="catePickerLabels" :value="p._edit_cate_index" @change="onManageCateChange(p, $event)">
+				<view class="scf-manage-card" v-for="(p, mIdx) in points" :key="p.id">
+					<input
+						class="scf-setup-input"
+						:value="p._edit_name"
+						placeholder="点位名称"
+						maxlength="16"
+						@input="onManageNameInput(mIdx, $event)"
+					/>
+					<picker mode="selector" :range="catePickerLabels" :value="p._edit_cate_index" @change="onManageCateChangeByIndex(mIdx, $event)">
 						<view class="scf-setup-picker">{{ catePickerLabels[p._edit_cate_index] || p.cate_name }}</view>
 					</picker>
 					<view class="scf-manage-actions">
-						<text class="scf-manage-save" @tap="savePointEdit(p)">保存</text>
-						<text class="scf-manage-del" @tap="deletePoint(p)">删除</text>
+						<text class="scf-manage-save" @tap="savePointEditByIndex(mIdx)">保存</text>
+						<text class="scf-manage-del" @tap="deletePointById(p.id)">删除</text>
 					</view>
 				</view>
 			</view>
@@ -345,11 +351,19 @@
 					_edit_cate_index: idx,
 				}
 			},
-			onManageCateChange(p, e) {
-				const v = parseInt(e.detail.value, 10)
-				if (!isNaN(v)) p._edit_cate_index = v
+			onManageNameInput(idx, e) {
+				const val = e.detail && e.detail.value !== undefined ? e.detail.value : ''
+				if (!this.points[idx]) return
+				this.$set(this.points[idx], '_edit_name', val)
 			},
-			async savePointEdit(p) {
+			onManageCateChangeByIndex(idx, e) {
+				const v = parseInt(e.detail.value, 10)
+				if (isNaN(v) || !this.points[idx]) return
+				this.$set(this.points[idx], '_edit_cate_index', v)
+			},
+			async savePointEditByIndex(idx) {
+				const p = this.points[idx]
+				if (!p) return
 				const name = String(p._edit_name || '').trim()
 				if (!name) return this.$u.toast('请填写点位名称')
 				const cate = this.cateList[p._edit_cate_index]
@@ -363,13 +377,15 @@
 				this.$u.toast('已保存')
 				this.initUserPoints('manage')
 			},
-			deletePoint(p) {
+			deletePointById(id) {
+				const pointId = Number(id)
+				if (!pointId) return
 				uni.showModal({
 					title: '提示',
 					content: '确定删除该真分点？',
 					success: async (res) => {
 						if (!res.confirm) return
-						await this.$u.api.delete_clock_scene_point({ id: p.id })
+						await this.$u.api.delete_clock_scene_point({ id: pointId })
 						this.$u.toast('已删除')
 						this.initUserPoints('manage')
 					},
@@ -399,7 +415,10 @@
 			backFromManage() {
 				this.flowStep = this.points.length ? 'points' : 'setup'
 			},
-			pickPoint(p) {
+			pickPointById(id) {
+				const pid = Number(id)
+				const p = (this.points || []).find(item => Number(item.id) === pid)
+				if (!p) return
 				this.pointId = p.id
 				this.pointName = p.point_name
 				this.cateId = p.cate_id
