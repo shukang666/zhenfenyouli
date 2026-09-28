@@ -102,14 +102,14 @@
 						>
 							<image
 								v-if="p.point_image"
-								class="scf-cluster-thumb"
+								class="scf-cluster-photo"
 								:src="p.point_image"
 								mode="aspectFill"
 							></image>
-							<view v-else class="scf-cluster-thumb scf-cluster-thumb--empty">
-								<text class="scf-cluster-thumb-t">点位</text>
+							<view v-else class="scf-cluster-photo scf-cluster-photo--empty">
+								<text class="scf-cluster-photo-t">暂无点位照片</text>
 							</view>
-							<view class="scf-cluster-item-body">
+							<view class="scf-cluster-item-foot">
 								<text class="scf-cluster-item-name">{{ p.point_name }}</text>
 								<text class="scf-point-go">去打卡 ›</text>
 							</view>
@@ -969,40 +969,43 @@
 }
 .scf-cluster-item {
 	display: flex;
-	align-items: center;
-	padding: 14rpx 16rpx;
+	flex-direction: column;
 	border-radius: 14rpx;
+	overflow: hidden;
 	background: #f5f8f6;
 }
-.scf-cluster-thumb {
-	width: 96rpx;
-	height: 96rpx;
-	border-radius: 12rpx;
-	flex-shrink: 0;
+.scf-cluster-photo {
+	width: 100%;
+	height: 320rpx;
+	display: block;
 	background: #e8eee9;
 }
-.scf-cluster-thumb--empty {
+.scf-cluster-photo--empty {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
-.scf-cluster-thumb-t {
-	font-size: 22rpx;
+.scf-cluster-photo-t {
+	font-size: 26rpx;
 	color: #8a958c;
 }
-.scf-cluster-item-body {
-	flex: 1;
-	min-width: 0;
-	margin-left: 16rpx;
+.scf-cluster-item-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 18rpx 20rpx;
+	gap: 16rpx;
 }
 .scf-cluster-item-name {
-	display: block;
-	font-size: 28rpx;
+	flex: 1;
+	min-width: 0;
+	font-size: 30rpx;
 	font-weight: 600;
 	color: #243028;
 }
-.scf-cluster-item .scf-point-go {
-	margin-top: 8rpx;
+.scf-cluster-item-foot .scf-point-go {
+	flex-shrink: 0;
+	margin-top: 0;
 }
 .scf-point-card--preview {
 	margin-bottom: 12rpx;
