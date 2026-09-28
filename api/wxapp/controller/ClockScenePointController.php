@@ -58,7 +58,7 @@ class ClockScenePointController extends AuthController
         if (!$cate) {
             $this->error('请选择垃圾种类');
         }
-        $pointImage = $this->normalizePointImageStored(trim((string)$this->request->param('point_image', '')));
+        $pointImage = $this->resolvePointImageParam();
         if ($pointImage !== '' && mb_strlen($pointImage) > 255) {
             $this->error('点位照片路径过长，请重新上传');
         }
@@ -75,8 +75,6 @@ class ClockScenePointController extends AuthController
         }
         if ($pointImage !== '') {
             $row['point_image'] = $pointImage;
-        } elseif ($id <= 0) {
-            $row['point_image'] = '';
         }
         if ($id > 0) {
             $exists = Db::name('clock_scene_point')
@@ -91,7 +89,12 @@ class ClockScenePointController extends AuthController
                 $this->error('该点位由社区配置，无法自行修改');
             }
             Db::name('clock_scene_point')->where('id', $id)->update($row);
-            $this->success('已保存', ['id' => $id]);
+            $savedImg = Db::name('clock_scene_point')->where('id', $id)->value('point_image');
+            $this->success('已保存', [
+                'id' => $id,
+                'point_image_raw' => (string)$savedImg,
+                'point_image' => $savedImg ? cmf_get_asset_url($savedImg) : '',
+            ]);
             return;
         }
         $maxOrder = (int)Db::name('clock_scene_point')
@@ -106,7 +109,21 @@ class ClockScenePointController extends AuthController
         $row['list_order'] = $maxOrder + 1;
         $row['create_time'] = $now;
         $newId = Db::name('clock_scene_point')->insertGetId($row);
-        $this->success('已添加', ['id' => $newId]);
+        $savedImg = Db::name('clock_scene_point')->where('id', $newId)->value('point_image');
+        $this->success('已添加', [
+            'id' => $newId,
+            'point_image_raw' => (string)$savedImg,
+            'point_image' => $savedImg ? cmf_get_asset_url($savedImg) : '',
+        ]);
+    }
+
+    private function resolvePointImageParam(): string
+    {
+        $raw = trim((string)$this->request->param('point_image', ''));
+        if ($raw === '') {
+            $raw = trim((string)$this->request->param('point_image_raw', ''));
+        }
+        return $this->normalizePointImageStored($raw);
     }
 
     public function delete()

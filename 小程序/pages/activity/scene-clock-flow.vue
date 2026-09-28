@@ -264,6 +264,7 @@
 
 <script>
 	import { uploadUrl } from '@/common/settings'
+	import { parseUploadAssetResponse } from '@/common/uploadAsset.js'
 	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
 	import { getHub, mergeGuide } from '@/common/sceneClockHub.js'
 	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind, SECTION_HINTS } from '@/common/clockScene.js'
@@ -274,6 +275,7 @@
 				hubKey: '',
 				hub: null,
 				flowStep: 'points',
+				pointsBootstrapped: false,
 				points: [],
 				pointsLoading: false,
 				setupRows: [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }],
@@ -382,10 +384,16 @@
 			}
 			uni.setNavigationBarTitle({ title: this.hub.title })
 			this.subKey = ''
-			this.loadCateList()
+			this.loadCateList().then(() => {
+				this.ensureExamGate().then(ok => {
+					if (ok) this.initUserPoints()
+				})
+			})
 		},
 		onShow() {
 			if (!this.hub) return
+			const editing = ['setup', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
+			if (editing) return
 			this.ensureExamGate().then(ok => {
 				if (ok) this.initUserPoints()
 			})
@@ -419,6 +427,9 @@
 				return this.cateHintByName(this.setupCateName(row))
 			},
 			goSetupStep() {
+				if (!this.setupRows.length) {
+					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
+				}
 				this.flowStep = 'setup'
 			},
 			guideSubKeyForHub() {
@@ -441,21 +452,32 @@
 				this.pointsLoading = true
 				return this.$u.api.list_clock_scene_point({ hub_key: this.hubKey }).then(res => {
 					this.points = res.data || []
+					this.pointsBootstrapped = true
 					if (keepFlow === 'manage') {
 						this.points = this.points.map(p => this.decoratePointForEdit(p))
 						this.flowStep = 'manage'
+						return
+					}
+					if (keepFlow === 'points') {
+						this.flowStep = this.points.length ? 'points' : 'setup'
+						return
+					}
+					if (keepFlow === 'setup') {
 						return
 					}
 					if (this.isCommunityHub) {
 						this.flowStep = this.points.length ? 'points' : 'hub_empty'
 						return
 					}
+					if (this.flowStep === 'setup' || this.flowStep === 'manage') {
+						return
+					}
 					this.flowStep = this.points.length ? 'points' : 'setup'
 					if (this.flowStep === 'setup' && !this.setupRows.length) {
-						this.setupRows = [{ point_name: '', cate_index: 0 }]
+						this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
 					}
 				}).catch(() => {
-					if (keepFlow === 'manage') return
+					if (keepFlow === 'manage' || keepFlow === 'setup') return
 					this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
 				}).finally(() => {
 					this.pointsLoading = false
@@ -497,16 +519,14 @@
 							success: (up) => {
 								try {
 									const data = JSON.parse(up.data)
-									if (data.code != 1 || !data.data) {
+									if (data.code != 1) {
 										return this.$u.toast(data.msg || '上传失败')
 									}
-									const d = data.data
-									const savePath = d.filepath || d.url || ''
-									const showUrl = d.url || d.filepath || ''
-									if (!savePath) {
+									const parsed = parseUploadAssetResponse(data)
+									if (!parsed.savePath) {
 										return this.$u.toast('上传失败')
 									}
-									onDone(savePath, showUrl)
+									onDone(parsed.savePath, parsed.showUrl)
 								} catch (e) {
 									this.$u.toast('上传失败')
 								}
@@ -528,19 +548,29 @@
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				const rows = this.setupRows.filter(r => r.point_name && String(r.point_name).trim())
 				if (!rows.length) return this.$u.toast('请至少添加一个真分点')
-				for (const row of rows) {
-					const cate = this.cateList[row.cate_index]
-					if (!cate) return this.$u.toast('请选择垃圾种类')
-					if (!row.point_image) return this.$u.toast('请为每个点位上传照片')
-					await this.$u.api.save_clock_scene_point({
-						hub_key: this.hubKey,
-						point_name: String(row.point_name).trim(),
-						cate_id: cate.id,
-						point_image: row.point_image,
-					})
+				try {
+					for (const row of rows) {
+						const cate = this.cateList[row.cate_index]
+						if (!cate) return this.$u.toast('请选择垃圾种类')
+						const img = String(row.point_image || '').trim()
+						if (!img) return this.$u.toast('请为每个点位上传照片')
+						const res = await this.$u.api.save_clock_scene_point({
+							hub_key: this.hubKey,
+							point_name: String(row.point_name).trim(),
+							cate_id: cate.id,
+							point_image: img,
+						})
+						const saved = (res && res.data) || {}
+						if (!saved.point_image_raw && !saved.point_image) {
+							console.warn('save_clock_scene_point: point_image empty in response', saved)
+						}
+					}
+					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
+					this.$u.toast('已保存')
+					await this.initUserPoints('points')
+				} catch (e) {
+					this.$u.toast((e && e.msg) || '保存失败，请重试')
 				}
-				this.$u.toast('已保存')
-				this.initUserPoints()
 			},
 			enterManage() {
 				this.points = (this.points || []).map(p => this.decoratePointForEdit(p))
