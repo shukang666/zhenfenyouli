@@ -37,7 +37,8 @@ class PublicController extends AdminBaseController
         if (!empty($result)) {
             return $result;
         }
-        return $this->fetch(":login");
+        $this->assign('set_config', $this->buildSetConfigForView());
+        return $this->fetch(':login');
     }
 
     /**
@@ -112,5 +113,28 @@ class PublicController extends AdminBaseController
     {
         session('ADMIN_ID', null);
         return redirect(url('/', [], false, true));
+    }
+
+    /**
+     * @return array{app_name:string,app_logo:string}
+     */
+    protected function buildSetConfigForView(): array
+    {
+        $setConfig = cmf_get_option('set_config');
+        if (!is_array($setConfig)) {
+            $setConfig = [];
+        }
+        $siteInfo = cmf_get_option('site_info');
+        if (!is_array($siteInfo)) {
+            $siteInfo = [];
+        }
+
+        return array_merge(
+            [
+                'app_name' => $siteInfo['site_name'] ?? '管理后台',
+                'app_logo' => '',
+            ],
+            $setConfig
+        );
     }
 }
