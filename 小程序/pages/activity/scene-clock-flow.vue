@@ -82,8 +82,8 @@
 			</view>
 			<view class="scf-point-grid">
 				<view
-					v-for="group in pointGroups"
-					:key="'g-' + group.key"
+					v-for="(group, gIdx) in pointGroups"
+					:key="group.key"
 					class="scf-point-card scf-point-card--cluster"
 				>
 					<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(group.cate_name)">
@@ -95,10 +95,10 @@
 					<view class="scf-cluster-list">
 						<view
 							class="scf-cluster-item"
-							v-for="p in group.items"
+							v-for="(p, pIdx) in group.items"
 							:key="p.id"
 							hover-class="scf-card--press"
-							@tap="pickPointById(p.id)"
+							@tap="pickClusterPoint(gIdx, pIdx)"
 						>
 							<image
 								v-if="p.point_image"
@@ -683,6 +683,13 @@
 			},
 			backFromManage() {
 				this.flowStep = this.points.length ? 'points' : 'setup'
+			},
+			pickClusterPoint(gIdx, pIdx) {
+				const groups = this.pointGroups || []
+				const group = groups[gIdx]
+				const p = group && group.items && group.items[pIdx]
+				if (!p || p.id == null) return
+				this.pickPointById(p.id)
 			},
 			pickPointById(id) {
 				const pid = Number(id)
