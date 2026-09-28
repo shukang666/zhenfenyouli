@@ -162,26 +162,14 @@ export const PAGE_GUIDES = {
 		steps: [
 			{
 				selector: '',
-				title: '垃圾分类打卡',
-				desc: '这里学分类、答题、拍照打卡攒积分，也可以报问题和领整改任务。点下一步认一认。'
-			},
-			{
-				selector: '#guide-dtsh-clock',
-				prefer: 'below',
-				title: '去拍照打卡',
-				desc: '点这张图进入打卡。先学会分类、通过考试，才能拍照交作业。'
+				title: '垃圾分类工作台',
+				desc: '督导员在这里做桶边督导、巡查检查和监测登记。点下一步认一认。'
 			},
 			{
 				selector: '#guide-dtsh-vol',
 				prefer: 'above',
 				title: '督导员工作台',
-				desc: '通过审核的督导员从这里进监测、巡查和治理。'
-			},
-			{
-				selector: '#guide-dtsh-task',
-				prefer: 'above',
-				title: '整改任务',
-				desc: '可领取邻居随手拍转来的任务。每人每天最多领 1 条，做完交照片审核。'
+				desc: '通过审核的督导员从这里进桶边督导、监测、巡查和商户共治。'
 			}
 		]
 	}

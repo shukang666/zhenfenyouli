@@ -1,0 +1,6 @@
+{
+	"component": true,
+	"usingComponents": {
+		"new-user-guide": "../new-user-guide/new-user-guide"
+	}
+}

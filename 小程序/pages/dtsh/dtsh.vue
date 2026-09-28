@@ -21,7 +21,7 @@
 			<view class="wb-stats u-flex u-row-around">
 				<view class="wb-stat">
 					<text class="wb-stat-num">{{ statCompleted }}</text>
-					<text class="wb-stat-lab">已完成任务</text>
+					<text class="wb-stat-lab">督导次数</text>
 				</view>
 				<view class="wb-stat">
 					<text class="wb-stat-num">{{ statPoints }}</text>
@@ -46,7 +46,9 @@
 		<view class="wb-section">
 			<text class="wb-section-title">志愿督导员工作</text>
 			<view class="wb-job" @click="goVolunteerPage('/pages/dtsh/volunteer-sign')">
-				<view class="wb-job-icon wb-job-icon--green">🪣</view>
+				<view class="wb-job-icon wb-job-icon--green">
+					<u-icon name="clock" size="44" color="#fff"></u-icon>
+				</view>
 				<view class="wb-job-main">
 					<text class="wb-job-name">桶边督导</text>
 					<text class="wb-job-desc">随时到岗 · 桶边留证与登记</text>
@@ -54,7 +56,9 @@
 				<view class="wb-job-btn">去执行</view>
 			</view>
 			<view class="wb-job" @click="goVolunteerPage('/pages/zzhd/dwxj/dwxj?type=3')">
-				<view class="wb-job-icon wb-job-icon--mint">📋</view>
+				<view class="wb-job-icon wb-job-icon--mint">
+					<u-icon name="file-text" size="44" color="#fff"></u-icon>
+				</view>
 				<view class="wb-job-main">
 					<text class="wb-job-name">小区分类检查</text>
 					<text class="wb-job-desc">点位巡查 · 现场记录与留证</text>
@@ -62,7 +66,9 @@
 				<view class="wb-job-btn">去检查</view>
 			</view>
 			<view class="wb-job" @click="goVolunteerMerchantInspect">
-				<view class="wb-job-icon wb-job-icon--blue">🏪</view>
+				<view class="wb-job-icon wb-job-icon--blue">
+					<u-icon name="home" size="44" color="#fff"></u-icon>
+				</view>
 				<view class="wb-job-main">
 					<text class="wb-job-name">商户共治</text>
 					<text class="wb-job-desc">沿街商户分类共治检查</text>
@@ -74,73 +80,14 @@
 		<view class="wb-section">
 			<text class="wb-section-title">单位指导员 · 点位监测</text>
 			<view class="wb-job" @click="goVolunteerMonitor">
-				<view class="wb-job-icon wb-job-icon--teal">📍</view>
+				<view class="wb-job-icon wb-job-icon--teal">
+					<u-icon name="map-fill" size="44" color="#fff"></u-icon>
+				</view>
 				<view class="wb-job-main">
 					<text class="wb-job-name">督导监测</text>
 					<text class="wb-job-desc">厨余督导信息登记与监测</text>
 				</view>
 				<view class="wb-job-btn">去监测</view>
-			</view>
-		</view>
-
-		<view class="wb-section task-section" id="guide-dtsh-task">
-			<view class="wb-section-head u-flex u-row-between u-col-center">
-				<text class="wb-section-title u-m-b-0">可领取的整改工作</text>
-				<text class="wb-section-more" @click="currentTab = 1" v-if="myTasks.length">我的任务 ›</text>
-			</view>
-			<text class="wb-section-hint">每人每天最多领取 1 条</text>
-
-			<scroll-view scroll-x class="wb-task-scroll" v-if="currentTab === 0 && taskList.length">
-				<view class="wb-task-row">
-					<view class="wb-task-card" v-for="(item, idx) in taskList" :key="idx">
-						<view class="wb-task-tag">{{ taskTypeLabel(item) }}</view>
-						<text class="wb-task-id">#{{ taskSerial(item) }}</text>
-						<text class="wb-task-loc">{{ taskLocation(item) }}</text>
-						<view class="wb-task-foot u-flex u-row-between u-col-center">
-							<text class="wb-task-time">{{ taskTimeText(item) }}</text>
-							<view
-								v-if="!item.accepted && !item.daily_limit"
-								class="wb-task-claim"
-								@click.stop="acceptTask(item)"
-							>领取</view>
-							<text v-else class="wb-task-muted">{{ item.accepted ? '已领' : '今日已领' }}</text>
-						</view>
-					</view>
-				</view>
-			</scroll-view>
-			<view v-if="currentTab === 0 && taskList.length === 0" class="wb-task-empty">
-				<u-empty text="暂无可领取任务" mode="list"></u-empty>
-			</view>
-
-			<view class="u-p-lr-10 u-m-t-20">
-				<u-tabs :list="taskTabs" :is-scroll="false" :current="currentTab" @change="changeTab" active-color="#078b5f"></u-tabs>
-			</view>
-
-			<view v-if="currentTab == 0" class="u-m-t-16">
-				<view v-for="(item, idx) in taskList" :key="'full-' + idx" class="task-card u-m-b-20">
-					<view class="u-font-30 u-font-bold">{{ item.title }}</view>
-					<image v-if="item.image" :src="item.image" mode="aspectFill" class="shot-thumb u-m-t-16" @click="previewShot(item.image)"></image>
-					<view class="u-font-26 u-type-info u-m-t-10">{{ item.content }}</view>
-					<view class="u-flex u-row-between u-m-t-20">
-						<view class="u-font-26" style="color:#078b5f;">奖励积分 +{{ item.point }}</view>
-						<u-button v-if="item.accepted" type="info" size="mini" shape="circle" disabled>已领取</u-button>
-						<u-button v-else-if="item.daily_limit" type="info" size="mini" shape="circle" disabled>今日已领</u-button>
-						<u-button v-else type="success" size="mini" shape="circle" @click="acceptTask(item)">领取任务</u-button>
-					</view>
-				</view>
-			</view>
-			<view v-if="currentTab == 1">
-				<view v-if="myTasks.length == 0"><u-empty text="无我的任务" mode="list"></u-empty></view>
-				<view v-for="(item, idx) in myTasks" :key="idx" class="task-card u-m-b-20" @click="goSubmit(item)">
-					<view class="u-font-30 u-font-bold">{{ taskDisplayTitle(item) }}</view>
-					<image v-if="item.task_image" :src="item.task_image" mode="aspectFill" class="shot-thumb u-m-t-16" @click.stop="previewShot(item.task_image)"></image>
-					<view class="u-font-26 u-type-info u-m-t-10">{{ taskDisplayContent(item) }}</view>
-					<view class="u-flex u-row-between u-m-t-20">
-						<view class="u-font-26" style="color:#078b5f;">奖励积分 +{{ taskDisplayPoint(item) }}</view>
-						<u-tag :text="item.status_name" :type="taskStatusType(item.status)" mode="dark" />
-					</view>
-					<view v-if="item.status == 2 && item.reason" class="u-font-24 u-type-error u-m-t-10">拒绝原因：{{ item.reason }}</view>
-				</view>
 			</view>
 		</view>
 
@@ -150,23 +97,19 @@
 </template>
 
 <script>
+	import PageGuide from '@/components/page-guide/index.vue'
+
 	export default {
+		components: {
+			PageGuide,
+		},
 		data() {
 			return {
-				swiper_list: [],
-				dtshBanner: '',
 				checkRole: null,
 				volunteerSupervision: {
 					total: 0,
 					last_date: '',
 				},
-				taskTabs: [
-					{ name: '可领取' },
-					{ name: '我的任务' },
-				],
-				currentTab: 0,
-				taskList: [],
-				myTasks: [],
 			};
 		},
 		computed: {
@@ -192,9 +135,8 @@
 				return '晚上好';
 			},
 			statCompleted() {
-				const done = (this.myTasks || []).filter(t => parseInt(t.status, 10) === 3).length;
 				const sup = this.volunteerSupervision.total || 0;
-				return `${done + sup}次`;
+				return `${sup}次`;
 			},
 			statPoints() {
 				const p = (this.isLogin && this.userInfo && this.userInfo.point) ? this.userInfo.point : 0;
@@ -207,16 +149,10 @@
 			},
 		},
 		onLoad() {
-			this.find_slide();
-			this.loadBanner();
 			this.loadCheckRole();
-			this.loadTaskList();
-			this.loadMyTasks();
 		},
 		onShow() {
 			this.loadCheckRole();
-			this.loadTaskList();
-			this.loadMyTasks();
 		},
 		methods: {
 			loadCheckRole() {
@@ -261,153 +197,6 @@
 			goVolunteerApply() {
 				if (!this.$u.func.checkLogin()) return;
 				this.$u.route('/pages/zzhd/add');
-			},
-			navigator(url) {
-				if (!this.isLogin) return this.$u.route('/pages/public/login');
-				this.$u.route(url);
-			},
-			async adLink(e, item) {
-				const data = item[e];
-				if (!data.url) return;
-				if (data.target == 'switchTab') {
-					return uni.switchTab({ url: data.url });
-				}
-				const openUrl = await this.$u.func.checkH5(data.url);
-				this.$u.route(openUrl);
-			},
-			find_slide() {
-				this.$u.api.find_slide({ id: 6 }).then(res => {
-					this.swiper_list = res.data;
-				});
-			},
-			async loadBanner() {
-				try {
-					const res = await this.$u.api.getPageConfig();
-					const banner = res.data?.dtsh_banner || '';
-					if (banner) this.dtshBanner = banner;
-				} catch (e) {}
-			},
-			goToClock() {
-				this.$u.route('/pages/flhd/ljfldk');
-			},
-			changeTab(idx) {
-				const i = (idx && typeof idx === 'object') ? idx.index : idx;
-				this.currentTab = i;
-				if (i == 1) this.loadMyTasks();
-				else this.loadTaskList();
-			},
-			loadTaskList() {
-				if (!this.isLogin) return;
-				this.$u.api.getVolunteerTaskList().then(res => {
-					this.taskList = res.data || [];
-				}).catch(() => {});
-			},
-			loadMyTasks() {
-				if (!this.isLogin) return;
-				this.$u.api.getMyVolunteerTasks({ page: 1, page_size: 20 }).then(res => {
-					this.myTasks = res.data.data || [];
-				}).catch(() => {});
-			},
-			taskTypeLabel(item) {
-				const t = (item && item.title) || '';
-				if (/满溢|桶满/.test(t)) return '桶满溢';
-				if (/设施|损坏/.test(t)) return '设施损坏';
-				if (/大件/.test(t)) return '大件垃圾';
-				return t.length > 6 ? t.slice(0, 6) : (t || '整改');
-			},
-			taskSerial(item) {
-				const id = item && item.id;
-				if (!id) return '—';
-				const d = new Date();
-				const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-				return `${ymd}${String(id).padStart(3, '0')}`;
-			},
-			taskLocation(item) {
-				const c = (item && item.content) || '';
-				if (c.length > 28) return c.slice(0, 28) + '…';
-				return c || (item && item.title) || '见任务说明';
-			},
-			taskTimeText(item) {
-				const ts = item && (item.create_time || item.update_time);
-				if (!ts) return '待领取';
-				const n = parseInt(ts, 10);
-				const d = new Date(n > 1e12 ? n : n * 1000);
-				const now = new Date();
-				const sameDay = d.toDateString() === now.toDateString();
-				const hh = String(d.getHours()).padStart(2, '0');
-				const mm = String(d.getMinutes()).padStart(2, '0');
-				return sameDay ? `今天 ${hh}:${mm}` : `${d.getMonth() + 1}月${d.getDate()}日`;
-			},
-			acceptTask(item) {
-				if (!this.$u.func.checkLogin()) return;
-				uni.showModal({
-					title: '确认领取',
-					content: `确定领取「${item.title}」吗？每人每天最多领取 1 条。`,
-					success: (r) => {
-						if (!r.confirm) return;
-						this.$u.api.acceptVolunteerTask({ task_id: item.id }).then(res => {
-							uni.showToast({ title: res.msg || '领取成功', icon: 'none' });
-							this.loadTaskList();
-							this.loadMyTasks();
-						}).catch(err => {
-							uni.showToast({ title: (err && err.msg) || '领取失败', icon: 'none' });
-						});
-					}
-				});
-			},
-			goSubmit(item) {
-				if (!this.$u.func.checkLogin()) return;
-				const st = parseInt(item.status, 10);
-				if (st === 1) {
-					uni.showToast({ title: '审核中，请勿重复提交', icon: 'none' });
-					return;
-				}
-				if (st === 3) {
-					uni.showToast({ title: '任务已完成', icon: 'none' });
-					return;
-				}
-				this.$u.route({
-					url: '/pages/dtsh/task-submit',
-					params: {
-						log_id: item.id,
-						title: this.taskDisplayTitle(item),
-						content: this.taskDisplayContent(item),
-						point: this.taskDisplayPoint(item),
-						status: item.status,
-						shot_image: item.task_image || '',
-						images: (item.images_arr && item.images_arr.length > 0) ? JSON.stringify(item.images_arr) : '',
-					}
-				});
-			},
-			taskStatusType(status) {
-				const map = { 0: 'info', 1: 'warning', 2: 'error', 3: 'success' };
-				return map[status] || 'info';
-			},
-			taskDisplayTitle(item) {
-				const t = item && item.task_title;
-				if (t === null || t === undefined || t === '' || t === 'null') {
-					return '整改任务（已下架）';
-				}
-				return t;
-			},
-			taskDisplayContent(item) {
-				const c = item && item.task_content;
-				if (c === null || c === undefined || c === '' || c === 'null') {
-					return '关联任务已删除，请等待管理员审核您的提交';
-				}
-				return c;
-			},
-			taskDisplayPoint(item) {
-				const p = item && item.task_point;
-				if (p === null || p === undefined || p === 'null' || p === '') {
-					return 0;
-				}
-				const n = parseInt(p, 10);
-				return isNaN(n) ? 0 : n;
-			},
-			previewShot(url) {
-				if (!url) return;
-				uni.previewImage({ urls: [url] });
 			},
 			customBack() {
 				uni.navigateBack({
@@ -545,22 +334,6 @@
 	margin-bottom: 20rpx;
 }
 
-.wb-section-head .wb-section-title {
-	margin-bottom: 0;
-}
-
-.wb-section-more {
-	font-size: 26rpx;
-	color: #078b5f;
-}
-
-.wb-section-hint {
-	display: block;
-	font-size: 24rpx;
-	color: #999;
-	margin-bottom: 16rpx;
-}
-
 .wb-job {
 	display: flex;
 	align-items: center;
@@ -615,94 +388,4 @@
 	flex-shrink: 0;
 }
 
-.wb-task-scroll {
-	width: 100%;
-	white-space: nowrap;
-}
-
-.wb-task-row {
-	display: inline-flex;
-	padding: 8rpx 0 16rpx;
-}
-
-.wb-task-card {
-	display: inline-block;
-	vertical-align: top;
-	width: 280rpx;
-	margin-right: 20rpx;
-	padding: 20rpx;
-	background: #fff;
-	border: 1rpx solid #e8ece9;
-	border-radius: 16rpx;
-	white-space: normal;
-}
-
-.wb-task-tag {
-	display: inline-block;
-	padding: 6rpx 14rpx;
-	background: #078b5f;
-	color: #fff;
-	font-size: 22rpx;
-	border-radius: 8rpx;
-	margin-bottom: 12rpx;
-}
-
-.wb-task-id {
-	display: block;
-	font-size: 22rpx;
-	color: #999;
-}
-
-.wb-task-loc {
-	display: block;
-	margin-top: 8rpx;
-	font-size: 26rpx;
-	color: #333;
-	line-height: 1.45;
-	min-height: 72rpx;
-}
-
-.wb-task-foot {
-	margin-top: 16rpx;
-}
-
-.wb-task-time {
-	font-size: 22rpx;
-	color: #aaa;
-}
-
-.wb-task-claim {
-	padding: 8rpx 20rpx;
-	background: #078b5f;
-	color: #fff;
-	font-size: 22rpx;
-	border-radius: 999rpx;
-}
-
-.wb-task-muted {
-	font-size: 22rpx;
-	color: #999;
-}
-
-.wb-task-empty {
-	padding: 20rpx 0;
-}
-
-.task-card {
-	padding: 24rpx;
-	background: #fff;
-	border-radius: 12rpx;
-	border: 1rpx solid #eef0ee;
-}
-
-.shot-thumb {
-	width: 200rpx;
-	height: 200rpx;
-	border-radius: 12rpx;
-	background: #eee;
-}
-
-.task-section {
-	margin-bottom: 30rpx;
-}
 </style>

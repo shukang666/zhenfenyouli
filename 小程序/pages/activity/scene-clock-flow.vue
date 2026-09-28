@@ -182,7 +182,7 @@
 		<!-- 处理指引 -->
 		<view class="scf-body" v-if="flowStep === 'guide'">
 			<view class="scf-panel">
-				<view class="scf-cate-hero scf-cate-hero--block" :class="'scf-cate-hero--' + cateTone(activeCateName)">
+				<view class="scf-cate-hero scf-cate-hero--panel" :class="'scf-cate-hero--' + cateTone(activeCateName)">
 					<text class="scf-cate-hero-kicker">垃圾分类</text>
 					<text class="scf-cate-hero-name">{{ activeCateName }}</text>
 				</view>
@@ -234,7 +234,7 @@
 				</view>
 				<text class="scf-clock-desc">{{ clockPhotoIntro }}</text>
 
-				<view class="scf-clock-photo-head u-flex u-row-between u-col-center">
+				<view class="scf-clock-photo-head scf-clock-photo-head--row">
 					<text class="scf-clock-photo-title">分三步拍照片</text>
 					<text class="scf-clock-photo-progress">{{ clockSlotFilledCount }}/3</text>
 				</view>
@@ -1248,7 +1248,7 @@
 	padding: 20rpx 22rpx;
 	color: #fff;
 }
-.scf-cate-hero--block {
+.scf-cate-hero--panel {
 	margin-bottom: 16rpx;
 }
 .scf-cate-hero-kicker {
@@ -1485,6 +1485,12 @@
 	font-size: 24rpx;
 	color: #18af38;
 	font-weight: 600;
+}
+.scf-clock-photo-head--row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
 }
 .scf-slot-row {
 	display: flex;

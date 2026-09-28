@@ -299,7 +299,8 @@
 				{
 					"path": "scene-clock-flow",
 					"style": {
-						"navigationBarTitleText": "场景分类"
+						"navigationBarTitleText": "场景分类",
+						"usingComponents": {}
 					}
 				},
 				{
@@ -653,14 +654,14 @@
 				"style": {
 					"navigationBarTitleText": "垃圾分类工作台",
 					"navigationStyle": "custom",
+					"usingComponents": {
+						"new-user-guide": "/components/new-user-guide/new-user-guide"
+					},
 					"componentPlaceholder": {
 						"u-navbar": "view",
 						"u-avatar": "view",
 						"u-icon": "view",
 						"u-button": "view",
-						"u-tabs": "view",
-						"u-empty": "view",
-						"u-tag": "view",
 						"u-gap": "view",
 						"page-guide": "view",
 						"new-user-guide": "view"
@@ -1021,6 +1022,14 @@
 	],
 	"preloadRule": {
 		"pages/low_carbon/lsxf/details-new": {
+			"network": "all",
+			"packages": ["pages/activity"]
+		},
+		"pages/low_carbon/low_carbon": {
+			"network": "all",
+			"packages": ["pages/activity"]
+		},
+		"pages/flhd/ljfldk": {
 			"network": "all",
 			"packages": ["pages/activity"]
 		},
