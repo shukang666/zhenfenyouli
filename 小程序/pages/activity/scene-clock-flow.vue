@@ -16,18 +16,18 @@
 			</view>
 		</view>
 
-		<!-- 办公：固定真分角提示 -->
-		<view class="scf-body" v-if="flowStep === 'office_tip'">
+		<!-- 沿街/办公：尚未配置统一回收点 -->
+		<view class="scf-body" v-if="flowStep === 'hub_empty'">
 			<view class="scf-panel scf-office-tip">
-				<text class="scf-office-tip-title">请前往大楼真分角打卡</text>
-				<text class="scf-info-text">办公场景使用大厦统一「真分角」投放点，无需在小程序内设置个人点位。请选择本次投放的垃圾种类后继续。</text>
+				<text class="scf-office-tip-title">{{ communityEmptyTitle }}</text>
+				<text class="scf-info-text">{{ communityEmptyDesc }}</text>
 			</view>
 			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="flowStep = 'cate'">选择种类并继续</view>
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="finishOnly">返回活动</view>
 			</view>
 		</view>
 
-		<!-- 首次：设置真分点 -->
+		<!-- 首次：设置真分点（仅家庭/亲子） -->
 		<view class="scf-body" v-if="flowStep === 'setup'">
 			<text class="scf-hint">首次进入请设置您的真分点。每个点位对应一种垃圾类型，后续可在列表中修改。</text>
 			<view class="scf-setup-list">
@@ -47,9 +47,13 @@
 
 		<!-- 真分点列表（打卡入口） -->
 		<view class="scf-body" v-if="flowStep === 'points'">
+			<view class="scf-panel scf-office-tip scf-points-intro" v-if="isCommunityHub">
+				<text class="scf-office-tip-title">{{ communityPointsTitle }}</text>
+				<text class="scf-info-text">{{ communityPointsDesc }}</text>
+			</view>
 			<view class="scf-points-head">
-				<text class="scf-hint scf-hint--inline">选择要打卡的真分点</text>
-				<text class="scf-manage-link" @tap="enterManage">管理真分点</text>
+				<text class="scf-hint scf-hint--inline">{{ isCommunityHub ? '选择回收点打卡' : '选择要打卡的真分点' }}</text>
+				<text class="scf-manage-link" v-if="!isCommunityHub" @tap="enterManage">管理真分点</text>
 			</view>
 			<view class="scf-point-grid">
 				<view
@@ -64,8 +68,8 @@
 					<text class="scf-point-go">去打卡 ›</text>
 				</view>
 			</view>
-			<view class="scf-foot scf-foot--single" v-if="!points.length">
-				<view class="scf-btn scf-btn--primary" @tap="flowStep = 'setup'">去设置真分点</view>
+			<view class="scf-foot scf-foot--single" v-if="!points.length && !isCommunityHub">
+				<view class="scf-btn scf-btn--primary" @tap="goSetupStep">去设置真分点</view>
 			</view>
 		</view>
 
@@ -93,27 +97,6 @@
 			<view class="scf-setup-add" @tap="addPointInManage">+ 新增点位</view>
 			<view class="scf-foot scf-foot--single">
 				<view class="scf-btn scf-btn--ghost" @tap="backFromManage">返回打卡</view>
-			</view>
-		</view>
-
-		<!-- 办公：选种类 -->
-		<view class="scf-body" v-if="flowStep === 'cate' && isOfficeHub">
-			<text class="scf-hint">请选择本次在真分角投放的垃圾种类</text>
-			<view class="scf-cate-grid">
-				<view
-					v-for="(item, idx) in cateList"
-					:key="idx"
-					class="scf-cate-card"
-					:class="'scf-cate-card--' + cateTone(item.name)"
-					hover-class="scf-card--press"
-					@tap="pickOfficeCate(item)"
-				>
-					<text class="scf-cate-name">{{ item.name }}</text>
-					<text class="scf-cate-go">选择 ›</text>
-				</view>
-			</view>
-			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'office_tip'">上一步</view>
 			</view>
 		</view>
 
@@ -212,6 +195,30 @@
 			isOfficeHub() {
 				return this.hubKey === 'office'
 			},
+			isStreetHub() {
+				return this.hubKey === 'street'
+			},
+			isCommunityHub() {
+				return this.isOfficeHub || this.isStreetHub
+			},
+			communityEmptyTitle() {
+				if (this.isStreetHub) return '暂未配置商铺回收点'
+				if (this.isOfficeHub) return '暂未配置真分角回收点'
+				return '暂未配置回收点'
+			},
+			communityEmptyDesc() {
+				return '社区工作人员将根据您的商铺/单位性质人工配置统一回收点，配置完成后即可在此选择点位打卡。如有疑问请联系社区。'
+			},
+			communityPointsTitle() {
+				if (this.isStreetHub) return '请前往统一回收点打卡'
+				return '请前往大楼真分角打卡'
+			},
+			communityPointsDesc() {
+				if (this.isStreetHub) {
+					return '以下为社区根据您的商铺情况配置的集中回收点，每个点位对应一种垃圾类型，请选择后拍照打卡。'
+				}
+				return '以下为社区配置的办公真分角投放点，无需自行设置，请选择点位后打卡。'
+			},
 			presetTips() {
 				const tips = this.guide && this.guide.preset_tips
 				return Array.isArray(tips) ? tips : []
@@ -228,7 +235,7 @@
 			},
 			stepTitle() {
 				const map = {
-					office_tip: '真分角打卡',
+					hub_empty: '等待配置',
 					setup: '设置真分点',
 					points: '选择真分点',
 					manage: '管理真分点',
@@ -240,14 +247,11 @@
 				return map[this.flowStep] || this.hub.title
 			},
 			visibleStepLabels() {
-				if (['setup', 'points', 'manage', 'office_tip'].indexOf(this.flowStep) >= 0) return []
-				if (this.isOfficeHub) return ['选种类', '指引', '小技巧', '打卡']
+				if (['setup', 'points', 'manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
 				return ['指引', '小技巧', '打卡']
 			},
 			stepIndex() {
-				const order = this.isOfficeHub
-					? ['cate', 'guide', 'survey', 'learn']
-					: ['guide', 'survey', 'learn']
+				const order = ['guide', 'survey', 'learn']
 				const i = order.indexOf(this.flowStep)
 				return i >= 0 ? i : 0
 			},
@@ -262,16 +266,18 @@
 				return
 			}
 			uni.setNavigationBarTitle({ title: this.hub.title })
-			this.subKey = this.isOfficeHub ? 'zhenfenjiao' : ''
+			this.subKey = ''
 			this.loadCateList().then(() => {
-				if (this.isOfficeHub) {
-					this.flowStep = 'office_tip'
-					return
-				}
 				this.initUserPoints()
 			})
 		},
 		methods: {
+			goSetupStep() {
+				this.flowStep = 'setup'
+			},
+			guideSubKeyForHub() {
+				return this.hubKey === 'office' ? 'zhenfenjiao' : ''
+			},
 			loadCateList() {
 				return this.$u.api.get_select_list({ type: 2 }).then(res => {
 					this.cateList = res.data || []
@@ -279,7 +285,7 @@
 			},
 			initUserPoints(keepFlow) {
 				if (!this.isLogin) {
-					this.flowStep = 'setup'
+					this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
 					return Promise.resolve()
 				}
 				if (!this.userInfo.community_id) {
@@ -294,12 +300,17 @@
 						this.flowStep = 'manage'
 						return
 					}
+					if (this.isCommunityHub) {
+						this.flowStep = this.points.length ? 'points' : 'hub_empty'
+						return
+					}
 					this.flowStep = this.points.length ? 'points' : 'setup'
 					if (this.flowStep === 'setup' && !this.setupRows.length) {
 						this.setupRows = [{ point_name: '', cate_index: 0 }]
 					}
 				}).catch(() => {
-					if (keepFlow !== 'manage') this.flowStep = 'setup'
+					if (keepFlow === 'manage') return
+					this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
 				}).finally(() => {
 					this.pointsLoading = false
 				})
@@ -423,16 +434,7 @@
 				this.pointName = p.point_name
 				this.cateId = p.cate_id
 				this.cateLabel = guideCateLabelFromName(p.cate_name)
-				this.subKey = ''
-				this.loadGuide()
-				this.flowStep = 'guide'
-			},
-			pickOfficeCate(item) {
-				this.pointId = 0
-				this.pointName = ''
-				this.cateId = item.id
-				this.cateLabel = guideCateLabelFromName(item.name)
-				this.subKey = 'zhenfenjiao'
+				this.subKey = this.guideSubKeyForHub()
 				this.loadGuide()
 				this.flowStep = 'guide'
 			},
@@ -452,10 +454,6 @@
 				}).catch(() => {})
 			},
 			backFromGuide() {
-				if (this.isOfficeHub) {
-					this.flowStep = 'cate'
-					return
-				}
 				this.flowStep = 'points'
 			},
 			goLearnStep() {
@@ -480,7 +478,9 @@
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类')
 				const sceneKey = this.hub.sceneKey
-				const sceneName = this.isOfficeHub ? '真分角' : (this.pointName || this.hub.title)
+				const sceneName = this.isCommunityHub
+					? (this.isOfficeHub ? '真分角' : '沿街回收点')
+					: (this.pointName || this.hub.title)
 				let url =
 					'/pages/flhd/add?scene_key=' +
 					encodeURIComponent(sceneKey) +
@@ -576,6 +576,9 @@
 .scf-hint--inline {
 	margin-bottom: 0;
 	flex: 1;
+}
+.scf-points-intro {
+	margin-bottom: 16rpx;
 }
 .scf-office-tip-title {
 	display: block;

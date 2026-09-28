@@ -1,0 +1,61 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('index',['type'=>2])}">垃圾打卡列表</a></li>
+        <li><a href="{:url('clock_tutorial_index')}">打卡教程</a></li>
+        <li><a href="{:url('clock_scene_guide_index')}">场景分类引导</a></li>
+        <li class="active"><a href="{:url('clock_scene_point_index')}">场景回收点配置</a></li>
+    </ul>
+    <p class="margin-top-20 text-muted">沿街商铺、办公真分角使用<strong>社区统一回收点</strong>，按用户人工配置（可结合商铺性质在备注中说明）。小程序端用户不可自行增删，仅选择点位打卡。</p>
+    <form class="well form-inline margin-top-15" method="get" action="{:url('clock_scene_point_index')}">
+        <label>场景：</label>
+        <select name="hub_key" class="form-control">
+            <option value="">全部</option>
+            <foreach name="hubLabels" item="lab" key="hk">
+                <option value="{$hk}" <if condition="$hub_key eq $hk">selected</if>>{$lab}</option>
+            </foreach>
+        </select>
+        <input type="text" name="keyword" class="form-control" placeholder="用户昵称/手机/点位名/备注" value="{$keyword|default=''}" style="width:220px;">
+        <button type="submit" class="btn btn-primary">搜索</button>
+        <a class="btn btn-success" href="{:url('clock_scene_point_add')}">新增配置</a>
+    </form>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>用户</th>
+            <th>手机号</th>
+            <th>场景</th>
+            <th>回收点名称</th>
+            <th>垃圾种类</th>
+            <th>备注（商铺性质等）</th>
+            <th>更新时间</th>
+            <th>{:lang('ACTIONS')}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.nickname|default='—'}</td>
+                <td>{$vo.mobile|default='—'}</td>
+                <td>{$hubLabels[$vo.hub_key]|default=$vo.hub_key}</td>
+                <td>{$vo.point_name}</td>
+                <td>{$vo.cate_name}</td>
+                <td>{$vo.remark|default='—'}</td>
+                <td>{$vo.update_time|date='Y-m-d H:i'}</td>
+                <td>
+                    <a class="btn btn-xs btn-primary" href="{:url('clock_scene_point_add',['id'=>$vo.id])}">编辑</a>
+                    <a class="btn btn-xs btn-danger js-ajax-delete" href="{:url('clock_scene_point_delete',['id'=>$vo.id])}">删除</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page|raw}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

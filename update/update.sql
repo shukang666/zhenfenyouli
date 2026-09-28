@@ -166,3 +166,19 @@ CREATE TABLE IF NOT EXISTS `cmf_clock_scene_point` (
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_forum' AND COLUMN_NAME = 'clock_point_id');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_forum` ADD COLUMN `clock_point_id` int(10) unsigned NOT NULL DEFAULT ''0'' COMMENT ''场景真分点id'' AFTER `clock_sub_scene`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_clock_scene_point' AND COLUMN_NAME = 'source');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_clock_scene_point` ADD COLUMN `source` tinyint(1) NOT NULL DEFAULT ''0'' COMMENT ''0用户自建 1后台配置'' AFTER `cate_name`, ADD COLUMN `remark` varchar(255) NOT NULL DEFAULT '''' COMMENT ''商铺性质/备注'' AFTER `source`, ADD COLUMN `admin_id` int(10) unsigned NOT NULL DEFAULT ''0'' COMMENT ''后台操作人'' AFTER `remark`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
+        SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1
+    )), 0) + 1,
+    'admin','Forum','clock_scene_point_index','','场景回收点配置','','沿街/办公统一回收点（按用户人工配置）'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_point_index' LIMIT 1);

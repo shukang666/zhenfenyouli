@@ -7,6 +7,7 @@ use api\wxapp\model\CommonModel;
 use app\admin\model\basic\SelectModel;
 use app\admin\model\forum\ForumCateModel;
 use app\admin\model\forum\ClockSceneGuideModel;
+use app\admin\model\forum\ClockScenePointModel;
 use app\admin\model\forum\ClockTutorialModel;
 use app\admin\model\forum\ForumDeleteLogModel;
 use app\admin\model\forum\ForumHandleModel;
@@ -475,6 +476,125 @@ class ForumController extends ToolController
         }
         ClockSceneGuideModel::where('id', $id)->update($save);
         $this->success('保存成功', url('clock_scene_guide_index'));
+    }
+
+    /** 沿街/办公：按用户人工配置统一回收点 */
+    public function clock_scene_point_index()
+    {
+        $hub = trim((string)$this->request->param('hub_key', ''));
+        $keyword = trim((string)$this->request->param('keyword', ''));
+        $adminHubs = array_keys(ClockScenePointModel::adminHubLabels());
+        $query = Db::name('clock_scene_point')->alias('p')
+            ->join('member m', 'm.id = p.user_id', 'LEFT')
+            ->where('p.source', ClockScenePointModel::SOURCE_ADMIN)
+            ->whereIn('p.hub_key', $adminHubs)
+            ->field('p.*, m.nickname, m.mobile')
+            ->order('p.id desc');
+        if ($hub !== '' && in_array($hub, $adminHubs, true)) {
+            $query->where('p.hub_key', $hub);
+        }
+        if ($keyword !== '') {
+            $query->where('m.nickname|m.mobile|p.point_name|p.remark', 'like', '%' . $keyword . '%');
+        }
+        $list = $query->paginate(20);
+        $hubLabels = ClockScenePointModel::adminHubLabels();
+        return $this->fetch('clock_scene_point_index', [
+            'list'      => $list,
+            'page'      => $list->render(),
+            'hub_key'   => $hub,
+            'keyword'   => $keyword,
+            'hubLabels' => $hubLabels,
+        ]);
+    }
+
+    public function clock_scene_point_add()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        $item = null;
+        if ($id > 0) {
+            $item = ClockScenePointModel::where('id', $id)
+                ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+                ->find();
+            if (empty($item)) {
+                $this->error('记录不存在');
+            }
+        }
+        $cateList = SelectModel::where('type', 2)->where('pid', 0)->order('list_order asc,id asc')->select();
+        return $this->fetch('clock_scene_point_add', [
+            'data'       => $item,
+            'cateList'   => $cateList,
+            'hubLabels'  => ClockScenePointModel::adminHubLabels(),
+        ]);
+    }
+
+    public function clock_scene_point_add_post()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('非法请求');
+        }
+        $id = $this->request->param('id', 0, 'intval');
+        $userId = intval($this->request->param('user_id', 0));
+        $hub = trim((string)$this->request->param('hub_key', ''));
+        $adminHubs = array_keys(ClockScenePointModel::adminHubLabels());
+        if ($userId <= 0) {
+            $this->error('请填写用户ID');
+        }
+        if (!in_array($hub, $adminHubs, true)) {
+            $this->error('请选择沿街或办公场景');
+        }
+        $member = Db::name('member')->where('id', $userId)->find();
+        if (empty($member)) {
+            $this->error('用户不存在');
+        }
+        $pointName = trim((string)$this->request->param('point_name', ''));
+        if ($pointName === '') {
+            $this->error('请填写回收点名称');
+        }
+        $cateId = intval($this->request->param('cate_id', 0));
+        $cate = SelectModel::where('id', $cateId)->where('type', 2)->where('pid', 0)->find();
+        if (empty($cate)) {
+            $this->error('请选择垃圾种类');
+        }
+        $now = time();
+        $save = [
+            'user_id'     => $userId,
+            'hub_key'     => $hub,
+            'point_name'  => mb_substr($pointName, 0, 32),
+            'cate_id'     => $cateId,
+            'cate_name'   => $cate['name'],
+            'source'      => ClockScenePointModel::SOURCE_ADMIN,
+            'remark'      => mb_substr(trim((string)$this->request->param('remark', '')), 0, 255),
+            'admin_id'    => (int)session('ADMIN_ID'),
+            'update_time' => $now,
+        ];
+        if ($id > 0) {
+            $row = ClockScenePointModel::where('id', $id)
+                ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+                ->find();
+            if (empty($row)) {
+                $this->error('记录不存在');
+            }
+            ClockScenePointModel::where('id', $id)->update($save);
+            $this->success('保存成功', url('clock_scene_point_index'));
+            return;
+        }
+        $maxOrder = (int)ClockScenePointModel::where('user_id', $userId)->where('hub_key', $hub)->max('list_order');
+        $save['list_order'] = $maxOrder + 1;
+        $save['create_time'] = $now;
+        ClockScenePointModel::insert($save);
+        $this->success('添加成功', url('clock_scene_point_index'));
+    }
+
+    public function clock_scene_point_delete()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        if ($id <= 0) {
+            $this->error('参数错误');
+        }
+        ClockScenePointModel::where('id', $id)
+            ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+            ->delete();
+        $this->success('已删除');
     }
 
     public function index3()

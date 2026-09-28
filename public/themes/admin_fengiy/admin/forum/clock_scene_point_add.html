@@ -1,0 +1,64 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('clock_scene_point_index')}">场景回收点配置</a></li>
+        <li class="active"><a href="javascript:;"><if condition="empty($data)">新增<else/>编辑</if></a></li>
+    </ul>
+    <form class="form-horizontal margin-top-20 js-ajax-form" action="{:url('clock_scene_point_add_post')}" method="post">
+        <if condition="!empty($data.id)">
+            <input type="hidden" name="id" value="{$data.id}">
+        </if>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>用户ID</label>
+            <div class="col-sm-6">
+                <input type="number" name="user_id" class="form-control" required value="{$data.user_id|default=''}" placeholder="cmf_member 用户 id">
+                <p class="help-block">可在「会员管理」中查看用户 ID；一个用户可配置多个回收点（每种垃圾一个点位）。</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>场景</label>
+            <div class="col-sm-6">
+                <select name="hub_key" class="form-control" required>
+                    <option value="">请选择</option>
+                    <foreach name="hubLabels" item="lab" key="hk">
+                        <option value="{$hk}" <if condition="isset($data.hub_key) && $data.hub_key eq $hk">selected</if>>{$lab}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>回收点名称</label>
+            <div class="col-sm-6">
+                <input type="text" name="point_name" class="form-control" required maxlength="32" value="{$data.point_name|default=''}" placeholder="如：店后集中回收点、XX大厦真分角">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>垃圾种类</label>
+            <div class="col-sm-6">
+                <select name="cate_id" class="form-control" required>
+                    <option value="">请选择</option>
+                    <foreach name="cateList" item="c">
+                        <option value="{$c.id}" <if condition="isset($data.cate_id) && $data.cate_id eq $c.id">selected</if>>{$c.name}</option>
+                    </foreach>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">备注</label>
+            <div class="col-sm-6">
+                <input type="text" name="remark" class="form-control" maxlength="255" value="{$data.remark|default=''}" placeholder="商铺性质、街道位置等，仅后台可见">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-6">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <a class="btn btn-default" href="{:url('clock_scene_point_index')}">返回</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

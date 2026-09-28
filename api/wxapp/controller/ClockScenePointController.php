@@ -3,20 +3,24 @@
 namespace api\wxapp\controller;
 
 use app\admin\model\forum\ClockSceneGuideModel;
+use app\admin\model\forum\ClockScenePointModel;
 use think\facade\Db;
 
 /**
- * 活动场景用户真分点（家庭/亲子/沿街，每用户独立；办公真分角不设点）
+ * 场景真分点：家庭/亲子用户自建；沿街/办公由后台统一配置
  */
 class ClockScenePointController extends AuthController
 {
     /** @var string[] */
-    private $pointHubs = ['home', 'qinzi', 'street'];
+    private $userHubs = ['home', 'qinzi'];
+
+    /** @var string[] */
+    private $listHubs = ['home', 'qinzi', 'street', 'office'];
 
     public function list()
     {
         $this->checkUser();
-        $hub = $this->normalizePointHub($this->request->param('hub_key', ''));
+        $hub = $this->normalizeListHub($this->request->param('hub_key', ''));
         if ($hub === '') {
             $this->error('场景参数无效');
         }
@@ -32,9 +36,9 @@ class ClockScenePointController extends AuthController
     public function save()
     {
         $this->checkUser();
-        $hub = $this->normalizePointHub($this->request->param('hub_key', ''));
+        $hub = $this->normalizeUserHub($this->request->param('hub_key', ''));
         if ($hub === '') {
-            $this->error('场景参数无效');
+            $this->error('该场景回收点由社区统一配置，请联系工作人员');
         }
         $pointName = trim((string)$this->request->param('point_name', ''));
         $cateId = intval($this->request->param('cate_id', 0));
@@ -65,6 +69,9 @@ class ClockScenePointController extends AuthController
             if (empty($exists)) {
                 $this->error('点位不存在');
             }
+            if ((int)($exists['source'] ?? 0) === ClockScenePointModel::SOURCE_ADMIN) {
+                $this->error('该点位由社区配置，无法自行修改');
+            }
             Db::name('clock_scene_point')->where('id', $id)->update($row);
             $this->success('已保存', ['id' => $id]);
             return;
@@ -75,6 +82,9 @@ class ClockScenePointController extends AuthController
             ->max('list_order');
         $row['user_id'] = $this->user_id;
         $row['hub_key'] = $hub;
+        $row['source'] = ClockScenePointModel::SOURCE_USER;
+        $row['remark'] = '';
+        $row['admin_id'] = 0;
         $row['list_order'] = $maxOrder + 1;
         $row['create_time'] = $now;
         $newId = Db::name('clock_scene_point')->insertGetId($row);
@@ -88,17 +98,30 @@ class ClockScenePointController extends AuthController
         if ($id <= 0) {
             $this->error('参数错误');
         }
-        Db::name('clock_scene_point')
+        $exists = Db::name('clock_scene_point')
             ->where('id', $id)
             ->where('user_id', $this->user_id)
-            ->delete();
+            ->find();
+        if (empty($exists)) {
+            $this->error('点位不存在');
+        }
+        if ((int)($exists['source'] ?? 0) === ClockScenePointModel::SOURCE_ADMIN) {
+            $this->error('该点位由社区配置，无法删除');
+        }
+        Db::name('clock_scene_point')->where('id', $id)->delete();
         $this->success('已删除');
     }
 
-    private function normalizePointHub($hub): string
+    private function normalizeListHub($hub): string
     {
         $hub = ClockSceneGuideModel::normalizeHub(trim((string)$hub));
-        return in_array($hub, $this->pointHubs, true) ? $hub : '';
+        return in_array($hub, $this->listHubs, true) ? $hub : '';
+    }
+
+    private function normalizeUserHub($hub): string
+    {
+        $hub = ClockSceneGuideModel::normalizeHub(trim((string)$hub));
+        return in_array($hub, $this->userHubs, true) ? $hub : '';
     }
 
     /**
