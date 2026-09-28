@@ -29,19 +29,44 @@
 
 		<!-- 首次：设置真分点（仅家庭/亲子） -->
 		<view class="scf-body" v-if="flowStep === 'setup'">
-			<text class="scf-hint">首次进入请设置您的真分点。每个点位对应一种垃圾类型，后续可在列表中修改。</text>
+			<view class="scf-panel scf-setup-guide">
+				<text class="scf-office-tip-title">什么是真分点？</text>
+				<text class="scf-info-text">真分点是您在家里（或亲子活动处）固定用来投放某一类垃圾的位置，例如「厨房厨余桶」「玄关可回收箱」。每个点位只对应一种垃圾类型，方便养成「分好再投」的习惯。</text>
+				<text class="scf-info-text scf-setup-guide-p">请至少设置 1 个点位：填写名称、选择垃圾类型，并拍一张点位照片（能看到桶/袋/标签即可）。保存后点卡片即可按指引打卡。</text>
+			</view>
 			<view class="scf-setup-list">
-				<view class="scf-setup-row" v-for="(row, idx) in setupRows" :key="idx">
-					<input class="scf-setup-input" v-model="row.point_name" placeholder="点位名称，如厨房桶" maxlength="16" />
-					<picker mode="selector" :range="catePickerLabels" :value="row.cate_index" @change="onSetupCateChange(idx, $event)">
-						<view class="scf-setup-picker">{{ catePickerLabels[row.cate_index] || '选种类' }}</view>
-					</picker>
-					<text class="scf-setup-del" v-if="setupRows.length > 1" @tap="removeSetupRow(idx)">删</text>
+				<view class="scf-setup-block" v-for="(row, idx) in setupRows" :key="idx">
+					<view class="scf-point-card scf-point-card--preview">
+						<image v-if="row.point_image_url" class="scf-point-photo" :src="row.point_image_url" mode="aspectFill"></image>
+						<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(setupCateName(row))">
+							<text class="scf-cate-hero-kicker">垃圾分类</text>
+							<text class="scf-cate-hero-name">{{ setupCateName(row) || '请选择类型' }}</text>
+						</view>
+						<text class="scf-cate-desc-lines">{{ cateHintLines(row) }}</text>
+						<text class="scf-point-name">{{ row.point_name || '点位名称（如厨房桶）' }}</text>
+					</view>
+					<view class="scf-setup-form">
+						<text class="scf-setup-label">点位名称</text>
+						<input class="scf-setup-input scf-setup-input--block" v-model="row.point_name" placeholder="如：厨房厨余桶、客厅可回收" maxlength="16" />
+						<text class="scf-setup-label">垃圾类型</text>
+						<picker mode="selector" :range="catePickerLabels" :value="row.cate_index" @change="onSetupCateChange(idx, $event)">
+							<view class="scf-setup-picker scf-setup-picker--block">{{ catePickerLabels[row.cate_index] || '选择四分类之一' }}</view>
+						</picker>
+						<text class="scf-setup-label">点位照片（必填）</text>
+						<view class="scf-point-upload" @tap="chooseSetupPhoto(idx)">
+							<image v-if="row.point_image_url" class="scf-point-upload-img" :src="row.point_image_url" mode="aspectFill"></image>
+							<view v-else class="scf-point-upload-placeholder">
+								<text class="scf-photo-add-icon">📷</text>
+								<text class="scf-photo-add-t">拍摄/上传点位环境</text>
+							</view>
+						</view>
+						<text class="scf-setup-del" v-if="setupRows.length > 1" @tap="removeSetupRow(idx)">删除本点位</text>
+					</view>
 				</view>
 			</view>
-			<view class="scf-setup-add" @tap="addSetupRow">+ 添加点位</view>
+			<view class="scf-setup-add" @tap="addSetupRow">+ 再添加一个真分点</view>
 			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">保存并开始</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">保存并开始打卡</view>
 			</view>
 		</view>
 
@@ -63,10 +88,12 @@
 					hover-class="scf-card--press"
 					@tap="pickPointById(p.id)"
 				>
+					<image v-if="p.point_image" class="scf-point-photo" :src="p.point_image" mode="aspectFill"></image>
 					<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(p.cate_name)">
 						<text class="scf-cate-hero-kicker">垃圾分类</text>
 						<text class="scf-cate-hero-name">{{ p.cate_name }}</text>
 					</view>
+					<text class="scf-cate-desc-lines">{{ cateHintByName(p.cate_name) }}</text>
 					<text class="scf-point-name">{{ p.point_name }}</text>
 					<text class="scf-point-go">去打卡 ›</text>
 				</view>
@@ -78,22 +105,33 @@
 
 		<!-- 管理真分点 -->
 		<view class="scf-body" v-if="flowStep === 'manage'">
-			<text class="scf-hint">修改名称或种类；删除后不影响历史打卡记录。</text>
+			<text class="scf-hint">修改名称、种类或点位照片；删除后不影响历史打卡记录。</text>
 			<view class="scf-point-grid">
-				<view class="scf-manage-card" v-for="(p, mIdx) in points" :key="p.id">
-					<input
-						class="scf-setup-input"
-						:value="p._edit_name"
-						placeholder="点位名称"
-						maxlength="16"
-						@input="onManageNameInput(mIdx, $event)"
-					/>
-					<picker mode="selector" :range="catePickerLabels" :value="p._edit_cate_index" @change="onManageCateChangeByIndex(mIdx, $event)">
-						<view class="scf-setup-picker">{{ catePickerLabels[p._edit_cate_index] || p.cate_name }}</view>
-					</picker>
-					<view class="scf-manage-actions">
-						<text class="scf-manage-save" @tap="savePointEditByIndex(mIdx)">保存</text>
-						<text class="scf-manage-del" @tap="deletePointById(p.id)">删除</text>
+				<view class="scf-setup-block" v-for="(p, mIdx) in points" :key="p.id">
+					<view class="scf-point-card scf-point-card--preview">
+						<image v-if="p._edit_image_url" class="scf-point-photo" :src="p._edit_image_url" mode="aspectFill"></image>
+						<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(manageCateName(p))">
+							<text class="scf-cate-hero-kicker">垃圾分类</text>
+							<text class="scf-cate-hero-name">{{ manageCateName(p) }}</text>
+						</view>
+						<text class="scf-cate-desc-lines">{{ cateHintByName(manageCateName(p)) }}</text>
+						<text class="scf-point-name">{{ p._edit_name || p.point_name }}</text>
+					</view>
+					<view class="scf-setup-form">
+						<input class="scf-setup-input scf-setup-input--block" :value="p._edit_name" placeholder="点位名称" maxlength="16" @input="onManageNameInput(mIdx, $event)" />
+						<picker mode="selector" :range="catePickerLabels" :value="p._edit_cate_index" @change="onManageCateChangeByIndex(mIdx, $event)">
+							<view class="scf-setup-picker scf-setup-picker--block">{{ catePickerLabels[p._edit_cate_index] || p.cate_name }}</view>
+						</picker>
+						<view class="scf-point-upload" @tap="chooseManagePhoto(mIdx)">
+							<image v-if="p._edit_image_url" class="scf-point-upload-img" :src="p._edit_image_url" mode="aspectFill"></image>
+							<view v-else class="scf-point-upload-placeholder">
+								<text class="scf-photo-add-t">更新点位照片</text>
+							</view>
+						</view>
+						<view class="scf-manage-actions">
+							<text class="scf-manage-save" @tap="savePointEditByIndex(mIdx)">保存</text>
+							<text class="scf-manage-del" @tap="deletePointById(p.id)">删除</text>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -228,7 +266,7 @@
 	import { uploadUrl } from '@/common/settings'
 	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
 	import { getHub, mergeGuide } from '@/common/sceneClockHub.js'
-	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind } from '@/common/clockScene.js'
+	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind, SECTION_HINTS } from '@/common/clockScene.js'
 
 	export default {
 		data() {
@@ -238,7 +276,7 @@
 				flowStep: 'points',
 				points: [],
 				pointsLoading: false,
-				setupRows: [{ point_name: '', cate_index: 0 }],
+				setupRows: [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }],
 				cateList: [],
 				pointId: 0,
 				pointName: '',
@@ -344,11 +382,42 @@
 			}
 			uni.setNavigationBarTitle({ title: this.hub.title })
 			this.subKey = ''
-			this.loadCateList().then(() => {
-				this.initUserPoints()
+			this.loadCateList()
+		},
+		onShow() {
+			if (!this.hub) return
+			this.ensureExamGate().then(ok => {
+				if (ok) this.initUserPoints()
 			})
 		},
 		methods: {
+			ensureExamGate() {
+				if (!this.isLogin) return Promise.resolve(true)
+				return this.$u.api.getUserInfo().then(res => {
+					this.$u.vuex('userInfo', res.data || {})
+					if (Number(res.data.is_answer) !== 1) {
+						this.$u.toast('请先完成真分介绍与测验')
+						setTimeout(() => this.$u.route('/pages/flhd/ljfldk'), 500)
+						return false
+					}
+					return true
+				}).catch(() => true)
+			},
+			setupCateName(row) {
+				const cate = this.cateList[row.cate_index]
+				return (cate && cate.name) || ''
+			},
+			manageCateName(p) {
+				const cate = this.cateList[p._edit_cate_index]
+				return (cate && cate.name) || p.cate_name || ''
+			},
+			cateHintByName(name) {
+				const kind = resolveCateKind(name)
+				return SECTION_HINTS[kind] || '按社区要求正确投放'
+			},
+			cateHintLines(row) {
+				return this.cateHintByName(this.setupCateName(row))
+			},
 			goSetupStep() {
 				this.flowStep = 'setup'
 			},
@@ -396,7 +465,57 @@
 				return resolveCateKind(name) || 'other'
 			},
 			addSetupRow() {
-				this.setupRows.push({ point_name: '', cate_index: 0 })
+				this.setupRows.push({ point_name: '', cate_index: 0, point_image: '', point_image_url: '' })
+			},
+			chooseSetupPhoto(idx) {
+				this.pickAndUploadPointPhoto(path => {
+					this.setupRows[idx].point_image = path
+					this.setupRows[idx].point_image_url = this.toDisplayUrl(path)
+				})
+			},
+			chooseManagePhoto(mIdx) {
+				this.pickAndUploadPointPhoto(path => {
+					const p = this.points[mIdx]
+					if (!p) return
+					this.$set(p, '_edit_image', path)
+					this.$set(p, '_edit_image_url', this.toDisplayUrl(path))
+				})
+			},
+			toDisplayUrl(path) {
+				if (!path) return ''
+				if (String(path).indexOf('http') === 0) return path
+				return path
+			},
+			pickAndUploadPointPhoto(onDone) {
+				uni.chooseImage({
+					count: 1,
+					sourceType: ['camera', 'album'],
+					success: (res) => {
+						const filePath = (res.tempFilePaths || [])[0]
+						if (!filePath) return
+						uni.showLoading({ title: '上传中…' })
+						uni.uploadFile({
+							url: this.uploadUrl,
+							filePath,
+							name: 'file',
+							formData: { filetype: 'image' },
+							success: (up) => {
+								try {
+									const data = JSON.parse(up.data)
+									if (data.code == 1 && data.data && data.data.url) {
+										onDone(data.data.url)
+									} else {
+										this.$u.toast(data.msg || '上传失败')
+									}
+								} catch (e) {
+									this.$u.toast('上传失败')
+								}
+							},
+							fail: () => this.$u.toast('上传失败'),
+							complete: () => uni.hideLoading(),
+						})
+					},
+				})
 			},
 			removeSetupRow(idx) {
 				this.setupRows.splice(idx, 1)
@@ -412,10 +531,12 @@
 				for (const row of rows) {
 					const cate = this.cateList[row.cate_index]
 					if (!cate) return this.$u.toast('请选择垃圾种类')
+					if (!row.point_image) return this.$u.toast('请为每个点位上传照片')
 					await this.$u.api.save_clock_scene_point({
 						hub_key: this.hubKey,
 						point_name: String(row.point_name).trim(),
 						cate_id: cate.id,
+						point_image: row.point_image,
 					})
 				}
 				this.$u.toast('已保存')
@@ -437,6 +558,8 @@
 					...p,
 					_edit_name: p.point_name,
 					_edit_cate_index: idx,
+					_edit_image: p.point_image || '',
+					_edit_image_url: p.point_image || '',
 				}
 			},
 			onManageNameInput(idx, e) {
@@ -456,11 +579,14 @@
 				if (!name) return this.$u.toast('请填写点位名称')
 				const cate = this.cateList[p._edit_cate_index]
 				if (!cate) return this.$u.toast('请选择种类')
+				const img = String(p._edit_image || p.point_image || '').trim()
+				if (!img) return this.$u.toast('请上传点位照片')
 				await this.$u.api.save_clock_scene_point({
 					id: p.id,
 					hub_key: this.hubKey,
 					point_name: name,
 					cate_id: cate.id,
+					point_image: img,
 				})
 				this.$u.toast('已保存')
 				this.initUserPoints('manage')
@@ -481,24 +607,8 @@
 			},
 			addPointInManage() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				uni.showModal({
-					title: '新增真分点',
-					editable: true,
-					placeholderText: '点位名称',
-					success: async (res) => {
-						if (!res.confirm) return
-						const name = String(res.content || '').trim()
-						if (!name) return this.$u.toast('请填写名称')
-						const cate = this.cateList[0]
-						if (!cate) return this.$u.toast('种类加载中')
-						await this.$u.api.save_clock_scene_point({
-							hub_key: this.hubKey,
-							point_name: name,
-							cate_id: cate.id,
-						})
-						this.initUserPoints('manage')
-					},
-				})
+				this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
+				this.flowStep = 'setup'
 			},
 			backFromManage() {
 				this.flowStep = this.points.length ? 'points' : 'setup'
@@ -763,6 +873,70 @@
 	border-radius: 18rpx;
 	padding: 20rpx;
 	box-shadow: 0 8rpx 24rpx rgba(20, 40, 28, 0.08);
+}
+.scf-point-card--preview {
+	margin-bottom: 12rpx;
+}
+.scf-point-photo {
+	width: 100%;
+	height: 200rpx;
+	border-radius: 14rpx;
+	margin-bottom: 14rpx;
+}
+.scf-cate-desc-lines {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 24rpx;
+	line-height: 1.5;
+	color: #6a756c;
+	min-height: 72rpx;
+}
+.scf-setup-guide {
+	margin-bottom: 16rpx;
+}
+.scf-setup-guide-p {
+	margin-top: 12rpx;
+}
+.scf-setup-block {
+	margin-bottom: 20rpx;
+}
+.scf-setup-form {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 16rpx;
+	box-shadow: 0 4rpx 16rpx rgba(20, 40, 28, 0.05);
+}
+.scf-setup-label {
+	display: block;
+	margin-top: 12rpx;
+	margin-bottom: 8rpx;
+	font-size: 24rpx;
+	font-weight: 600;
+	color: #4a564e;
+}
+.scf-setup-input--block,
+.scf-setup-picker--block {
+	width: 100%;
+	box-sizing: border-box;
+}
+.scf-point-upload {
+	margin-top: 8rpx;
+	height: 200rpx;
+	border-radius: 14rpx;
+	overflow: hidden;
+	border: 2rpx dashed #c5d0c8;
+	background: #f7faf8;
+}
+.scf-point-upload-img {
+	width: 100%;
+	height: 100%;
+}
+.scf-point-upload-placeholder {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 .scf-cate-hero {
 	border-radius: 16rpx;

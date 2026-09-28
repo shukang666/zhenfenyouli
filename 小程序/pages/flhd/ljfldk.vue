@@ -1,7 +1,7 @@
 <template>
 	<view class="dk-hub dk-hub--page" v-if="!setting.app_test">
 		<view class="dk-banner">
-			<text class="dk-banner-title">践行真分</text>
+			<text class="dk-banner-title">今天是否践行真分</text>
 		</view>
 
 		<view class="dk-stats" v-if="isLogin">
@@ -32,75 +32,48 @@
 			</view>
 		</view>
 
-		<!-- 新用户：先学指导 → 再考试，通过后才显示场景选择 -->
-		<view class="dk-block dk-block--learn" v-if="showLearnHub">
-			<text class="dk-block-t">分类学习</text>
-			<text class="dk-block-hint">学完全部分类指导后，方可参加下方考试</text>
-
-			<view class="dk-learn-wrap">
-				<view class="dk-learn-progress" v-if="waste.waste_count">
-					<text class="dk-learn-progress-t">学习进度 {{ waste.user_count || 0 }}/{{ waste.waste_count }}</text>
-					<u-line-progress
-						active-color="#18AF38"
-						inactive-color="#e8eee9"
-						:percent="learnPercent"
-						:show-percent="false"
-						height="12"
-					></u-line-progress>
+		<!-- 新用户：真分介绍 + 考试一体；通过后下方打卡 -->
+		<view class="dk-block dk-block--intro" v-if="showLearnHub">
+			<text class="dk-block-t">了解践行真分</text>
+			<text class="dk-block-hint">请先阅读介绍、意义与收获，再完成下方小测验</text>
+			<scroll-view scroll-y class="dk-intro-scroll" :show-scrollbar="false">
+				<view class="dk-intro-card" v-for="(sec, si) in introSections" :key="'intro-' + si">
+					<text class="dk-intro-name">{{ sec.name }}</text>
+					<text class="dk-intro-desc" v-if="sec.desc">{{ sec.desc }}</text>
+					<view class="dk-intro-rich" v-if="sec.contentHtml">
+						<u-parse :html="sec.contentHtml"></u-parse>
+					</view>
 				</view>
-				<view class="dk-learn-scroll-wrap">
-					<scroll-view
-						scroll-y
-						class="dk-learn-scroll"
-						:style="{ height: learnScrollPx + 'px' }"
-						:show-scrollbar="false"
-						@scrolltolower="onLearnScrollBottom"
-					>
-						<view
-							class="dk-learn-item"
-							v-for="(item, index) in waste_list"
-							:key="'waste-' + index"
-							hover-class="dk-learn-item--press"
-							@tap="goLearnDetail(index)"
-						>
-							<u-image width="120" height="120" :src="item.thumb" border-radius="12"></u-image>
-							<view class="dk-learn-item-body">
-								<text class="dk-learn-item-name">{{ item.name }}</text>
-								<text class="dk-learn-item-desc u-line-2">{{ item.desc }}</text>
-								<view class="dk-learn-item-act" @tap.stop="goLearnDetail(index)">
-									<text class="dk-learn-item-go">{{ item.is_study == 1 ? '继续学习' : '开始学习' }}</text>
-								</view>
-							</view>
-						</view>
-						<view class="dk-learn-empty" v-if="tutorialLoaded && !waste_list.length">暂无分类指导，请联系社区管理员</view>
-					</scroll-view>
-				</view>
+				<view class="dk-intro-empty" v-if="introLoaded && !introSections.length">介绍内容加载失败，请稍后重试或联系社区管理员</view>
+			</scroll-view>
+			<view
+				class="dk-intro-ack"
+				:class="{ 'dk-intro-ack--done': introAcknowledged }"
+				@tap="ackIntro"
+			>
+				<text>{{ introAcknowledged ? '已完成阅读' : '我已阅读以上介绍' }}</text>
 			</view>
-
-			<view class="dk-exam-block">
-				<text class="dk-block-t dk-exam-block-t">分类考试</text>
-				<view
-					class="dk-exam-card"
-					:class="{ 'dk-exam-card--locked': needsLearn, 'dk-exam-card--ready': !needsLearn && needsExam }"
-				>
-					<text class="dk-exam-desc" v-if="needsLearn">请先完成上方全部分类学习，再参加答题考试。</text>
-					<text class="dk-exam-desc" v-else>已通过学习，参加答题考试通过后即可选择场景打卡；也可暂不考试，稍后再来。</text>
+			<view class="dk-exam-block dk-exam-block--inline">
+				<text class="dk-block-t dk-exam-block-t">分类小测验</text>
+				<view class="dk-exam-card" :class="{ 'dk-exam-card--locked': !introAcknowledged, 'dk-exam-card--ready': introAcknowledged }">
+					<text class="dk-exam-desc" v-if="!introAcknowledged">阅读并确认上方介绍后，即可开始答题。</text>
+					<text class="dk-exam-desc" v-else>通过测验后即可选择场景打卡；也可稍后再答。</text>
 					<view
 						class="dk-scene-btn"
-						:class="needsLearn ? 'dk-scene-btn--disabled' : 'dk-scene-btn--primary'"
-						:hover-class="needsLearn ? '' : 'dk-scene-btn--press'"
+						:class="!introAcknowledged ? 'dk-scene-btn--disabled' : 'dk-scene-btn--primary'"
+						:hover-class="introAcknowledged ? 'dk-scene-btn--press' : ''"
 						:hover-stay-time="80"
 						@tap="onExamTap"
 					>
-						<text class="dk-scene-btn-t">{{ needsLearn ? '请先完成学习' : '去答题考试' }}</text>
+						<text class="dk-scene-btn-t">{{ introAcknowledged ? '开始答题' : '请先阅读介绍' }}</text>
 					</view>
 				</view>
 			</view>
 		</view>
 
 		<view class="dk-block dk-block--scenes" v-if="showSceneHub">
-			<text class="dk-block-t">你在哪投放</text>
-			<text class="dk-block-hint">点选场景进入，再选择垃圾类型并拍照打卡</text>
+			<text class="dk-block-t">去打卡</text>
+			<text class="dk-block-hint">选择场景，设置或选择真分点后拍照打卡</text>
 			<view class="dk-scene-list">
 			<view
 				class="dk-scene-card"
@@ -129,15 +102,15 @@
 			</view>
 		</view>
 
-		<view class="dk-block dk-block--hist">
-			<text class="dk-block-t">过往记录</text>
+		<view class="dk-block dk-block--hist" v-if="showSceneHub">
+			<text class="dk-block-t">看看别人怎么分</text>
 			<view class="dk-hist-row">
-				<view class="dk-hist-btn dk-hist-btn--mine" hover-class="dk-hist-btn--press" :hover-stay-time="80" @click="goMy">
-					<text class="dk-hist-name">我的打卡</text>
-					<text class="dk-hist-go">查看 ›</text>
-				</view>
 				<view class="dk-hist-btn dk-hist-btn--pick" hover-class="dk-hist-btn--press" :hover-stay-time="80" @click="goChoice">
 					<text class="dk-hist-name">精选打卡</text>
+					<text class="dk-hist-go">查看 ›</text>
+				</view>
+				<view class="dk-hist-btn dk-hist-btn--mine" hover-class="dk-hist-btn--press" :hover-stay-time="80" @click="goMy">
+					<text class="dk-hist-name">我的打卡</text>
 					<text class="dk-hist-go">查看 ›</text>
 				</view>
 			</view>
@@ -151,17 +124,19 @@
 		isSupervisorBannerHidden,
 		shouldShowSupervisorInvite,
 	} from '@/common/supervisorInvite.js'
+	import {
+		ZHENFEN_INTRO_NAMES,
+		isIntroAcknowledged,
+		setIntroAcknowledged,
+	} from '@/common/zhenfenIntro.js'
 
 	export default {
 		data() {
 			return {
 				supervisorBannerLocalHide: false,
-				waste_list: [],
-				waste: {},
-				wastePage: 1,
-				wasteTotal: 0,
-				tutorialLoaded: false,
-				learnScrollPx: 280,
+				introSections: [],
+				introLoaded: false,
+				introAcknowledged: false,
 				scenes: [
 					{
 						key: 'home',
@@ -206,35 +181,18 @@
 				const n = (this.userInfo && this.userInfo.remaining_count) || 0
 				return n > 0 ? n + '天' : '已达成'
 			},
-			/** 已通过学习 + 考试，展示家庭/亲子等场景 */
+			/** 已通过分类测验，展示打卡入口 */
 			showSceneHub() {
 				if (!this.isLogin) return true
 				const u = this.userInfo || {}
-				return Number(u.is_learn) === 1 && Number(u.is_answer) === 1
+				return Number(u.is_answer) === 1
 			},
 			showLearnHub() {
 				if (!this.isLogin) return false
 				return !this.showSceneHub
 			},
-			needsLearn() {
-				if (this.learnAllFromWaste) return false
-				const u = this.userInfo || {}
-				return Number(u.is_learn) !== 1
-			},
-			learnAllFromWaste() {
-				const total = Number(this.waste.waste_count) || 0
-				const done = Number(this.waste.user_count) || 0
-				return total > 0 && done >= total
-			},
 			needsExam() {
-				const u = this.userInfo || {}
-				return Number(u.is_learn) === 1 && Number(u.is_answer) !== 1
-			},
-			learnPercent() {
-				const total = Number(this.waste.waste_count) || 0
-				const done = Number(this.waste.user_count) || 0
-				if (total <= 0) return 0
-				return Math.min(100, Math.round((done / total) * 100))
+				return this.showLearnHub
 			},
 			supervisorInvite() {
 				return (this.userInfo && this.userInfo.supervisor_invite) || {}
@@ -246,86 +204,63 @@
 		},
 		onShow() {
 			this.supervisorBannerLocalHide = isSupervisorBannerHidden()
+			this.introAcknowledged = isIntroAcknowledged()
 			if (!this.isLogin) {
 				this.refreshUser()
 				return
 			}
 			this.refreshUser().then(() => {
-				if (!this.showLearnHub) return
-				return this.reloadWasteList()
-			}).then(() => {
-				this.measureLearnScroll()
+				if (this.showLearnHub) {
+					this.loadIntroSections()
+				}
 			})
 		},
-		onReady() {
-			this.measureLearnScroll()
-		},
 		methods: {
-			measureLearnScroll() {
-				if (!this.showLearnHub) return
-				this.$nextTick(() => {
-					uni.createSelectorQuery()
-						.in(this)
-						.select('.dk-learn-scroll-wrap')
-						.boundingClientRect(rect => {
-							if (rect && rect.height > 80) {
-								this.learnScrollPx = Math.floor(rect.height)
+			loadIntroSections() {
+				this.introLoaded = false
+				return this.$u.api.get_waste_list({ page: 1 }).then(res => {
+					const list = (res.data && res.data.list && res.data.list.data) || []
+					const byName = {}
+					list.forEach(item => {
+						if (item && item.name) byName[item.name] = item
+					})
+					const ordered = ZHENFEN_INTRO_NAMES.map(name => byName[name]).filter(Boolean)
+					const tasks = ordered.map(item =>
+						this.$u.api.get_waste_list({ id: item.id }).then(detail => {
+							const row = detail.data || {}
+							return {
+								id: item.id,
+								name: row.name || item.name,
+								desc: row.desc || item.desc || '',
+								contentHtml: this.$u.func.formatRichText(row.content || ''),
 							}
-						})
-						.exec()
-				})
-			},
-			resetWasteList() {
-				this.waste_list = []
-				this.wastePage = 1
-				this.wasteTotal = 0
-				this.waste = {}
-				this.tutorialLoaded = false
-			},
-			reloadWasteList() {
-				this.wastePage = 1
-				return this.loadWasteList(true)
-			},
-			loadWasteList(replaceFirstPage) {
-				const page = this.wastePage
-				return this.$u.api.get_waste_list({ page }).then(res => {
-					this.tutorialLoaded = true
-					const data = res.data || {}
-					this.waste = data
-					const list = (data.list && data.list.data) || []
-					if (page === 1 || replaceFirstPage) {
-						this.waste_list = list
-					} else {
-						this.waste_list = this.waste_list.concat(list)
-					}
-					this.wasteTotal = (data.list && data.list.total) || 0
-					if (this.learnAllFromWaste) {
-						this.syncLearnComplete()
-					}
-					this.measureLearnScroll()
+						}).catch(() => ({
+							id: item.id,
+							name: item.name,
+							desc: item.desc || '',
+							contentHtml: '',
+						})),
+					)
+					return Promise.all(tasks).then(sections => {
+						this.introSections = sections
+						this.introLoaded = true
+					})
 				}).catch(() => {
-					this.tutorialLoaded = true
+					this.introLoaded = true
 				})
 			},
-			syncLearnComplete() {
-				return this.refreshUser()
-			},
-			onLearnScrollBottom() {
-				if (this.waste_list.length >= this.wasteTotal) return
-				this.wastePage++
-				this.loadWasteList()
-			},
-			goLearnDetail(index) {
-				const item = this.waste_list[index]
-				const id = item && (item.id || item.waste_id)
-				if (!id) {
-					return this.$u.toast('无法打开该指导')
-				}
-				this.$u.route('/pages/flhd/details?id=' + id)
+			ackIntro() {
+				this.introAcknowledged = true
+				setIntroAcknowledged()
+				this.introSections.forEach(sec => {
+					if (sec && sec.id) {
+						this.$u.api.get_waste_list({ id: sec.id }).catch(() => {})
+					}
+				})
 			},
 			onExamTap() {
-				if (this.needsLearn) {
-					return this.$u.toast('请先学完全部分类指导')
+				if (!this.introAcknowledged) {
+					return this.$u.toast('请先阅读并确认真分介绍')
 				}
 				this.goExam()
 			},
@@ -341,18 +276,13 @@
 			navigateScene(sceneKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.showSceneHub) {
-					return this.$u.toast(this.needsExam ? '请先通过分类考试' : '请先学完分类指导')
+					return this.$u.toast('请先完成介绍阅读并通过分类测验')
 				}
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				const scene = this.scenes.find(s => s.key === sceneKey)
 				if (!scene) return
-				const apiKey = sceneKey === 'office' ? 'zhenfenjiao' : sceneKey
-				this.$u.route(
-					'/pages/flhd/add?scene_key=' +
-						encodeURIComponent(apiKey) +
-						'&scene=' +
-						encodeURIComponent(scene.name),
-				)
+				const hub = sceneKey === 'office' ? 'office' : sceneKey
+				this.$u.route('/pages/activity/scene-clock-flow?hub=' + encodeURIComponent(hub))
 			},
 			goMy() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -572,12 +502,66 @@
 	flex-direction: column;
 	margin-top: 12rpx;
 }
-.dk-block--learn {
+.dk-block--intro {
 	flex: 1;
 	min-height: 0;
 	display: flex;
 	flex-direction: column;
 	margin-top: 12rpx;
+}
+.dk-intro-scroll {
+	flex: 1;
+	min-height: 280rpx;
+	max-height: 52vh;
+}
+.dk-intro-card {
+	margin-bottom: 16rpx;
+	padding: 22rpx;
+	border-radius: 18rpx;
+	background: #fff;
+	box-shadow: 0 6rpx 20rpx rgba(36, 48, 40, 0.06);
+}
+.dk-intro-name {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #148a2e;
+}
+.dk-intro-desc {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	color: #8a958c;
+}
+.dk-intro-rich {
+	margin-top: 12rpx;
+	font-size: 26rpx;
+	line-height: 1.6;
+	color: #444;
+}
+.dk-intro-empty {
+	padding: 32rpx;
+	text-align: center;
+	font-size: 26rpx;
+	color: #999;
+}
+.dk-intro-ack {
+	margin-top: 16rpx;
+	padding: 18rpx;
+	border-radius: 14rpx;
+	text-align: center;
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #18af38;
+	background: rgba(24, 175, 56, 0.1);
+	border: 2rpx dashed rgba(24, 175, 56, 0.45);
+}
+.dk-intro-ack--done {
+	background: rgba(24, 175, 56, 0.18);
+	border-style: solid;
+}
+.dk-exam-block--inline {
+	flex-shrink: 0;
 }
 .dk-learn-wrap {
 	flex: 1;

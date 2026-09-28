@@ -30,6 +30,11 @@ class ClockScenePointController extends AuthController
             ->order('list_order asc,id asc')
             ->select()
             ->toArray();
+        foreach ($list as &$item) {
+            $img = trim((string)($item['point_image'] ?? ''));
+            $item['point_image'] = $img === '' ? '' : cmf_get_asset_url($img);
+        }
+        unset($item);
         $this->success('请求成功', $list);
     }
 
@@ -52,6 +57,10 @@ class ClockScenePointController extends AuthController
         if (!$cate) {
             $this->error('请选择垃圾种类');
         }
+        $pointImage = trim((string)$this->request->param('point_image', ''));
+        if ($pointImage !== '' && mb_strlen($pointImage) > 255) {
+            $this->error('点位照片路径无效');
+        }
         $id = intval($this->request->param('id', 0));
         $now = time();
         $row = [
@@ -60,6 +69,14 @@ class ClockScenePointController extends AuthController
             'cate_name'   => $cate['name'],
             'update_time' => $now,
         ];
+        if ($id <= 0 && $pointImage === '') {
+            $this->error('请上传点位照片');
+        }
+        if ($pointImage !== '') {
+            $row['point_image'] = $pointImage;
+        } elseif ($id <= 0) {
+            $row['point_image'] = '';
+        }
         if ($id > 0) {
             $exists = Db::name('clock_scene_point')
                 ->where('id', $id)

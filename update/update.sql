@@ -184,3 +184,7 @@ WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_point_index' LIMIT 1);
 
 -- 分类学习 cmf_waste：追加真分说明/为什么/怎么做/收获 四条（可重复执行见 data/seed_waste_zhenfen_guides.php）；小程序 get_waste_list 按 create_time desc 展示
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_clock_scene_point' AND COLUMN_NAME = 'point_image');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_clock_scene_point` ADD COLUMN `point_image` varchar(255) NOT NULL DEFAULT '''' COMMENT ''真分点环境照片'' AFTER `cate_name`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;

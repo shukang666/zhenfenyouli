@@ -5,7 +5,7 @@
 <script>
 export default {
 	onLoad() {
-		uni.redirectTo({ url: '/pages/activity/scene-clock-flow?hub=home' })
+		uni.redirectTo({ url: '/pages/flhd/ljfldk' })
 	},
 }
 </script>
