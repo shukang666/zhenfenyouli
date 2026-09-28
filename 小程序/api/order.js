@@ -13,6 +13,9 @@ const order = {
     get_clock_tutorial: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_tutorial', params),
     get_clock_scene_guide: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_scene_guide', params),
     submit_clock_scene_survey: (params = {}) => uni.$u.post('/wxapp/forum/submit_clock_scene_survey', params),
+    list_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/list', params),
+    save_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/save', params),
+    delete_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/delete', params),
     // 删除发布
     del_forum: (params = {}) => uni.$u.post('/wxapp/forum/del_forum', params),
     // 评论列表

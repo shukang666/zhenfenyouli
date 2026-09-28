@@ -8,36 +8,7 @@ export const HUB_META = {
 		title: '家庭场景',
 		sceneKey: 'home',
 		theme: 'scf--home',
-		subs: [
-			{
-				key: 'after_meal',
-				name: '餐后清理',
-				emoji: '🍽️',
-				desc: '碗筷、剩菜与包装物',
-				cates: ['可回收', '厨余'],
-			},
-			{
-				key: 'room_clean',
-				name: '居室扫除',
-				emoji: '🧹',
-				desc: '灰尘、旧物与清洁用品',
-				cates: ['可回收', '不可回收', '有害'],
-			},
-			{
-				key: 'express',
-				name: '拆取快递',
-				emoji: '📦',
-				desc: '纸箱、填充物与胶带',
-				cates: ['可回收', '不可回收'],
-			},
-			{
-				key: 'daily',
-				name: '日常整理',
-				emoji: '🏠',
-				desc: '混合生活垃圾整理',
-				cates: ['可回收', '不可回收', '厨余', '有害'],
-			},
-		],
+		subs: null,
 	},
 	qinzi: {
 		title: '亲子场景',
@@ -190,8 +161,14 @@ export function getHub(hubKey) {
 }
 
 export function getDefaultGuide(hub, subKey, cateLabel) {
-	const k = guideKey(hub, subKey, cateLabel)
-	const row = DEFAULT_GUIDE[k]
+	let k = guideKey(hub, subKey, cateLabel)
+	let row = DEFAULT_GUIDE[k]
+	if (!row && hub === 'home' && !subKey) {
+		row = DEFAULT_GUIDE[guideKey('home', 'daily', cateLabel)]
+	}
+	if (!row && hub === 'office' && !subKey) {
+		row = DEFAULT_GUIDE[guideKey('office', 'zhenfenjiao', cateLabel)]
+	}
 	if (!row) {
 		return {
 			handle_guide: '请按当地分类标准，保持垃圾干燥、清洁后投放至对应桶/点。',

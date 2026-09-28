@@ -147,3 +147,22 @@ SET @__sql := IF(@__tbl > 0,
     MODIFY COLUMN `transport_photo` text COMMENT ''收运链条照片，单 URL 或 JSON 数组''',
   'SELECT 1');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+-- 活动场景：用户自定义真分点（家庭/亲子/沿街，每用户独立）
+CREATE TABLE IF NOT EXISTS `cmf_clock_scene_point` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `hub_key` varchar(20) NOT NULL DEFAULT '' COMMENT 'home/qinzi/street',
+  `point_name` varchar(32) NOT NULL DEFAULT '' COMMENT '真分点名称，如厨房桶',
+  `cate_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'basic_select type=2',
+  `cate_name` varchar(32) NOT NULL DEFAULT '' COMMENT '种类名称冗余',
+  `list_order` int(11) NOT NULL DEFAULT '0',
+  `create_time` int(11) NOT NULL DEFAULT '0',
+  `update_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_hub` (`user_id`,`hub_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='场景真分点（用户级）';
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_forum' AND COLUMN_NAME = 'clock_point_id');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_forum` ADD COLUMN `clock_point_id` int(10) unsigned NOT NULL DEFAULT ''0'' COMMENT ''场景真分点id'' AFTER `clock_sub_scene`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;

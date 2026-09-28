@@ -168,6 +168,22 @@ class ForumController extends AuthController
         if ($type == 2 && isset($params['clock_sub_scene'])) {
             $params['clock_sub_scene'] = mb_substr(trim((string)$params['clock_sub_scene']), 0, 50);
         }
+        if ($type == 2 && isset($params['clock_point_id'])) {
+            $pointId = intval($params['clock_point_id']);
+            $params['clock_point_id'] = 0;
+            if ($pointId > 0) {
+                $point = \think\facade\Db::name('clock_scene_point')
+                    ->where('id', $pointId)
+                    ->where('user_id', $this->user_id)
+                    ->find();
+                if (!empty($point)) {
+                    $params['clock_point_id'] = $pointId;
+                    if (empty($params['cate_id'])) {
+                        $params['cate_id'] = (int)$point['cate_id'];
+                    }
+                }
+            }
+        }
 
         if (!empty($params['image'])) {
             $params['image'] = json_encode($params['image']);

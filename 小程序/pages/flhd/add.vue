@@ -16,8 +16,8 @@
 			</view>
 		</view>
 
-		<!-- Step 1：四种垃圾类型 -->
-		<view class="clock-wiz-body" v-show="wizardStep === 1">
+		<!-- Step 1：四种垃圾类型（点位打卡时种类已固定则跳过） -->
+		<view class="clock-wiz-body" v-show="wizardStep === 1 && !lockCate">
 			<text class="clock-wiz-hint">请选择本次投放的垃圾类型</text>
 			<view class="clock-cate-grid">
 				<view
@@ -55,7 +55,7 @@
 				</view>
 			</view>
 			<view class="clock-wiz-foot">
-				<u-button type="default" hover-class="none" :custom-style="btnGhost" @click="wizardStep = 1">上一步</u-button>
+				<u-button v-if="!lockCate" type="default" hover-class="none" :custom-style="btnGhost" @click="wizardStep = 1">上一步</u-button>
 				<u-button type="success" hover-class="none" :custom-style="btnPrimary" @click="goStep3">下一步</u-button>
 			</view>
 		</view>
@@ -137,6 +137,8 @@
 				sceneKey: '',
 				sceneName: '',
 				subSceneKey: '',
+				pointName: '',
+				lockCate: false,
 				form: {
 					type: 2,
 					cate_id: 0,
@@ -144,6 +146,7 @@
 					image: [],
 					clock_scene: '',
 					clock_sub_scene: '',
+					clock_point_id: 0,
 				},
 				cate_list: [],
 				cate_index: 0,
@@ -170,6 +173,7 @@
 				return clockSceneLabel(this.sceneKey, this.sceneName)
 			},
 			kickerText() {
+				if (this.pointName) return '真分点 · ' + this.pointName
 				if (this.sceneName) return '本次场景 · ' + this.sceneName
 				if (this.sceneLabel) return '本次场景 · ' + this.sceneLabel
 				return '践行真分'
@@ -191,8 +195,8 @@
 				return (this.pageMeta && this.pageMeta.placeholder) || '可补充投放位置、心得或注意事项（选填）'
 			},
 			stepTitle() {
-				if (this.wizardStep === 1) return '选择垃圾类型'
-				if (this.wizardStep === 2) return '上传投放照片'
+				if (this.wizardStep === 1 && !this.lockCate) return '选择垃圾类型'
+				if (this.wizardStep === 2 || (this.wizardStep === 1 && this.lockCate)) return '上传投放照片'
 				return '补充说明并提交'
 			},
 			showSupervisorInvite() {
@@ -205,9 +209,12 @@
 			this.sceneKey = option.scene_key ? String(option.scene_key) : 'home'
 			this.sceneName = option.scene ? decodeURIComponent(option.scene) : ''
 			this.subSceneKey = option.sub_scene ? decodeURIComponent(option.sub_scene) : ''
+			this.pointName = option.point_name ? decodeURIComponent(option.point_name) : ''
+			this.lockCate = option.lock_cate === '1' || option.lock_cate === 1
+			this.form.clock_point_id = option.clock_point_id ? parseInt(option.clock_point_id, 10) : 0
 			this.pendingCateId = cateId
 			this.form.clock_scene = this.resolveClockScene(this.sceneKey)
-			this.form.clock_sub_scene = this.subSceneKey
+			this.form.clock_sub_scene = this.lockCate ? '' : this.subSceneKey
 			this.get_select_list()
 			uni.setNavigationBarTitle({ title: (this.sceneLabel || '垃圾分类') + '打卡' })
 		},
@@ -242,7 +249,7 @@
 				for (let i = 0; i < this.cate_list.length; i++) {
 					if (Number(this.cate_list[i].id) === Number(pending)) {
 						this.pickCate(i)
-						this.wizardStep = 2
+						this.wizardStep = this.lockCate ? 2 : 2
 						break
 					}
 				}
@@ -304,6 +311,8 @@
 							content: that.form.content,
 							image: that.form.image,
 							clock_scene: that.form.clock_scene,
+							clock_sub_scene: that.form.clock_sub_scene,
+							clock_point_id: that.form.clock_point_id,
 						})
 							.then(msg => {
 								that.msg = msg

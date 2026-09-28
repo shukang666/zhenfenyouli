@@ -29,6 +29,16 @@ export function matchCate(list, rule) {
 	return null
 }
 
+/** 打卡种类名称 → 场景引导用的短标签 */
+export function guideCateLabelFromName(cateName) {
+	const name = cateName || ''
+	if (name.indexOf('不可回收') >= 0 || name.indexOf('其他') >= 0) return '不可回收'
+	if (name.indexOf('可回收') >= 0) return '可回收'
+	if (name.indexOf('有害') >= 0) return '有害'
+	if (name.indexOf('厨余') >= 0) return '厨余'
+	return name
+}
+
 export function resolveCateByLabel(list, label) {
 	const map = {
 		可回收: { match: '可回收', exclude: '不可' },

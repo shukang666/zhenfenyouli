@@ -3,7 +3,7 @@
 		<view class="scf-hero">
 			<text class="scf-hero-kicker">{{ hub.title }}</text>
 			<text class="scf-hero-title">{{ stepTitle }}</text>
-			<view class="scf-steps">
+			<view class="scf-steps" v-if="visibleStepLabels.length">
 				<view
 					v-for="(lab, idx) in visibleStepLabels"
 					:key="idx"
@@ -16,50 +16,105 @@
 			</view>
 		</view>
 
-		<!-- 1 子场景 -->
-		<view class="scf-body" v-if="flowStep === 'sub'">
-			<text class="scf-hint">请选择具体情境</text>
-			<view class="scf-sub-grid">
-				<view
-					v-for="sub in subList"
-					:key="sub.key"
-					class="scf-sub-card"
-					hover-class="scf-card--press"
-					@tap="pickSub(sub)"
-				>
-					<text class="scf-sub-emoji">{{ sub.emoji }}</text>
-					<text class="scf-sub-name">{{ sub.name }}</text>
-					<text class="scf-sub-desc">{{ sub.desc }}</text>
-				</view>
+		<!-- 办公：固定真分角提示 -->
+		<view class="scf-body" v-if="flowStep === 'office_tip'">
+			<view class="scf-panel scf-office-tip">
+				<text class="scf-office-tip-title">请前往大楼真分角打卡</text>
+				<text class="scf-info-text">办公场景使用大厦统一「真分角」投放点，无需在小程序内设置个人点位。请选择本次投放的垃圾种类后继续。</text>
+			</view>
+			<view class="scf-foot scf-foot--single">
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="flowStep = 'cate'">选择种类并继续</view>
 			</view>
 		</view>
 
-		<!-- 2 垃圾种类 -->
-		<view class="scf-body" v-if="flowStep === 'cate'">
-			<text class="scf-hint" v-if="subName">「{{ subName }}」请选择垃圾种类</text>
-			<text class="scf-hint" v-else>请选择垃圾种类</text>
+		<!-- 首次：设置真分点 -->
+		<view class="scf-body" v-if="flowStep === 'setup'">
+			<text class="scf-hint">首次进入请设置您的真分点。每个点位对应一种垃圾类型，后续可在列表中修改。</text>
+			<view class="scf-setup-list">
+				<view class="scf-setup-row" v-for="(row, idx) in setupRows" :key="idx">
+					<input class="scf-setup-input" v-model="row.point_name" placeholder="点位名称，如厨房桶" maxlength="16" />
+					<picker mode="selector" :range="catePickerLabels" :value="row.cate_index" @change="onSetupCateChange(idx, $event)">
+						<view class="scf-setup-picker">{{ catePickerLabels[row.cate_index] || '选种类' }}</view>
+					</picker>
+					<text class="scf-setup-del" v-if="setupRows.length > 1" @tap="removeSetupRow(idx)">删</text>
+				</view>
+			</view>
+			<view class="scf-setup-add" @tap="addSetupRow">+ 添加点位</view>
+			<view class="scf-foot scf-foot--single">
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">保存并开始</view>
+			</view>
+		</view>
+
+		<!-- 真分点列表（打卡入口） -->
+		<view class="scf-body" v-if="flowStep === 'points'">
+			<view class="scf-points-head">
+				<text class="scf-hint scf-hint--inline">选择要打卡的真分点</text>
+				<text class="scf-manage-link" @tap="enterManage">管理真分点</text>
+			</view>
+			<view class="scf-point-grid">
+				<view
+					v-for="p in points"
+					:key="p.id"
+					class="scf-point-card"
+					hover-class="scf-card--press"
+					@tap="pickPoint(p)"
+				>
+					<text class="scf-point-name">{{ p.point_name }}</text>
+					<text class="scf-point-cate">{{ p.cate_name }}</text>
+					<text class="scf-point-go">去打卡 ›</text>
+				</view>
+			</view>
+			<view class="scf-foot scf-foot--single" v-if="!points.length">
+				<view class="scf-btn scf-btn--primary" @tap="flowStep = 'setup'">去设置真分点</view>
+			</view>
+		</view>
+
+		<!-- 管理真分点 -->
+		<view class="scf-body" v-if="flowStep === 'manage'">
+			<text class="scf-hint">修改名称或种类；删除后不影响历史打卡记录。</text>
+			<view class="scf-point-grid">
+				<view class="scf-manage-card" v-for="p in points" :key="'m' + p.id">
+					<input class="scf-setup-input" v-model="p._edit_name" placeholder="点位名称" maxlength="16" />
+					<picker mode="selector" :range="catePickerLabels" :value="p._edit_cate_index" @change="onManageCateChange(p, $event)">
+						<view class="scf-setup-picker">{{ catePickerLabels[p._edit_cate_index] || p.cate_name }}</view>
+					</picker>
+					<view class="scf-manage-actions">
+						<text class="scf-manage-save" @tap="savePointEdit(p)">保存</text>
+						<text class="scf-manage-del" @tap="deletePoint(p)">删除</text>
+					</view>
+				</view>
+			</view>
+			<view class="scf-setup-add" @tap="addPointInManage">+ 新增点位</view>
+			<view class="scf-foot scf-foot--single">
+				<view class="scf-btn scf-btn--ghost" @tap="backFromManage">返回打卡</view>
+			</view>
+		</view>
+
+		<!-- 办公：选种类 -->
+		<view class="scf-body" v-if="flowStep === 'cate' && isOfficeHub">
+			<text class="scf-hint">请选择本次在真分角投放的垃圾种类</text>
 			<view class="scf-cate-grid">
 				<view
-					v-for="(label, idx) in cateLabels"
+					v-for="(item, idx) in cateList"
 					:key="idx"
 					class="scf-cate-card"
-					:class="'scf-cate-card--' + cateTone(label)"
+					:class="'scf-cate-card--' + cateTone(item.name)"
 					hover-class="scf-card--press"
-					@tap="pickCate(label)"
+					@tap="pickOfficeCate(item)"
 				>
-					<text class="scf-cate-name">{{ label }}</text>
+					<text class="scf-cate-name">{{ item.name }}</text>
 					<text class="scf-cate-go">选择 ›</text>
 				</view>
 			</view>
-			<view class="scf-foot scf-foot--single" v-if="hasSubStep">
-				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'sub'">上一步</view>
+			<view class="scf-foot scf-foot--single">
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'office_tip'">上一步</view>
 			</view>
 		</view>
 
-		<!-- 3 处理指引 -->
+		<!-- 处理指引 -->
 		<view class="scf-body" v-if="flowStep === 'guide'">
 			<view class="scf-panel">
-				<text class="scf-panel-tag">{{ cateLabel }}</text>
+				<text class="scf-panel-tag">{{ guideTag }}</text>
 				<view class="scf-info-block">
 					<text class="scf-info-title">如何处理</text>
 					<text class="scf-info-text">{{ guide.handle_guide }}</text>
@@ -70,12 +125,12 @@
 				</view>
 			</view>
 			<view class="scf-foot">
-				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'cate'">上一步</view>
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="backFromGuide">上一步</view>
 				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="flowStep = 'survey'">下一步</view>
 			</view>
 		</view>
 
-		<!-- 4 问卷 / 技巧 -->
+		<!-- 问卷 / 技巧 -->
 		<view class="scf-body" v-if="flowStep === 'survey'">
 			<text class="scf-hint">{{ guide.survey_question }}</text>
 			<view class="scf-tip-list">
@@ -91,12 +146,7 @@
 			</view>
 			<view class="scf-custom">
 				<text class="scf-custom-label">或写下您的分类小技巧</text>
-				<textarea
-					class="scf-textarea"
-					v-model="customTip"
-					placeholder="选填，分享您的经验"
-					maxlength="200"
-				/>
+				<textarea class="scf-textarea" v-model="customTip" placeholder="选填" maxlength="200" />
 			</view>
 			<view class="scf-foot">
 				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'guide'">上一步</view>
@@ -104,7 +154,7 @@
 			</view>
 		</view>
 
-		<!-- 5 学习更多 / 打卡 -->
+		<!-- 学习 / 打卡 -->
 		<view class="scf-body" v-if="flowStep === 'learn'">
 			<view class="scf-learn-card">
 				<text class="scf-learn-title">是否想学习更多分类技巧？</text>
@@ -124,31 +174,38 @@
 
 <script>
 	import { getHub, mergeGuide } from '@/common/sceneClockHub.js'
-	import { resolveCateByLabel, resolveCateKind } from '@/common/clockScene.js'
+	import { guideCateLabelFromName, resolveCateKind } from '@/common/clockScene.js'
 
 	export default {
 		data() {
 			return {
 				hubKey: '',
 				hub: null,
-				flowStep: 'sub',
+				flowStep: 'points',
+				points: [],
+				pointsLoading: false,
+				setupRows: [{ point_name: '', cate_index: 0 }],
+				cateList: [],
+				pointId: 0,
+				pointName: '',
 				subKey: '',
-				subName: '',
 				cateLabel: '',
 				cateId: 0,
-				cateList: [],
 				guide: {
 					handle_guide: '',
 					dispose_time: '',
 					survey_question: '',
 					preset_tips: [],
-					learn_path: '/pages/flhd/list',
+					learn_path: '/pages/dtsh/knowledge',
 				},
 				userChoice: '',
 				customTip: '',
 			}
 		},
 		computed: {
+			isOfficeHub() {
+				return this.hubKey === 'office'
+			},
 			presetTips() {
 				const tips = this.guide && this.guide.preset_tips
 				return Array.isArray(tips) ? tips : []
@@ -156,42 +213,37 @@
 			hubTheme() {
 				return (this.hub && this.hub.theme) || 'scf--home'
 			},
-			subList() {
-				if (this.hub && this.hub.subs && this.hub.subs.length) return this.hub.subs
-				return []
+			catePickerLabels() {
+				return (this.cateList || []).map(c => c.name)
 			},
-			hasSubStep() {
-				return this.subList.length > 0
-			},
-			stepIndex() {
-				const order = this.hasSubStep
-					? ['sub', 'cate', 'guide', 'survey', 'learn']
-					: ['cate', 'guide', 'survey', 'learn']
-				return order.indexOf(this.flowStep)
-			},
-			visibleStepLabels() {
-				const base = []
-				if (this.hasSubStep) base.push('选情境')
-				base.push('选种类', '怎么处理', '小技巧', '下一步')
-				return base
-			},
-			cateLabels() {
-				if (this.subKey && this.subList.length) {
-					const sub = this.subList.find(s => s.key === this.subKey)
-					if (sub && sub.cates) return sub.cates
-				}
-				if (this.hub && this.hub.cates) return this.hub.cates
-				return []
+			guideTag() {
+				if (this.pointName) return this.pointName + ' · ' + (this.cateLabel || '')
+				return this.cateLabel || ''
 			},
 			stepTitle() {
 				const map = {
-					sub: '选择情境',
+					office_tip: '真分角打卡',
+					setup: '设置真分点',
+					points: '选择真分点',
+					manage: '管理真分点',
 					cate: '选择垃圾种类',
 					guide: '分类指引',
 					survey: '分享分类技巧',
 					learn: '继续学习',
 				}
-				return map[this.flowStep] || ''
+				return map[this.flowStep] || this.hub.title
+			},
+			visibleStepLabels() {
+				if (['setup', 'points', 'manage', 'office_tip'].indexOf(this.flowStep) >= 0) return []
+				if (this.isOfficeHub) return ['选种类', '指引', '小技巧', '打卡']
+				return ['指引', '小技巧', '打卡']
+			},
+			stepIndex() {
+				const order = this.isOfficeHub
+					? ['cate', 'guide', 'survey', 'learn']
+					: ['guide', 'survey', 'learn']
+				const i = order.indexOf(this.flowStep)
+				return i >= 0 ? i : 0
 			},
 		},
 		onLoad(option) {
@@ -204,28 +256,164 @@
 				return
 			}
 			uni.setNavigationBarTitle({ title: this.hub.title })
-			this.flowStep = this.hasSubStep ? 'sub' : 'cate'
-			this.loadCateList()
+			this.subKey = this.isOfficeHub ? 'zhenfenjiao' : ''
+			this.loadCateList().then(() => {
+				if (this.isOfficeHub) {
+					this.flowStep = 'office_tip'
+					return
+				}
+				this.initUserPoints()
+			})
 		},
 		methods: {
 			loadCateList() {
-				this.$u.api.get_select_list({ type: 2 }).then(res => {
+				return this.$u.api.get_select_list({ type: 2 }).then(res => {
 					this.cateList = res.data || []
 				}).catch(() => {})
 			},
-			cateTone(label) {
-				const kind = resolveCateKind(label)
-				return kind || 'other'
+			initUserPoints(keepFlow) {
+				if (!this.isLogin) {
+					this.flowStep = 'setup'
+					return Promise.resolve()
+				}
+				if (!this.userInfo.community_id) {
+					this.$u.route('/pages/member/info')
+					return Promise.resolve()
+				}
+				this.pointsLoading = true
+				return this.$u.api.list_clock_scene_point({ hub_key: this.hubKey }).then(res => {
+					this.points = res.data || []
+					if (keepFlow === 'manage') {
+						this.points = this.points.map(p => this.decoratePointForEdit(p))
+						this.flowStep = 'manage'
+						return
+					}
+					this.flowStep = this.points.length ? 'points' : 'setup'
+					if (this.flowStep === 'setup' && !this.setupRows.length) {
+						this.setupRows = [{ point_name: '', cate_index: 0 }]
+					}
+				}).catch(() => {
+					if (keepFlow !== 'manage') this.flowStep = 'setup'
+				}).finally(() => {
+					this.pointsLoading = false
+				})
 			},
-			pickSub(sub) {
-				this.subKey = sub.key
-				this.subName = sub.name
-				this.flowStep = 'cate'
+			cateTone(name) {
+				return resolveCateKind(name) || 'other'
 			},
-			pickCate(label) {
-				this.cateLabel = label
-				const item = resolveCateByLabel(this.cateList, label)
-				this.cateId = item ? item.id : 0
+			addSetupRow() {
+				this.setupRows.push({ point_name: '', cate_index: 0 })
+			},
+			removeSetupRow(idx) {
+				this.setupRows.splice(idx, 1)
+			},
+			onSetupCateChange(idx, e) {
+				const v = parseInt(e.detail.value, 10)
+				if (!isNaN(v)) this.setupRows[idx].cate_index = v
+			},
+			async saveSetup() {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				const rows = this.setupRows.filter(r => r.point_name && String(r.point_name).trim())
+				if (!rows.length) return this.$u.toast('请至少添加一个真分点')
+				for (const row of rows) {
+					const cate = this.cateList[row.cate_index]
+					if (!cate) return this.$u.toast('请选择垃圾种类')
+					await this.$u.api.save_clock_scene_point({
+						hub_key: this.hubKey,
+						point_name: String(row.point_name).trim(),
+						cate_id: cate.id,
+					})
+				}
+				this.$u.toast('已保存')
+				this.initUserPoints()
+			},
+			enterManage() {
+				this.points = (this.points || []).map(p => this.decoratePointForEdit(p))
+				this.flowStep = 'manage'
+			},
+			decoratePointForEdit(p) {
+				let idx = 0
+				for (let i = 0; i < this.cateList.length; i++) {
+					if (Number(this.cateList[i].id) === Number(p.cate_id)) {
+						idx = i
+						break
+					}
+				}
+				return {
+					...p,
+					_edit_name: p.point_name,
+					_edit_cate_index: idx,
+				}
+			},
+			onManageCateChange(p, e) {
+				const v = parseInt(e.detail.value, 10)
+				if (!isNaN(v)) p._edit_cate_index = v
+			},
+			async savePointEdit(p) {
+				const name = String(p._edit_name || '').trim()
+				if (!name) return this.$u.toast('请填写点位名称')
+				const cate = this.cateList[p._edit_cate_index]
+				if (!cate) return this.$u.toast('请选择种类')
+				await this.$u.api.save_clock_scene_point({
+					id: p.id,
+					hub_key: this.hubKey,
+					point_name: name,
+					cate_id: cate.id,
+				})
+				this.$u.toast('已保存')
+				this.initUserPoints('manage')
+			},
+			deletePoint(p) {
+				uni.showModal({
+					title: '提示',
+					content: '确定删除该真分点？',
+					success: async (res) => {
+						if (!res.confirm) return
+						await this.$u.api.delete_clock_scene_point({ id: p.id })
+						this.$u.toast('已删除')
+						this.initUserPoints('manage')
+					},
+				})
+			},
+			addPointInManage() {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				uni.showModal({
+					title: '新增真分点',
+					editable: true,
+					placeholderText: '点位名称',
+					success: async (res) => {
+						if (!res.confirm) return
+						const name = String(res.content || '').trim()
+						if (!name) return this.$u.toast('请填写名称')
+						const cate = this.cateList[0]
+						if (!cate) return this.$u.toast('种类加载中')
+						await this.$u.api.save_clock_scene_point({
+							hub_key: this.hubKey,
+							point_name: name,
+							cate_id: cate.id,
+						})
+						this.initUserPoints('manage')
+					},
+				})
+			},
+			backFromManage() {
+				this.flowStep = this.points.length ? 'points' : 'setup'
+			},
+			pickPoint(p) {
+				this.pointId = p.id
+				this.pointName = p.point_name
+				this.cateId = p.cate_id
+				this.cateLabel = guideCateLabelFromName(p.cate_name)
+				this.subKey = ''
+				this.loadGuide()
+				this.flowStep = 'guide'
+			},
+			pickOfficeCate(item) {
+				this.pointId = 0
+				this.pointName = ''
+				this.cateId = item.id
+				this.cateLabel = guideCateLabelFromName(item.name)
+				this.subKey = 'zhenfenjiao'
 				this.loadGuide()
 				this.flowStep = 'guide'
 			},
@@ -244,6 +432,13 @@
 					}
 				}).catch(() => {})
 			},
+			backFromGuide() {
+				if (this.isOfficeHub) {
+					this.flowStep = 'cate'
+					return
+				}
+				this.flowStep = 'points'
+			},
 			goLearnStep() {
 				if (!this.userChoice && !this.customTip.trim()) {
 					return this.$u.toast('请选择或填写一种方法')
@@ -258,15 +453,15 @@
 				this.flowStep = 'learn'
 			},
 			goLearn() {
-				const path = this.guide.learn_path || '/pages/flhd/list'
+				const path = this.guide.learn_path || '/pages/dtsh/knowledge'
 				this.$u.route(path)
 			},
 			goClock() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
-				if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类，请稍后重试')
+				if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类')
 				const sceneKey = this.hub.sceneKey
-				const sceneName = this.subName || this.hub.title
+				const sceneName = this.isOfficeHub ? '真分角' : (this.pointName || this.hub.title)
 				let url =
 					'/pages/flhd/add?scene_key=' +
 					encodeURIComponent(sceneKey) +
@@ -274,12 +469,14 @@
 					encodeURIComponent(sceneName) +
 					'&cate_id=' +
 					this.cateId +
-					'&sub_scene=' +
-					encodeURIComponent(this.subKey || '')
+					'&lock_cate=1'
+				if (this.pointId) {
+					url += '&clock_point_id=' + this.pointId + '&point_name=' + encodeURIComponent(this.pointName)
+				}
 				this.$u.route(url)
 			},
 			finishOnly() {
-				uni.navigateBack()
+				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
 			},
 		},
 	}
@@ -355,38 +552,113 @@
 	font-size: 28rpx;
 	color: #4a564e;
 	margin-bottom: 16rpx;
+	line-height: 1.55;
 }
-.scf-sub-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 16rpx;
+.scf-hint--inline {
+	margin-bottom: 0;
+	flex: 1;
 }
-.scf-sub-card {
+.scf-office-tip-title {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #142018;
+	margin-bottom: 12rpx;
+}
+.scf-points-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 12rpx;
+}
+.scf-manage-link {
+	font-size: 26rpx;
+	color: #18af38;
+}
+.scf-point-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 14rpx;
+}
+.scf-point-card {
 	background: #fff;
-	border-radius: 20rpx;
-	padding: 24rpx 20rpx;
+	border-radius: 18rpx;
+	padding: 22rpx 20rpx;
 	box-shadow: 0 8rpx 24rpx rgba(20, 40, 28, 0.08);
 }
-.scf-card--press {
-	opacity: 0.92;
-	transform: scale(0.99);
-}
-.scf-sub-emoji {
-	font-size: 40rpx;
-}
-.scf-sub-name {
+.scf-point-name {
 	display: block;
-	margin-top: 10rpx;
-	font-size: 30rpx;
+	font-size: 32rpx;
 	font-weight: 700;
 	color: #142018;
 }
-.scf-sub-desc {
+.scf-point-cate {
 	display: block;
 	margin-top: 6rpx;
-	font-size: 22rpx;
-	color: #7a857c;
-	line-height: 1.4;
+	font-size: 24rpx;
+	color: #18af38;
+}
+.scf-point-go {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 26rpx;
+	color: #6a756c;
+}
+.scf-setup-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
+}
+.scf-setup-row,
+.scf-manage-card {
+	background: #fff;
+	border-radius: 16rpx;
+	padding: 16rpx;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10rpx;
+}
+.scf-setup-input {
+	flex: 1;
+	min-width: 200rpx;
+	font-size: 28rpx;
+	padding: 12rpx 16rpx;
+	background: #f5f7f6;
+	border-radius: 10rpx;
+}
+.scf-setup-picker {
+	font-size: 26rpx;
+	padding: 12rpx 16rpx;
+	background: #eef8f0;
+	color: #18af38;
+	border-radius: 10rpx;
+}
+.scf-setup-del {
+	color: #e75e5e;
+	font-size: 26rpx;
+	padding: 8rpx;
+}
+.scf-setup-add {
+	margin-top: 16rpx;
+	text-align: center;
+	font-size: 28rpx;
+	color: #18af38;
+	padding: 16rpx;
+}
+.scf-manage-actions {
+	width: 100%;
+	display: flex;
+	gap: 24rpx;
+	margin-top: 8rpx;
+}
+.scf-manage-save {
+	color: #18af38;
+	font-size: 26rpx;
+}
+.scf-manage-del {
+	color: #e75e5e;
+	font-size: 26rpx;
 }
 .scf-cate-grid {
 	display: grid;
@@ -555,5 +827,9 @@
 	font-size: 26rpx;
 	color: #243028;
 	line-height: 1.5;
+}
+.scf-card--press {
+	opacity: 0.92;
+	transform: scale(0.99);
 }
 </style>
