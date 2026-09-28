@@ -63,8 +63,11 @@
 					hover-class="scf-card--press"
 					@tap="pickPointById(p.id)"
 				>
+					<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(p.cate_name)">
+						<text class="scf-cate-hero-kicker">垃圾分类</text>
+						<text class="scf-cate-hero-name">{{ p.cate_name }}</text>
+					</view>
 					<text class="scf-point-name">{{ p.point_name }}</text>
-					<text class="scf-point-cate">{{ p.cate_name }}</text>
 					<text class="scf-point-go">去打卡 ›</text>
 				</view>
 			</view>
@@ -103,7 +106,11 @@
 		<!-- 处理指引 -->
 		<view class="scf-body" v-if="flowStep === 'guide'">
 			<view class="scf-panel">
-				<text class="scf-panel-tag">{{ guideTag }}</text>
+				<view class="scf-cate-hero scf-cate-hero--block" :class="'scf-cate-hero--' + cateTone(activeCateName)">
+					<text class="scf-cate-hero-kicker">垃圾分类</text>
+					<text class="scf-cate-hero-name">{{ activeCateName }}</text>
+				</view>
+				<text v-if="pointName" class="scf-guide-point-name">{{ pointName }}</text>
 				<view class="scf-info-block">
 					<text class="scf-info-title">如何处理</text>
 					<text class="scf-info-text">{{ guide.handle_guide }}</text>
@@ -179,6 +186,7 @@
 				pointName: '',
 				subKey: '',
 				cateLabel: '',
+				activeCateName: '',
 				cateId: 0,
 				guide: {
 					handle_guide: '',
@@ -228,10 +236,6 @@
 			},
 			catePickerLabels() {
 				return (this.cateList || []).map(c => c.name)
-			},
-			guideTag() {
-				if (this.pointName) return this.pointName + ' · ' + (this.cateLabel || '')
-				return this.cateLabel || ''
 			},
 			stepTitle() {
 				const map = {
@@ -433,6 +437,7 @@
 				this.pointId = p.id
 				this.pointName = p.point_name
 				this.cateId = p.cate_id
+				this.activeCateName = p.cate_name || ''
 				this.cateLabel = guideCateLabelFromName(p.cate_name)
 				this.subKey = this.guideSubKeyForHub()
 				this.loadGuide()
@@ -605,26 +610,62 @@
 .scf-point-card {
 	background: #fff;
 	border-radius: 18rpx;
-	padding: 22rpx 20rpx;
+	padding: 20rpx;
 	box-shadow: 0 8rpx 24rpx rgba(20, 40, 28, 0.08);
+}
+.scf-cate-hero {
+	border-radius: 16rpx;
+	padding: 20rpx 22rpx;
+	color: #fff;
+}
+.scf-cate-hero--block {
+	margin-bottom: 16rpx;
+}
+.scf-cate-hero-kicker {
+	display: block;
+	font-size: 22rpx;
+	opacity: 0.88;
+	letter-spacing: 2rpx;
+}
+.scf-cate-hero-name {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 44rpx;
+	font-weight: 800;
+	line-height: 1.25;
+	letter-spacing: 1rpx;
+}
+.scf-cate-hero--recycle {
+	background: linear-gradient(141deg, #2b8bb8, #156a90);
+}
+.scf-cate-hero--food {
+	background: linear-gradient(141deg, #3d9e4a, #1a7a32);
+}
+.scf-cate-hero--harm {
+	background: linear-gradient(141deg, #c45c8a, #9a3366);
+}
+.scf-cate-hero--other {
+	background: linear-gradient(141deg, #7a8494, #4a5568);
 }
 .scf-point-name {
 	display: block;
-	font-size: 32rpx;
-	font-weight: 700;
-	color: #142018;
+	margin-top: 14rpx;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #4a564e;
 }
-.scf-point-cate {
+.scf-guide-point-name {
 	display: block;
-	margin-top: 6rpx;
-	font-size: 24rpx;
-	color: #18af38;
+	margin-bottom: 18rpx;
+	font-size: 28rpx;
+	color: #6a756c;
 }
 .scf-point-go {
 	display: block;
-	margin-top: 10rpx;
+	margin-top: 12rpx;
 	font-size: 26rpx;
-	color: #6a756c;
+	color: #18af38;
+	font-weight: 600;
 }
 .scf-setup-list {
 	display: flex;
