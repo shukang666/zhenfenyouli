@@ -33,7 +33,7 @@
 				<text class="scf-intro-lead">{{ introDisplayLead }}</text>
 				<text class="scf-intro-summary">{{ introDisplaySummary }}</text>
 				<view class="scf-intro-toggle" hover-class="scf-card--press" @tap="introExpanded = !introExpanded">
-					<text class="scf-intro-toggle-t">{{ introExpanded ? '收起说明' : '政策背景 · 七贤岭做法 · 小程序愿景' }}</text>
+					<text class="scf-intro-toggle-t">{{ introExpanded ? '收起' : '了解更多' }}</text>
 					<text class="scf-intro-chevron">{{ introExpanded ? '▲' : '▼' }}</text>
 				</view>
 				<view class="scf-intro-detail" v-if="introExpanded">
@@ -43,7 +43,6 @@
 					</view>
 				</view>
 			</view>
-			<text class="scf-setup-action">{{ setupActionHint }}</text>
 			<view class="scf-setup-list">
 				<view class="scf-setup-block" v-for="(row, idx) in setupRows" :key="idx">
 					<view class="scf-point-card scf-point-card--preview">
@@ -74,9 +73,9 @@
 					</view>
 				</view>
 			</view>
-			<view class="scf-setup-add" @tap="addSetupRow">+ 再添加一个打卡点</view>
+			<view class="scf-setup-add" @tap="addSetupRow">+ 再添一个扔垃圾的地方</view>
 			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">保存并开始打卡</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">保存，去选位置拍照</view>
 			</view>
 		</view>
 
@@ -86,7 +85,7 @@
 				<text class="scf-intro-lead">{{ introDisplayLead }}</text>
 				<text class="scf-intro-summary">{{ introDisplaySummary }}</text>
 				<view class="scf-intro-toggle" hover-class="scf-card--press" @tap="introExpanded = !introExpanded">
-					<text class="scf-intro-toggle-t">{{ introExpanded ? '收起说明' : '政策背景 · 七贤岭做法 · 小程序愿景' }}</text>
+					<text class="scf-intro-toggle-t">{{ introExpanded ? '收起' : '了解更多' }}</text>
 					<text class="scf-intro-chevron">{{ introExpanded ? '▲' : '▼' }}</text>
 				</view>
 				<view class="scf-intro-detail" v-if="introExpanded">
@@ -98,7 +97,7 @@
 			</view>
 			<view class="scf-points-head">
 				<text class="scf-hint scf-hint--inline">{{ pointsStepHint }}</text>
-				<text class="scf-manage-link" v-if="!isCommunityHub" @tap="enterManage">管理打卡点</text>
+				<text class="scf-manage-link" v-if="!isCommunityHub" @tap="enterManage">改分类位置</text>
 			</view>
 			<view class="scf-point-grid">
 				<view
@@ -131,20 +130,20 @@
 							</view>
 							<view class="scf-cluster-item-foot">
 								<text class="scf-cluster-item-name">{{ p.point_name }}</text>
-								<text class="scf-point-go">去打卡 ›</text>
+								<text class="scf-point-go">去拍照 ›</text>
 							</view>
 						</view>
 					</view>
 				</view>
 			</view>
 			<view class="scf-foot scf-foot--single" v-if="!points.length && !isCommunityHub">
-				<view class="scf-btn scf-btn--primary" @tap="goSetupStep">去设置分类打卡点</view>
+				<view class="scf-btn scf-btn--primary" @tap="goSetupStep">去设置家里分类位置</view>
 			</view>
 		</view>
 
 		<!-- 管理打卡点 -->
 		<view class="scf-body" v-if="flowStep === 'manage'">
-			<text class="scf-hint">可修改名称、垃圾类型或照片；删除后不影响历史打卡记录。</text>
+			<text class="scf-hint">可以改名字、种类或照片；删掉后以前交过的记录还在。</text>
 			<view class="scf-point-grid">
 				<view class="scf-setup-block" v-for="(p, mIdx) in points" :key="p.id">
 					<view class="scf-point-card scf-point-card--preview">
@@ -176,7 +175,7 @@
 			</view>
 			<view class="scf-setup-add" @tap="addPointInManage">+ 新增点位</view>
 			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--ghost" @tap="backFromManage">返回打卡</view>
+				<view class="scf-btn scf-btn--ghost" @tap="backFromManage">返回选位置</view>
 			</view>
 		</view>
 
@@ -236,7 +235,7 @@
 				<text class="scf-clock-desc">{{ clockPhotoIntro }}</text>
 
 				<view class="scf-clock-photo-head u-flex u-row-between u-col-center">
-					<text class="scf-clock-photo-title">记录一次完整投放</text>
+					<text class="scf-clock-photo-title">分三步拍照片</text>
 					<text class="scf-clock-photo-progress">{{ clockSlotFilledCount }}/3</text>
 				</view>
 
@@ -291,7 +290,7 @@
 					:class="{ 'scf-clock-submit--disabled': clockSubmitting }"
 					hover-class="scf-card--press"
 					@tap="submitClock"
-				>{{ clockSubmitting ? '提交中…' : '确认提交打卡' }}</view>
+				>{{ clockSubmitting ? '提交中…' : '提交' }}</view>
 
 				<view class="scf-learn-link" hover-class="scf-card--press" @tap="goLearn">
 					<text>还想学分类知识？</text>
@@ -314,7 +313,7 @@
 					<text class="scf-habit-text">{{ clockHabitTip }}</text>
 				</view>
 				<view class="scf-success-actions">
-					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">继续打卡</view>
+					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">再选位置拍照</view>
 					<view class="scf-btn scf-btn--ghost scf-btn--block scf-success-back" @tap="goActivityTab">返回活动</view>
 				</view>
 			</view>
@@ -333,10 +332,13 @@
 		getIntroLead,
 		getIntroSummary,
 		getIntroBlocks,
-		getSetupActionHint,
+		getSetupIntroLine,
 		getCommunityEmptyTitle,
+		getCommunityEmptyDesc,
+		getCommunityIntroLead,
 		getCommunityPointsDesc,
-		HOME_POINT_LABEL_SHORT,
+		getPointsPickSummary,
+		getPointsStepHint,
 	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
@@ -379,57 +381,48 @@
 			introBlocks() {
 				return getIntroBlocks(this.hubKey)
 			},
-			setupActionHint() {
-				return getSetupActionHint(this.hubKey)
-			},
 			introDisplayLead() {
 				if (this.flowStep === 'points' && this.isCommunityHub) {
-					return this.isStreetHub ? '到商铺集中分类点打卡' : '到大楼集中分类点打卡'
+					return getCommunityIntroLead(this.isStreetHub)
 				}
 				return getIntroLead(this.hubKey)
 			},
 			introDisplaySummary() {
-				if (this.flowStep === 'points' && this.isCommunityHub) {
-					return getCommunityPointsDesc(this.isStreetHub)
+				if (this.flowStep === 'setup') {
+					return getSetupIntroLine(this.hubKey)
 				}
-				if (this.flowStep === 'points' && !this.isCommunityHub) {
-					if (this.points.length) {
-						return '下面是你在家设置的「' + HOME_POINT_LABEL_SHORT + '」。点选一处，按指引分步拍照即可完成本次打卡。'
-					}
-					return getIntroSummary(this.hubKey)
+				if (this.flowStep === 'points' && this.isCommunityHub) {
+					return getCommunityPointsDesc()
+				}
+				if (this.flowStep === 'points' && this.points.length) {
+					return getPointsPickSummary()
 				}
 				return getIntroSummary(this.hubKey)
 			},
 			pointsStepHint() {
-				if (this.isCommunityHub) return '选择集中分类点'
-				return '选择本次打卡位置'
+				return getPointsStepHint(this.isCommunityHub)
 			},
 			clockPhotoIntro() {
 				const sk = this.hub && this.hub.sceneKey ? this.hub.sceneKey : this.hubKey
 				const cateLine = buildSceneCateSubtitle(sk, this.activeCateName)
-				if (this.isCommunityHub) {
-					return (cateLine ? cateLine + '。' : '') + '按下面三步各拍一张，帮社区确认您投对了类型。'
-				}
-				return (cateLine ? cateLine + '。' : '') + '用三张照片讲清楚：从分类前到进桶，比随手拍一张更有说服力。'
+				const tail = '下面三个格各拍一张：扔之前、对准桶、扔完了。'
+				return (cateLine ? cateLine + '。' : '') + tail
 			},
 			clockPhotoFootnote() {
-				if (this.isCommunityHub) {
-					return '三步都拍全再提交；看不清垃圾或桶口可能影响审核。'
-				}
-				return '建议连拍三步再提交；中间「分好类」可拍袋口、标签或分拣过程。'
+				return '三张都拍好再点提交；拍糊了社区可能看不清楚。'
 			},
 			clockPhotoSlotMeta() {
 				if (this.isCommunityHub) {
 					return [
-						{ key: 'before', title: '投放前', hint: '垃圾内容清晰', emoji: '📦' },
-						{ key: 'aim', title: '对准桶口', hint: '颜色/标识可见', emoji: '🎯' },
-						{ key: 'after', title: '投放后', hint: '桶内或点位全貌', emoji: '✅' },
+						{ key: 'before', title: '扔之前', hint: '看清是啥垃圾', emoji: '📦' },
+						{ key: 'aim', title: '对准桶', hint: '桶口拍清楚', emoji: '🎯' },
+						{ key: 'after', title: '扔完了', hint: '桶里拍一下', emoji: '✅' },
 					]
 				}
 				return [
-					{ key: 'before', title: '分类前', hint: '待处理的垃圾', emoji: '🗑️' },
-					{ key: 'sorted', title: '分好类', hint: '袋/盒已分清楚', emoji: '♻️' },
-					{ key: 'after', title: '进桶后', hint: '投入对应桶内', emoji: '✅' },
+					{ key: 'before', title: '扔之前', hint: '垃圾分好的样', emoji: '🗑️' },
+					{ key: 'sorted', title: '分好了', hint: '袋子或桶口', emoji: '♻️' },
+					{ key: 'after', title: '进桶了', hint: '已经在桶里', emoji: '✅' },
 				]
 			},
 			clockSlotFilledCount() {
@@ -455,10 +448,7 @@
 				return getCommunityEmptyTitle(this.isStreetHub, this.isOfficeHub)
 			},
 			communityEmptyDesc() {
-				return '社区工作人员将根据您的商铺/单位情况配置集中分类点，配置完成后即可在此选择并打卡。如有疑问请联系社区。'
-			},
-			communityPointsDesc() {
-				return getCommunityPointsDesc(this.isStreetHub)
+				return getCommunityEmptyDesc()
 			},
 			presetTips() {
 				const tips = this.guide && this.guide.preset_tips
@@ -678,7 +668,7 @@
 			async saveSetup() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				const rows = this.setupRows.filter(r => r.point_name && String(r.point_name).trim())
-				if (!rows.length) return this.$u.toast('请至少添加一个分类打卡点')
+				if (!rows.length) return this.$u.toast('请至少添一个扔垃圾的地方')
 				try {
 					for (const row of rows) {
 						const cate = this.cateList[row.cate_index]
@@ -759,7 +749,7 @@
 				if (!pointId) return
 				uni.showModal({
 					title: '提示',
-					content: '确定删除该打卡点？',
+					content: '确定删掉这个位置？',
 					success: async (res) => {
 						if (!res.confirm) return
 						await this.$u.api.delete_clock_scene_point({ id: pointId })
@@ -912,7 +902,7 @@
 				const that = this
 				uni.showModal({
 					title: '提示',
-					content: '三步照片需对应真实投放过程，分类错误或不符可能影响积分。',
+					content: '请按真实情况拍照。分错了或照片不对，积分可能拿不到。',
 					success(res) {
 						if (!res.confirm) return
 						that.doSubmitClock()
@@ -1151,28 +1141,28 @@
 }
 .scf-intro-lead {
 	display: block;
-	font-size: 32rpx;
+	font-size: 38rpx;
 	font-weight: 800;
 	color: #142018;
-	line-height: 1.4;
+	line-height: 1.45;
 }
 .scf-intro-summary {
 	display: block;
-	margin-top: 14rpx;
-	font-size: 26rpx;
-	color: #5a665e;
-	line-height: 1.65;
+	margin-top: 16rpx;
+	font-size: 30rpx;
+	color: #3d4840;
+	line-height: 1.55;
 }
 .scf-intro-toggle {
-	margin-top: 20rpx;
-	padding-top: 18rpx;
+	margin-top: 22rpx;
+	padding-top: 20rpx;
 	border-top: 1rpx solid #eef0ee;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 }
 .scf-intro-toggle-t {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #18af38;
 	font-weight: 600;
 }
@@ -1180,15 +1170,15 @@
 	color: #156a90;
 }
 .scf-intro-chevron {
-	font-size: 20rpx;
+	font-size: 24rpx;
 	color: #9aa59d;
 	margin-left: 12rpx;
 }
 .scf-intro-detail {
-	margin-top: 20rpx;
+	margin-top: 16rpx;
 }
 .scf-intro-block {
-	padding: 18rpx 0;
+	padding: 20rpx 0;
 	border-bottom: 1rpx solid #f0f2f0;
 	&:last-child {
 		border-bottom: none;
@@ -1197,24 +1187,16 @@
 }
 .scf-intro-block-title {
 	display: block;
-	font-size: 26rpx;
+	font-size: 30rpx;
 	font-weight: 700;
 	color: #243028;
-	margin-bottom: 8rpx;
+	margin-bottom: 10rpx;
 }
 .scf-intro-block-body {
 	display: block;
-	font-size: 24rpx;
-	color: #6a756c;
-	line-height: 1.65;
-}
-.scf-setup-action {
-	display: block;
-	font-size: 26rpx;
-	color: #4a564e;
-	line-height: 1.6;
-	margin-bottom: 20rpx;
-	padding: 0 4rpx;
+	font-size: 28rpx;
+	color: #5a665e;
+	line-height: 1.55;
 }
 .scf-setup-block {
 	margin-bottom: 20rpx;

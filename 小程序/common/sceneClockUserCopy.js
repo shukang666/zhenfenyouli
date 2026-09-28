@@ -1,98 +1,94 @@
 /**
- * 场景打卡流（scene-clock-flow）用户向文案
- * 避免「真分点」等内部术语，面向普通居民
+ * 场景打卡流说明文案（短句、大字、口语，方便老年居民）
  */
 
-/** 家庭/亲子：用户自建的固定投放位置 */
-export const HOME_POINT_LABEL = '分类打卡点'
-export const HOME_POINT_LABEL_SHORT = '打卡点'
-
-/** 办公/沿街：社区配置的集中投放位置 */
-export const COMMUNITY_POINT_LABEL = '集中分类点'
+/** 不说「真分点」，用家里能听懂的说法 */
+export const HOME_POINT_LABEL = '家里分类位置'
+export const HOME_POINT_LABEL_SHORT = '分类位置'
+export const COMMUNITY_POINT_LABEL = '社区投放点'
 
 export function getStepTitles() {
 	return {
-		hub_empty: '等待配置',
+		hub_empty: '请稍等',
 		setup: '设置' + HOME_POINT_LABEL,
-		points: '选择' + HOME_POINT_LABEL_SHORT,
-		manage: '管理' + HOME_POINT_LABEL_SHORT,
-		cate: '选择垃圾种类',
-		guide: '分类指引',
-		survey: '分享分类技巧',
-		learn: '拍照打卡',
+		points: '选' + HOME_POINT_LABEL_SHORT,
+		manage: '改' + HOME_POINT_LABEL_SHORT,
+		cate: '选垃圾种类',
+		guide: '怎么扔才对',
+		survey: '说说您的习惯',
+		learn: '拍照提交',
 	}
 }
 
 export function getIntroLead(hubKey) {
-	if (hubKey === 'qinzi') {
-		return '和孩子一起：在家分好类，再投对桶'
-	}
-	return '在家分好类，再投对桶'
+	if (hubKey === 'qinzi') return '带着孩子，垃圾先分清再扔'
+	return '垃圾先分清，再扔进对的桶'
 }
 
+/** 设置页：一句话说清要做什么 */
+export function getSetupIntroLine(hubKey) {
+	if (hubKey === 'qinzi') {
+		return '请先添一个平时扔垃圾的地方（如装菜叶的桶）。起个名、选种类、给桶拍张照。'
+	}
+	return '请先添一个平时扔垃圾的地方（如厨房桶、装瓶罐的袋子）。起个名、选种类、给桶拍张照。'
+}
+
+/** 选择页：还没有位置时 */
 export function getIntroSummary(hubKey) {
-	if (hubKey === 'qinzi') {
-		return '先在家里设几个固定「打卡点」（如厨房厨余桶、客厅可回收箱），每次投放拍照片记录，习惯更容易坚持。'
-	}
-	return '先在家里设几个固定「打卡点」（如厨房厨余桶、玄关可回收箱），每次投放拍照片记录，方便养成习惯。'
+	if (hubKey === 'qinzi') return '在家固定好扔哪儿，扔的时候按提示拍照片就行。'
+	return '在家固定好扔哪儿，扔的时候按提示拍照片就行。'
 }
 
+/** 展开「了解更多」 */
 export function getIntroBlocks(hubKey) {
-	const qinziExtra =
+	const local =
 		hubKey === 'qinzi'
-			? '亲子场景会侧重与孩子一起认识可回收、有害等类别，打卡也是记录陪伴过程。'
-			: ''
+			? '七贤岭这边：手机上学会怎么分，扔对了拍个照，还能攒积分；带孩子一起更好记。'
+			: '七贤岭这边：手机上学会怎么分，扔对了拍个照，还能攒积分。'
 
 	return [
 		{
 			id: 'what',
-			title: '先把垃圾分对了',
-			body:
-				'「践行真分」是社区里的简称，意思就是：垃圾在产生的地方就按可回收、厨余、有害、其他分开，装对袋子或桶，再投到对应收集容器。不是额外折腾，而是少混投、少返工，环境更干净。',
+			title: '为啥要分一分',
+			body: '菜叶剩饭、瓶罐纸板、电池药品等要分开，别混在一个袋子里，投进对应桶，小区干净，也不容易被说扔错了。',
 		},
 		{
 			id: 'policy',
-			title: '国家政策',
-			body:
-				'2019年起，国家推动地级及以上城市全面开展生活垃圾分类（《关于在全国地级及以上城市全面开展生活垃圾分类工作的通知》等）。生活垃圾一般按可回收物、厨余垃圾、有害垃圾、其他垃圾四类管理。居民准确分类，是法规要求，也是绿色生活的一部分。',
-		},
-		{
-			id: 'local',
-			title: '大连高新区 · 七贤岭',
-			body:
-				'七贤岭街道结合辖区实际，用数字化方式把分类做进日常：居民通过本小程序学习分类知识、通过测验后再打卡；按家庭、办公、商铺等场景拍照记录投放；参与低碳活动、志愿督导与问题反馈，可获积分激励。社区与物业协同配置集中投放点，逐步推动「会分、愿分、准确分」。' +
-				(qinziExtra ? ' ' + qinziExtra : ''),
+			title: '国家跟社区的要求',
+			body: '现在城镇都要做垃圾分类。' + local,
 		},
 		{
 			id: 'vision',
-			title: '这个小程序想做什么',
-			body:
-				'「真分」小程序希望分类不再难懂、不再孤单：学得会、做得到、有反馈。用打卡记录真实投放，用活动和积分鼓励坚持，用督导与随手拍推动共治，共建干净、低碳的七贤岭社区。',
+			title: '这个程序帮什么忙',
+			body: '教怎么分、提醒别乱扔，用得勤有积分，邻里一起把环境搞好。',
 		},
 	]
 }
 
-export function getSetupActionHint(hubKey) {
-	if (hubKey === 'qinzi') {
-		return '请至少添加 1 个打卡点：填写名称、选择垃圾类型，并拍一张能看清桶/袋/标签的照片。保存后点下方卡片即可开始打卡。'
-	}
-	return '请至少添加 1 个打卡点：填写名称、选择垃圾类型，并拍一张能看清桶/袋/标签的照片。保存后点下方卡片即可开始打卡。'
-}
-
 export function getCommunityEmptyTitle(isStreetHub, isOfficeHub) {
-	if (isStreetHub) return '暂未配置商铺集中分类点'
-	if (isOfficeHub) return '暂未配置办公集中分类点'
-	return '暂未配置回收点'
+	if (isStreetHub) return '店里还没安排投放点'
+	if (isOfficeHub) return '楼里还没安排投放点'
+	return '还没安排投放点'
 }
 
-export function getCommunityPointsTitle(isStreetHub) {
-	if (isStreetHub) return '请到集中分类点打卡'
-	return '请到大楼集中分类点打卡'
+export function getCommunityEmptyDesc() {
+	return '社区会根据商铺或单位情况安排扔垃圾的地方，弄好后会出现在这里。不清楚就问社区或物业。'
 }
 
-export function getCommunityPointsDesc(isStreetHub) {
-	if (isStreetHub) {
-		return '以下为社区根据商铺情况配置的集中分类点，每个点位对应一种垃圾类型，选择后按指引拍照打卡即可。'
-	}
-	return '以下为社区在办公区域配置的集中分类点，无需自行设置，选择后按指引拍照打卡即可。'
+export function getCommunityIntroLead(isStreetHub) {
+	if (isStreetHub) return '到社区安排的扔垃圾点'
+	return '到楼里统一的扔垃圾点'
+}
+
+export function getCommunityPointsDesc() {
+	return '社区已经安排好了扔垃圾的地方，点一个，按下面步骤拍照提交。'
+}
+
+export function getPointsPickSummary() {
+	return '点您这次要用的桶或位置，跟着提示拍照就行。'
+}
+
+export function getPointsStepHint(isCommunityHub) {
+	if (isCommunityHub) return '选扔垃圾的地方'
+	return '选这次用的位置'
 }
