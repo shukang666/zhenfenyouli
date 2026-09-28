@@ -184,7 +184,8 @@ class OrderController extends AuthController
                         'order_num' => $order_num, 'goods_id' => $goods_item['goods_id'],
                         'goods_name' => $goods_info['goods_name'],
 //                        'start_time'=>$goods_info['start_time'],'end_time'=>$goods_info['end_time'],
-                        'thumb' => cmf_get_asset_url($goods_info['thumb']), 'user_id' => $this->user_id,
+                        // 明细表 thumb 仅 varchar(100)，存相对路径；展示时 getFullData/cmf_get_asset_url 再拼 URL
+                        'thumb' => $goods_info['thumb'], 'user_id' => $this->user_id,
                         'count' => $goods_item['count'], 'pay_order_num' => $pay_order_num
                     ];
 
