@@ -4,31 +4,24 @@ declare(strict_types=1);
 
 namespace Yansongda\Pay\Event;
 
+use Psr\Http\Message\ServerRequestInterface;
 use Yansongda\Pay\Rocket;
 
 class CallbackReceived extends Event
 {
-    /**
-     * @var string
-     */
-    public $provider;
+    public string $provider;
+
+    public ?array $params = null;
 
     /**
-     * @var array|\Psr\Http\Message\ServerRequestInterface|null
+     * @var null|array|ServerRequestInterface
      */
     public $contents;
 
     /**
-     * @var array|null
+     * @param null|array|ServerRequestInterface $contents
      */
-    public $params;
-
-    /**
-     * Bootstrap.
-     *
-     * @param array|\Psr\Http\Message\ServerRequestInterface|null $contents
-     */
-    public function __construct(string $provider, $contents, ?array $params, ?Rocket $rocket)
+    public function __construct(string $provider, $contents, ?array $params = null, ?Rocket $rocket = null)
     {
         $this->provider = $provider;
         $this->contents = $contents;

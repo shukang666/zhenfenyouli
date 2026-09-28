@@ -6,6 +6,11 @@
 $commands = [];
 
 if (PHP_SAPI == 'cli') {
+
+    $commands = [
+        'cli' => \cmf\console\command\Cli::class
+    ];
+
     $apps = cmf_scan_dir(APP_PATH . '*', GLOB_ONLYDIR);
 
     foreach ($apps as $app) {

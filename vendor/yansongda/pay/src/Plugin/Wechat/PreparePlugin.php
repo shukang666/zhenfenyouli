@@ -14,7 +14,7 @@ class PreparePlugin implements PluginInterface
 {
     public function assembly(Rocket $rocket, Closure $next): Rocket
     {
-        Logger::info('[wechat][PreparePlugin] 插件开始装载', ['rocket' => $rocket]);
+        Logger::debug('[wechat][PreparePlugin] 插件开始装载', ['rocket' => $rocket]);
 
         $rocket->mergePayload($this->getPayload($rocket->getParams()));
 
@@ -25,8 +25,6 @@ class PreparePlugin implements PluginInterface
 
     protected function getPayload(array $params): array
     {
-        return array_filter($params, function ($v, $k) {
-            return !Str::startsWith(strval($k), '_');
-        }, ARRAY_FILTER_USE_BOTH);
+        return array_filter($params, fn ($v, $k) => !Str::startsWith(strval($k), '_'), ARRAY_FILTER_USE_BOTH);
     }
 }

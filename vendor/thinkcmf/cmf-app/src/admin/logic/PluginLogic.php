@@ -17,11 +17,12 @@ use app\admin\model\HookPluginModel;
 use app\admin\model\PluginModel;
 use mindplay\annotations\Annotations;
 use think\facade\Cache;
+use think\migration\Migrate;
 
 class PluginLogic
 {
     /**
-     * 安装应用
+     * 安装插件
      */
     public static function install($pluginName)
     {
@@ -47,6 +48,9 @@ class PluginLogic
         if (!$installSuccess) {
             return '插件预安装失败!';
         }
+
+        $migrate = new Migrate('', $pluginName);
+        $migrate->migrate();
 
         $methods = get_class_methods($plugin);
 
@@ -83,6 +87,43 @@ class PluginLogic
         return true;
     }
 
+    public static function uninstall($pluginName)
+    {
+        $class      = cmf_get_plugin_class($pluginName);
+        $pluginName = cmf_parse_name($pluginName,1);
+
+        HookPluginModel::startTrans();
+        try {
+            PluginModel::where('name', $pluginName)->delete();
+            HookPluginModel::where('plugin', $pluginName)->delete();
+
+            if (class_exists($class)) {
+                $plugin = new $class;
+
+                $uninstallSuccess = $plugin->uninstall();
+                if (!$uninstallSuccess) {
+                    HookPluginModel::rollback();
+                    return "插件卸载失败!";
+                }
+            }
+
+            // 删除后台菜单
+            AdminMenuModel::where([
+                'app' => "plugin/{$pluginName}",
+            ])->delete();
+
+            // 删除权限规则
+            AuthRuleModel::where('app', "plugin/{$pluginName}")->delete();
+
+            HookPluginModel::commit();
+        } catch (\Exception $e) {
+            HookPluginModel::rollback();
+            return false;
+        }
+
+        return true;
+    }
+
     public static function update($pluginName)
     {
         $class = cmf_get_plugin_class($pluginName);
@@ -102,6 +143,9 @@ class PluginLogic
                 return '插件预升级失败!';
             }
         }
+
+        $migrate = new Migrate('', $pluginName);
+        $migrate->migrate();
 
         $methods = get_class_methods($plugin);
 
@@ -138,12 +182,12 @@ class PluginLogic
 
         $samePluginHooks = array_intersect($pluginHooks, $pluginHooksInDb);
 
-        $shouldDeleteHooks = array_diff($samePluginHooks, $pluginHooksInDb);
+        $shouldDeleteHooks = array_diff($pluginHooksInDb, $pluginHooks);
 
         $newHooks = array_diff($pluginHooks, $samePluginHooks);
 
         if (count($shouldDeleteHooks) > 0) {
-            $hookPluginModel->where('hook', 'in', $shouldDeleteHooks)->delete();
+            $hookPluginModel->where('plugin', $pluginName)->where('hook', 'in', $shouldDeleteHooks)->delete();
         }
 
         foreach ($newHooks as $pluginHook) {

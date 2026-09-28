@@ -12,19 +12,17 @@ namespace app\admin\controller;
 
 use cmf\controller\AdminBaseController;
 use app\admin\model\LinkModel;
-use think\facade\Db;
-use think\Model;
 
 class LinkController extends AdminBaseController
 {
     protected $targets = ["_blank" => "新标签页打开", "_self" => "本窗口打开"];
-//    protected $cateList = Db::name("link_category")->select();
+
     /**
      * 友情链接管理
      * @adminMenu(
      *     'name'   => '友情链接',
      *     'parent' => 'admin/Setting/default',
-     *     'display'=> true,
+     *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 50,
      *     'icon'   => '',
@@ -66,9 +64,7 @@ class LinkController extends AdminBaseController
      */
     public function add()
     {
-        $cateList = Db::name("link_category")->select();
-        $this->assign('cateList', $cateList);
-
+        $this->assign('targets', $this->targets);
         return $this->fetch();
     }
 
@@ -120,8 +116,7 @@ class LinkController extends AdminBaseController
         $id        = $this->request->param('id', 0, 'intval');
         $linkModel = new LinkModel();
         $link      = $linkModel->find($id);
-        $cateList = Db::name("link_category")->select();
-        $this->assign('cateList', $cateList);
+        $this->assign('targets', $this->targets);
         $this->assign('link', $link);
         return $this->fetch();
     }
@@ -227,19 +222,6 @@ class LinkController extends AdminBaseController
                 $this->success(lang('Updated successfully'));
             }
         }
-    }
-
-    /**
-     * Notes:选择器LinkList
-     * User: shizhongyu
-     * DateTime: 2023/7/14 8:52
-     */
-    public function linkList()
-    {
-        $linkModel = new LinkModel();
-        $links     = $linkModel->select();
-        $this->assign('links', $links);
-        return $this->fetch();
     }
 
 }

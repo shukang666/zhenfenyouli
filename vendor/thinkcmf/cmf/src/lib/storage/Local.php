@@ -108,9 +108,7 @@ class Local
 
     private function _getWebRoot()
     {
-        if (function_exists('cmf_get_public_site_root')) {
-            return cmf_get_public_site_root() . cmf_get_root();
-        }
         return cmf_get_domain() . cmf_get_root();
+
     }
 }

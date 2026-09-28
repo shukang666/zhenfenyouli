@@ -21,7 +21,11 @@ class IndexController extends AdminBaseController
     public function initialize()
     {
         $adminSettings = cmf_get_option('admin_settings');
-        if (empty($adminSettings['admin_password']) || $this->request->pathinfo() == $adminSettings['admin_password'] || true) {
+
+        if (
+            empty($adminSettings['admin_password'])
+            || ($adminSettings['admin_password'] == str_replace('.html', '', $this->request->pathinfo()))
+        ) {
             $adminId = cmf_get_current_admin_id();
             if (empty($adminId)) {
                 session("__LOGIN_BY_CMF_ADMIN_PW__", 1);//设置后台登录加密码
@@ -41,20 +45,16 @@ class IndexController extends AdminBaseController
         if (!empty($content)) {
             return $content;
         }
+
         $adminMenuModel = new AdminMenuModel();
-        $menus = $adminMenuModel->menuTree();
+        $menus          = cache('admin_menus_' . cmf_get_current_admin_id(), '', null, 'admin_menus');
 
-//        var_dump($menus['235admin']['items']);exit;
+        if (empty($menus)) {
+            $menus = $adminMenuModel->menuTree();
+            cache('admin_menus_' . cmf_get_current_admin_id(), $menus, null, 'admin_menus');
+        }
+
         $this->assign("menus", $menus);
-
-//        $menus          = cache('admin_menus_' . cmf_get_current_admin_id(), '', null, 'admin_menus');
-//
-//        if (empty($menus)) {
-//            $menus = $adminMenuModel->menuTree();
-//            cache('admin_menus_' . cmf_get_current_admin_id(), $menus, null, 'admin_menus');
-//        }
-//
-//        $this->assign("menus", $menus);
 
 
         $result   = $service->getAll();

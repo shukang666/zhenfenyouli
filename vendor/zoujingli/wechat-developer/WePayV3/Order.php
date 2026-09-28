@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | WeChatDeveloper
 // +----------------------------------------------------------------------
-// | 版权所有 2014~2023 ThinkAdmin [ thinkadmin.top ]
+// | 版权所有 2014~2025 ThinkAdmin [ thinkadmin.top ]
 // +----------------------------------------------------------------------
 // | 官方网站: https://thinkadmin.top
 // +----------------------------------------------------------------------
@@ -104,11 +104,11 @@ class Order extends BasicWePay
 
     /**
      * 支付通知解析
-     * @param array $data
+     * @param array|null $data
      * @return array
      * @throws \WeChat\Exceptions\InvalidDecryptException
      */
-    public function notify(array $data = [])
+    public function notify($data = [])
     {
         if (empty($data)) {
             $data = json_decode(Tools::getRawInput(), true);

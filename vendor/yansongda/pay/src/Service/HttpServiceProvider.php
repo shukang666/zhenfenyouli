@@ -8,22 +8,28 @@ use GuzzleHttp\Client;
 use Yansongda\Pay\Contract\ConfigInterface;
 use Yansongda\Pay\Contract\HttpClientInterface;
 use Yansongda\Pay\Contract\ServiceProviderInterface;
+use Yansongda\Pay\Exception\ContainerException;
+use Yansongda\Pay\Exception\ServiceNotFoundException;
 use Yansongda\Pay\Pay;
+use Yansongda\Supports\Config;
 
 class HttpServiceProvider implements ServiceProviderInterface
 {
     /**
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @param mixed $data
+     *
+     * @throws ContainerException
+     * @throws ServiceNotFoundException
      */
-    public function register(Pay $pay, ?array $data = null): void
+    public function register($data = null): void
     {
-        /* @var \Yansongda\Supports\Config $config */
+        /* @var Config $config */
         $config = Pay::get(ConfigInterface::class);
 
-        $service = new Client($config->get('http', []));
+        if (class_exists(Client::class)) {
+            $service = new Client($config->get('http', []));
 
-        Pay::set(HttpClientInterface::class, $service);
+            Pay::set(HttpClientInterface::class, $service);
+        }
     }
 }

@@ -6,8 +6,11 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
 
 /**
  * @method DetectVideoShot detectVideoShot(array $options = [])
+ * @method EvaluateVideoQuality evaluateVideoQuality(array $options = [])
  * @method GenerateVideoCover generateVideoCover(array $options = [])
  * @method GetAsyncJobResult getAsyncJobResult(array $options = [])
+ * @method RecognizeVideoCastCrewList recognizeVideoCastCrewList(array $options = [])
+ * @method SplitVideoParts splitVideoParts(array $options = [])
  * @method UnderstandVideoContent understandVideoContent(array $options = [])
  */
 class VideorecogApiResolver extends ApiResolver
@@ -35,6 +38,54 @@ class Rpc extends \AlibabaCloud\Client\Resolver\Rpc
  */
 class DetectVideoShot extends Rpc
 {
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAsync($value)
+    {
+        $this->data['Async'] = $value;
+        $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withVideoUrl($value)
+    {
+        $this->data['VideoUrl'] = $value;
+        $this->options['form_params']['VideoUrl'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getMode()
+ * @method string getAsync()
+ * @method string getVideoUrl()
+ */
+class EvaluateVideoQuality extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withMode($value)
+    {
+        $this->data['Mode'] = $value;
+        $this->options['form_params']['Mode'] = $value;
+
+        return $this;
+    }
 
     /**
      * @param string $value
@@ -140,6 +191,144 @@ class GetAsyncJobResult extends Rpc
     {
         $this->data['Async'] = $value;
         $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getParams()
+ * @method string getAsync()
+ * @method string getRegisterUrl()
+ * @method string getVideoUrl()
+ */
+class RecognizeVideoCastCrewList extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withParams($value)
+    {
+        $this->data['Params'] = $value;
+        $this->options['form_params']['Params'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAsync($value)
+    {
+        $this->data['Async'] = $value;
+        $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withRegisterUrl($value)
+    {
+        $this->data['RegisterUrl'] = $value;
+        $this->options['form_params']['RegisterUrl'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withVideoUrl($value)
+    {
+        $this->data['VideoUrl'] = $value;
+        $this->options['form_params']['VideoUrl'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getTemplate()
+ * @method string getMinTime()
+ * @method string getMaxTime()
+ * @method string getAsync()
+ * @method string getVideoUrl()
+ */
+class SplitVideoParts extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withTemplate($value)
+    {
+        $this->data['Template'] = $value;
+        $this->options['form_params']['Template'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withMinTime($value)
+    {
+        $this->data['MinTime'] = $value;
+        $this->options['form_params']['MinTime'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withMaxTime($value)
+    {
+        $this->data['MaxTime'] = $value;
+        $this->options['form_params']['MaxTime'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAsync($value)
+    {
+        $this->data['Async'] = $value;
+        $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withVideoUrl($value)
+    {
+        $this->data['VideoUrl'] = $value;
+        $this->options['form_params']['VideoUrl'] = $value;
 
         return $this;
     }

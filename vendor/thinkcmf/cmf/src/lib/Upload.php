@@ -93,7 +93,7 @@ class Upload
          */
 
         $app = $this->request->param('app');
-        if (empty($app) || !file_exists(APP_PATH . $app)) {
+        if (empty($app) || !file_exists(app_path() . $app)) {
             $app = 'default';
         }
 
@@ -122,6 +122,9 @@ class Upload
         if (empty($userId)) {
 
             $token = $this->request->header('Authorization');
+            if (substr($token, 0, 7) === 'Bearer ') {
+                $token = substr($token, 7);
+            }
             if (empty($token)) {
                 $token = $this->request->header('XX-Token');
             }
@@ -209,19 +212,7 @@ class Upload
 
         $uploadPath = WEB_ROOT . 'upload/';
 
-        $storageSetting = cmf_get_option('storage');
-        $storageType = isset($storageSetting['type']) ? $storageSetting['type'] : 'Local';
-        $alioss_config = cmf_get_plugin_config('Oss');
-        if ($storageType === 'Oss' && !empty($alioss_config['dir'])) {
-            $base_dir = rtrim($alioss_config['dir'], '/') . '/';
-        } elseif (!empty($alioss_config['dir'])) {
-            // 本地存储仍沿用原目录前缀，避免历史相对路径失效
-            $base_dir = rtrim($alioss_config['dir'], '/') . '/';
-        } else {
-            $base_dir = 'xcxkf052/';
-        }
-
-        $fileSaveName    = $base_dir.(empty($app) ? '' : $app . '/') . $strDate . '/' . md5(uniqid()) . "." . $strFileExtension;
+        $fileSaveName    = (empty($app) ? '' : $app . '/') . $strDate . '/' . md5(uniqid()) . "." . $strFileExtension;
         $strSaveFilePath = $uploadPath . $fileSaveName; //TODO 测试 windows 下
         $strSaveFileDir  = dirname($strSaveFilePath);
         if (!file_exists($strSaveFileDir)) {
@@ -324,18 +315,6 @@ class Upload
         if (empty($storage['type'])) {
             $storage['type'] = 'Local';
         }
-        // 已改本地存储或 OSS 密钥未配置时，禁止走云存储（否则报 access key id is empty）
-        if ($storage['type'] !== 'Local') {
-            $remotePluginCfg = cmf_get_plugin_config($storage['type']);
-            if ($storage['type'] === 'Oss') {
-                $ossAk = isset($remotePluginCfg['accessKey']) ? trim((string)$remotePluginCfg['accessKey']) : '';
-                $ossSk = isset($remotePluginCfg['secretKey']) ? trim((string)$remotePluginCfg['secretKey']) : '';
-                $ossBucket = isset($remotePluginCfg['bucket']) ? trim((string)$remotePluginCfg['bucket']) : '';
-                if ($ossAk === '' || $ossSk === '' || $ossBucket === '') {
-                    $storage['type'] = 'Local';
-                }
-            }
-        }
 
         $needUploadToRemoteStorage = false;//是否要上传到云存储
         if ($objAsset && $storage['type'] == 'Local') {
@@ -379,11 +358,6 @@ class Upload
                 session_write_close();
                 $result = $storage->upload($arrInfo["file_path"], $uploadPath . $arrInfo["file_path"], $fileType);
                 if (!empty($result)) {
-
-                    if(file_exists('./upload/'.$arrInfo["file_path"])){
-                        unlink('./upload/'.$arrInfo["file_path"]);
-                    }
-
                     return array_merge([
                         'filepath'    => $arrInfo["file_path"],
                         "name"        => $arrInfo["filename"],
@@ -404,16 +378,16 @@ class Upload
                     'url'         => $url,
                 ];
             }
-        }
 
-        $localUrl = cmf_get_image_url($arrInfo["file_path"]);
+
+        }
 
         return [
             'filepath'    => $arrInfo["file_path"],
             "name"        => $arrInfo["filename"],
             'id'          => $strId,
-            'preview_url' => $localUrl,
-            'url'         => $localUrl,
+            'preview_url' => cmf_get_root() . '/upload/' . $arrInfo["file_path"],
+            'url'         => cmf_get_root() . '/upload/' . $arrInfo["file_path"],
         ];
     }
 

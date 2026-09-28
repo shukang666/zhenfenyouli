@@ -11,7 +11,6 @@
 
 namespace app\user\controller;
 
-use app\user\model\ThirdPartyUserModel;
 use app\user\model\UserModel;
 use cmf\controller\AdminBaseController;
 use think\db\Query;
@@ -34,7 +33,7 @@ use think\db\Query;
  *     'name'   =>'用户组',
  *     'action' =>'default1',
  *     'parent' =>'user/AdminIndex/default',
- *     'display'=> true,
+ *     'display'=> false,
  *     'order'  => 10000,
  *     'icon'   =>'',
  *     'remark' =>'用户组'
@@ -47,7 +46,7 @@ class AdminIndexController extends AdminBaseController
      * 后台本站用户列表
      * @adminMenu(
      *     'name'   => '本站用户',
-     *     'parent' => 'default1',
+     *     'parent' => 'user/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10000,
@@ -66,7 +65,6 @@ class AdminIndexController extends AdminBaseController
 
         $list = UserModel::where(function (Query $query) {
             $data = $this->request->param();
-            $query->where('user_type', 'in',[2,3]);
             if (!empty($data['uid'])) {
                 $query->where('id', intval($data['uid']));
             }
@@ -101,7 +99,7 @@ class AdminIndexController extends AdminBaseController
      */
     public function ban()
     {
-        $id = input('param.id', 0, 'intval');
+        $id = $this->request->param('id', 0, 'intval');
         if ($id) {
             $result = UserModel::where(["id" => $id, "user_type" => 2])->update(['user_status' => 0]);
             if ($result) {
@@ -129,36 +127,16 @@ class AdminIndexController extends AdminBaseController
      */
     public function cancelBan()
     {
-        $id = input('param.id', 0, 'intval');
+        $id = $this->request->param('id', 0, 'intval');
         if ($id) {
-            UserModel::where(["id" => $id, "user_type" => 2])->update(['user_status' => 1]);
-            $this->success("会员启用成功！", '');
+            $result = UserModel::where(["id" => $id, "user_type" => 2])->update(['user_status' => 1]);
+            if ($result) {
+                $this->success("会员启用成功！", "adminIndex/index");
+            } else {
+                $this->error('会员启用失败,会员不存在,或者是管理员！');
+            }
         } else {
             $this->error('数据传入失败！');
         }
     }
-
-    public function deleteUser(){
-        $id = $this->request->param('id');
-        $UserModel = new UserModel();
-        $ThirdModel = new ThirdPartyUserModel();
-        $UserModel->where(['id'=>$id])->delete();
-        $ThirdModel->where(['user_id'=>$id])->delete();
-        $this->success('删除成功');
-    }
-
-
-    public function setUser(){
-        $id = $this->request->param('id');
-        $status= $this->request->param('status');
-        $Model = UserModel::find($id);
-        if(empty($Model)){
-            $this->error('不存在');
-        }
-        $Model->save(['group'=>$status]);
-
-        $this->success('设置成功');
-    }
-
-
 }

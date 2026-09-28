@@ -14,6 +14,7 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method CheckScdnService checkScdnService(array $options = [])
  * @method DeleteScdnDomain deleteScdnDomain(array $options = [])
  * @method DeleteScdnSpecificConfig deleteScdnSpecificConfig(array $options = [])
+ * @method DescribeScdnCcInfo describeScdnCcInfo(array $options = [])
  * @method DescribeScdnCcQpsInfo describeScdnCcQpsInfo(array $options = [])
  * @method DescribeScdnCcTopIp describeScdnCcTopIp(array $options = [])
  * @method DescribeScdnCcTopUrl describeScdnCcTopUrl(array $options = [])
@@ -54,17 +55,17 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DescribeScdnUserDomains describeScdnUserDomains(array $options = [])
  * @method DescribeScdnUserProtectInfo describeScdnUserProtectInfo(array $options = [])
  * @method DescribeScdnUserQuota describeScdnUserQuota(array $options = [])
- * @method OpenScdnService openScdnService(array $options = [])
+ * @method DescribeScdnVerifyContent describeScdnVerifyContent(array $options = [])
  * @method PreloadScdnObjectCaches preloadScdnObjectCaches(array $options = [])
  * @method RefreshScdnObjectCaches refreshScdnObjectCaches(array $options = [])
  * @method SetScdnBotInfo setScdnBotInfo(array $options = [])
  * @method SetScdnCcInfo setScdnCcInfo(array $options = [])
  * @method SetScdnDDoSInfo setScdnDDoSInfo(array $options = [])
- * @method SetScdnDomainBizInfo setScdnDomainBizInfo(array $options = [])
  * @method SetScdnDomainCertificate setScdnDomainCertificate(array $options = [])
  * @method StartScdnDomain startScdnDomain(array $options = [])
  * @method StopScdnDomain stopScdnDomain(array $options = [])
  * @method UpdateScdnDomain updateScdnDomain(array $options = [])
+ * @method VerifyScdnDomainOwner verifyScdnDomainOwner(array $options = [])
  */
 class ScdnApiResolver extends ApiResolver
 {
@@ -109,12 +110,12 @@ class AddScdnDomain extends Rpc
  * @method $this withFunctionNames($value)
  * @method string getDomainNames()
  * @method $this withDomainNames($value)
+ * @method string getSecurityToken()
+ * @method $this withSecurityToken($value)
  * @method string getOwnerAccount()
  * @method $this withOwnerAccount($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getSecurityToken()
- * @method $this withSecurityToken($value)
  */
 class BatchDeleteScdnDomainConfigs extends Rpc
 {
@@ -125,12 +126,12 @@ class BatchDeleteScdnDomainConfigs extends Rpc
  * @method $this withFunctions($value)
  * @method string getDomainNames()
  * @method $this withDomainNames($value)
+ * @method string getSecurityToken()
+ * @method $this withSecurityToken($value)
  * @method string getOwnerAccount()
  * @method $this withOwnerAccount($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getSecurityToken()
- * @method $this withSecurityToken($value)
  */
 class BatchSetScdnDomainConfigs extends Rpc
 {
@@ -189,26 +190,26 @@ class CheckScdnService extends Rpc
 }
 
 /**
+ * @method string getSecurityToken()
+ * @method $this withSecurityToken($value)
  * @method string getOwnerAccount()
  * @method $this withOwnerAccount($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getSecurityToken()
- * @method $this withSecurityToken($value)
  */
 class DeleteScdnDomain extends Rpc
 {
 }
 
 /**
+ * @method string getSecurityToken()
+ * @method $this withSecurityToken($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getSecurityToken()
- * @method $this withSecurityToken($value)
  * @method string getConfigId()
  * @method $this withConfigId($value)
  */
@@ -216,15 +217,20 @@ class DeleteScdnSpecificConfig extends Rpc
 {
 }
 
+class DescribeScdnCcInfo extends Rpc
+{
+
+    /** @var string */
+    public $method = 'GET';
+}
+
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnCcQpsInfo extends Rpc
 {
@@ -234,18 +240,16 @@ class DescribeScdnCcQpsInfo extends Rpc
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getPageSize()
+ * @method $this withPageSize($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
  * @method string getPageNumber()
  * @method $this withPageNumber($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  */
 class DescribeScdnCcTopIp extends Rpc
 {
@@ -255,18 +259,16 @@ class DescribeScdnCcTopIp extends Rpc
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getPageSize()
+ * @method $this withPageSize($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
  * @method string getPageNumber()
  * @method $this withPageNumber($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  */
 class DescribeScdnCcTopUrl extends Rpc
 {
@@ -276,33 +278,29 @@ class DescribeScdnCcTopUrl extends Rpc
 }
 
 /**
+ * @method string getSecurityToken()
+ * @method $this withSecurityToken($value)
  * @method string getCertName()
  * @method $this withCertName($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getSecurityToken()
- * @method $this withSecurityToken($value)
  */
 class DescribeScdnCertificateDetail extends Rpc
 {
 }
 
 /**
+ * @method string getSecurityToken()
+ * @method $this withSecurityToken($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getSecurityToken()
- * @method $this withSecurityToken($value)
  */
 class DescribeScdnCertificateList extends Rpc
 {
 }
 
-/**
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- */
 class DescribeScdnDDoSInfo extends Rpc
 {
 
@@ -313,12 +311,10 @@ class DescribeScdnDDoSInfo extends Rpc
 /**
  * @method string getLine()
  * @method $this withLine($value)
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDDoSTrafficInfo extends Rpc
 {
@@ -328,20 +324,18 @@ class DescribeScdnDDoSTrafficInfo extends Rpc
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
+ * @method string getInterval()
+ * @method $this withInterval($value)
  * @method string getLocationNameEn()
  * @method $this withLocationNameEn($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
  * @method string getIspNameEn()
  * @method $this withIspNameEn($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getInterval()
- * @method $this withInterval($value)
  */
 class DescribeScdnDomainBpsData extends Rpc
 {
@@ -350,8 +344,6 @@ class DescribeScdnDomainBpsData extends Rpc
 /**
  * @method string getDomainName()
  * @method $this withDomainName($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  */
 class DescribeScdnDomainCertificateInfo extends Rpc
 {
@@ -360,8 +352,6 @@ class DescribeScdnDomainCertificateInfo extends Rpc
 /**
  * @method string getDomainName()
  * @method $this withDomainName($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  */
 class DescribeScdnDomainCname extends Rpc
 {
@@ -373,12 +363,12 @@ class DescribeScdnDomainCname extends Rpc
 /**
  * @method string getFunctionNames()
  * @method $this withFunctionNames($value)
+ * @method string getSecurityToken()
+ * @method $this withSecurityToken($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getOwnerId()
  * @method $this withOwnerId($value)
- * @method string getSecurityToken()
- * @method $this withSecurityToken($value)
  * @method string getConfigId()
  * @method $this withConfigId($value)
  */
@@ -399,152 +389,134 @@ class DescribeScdnDomainDetail extends Rpc
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getInterval()
  * @method $this withInterval($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainHitRateData extends Rpc
 {
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
+ * @method string getInterval()
+ * @method $this withInterval($value)
  * @method string getLocationNameEn()
  * @method $this withLocationNameEn($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
  * @method string getIspNameEn()
  * @method $this withIspNameEn($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getInterval()
- * @method $this withInterval($value)
  */
 class DescribeScdnDomainHttpCodeData extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainIspData extends Rpc
 {
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getPageSize()
+ * @method $this withPageSize($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
  * @method string getPageNumber()
  * @method $this withPageNumber($value)
- * @method string getPageSize()
- * @method $this withPageSize($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  */
 class DescribeScdnDomainLog extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getInterval()
  * @method $this withInterval($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainOriginBpsData extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getInterval()
  * @method $this withInterval($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainOriginTrafficData extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainPvData extends Rpc
 {
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
+ * @method string getInterval()
+ * @method $this withInterval($value)
  * @method string getLocationNameEn()
  * @method $this withLocationNameEn($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
  * @method string getIspNameEn()
  * @method $this withIspNameEn($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getInterval()
- * @method $this withInterval($value)
  */
 class DescribeScdnDomainQpsData extends Rpc
 {
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
  * @method string getLocationNameEn()
  * @method $this withLocationNameEn($value)
  * @method string getIspNameEn()
  * @method $this withIspNameEn($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  */
 class DescribeScdnDomainRealTimeBpsData extends Rpc
 {
@@ -554,14 +526,12 @@ class DescribeScdnDomainRealTimeBpsData extends Rpc
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainRealTimeByteHitRateData extends Rpc
 {
@@ -571,36 +541,32 @@ class DescribeScdnDomainRealTimeByteHitRateData extends Rpc
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
  * @method string getLocationNameEn()
  * @method $this withLocationNameEn($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
  * @method string getIspNameEn()
  * @method $this withIspNameEn($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  */
 class DescribeScdnDomainRealTimeHttpCodeData extends Rpc
 {
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
  * @method string getLocationNameEn()
  * @method $this withLocationNameEn($value)
  * @method string getIspNameEn()
  * @method $this withIspNameEn($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  */
 class DescribeScdnDomainRealTimeQpsData extends Rpc
 {
@@ -610,14 +576,12 @@ class DescribeScdnDomainRealTimeQpsData extends Rpc
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainRealTimeReqHitRateData extends Rpc
 {
@@ -627,118 +591,102 @@ class DescribeScdnDomainRealTimeReqHitRateData extends Rpc
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainRealTimeSrcBpsData extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainRealTimeSrcTrafficData extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainRealTimeTrafficData extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainRegionData extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getSortBy()
  * @method $this withSortBy($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainTopReferVisit extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getSortBy()
  * @method $this withSortBy($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainTopUrlVisit extends Rpc
 {
 }
 
 /**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getEndTime()
+ * @method $this withEndTime($value)
+ * @method string getInterval()
+ * @method $this withInterval($value)
  * @method string getLocationNameEn()
  * @method $this withLocationNameEn($value)
  * @method string getStartTime()
  * @method $this withStartTime($value)
  * @method string getIspNameEn()
  * @method $this withIspNameEn($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getEndTime()
- * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getInterval()
- * @method $this withInterval($value)
  */
 class DescribeScdnDomainTrafficData extends Rpc
 {
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnDomainUvData extends Rpc
 {
@@ -795,16 +743,14 @@ class DescribeScdnService extends Rpc
 }
 
 /**
- * @method string getStartTime()
- * @method $this withStartTime($value)
- * @method string getLimit()
- * @method $this withLimit($value)
  * @method string getProduct()
  * @method $this withProduct($value)
+ * @method string getLimit()
+ * @method $this withLimit($value)
  * @method string getEndTime()
  * @method $this withEndTime($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
+ * @method string getStartTime()
+ * @method $this withStartTime($value)
  */
 class DescribeScdnTopDomainsByFlow extends Rpc
 {
@@ -842,10 +788,6 @@ class DescribeScdnUserDomains extends Rpc
 {
 }
 
-/**
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- */
 class DescribeScdnUserProtectInfo extends Rpc
 {
 
@@ -864,40 +806,26 @@ class DescribeScdnUserQuota extends Rpc
 }
 
 /**
- * @method string getStartDate()
- * @method $this withStartDate($value)
- * @method string getCcProtection()
- * @method $this withCcProtection($value)
- * @method string getSecurityToken()
- * @method $this withSecurityToken($value)
- * @method string getProtectType()
- * @method $this withProtectType($value)
- * @method string getDDoSBasic()
- * @method $this withDDoSBasic($value)
- * @method string getBandwidth()
- * @method $this withBandwidth($value)
- * @method string getDomainCount()
- * @method $this withDomainCount($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- * @method string getEndDate()
- * @method $this withEndDate($value)
- * @method string getElasticProtection()
- * @method $this withElasticProtection($value)
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
  */
-class OpenScdnService extends Rpc
+class DescribeScdnVerifyContent extends Rpc
 {
 }
 
 /**
- * @method string getArea()
- * @method $this withArea($value)
  * @method string getObjectPath()
  * @method $this withObjectPath($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getSecurityToken()
  * @method $this withSecurityToken($value)
+ * @method string getL2Preload()
+ * @method $this withL2Preload($value)
+ * @method string getArea()
+ * @method $this withArea($value)
+ * @method string getWithHeader()
+ * @method $this withWithHeader($value)
+ * @method string getOwnerId()
+ * @method $this withOwnerId($value)
  */
 class PreloadScdnObjectCaches extends Rpc
 {
@@ -906,12 +834,12 @@ class PreloadScdnObjectCaches extends Rpc
 /**
  * @method string getObjectPath()
  * @method $this withObjectPath($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getSecurityToken()
  * @method $this withSecurityToken($value)
  * @method string getObjectType()
  * @method $this withObjectType($value)
+ * @method string getOwnerId()
+ * @method $this withOwnerId($value)
  */
 class RefreshScdnObjectCaches extends Rpc
 {
@@ -922,8 +850,6 @@ class RefreshScdnObjectCaches extends Rpc
  * @method $this withEnable($value)
  * @method string getDomainName()
  * @method $this withDomainName($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getStatus()
  * @method $this withStatus($value)
  */
@@ -935,8 +861,6 @@ class SetScdnBotInfo extends Rpc
 }
 
 /**
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getStatus()
  * @method $this withStatus($value)
  */
@@ -948,27 +872,10 @@ class SetScdnCcInfo extends Rpc
 }
 
 /**
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getElasticBandwidth()
  * @method $this withElasticBandwidth($value)
  */
 class SetScdnDDoSInfo extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
-}
-
-/**
- * @method string getBizName()
- * @method $this withBizName($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
- */
-class SetScdnDomainBizInfo extends Rpc
 {
 
     /** @var string */
@@ -1028,15 +935,25 @@ class StopScdnDomain extends Rpc
 /**
  * @method string getSources()
  * @method $this withSources($value)
- * @method string getDomainName()
- * @method $this withDomainName($value)
- * @method string getOwnerId()
- * @method $this withOwnerId($value)
  * @method string getResourceGroupId()
  * @method $this withResourceGroupId($value)
  * @method string getSecurityToken()
  * @method $this withSecurityToken($value)
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getOwnerId()
+ * @method $this withOwnerId($value)
  */
 class UpdateScdnDomain extends Rpc
+{
+}
+
+/**
+ * @method string getDomainName()
+ * @method $this withDomainName($value)
+ * @method string getVerifyType()
+ * @method $this withVerifyType($value)
+ */
+class VerifyScdnDomainOwner extends Rpc
 {
 }

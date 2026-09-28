@@ -13,7 +13,7 @@ return [
     // 开启应用快速访问
     'app_express'           => true,
     // 默认应用
-    'default_app'           => 'admin',
+    'default_app'           => 'portal',
     // 默认时区
     'default_timezone'      => env('APP_DEFAULT_TIMEZONE', 'Asia/Shanghai'),
 

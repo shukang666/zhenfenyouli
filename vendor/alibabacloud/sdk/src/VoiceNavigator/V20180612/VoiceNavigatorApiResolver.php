@@ -15,7 +15,6 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DebugCollectedNumber debugCollectedNumber(array $options = [])
  * @method DebugDialogue debugDialogue(array $options = [])
  * @method DeleteInstance deleteInstance(array $options = [])
- * @method DescribeAsrVadConfig describeAsrVadConfig(array $options = [])
  * @method DescribeConversation describeConversation(array $options = [])
  * @method DescribeConversationContext describeConversationContext(array $options = [])
  * @method DescribeExportProgress describeExportProgress(array $options = [])
@@ -24,19 +23,21 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method DescribeRecording describeRecording(array $options = [])
  * @method DescribeStatisticalData describeStatisticalData(array $options = [])
  * @method DescribeTTSConfig describeTTSConfig(array $options = [])
- * @method DescribeVoiceConfig describeVoiceConfig(array $options = [])
  * @method Dialogue dialogue(array $options = [])
  * @method DisableInstance disableInstance(array $options = [])
  * @method EnableInstance enableInstance(array $options = [])
  * @method EndDialogue endDialogue(array $options = [])
  * @method ExportConversationDetails exportConversationDetails(array $options = [])
  * @method ExportStatisticalData exportStatisticalData(array $options = [])
+ * @method GenerateUploadUrl generateUploadUrl(array $options = [])
+ * @method GetAsrConfig getAsrConfig(array $options = [])
+ * @method GetRealTimeConcurrency getRealTimeConcurrency(array $options = [])
  * @method ListChatbotInstances listChatbotInstances(array $options = [])
  * @method ListConversationDetails listConversationDetails(array $options = [])
  * @method ListConversations listConversations(array $options = [])
  * @method ListDownloadTasks listDownloadTasks(array $options = [])
  * @method ListInstances listInstances(array $options = [])
- * @method ModifyAsrVadConfig modifyAsrVadConfig(array $options = [])
+ * @method ModifyAsrConfig modifyAsrConfig(array $options = [])
  * @method ModifyGreetingConfig modifyGreetingConfig(array $options = [])
  * @method ModifyInstance modifyInstance(array $options = [])
  * @method ModifySilenceTimeoutConfig modifySilenceTimeoutConfig(array $options = [])
@@ -207,17 +208,6 @@ class DeleteInstance extends Rpc
 }
 
 /**
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- */
-class DescribeAsrVadConfig extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
-}
-
-/**
  * @method string getConversationId()
  * @method $this withConversationId($value)
  * @method string getInstanceId()
@@ -279,6 +269,8 @@ class DescribeNavigationConfig extends Rpc
 }
 
 /**
+ * @method string getNeedVoiceSliceRecording()
+ * @method $this withNeedVoiceSliceRecording($value)
  * @method string getConversationId()
  * @method $this withConversationId($value)
  * @method string getInstanceId()
@@ -315,19 +307,6 @@ class DescribeStatisticalData extends Rpc
  * @method $this withInstanceOwnerId($value)
  */
 class DescribeTTSConfig extends Rpc
-{
-
-    /** @var string */
-    public $method = 'GET';
-}
-
-/**
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- * @method string getInstanceOwnerId()
- * @method $this withInstanceOwnerId($value)
- */
-class DescribeVoiceConfig extends Rpc
 {
 
     /** @var string */
@@ -373,6 +352,8 @@ class EnableInstance extends Rpc
 /**
  * @method string getConversationId()
  * @method $this withConversationId($value)
+ * @method string getHangUpParams()
+ * @method $this withHangUpParams($value)
  * @method string getInstanceId()
  * @method $this withInstanceId($value)
  * @method string getInstanceOwnerId()
@@ -391,9 +372,25 @@ class EndDialogue extends Rpc
  * @method $this withInstanceId($value)
  * @method string getBeginTimeRightRange()
  * @method $this withBeginTimeRightRange($value)
+ * @method array getOptions()
  */
 class ExportConversationDetails extends Rpc
 {
+
+    /**
+     * @param array $options
+     *
+     * @return $this
+     */
+	public function withOptions(array $options)
+	{
+	    $this->data['Options'] = $options;
+		foreach ($options as $i => $iValue) {
+			$this->options['query']['Options.' . ($i + 1)] = $iValue;
+		}
+
+		return $this;
+    }
 }
 
 /**
@@ -410,6 +407,369 @@ class ExportConversationDetails extends Rpc
  */
 class ExportStatisticalData extends Rpc
 {
+}
+
+/**
+ * @method string getCallerParentId()
+ * @method string getSecurityTransport()
+ * @method string getProxyOriginalSecurityTransport()
+ * @method string getUserId()
+ * @method string getCallerType()
+ * @method string getCallerIp()
+ * @method string getSecurityToken()
+ * @method string getInstanceOwnerId()
+ * @method string getClientIp()
+ * @method string getTenantId()
+ * @method string getProxyOriginalSourceIp()
+ * @method string getKey()
+ * @method string getCallerUid()
+ * @method string getCallerBid()
+ * @method string getXspaceTenantBuId()
+ * @method string getMfaPresent()
+ * @method string getEnvironment()
+ * @method string getFileName()
+ * @method string getInstanceId()
+ * @method string getRequestId()
+ * @method string getXspaceServicerId()
+ * @method string getTenantName()
+ * @method string getProxyTrustTransportInfo()
+ * @method string getUserName()
+ */
+class GenerateUploadUrl extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withCallerParentId($value)
+    {
+        $this->data['CallerParentId'] = $value;
+        $this->options['form_params']['CallerParentId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withSecurityTransport($value)
+    {
+        $this->data['SecurityTransport'] = $value;
+        $this->options['form_params']['SecurityTransport'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProxyOriginalSecurityTransport($value)
+    {
+        $this->data['ProxyOriginalSecurityTransport'] = $value;
+        $this->options['form_params']['ProxyOriginalSecurityTransport'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withUserId($value)
+    {
+        $this->data['UserId'] = $value;
+        $this->options['form_params']['UserId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withCallerType($value)
+    {
+        $this->data['CallerType'] = $value;
+        $this->options['form_params']['CallerType'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withCallerIp($value)
+    {
+        $this->data['CallerIp'] = $value;
+        $this->options['form_params']['CallerIp'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withSecurityToken($value)
+    {
+        $this->data['SecurityToken'] = $value;
+        $this->options['form_params']['SecurityToken'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withInstanceOwnerId($value)
+    {
+        $this->data['InstanceOwnerId'] = $value;
+        $this->options['form_params']['InstanceOwnerId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withClientIp($value)
+    {
+        $this->data['ClientIp'] = $value;
+        $this->options['form_params']['ClientIp'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withTenantId($value)
+    {
+        $this->data['TenantId'] = $value;
+        $this->options['form_params']['TenantId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProxyOriginalSourceIp($value)
+    {
+        $this->data['ProxyOriginalSourceIp'] = $value;
+        $this->options['form_params']['ProxyOriginalSourceIp'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withKey($value)
+    {
+        $this->data['Key'] = $value;
+        $this->options['form_params']['Key'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withCallerUid($value)
+    {
+        $this->data['CallerUid'] = $value;
+        $this->options['form_params']['CallerUid'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withCallerBid($value)
+    {
+        $this->data['CallerBid'] = $value;
+        $this->options['form_params']['CallerBid'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withXspaceTenantBuId($value)
+    {
+        $this->data['XspaceTenantBuId'] = $value;
+        $this->options['form_params']['XspaceTenantBuId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withMfaPresent($value)
+    {
+        $this->data['MfaPresent'] = $value;
+        $this->options['form_params']['MfaPresent'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withEnvironment($value)
+    {
+        $this->data['Environment'] = $value;
+        $this->options['form_params']['Environment'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withFileName($value)
+    {
+        $this->data['FileName'] = $value;
+        $this->options['form_params']['FileName'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withInstanceId($value)
+    {
+        $this->data['InstanceId'] = $value;
+        $this->options['form_params']['InstanceId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withRequestId($value)
+    {
+        $this->data['RequestId'] = $value;
+        $this->options['form_params']['RequestId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withXspaceServicerId($value)
+    {
+        $this->data['XspaceServicerId'] = $value;
+        $this->options['form_params']['XspaceServicerId'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withTenantName($value)
+    {
+        $this->data['TenantName'] = $value;
+        $this->options['form_params']['TenantName'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withProxyTrustTransportInfo($value)
+    {
+        $this->data['ProxyTrustTransportInfo'] = $value;
+        $this->options['form_params']['ProxyTrustTransportInfo'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withUserName($value)
+    {
+        $this->data['UserName'] = $value;
+        $this->options['form_params']['UserName'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getEntryId()
+ * @method $this withEntryId($value)
+ * @method string getConfigLevel()
+ * @method $this withConfigLevel($value)
+ */
+class GetAsrConfig extends Rpc
+{
+}
+
+/**
+ * @method string getInstanceId()
+ * @method $this withInstanceId($value)
+ */
+class GetRealTimeConcurrency extends Rpc
+{
+
+    /** @var string */
+    public $method = 'GET';
 }
 
 /**
@@ -455,6 +815,8 @@ class ListConversationDetails extends Rpc
  * @method $this withInstanceId($value)
  * @method string getBeginTimeRightRange()
  * @method $this withBeginTimeRightRange($value)
+ * @method string getIsSandBox()
+ * @method $this withIsSandBox($value)
  * @method string getPageSize()
  * @method $this withPageSize($value)
  */
@@ -481,6 +843,8 @@ class ListDownloadTasks extends Rpc
 /**
  * @method string getPageNumber()
  * @method $this withPageNumber($value)
+ * @method string getNluServiceTypeListJsonString()
+ * @method $this withNluServiceTypeListJsonString($value)
  * @method string getPageSize()
  * @method $this withPageSize($value)
  */
@@ -492,16 +856,21 @@ class ListInstances extends Rpc
 }
 
 /**
- * @method string getInstanceId()
- * @method $this withInstanceId($value)
- * @method string getSpeechNoiseThreshold()
- * @method $this withSpeechNoiseThreshold($value)
+ * @method string getAsrVocabularyId()
+ * @method $this withAsrVocabularyId($value)
+ * @method string getAsrClassVocabularyId()
+ * @method $this withAsrClassVocabularyId($value)
+ * @method string getEntryId()
+ * @method $this withEntryId($value)
+ * @method string getAsrCustomizationId()
+ * @method $this withAsrCustomizationId($value)
+ * @method string getConfigLevel()
+ * @method $this withConfigLevel($value)
+ * @method string getAsrAcousticModelId()
+ * @method $this withAsrAcousticModelId($value)
  */
-class ModifyAsrVadConfig extends Rpc
+class ModifyAsrConfig extends Rpc
 {
-
-    /** @var string */
-    public $method = 'GET';
 }
 
 /**
@@ -610,6 +979,8 @@ class QueryConversations extends Rpc
 }
 
 /**
+ * @method string getVoiceSliceRecordingList()
+ * @method $this withVoiceSliceRecordingList($value)
  * @method string getConversationId()
  * @method $this withConversationId($value)
  * @method string getStartTime()

@@ -13,7 +13,11 @@ use AlibabaCloud\Client\Resolver\ApiResolver;
  * @method EnhanceImageColor enhanceImageColor(array $options = [])
  * @method ErasePerson erasePerson(array $options = [])
  * @method ExtendImageStyle extendImageStyle(array $options = [])
+ * @method GenerateCartoonizedImage generateCartoonizedImage(array $options = [])
  * @method GenerateDynamicImage generateDynamicImage(array $options = [])
+ * @method GenerateImageWithText generateImageWithText(array $options = [])
+ * @method GenerateImageWithTextAndImage generateImageWithTextAndImage(array $options = [])
+ * @method GenerateSuperResolutionImage generateSuperResolutionImage(array $options = [])
  * @method GetAsyncJobResult getAsyncJobResult(array $options = [])
  * @method ImageBlindCharacterWatermark imageBlindCharacterWatermark(array $options = [])
  * @method ImageBlindPicWatermark imageBlindPicWatermark(array $options = [])
@@ -105,12 +109,25 @@ class AssessSharpness extends Rpc
 }
 
 /**
+ * @method string getHeight()
  * @method string getUrl()
  * @method string getWidth()
- * @method string getHeight()
  */
 class ChangeImageSize extends Rpc
 {
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withHeight($value)
+    {
+        $this->data['Height'] = $value;
+        $this->options['form_params']['Height'] = $value;
+
+        return $this;
+    }
 
     /**
      * @param string $value
@@ -134,19 +151,6 @@ class ChangeImageSize extends Rpc
     {
         $this->data['Width'] = $value;
         $this->options['form_params']['Width'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withHeight($value)
-    {
-        $this->data['Height'] = $value;
-        $this->options['form_params']['Height'] = $value;
 
         return $this;
     }
@@ -174,8 +178,8 @@ class ColorizeImage extends Rpc
 
 /**
  * @method string getMode()
- * @method string getImageURL()
  * @method string getOutputFormat()
+ * @method string getImageURL()
  */
 class EnhanceImageColor extends Rpc
 {
@@ -198,19 +202,6 @@ class EnhanceImageColor extends Rpc
      *
      * @return $this
      */
-    public function withImageURL($value)
-    {
-        $this->data['ImageURL'] = $value;
-        $this->options['form_params']['ImageURL'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withOutputFormat($value)
     {
         $this->data['OutputFormat'] = $value;
@@ -218,14 +209,6 @@ class EnhanceImageColor extends Rpc
 
         return $this;
     }
-}
-
-/**
- * @method string getImageURL()
- * @method string getUserMask()
- */
-class ErasePerson extends Rpc
-{
 
     /**
      * @param string $value
@@ -239,6 +222,14 @@ class ErasePerson extends Rpc
 
         return $this;
     }
+}
+
+/**
+ * @method string getUserMask()
+ * @method string getImageURL()
+ */
+class ErasePerson extends Rpc
+{
 
     /**
      * @param string $value
@@ -249,6 +240,19 @@ class ErasePerson extends Rpc
     {
         $this->data['UserMask'] = $value;
         $this->options['form_params']['UserMask'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withImageURL($value)
+    {
+        $this->data['ImageURL'] = $value;
+        $this->options['form_params']['ImageURL'] = $value;
 
         return $this;
     }
@@ -289,6 +293,68 @@ class ExtendImageStyle extends Rpc
 }
 
 /**
+ * @method string getImageType()
+ * @method string getIndex()
+ * @method string getAsync()
+ * @method string getImageUrl()
+ */
+class GenerateCartoonizedImage extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withImageType($value)
+    {
+        $this->data['ImageType'] = $value;
+        $this->options['form_params']['ImageType'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withIndex($value)
+    {
+        $this->data['Index'] = $value;
+        $this->options['form_params']['Index'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAsync($value)
+    {
+        $this->data['Async'] = $value;
+        $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withImageUrl($value)
+    {
+        $this->data['ImageUrl'] = $value;
+        $this->options['form_params']['ImageUrl'] = $value;
+
+        return $this;
+    }
+}
+
+/**
  * @method string getUrl()
  * @method string getOperation()
  */
@@ -323,11 +389,220 @@ class GenerateDynamicImage extends Rpc
 }
 
 /**
+ * @method string getResolution()
+ * @method string getNumber()
+ * @method string getText()
  * @method string getAsync()
- * @method string getJobId()
  */
-class GetAsyncJobResult extends Rpc
+class GenerateImageWithText extends Rpc
 {
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withResolution($value)
+    {
+        $this->data['Resolution'] = $value;
+        $this->options['form_params']['Resolution'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withNumber($value)
+    {
+        $this->data['Number'] = $value;
+        $this->options['form_params']['Number'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withText($value)
+    {
+        $this->data['Text'] = $value;
+        $this->options['form_params']['Text'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAsync($value)
+    {
+        $this->data['Async'] = $value;
+        $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getResolution()
+ * @method string getNumber()
+ * @method string getSimilarity()
+ * @method string getAspectRatioMode()
+ * @method string getText()
+ * @method string getRefImageUrl()
+ * @method string getAsync()
+ */
+class GenerateImageWithTextAndImage extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withResolution($value)
+    {
+        $this->data['Resolution'] = $value;
+        $this->options['form_params']['Resolution'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withNumber($value)
+    {
+        $this->data['Number'] = $value;
+        $this->options['form_params']['Number'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withSimilarity($value)
+    {
+        $this->data['Similarity'] = $value;
+        $this->options['form_params']['Similarity'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAspectRatioMode($value)
+    {
+        $this->data['AspectRatioMode'] = $value;
+        $this->options['form_params']['AspectRatioMode'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withText($value)
+    {
+        $this->data['Text'] = $value;
+        $this->options['form_params']['Text'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withRefImageUrl($value)
+    {
+        $this->data['RefImageUrl'] = $value;
+        $this->options['form_params']['RefImageUrl'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAsync($value)
+    {
+        $this->data['Async'] = $value;
+        $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getScale()
+ * @method string getUserData()
+ * @method string getOutputFormat()
+ * @method string getAsync()
+ * @method string getImageUrl()
+ * @method string getOutputQuality()
+ */
+class GenerateSuperResolutionImage extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withScale($value)
+    {
+        $this->data['Scale'] = $value;
+        $this->options['form_params']['Scale'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withUserData($value)
+    {
+        $this->data['UserData'] = $value;
+        $this->options['form_params']['UserData'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withOutputFormat($value)
+    {
+        $this->data['OutputFormat'] = $value;
+        $this->options['form_params']['OutputFormat'] = $value;
+
+        return $this;
+    }
 
     /**
      * @param string $value
@@ -347,6 +622,40 @@ class GetAsyncJobResult extends Rpc
      *
      * @return $this
      */
+    public function withImageUrl($value)
+    {
+        $this->data['ImageUrl'] = $value;
+        $this->options['form_params']['ImageUrl'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withOutputQuality($value)
+    {
+        $this->data['OutputQuality'] = $value;
+        $this->options['form_params']['OutputQuality'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getJobId()
+ * @method string getAsync()
+ */
+class GetAsyncJobResult extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
     public function withJobId($value)
     {
         $this->data['JobId'] = $value;
@@ -354,15 +663,28 @@ class GetAsyncJobResult extends Rpc
 
         return $this;
     }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withAsync($value)
+    {
+        $this->data['Async'] = $value;
+        $this->options['form_params']['Async'] = $value;
+
+        return $this;
+    }
 }
 
 /**
  * @method string getWatermarkImageURL()
+ * @method string getOutputFileType()
+ * @method string getText()
  * @method string getQualityFactor()
  * @method string getFunctionType()
- * @method string getOutputFileType()
  * @method string getOriginImageURL()
- * @method string getText()
  */
 class ImageBlindCharacterWatermark extends Rpc
 {
@@ -385,49 +707,10 @@ class ImageBlindCharacterWatermark extends Rpc
      *
      * @return $this
      */
-    public function withQualityFactor($value)
-    {
-        $this->data['QualityFactor'] = $value;
-        $this->options['form_params']['QualityFactor'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withFunctionType($value)
-    {
-        $this->data['FunctionType'] = $value;
-        $this->options['form_params']['FunctionType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withOutputFileType($value)
     {
         $this->data['OutputFileType'] = $value;
         $this->options['form_params']['OutputFileType'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withOriginImageURL($value)
-    {
-        $this->data['OriginImageURL'] = $value;
-        $this->options['form_params']['OriginImageURL'] = $value;
 
         return $this;
     }
@@ -444,31 +727,6 @@ class ImageBlindCharacterWatermark extends Rpc
 
         return $this;
     }
-}
-
-/**
- * @method string getWatermarkImageURL()
- * @method string getQualityFactor()
- * @method string getFunctionType()
- * @method string getLogoURL()
- * @method string getOutputFileType()
- * @method string getOriginImageURL()
- */
-class ImageBlindPicWatermark extends Rpc
-{
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withWatermarkImageURL($value)
-    {
-        $this->data['WatermarkImageURL'] = $value;
-        $this->options['form_params']['WatermarkImageURL'] = $value;
-
-        return $this;
-    }
 
     /**
      * @param string $value
@@ -492,6 +750,44 @@ class ImageBlindPicWatermark extends Rpc
     {
         $this->data['FunctionType'] = $value;
         $this->options['form_params']['FunctionType'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withOriginImageURL($value)
+    {
+        $this->data['OriginImageURL'] = $value;
+        $this->options['form_params']['OriginImageURL'] = $value;
+
+        return $this;
+    }
+}
+
+/**
+ * @method string getWatermarkImageURL()
+ * @method string getLogoURL()
+ * @method string getOutputFileType()
+ * @method string getQualityFactor()
+ * @method string getFunctionType()
+ * @method string getOriginImageURL()
+ */
+class ImageBlindPicWatermark extends Rpc
+{
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withWatermarkImageURL($value)
+    {
+        $this->data['WatermarkImageURL'] = $value;
+        $this->options['form_params']['WatermarkImageURL'] = $value;
 
         return $this;
     }
@@ -518,6 +814,32 @@ class ImageBlindPicWatermark extends Rpc
     {
         $this->data['OutputFileType'] = $value;
         $this->options['form_params']['OutputFileType'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withQualityFactor($value)
+    {
+        $this->data['QualityFactor'] = $value;
+        $this->options['form_params']['QualityFactor'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withFunctionType($value)
+    {
+        $this->data['FunctionType'] = $value;
+        $this->options['form_params']['FunctionType'] = $value;
 
         return $this;
     }
@@ -607,7 +929,9 @@ class IntelligentComposition extends Rpc
 /**
  * @method string getUpscaleFactor()
  * @method string getMode()
+ * @method string getOutputFormat()
  * @method string getUrl()
+ * @method string getOutputQuality()
  */
 class MakeSuperResolutionImage extends Rpc
 {
@@ -643,6 +967,19 @@ class MakeSuperResolutionImage extends Rpc
      *
      * @return $this
      */
+    public function withOutputFormat($value)
+    {
+        $this->data['OutputFormat'] = $value;
+        $this->options['form_params']['OutputFormat'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
     public function withUrl($value)
     {
         $this->data['Url'] = $value;
@@ -650,19 +987,58 @@ class MakeSuperResolutionImage extends Rpc
 
         return $this;
     }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withOutputQuality($value)
+    {
+        $this->data['OutputQuality'] = $value;
+        $this->options['form_params']['OutputQuality'] = $value;
+
+        return $this;
+    }
 }
 
 /**
+ * @method string getMode()
+ * @method string getColorCount()
  * @method array getColorTemplate()
  * @method string getDegree()
  * @method string getUrl()
- * @method string getMode()
  * @method string getAsync()
- * @method string getColorCount()
  * @method string getRefUrl()
  */
 class RecolorHDImage extends Rpc
 {
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withMode($value)
+    {
+        $this->data['Mode'] = $value;
+        $this->options['form_params']['Mode'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withColorCount($value)
+    {
+        $this->data['ColorCount'] = $value;
+        $this->options['form_params']['ColorCount'] = $value;
+
+        return $this;
+    }
 
     /**
      * @param array $colorTemplate
@@ -712,36 +1088,10 @@ class RecolorHDImage extends Rpc
      *
      * @return $this
      */
-    public function withMode($value)
-    {
-        $this->data['Mode'] = $value;
-        $this->options['form_params']['Mode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withAsync($value)
     {
         $this->data['Async'] = $value;
         $this->options['form_params']['Async'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withColorCount($value)
-    {
-        $this->data['ColorCount'] = $value;
-        $this->options['form_params']['ColorCount'] = $value;
 
         return $this;
     }
@@ -761,14 +1111,40 @@ class RecolorHDImage extends Rpc
 }
 
 /**
- * @method array getColorTemplate()
- * @method string getUrl()
  * @method string getMode()
  * @method string getColorCount()
+ * @method array getColorTemplate()
+ * @method string getUrl()
  * @method string getRefUrl()
  */
 class RecolorImage extends Rpc
 {
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withMode($value)
+    {
+        $this->data['Mode'] = $value;
+        $this->options['form_params']['Mode'] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function withColorCount($value)
+    {
+        $this->data['ColorCount'] = $value;
+        $this->options['form_params']['ColorCount'] = $value;
+
+        return $this;
+    }
 
     /**
      * @param array $colorTemplate
@@ -805,32 +1181,6 @@ class RecolorImage extends Rpc
      *
      * @return $this
      */
-    public function withMode($value)
-    {
-        $this->data['Mode'] = $value;
-        $this->options['form_params']['Mode'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
-    public function withColorCount($value)
-    {
-        $this->data['ColorCount'] = $value;
-        $this->options['form_params']['ColorCount'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param string $value
-     *
-     * @return $this
-     */
     public function withRefUrl($value)
     {
         $this->data['RefUrl'] = $value;
@@ -844,8 +1194,8 @@ class RecolorImage extends Rpc
  * @method string getBH()
  * @method string getBW()
  * @method string getBX()
- * @method string getImageURL()
  * @method string getBY()
+ * @method string getImageURL()
  */
 class RemoveImageSubtitles extends Rpc
 {
@@ -894,10 +1244,10 @@ class RemoveImageSubtitles extends Rpc
      *
      * @return $this
      */
-    public function withImageURL($value)
+    public function withBY($value)
     {
-        $this->data['ImageURL'] = $value;
-        $this->options['form_params']['ImageURL'] = $value;
+        $this->data['BY'] = $value;
+        $this->options['form_params']['BY'] = $value;
 
         return $this;
     }
@@ -907,10 +1257,10 @@ class RemoveImageSubtitles extends Rpc
      *
      * @return $this
      */
-    public function withBY($value)
+    public function withImageURL($value)
     {
-        $this->data['BY'] = $value;
-        $this->options['form_params']['BY'] = $value;
+        $this->data['ImageURL'] = $value;
+        $this->options['form_params']['ImageURL'] = $value;
 
         return $this;
     }

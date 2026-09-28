@@ -10,11 +10,8 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
-use app\admin\model\SlideModel;
 use cmf\controller\AdminBaseController;
 use app\admin\model\SlideItemModel;
-
-use think\Model;
 
 class SlideItemController extends AdminBaseController
 {
@@ -43,12 +40,9 @@ class SlideItemController extends AdminBaseController
             return $content;
         }
 
-        $id      = $this->request->param('slide_id', 1, 'intval');
+        $id      = $this->request->param('slide_id', 0, 'intval');
         $slideId = !empty($id) ? $id : 1;
-        $result  = SlideItemModel::where('slide_id', $slideId)->select()->each(function ($item,$key){
-            $item['slide_name'] = SlideModel::where('id',$item['slide_id'])->value('name');
-            return $item;
-        });
+        $result  = SlideItemModel::where('slide_id', $slideId)->select();
 
         $this->assign('slide_id', $id);
         $this->assign('result', $result);
@@ -75,9 +69,7 @@ class SlideItemController extends AdminBaseController
         if (!empty($content)) {
             return $content;
         }
-        $slidePostModel = new SlideModel();
-        $cate_list         = $slidePostModel->where('delete_time', 0)->select();
-        $this->assign('cate_list', $cate_list);
+
         $slideId = $this->request->param('slide_id');
         $this->assign('slide_id', $slideId);
         return $this->fetch();
@@ -99,7 +91,7 @@ class SlideItemController extends AdminBaseController
     public function addPost()
     {
         if ($this->request->isPost()) {
-            $data = $this->request->param();
+            $data = $this->request->param('',null,'strip_tags');
             SlideItemModel::insert($data['post']);
             $this->success(lang('ADD_SUCCESS'), url('SlideItem/index', ['slide_id' => $data['post']['slide_id']]));
         }
@@ -129,10 +121,6 @@ class SlideItemController extends AdminBaseController
         $id     = $this->request->param('id', 0, 'intval');
         $result = SlideItemModel::where('id', $id)->find();
 
-        $slidePostModel = new SlideModel();
-        $cate_list         = $slidePostModel->where('delete_time', 0)->select();
-        $this->assign('cate_list', $cate_list);
-
         $this->assign('result', $result);
         $this->assign('slide_id', $result['slide_id']);
         return $this->fetch();
@@ -154,7 +142,7 @@ class SlideItemController extends AdminBaseController
     public function editPost()
     {
         if ($this->request->isPost()) {
-            $data = $this->request->param();
+            $data = $this->request->param('',null,'strip_tags');
 
             $data['post']['image'] = cmf_asset_relative_url($data['post']['image']);
 
@@ -275,20 +263,5 @@ class SlideItemController extends AdminBaseController
         $slideItemModel = new  SlideItemModel();
         parent::listOrders($slideItemModel);
         $this->success(lang('Sort update successful'));
-    }
-
-    public function setStatus(){
-        $id = $this->request->param('id');
-        $status= $this->request->param('status');
-        $type= $this->request->param('type',1);
-        $data = SlideItemModel::find($id);
-        if(empty($data)){
-            $this->error('不存在');
-        }
-        if($type == 1){
-            $data->save(['status'=>$status]);
-        }
-
-        $this->success('设置成功');
     }
 }

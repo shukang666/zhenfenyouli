@@ -61,14 +61,14 @@ class PublicController extends AdminBaseController
             $this->error('非法登录!', cmf_get_root() . '/');
         }
 
-       /* $captcha = $this->request->param('captcha');
+        $captcha = $this->request->param('captcha');
         if (empty($captcha)) {
             $this->error(lang('CAPTCHA_REQUIRED'));
         }
         //验证码
         if (!cmf_captcha_check($captcha)) {
             $this->error(lang('CAPTCHA_NOT_RIGHT'));
-        }*/
+        }
 
         $name = $this->request->param("username");
         if (empty($name)) {
@@ -79,26 +79,24 @@ class PublicController extends AdminBaseController
             $this->error(lang('PASSWORD_REQUIRED'));
         }
         if (strpos($name, "@") > 0) {//邮箱登陆
-            $where[] = ['user_email','=',$name];
+            $where['user_email'] = $name;
         } else {
-            $where[] = ['user_login|mobile','=',$name];
+            $where['user_login'] = $name;
         }
-        $where[] = ['user_type','in',[1,3]];
 
         $result = UserModel::where($where)->find();
 
-        if (!empty($result)) {
+        if (!empty($result) && $result['user_type'] == 1) {
             if (cmf_compare_password($pass, $result['user_pass'])) {
                 $groups = RoleUserModel::alias("a")
                     ->join('role b', 'a.role_id =b.id')
                     ->where(["user_id" => $result["id"], "status" => 1])
                     ->value("role_id");
                 if ($result["id"] != 1 && (empty($groups) || empty($result['user_status']))) {
-                    $this->error(lang('USE_DISABLED'));
+                    $this->error(lang('USER_DISABLED'));
                 }
                 //登入成功页面跳转
                 session('ADMIN_ID', $result["id"]);
-
                 session('name', $result["user_login"]);
                 $data                    = [];
                 $data['last_login_ip']   = get_client_ip(0, true);
@@ -110,7 +108,7 @@ class PublicController extends AdminBaseController
                 UserModel::where('id', $result['id'])->update($data);
                 cookie("admin_username", $name, 3600 * 24 * 30);
                 session("__LOGIN_BY_CMF_ADMIN_PW__", null);
-                $this->success(lang('LOGIN_SUCCESS'), url("admin/Index/index"));
+                $this->success(lang('LOGIN_SUCCESS'), url("admin/Index/index"), ['token' => $token]);
             } else {
                 $this->error(lang('PASSWORD_NOT_RIGHT'));
             }

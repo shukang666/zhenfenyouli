@@ -108,7 +108,7 @@ class AdminUserActionController extends AdminBaseController
                 ->field('score,coin,reward_number,cycle_type,cycle_time')
                 ->update($data);
 
-            $this->success('保存成功！');
+            $this->success(lang('EDIT_SUCCESS'));
         }
     }
 
@@ -116,7 +116,7 @@ class AdminUserActionController extends AdminBaseController
      * 同步用户操作
      * @adminMenu(
      *     'name'   => '同步用户操作',
-     *     'parent' => 'index',
+     *     'parent' => 'admin/Dev/index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10000,
@@ -128,7 +128,7 @@ class AdminUserActionController extends AdminBaseController
     public function sync()
     {
 
-        $apps = cmf_scan_dir(APP_PATH . '*', GLOB_ONLYDIR);
+        $apps = cmf_scan_dir($this->app->getAppPath() . '*', GLOB_ONLYDIR);
 
         array_push($apps, 'admin', 'user');
 

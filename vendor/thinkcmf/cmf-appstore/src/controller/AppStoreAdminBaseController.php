@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkCMF [ WE CAN DO IT MORE SIMPLE ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2013-2019 http://www.thinkcmf.com All rights reserved.
+// | Copyright (c) 2013-present http://www.thinkcmf.com All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -17,6 +17,7 @@ class AppStoreAdminBaseController extends AdminBaseController
     protected function fetch($template = '', $vars = [], $config = [])
     {
         $templateFile = $this->parseTemplate($template);
+
         if (!is_file($templateFile)) {
             $request = $this->request;
             $depr    = config('view.view_depr');
@@ -40,7 +41,7 @@ class AppStoreAdminBaseController extends AdminBaseController
             }
         }
 
-        return $this->view->fetch($template);
+        return $this->view->fetch($templateFile);
     }
 
 }

@@ -11,12 +11,10 @@
 use think\facade\Db;
 use cmf\model\OptionModel;
 use think\facade\Env;
-use think\facade\Url;
 use dir\Dir;
 use think\facade\Route;
-use think\Loader;
 use cmf\lib\Storage;
-use think\facade\Hook;
+use think\facade\Cache;
 
 // 应用公共文件
 
@@ -27,34 +25,33 @@ if (!defined('T_NAME_RELATIVE')) {
 
 /**
  * Url生成
- * @param string $url 路由地址
- * @param array $vars 变量
+ * @param string      $url    路由地址
+ * @param array       $vars   变量
  * @param bool|string $suffix 生成的URL后缀
  * @param bool|string $domain 域名
  * @return UrlBuild
  */
 function url(string $url = '', array $vars = [], $suffix = true, $domain = false)
 {
-//    var_dump($vars);exit;
     return Route::buildUrl($url, $vars)->suffix($suffix)->domain($domain)->build();
 }
 
 /**
  * 调用模块的操作方法 参数格式 [模块/控制器/]操作
- * @param string $url 调用地址
- * @param string|array $vars 调用参数 支持字符串和数组
- * @param string $layer 要调用的控制层名称
- * @param bool $appendSuffix 是否添加类名后缀
+ * @param string       $url          调用地址
+ * @param string|array $vars         调用参数 支持字符串和数组
+ * @param string       $layer        要调用的控制层名称
+ * @param bool         $appendSuffix 是否添加类名后缀
  * @return mixed
  */
 function action($url, $vars = [], $layer = 'controller', $appendSuffix = false)
 {
-    $app = app();
+    $app           = app();
     $rootNamespace = $app->getRootNamespace();
-    $urlArr = explode('/', $url);
-    $appName = $urlArr[0];
-    $controller = cmf_parse_name($urlArr[1], 1, true);
-    $action = $urlArr[2];
+    $urlArr        = explode('/', $url);
+    $appName       = $urlArr[0];
+    $controller    = cmf_parse_name($urlArr[1], 1, true);
+    $action        = $urlArr[2];
 
     return $app->invokeMethod(["{$rootNamespace}\\$appName\\$layer\\$controller" . ucfirst($layer), $action], $vars);
 }
@@ -62,9 +59,9 @@ function action($url, $vars = [], $layer = 'controller', $appendSuffix = false)
 if (!function_exists('db')) {
     /**
      * 实例化数据库类
-     * @param string $name 操作的数据表名称（不含前缀）
+     * @param string $name   操作的数据表名称（不含前缀）
      * @param string $config 数据库配置参数
-     * @param bool $force 是否强制重新连接
+     * @param bool   $force  是否强制重新连接
      * @return \think\db\Query
      */
     function db($name = '', $config = null, $force = false)
@@ -170,7 +167,7 @@ function cmf_get_current_theme()
         }
     }
 
-    $t = 't';
+    $t     = 't';
     $theme = config('template.cmf_default_theme');
 
     $cmfDetectTheme = config('template.cmf_detect_theme');
@@ -218,7 +215,7 @@ function cmf_get_current_admin_theme()
         }
     }
 
-    $t = '_at';
+    $t     = '_at';
     $theme = config('template.cmf_admin_default_theme');
 
     $cmfDetectTheme = true;
@@ -280,7 +277,7 @@ function cmf_get_user_avatar_url($avatar)
 
 /**
  * CMF密码加密方法
- * @param string $pw 要加密的原始密码
+ * @param string $pw       要加密的原始密码
  * @param string $authCode 加密字符串
  * @return string
  */
@@ -301,13 +298,13 @@ function cmf_password($pw, $authCode = '')
 function cmf_password_old($pw)
 {
     $decor = md5(config('database.connections.mysql.prefix'));
-    $mi = md5($pw);
+    $mi    = md5($pw);
     return substr($decor, 0, 12) . $mi . substr($decor, -4, 4);
 }
 
 /**
  * CMF密码比较方法,所有涉及密码比较的地方都用这个方法
- * @param string $password 要比较的密码
+ * @param string $password     要比较的密码
  * @param string $passwordInDb 数据库保存的已经加密过的密码
  * @return boolean 密码相同，返回true
  */
@@ -320,40 +317,14 @@ function cmf_compare_password($password, $passwordInDb)
     }
 }
 
-function checkZero($data)
-{
-    if (empty($data) || $data == '0.00' || $data == 0.00) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 /**
  * 文件日志
  * @param        $content 要写入的内容
- * @param string $file 日志文件,在web 入口目录
+ * @param string $file    日志文件,在web 入口目录
  */
-function cmf_log($content,$name='参数', $file = "log.txt")
+function cmf_log($content, $file = "log.txt")
 {
-    $file_url = 'log';
-    $time = date("Y-m-d H:i:s");
-    $content = "[{$time}]-[$name] " . json_encode($content, 256) . "\r\n";
-    if (!is_dir(dirname($file_url))) {
-        mkdir($file_url, 0755, true);
-    }
-    $file_url .= "/{$file}";
-    $res= file_put_contents($file_url, $content, FILE_APPEND);
-  //文件大小5M就把这个文件放到新文件里 把现在得清空
-    $size = 5242880;
-    $file_size = file_exists($file_url) ? filesize($file_url) : 0;
-    if ($file_size > $size) {
-        $file_name = $file_url;
-        $file_url = dirname($file_url) . '/' . date("YmdHis") . '.log';
-        $content = "\r\n\r\n\r\n" . $content;
-        $res = file_put_contents($file_url, $content);
-        $res = file_put_contents($file_name, "");
-    }
+    file_put_contents($file, $content, FILE_APPEND);
 }
 
 /**
@@ -363,7 +334,7 @@ function cmf_log($content,$name='参数', $file = "log.txt")
  */
 function cmf_random_string($len = 6)
 {
-    $chars = [
+    $chars    = [
         "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
         "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
         "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G",
@@ -391,11 +362,11 @@ function cmf_clear_cache()
     }
 
     $runtimePath = runtime_path();
-    $dirs = [];
-    $rootDirs = cmf_scan_dir($runtimePath . "*");
+    $dirs        = [];
+    $rootDirs    = cmf_scan_dir($runtimePath . "*");
     //$noNeedClear=array(".","..","Data");
     $noNeedClear = ['.', '..', 'log', 'session'];
-    $rootDirs = array_diff($rootDirs, $noNeedClear);
+    $rootDirs    = array_diff($rootDirs, $noNeedClear);
     foreach ($rootDirs as $dir) {
 
         if ($dir != "." && $dir != "..") {
@@ -422,12 +393,14 @@ function cmf_clear_cache()
     foreach ($dirs as $dir) {
         $dirTool->delDir($dir);
     }
+
+    Cache::clear();
 }
 
 /**
  * 保存数组变量到php文件
  * @param string $path 保存路径
- * @param mixed $var 要保存的变量
+ * @param mixed  $var  要保存的变量
  * @return boolean 保存成功返回true,否则false
  */
 function cmf_save_var($path, $var)
@@ -539,9 +512,9 @@ function cmf_set_cmf_setting($data)
 
 /**
  * 设置系统配置，通用
- * @param string $key 配置键值,都小写
- * @param array $data 配置值，数组
- * @param bool $replace 是否完全替换
+ * @param string $key     配置键值,都小写
+ * @param array  $data    配置值，数组
+ * @param bool   $replace 是否完全替换
  * @return bool 是否成功
  * @throws \think\Exception
  * @throws \think\db\exception\DataNotFoundException
@@ -555,7 +528,7 @@ function cmf_set_option($key, $data, $replace = false)
         return false;
     }
 
-    $key = strtolower($key);
+    $key    = strtolower($key);
     $option = [];
 
     $findOption = OptionModel::where('option_name', $key)->find();
@@ -570,38 +543,7 @@ function cmf_set_option($key, $data, $replace = false)
         $option['option_value'] = json_encode($data, JSON_UNESCAPED_UNICODE);
         OptionModel::where('option_name', $key)->update($option);
     } else {
-        $option['option_name'] = $key;
-        $option['option_value'] = $data;
-        OptionModel::create($option);
-    }
-
-    cache('cmf_options_' . $key, null);//删除缓存
-
-    return true;
-}
-
-function cmf_set_new_option($key, $data, $replace = false)
-{
-    if (empty($data) || !is_string($key) || empty($key)) {
-        return false;
-    }
-
-    $key = strtolower($key);
-    $option = [];
-
-    $findOption = OptionModel::where('option_name', $key)->find();
-    if ($findOption) {
-        if (!$replace) {
-            $oldOptionValue = $findOption['option_value'];
-            if (!empty($oldOptionValue)) {
-                $data = array_merge($oldOptionValue, $data);
-            }
-        }
-
-        $option['option_value'] = json_encode($data, JSON_UNESCAPED_UNICODE);
-        OptionModel::where('option_name', $key)->update($option);
-    } else {
-        $option['option_name'] = $key;
+        $option['option_name']  = $key;
         $option['option_value'] = $data;
         OptionModel::create($option);
     }
@@ -650,40 +592,6 @@ function cmf_get_option($key)
     return $optionValue;
 }
 
-
-/**
- * 获取系统配置，通用
- * @param string $key 配置键值,都小写
- * @return array
- */
-function cmf_get_new_option($key)
-{
-    if (!is_string($key) || empty($key)) {
-        return [];
-    }
-
-    if (PHP_SAPI != 'cli') {
-        static $cmfGetOption;
-
-        if (empty($cmfGetOption)) {
-            $cmfGetOption = [];
-        } else {
-            if (!empty($cmfGetOption[$key])) {
-                return $cmfGetOption[$key];
-            }
-        }
-    }
-
-    $optionValue = OptionModel::where('option_name', $key)->value('option_value');
-    if (!empty($optionValue)) {
-        $optionValue = json_decode($optionValue, true);
-
-    }
-    $cmfGetOption[$key] = $optionValue;
-
-    return $optionValue;
-}
-
 /**
  * 获取CMF上传配置
  */
@@ -694,24 +602,24 @@ function cmf_get_upload_setting()
         $uploadSetting = [
             'file_types' => [
                 'image' => [
-                    'upload_max_filesize' => '5120',//单位KB
-                    'extensions' => 'jpg,jpeg,png,gif,bmp4'
+                    'upload_max_filesize' => '10240',//单位KB
+                    'extensions'          => 'jpg,jpeg,png,gif,bmp4'
                 ],
                 'video' => [
-                    'upload_max_filesize' => '202400',
-                    'extensions' => 'mp4,avi,wmv,rm,rmvb,mkv'
+                    'upload_max_filesize' => '10240',
+                    'extensions'          => 'mp4,avi,wmv,rm,rmvb,mkv'
                 ],
                 'audio' => [
                     'upload_max_filesize' => '10240',
-                    'extensions' => 'mp3,wma,wav'
+                    'extensions'          => 'mp3,wma,wav'
                 ],
-                'file' => [
+                'file'  => [
                     'upload_max_filesize' => '10240',
-                    'extensions' => 'txt,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar'
+                    'extensions'          => 'txt,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar'
                 ]
             ],
             'chunk_size' => 512,//单位KB
-            'max_files' => 20 //最大同时上传文件数
+            'max_files'  => 20 //最大同时上传文件数
         ];
     }
 
@@ -750,16 +658,16 @@ function cmf_get_content_images($content)
 {
     //import('phpQuery.phpQuery', EXTEND_PATH);
     \phpQuery::newDocumentHTML($content);
-    $pq = pq(null);
-    $images = $pq->find("img");
+    $pq         = pq(null);
+    $images     = $pq->find("img");
     $imagesData = [];
     if ($images->length) {
         foreach ($images as $img) {
-            $img = pq($img);
-            $image = [];
-            $image['src'] = $img->attr("src");
+            $img            = pq($img);
+            $image          = [];
+            $image['src']   = $img->attr("src");
             $image['title'] = $img->attr("title");
-            $image['alt'] = $img->attr("alt");
+            $image['alt']   = $img->attr("alt");
             array_push($imagesData, $image);
         }
     }
@@ -769,7 +677,7 @@ function cmf_get_content_images($content)
 
 /**
  * 去除字符串中的指定字符
- * @param string $str 待处理字符串
+ * @param string $str   待处理字符串
  * @param string $chars 需去掉的特殊字符
  * @return string
  */
@@ -794,7 +702,7 @@ function cmf_strip_chars($str, $chars = '?<*.>\'\"')
 function cmf_send_email($address, $subject, $message)
 {
     $smtpSetting = cmf_get_option('smtp_setting');
-    $mail = new \PHPMailer\PHPMailer\PHPMailer();
+    $mail        = new \PHPMailer\PHPMailer\PHPMailer();
     // 设置PHPMailer使用SMTP服务器发送Email
     $mail->IsSMTP();
     $mail->IsHTML(true);
@@ -815,15 +723,15 @@ function cmf_send_email($address, $subject, $message)
     $mail->Host = $smtpSetting['host'];
     //by Rainfer
     // 设置SMTPSecure。
-    $Secure = $smtpSetting['smtp_secure'];
+    $Secure           = $smtpSetting['smtp_secure'];
     $mail->SMTPSecure = empty($Secure) ? '' : $Secure;
     // 设置SMTP服务器端口。
-    $port = $smtpSetting['port'];
+    $port       = $smtpSetting['port'];
     $mail->Port = empty($port) ? "25" : $port;
     // 设置为"需要验证"
-    $mail->SMTPAuth = true;
+    $mail->SMTPAuth    = true;
     $mail->SMTPAutoTLS = false;
-    $mail->Timeout = 10;
+    $mail->Timeout     = 10;
     // 设置用户名和密码。
     $mail->Username = $smtpSetting['username'];
     $mail->Password = $smtpSetting['password'];
@@ -839,135 +747,15 @@ function cmf_send_email($address, $subject, $message)
 /**
  * 转化数据库保存的文件路径，为可以访问的url
  * @param string $file
- * @param mixed $style 图片样式,支持各大云存储
+ * @param mixed  $style 图片样式,支持各大云存储
  * @return string
  */
 function cmf_get_asset_url($file, $style = '')
 {
-    if (!empty($file)) {
-        return doGetAssetUrl($file);
-    } else {
-        return '';
-    }
-}
-
-/**
- * 站点对外根 URL（无尾斜杠），用于本地 /upload 资源
- */
-function cmf_get_public_site_root()
-{
-    $site = cmf_get_option('site_info');
-    $base = !empty($site['site_url']) ? rtrim((string)$site['site_url'], '/') : rtrim(cmf_get_domain(), '/');
-    if ($base === '' || $base === 'http://' || $base === 'https://') {
-        $base = 'https://admin.circular-economy.cn';
-    }
-    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
-    if ($isHttps) {
-        $base = preg_replace('#^http://#i', 'https://', $base);
-    }
-    // 本机/其它域名进后台时，upload 跟当前访问域（避免 site_url 指生产而本地 public/upload 有图仍 404）
-    if (PHP_SAPI !== 'cli') {
-        $requestDomain = rtrim(cmf_get_domain(), '/');
-        if ($requestDomain !== '' && $base !== '') {
-            $baseHost = parse_url($base, PHP_URL_HOST);
-            $reqHost  = parse_url($requestDomain, PHP_URL_HOST);
-            if ($baseHost && $reqHost && strcasecmp((string)$baseHost, (string)$reqHost) !== 0) {
-                $base = $requestDomain;
-                if ($isHttps) {
-                    $base = preg_replace('#^http://#i', 'https://', $base);
-                }
-            }
-        }
-    }
-    return $base;
-}
-
-/** 修正缺 /upload/ 的本站绝对地址（OSS 迁移后常见） */
-function cmf_normalize_public_file_url($url)
-{
-    if (!is_string($url) || $url === '') {
-        return $url;
-    }
-    if (strpos($url, 'oss.ausite.cn') !== false) {
-        return cmf_get_asset_url($url);
-    }
-    if (preg_match('#^https?://[^/]+/(upload/)?(xcxkf052/|dz\d+/|kf\d+/)#i', $url, $m)) {
-        if (empty($m[1])) {
-            return preg_replace('#^(https?://[^/]+)/((?:xcxkf052|dz\d+|kf\d+)/)#i', '$1/upload/$2', $url);
-        }
-    }
-    return $url;
-}
-
-function doGetAssetUrl($file, $style = '')
-{
     if (strpos($file, "http") === 0) {
-        // 旧乙方 OSS 域名已下线，转为本地 upload 相对路径再拼站域名
-        if (strpos($file, 'oss.ausite.cn') !== false) {
-            $file = preg_replace('#^https?://[^/]+/#', '', $file);
-            $file = preg_replace('/\?.*$/', '', $file);
-            $file = ltrim($file, '/');
-            if (strpos($file, 'upload/') === 0) {
-                $file = substr($file, 7);
-            }
-        } else {
-            return cmf_normalize_public_file_url($file);
-        }
-    }
-    if (strpos($file, "/") === 0) {
-        if (strpos($file, '/upload/') === 0) {
-            return cmf_get_public_site_root() . $file;
-        }
-        if (preg_match('#^/(xcxkf052/|dz\d+/|kf\d+/)#', $file)) {
-            return cmf_get_public_site_root() . '/upload' . $file;
-        }
-        return rtrim(cmf_get_public_site_root(), '/') . $file;
-    }
-    $storage = Storage::instance();
-    return cmf_normalize_public_file_url($storage->getUrl($file, $style));
-}
-
-function get_true_asset_url($file)
-{
-    if (!empty($file)) {
-        return cmf_get_asset_url($file);
-    } else {
-        return '';
-    }
-}
-
-/**
- * 转化数据库保存图片的文件路径，为可以访问的url
- * @param string $file 文件路径，数据存储的文件相对路径
- * @param string $style 图片样式,支持各大云存储
- * @return string 图片链接
- */
-function cmf_get_image_url($file, $style = '')
-{
-    if (empty($file)) {
-        return '';
-    }
-
-    if (strpos($file, "http") === 0) {
-        if (strpos($file, 'oss.ausite.cn') !== false) {
-            $file = preg_replace('#^https?://[^/]+/#', '', $file);
-            $file = preg_replace('/\?.*$/', '', $file);
-            $file = ltrim($file, '/');
-            if (strpos($file, 'upload/') === 0) {
-                $file = substr($file, 7);
-            }
-        } else {
-            return cmf_normalize_public_file_url($file);
-        }
+        return $file;
     } else if (strpos($file, "/") === 0) {
-        if (strpos($file, '/upload/') === 0) {
-            return cmf_get_public_site_root() . $file;
-        }
-        if (preg_match('#^/(xcxkf052/|dz\d+/|kf\d+/)#', $file)) {
-            return cmf_get_public_site_root() . '/upload' . $file;
-        }
-        return rtrim(cmf_get_public_site_root(), '/') . $file;
+        return $file;
     } else {
 //        $storage = cmf_get_option('storage');
 //        if (empty($storage['type'])) {
@@ -978,29 +766,78 @@ function cmf_get_image_url($file, $style = '')
 //            $style     = empty($style) ? $watermark['styles_watermark'] : $style;
 //        }
         $storage = Storage::instance();
-        return cmf_normalize_public_file_url($storage->getImageUrl($file, $style));
+        return $storage->getUrl($file, $style);
+    }
+}
+
+/**
+ * 转化数据库保存图片的文件路径，为可以访问的url
+ * @param string $file  文件路径，数据存储的文件相对路径
+ * @param string $style 图片样式,支持各大云存储
+ * @return string 图片链接
+ */
+function cmf_get_image_url($file, $style = 'watermark')
+{
+    if (empty($file)) {
+        return '';
+    }
+
+    if (strpos($file, "http") === 0) {
+        return $file;
+    } else if (strpos($file, "/") === 0) {
+        return cmf_get_domain() . $file;
+    } else {
+//        $storage = cmf_get_option('storage');
+//        if (empty($storage['type'])) {
+//            $storage['type'] = 'Local';
+//        }
+//        if ($storage['type'] != 'Local') {
+//            $watermark = cmf_get_plugin_config($storage['type']);
+//            $style     = empty($style) ? $watermark['styles_watermark'] : $style;
+//        }
+        $storage = Storage::instance();
+        return $storage->getImageUrl($file, $style);
     }
 }
 
 /**
  * 获取图片预览链接
- * @param string $file 文件路径，相对于upload
+ * @param string $file  文件路径，相对于upload
  * @param string $style 图片样式,支持各大云存储
  * @return string
  */
-function cmf_get_image_preview_url($file, $style = '')
+function cmf_get_image_preview_url($file, $style = 'watermark')
 {
-    // 与 cmf_get_image_url 一致（后台列表/表单大量用 preview_url，旧实现会漏 /upload/ 或裸域名路径）
-    return cmf_get_image_url($file, $style);
+    if (empty($file)) {
+        return '';
+    }
+
+    if (strpos($file, "http") === 0) {
+        return $file;
+    } else if (strpos($file, "/") === 0) {
+        return $file;
+    } else {
+//        $storage = cmf_get_option('storage');
+//        if (empty($storage['type'])) {
+//            $storage['type'] = 'Local';
+//        }
+//        if ($storage['type'] != 'Local') {
+//            $watermark = cmf_get_plugin_config($storage['type']);
+//            $style     = empty($style) ? $watermark['styles_watermark'] : $style;
+//        }
+        $storage = Storage::instance();
+        return $storage->getPreviewUrl($file, $style);
+    }
 }
 
 /**
  * 获取文件下载链接
- * @param string $file 文件路径，数据库里保存的相对路径
- * @param int $expires 过期时间，单位 s
+ * @param string $file    文件路径，数据库里保存的相对路径
+ * @param int    $expires 过期时间，单位 s
+ * @param bool   $force   是否直接下载
  * @return string 文件链接
  */
-function cmf_get_file_download_url($file, $expires = 3600)
+function cmf_get_file_download_url($file, $expires = 3600, $force = true)
 {
     if (empty($file)) {
         return '';
@@ -1014,15 +851,26 @@ function cmf_get_file_download_url($file, $expires = 3600)
         return $file;
     } else {
         $storage = Storage::instance();
-        return $storage->getFileDownloadUrl($file, $expires);
+        return $storage->getFileDownloadUrl($file, $expires, $force);
     }
+}
+
+/**
+ * 获取文件访问链接
+ * @param string $file    文件路径，数据库里保存的相对路径
+ * @param int    $expires 过期时间，单位 s
+ * @return string 文件链接
+ */
+function cmf_get_file_url($file, $expires = 3600)
+{
+    return cmf_get_file_download_url($file, $expires, false);
 }
 
 /**
  * 解密用cmf_str_encode加密的字符串
  * @param        $string    要解密的字符串
- * @param string $key 加密时salt
- * @param int $expiry 多少秒后过期
+ * @param string $key       加密时salt
+ * @param int    $expiry    多少秒后过期
  * @param string $operation 操作,默认为DECODE
  * @return bool|string
  */
@@ -1030,19 +878,19 @@ function cmf_str_decode($string, $key = '', $expiry = 0, $operation = 'DECODE')
 {
     $ckey_length = 4;
 
-    $key = md5($key ? $key : config("database.authcode"));
+    $key  = md5($key ? $key : config("database.authcode"));
     $keya = md5(substr($key, 0, 16));
     $keyb = md5(substr($key, 16, 16));
     $keyc = $ckey_length ? ($operation == 'DECODE' ? substr($string, 0, $ckey_length) : substr(md5(microtime()), -$ckey_length)) : '';
 
-    $cryptkey = $keya . md5($keya . $keyc);
+    $cryptkey   = $keya . md5($keya . $keyc);
     $key_length = strlen($cryptkey);
 
-    $string = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0) . substr(md5($string . $keyb), 0, 16) . $string;
+    $string        = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0) . substr(md5($string . $keyb), 0, 16) . $string;
     $string_length = strlen($string);
 
     $result = '';
-    $box = range(0, 255);
+    $box    = range(0, 255);
 
     $rndkey = [];
     for ($i = 0; $i <= 255; $i++) {
@@ -1050,19 +898,19 @@ function cmf_str_decode($string, $key = '', $expiry = 0, $operation = 'DECODE')
     }
 
     for ($j = $i = 0; $i < 256; $i++) {
-        $j = ($j + $box[$i] + $rndkey[$i]) % 256;
-        $tmp = $box[$i];
+        $j       = ($j + $box[$i] + $rndkey[$i]) % 256;
+        $tmp     = $box[$i];
         $box[$i] = $box[$j];
         $box[$j] = $tmp;
     }
 
     for ($a = $j = $i = 0; $i < $string_length; $i++) {
-        $a = ($a + 1) % 256;
-        $j = ($j + $box[$a]) % 256;
-        $tmp = $box[$a];
+        $a       = ($a + 1) % 256;
+        $j       = ($j + $box[$a]) % 256;
+        $tmp     = $box[$a];
         $box[$a] = $box[$j];
         $box[$j] = $tmp;
-        $result .= chr(ord($string[$i]) ^ ($box[($box[$a] + $box[$j]) % 256]));
+        $result  .= chr(ord($string[$i]) ^ ($box[($box[$a] + $box[$j]) % 256]));
     }
 
     if ($operation == 'DECODE') {
@@ -1080,8 +928,8 @@ function cmf_str_decode($string, $key = '', $expiry = 0, $operation = 'DECODE')
 /**
  * 加密字符串
  * @param        $string 要加密的字符串
- * @param string $key salt
- * @param int $expiry 多少秒后过期
+ * @param string $key    salt
+ * @param int    $expiry 多少秒后过期
  * @return bool|string
  */
 function cmf_str_encode($string, $key = '', $expiry = 0)
@@ -1105,10 +953,10 @@ function cmf_asset_relative_url($assetUrl)
 
 /**
  * 检查用户对某个url内容的可访问性，用于记录如是否赞过，是否访问过等等;开发者可以自由控制，对于没有必要做的检查可以不做，以减少服务器压力
- * @param string $object 访问对象的id,格式：不带前缀的表名+id;如post1表示xx_post表里id为1的记录;如果object为空，表示只检查对某个url访问的合法性
- * @param int $countLimit 访问次数限制,如1，表示只能访问一次
- * @param boolean $ipLimit ip限制,false为不限制，true为限制
- * @param int $expire 距离上次访问的最小时间单位s，0表示不限制，大于0表示最后访问$expire秒后才可以访问
+ * @param string  $object     访问对象的id,格式：不带前缀的表名+id;如post1表示xx_post表里id为1的记录;如果object为空，表示只检查对某个url访问的合法性
+ * @param int     $countLimit 访问次数限制,如1，表示只能访问一次
+ * @param boolean $ipLimit    ip限制,false为不限制，true为限制
+ * @param int     $expire     距离上次访问的最小时间单位s，0表示不限制，大于0表示最后访问$expire秒后才可以访问
  * @return true 可访问，false不可访问
  * @throws \think\Exception
  * @throws \think\db\exception\DataNotFoundException
@@ -1119,7 +967,7 @@ function cmf_asset_relative_url($assetUrl)
 function cmf_check_user_action($object = "", $countLimit = 1, $ipLimit = false, $expire = 0)
 {
     $request = request();
-    $action = app()->http->getName() . "/" . $request->controller() . "/" . $request->action();
+    $action  = app()->http->getName() . "/" . $request->controller() . "/" . $request->action();
 
     if (is_array($object)) {
         $userId = $object['user_id'];
@@ -1141,9 +989,9 @@ function cmf_check_user_action($object = "", $countLimit = 1, $ipLimit = false, 
     $time = time();
     if ($findLog) {
         Db::name('user_action_log')->where($where)->update([
-            "count" => Db::raw("count+1"),
+            "count"           => Db::raw("count+1"),
             "last_visit_time" => $time,
-            "ip" => $ip
+            "ip"              => $ip
         ]);
 
         if ($findLog['count'] >= $countLimit) {
@@ -1155,12 +1003,12 @@ function cmf_check_user_action($object = "", $countLimit = 1, $ipLimit = false, 
         }
     } else {
         Db::name('user_action_log')->insert([
-            "user_id" => $userId,
-            "action" => $action,
-            "object" => $object,
-            "count" => Db::raw("count+1"),
+            "user_id"         => $userId,
+            "action"          => $action,
+            "object"          => $object,
+            "count"           => Db::raw("count+1"),
             "last_visit_time" => $time,
-            "ip" => $ip
+            "ip"              => $ip
         ]);
     }
 
@@ -1247,9 +1095,9 @@ function cmf_is_ipad()
 
 /**
  * 添加钩子
- * @param string $hook 钩子名称
- * @param mixed $params 传入参数
- * @param bool $once
+ * @param string $hook   钩子名称
+ * @param mixed  $params 传入参数
+ * @param bool   $once
  * @return mixed
  */
 function hook($hook, $params = null, $once = false)
@@ -1260,8 +1108,8 @@ function hook($hook, $params = null, $once = false)
 
 /**
  * 添加钩子,只执行一个
- * @param string $hook 钩子名称
- * @param mixed $params 传入参数
+ * @param string $hook   钩子名称
+ * @param mixed  $params 传入参数
  * @return mixed
  */
 function hook_one($hook, $params = null)
@@ -1271,15 +1119,28 @@ function hook_one($hook, $params = null)
 }
 
 /**
+ * 获取应用类名，
+ * @param $name      纯字母应用名，如:portal
+ * @return string
+ */
+function cmf_get_app_class($name)
+{
+    $name        = strtolower($name);
+    $classPrefix = ucwords($name);
+    $class       = "app\\{$name}\\{$classPrefix}App";
+    return $class;
+}
+
+/**
  * 获取插件类名
  * @param string $name 插件名
  * @return string
  */
 function cmf_get_plugin_class($name)
 {
-    $name = ucwords($name);
+    $name      = ucwords($name);
     $pluginDir = cmf_parse_name($name);
-    $class = "plugins\\{$pluginDir}\\{$name}Plugin";
+    $class     = "plugins\\{$pluginDir}\\{$name}Plugin";
     return $class;
 }
 
@@ -1302,11 +1163,11 @@ function cmf_get_plugin_config($name)
 /**
  * 替代scan_dir的方法
  * @param string $pattern 检索模式 搜索模式 *.txt,*.doc; (同glog方法)
- * @param int $flags
+ * @param int    $flags
  * @param        $pattern
  * @return array
  */
-function cmf_scan_dir($pattern, $flags = null)
+function cmf_scan_dir($pattern, $flags = 0)
 {
     $files = glob($pattern, $flags);
     if (empty($files)) {
@@ -1325,8 +1186,8 @@ function cmf_scan_dir($pattern, $flags = null)
  */
 function cmf_sub_dirs($dir)
 {
-    $dir = ltrim($dir, "/");
-    $dirs = [];
+    $dir     = ltrim($dir, "/");
+    $dirs    = [];
     $subDirs = cmf_scan_dir("$dir/*", GLOB_ONLYDIR);
     if (!empty($subDirs)) {
         foreach ($subDirs as $subDir) {
@@ -1344,9 +1205,9 @@ function cmf_sub_dirs($dir)
 
 /**
  * 生成访问插件的url
- * @param string $url url格式：插件名://控制器名/方法
- * @param array $vars 参数
- * @param bool $domain 是否显示域名 或者直接传入域名
+ * @param string $url    url格式：插件名://控制器名/方法
+ * @param array  $vars   参数
+ * @param bool   $domain 是否显示域名 或者直接传入域名
  * @return string
  */
 function cmf_plugin_url($url, $vars = [], $domain = false)
@@ -1354,15 +1215,15 @@ function cmf_plugin_url($url, $vars = [], $domain = false)
     global $CMF_GV_routes;
 
     if (empty($CMF_GV_routes)) {
-        $routeModel = new \app\admin\model\RouteModel();
+        $routeModel    = new \app\admin\model\RouteModel();
         $CMF_GV_routes = $routeModel->getRoutes();
     }
 
-    $url = parse_url($url);
+    $url              = parse_url($url);
     $case_insensitive = true;
-    $plugin = $case_insensitive ? cmf_parse_name($url['scheme']) : $url['scheme'];
-    $controller = $case_insensitive ? cmf_parse_name($url['host']) : $url['host'];
-    $action = trim($case_insensitive ? strtolower($url['path']) : $url['path'], '/');
+    $plugin           = $case_insensitive ? cmf_parse_name($url['scheme']) : $url['scheme'];
+    $controller       = $case_insensitive ? cmf_parse_name($url['host']) : $url['host'];
+    $action           = trim($case_insensitive ? strtolower($url['path']) : $url['path'], '/');
 
     /* 解析URL带的参数 */
     if (isset($url['query'])) {
@@ -1372,9 +1233,9 @@ function cmf_plugin_url($url, $vars = [], $domain = false)
 
     /* 基础参数 */
     $params = [
-        '_plugin' => $plugin,
+        '_plugin'     => $plugin,
         '_controller' => $controller,
-        '_action' => $action,
+        '_action'     => $action,
     ];
 
     $pluginUrl = '\\cmf\\controller\\PluginController@index?' . http_build_query($params);
@@ -1384,10 +1245,10 @@ function cmf_plugin_url($url, $vars = [], $domain = false)
         foreach ($CMF_GV_routes[$pluginUrl] as $actionRoute) {
             $sameVars = array_intersect_assoc($vars, $actionRoute['vars']);
 
-            if (count($sameVars) == count($actionRoute['vars'])) {
+            if (!empty($sameVars) && count($sameVars) == count($actionRoute['vars'])) {
                 ksort($sameVars);
                 $pluginUrl = $pluginUrl . '&' . http_build_query($sameVars);
-                $vars = array_diff_assoc($vars, $sameVars);
+                $vars      = array_diff_assoc($vars, $sameVars);
                 break;
             }
         }
@@ -1401,9 +1262,10 @@ function cmf_plugin_url($url, $vars = [], $domain = false)
  * @param $userId   int        要检查权限的用户 ID
  * @param $name     string|array  需要验证的规则列表,支持逗号分隔的权限规则或索引数组
  * @param $relation string    如果为 'or' 表示满足任一条规则即通过验证;如果为 'and'则表示需满足所有规则才能通过验证
+ * @param $roleType string    角色类型
  * @return boolean            通过验证返回true;失败返回false
  */
-function cmf_auth_check($userId, $name = null, $relation = 'or')
+function cmf_auth_check($userId, $name = null, $relation = 'or', $roleType = 'admin')
 {
     if (empty($userId)) {
         return false;
@@ -1415,43 +1277,14 @@ function cmf_auth_check($userId, $name = null, $relation = 'or')
 
     $authObj = new \cmf\lib\Auth();
     if (empty($name)) {
-        $request = request();
-        $app = app()->http->getName();
+        $request    = request();
+        $app        = app()->http->getName();
         $controller = $request->controller();
-        $action = $request->action();
-        $name = strtolower($app . "/" . $controller . "/" . $action);
+        $action     = $request->action();
+        $name       = strtolower($app . "/" . $controller . "/" . $action);
     }
-    return $authObj->check($userId, $name, $relation);
+    return $authObj->check($userId, $name, $relation, $roleType);
 }
-
-/**
- * 检查权限
- * @param $userId   int        要检查权限的用户 ID
- * @param $name     string|array  需要验证的规则列表,支持逗号分隔的权限规则或索引数组
- * @param $relation string    如果为 'or' 表示满足任一条规则即通过验证;如果为 'and'则表示需满足所有规则才能通过验证
- * @return boolean            通过验证返回true;失败返回false
- */
-function cmf_auth_all_check($userId, $name = null, $relation = 'or')
-{
-    if (empty($userId)) {
-        return false;
-    }
-
-    if (in_array($userId, [1, 14])) {
-        return true;
-    }
-
-    $authObj = new \cmf\lib\Auth();
-    if (empty($name)) {
-        $request = request();
-        $app = app()->http->getName();
-        $controller = $request->controller();
-        $action = $request->action();
-        $name = strtolower($app . "/" . $controller . "/" . $action);
-    }
-    return $authObj->allCheck($userId, $name, $relation);
-}
-
 
 function cmf_alpha_id($in, $to_num = false, $pad_up = 4, $passKey = null)
 {
@@ -1478,12 +1311,12 @@ function cmf_alpha_id($in, $to_num = false, $pad_up = 4, $passKey = null)
 
     if ($to_num) {
         // Digital number  <<--  alphabet letter code
-        $in = strrev($in);
+        $in  = strrev($in);
         $out = 0;
         $len = strlen($in) - 1;
         for ($t = 0; $t <= $len; $t++) {
             $bcpow = pow($base, $len - $t);
-            $out = $out + strpos($index, substr($in, $t, 1)) * $bcpow;
+            $out   = $out + strpos($index, substr($in, $t, 1)) * $bcpow;
         }
 
         if (is_numeric($pad_up)) {
@@ -1502,9 +1335,9 @@ function cmf_alpha_id($in, $to_num = false, $pad_up = 4, $passKey = null)
         $out = "";
         for ($t = floor(log($in, $base)); $t >= 0; $t--) {
             $bcp = pow($base, $t);
-            $a = floor($in / $bcp) % $base;
+            $a   = floor($in / $bcp) % $base;
             $out = $out . substr($index, $a, 1);
-            $in = $in - ($a * $bcp);
+            $in  = $in - ($a * $bcp);
         }
         $out = strrev($out); // reverse
     }
@@ -1515,8 +1348,8 @@ function cmf_alpha_id($in, $to_num = false, $pad_up = 4, $passKey = null)
 /**
  * 验证码检查，验证完后销毁验证码
  * @param string $value 要验证的字符串
- * @param string $id 验证码的ID
- * @param bool $reset 验证成功后是否重置
+ * @param string $id    验证码的ID
+ * @param bool   $reset 验证成功后是否重置
  * @return bool
  */
 function cmf_captcha_check($value, $id = "", $reset = true)
@@ -1528,9 +1361,9 @@ function cmf_captcha_check($value, $id = "", $reset = true)
  * 切分SQL文件成多个可以单独执行的sql语句
  * @param        $file            string sql文件路径
  * @param        $tablePre        string 表前缀
- * @param string $charset 字符集
+ * @param string $charset         字符集
  * @param string $defaultTablePre 默认表前缀
- * @param string $defaultCharset 默认字符集
+ * @param string $defaultCharset  默认字符集
  * @return array
  */
 function cmf_split_sql($file, $tablePre, $charset = 'utf8mb4', $defaultTablePre = 'cmf_', $defaultCharset = 'utf8mb4')
@@ -1544,7 +1377,7 @@ function cmf_split_sql($file, $tablePre, $charset = 'utf8mb4', $defaultTablePre 
         $sql = str_replace($defaultCharset, $charset, $sql);
         $sql = trim($sql);
         //替换表前缀
-        $sql = str_replace(" `{$defaultTablePre}", " `{$tablePre}", $sql);
+        $sql  = str_replace(" `{$defaultTablePre}", " `{$tablePre}", $sql);
         $sqls = explode(";\n", $sql);
         return $sqls;
     }
@@ -1583,8 +1416,8 @@ function cmf_get_file_extension($filename)
 
 /**
  * 检查手机或邮箱是否还可以发送验证码,并返回生成的验证码
- * @param string $account 手机或邮箱
- * @param integer $length 验证码位数,支持4,6,8
+ * @param string  $account 手机或邮箱
+ * @param integer $length  验证码位数,支持4,6,8
  * @return string 数字验证码
  * @throws \think\db\exception\DataNotFoundException
  * @throws \think\db\exception\ModelNotFoundException
@@ -1594,14 +1427,14 @@ function cmf_get_verification_code($account, $length = 6)
 {
     if (empty($account)) return false;
     $verificationCodeQuery = Db::name('verification_code');
-    $currentTime = time();
-    $maxCount = 5;
-    $findVerificationCode = $verificationCodeQuery->where('account', $account)->find();
-    $result = false;
+    $currentTime           = time();
+    $maxCount              = 5;
+    $findVerificationCode  = $verificationCodeQuery->where('account', $account)->find();
+    $result                = false;
     if (empty($findVerificationCode)) {
         $result = true;
     } else {
-        $sendTime = $findVerificationCode['send_time'];
+        $sendTime       = $findVerificationCode['send_time'];
         $todayStartTime = strtotime(date('Y-m-d', $currentTime));
         if ($sendTime < $todayStartTime) {
             $result = true;
@@ -1631,9 +1464,9 @@ function cmf_get_verification_code($account, $length = 6)
 
 /**
  * 更新手机或邮箱验证码发送日志
- * @param string $account 手机或邮箱
- * @param string $code 验证码
- * @param int $expireTime 过期时间
+ * @param string $account    手机或邮箱
+ * @param string $code       验证码
+ * @param int    $expireTime 过期时间
  * @return int|string
  * @throws \think\Exception
  * @throws \think\db\exception\DataNotFoundException
@@ -1644,7 +1477,7 @@ function cmf_get_verification_code($account, $length = 6)
 function cmf_verification_code_log($account, $code, $expireTime = 0)
 {
     $currentTime = time();
-    $expireTime = $expireTime > $currentTime ? $expireTime : $currentTime + 30 * 60;
+    $expireTime  = $expireTime > $currentTime ? $expireTime : $currentTime + 30 * 60;
 
     $findVerificationCode = Db::name('verification_code')->where('account', $account)->find();
 
@@ -1658,18 +1491,18 @@ function cmf_verification_code_log($account, $code, $expireTime = 0)
         $result = Db::name('verification_code')
             ->where('account', $account)
             ->update([
-                'send_time' => $currentTime,
+                'send_time'   => $currentTime,
                 'expire_time' => $expireTime,
-                'code' => $code,
-                'count' => $count
+                'code'        => $code,
+                'count'       => $count
             ]);
     } else {
         $result = Db::name('verification_code')
             ->insert([
-                'account' => $account,
-                'send_time' => $currentTime,
-                'code' => $code,
-                'count' => 1,
+                'account'     => $account,
+                'send_time'   => $currentTime,
+                'code'        => $code,
+                'count'       => 1,
                 'expire_time' => $expireTime
             ]);
     }
@@ -1679,9 +1512,9 @@ function cmf_verification_code_log($account, $code, $expireTime = 0)
 
 /**
  * 手机或邮箱验证码检查，验证完后销毁验证码增加安全性,返回true验证码正确，false验证码错误
- * @param string $account 手机或邮箱
- * @param string $code 验证码
- * @param boolean $clear 是否验证后销毁验证码
+ * @param string  $account 手机或邮箱
+ * @param string  $code    验证码
+ * @param boolean $clear   是否验证后销毁验证码
  * @return string  错误消息,空字符串代码验证码正确
  * @return string
  * @throws \think\Exception
@@ -1725,7 +1558,7 @@ function cmf_check_verification_code($account, $code, $clear = false)
 function cmf_clear_verification_code($account)
 {
     $verificationCodeQuery = Db::name('verification_code');
-    $result = $verificationCodeQuery->where('account', $account)->update(['code' => '']);
+    $result                = $verificationCodeQuery->where('account', $account)->update(['code' => '']);
     return $result;
 }
 
@@ -1762,14 +1595,14 @@ function cmf_generate_user_token($userId, $deviceType)
     $userTokenQuery = Db::name("user_token")
         ->where('user_id', $userId)
         ->where('device_type', $deviceType);
-    $findUserToken = $userTokenQuery->find();
-    $currentTime = time();
-    $expireTime = $currentTime + 24 * 3600 * 180;
-    $token = md5(uniqid()) . md5(uniqid());
+    $findUserToken  = $userTokenQuery->find();
+    $currentTime    = time();
+    $expireTime     = $currentTime + 24 * 3600 * 180;
+    $token          = md5(uniqid()) . md5(uniqid());
     if (empty($findUserToken)) {
         Db::name("user_token")->insert([
-            'token' => $token,
-            'user_id' => $userId,
+            'token'       => $token,
+            'user_id'     => $userId,
             'expire_time' => $expireTime,
             'create_time' => $currentTime,
             'device_type' => $deviceType
@@ -1782,7 +1615,7 @@ function cmf_generate_user_token($userId, $deviceType)
                 ->where('user_id', $userId)
                 ->where('device_type', $deviceType)
                 ->update([
-                    'token' => $token,
+                    'token'       => $token,
                     'expire_time' => $expireTime,
                     'create_time' => $currentTime
                 ]);
@@ -1796,9 +1629,9 @@ function cmf_generate_user_token($userId, $deviceType)
 /**
  * 字符串命名风格转换
  * type 0 将Java风格转换为C的风格 1 将C风格转换为Java的风格
- * @param string $name 字符串
- * @param integer $type 转换类型
- * @param bool $ucfirst 首字母是否大写（驼峰规则）
+ * @param string  $name    字符串
+ * @param integer $type    转换类型
+ * @param bool    $ucfirst 首字母是否大写（驼峰规则）
  * @return string
  */
 function cmf_parse_name($name, $type = 0, $ucfirst = true)
@@ -1850,8 +1683,8 @@ function cmf_get_cmf_settings($key = "")
     $cmfSettings = cache("cmf_settings");
     if (empty($cmfSettings)) {
         $objOptions = new \app\admin\model\OptionModel();
-        $objResult = $objOptions->where("option_name", 'cmf_settings')->find();
-        $arrOption = $objResult ? $objResult->toArray() : [];
+        $objResult  = $objOptions->where("option_name", 'cmf_settings')->find();
+        $arrOption  = $objResult ? $objResult->toArray() : [];
         if ($arrOption) {
             $cmfSettings = json_decode($arrOption['option_value'], true);
         } else {
@@ -1887,7 +1720,7 @@ function cmf_is_sae()
 /**
  * 获取客户端IP地址
  * @param integer $type 返回类型 0 返回IP地址 1 返回IPV4地址数字
- * @param boolean $adv 是否进行高级模式获取（有可能被伪装）
+ * @param boolean $adv  是否进行高级模式获取（有可能被伪装）
  * @return string
  */
 function get_client_ip($type = 0, $adv = true)
@@ -1914,10 +1747,10 @@ function cmf_url_encode($url, $params)
 
 /**
  * CMF Url生成
- * @param string $url 路由地址
- * @param string|array $vars 变量
- * @param bool|string $suffix 生成的URL后缀
- * @param bool|string $domain 域名
+ * @param string       $url    路由地址
+ * @param string|array $vars   变量
+ * @param bool|string  $suffix 生成的URL后缀
+ * @param bool|string  $domain 域名
  * @return string
  * @throws \think\db\exception\DataNotFoundException
  * @throws \think\db\exception\ModelNotFoundException
@@ -1928,13 +1761,13 @@ function cmf_url($url = '', $vars = '', $suffix = true, $domain = false)
     global $CMF_GV_routes;
 
     if (empty($CMF_GV_routes)) {
-        $routeModel = new \app\admin\model\RouteModel();
+        $routeModel    = new \app\admin\model\RouteModel();
         $CMF_GV_routes = $routeModel->getRoutes();
     }
 
     if (false === strpos($url, '://') && 0 !== strpos($url, '/')) {
         $info = parse_url($url);
-        $url = !empty($info['path']) ? $info['path'] : '';
+        $url  = !empty($info['path']) ? $info['path'] : '';
         if (isset($info['fragment'])) {
             // 解析锚点
             $anchor = $info['fragment'];
@@ -1971,7 +1804,7 @@ function cmf_url($url = '', $vars = '', $suffix = true, $domain = false)
 
             if (count($sameVars) == count($actionRoute['vars'])) {
                 ksort($sameVars);
-                $url = $url . '?' . http_build_query($sameVars);
+                $url  = $url . '?' . http_build_query($sameVars);
                 $vars = array_diff_assoc($vars, $sameVars);
                 break;
             }
@@ -2004,7 +1837,7 @@ function cmf_is_installed()
 
 /**
  * 替换编辑器内容中的文件地址
- * @param string $content 编辑器内容
+ * @param string  $content     编辑器内容
  * @param boolean $isForDbSave true:表示把绝对地址换成相对地址,用于数据库保存,false:表示把相对地址换成绝对地址用于界面显示
  * @return string
  */
@@ -2013,15 +1846,15 @@ function cmf_replace_content_file_url($content, $isForDbSave = false)
     \phpQuery::newDocumentHTML($content);
     $pq = pq(null);
 
-    $storage = Storage::instance();
-    $localStorage = new cmf\lib\storage\Local([]);
+    $storage       = Storage::instance();
+    $localStorage  = new cmf\lib\storage\Local([]);
     $storageDomain = $storage->getDomain();
-    $domain = request()->host();
+    $domain        = request()->host();
 
     $images = $pq->find("img");
     if ($images->length) {
         foreach ($images as $img) {
-            $img = pq($img);
+            $img    = pq($img);
             $imgSrc = $img->attr("src");
 
             if ($isForDbSave) {
@@ -2099,10 +1932,10 @@ function cmf_curl_get($url)
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 5);
     $SSL = substr($url, 0, 8) == "https://" ? true : false;
-//    if ($SSL) {
-//        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // 信任任何证书
-//        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // 检查证书中是否设置域名
-//    }
+    if ($SSL) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // 信任任何证书
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2); // 检查证书中是否设置域名
+    }
     $content = curl_exec($ch);
     curl_close($ch);
     return $content;
@@ -2143,7 +1976,7 @@ function cmf_user_action($action)
             switch ($cycleType) {//1:按天;2:按小时;3:永久
                 case 1:
                     $firstDayStartTime = strtotime(date('Y-m-d', $findUserScoreLog['create_time']));
-                    $endDayEndTime = strtotime(date('Y-m-d', strtotime("+{$cycleTime} day", $firstDayStartTime)));
+                    $endDayEndTime     = strtotime(date('Y-m-d', strtotime("+{$cycleTime} day", $firstDayStartTime)));
 //                    $todayStartTime        = strtotime(date('Y-m-d'));
 //                    $todayEndTime          = strtotime(date('Y-m-d', strtotime('+1 day')));
                     $findUserScoreLogCount = Db::name('user_score_log')
@@ -2172,11 +2005,11 @@ function cmf_user_action($action)
     if ($changeScore) {
         if (!empty($findUserAction['score']) || !empty($findUserAction['coin'])) {
             Db::name('user_score_log')->insert([
-                'user_id' => $userId,
+                'user_id'     => $userId,
                 'create_time' => time(),
-                'action' => $action,
-                'score' => $findUserAction['score'],
-                'coin' => $findUserAction['coin'],
+                'action'      => $action,
+                'score'       => $findUserAction['score'],
+                'coin'        => $findUserAction['coin'],
             ]);
         }
 
@@ -2244,11 +2077,11 @@ function cmf_is_open_registration()
 
 /**
  * XML编码
- * @param mixed $data 数据
- * @param string $root 根节点名
- * @param string $item 数字索引的子节点名
- * @param string $attr 根节点属性
- * @param string $id 数字索引子节点key转换的属性名
+ * @param mixed  $data     数据
+ * @param string $root     根节点名
+ * @param string $item     数字索引的子节点名
+ * @param string $attr     根节点属性
+ * @param string $id       数字索引子节点key转换的属性名
  * @param string $encoding 数据编码
  * @return string
  */
@@ -2263,18 +2096,18 @@ function cmf_xml_encode($data, $root = 'think', $item = 'item', $attr = '', $id 
     }
     $attr = trim($attr);
     $attr = empty($attr) ? '' : " {$attr}";
-    $xml = "<?xml version=\"1.0\" encoding=\"{$encoding}\"?>";
-    $xml .= "<{$root}{$attr}>";
-    $xml .= cmf_data_to_xml($data, $item, $id);
-    $xml .= "</{$root}>";
+    $xml  = "<?xml version=\"1.0\" encoding=\"{$encoding}\"?>";
+    $xml  .= "<{$root}{$attr}>";
+    $xml  .= cmf_data_to_xml($data, $item, $id);
+    $xml  .= "</{$root}>";
     return $xml;
 }
 
 /**
  * 数据XML编码
- * @param mixed $data 数据
+ * @param mixed  $data 数据
  * @param string $item 数字索引时的节点名称
- * @param string $id 数字索引key转换为的属性名
+ * @param string $id   数字索引key转换为的属性名
  * @return string
  */
 function cmf_data_to_xml($data, $item = 'item', $id = 'id')
@@ -2333,7 +2166,7 @@ function cmf_file_size_format($bytes)
 /**
  * 计数器增加
  * @param     $name 计数器英文标识
- * @param int $min 计数器最小值
+ * @param int $min  计数器最小值
  * @param int $step 增加步长
  * @return mixed
  */
@@ -2345,7 +2178,7 @@ function cmf_counter_inc($name, $min = 1, $step = 1)
 
         if (empty($id)) {
             $id = Db::name('core_counter')->insertGetId([
-                'name' => $name,
+                'name'  => $name,
                 'value' => 0
             ]);
         }
@@ -2419,7 +2252,7 @@ function cmf_get_app_config_file($app, $file)
             $configFile = CMF_ROOT . "vendor/thinkcmf/cmf-swoole/src/{$file}.php";
             break;
         default:
-            $configFile = APP_PATH . $app . "/{$file}.php";
+            $configFile = app_path() . $app . "/{$file}.php";
             if (!file_exists($configFile)) {
                 $configFile = CMF_ROOT . "vendor/thinkcmf/cmf-app/src/{$app}/{$file}.php";
             }
@@ -2439,8 +2272,8 @@ function order_shift($order)
 {
     $orderArr = [];
     foreach ($order as $key => $value) {
-        $upDwn = substr($value, 0, 1);
-        $orderType = $upDwn == '-' ? 'desc' : 'asc';
+        $upDwn      = substr($value, 0, 1);
+        $orderType  = $upDwn == '-' ? 'desc' : 'asc';
         $orderField = substr($value, 1);
         if (!empty($whiteParams)) {
             if (in_array($orderField, $whiteParams)) {
@@ -2483,135 +2316,57 @@ function str_to_arr($string)
     return $result;
 }
 
-
-function getFullData($data, $type = 0)
+/**
+ * 检测是否是命令行
+ * @return bool
+ */
+function cmf_is_cli()
 {
-    foreach ($data as &$item) {
-        $item = getOneFullData($item);
-    }
-    return $data;
-}
-
-function getOneFullData($data, $type = 0)
-{
-    if (!empty($data['thumb'])) {
-        $data['thumb'] = cmf_get_asset_url($data['thumb']);
-    }
-
-    if (!empty($data['avatar'])) {
-        $data['avatar'] = cmf_get_asset_url($data['avatar']);
-    }
-
-    if (!empty($data['photos'])) {
-        $show_image_url = [];
-        if (!empty($data['photos'])) {
-            $image_url_arr = explode(',', $data['photos']);
-            foreach ($image_url_arr as $key => $dataalue) {
-                $show_image_url[] = cmf_get_asset_url($dataalue);
-            }
-        }
-        $data['photos'] = $show_image_url;
-    }
-
-    if (!empty($data['content'])) {
-        $data['content'] = cmf_replace_content_file_url(htmlspecialchars_decode($data['content']));
-    }
-    if (!empty($data['create_time'])) {
-        if ($type == 1) {
-            $data['create_time'] = date('Y-m-d', $data['create_time']);
-        } elseif ($type == 2) {
-            $data['create_time'] = date('Y-m-d H:i', $data['create_time']);
-        } elseif ($type == 3) {
-            $data['create_time'] = date('Y-m-d H:i:s', $data['create_time']);
-        }
-    }
-
-    return $data;
-}
-
-function getMaxDim($vDim)
-{
-    if (!is_array($vDim)) return 0;
-    else {
-        $max1 = 0;
-        foreach ($vDim as $item1) {
-            $t1 = getMaxDim($item1);
-            if ($t1 > $max1) $max1 = $t1;
-        }
-        return $max1 + 1;
-    }
-}
-
-function curl_get($url)
-{
-    $info = curl_init();
-    curl_setopt($info, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($info, CURLOPT_HEADER, 0);
-    curl_setopt($info, CURLOPT_NOBODY, 0);
-    curl_setopt($info, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($info, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($info, CURLOPT_URL, $url);
-    $output = curl_exec($info);
-    curl_close($info);
-    return $output;
-}
-
-function curl_post($url, $post_data)
-{
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);   //没有这个会自动输出，不用print_r();也会在后面多个1
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-    $headers = array(
-        'Content-Type: application/json',
-    );
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $output = curl_exec($ch);
-    curl_close($ch);
-    return $output;
+    return PHP_SAPI === 'cli' || defined('STDIN');
 }
 
 /**
- * 简单对称加密算法之加密
- * @param String $string 需要加密的字串
- * @param String $skey 加密EKY
- * @return String
- * @author Anyon Zou <zoujingli@qq.com>
- * @date 2013-08-13 19:30
- * @update 2014-10-10 10:10
+ * 检查目录是否可写
+ * @param $d
+ * @return bool
  */
-function str_encode($string = '', $skey = 'fei')
+function cmf_test_write($d)
 {
-    $strArr = str_split(base64_encode($string));
-    $strCount = count($strArr);
-    foreach (str_split($skey) as $key => $value)
-        $key < $strCount && $strArr[$key] .= $value;
-    return str_replace(array('=', '+', '/'), array('O0O0O', 'o000o', 'oo00o'), join('', $strArr));
+    $tfile = "_test_write.cmf";
+    $fp    = @fopen($d . "/" . $tfile, "w");
+    if (!$fp) {
+        return false;
+    }
+    fclose($fp);
+    $rs = @unlink($d . "/" . $tfile);
+    if ($rs) {
+        return true;
+    }
+    return false;
+}
+
+function cmf_mobile_mask($mobile)
+{
+    return substr($mobile, 0, 3) . '****' . substr($mobile, -4, 4);
 }
 
 /**
- * 简单对称加密算法之解密
- * @param String $string 需要解密的字串
- * @param String $skey 解密KEY
- * @return String
- * @author Anyon Zou <zoujingli@qq.com>
- * @date 2013-08-13 19:30
- * @update 2014-10-10 10:10
+ * UTF8 BOM，多用于CSV导出
+ * @return string
  */
-function str_decode($string = '', $skey = 'fei')
+function cmf_utf8_bom()
 {
-    $strArr = str_split(str_replace(array('O0O0O', 'o000o', 'oo00o'), array('=', '+', '/'), $string), 2);
-    $strCount = count($strArr);
-    foreach (str_split($skey) as $key => $value)
-        $key <= $strCount && isset($strArr[$key]) && $strArr[$key][1] === $value && $strArr[$key] = $strArr[$key][0];
-    return base64_decode(join('', $strArr));
+    return "\xEF\xBB\xBF";
 }
 
-//根据表名操作数据
-
-function cmf_table($table)
+/**
+ * 吾辈当自强
+ * @param string $dayDayUp
+ * @return string
+ */
+function cmf_together(string $dayDayUp = '2022-08-03 01:58')
 {
-    return Db::name($table);
+    return "吾辈当自强!\n$dayDayUp";
 }
+
+

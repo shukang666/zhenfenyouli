@@ -299,7 +299,9 @@
 				{
 					"path": "scene-clock-flow",
 					"style": {
-						"navigationBarTitleText": "场景分类",
+						"navigationBarTitleText": "真分打卡",
+						"navigationBarBackgroundColor": "#E8F7EE",
+						"navigationBarTextStyle": "black",
 						"usingComponents": {}
 					}
 				},

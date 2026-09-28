@@ -17,9 +17,7 @@ class Exception extends \Exception
 
     public const CONTAINER_NOT_FOUND = 1001;
 
-    public const CONTAINER_DEPENDENCY_ERROR = 1002;
-
-    public const CONTAINER_NOT_FOUND_ENTRY = 1003;
+    public const CONTAINER_NOT_FOUND_ENTRY = 1002;
 
     /**
      * 关于容器的服务.
@@ -33,7 +31,7 @@ class Exception extends \Exception
      */
     public const CONFIG_ERROR = 3000;
 
-    public const INVALID_PACKER = 3001;
+    public const INVALID_PARSER = 3001;
 
     public const ALIPAY_CONFIG_ERROR = 3002;
 
@@ -45,6 +43,10 @@ class Exception extends \Exception
 
     public const WECHAT_CONFIG_ERROR = 3006;
 
+    public const UNIPAY_CONFIG_ERROR = 3007;
+
+    public const INVALID_PACKER = 3008;
+
     /*
      * 关于参数.
      */
@@ -54,7 +56,7 @@ class Exception extends \Exception
 
     public const PLUGIN_ERROR = 4002;
 
-    public const SHORTCUT_QUERY_TYPE_ERROR = 4003;
+    public const SHORTCUT_MULTI_ACTION_ERROR = 4003;
 
     public const METHOD_NOT_SUPPORTED = 4004;
 
@@ -65,6 +67,10 @@ class Exception extends \Exception
     public const NOT_IN_SERVICE_MODE = 4007;
 
     public const WECHAT_SERIAL_NO_NOT_FOUND = 4008;
+
+    public const UNIPAY_FIND_STRING_NOT_SUPPORTED = 4009;
+
+    public const UNIPAY_CANCEL_STRING_NOT_SUPPORTED = 4010;
 
     /**
      * 关于api.
@@ -94,11 +100,9 @@ class Exception extends \Exception
      *
      * @var mixed
      */
-    public $extra = null;
+    public $extra;
 
     /**
-     * Bootstrap.
-     *
      * @param mixed $extra
      */
     public function __construct(string $message = 'Unknown Error', int $code = self::UNKNOWN_ERROR, $extra = null, Throwable $previous = null)

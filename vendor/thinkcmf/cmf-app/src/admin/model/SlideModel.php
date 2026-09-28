@@ -19,13 +19,4 @@ class SlideModel extends Model
      * @var string
      */
     protected $name = 'slide';
-
-    /**
-     * 一对一关联模型 关联分类下的幻灯片
-     * @return \think\model\relation\HasMany
-     */
-    protected function items()
-    {
-        return $this->hasMany('SlideItemModel')->order('list_order ASC');
-    }
 }

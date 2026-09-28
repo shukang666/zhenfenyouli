@@ -6,22 +6,26 @@ namespace Yansongda\Pay\Plugin\Alipay\Trade;
 
 use Closure;
 use Yansongda\Pay\Contract\PluginInterface;
+use Yansongda\Pay\Exception\ContainerException;
+use Yansongda\Pay\Exception\ServiceNotFoundException;
 use Yansongda\Pay\Logger;
 use Yansongda\Pay\Rocket;
 use Yansongda\Pay\Traits\SupportServiceProviderTrait;
 
+/**
+ * @see https://opendocs.alipay.com/open/02fkat?ref=api&scene=common
+ */
 class PayPlugin implements PluginInterface
 {
     use SupportServiceProviderTrait;
 
     /**
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @throws ContainerException
+     * @throws ServiceNotFoundException
      */
     public function assembly(Rocket $rocket, Closure $next): Rocket
     {
-        Logger::info('[alipay][PayPlugin] 插件开始装载', ['rocket' => $rocket]);
+        Logger::debug('[alipay][PayPlugin] 插件开始装载', ['rocket' => $rocket]);
 
         $this->loadAlipayServiceProvider($rocket);
 

@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace Yansongda\Pay\Event;
 
+use Yansongda\Pay\Contract\PluginInterface;
 use Yansongda\Pay\Rocket;
 
 class PayStarted extends Event
 {
     /**
-     * @var \Yansongda\Pay\Contract\PluginInterface[]
+     * @var PluginInterface[]
      */
-    public $plugins;
+    public array $plugins;
 
-    /**
-     * @var array
-     */
-    public $params;
+    public array $params;
 
-    public function __construct(array $plugins, array $params, ?Rocket $rocket)
+    public function __construct(array $plugins, array $params, ?Rocket $rocket = null)
     {
         $this->plugins = $plugins;
         $this->params = $params;

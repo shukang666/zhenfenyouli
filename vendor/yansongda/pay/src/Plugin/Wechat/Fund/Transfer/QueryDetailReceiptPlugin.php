@@ -9,6 +9,9 @@ use Yansongda\Pay\Exception\InvalidParamsException;
 use Yansongda\Pay\Plugin\Wechat\GeneralPlugin;
 use Yansongda\Pay\Rocket;
 
+/**
+ * @see https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter4_3_10.shtml
+ */
 class QueryDetailReceiptPlugin extends GeneralPlugin
 {
     protected function getMethod(): string
@@ -17,13 +20,13 @@ class QueryDetailReceiptPlugin extends GeneralPlugin
     }
 
     /**
-     * @throws \Yansongda\Pay\Exception\InvalidParamsException
+     * @throws InvalidParamsException
      */
     protected function doSomething(Rocket $rocket): void
     {
         $payload = $rocket->getPayload();
 
-        if (is_null($payload->get('out_detail_no')) || is_null($payload->get('accept_type'))) {
+        if (!$payload->has('out_detail_no') || !$payload->has('accept_type')) {
             throw new InvalidParamsException(Exception::MISSING_NECESSARY_PARAMS);
         }
 

@@ -28,10 +28,8 @@ class HomeBaseController extends BaseController
     {
         $cmfThemePath    = config('template.cmf_theme_path');
         $cmfDefaultTheme = cmf_get_current_theme();
-
-        $themePath = "{$cmfThemePath}{$cmfDefaultTheme}";
-
-        $root = cmf_get_root();
+        $root            = cmf_get_root();
+        $themePath       = "{$cmfThemePath}{$cmfDefaultTheme}";
         //使cdn设置生效
         $cdnSettings = cmf_get_option('cdn_settings');
         if (empty($cdnSettings['cdn_static_root'])) {
@@ -52,7 +50,7 @@ class HomeBaseController extends BaseController
         }
 
         $this->view->engine()->config([
-            'view_base'          => $themePath . '/',
+            'view_base'          => WEB_ROOT . $themePath . '/',
             'tpl_replace_string' => $viewReplaceStr
         ]);
 
@@ -81,8 +79,7 @@ class HomeBaseController extends BaseController
     {
         $template = $this->parseTemplate($template);
         $more     = $this->getThemeFileMore($template);
-        $this->assign('theme_vars', $more['vars']);
-        $this->assign('theme_widgets', $more['widgets']);
+        $this->assign($more);
         $content        = $this->view->fetch($template, $vars, $config);
         $designingTheme = cookie('cmf_design_theme');
 
@@ -98,7 +95,7 @@ var _themeTest="test";
 var _app='{$app}';
 var _controller='{$controller}';
 var _action='{$action}';
-var _themeFile='{$more['file']}';
+var _themeFile='{$more['_theme_file']}';
 if(parent && parent.simulatorRefresh){
   parent.simulatorRefresh();  
 }
@@ -137,7 +134,7 @@ hello;
 
         $cmfThemePath    = config('template.cmf_theme_path');
         $cmfDefaultTheme = cmf_get_current_theme();
-        $themePath       = "{$cmfThemePath}{$cmfDefaultTheme}/";
+        $themePath       = WEB_ROOT . "{$cmfThemePath}{$cmfDefaultTheme}/";
 
         // 基础视图目录
         $module = isset($module) ? $module : $this->app->http->getName();
@@ -168,9 +165,8 @@ hello;
      * @param string $theme
      * @return array
      */
-    private function getThemeFileMore($file, $theme = "")
+    private function getThemeFileMore($file, $theme = '')
     {
-
         //TODO 增加缓存
         $theme = empty($theme) ? cmf_get_current_theme() : $theme;
 
@@ -184,15 +180,18 @@ hello;
         $file      = str_replace('\\', '/', $file);
         $file      = str_replace('//', '/', $file);
         $webRoot   = str_replace('\\', '/', WEB_ROOT);
-        $themeFile = str_replace(['.html', '.php', $themePath . $theme . "/", $webRoot], '', $file);
+        $themeFile = str_replace(['.html', '.php', $themePath . $theme . '/', $webRoot], '', $file);
 
-        $files = Db::name('theme_file')->field('more')->where('theme', $theme)
+        $files = Db::name('theme_file')->field('more,file,id')->where('theme', $theme)
             ->where(function ($query) use ($themeFile) {
                 $query->where('is_public', 1)->whereOr('file', $themeFile);
-            })->select();
+            })->order('is_public desc')->select();
 
-        $vars    = [];
-        $widgets = [];
+        $vars           = [];
+        $widgets        = [];
+        $widgetsBlocks  = [];
+        $widgetsInBlock = [];
+
         foreach ($files as $file) {
             $oldMore = json_decode($file['more'], true);
             if (!empty($oldMore['vars'])) {
@@ -226,19 +225,61 @@ hello;
                     }
                 }
             }
+
+            if ($themeFile == $file['file'] && !empty($oldMore['widgets_blocks'])) {
+
+                if (!empty($oldMore['widgets_blocks'])) {
+                    foreach ($oldMore['widgets_blocks'] as $widgetsBlockName => $widgetsBlock) {
+                        $widgetsBlock['_file_id'] = $file['id'];
+                        if (!empty($widgetsBlock['widgets'])) {
+                            foreach ($widgetsBlock['widgets'] as $widgetId => $widget) {
+
+                                if (!empty($widget['vars'])) {
+                                    foreach ($widget['vars'] as $varName => $varValue) {
+                                        if (isset($widget['vars'][$varName . '_type_']) && $widget['vars'][$varName . '_type_'] == 'rich_text') {
+                                            $widget['vars'][$varName] = cmf_replace_content_file_url(htmlspecialchars_decode($varValue));
+                                        }
+                                    }
+                                }
+
+                                $widgetsBlock['widgets'][$widgetId]['vars'] = $widget['vars'];
+
+                                $widgetsInBlock[$widget['name']] = [
+                                    'name'    => $widget['name'],
+                                    'display' => $widget['display']
+                                ];
+                            }
+                        }
+                        $widgetsBlocks[$widgetsBlockName] = $widgetsBlock;
+                    }
+                }
+            }
         }
 
-        return ['vars' => $vars, 'widgets' => $widgets, 'file' => $themeFile];
+
+        return [
+            'theme_vars'           => $vars,
+            'theme_widgets'        => $widgets,
+            'theme_widgets_blocks' => $widgetsBlocks,
+            '_theme_widgets'       => $widgetsInBlock,
+            '_theme_file'          => $themeFile
+        ];
     }
 
-    public function checkUserLogin()
+    public function checkUserLogin($isreurl = false)
     {
+        $refer  = $this->request->server('HTTP_REFERER');
         $userId = cmf_get_current_user_id();
         if (empty($userId)) {
-            if ($this->request->isAjax()) {
-                $this->error("您尚未登录", cmf_url("user/Login/index"));
+            if ($isreurl !== false) {
+                $tourl = cmf_url('user/Login/index', ['redirect' => $refer]);
             } else {
-                $this->redirect(cmf_url("user/Login/index"));
+                $tourl = cmf_url('user/Login/index');
+            }
+            if ($this->request->isAjax()) {
+                $this->error('您尚未登录', $tourl);
+            } else {
+                $this->redirect($tourl);
             }
         }
     }

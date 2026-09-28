@@ -9,11 +9,14 @@ use Yansongda\Pay\Contract\PluginInterface;
 use Yansongda\Pay\Logger;
 use Yansongda\Pay\Rocket;
 
+/**
+ * @see https://opendocs.alipay.com/open/02hd33
+ */
 class PdeductSignAddPlugin implements PluginInterface
 {
     public function assembly(Rocket $rocket, Closure $next): Rocket
     {
-        Logger::info('[alipay][PdeductSignAddPlugin] 插件开始装载', ['rocket' => $rocket]);
+        Logger::debug('[alipay][PdeductSignAddPlugin] 插件开始装载', ['rocket' => $rocket]);
 
         $rocket->mergePayload([
             'method' => 'alipay.ebpp.pdeduct.sign.add',

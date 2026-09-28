@@ -1,5 +1,99 @@
 <template>
-	<view :class="['scf-page', hubTheme]" v-if="hub">
+	<!-- uni-app 小程序要求单根节点，否则可能白屏且无报错 -->
+	<view class="scene-clock-root">
+	<!-- 原型 Screen 2：欢迎参与真分打卡 -->
+	<view v-if="flowStep === 'theme_intro'" class="zf-intro">
+		<view class="zf-intro-hero">
+			<view class="zf-intro-sky"></view>
+			<view class="zf-intro-hill zf-intro-hill--back"></view>
+			<view class="zf-intro-hill zf-intro-hill--front"></view>
+			<view class="zf-intro-people">
+				<text class="zf-intro-people-ico">👨‍👩‍👧</text>
+				<text class="zf-intro-people-ico">♻️</text>
+				<text class="zf-intro-people-ico">🌳</text>
+			</view>
+			<view class="zf-intro-hero-copy">
+				<text class="zf-intro-hero-l1">{{ themeHeroSlogan.line1 }}</text>
+				<text class="zf-intro-hero-l2">{{ themeHeroSlogan.line2 }}</text>
+			</view>
+		</view>
+		<view class="zf-intro-sheet">
+			<text class="zf-intro-welcome">{{ themeHeadline }}</text>
+			<text class="zf-intro-sub">{{ themeSubline }}</text>
+			<view class="zf-intro-step" v-for="step in themeSteps" :key="step.num">
+				<view class="zf-intro-step-no">{{ step.num }}</view>
+				<view class="zf-intro-step-body">
+					<view class="zf-intro-step-head">
+						<text class="zf-intro-step-ico">{{ step.icon }}</text>
+						<text class="zf-intro-step-title">{{ step.title }}</text>
+					</view>
+					<text class="zf-intro-step-desc">{{ step.desc }}</text>
+				</view>
+			</view>
+		</view>
+		<view class="zf-foot">
+			<view class="zf-btn zf-btn--primary" hover-class="zf-btn--press" @tap="onThemeStart">{{ themeCta }}</view>
+		</view>
+	</view>
+
+	<!-- 原型 Screen 4：选择打卡场景 -->
+	<view v-else-if="flowStep === 'theme_scenes'" class="zf-scenes">
+		<text class="zf-scenes-hint">{{ scenePickHint }}</text>
+		<view
+			class="zf-scene-card"
+			v-for="item in sceneHubCards"
+			:key="item.hub"
+			:class="'zf-scene-card--' + item.theme"
+			hover-class="zf-scene-card--press"
+			:hover-stay-time="80"
+			@tap="pickThemeHub(item.hub)"
+		>
+			<view class="zf-scene-icon-wrap">
+				<text class="zf-scene-icon">{{ item.emoji }}</text>
+			</view>
+			<view class="zf-scene-copy">
+				<text class="zf-scene-title">{{ item.title }}</text>
+				<text class="zf-scene-desc">{{ item.desc }}</text>
+			</view>
+			<text class="zf-scene-arrow">›</text>
+		</view>
+		<view class="zf-promo">
+			<text class="zf-promo-line">{{ themePromoLines[0] }}</text>
+			<text class="zf-promo-line" v-if="themePromoLines[1]">{{ themePromoLines[1] }}</text>
+			<view class="zf-promo-pillars">
+				<view class="zf-promo-pillar" v-for="(p, i) in themePillars" :key="i">
+					<text class="zf-promo-pillar-ico">{{ p.icon }}</text>
+					<text class="zf-promo-pillar-lab">{{ p.label }}</text>
+				</view>
+			</view>
+		</view>
+	</view>
+
+	<!-- 原型 Screen 5：今日真分任务说明 -->
+	<view v-else-if="flowStep === 'theme_brief'" class="zf-brief">
+		<text class="zf-brief-tagline">{{ themeBriefTagline }}</text>
+		<view class="zf-brief-card">
+			<text class="zf-brief-card-title">{{ themeBriefTaskTitle }}</text>
+			<view class="zf-brief-tasks">
+				<view class="zf-brief-task" v-for="(t, i) in themeBriefTasks" :key="i">
+					<view class="zf-brief-task-ico-wrap">
+						<text class="zf-brief-task-ico">{{ t.icon }}</text>
+					</view>
+					<text class="zf-brief-task-label">{{ t.label }}</text>
+					<text class="zf-brief-task-sub">{{ t.sub }}</text>
+				</view>
+			</view>
+		</view>
+		<view class="zf-brief-scene">
+			<text class="zf-brief-scene-k">当前场景</text>
+			<text class="zf-brief-scene-v">{{ pendingHubLabel }}</text>
+		</view>
+		<view class="zf-foot zf-foot--inline">
+			<view class="zf-btn zf-btn--primary" hover-class="zf-btn--press" @tap="startHubFlow">{{ themeBriefCta }}</view>
+		</view>
+	</view>
+
+	<view v-else-if="hub" :class="['scf-page', hubTheme]">
 		<view class="scf-hero">
 			<text class="scf-hero-kicker">{{ hub.title }}</text>
 			<text class="scf-hero-title">{{ stepTitle }}</text>
@@ -323,6 +417,11 @@
 			</view>
 		</view>
 	</view>
+
+	<view v-else class="scene-clock-loading">
+		<text class="scene-clock-loading-t">加载中…</text>
+	</view>
+	</view>
 </template>
 
 <script>
@@ -343,6 +442,20 @@
 		getCommunityPointsDesc,
 		getPointsPickSummary,
 		getPointsStepHint,
+		getThemeIntroHeadline,
+		getThemeIntroSubline,
+		getThemeIntroSteps,
+		getThemeIntroCta,
+		getScenePickNavTitle,
+		getScenePickHint,
+		getSceneHubCards,
+		getThemePromoHeadline,
+		getThemePromoPillars,
+		getThemeIntroHeroSlogan,
+		getThemeBriefTagline,
+		getThemeBriefTaskTitle,
+		getThemeBriefTasks,
+		getThemeBriefCta,
 	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
@@ -379,9 +492,27 @@
 				clockHabitTip: '',
 				uploadUrl,
 				introExpanded: false,
+				themeHeadline: getThemeIntroHeadline(),
+				themeSubline: getThemeIntroSubline(),
+				themeSteps: getThemeIntroSteps(),
+				themeCta: getThemeIntroCta(),
+				scenePickHint: getScenePickHint(),
+				sceneHubCards: getSceneHubCards(),
+				themePillars: getThemePromoPillars(),
+				themePromoLines: getThemePromoHeadline().split('\n'),
+				themeHeroSlogan: getThemeIntroHeroSlogan(),
+				themeBriefTagline: getThemeBriefTagline(),
+				themeBriefTaskTitle: getThemeBriefTaskTitle(),
+				themeBriefTasks: getThemeBriefTasks(),
+				themeBriefCta: getThemeBriefCta(),
+				pendingHubKey: '',
 			}
 		},
 		computed: {
+			pendingHubLabel() {
+				const card = (this.sceneHubCards || []).find(c => c.hub === this.pendingHubKey)
+				return (card && card.title) || '未选择'
+			},
 			introBlocks() {
 				return getIntroBlocks(this.hubKey)
 			},
@@ -466,7 +597,9 @@
 			},
 			stepTitle() {
 				const map = getStepTitles()
-				return map[this.flowStep] || this.hub.title
+				if (map[this.flowStep]) return map[this.flowStep]
+				if (this.hub && this.hub.title) return this.hub.title
+				return getScenePickNavTitle()
 			},
 			visibleStepLabels() {
 				if (['setup', 'points', 'manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
@@ -499,23 +632,18 @@
 			},
 		},
 		onLoad(option) {
-			const hubKey = option.hub ? String(option.hub) : 'home'
-			this.hubKey = hubKey
-			this.hub = getHub(hubKey)
-			if (!this.hub) {
-				this.$u.toast('场景无效')
-				setTimeout(() => uni.navigateBack(), 800)
+			const opt = option || {}
+			const mode = String(opt.mode || opt.entry || '').trim()
+			if (mode === 'theme' || mode === 'intro') {
+				this.flowStep = 'theme_intro'
+				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
 				return
 			}
-			uni.setNavigationBarTitle({ title: this.hub.title })
-			this.subKey = ''
-			this.loadCateList().then(() => {
-				this.ensureExamGate().then(ok => {
-					if (ok) this.initUserPoints()
-				})
-			})
+			const hubKey = opt.hub ? String(opt.hub) : 'home'
+			this.bootstrapHub(hubKey)
 		},
 		onShow() {
+			if (['theme_intro', 'theme_scenes', 'theme_brief'].indexOf(this.flowStep) >= 0) return
 			if (!this.hub) return
 			const editing = ['setup', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
 			if (editing) return
@@ -524,6 +652,74 @@
 			})
 		},
 		methods: {
+			bootstrapHub(hubKey) {
+				this.hubKey = hubKey
+				this.hub = getHub(hubKey)
+				if (!this.hub) {
+					this.$u.toast('场景无效')
+					setTimeout(() => uni.navigateBack(), 800)
+					return
+				}
+				uni.setNavigationBarTitle({ title: this.hub.title })
+				this.subKey = ''
+				this.loadCateList().then(() => {
+					this.ensureExamGate().then(ok => {
+						if (ok) this.initUserPoints()
+					})
+				})
+			},
+			async onThemeStart() {
+				if (!this.isLogin) {
+					return this.$u.route('/pages/public/login')
+				}
+				let info = this.userInfo || {}
+				try {
+					const res = await this.$u.api.getUserInfo()
+					info = res.data || {}
+					this.$u.vuex('userInfo', info)
+				} catch (e) {}
+				if (!info.is_learn) {
+					uni.showModal({
+						title: '提示',
+						content: '请先学习垃圾分类指导，通过答题考试后可参与真分打卡',
+						showCancel: false,
+						confirmText: '立即学习',
+						confirmColor: '#38B061',
+						success: (res) => {
+							if (res.confirm) this.$u.route('/pages/flhd/list')
+						},
+					})
+					return
+				}
+				if (!info.is_answer) {
+					uni.showModal({
+						title: '提示',
+						content: '学习已完成，请通过垃圾分类答题考试后即可打卡',
+						showCancel: false,
+						confirmText: '去考试',
+						confirmColor: '#38B061',
+						success: (res) => {
+							if (res.confirm) this.$u.route('/pages/answer/examine?id=1')
+						},
+					})
+					return
+				}
+				this.flowStep = 'theme_scenes'
+				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
+			},
+			pickThemeHub(hub) {
+				this.pendingHubKey = hub
+				this.flowStep = 'theme_brief'
+				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
+			},
+			startHubFlow() {
+				if (!this.pendingHubKey) {
+					this.$u.toast('请先选择打卡场景')
+					this.flowStep = 'theme_scenes'
+					return
+				}
+				this.bootstrapHub(this.pendingHubKey)
+			},
 			ensureExamGate() {
 				if (!this.isLogin) return Promise.resolve(true)
 				return this.$u.api.getUserInfo().then(res => {
@@ -1758,5 +1954,377 @@
 .scf-card--press {
 	opacity: 0.92;
 	transform: scale(0.99);
+}
+
+.scene-clock-root {
+	min-height: 100vh;
+}
+.scene-clock-loading {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #f4f7f5;
+}
+.scene-clock-loading-t {
+	font-size: 28rpx;
+	color: #8a9a90;
+}
+
+/* 真分主题流（原型 Screen 2 / 4 / 5） */
+.zf-foot {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 20rpx 40rpx calc(24rpx + env(safe-area-inset-bottom));
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 35%);
+	z-index: 10;
+}
+.zf-foot--inline {
+	position: static;
+	padding: 32rpx 0 0;
+	background: none;
+}
+.zf-btn {
+	height: 96rpx;
+	line-height: 96rpx;
+	text-align: center;
+	border-radius: 48rpx;
+	font-size: 32rpx;
+	font-weight: 600;
+}
+.zf-btn--primary {
+	color: #fff;
+	background: linear-gradient(90deg, #45c56a 0%, #38b061 100%);
+	box-shadow: 0 12rpx 28rpx rgba(56, 176, 97, 0.35);
+}
+.zf-btn--press {
+	opacity: 0.92;
+	transform: scale(0.99);
+}
+
+.zf-intro {
+	min-height: 100vh;
+	background: #f5f8f6;
+	padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
+}
+.zf-intro-hero {
+	position: relative;
+	height: 360rpx;
+	overflow: hidden;
+	background: linear-gradient(180deg, #7ed4a0 0%, #4caf50 55%, #3d9b5c 100%);
+}
+.zf-intro-sky {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(180deg, #b8e6cf 0%, transparent 55%);
+}
+.zf-intro-hill {
+	position: absolute;
+	bottom: -20rpx;
+	border-radius: 50% 50% 0 0;
+}
+.zf-intro-hill--back {
+	left: -20%;
+	width: 70%;
+	height: 120rpx;
+	background: rgba(255, 255, 255, 0.15);
+}
+.zf-intro-hill--front {
+	right: -10%;
+	width: 85%;
+	height: 160rpx;
+	background: rgba(255, 255, 255, 0.22);
+}
+.zf-intro-people {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 48rpx;
+	display: flex;
+	justify-content: center;
+	gap: 48rpx;
+}
+.zf-intro-people-ico {
+	font-size: 56rpx;
+	filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.12));
+}
+.zf-intro-hero-copy {
+	position: absolute;
+	left: 40rpx;
+	right: 40rpx;
+	top: 48rpx;
+}
+.zf-intro-hero-l1 {
+	display: block;
+	font-size: 48rpx;
+	font-weight: 800;
+	color: #fff;
+	text-shadow: 0 4rpx 12rpx rgba(0, 60, 30, 0.25);
+}
+.zf-intro-hero-l2 {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 28rpx;
+	color: rgba(255, 255, 255, 0.95);
+	line-height: 1.45;
+}
+.zf-intro-sheet {
+	margin: -40rpx 32rpx 0;
+	position: relative;
+	z-index: 2;
+	background: #fff;
+	border-radius: 24rpx;
+	padding: 36rpx 32rpx 24rpx;
+	box-shadow: 0 16rpx 48rpx rgba(24, 100, 60, 0.1);
+}
+.zf-intro-welcome {
+	display: block;
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #1a1a1a;
+	text-align: center;
+}
+.zf-intro-sub {
+	display: block;
+	margin-top: 12rpx;
+	margin-bottom: 28rpx;
+	font-size: 24rpx;
+	color: #888;
+	text-align: center;
+	line-height: 1.5;
+}
+.zf-intro-step {
+	display: flex;
+	padding: 20rpx 0;
+	border-top: 1rpx solid #f0f2f1;
+}
+.zf-intro-step-no {
+	width: 44rpx;
+	height: 44rpx;
+	line-height: 44rpx;
+	text-align: center;
+	border-radius: 50%;
+	background: #38b061;
+	color: #fff;
+	font-size: 24rpx;
+	font-weight: 700;
+	margin-right: 20rpx;
+	flex-shrink: 0;
+}
+.zf-intro-step-body {
+	flex: 1;
+	min-width: 0;
+}
+.zf-intro-step-head {
+	display: flex;
+	align-items: center;
+	margin-bottom: 6rpx;
+}
+.zf-intro-step-ico {
+	font-size: 30rpx;
+	margin-right: 8rpx;
+}
+.zf-intro-step-title {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #222;
+}
+.zf-intro-step-desc {
+	font-size: 24rpx;
+	color: #666;
+	line-height: 1.55;
+}
+
+.zf-scenes {
+	min-height: 100vh;
+	background: #f5f8f6;
+	padding: 24rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
+	box-sizing: border-box;
+}
+.zf-scenes-hint {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #333;
+	margin-bottom: 28rpx;
+	padding-left: 8rpx;
+}
+.zf-scene-card {
+	display: flex;
+	align-items: center;
+	background: #fff;
+	border-radius: 20rpx;
+	padding: 28rpx 24rpx;
+	margin-bottom: 20rpx;
+	box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.05);
+}
+.zf-scene-card--press {
+	opacity: 0.96;
+}
+.zf-scene-icon-wrap {
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 20rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 24rpx;
+	flex-shrink: 0;
+}
+.zf-scene-card--home .zf-scene-icon-wrap {
+	background: linear-gradient(145deg, #e8f9ee 0%, #c8ead4 100%);
+}
+.zf-scene-card--qinzi .zf-scene-icon-wrap {
+	background: linear-gradient(145deg, #fff0f5 0%, #ffd6e5 100%);
+}
+.zf-scene-card--office .zf-scene-icon-wrap {
+	background: linear-gradient(145deg, #eef4ff 0%, #cfe0ff 100%);
+}
+.zf-scene-card--street .zf-scene-icon-wrap {
+	background: linear-gradient(145deg, #fff6eb 0%, #ffe0b8 100%);
+}
+.zf-scene-icon {
+	font-size: 44rpx;
+}
+.zf-scene-copy {
+	flex: 1;
+	min-width: 0;
+}
+.zf-scene-title {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #1a1a1a;
+}
+.zf-scene-desc {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	color: #888;
+}
+.zf-scene-arrow {
+	font-size: 40rpx;
+	color: #ccc;
+	margin-left: 12rpx;
+}
+.zf-promo {
+	margin-top: 32rpx;
+	padding: 32rpx 24rpx;
+	border-radius: 24rpx;
+	background: linear-gradient(160deg, #3d9b5c 0%, #2a7d48 100%);
+}
+.zf-promo-line {
+	display: block;
+	text-align: center;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #fff;
+	line-height: 1.45;
+}
+.zf-promo-pillars {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 28rpx;
+	padding-top: 24rpx;
+	border-top: 1rpx solid rgba(255, 255, 255, 0.25);
+}
+.zf-promo-pillar {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.zf-promo-pillar-ico {
+	font-size: 36rpx;
+}
+.zf-promo-pillar-lab {
+	margin-top: 8rpx;
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.92);
+}
+
+.zf-brief {
+	min-height: 100vh;
+	background: linear-gradient(180deg, #e8f7ee 0%, #f5f8f6 45%);
+	padding: 40rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
+	box-sizing: border-box;
+}
+.zf-brief-tagline {
+	display: block;
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #2d8a52;
+	text-align: center;
+	line-height: 1.5;
+	padding: 16rpx 20rpx 32rpx;
+}
+.zf-brief-card {
+	background: #fff;
+	border-radius: 24rpx;
+	padding: 32rpx 24rpx 36rpx;
+	box-shadow: 0 12rpx 40rpx rgba(56, 176, 97, 0.12);
+}
+.zf-brief-card-title {
+	display: block;
+	text-align: center;
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #222;
+	margin-bottom: 32rpx;
+}
+.zf-brief-tasks {
+	display: flex;
+	justify-content: space-between;
+}
+.zf-brief-task {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0 8rpx;
+}
+.zf-brief-task-ico-wrap {
+	width: 100rpx;
+	height: 100rpx;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #f0faf4 0%, #d4f0de 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 12rpx;
+}
+.zf-brief-task-ico {
+	font-size: 40rpx;
+}
+.zf-brief-task-label {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #333;
+}
+.zf-brief-task-sub {
+	margin-top: 6rpx;
+	font-size: 22rpx;
+	color: #999;
+	text-align: center;
+}
+.zf-brief-scene {
+	margin-top: 28rpx;
+	padding: 24rpx 28rpx;
+	background: rgba(56, 176, 97, 0.1);
+	border-radius: 16rpx;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.zf-brief-scene-k {
+	font-size: 26rpx;
+	color: #5a6b62;
+}
+.zf-brief-scene-v {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #2a9d52;
 }
 </style>

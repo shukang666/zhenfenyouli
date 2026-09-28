@@ -34,17 +34,16 @@ class AdminMenuModel extends Model
     {
         //父节点ID
         $parentId = intval($parentId);
-        $result   = $this->where(['parent_id' => $parentId, 'status' => 1])->where('status',1)->order("list_order", "ASC")->select();
+        $result   = $this->where(['parent_id' => $parentId, 'status' => 1])->order("list_order", "ASC")->select();
 
         if ($withSelf) {
             $result2[] = $this->where('id', $parentId)->find();
             $result    = array_merge($result2, $result);
         }
 
-
         //权限检查
-        if (in_array(cmf_get_current_admin_id(), [1, 14])) {
-            //如果是超级管理员 直接通过（1=创建者, 14=测试账号同等权限）
+        if (cmf_get_current_admin_id() == 1) {
+            //如果是超级管理员 直接通过
             return $result;
         }
 
@@ -67,7 +66,7 @@ class AdminMenuModel extends Model
 
                 $ruleName = strtolower($v['app'] . "/" . $v['controller'] . "/" . $action);
 //                print_r($ruleName);
-                if (cmf_auth_all_check(cmf_get_current_admin_id(), $ruleName)) {
+                if (cmf_auth_check(cmf_get_current_admin_id(), $ruleName)) {
                     $array[] = $v;
                 }
 
@@ -118,7 +117,6 @@ class AdminMenuModel extends Model
     public function getTree($myId, $parent = "", $Level = 1)
     {
         $data = $this->adminMenu($myId);
-
         $Level++;
         if (count($data) > 0) {
             $ret = NULL;
@@ -155,14 +153,12 @@ class AdminMenuModel extends Model
 
                 $ret[$id . $app] = $array;
                 $child           = $this->getTree($a['id'], $id, $Level);
-
                 //由于后台管理界面只支持三层，超出的不层级的不显示
                 if ($child && $Level <= 3) {
                     $ret[$id . $app]['items'] = $child;
                 }
-              
-            }
 
+            }
             return $ret;
         }
 
@@ -176,8 +172,8 @@ class AdminMenuModel extends Model
      */
     public function menuCache($data = null)
     {
-        if (empty($data)) {//->where('status',1) 只显示 显示的
-            $data = $this->order("list_order", "ASC")->where('status',1)->column('*','id');
+        if (empty($data)) {
+            $data = $this->order("list_order", "ASC")->column('*','id');
             Cache::set('Menu', $data, 0);
         } else {
             Cache::set('Menu', $data, 0);

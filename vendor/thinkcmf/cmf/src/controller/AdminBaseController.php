@@ -10,16 +10,11 @@
 // +----------------------------------------------------------------------
 namespace cmf\controller;
 
-use api\wxapp\model\ShopModel;
 use app\admin\model\UserModel;
-use cmf\model\RoleUserModel;
 
 class AdminBaseController extends BaseController
 {
 
-    public $admin_id;
-    public $role_id;
-    public $shop_id;
     protected function initialize()
     {
         // 监听admin_init
@@ -30,39 +25,14 @@ class AdminBaseController extends BaseController
             $user = UserModel::where('id', $sessionAdminId)->find();
 
             if (!$this->checkAccess($sessionAdminId)) {
-                $this->error("您没有访问权限！");
+                $this->error(lang('no access'));
             }
-            $this->admin_id = $sessionAdminId;
-            $role_id = RoleUserModel::where('user_id',$sessionAdminId)->value('role_id');
-            $this->role_id = $role_id;
-
-            $this->assign('role_id',$role_id);
-
-//            $shop = ShopModel::where('user_id',$sessionAdminId)->find();
-//            if(!empty($shop)){
-//                $this->shop_id = $shop['id'];
-//                if($shop['status'] == 2){
-//                    $this->error('您被禁用');
-//                }
-//            }
-
-            if($sessionAdminId != 1){
-                if($user['user_status'] == 0){
-                    $this->error('您被禁用');
-                }
-            }
-
-            $this->assign("admin", $user);
-            $this->assign("domain", cmf_get_domain());
-            $set_config = cmf_get_new_option('set_config');
-            $set_config['app_logo'] = cmf_get_asset_url($set_config['app_logo']);
-            $this->assign('set_config',$set_config);
-
+            $this->assign('admin', $user);
         } else {
             if ($this->request->isPost()) {
-                $this->error("您还没有登录！", url("admin/Public/login"));
+                $this->error(lang('You are not logged in'), url('admin/Public/login'));
             } else {
-                return $this->redirect(url("admin/Public/login"));
+                return $this->redirect(url('admin/Public/login'));
             }
         }
     }
@@ -149,7 +119,7 @@ class AdminBaseController extends BaseController
 
         $cmfAdminThemePath    = config('template.cmf_admin_theme_path');
         $cmfAdminDefaultTheme = cmf_get_current_admin_theme();
-        $themePath            = "{$cmfAdminThemePath}{$cmfAdminDefaultTheme}/";
+        $themePath            = WEB_ROOT . "{$cmfAdminThemePath}{$cmfAdminDefaultTheme}/";
 
         // 基础视图目录
         $app = isset($app) ? $app : $this->app->http->getName();
@@ -216,7 +186,7 @@ class AdminBaseController extends BaseController
         $action     = $this->request->action();
         $rule       = $app . $controller . $action;
 
-        $notRequire = ["adminIndexindex", "adminMainindex"];
+        $notRequire = ['adminIndexindex', 'adminMainindex'];
         if (!in_array($rule, $notRequire)) {
             return cmf_auth_check($userId);
         } else {

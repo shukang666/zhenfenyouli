@@ -7,21 +7,25 @@ namespace Yansongda\Pay\Plugin\Wechat;
 use Closure;
 use Psr\Http\Message\RequestInterface;
 use Yansongda\Pay\Contract\PluginInterface;
+use Yansongda\Pay\Exception\ContainerException;
+use Yansongda\Pay\Exception\ServiceNotFoundException;
 use Yansongda\Pay\Logger;
 use Yansongda\Pay\Pay;
 use Yansongda\Pay\Request;
 use Yansongda\Pay\Rocket;
 
+use function Yansongda\Pay\get_wechat_base_uri;
+use function Yansongda\Pay\get_wechat_config;
+
 abstract class GeneralPlugin implements PluginInterface
 {
     /**
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
+     * @throws ServiceNotFoundException
+     * @throws ContainerException
      */
     public function assembly(Rocket $rocket, Closure $next): Rocket
     {
-        Logger::info('[wechat][GeneralPlugin] 通用插件开始装载', ['rocket' => $rocket]);
+        Logger::debug('[wechat][GeneralPlugin] 通用插件开始装载', ['rocket' => $rocket]);
 
         $rocket->setRadar($this->getRequest($rocket));
         $this->doSomething($rocket);
@@ -32,9 +36,8 @@ abstract class GeneralPlugin implements PluginInterface
     }
 
     /**
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @throws ContainerException
+     * @throws ServiceNotFoundException
      */
     protected function getRequest(Rocket $rocket): RequestInterface
     {
@@ -51,15 +54,14 @@ abstract class GeneralPlugin implements PluginInterface
     }
 
     /**
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @throws ContainerException
+     * @throws ServiceNotFoundException
      */
     protected function getUrl(Rocket $rocket): string
     {
         $params = $rocket->getParams();
 
-        $url = Pay::MODE_SERVICE == get_wechat_config($params)->get('mode') ? $this->getPartnerUri($rocket) : $this->getUri($rocket);
+        $url = Pay::MODE_SERVICE === (get_wechat_config($params)['mode'] ?? null) ? $this->getPartnerUri($rocket) : $this->getUri($rocket);
 
         return 0 === strpos($url, 'http') ? $url : (get_wechat_base_uri($params).$url);
     }
@@ -68,9 +70,20 @@ abstract class GeneralPlugin implements PluginInterface
     {
         return [
             'Accept' => 'application/json, text/plain, application/x-gzip',
-            'User-Agent' => 'yansongda/pay-v3.0',
+            'User-Agent' => 'yansongda/pay-v3',
             'Content-Type' => 'application/json; charset=utf-8',
         ];
+    }
+
+    protected function getConfigKey(array $params): string
+    {
+        $key = ($params['_type'] ?? 'mp').'_app_id';
+
+        if ('app_app_id' === $key) {
+            $key = 'app_id';
+        }
+
+        return $key;
     }
 
     abstract protected function doSomething(Rocket $rocket): void;

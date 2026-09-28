@@ -53,12 +53,6 @@ class DbManager
     protected $listen = [];
 
     /**
-     * SQL日志
-     * @var array
-     */
-    protected $dbLog = [];
-
-    /**
      * 查询次数
      * @var int
      */
@@ -167,8 +161,6 @@ class DbManager
     {
         if ($this->log) {
             $this->log->log($type, $log);
-        } else {
-            $this->dbLog[$type][] = $log;
         }
     }
 
@@ -180,12 +172,7 @@ class DbManager
      */
     public function getDbLog(bool $clear = false): array
     {
-        $logs = $this->dbLog;
-        if ($clear) {
-            $this->dbLog = [];
-        }
-
-        return $logs;
+        return [];
     }
 
     /**
@@ -292,16 +279,17 @@ class DbManager
 
     /**
      * 更新查询次数
+     * @deprecated
      * @access public
      * @return void
      */
     public function updateQueryTimes(): void
     {
-        $this->queryTimes++;
     }
 
     /**
      * 重置查询次数
+     * @deprecated
      * @access public
      * @return void
      */
@@ -312,6 +300,7 @@ class DbManager
 
     /**
      * 获得查询次数
+     * @deprecated
      * @access public
      * @return integer
      */
@@ -342,6 +331,16 @@ class DbManager
     }
 
     /**
+     * 获取所有连接实列
+     * @access public
+     * @return array
+     */
+    public function getInstance(): array
+    {
+        return $this->instance;
+    }
+
+    /**
      * 注册回调方法
      * @access public
      * @param string   $event    事件名
@@ -364,7 +363,7 @@ class DbManager
     {
         if (isset($this->event[$event])) {
             foreach ($this->event[$event] as $callback) {
-                call_user_func_array($callback, [$this]);
+                call_user_func_array($callback, [$params]);
             }
         }
     }

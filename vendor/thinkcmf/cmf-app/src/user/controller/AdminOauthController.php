@@ -20,7 +20,7 @@ class AdminOauthController extends AdminBaseController
      * 后台第三方用户列表
      * @adminMenu(
      *     'name'   => '第三方用户',
-     *     'parent' => 'user/AdminIndex/default1',
+     *     'parent' => 'user/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10000,
@@ -68,13 +68,13 @@ class AdminOauthController extends AdminBaseController
     public function delete()
     {
         if ($this->request->isPost()) {
-            $id = input('param.id', 0, 'intval');
+            $id = $this->request->param('id', 0, 'intval');
             if (empty($id)) {
-                $this->error('非法数据！');
+                $this->error(lang('illegal data'));
             }
 
             ThirdPartyUserModel::where("id", $id)->delete();
-            $this->success("删除成功！", url('AdminOauth/index'));
+            $this->success(lang('DELETE_SUCCESS'), url('AdminOauth/index'));
         }
     }
 

@@ -24,7 +24,7 @@ class MenuController extends AdminBaseController
      * 后台菜单管理
      * @adminMenu(
      *     'name'   => '后台菜单',
-     *     'parent' => 'admin/Setting/default',
+     *     'parent' => 'admin/Dev/index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10000,
@@ -46,7 +46,10 @@ class MenuController extends AdminBaseController
         }
 
         session('admin_menu_index', 'Menu/index');
-        $result     = AdminMenuModel::order(["list_order" => "ASC"])->select()->toArray();
+        $result = AdminMenuModel::order(["list_order" => "ASC"])->select()->toArray();
+        $this->assign('menus', $result);
+
+        /*即将废弃start*/
         $tree       = new Tree();
         $tree->icon = ['&nbsp;&nbsp;&nbsp;│ ', '&nbsp;&nbsp;&nbsp;├─', '&nbsp;&nbsp;&nbsp;└─ '];
         $tree->nbsp = '&nbsp;&nbsp;&nbsp;';
@@ -59,9 +62,12 @@ class MenuController extends AdminBaseController
 
             $result[$key]['parent_id_node'] = ($value['parent_id']) ? ' class="child-of-node-' . $value['parent_id'] . '"' : '';
             $result[$key]['style']          = empty($value['parent_id']) ? '' : 'display:none;';
-            $result[$key]['str_manage']     = '<a class="btn btn-xs btn-primary" href="' . url("Menu/add", ["parent_id" => $value['id'], "menu_id" => $this->request->param("menu_id")]) . '">' . lang('ADD_SUB_MENU') . '</a> 
-                                               <a class="btn btn-xs btn-primary" href="' . url("Menu/edit", ["id" => $value['id'], "menu_id" => $this->request->param("menu_id")]) . '">' . lang('EDIT') . '</a>  
-                                               <a class="btn btn-xs btn-danger js-ajax-delete" href="' . url("Menu/delete", ["id" => $value['id'], "menu_id" => $this->request->param("menu_id")]) . '">' . lang('DELETE') . '</a> ';
+            $result[$key]['str_manage']     = '<a class="btn btn-xs btn-primary" href="' . url("Menu/add", ["parent_id" => $value['id'],
+                                                                                                            "menu_id"   => $this->request->param("menu_id")]) . '">' . lang('ADD_SUB_MENU') . '</a> 
+                                               <a class="btn btn-xs btn-success" href="' . url("Menu/edit", ["id"      => $value['id'],
+                                                                                                             "menu_id" => $this->request->param("menu_id")]) . '">' . lang('EDIT') . '</a>  
+                                               <a class="btn btn-xs btn-danger js-ajax-delete" href="' . url("Menu/delete", ["id"      => $value['id'],
+                                                                                                                             "menu_id" => $this->request->param("menu_id")]) . '">' . lang('DELETE') . '</a> ';
             $result[$key]['status']         = $value['status'] ? '<span class="label label-success">' . lang('DISPLAY') . '</span>' : '<span class="label label-warning">' . lang('HIDDEN') . '</span>';
             if (APP_DEBUG) {
                 $result[$key]['app'] = $value['app'] . "/" . $value['controller'] . "/" . $value['action'];
@@ -79,6 +85,8 @@ class MenuController extends AdminBaseController
                     </tr>";
         $category = $tree->getTree(0, $str);
         $this->assign("category", $category);
+        /*即将废弃end*/
+
         return $this->fetch();
     }
 
@@ -129,14 +137,9 @@ class MenuController extends AdminBaseController
         $tree     = new Tree();
         $parentId = $this->request->param("parent_id", 0, 'intval');
         $result   = AdminMenuModel::order(["list_order" => "ASC"])->select()->toArray();
-        $array    = [];
-        foreach ($result as $r) {
-            $r['selected'] = $r['id'] == $parentId ? 'selected' : '';
-            $array[]       = $r;
-        }
-        $str = "<option value='\$id' \$selected>\$spacer \$name</option>";
-        $tree->init($array);
-        $selectCategory = $tree->getTree(0, $str);
+        $str      = "<option value='\$id' \$selected>\$spacer \$name</option>";
+        $tree->init($result);
+        $selectCategory = $tree->getTree(0, $str, $parentId);
         $this->assign("select_category", $selectCategory);
         return $this->fetch();
     }
@@ -189,7 +192,7 @@ class MenuController extends AdminBaseController
                 $to                    = empty($sessionAdminMenuIndex) ? "Menu/index" : $sessionAdminMenuIndex;
                 $this->_exportAppMenuDefaultLang();
                 Cache::clear('admin_menus');// 删除后台菜单缓存
-                $this->success("添加成功！", url($to));
+                $this->success(lang('ADD_SUCCESS'), url($to));
             }
         }
     }
@@ -217,14 +220,9 @@ class MenuController extends AdminBaseController
         $id        = $this->request->param("id", 0, 'intval');
         $adminMenu = AdminMenuModel::where("id", $id)->find();
         $result    = AdminMenuModel::order(["list_order" => "ASC"])->select()->toArray();
-        $array     = [];
-        foreach ($result as $r) {
-            $r['selected'] = $r['id'] == $adminMenu['parent_id'] ? 'selected' : '';
-            $array[]       = $r;
-        }
-        $str = "<option value='\$id' \$selected>\$spacer \$name</option>";
-        $tree->init($array);
-        $selectCategory = $tree->getTree(0, $str);
+        $str       = "<option value='\$id' \$selected>\$spacer \$name</option>";
+        $tree->init($result);
+        $selectCategory = $tree->getTree(0, $str, $adminMenu['parent_id']);
         $this->assign("data", $adminMenu);
         $this->assign("select_category", $selectCategory);
         return $this->fetch();
@@ -303,7 +301,7 @@ class MenuController extends AdminBaseController
                 }
                 $this->_exportAppMenuDefaultLang();
                 Cache::clear('admin_menus');// 删除后台菜单缓存
-                $this->success("保存成功！");
+                $this->success(lang('EDIT_SUCCESS'));
             }
         }
     }
@@ -332,9 +330,9 @@ class MenuController extends AdminBaseController
                 $this->error("该菜单下还有子菜单，无法删除！");
             }
             if (AdminMenuModel::destroy($id) !== false) {
-                $this->success("删除菜单成功！");
+                $this->success(lang('DELETE_SUCCESS'));
             } else {
-                $this->error("删除失败！");
+                $this->error(lang('DELETE_FAILED'));
             }
         }
     }
@@ -356,7 +354,7 @@ class MenuController extends AdminBaseController
     {
         $adminMenuModel = new AdminMenuModel();
         parent::listOrders($adminMenuModel);
-        $this->success("排序更新成功！");
+        $this->success(lang('Sort update successful'));
     }
 
     /**
@@ -381,7 +379,7 @@ class MenuController extends AdminBaseController
      */
     public function getActions()
     {
-        $apps = cmf_scan_dir(APP_PATH . '*', GLOB_ONLYDIR);
+        $apps = cmf_scan_dir($this->app->getAppPath() . '*', GLOB_ONLYDIR);
 
         array_push($apps, 'admin', 'user');
 
@@ -410,6 +408,12 @@ class MenuController extends AdminBaseController
 
         return $this->fetch();
 
+    }
+
+    public function exportMenuLang()
+    {
+        $this->_exportAppMenuDefaultLang();
+        $this->success('操作成功');
     }
 
     /**

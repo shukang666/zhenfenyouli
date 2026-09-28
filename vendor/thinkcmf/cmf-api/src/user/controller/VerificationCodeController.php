@@ -11,13 +11,38 @@
 namespace api\user\controller;
 
 use cmf\controller\RestBaseController;
+use OpenApi\Annotations as OA;
 use think\facade\Validate;
-use think\View;
+use think\facade\View;
 
 class VerificationCodeController extends RestBaseController
 {
     /**
      * 验证码发送
+     * @OA\Post(
+     *     tags={"user"},
+     *     path="/user/verification_code/send",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/x-www-form-urlencoded",
+     *             @OA\Schema(
+     *                  @OA\Property(
+     *                      property="username",
+     *                      description="手机号，邮箱，账户",
+     *                      type="string"
+     *                  )
+     *             )
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *          response="1",
+     *          @OA\JsonContent(example={"code": 1,"msg": "验证码已经发送成功!您的验证码默认是666666","data": null})
+     *     ),
+     *     @OA\Response(
+     *          response="0",
+     *          @OA\JsonContent(example={"code": 0,"msg": "请输入手机号或邮箱!","data": null})
+     *     ),
+     * )
      * @throws \think\Exception
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\ModelNotFoundException
@@ -64,8 +89,7 @@ class VerificationCodeController extends RestBaseController
             $username = empty($user['user_nickname']) ? $user['user_login'] : $user['user_nickname'];
 
             $message = htmlspecialchars_decode($emailTemplate['template']);
-            $view    =  (new View())->init();
-            $message = $view->display($message, ['code' => $code, 'username' => $username]);
+            $message = View::display($message, ['code' => $code, 'username' => $username]);
 
             $subject = empty($emailTemplate['subject']) ? 'ThinkCMF验证码' : $emailTemplate['subject'];
             $result  = cmf_send_email($data['username'], $subject, $message);

@@ -6,26 +6,33 @@ namespace Yansongda\Pay\Provider;
 
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
+use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yansongda\Pay\Event;
+use Yansongda\Pay\Exception\ContainerException;
 use Yansongda\Pay\Exception\Exception;
 use Yansongda\Pay\Exception\InvalidParamsException;
+use Yansongda\Pay\Exception\ServiceNotFoundException;
 use Yansongda\Pay\Pay;
 use Yansongda\Pay\Plugin\ParserPlugin;
 use Yansongda\Pay\Plugin\Wechat\CallbackPlugin;
 use Yansongda\Pay\Plugin\Wechat\LaunchPlugin;
 use Yansongda\Pay\Plugin\Wechat\PreparePlugin;
-use Yansongda\Pay\Plugin\Wechat\SignPlugin;
+use Yansongda\Pay\Plugin\Wechat\RadarSignPlugin;
 use Yansongda\Supports\Collection;
 use Yansongda\Supports\Str;
 
 /**
- * @method ResponseInterface app(array $order)  APP 支付
- * @method Collection        mini(array $order) 小程序支付
- * @method Collection        mp(array $order)   公众号支付
- * @method Collection        scan(array $order) 扫码支付
- * @method ResponseInterface wap(array $order)  H5 支付
+ * @method Collection app(array $order)           APP 支付
+ * @method Collection mini(array $order)          小程序支付
+ * @method Collection mp(array $order)            公众号支付
+ * @method Collection scan(array $order)          扫码支付
+ * @method Collection wap(array $order)           H5 支付
+ * @method Collection transfer(array $order)      帐户转账
+ * @method Collection papay(array $order)         支付时签约（委托代扣）
+ * @method Collection papayApply(array $order)    申请代扣（委托代扣）
+ * @method Collection papayContract(array $order) 申请代扣（委托代扣）
  */
 class Wechat extends AbstractProvider
 {
@@ -40,12 +47,11 @@ class Wechat extends AbstractProvider
     ];
 
     /**
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\InvalidParamsException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @return null|array|Collection|MessageInterface
      *
-     * @return \Psr\Http\Message\MessageInterface|\Yansongda\Supports\Collection|array|null
+     * @throws ContainerException
+     * @throws InvalidParamsException
+     * @throws ServiceNotFoundException
      */
     public function __call(string $shortcut, array $params)
     {
@@ -58,12 +64,11 @@ class Wechat extends AbstractProvider
     /**
      * @param array|string $order
      *
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\InvalidParamsException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @return array|Collection
      *
-     * @return array|\Yansongda\Supports\Collection
+     * @throws ContainerException
+     * @throws InvalidParamsException
+     * @throws ServiceNotFoundException
      */
     public function find($order)
     {
@@ -77,7 +82,7 @@ class Wechat extends AbstractProvider
     /**
      * @param array|string $order
      *
-     * @throws \Yansongda\Pay\Exception\InvalidParamsException
+     * @throws InvalidParamsException
      */
     public function cancel($order): void
     {
@@ -87,10 +92,9 @@ class Wechat extends AbstractProvider
     /**
      * @param array|string $order
      *
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\InvalidParamsException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @throws ContainerException
+     * @throws InvalidParamsException
+     * @throws ServiceNotFoundException
      */
     public function close($order): void
     {
@@ -102,12 +106,11 @@ class Wechat extends AbstractProvider
     }
 
     /**
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\InvalidParamsException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @return array|Collection
      *
-     * @return array|\Yansongda\Supports\Collection
+     * @throws ContainerException
+     * @throws InvalidParamsException
+     * @throws ServiceNotFoundException
      */
     public function refund(array $order)
     {
@@ -117,21 +120,20 @@ class Wechat extends AbstractProvider
     }
 
     /**
-     * @param array|\Psr\Http\Message\ServerRequestInterface|null $contents
+     * @param null|array|ServerRequestInterface $contents
      *
-     * @throws \Yansongda\Pay\Exception\ContainerDependencyException
-     * @throws \Yansongda\Pay\Exception\ContainerException
-     * @throws \Yansongda\Pay\Exception\InvalidParamsException
-     * @throws \Yansongda\Pay\Exception\ServiceNotFoundException
+     * @throws ContainerException
+     * @throws InvalidParamsException
      */
     public function callback($contents = null, ?array $params = null): Collection
     {
-        Event::dispatch(new Event\CallbackReceived('wechat', $contents, $params, null));
-
         $request = $this->getCallbackParams($contents);
 
+        Event::dispatch(new Event\CallbackReceived('wechat', clone $request, $params, null));
+
         return $this->pay(
-            [CallbackPlugin::class], ['request' => $request, 'params' => $params]
+            [CallbackPlugin::class],
+            ['request' => $request, 'params' => $params]
         );
     }
 
@@ -149,17 +151,17 @@ class Wechat extends AbstractProvider
         return array_merge(
             [PreparePlugin::class],
             $plugins,
-            [SignPlugin::class],
+            [RadarSignPlugin::class],
             [LaunchPlugin::class, ParserPlugin::class],
         );
     }
 
     /**
-     * @param array|ServerRequestInterface|null $contents
+     * @param null|array|ServerRequestInterface $contents
      */
     protected function getCallbackParams($contents = null): ServerRequestInterface
     {
-        if (is_array($contents) && isset($contents['body']) && isset($contents['headers'])) {
+        if (is_array($contents) && isset($contents['body'], $contents['headers'])) {
             return new ServerRequest('POST', 'http://localhost', $contents['headers'], $contents['body']);
         }
 
