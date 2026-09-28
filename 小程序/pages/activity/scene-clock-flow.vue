@@ -1009,7 +1009,7 @@
 }
 .scf-point-photo {
 	width: 100%;
-	height: 200rpx;
+	height: 320rpx;
 	border-radius: 14rpx;
 	margin-bottom: 14rpx;
 }
@@ -1051,7 +1051,7 @@
 }
 .scf-point-upload {
 	margin-top: 8rpx;
-	height: 200rpx;
+	height: 320rpx;
 	border-radius: 14rpx;
 	overflow: hidden;
 	border: 2rpx dashed #c5d0c8;
