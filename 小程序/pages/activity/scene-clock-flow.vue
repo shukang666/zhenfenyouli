@@ -121,15 +121,22 @@
 			</view>
 		</view>
 
-		<!-- 家庭/亲子：为什么要分 -->
+		<!-- 家庭：为什么要分（promo 卡片 + 四格要点，与场景选择页同风格） -->
 		<view class="scf-body" v-if="flowStep === 'why'">
-			<view class="scf-intro scf-intro--open">
-				<text class="scf-intro-lead">{{ whyIntroLead }}</text>
-				<text class="scf-intro-summary">{{ whyIntroSummary }}</text>
-				<view class="scf-intro-detail scf-intro-detail--always">
-					<view class="scf-intro-block" v-for="block in introBlocks" :key="block.id">
-						<text class="scf-intro-block-title">{{ block.title }}</text>
-						<text class="scf-intro-block-body">{{ block.body }}</text>
+			<view class="scf-promo" :class="'scf-promo--' + hubPromoSkin">
+				<text class="scf-promo-line">{{ whyIntroLead }}</text>
+				<text class="scf-promo-line scf-promo-line--sub">{{ whyIntroSummary }}</text>
+				<view class="scf-promo-pillars scf-promo-pillars--grid">
+					<view class="scf-promo-pillar scf-promo-pillar--tile" v-for="block in introInsightCards" :key="block.id">
+						<text class="scf-promo-pillar-ico">{{ block.icon }}</text>
+						<text class="scf-promo-pillar-lab">{{ block.title }}</text>
+						<text class="scf-promo-pillar-desc">{{ block.body }}</text>
+					</view>
+				</view>
+				<view class="scf-promo-pillars scf-promo-pillars--mini">
+					<view class="scf-promo-pillar" v-for="(p, i) in themePillars" :key="'tp' + i">
+						<text class="scf-promo-pillar-ico">{{ p.icon }}</text>
+						<text class="scf-promo-pillar-lab">{{ p.label }}</text>
 					</view>
 				</view>
 			</view>
@@ -140,29 +147,28 @@
 
 		<!-- 首次：设置分类打卡点（仅家庭/亲子） -->
 		<view class="scf-body" v-if="flowStep === 'setup'">
-			<view class="scf-bin-guide" v-if="isResidentialHub && binLayoutExamples.length">
-				<text class="scf-bin-guide-title">{{ binSetupLead }}</text>
-				<view class="scf-bin-example" v-for="(ex, eIdx) in binLayoutExamples" :key="eIdx">
-					<text class="scf-bin-example-emoji">{{ ex.emoji }}</text>
-					<view class="scf-bin-example-copy">
-						<text class="scf-bin-example-room">{{ ex.room }} · {{ ex.cate }}</text>
-						<text class="scf-bin-example-tip">{{ ex.tip }}</text>
+			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
+				<text class="scf-promo-line">{{ binSetupLead }}</text>
+				<text class="scf-promo-line scf-promo-line--sub">{{ introDisplaySummary }}</text>
+			</view>
+			<view class="scf-room-list" v-if="isResidentialHub && binLayoutExamples.length">
+				<view class="zf-scene-card scf-room-card" v-for="(ex, eIdx) in binLayoutExamples" :key="eIdx">
+					<view class="zf-scene-icon-wrap scf-room-icon">
+						<text class="zf-scene-icon">{{ ex.emoji }}</text>
+					</view>
+					<view class="zf-scene-copy">
+						<text class="zf-scene-title">{{ ex.room }}</text>
+						<text class="zf-scene-desc">{{ ex.cate }} · {{ ex.tip }}</text>
 					</view>
 				</view>
 			</view>
-			<view class="scf-intro">
-				<text class="scf-intro-lead">{{ introDisplayLead }}</text>
-				<text class="scf-intro-summary">{{ introDisplaySummary }}</text>
-				<view class="scf-intro-toggle" hover-class="scf-card--press" @tap="introExpanded = !introExpanded">
-					<text class="scf-intro-toggle-t">{{ introExpanded ? '收起' : '了解更多' }}</text>
-					<text class="scf-intro-chevron">{{ introExpanded ? '▲' : '▼' }}</text>
-				</view>
-				<view class="scf-intro-detail" v-if="introExpanded">
-					<view class="scf-intro-block" v-for="block in introBlocks" :key="block.id">
-						<text class="scf-intro-block-title">{{ block.title }}</text>
-						<text class="scf-intro-block-body">{{ block.body }}</text>
-					</view>
-				</view>
+			<view class="scf-section-kicker" v-if="isResidentialHub">
+				<text class="scf-section-kicker-t">拍下您家的桶</text>
+				<text class="scf-section-kicker-s">名称和种类可随时改</text>
+			</view>
+			<view class="scf-promo scf-promo--compact scf-promo--light" v-else-if="!isResidentialHub">
+				<text class="scf-promo-line scf-promo-line--dark">{{ introDisplayLead }}</text>
+				<text class="scf-promo-line scf-promo-line--subdark">{{ introDisplaySummary }}</text>
 			</view>
 			<view class="scf-setup-list">
 				<view class="scf-bin-card" v-for="(row, idx) in setupRows" :key="idx">
@@ -205,20 +211,31 @@
 			</view>
 		</view>
 
-		<!-- 家庭/亲子：四分类选择 -->
+		<!-- 家庭：四分类选择 -->
 		<view class="scf-body" v-if="flowStep === 'cate'">
-			<text class="scf-hint">这次要打卡哪一类？点选后继续上传分类成果。</text>
-			<view class="scf-cate-grid">
+			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
+				<text class="scf-promo-line">这次打卡哪一类？</text>
+				<text class="scf-promo-line scf-promo-line--sub">点选一种，接着上传分类成果</text>
+			</view>
+			<view class="scf-cate-scene-list">
 				<view
 					v-for="c in cateList"
 					:key="c.id"
-					class="scf-cate-pick"
-					:class="{ 'scf-cate-pick--on': Number(cateId) === Number(c.id), ['scf-cate-pick--' + cateTone(c.name)]: true }"
-					hover-class="scf-card--press"
+					class="zf-scene-card scf-cate-scene-card"
+					:class="{ 'scf-cate-scene-card--on': Number(cateId) === Number(c.id), ['scf-cate-scene-card--' + cateTone(c.name)]: true }"
+					hover-class="zf-scene-card--press"
+					:hover-stay-time="80"
 					@tap="pickResidentialCate(c)"
 				>
-					<text class="scf-cate-pick-name">{{ c.name }}</text>
-					<text class="scf-cate-pick-sub">{{ cateHintByName(c.name) }}</text>
+					<view class="zf-scene-icon-wrap" :class="'scf-cate-icon--' + cateTone(c.name)">
+						<text class="zf-scene-icon">{{ cateEmoji(c.name) }}</text>
+					</view>
+					<view class="zf-scene-copy">
+						<text class="zf-scene-title">{{ c.name }}</text>
+						<text class="zf-scene-desc">{{ cateHintByName(c.name) }}</text>
+					</view>
+					<text class="scf-cate-check" v-if="Number(cateId) === Number(c.id)">✓</text>
+					<text class="zf-scene-arrow" v-else>›</text>
 				</view>
 			</view>
 			<view class="scf-foot">
@@ -229,19 +246,9 @@
 
 		<!-- 打卡点列表（打卡入口） -->
 		<view class="scf-body" v-if="flowStep === 'points'">
-			<view class="scf-intro" :class="{ 'scf-intro--compact': isCommunityHub }">
-				<text class="scf-intro-lead">{{ introDisplayLead }}</text>
-				<text class="scf-intro-summary">{{ introDisplaySummary }}</text>
-				<view class="scf-intro-toggle" hover-class="scf-card--press" @tap="introExpanded = !introExpanded">
-					<text class="scf-intro-toggle-t">{{ introExpanded ? '收起' : '了解更多' }}</text>
-					<text class="scf-intro-chevron">{{ introExpanded ? '▲' : '▼' }}</text>
-				</view>
-				<view class="scf-intro-detail" v-if="introExpanded">
-					<view class="scf-intro-block" v-for="block in introBlocks" :key="block.id">
-						<text class="scf-intro-block-title">{{ block.title }}</text>
-						<text class="scf-intro-block-body">{{ block.body }}</text>
-					</view>
-				</view>
+			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
+				<text class="scf-promo-line">{{ introDisplayLead }}</text>
+				<text class="scf-promo-line scf-promo-line--sub">{{ introDisplaySummary }}</text>
 			</view>
 			<view class="scf-points-head">
 				<text class="scf-hint scf-hint--inline">{{ pointsStepHint }}</text>
@@ -336,7 +343,11 @@
 
 		<!-- 处理指引 -->
 		<view class="scf-body" v-if="flowStep === 'guide'">
-			<view class="scf-panel">
+			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
+				<text class="scf-promo-line">{{ activeCateName || '分类' }} · 怎么投</text>
+				<text class="scf-promo-line scf-promo-line--sub" v-if="pointName">{{ pointName }}</text>
+			</view>
+			<view class="scf-panel scf-panel--card">
 				<view class="scf-cate-hero scf-cate-hero--panel" :class="'scf-cate-hero--' + cateTone(activeCateName)">
 					<text class="scf-cate-hero-kicker">垃圾分类</text>
 					<text class="scf-cate-hero-name">{{ activeCateName }}</text>
@@ -359,7 +370,10 @@
 
 		<!-- 问卷 / 技巧 -->
 		<view class="scf-body" v-if="flowStep === 'survey'">
-			<text class="scf-hint">{{ guide.survey_question }}</text>
+			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
+				<text class="scf-promo-line">选一个小窍门</text>
+				<text class="scf-promo-line scf-promo-line--sub">{{ guide.survey_question }}</text>
+			</view>
 			<view class="scf-tip-list">
 				<view
 					v-for="(tip, idx) in presetTips"
@@ -383,11 +397,11 @@
 
 		<!-- 拍照打卡（原跳转 add 页，现页内完成） -->
 		<view class="scf-body" v-if="flowStep === 'learn'">
+			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
+				<text class="scf-promo-line">上传 {{ activeCateName || '分类' }} 成果</text>
+				<text class="scf-promo-line scf-promo-line--sub">{{ clockPhotoIntro }}</text>
+			</view>
 			<view class="scf-clock-card">
-				<view class="scf-cate-hero scf-cate-hero--compact" :class="'scf-cate-hero--' + cateTone(activeCateName)">
-					<text class="scf-cate-hero-name">{{ activeCateName }}</text>
-				</view>
-				<text class="scf-clock-desc">{{ clockPhotoIntro }}</text>
 
 				<view class="scf-clock-photo-head scf-clock-photo-head--row">
 					<text class="scf-clock-photo-title">{{ isResidentialHub ? '上传分类成果照片' : '按顺序拍 3 张照片' }}</text>
@@ -660,6 +674,18 @@
 			},
 			introBlocks() {
 				return getIntroBlocks()
+			},
+			introInsightCards() {
+				const iconMap = { what: '📦', benefit: '♻️', policy: '🤝', vision: '⭐' }
+				return (this.introBlocks || []).map(b => ({
+					...b,
+					icon: iconMap[b.id] || '💡',
+				}))
+			},
+			hubPromoSkin() {
+				if (this.hubKey === 'office') return 'office'
+				if (this.hubKey === 'street') return 'street'
+				return 'home'
 			},
 			introDisplayLead() {
 				if (this.flowStep === 'points' && this.isCommunityHub) {
@@ -1101,6 +1127,11 @@
 			},
 			cateTone(name) {
 				return resolveCateKind(name) || 'other'
+			},
+			cateEmoji(name) {
+				const k = resolveCateKind(name)
+				const map = { food: '🍃', recycle: '♻️', harm: '☣️', other: '🗑️' }
+				return map[k] || '🗂️'
 			},
 			addSetupRow() {
 				this.setupRows.push({ point_name: '', cate_index: 0, point_image: '', point_image_url: '' })
@@ -1584,6 +1615,164 @@
 }
 .scf-body {
 	padding: 8rpx 24rpx 24rpx;
+}
+
+/* 与 theme_scenes 的 zf-promo 同系视觉，用于流程内各步 */
+.scf-promo {
+	margin-bottom: 24rpx;
+	padding: 32rpx 24rpx 28rpx;
+	border-radius: 24rpx;
+	background: linear-gradient(160deg, #3d9b5c 0%, #2a7d48 100%);
+	box-shadow: 0 12rpx 36rpx rgba(42, 125, 72, 0.22);
+}
+.scf-promo--compact {
+	padding: 28rpx 24rpx;
+}
+.scf-promo--home {
+	background: linear-gradient(160deg, #3d9b5c 0%, #2a7d48 100%);
+}
+.scf-promo--office {
+	background: linear-gradient(160deg, #4a7fd4 0%, #2f5f9e 100%);
+	box-shadow: 0 12rpx 36rpx rgba(47, 95, 158, 0.22);
+}
+.scf-promo--street {
+	background: linear-gradient(160deg, #e8a045 0%, #c9782a 100%);
+	box-shadow: 0 12rpx 36rpx rgba(201, 120, 42, 0.22);
+}
+.scf-promo--light {
+	background: #fff;
+	box-shadow: 0 8rpx 28rpx rgba(20, 40, 28, 0.08);
+}
+.scf-promo-line {
+	display: block;
+	text-align: center;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #fff;
+	line-height: 1.45;
+}
+.scf-promo-line--sub {
+	margin-top: 10rpx;
+	font-size: 24rpx;
+	font-weight: 500;
+	opacity: 0.92;
+}
+.scf-promo-line--dark {
+	color: #142018;
+}
+.scf-promo-line--subdark {
+	color: #5f7166;
+	font-size: 24rpx;
+	font-weight: 500;
+	margin-top: 8rpx;
+}
+.scf-promo-pillars {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 24rpx;
+	padding-top: 20rpx;
+	border-top: 1rpx solid rgba(255, 255, 255, 0.25);
+}
+.scf-promo-pillars--grid {
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 16rpx 0;
+	border-top: none;
+	padding-top: 24rpx;
+}
+.scf-promo-pillars--mini {
+	margin-top: 20rpx;
+	padding-top: 20rpx;
+}
+.scf-promo-pillar {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.scf-promo-pillar--tile {
+	flex: 0 0 48%;
+	align-items: flex-start;
+	background: rgba(255, 255, 255, 0.14);
+	border-radius: 18rpx;
+	padding: 18rpx 16rpx 20rpx;
+	box-sizing: border-box;
+}
+.scf-promo-pillar-ico {
+	font-size: 36rpx;
+}
+.scf-promo-pillar-lab {
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	font-weight: 700;
+	color: rgba(255, 255, 255, 0.98);
+	line-height: 1.35;
+}
+.scf-promo-pillar-desc {
+	margin-top: 8rpx;
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.88);
+	line-height: 1.45;
+}
+.scf-section-kicker {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	margin: 8rpx 4rpx 16rpx;
+}
+.scf-section-kicker-t {
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #142018;
+}
+.scf-section-kicker-s {
+	font-size: 24rpx;
+	color: #6a756c;
+}
+.scf-room-list {
+	margin-bottom: 20rpx;
+}
+.scf-room-card {
+	margin-bottom: 16rpx;
+	box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.05);
+}
+.scf-room-icon {
+	background: linear-gradient(145deg, #e8f9ee 0%, #c8ead4 100%) !important;
+}
+.scf-cate-scene-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+}
+.scf-cate-scene-card {
+	margin-bottom: 0;
+	border: 2rpx solid transparent;
+}
+.scf-cate-scene-card--on {
+	border-color: #38b061;
+	box-shadow: 0 8rpx 28rpx rgba(56, 176, 97, 0.2);
+}
+.scf-cate-icon--recycle {
+	background: linear-gradient(145deg, #e3f2fa 0%, #b8d9ef 100%) !important;
+}
+.scf-cate-icon--food {
+	background: linear-gradient(145deg, #e8f9ee 0%, #b8e6c8 100%) !important;
+}
+.scf-cate-icon--harm {
+	background: linear-gradient(145deg, #fce8f0 0%, #f0c4d8 100%) !important;
+}
+.scf-cate-icon--other {
+	background: linear-gradient(145deg, #eef0f3 0%, #d5dae2 100%) !important;
+}
+.scf-cate-check {
+	font-size: 36rpx;
+	font-weight: 800;
+	color: #38b061;
+	margin-left: 12rpx;
+}
+.scf-panel--card {
+	border-radius: 20rpx;
+	box-shadow: 0 8rpx 28rpx rgba(20, 40, 28, 0.08);
 }
 .scf-hint {
 	display: block;
