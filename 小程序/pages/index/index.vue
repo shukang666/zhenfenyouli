@@ -249,7 +249,7 @@
 import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 import NewUserGuide from '@/components/new-user-guide/new-user-guide.vue'
 import careGesture from '@/common/care-gesture.mixin.js'
-import { shouldTabRefresh } from '@/common/tab-refresh.js'
+import { shouldTabRefresh, markTabRefreshed } from '@/common/tab-refresh.js'
 export default {
 	components: {
 		SkeletonScreen,
@@ -451,11 +451,11 @@ export default {
 			if (op.scene) {
 				uni.setStorageSync('vcode', op.scene)
 			}
-			this.loadAllData()
-			// 已登录则拉取用户成长信息（问候模块+打卡卡片）
-			if (this.isLogin) {
-				this.fetchIndexTabHome()
-			}
+			this._indexHomeBootstrapping = true
+			this.loadAllData().finally(() => {
+				this._indexHomeBootstrapping = false
+				if (this.isLogin) markTabRefreshed('index-user-growth')
+			})
 		},
 		onShow() {
 			this.guideOnPage = true
@@ -463,8 +463,12 @@ export default {
 			uni.$on('pause-new-user-guide', this.pauseGuideOverlay)
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(0)
-			// 已登录则刷新用户成长数据（节流，走首页聚合接口 refresh=1）
-			if (this.isLogin && shouldTabRefresh('index-user-growth')) {
+			// 已登录：从其它页回到首页时刷新用户成长（首屏 loadAllData 已拉过，跳过）
+			if (
+				this.isLogin &&
+				!this._indexHomeBootstrapping &&
+				shouldTabRefresh('index-user-growth')
+			) {
 				this.fetchIndexTabHome({ refresh: 1 })
 			}
 		},
@@ -564,7 +568,7 @@ export default {
 		async loadAllData() {
 			const startTime = Date.now()
 			try {
-				await this.fetchIndexTabHome()
+				await this.fetchIndexTabHome({ refresh: this.isLogin ? 1 : 0 })
 			} catch (e) {
 				console.log('数据加载失败:', e)
 			} finally {
@@ -580,8 +584,11 @@ export default {
 			}
 		},
 		fetchIndexTabHome(opts = {}) {
+			if (this._indexTabHomeInflight) {
+				return this._indexTabHomeInflight
+			}
 			const params = opts.refresh ? { refresh: 1 } : {}
-			return this.$u.api.get_index_tab_home(params).then(res => {
+			const req = this.$u.api.get_index_tab_home(params).then(res => {
 				const d = res.data || {}
 				this.bannerList = d.banner_list || []
 				this.active_list = d.active_list || []
@@ -595,7 +602,13 @@ export default {
 					this.$u.vuex('userInfo', Object.assign({}, this.userInfo, d.user_info))
 					this.applyIndexUserGrowth(d.user_info)
 				}
+			}).finally(() => {
+				if (this._indexTabHomeInflight === req) {
+					this._indexTabHomeInflight = null
+				}
 			})
+			this._indexTabHomeInflight = req
+			return req
 		},
 		mergeHomeEntries(list) {
 			if (!list || list.length === 0) return
