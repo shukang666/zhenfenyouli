@@ -200,8 +200,9 @@
       </view>
     </view>
 
+    <!-- 暂时不需要，注释掉了 -->
     <!-- 分类轻量化入口（与快捷入口同套卡片样式） -->
-    <view class="fb-light-task" id="guide-fb-light-task">
+    <!-- <view class="fb-light-task" id="guide-fb-light-task">
       <view class="fb-entry-kicker">
         <view class="fb-entry-kicker-dot"></view>
         <text class="fb-entry-kicker-text">分类随手学</text>
@@ -262,7 +263,7 @@
           </view>
         </view>
       </view>
-    </view>
+    </view> -->
 
     <!-- 主题活动：5 大分类 -->
     <view class="fb-section fb-theme-act" id="guide-fb-theme">
