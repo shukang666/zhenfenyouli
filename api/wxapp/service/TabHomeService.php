@@ -19,6 +19,7 @@ use app\admin\model\SlideItemModel;
 use api\wxapp\model\CouponModel;
 use api\wxapp\model\UserCouponModel;
 use think\facade\Db;
+use think\facade\Request;
 
 /**
  * 五个 TabBar 页聚合数据
@@ -353,10 +354,14 @@ class TabHomeService
             $map[] = ['a.second_cate', '=', $secondCate];
         }
         $order = 'a.list_order,a.id desc';
-        $this->auth->request->withGet(['page' => $page]);
+        Request::withGet(array_merge(Request::get(), ['page' => $page]));
         $list = $GoodsModel->getInfo($map, $pageSize, 0, GoodsModel::getListField(), $order);
         if (is_object($list) && method_exists($list, 'total')) {
-            return ['list' => $list->items(), 'total' => $list->total()];
+            $items = $list->items();
+            if (is_object($items) && method_exists($items, 'all')) {
+                $items = $items->all();
+            }
+            return ['list' => $items ?: [], 'total' => (int)$list->total()];
         }
         return ['list' => $list ?: [], 'total' => is_countable($list) ? count($list) : 0];
     }
