@@ -326,16 +326,16 @@
         <view class="fb-weekly-list">
           <view
             class="fb-weekly-card"
-            :class="{ 'fb-weekly-card--clock': item.is_clock_pin }"
-            v-for="item in weekly_display_list"
-            :key="item.is_clock_pin ? 'clock-pin' : item.id"
+            :class="{ 'fb-weekly-card--pin': item.isWeeklyPin }"
+            v-for="(item, wIdx) in weekly_display_list"
+            :key="'weekly-' + wIdx"
             hover-class="fb-press"
             :hover-stay-time="80"
-            @click="onWeeklyCardTap(item)"
+            @tap="onWeeklyCardTap(wIdx)"
           >
-            <view v-if="item.is_clock_pin" class="fb-weekly-clock-bg">
-              <text class="fb-weekly-clock-emoji">♻️</text>
-              <text class="fb-weekly-clock-bg-t">垃圾分类真分打卡</text>
+            <view v-if="item.isWeeklyPin" class="fb-weekly-pin-bg">
+              <text class="fb-weekly-pin-emoji">♻️</text>
+              <text class="fb-weekly-pin-bg-t">垃圾分类真分打卡</text>
             </view>
             <u-image
               v-else
@@ -347,21 +347,16 @@
             <view class="fb-weekly-hatch"></view>
             <view class="fb-weekly-mask"></view>
             <view class="fb-weekly-tag">
-              <text class="fb-weekly-tag-text">{{
-                item.is_clock_pin ? "真分打卡" : "本周精选"
-              }}</text>
+              <text class="fb-weekly-tag-text">{{ item.isWeeklyPin ? '真分打卡' : '本周精选' }}</text>
             </view>
-            <view class="fb-weekly-badge" v-if="!item.is_clock_pin && item.active_count > 0">
+            <view class="fb-weekly-badge" v-if="!item.isWeeklyPin && item.active_count > 0">
               <text class="fb-weekly-badge-text"
                 >{{ item.active_count }}人参与</text
               >
             </view>
             <view class="fb-weekly-foot">
               <text class="fb-weekly-name u-line-2">{{ item.name }}</text>
-              <text class="fb-weekly-date"
-                >{{ formatActiveDate(item)
-                }}{{ item.is_date_pending == 1 ? "" : " 结束" }}</text
-              >
+              <text class="fb-weekly-date">{{ weeklyCardDateLine(item) }}</text>
             </view>
           </view>
         </view>
@@ -565,9 +560,8 @@ import careGesture from "@/common/care-gesture.mixin.js";
 import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 
 /** 本周推荐横滑第一项：固定真分打卡（不走后台 is_month_recommend） */
-const WEEKLY_CLOCK_PIN = {
-  id: "__clock_pin__",
-  is_clock_pin: true,
+const WEEKLY_ZHENFEN_PIN = {
+  isWeeklyPin: true,
   name: "真分打卡",
   active_count: 0,
 };
@@ -631,7 +625,7 @@ export default {
   },
   computed: {
     weekly_display_list() {
-      return [WEEKLY_CLOCK_PIN].concat(this.weekly_list || []);
+      return [WEEKLY_ZHENFEN_PIN].concat(this.weekly_list || []);
     },
   },
   onLoad(options) {
@@ -643,16 +637,25 @@ export default {
     if (!this.isLogin) return;
   },
   methods: {
-    onWeeklyCardTap(item) {
-      if (item && item.is_clock_pin) {
+    onWeeklyCardTap(wIdx) {
+      const list = this.weekly_display_list || [];
+      const item = list[wIdx];
+      if (!item) return;
+      if (item.isWeeklyPin) {
         this.$u.route("/pages/activity/scene-clock-flow?mode=theme");
         return;
       }
-      if (!item || !item.id) return;
-      this.$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`);
+      if (!item.id) return;
+      this.$u.route("/pages/activity/lsxf/details-new?id=" + item.id);
+    },
+    weeklyCardDateLine(item) {
+      const base = this.formatActiveDate(item);
+      if (item && item.isWeeklyPin) return base;
+      if (Number(item.is_date_pending) === 1) return base;
+      return base + " 结束";
     },
     formatActiveDate(item) {
-      if (item && item.is_clock_pin) {
+      if (item && item.isWeeklyPin) {
         return "选场景 · 摆桶 · 拍照";
       }
       if (Number(item.is_date_pending) === 1) {
@@ -1864,11 +1867,11 @@ export default {
     0 90%
   );
 }
-.fb-weekly-card--clock {
+.fb-weekly-card--pin {
   background: linear-gradient(145deg, #3d9b5c 0%, #2a7d48 55%, #1f6b3a 100%);
   box-shadow: 0 14rpx 32rpx rgba(42, 125, 72, 0.28);
 }
-.fb-weekly-clock-bg {
+.fb-weekly-pin-bg {
   position: absolute;
   left: 0;
   right: 0;
@@ -1881,11 +1884,11 @@ export default {
   padding: 24rpx;
   box-sizing: border-box;
 }
-.fb-weekly-clock-emoji {
+.fb-weekly-pin-emoji {
   font-size: 72rpx;
   line-height: 1;
 }
-.fb-weekly-clock-bg-t {
+.fb-weekly-pin-bg-t {
   margin-top: 16rpx;
   font-size: 28rpx;
   font-weight: 700;
