@@ -178,6 +178,9 @@
 				keyword: this.keyword || ''
 			}).then(res => {
 				const d = res.data || {}
+				if (d.page_setting) {
+					this.$u.vuex('setting', Object.assign({}, this.setting || {}, d.page_setting))
+				}
 				const list = d.forum_list || []
 				if (page === 1) {
 					this.forum_list = list

@@ -11,7 +11,11 @@ use app\admin\model\active\MemberBadgeModel;
 use api\wxapp\model\AnswerModel;
 use app\admin\model\active\WasteModel;
 use app\admin\model\active\WasteUserModel;
+use app\admin\model\forum\ForumCommentModel;
+use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\forum\ForumModel;
+use app\admin\model\forum\ForumCateModel;
+use app\admin\model\member\CommunityModel;
 use app\admin\model\goods\GoodsCategoryModel;
 use app\admin\model\goods\GoodsModel;
 use app\admin\model\member\MemberModel;
@@ -81,6 +85,8 @@ class TabHomeService
             $where[] = ['a.content|a.title', 'like', '%' . $keyword . '%'];
         }
         $forumModel = new ForumModel();
+        $forumCateModel = new ForumCateModel();
+        $communityModel = new CommunityModel();
         $query = $forumModel->alias('a')
             ->join('member b', 'a.user_id=b.id')
             ->where($where)
@@ -91,14 +97,42 @@ class TabHomeService
         $rows = $query->page($page, $pageSize)->select();
         $list = [];
         foreach ($rows as $item) {
-            $list[] = CommonModel::getOne($item, ['thumb', 'avatar', 'image_one', 'image_two', 'image_three'], ['image']);
+            $item['is_like'] = ForumLikeModel::where('rid', $item['id'])
+                ->where('user_id', $this->userId)->where('type', 1)->count();
+            $item['comment_total'] = ForumCommentModel::where('info_id', $item['id'])->count();
+            $item['community_name'] = $communityModel->where('id', $item['community_id'])->value('name');
+            if (empty($item['community_name'])) {
+                $community = $communityModel->where(['status' => 1])->find();
+                $item['community_name'] = $community['name'] ?? '';
+            }
+            if ((int)$item['type'] === 1) {
+                $item['cate_name'] = $forumCateModel->where('id', $item['cate_id'])->value('name');
+            }
+            if (!isset($item['like_total']) || $item['like_total'] === null) {
+                $item['like_total'] = 0;
+            }
+            $row = CommonModel::getOne($item, ['thumb', 'avatar', 'image_one', 'image_two', 'image_three'], ['image']);
+            $list[] = is_array($row) ? $row : (method_exists($row, 'toArray') ? $row->toArray() : (array)$row);
         }
-        return [
+        $data = [
             'forum_list' => $list,
             'forum_total' => $total,
             'forum_page' => $page,
             'forum_page_size' => $pageSize,
         ];
+        if ($page === 1 && $keyword === '') {
+            $cfg = cmf_get_option('set_config');
+            if (!is_array($cfg)) {
+                $cfg = [];
+            }
+            $minLogo = $cfg['min_logo'] ?? '';
+            $data['page_setting'] = [
+                'min_logo' => $minLogo !== '' ? cmf_get_asset_url($minLogo) : '',
+                'app_test' => $cfg['app_test'] ?? 0,
+                'video_id' => $cfg['video_id'] ?? '',
+            ];
+        }
+        return $data;
     }
 
     public function buildMallTabHome(int $page, int $secondCate, string $keyword): array
