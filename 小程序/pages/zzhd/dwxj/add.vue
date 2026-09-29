@@ -140,7 +140,7 @@
 
 				<view class="u-text-center">
 
-					<image src="https://admin.circular-economy.cn/static/images/dakachenggong.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
+					<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/dakachenggong.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
 
 					<view class="u-font-32 u-m-t-30">恭喜您获得 <text class="u-font-40 u-main-c u-font-bold">{{ point }}</text> 积分</view>
 
@@ -158,7 +158,7 @@
 
 				<view class="u-text-center">
 
-					<image src="https://admin.circular-economy.cn/static/images/wenxintishi.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
+					<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/wenxintishi.png" class="u-w-280 u-h-188" mode="aspectFill"></image>
 
 					<view class="u-m-t-30">
 

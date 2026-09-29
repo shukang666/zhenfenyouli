@@ -252,7 +252,18 @@ class TabHomeService
     protected function fetchOptionArray(string $name): array
     {
         $value = cmf_get_new_option($name);
-        return is_array($value) ? $value : [];
+        if (!is_array($value)) {
+            return [];
+        }
+        if ($name === 'home_entries') {
+            foreach ($value as $idx => $item) {
+                if (!is_array($item) || empty($item['image'])) {
+                    continue;
+                }
+                $value[$idx]['image'] = cmf_get_asset_url($item['image']);
+            }
+        }
+        return $value;
     }
 
     protected function fetchHomeNoticeText(): string

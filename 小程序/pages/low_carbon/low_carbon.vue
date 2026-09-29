@@ -404,7 +404,7 @@
               height="100%"
               :src="
                 item.thumb ||
-                'https://admin.circular-economy.cn/static/images/default-avatar.png'
+                'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/default-avatar.png'
               "
               mode="aspectFill"
             ></u-image>

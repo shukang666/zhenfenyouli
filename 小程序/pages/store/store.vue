@@ -69,35 +69,35 @@
             </view>
             <u-grid :col="4" :border="false">
                 <u-grid-item @click="$u.route('/pages/balance/balance')">
-                    <u-icon name="https://admin.circular-economy.cn/static/shop-1.png" :size="50"></u-icon>
+                    <u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shop-1.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">收益提现</view>
                 </u-grid-item>
                 <u-grid-item @click="$u.route('/pages/store/goods_list')">
-                    <u-icon name="https://admin.circular-economy.cn/static/shop-2.png" :size="50"></u-icon>
+                    <u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shop-2.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">商品管理</view>
                 </u-grid-item>
                 <u-grid-item @click="$u.route('/pages/store/coupon_list')">
-                    <u-icon name="https://admin.circular-economy.cn/static/shop-3.png" :size="50"></u-icon>
+                    <u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shop-3.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">优惠券管理</view>
                 </u-grid-item>
                 <u-grid-item @click="$u.route('/pages/settled/settled')">
-                    <u-icon name="https://admin.circular-economy.cn/static/shop-4.png" :size="50"></u-icon>
+                    <u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shop-4.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">门店信息</view>
                 </u-grid-item>
                 <!-- <u-grid-item>
-                    <u-icon name="https://admin.circular-economy.cn/static/shop-5.png" :size="50"></u-icon>
+                    <u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shop-5.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">扫码核销</view>
                 </u-grid-item>
                 <u-grid-item>
-                    <u-icon name="https://admin.circular-economy.cn/static/shop-6.png" :size="50"></u-icon>
+                    <u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shop-6.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">优惠券核销记录</view>
                 </u-grid-item> -->
                 <u-grid-item @click="$u.route('/pages/shop_order/shop_order')">
-                    <u-icon name="https://admin.circular-economy.cn/static/shop-7.png" :size="50"></u-icon>
+                    <u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shop-7.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">订单管理</view>
                 </u-grid-item>
                 <u-grid-item @click="$u.route('/pages/store/statistics')">
-                    <u-icon name="https://admin.circular-economy.cn/static/shop-8.png" :size="50"></u-icon>
+                    <u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shop-8.png" :size="50"></u-icon>
                     <view class="u-font-24 u-m-t-10">数据统计</view>
                 </u-grid-item>
             </u-grid>

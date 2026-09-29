@@ -11,14 +11,18 @@ module.exports = {
 	devUrl: 'https://admin.circular-economy.cn/api',
 	// 线上环境接口Url
 	prodUrl: 'https://admin.circular-economy.cn/api',
-	// 静态资源（腾讯云 COS，键为 xcxkf052/...，无 /upload/ 段）
+	// 腾讯云 COS 公网根（无尾斜杠）
+	cosPublicBase: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com',
+	// 业务上传图（xcxkf052/...，无 /upload/ 段）
 	staticUploadBase: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/',
+	// 原 public/static 资源在 COS 上的前缀（需同步 public/static → 桶内 static/）
+	staticAssetBase: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/',
 	// H5授权登陆Url
 	// loginUrl: 'https://xcxkf052.aubye.com/api/common/public/h5_login',
 	// 上传接口完整地址（uni.uploadFile / u-upload 直接用，勿再拼 /wxapp/public/upload_asset）
 	uploadUrl: 'https://admin.circular-economy.cn/api/wxapp/public/upload_asset',
 	// 微信分享卡片封面（5:4）
-	shareCoverUrl: 'https://admin.circular-economy.cn/static/images/share.png',
+	shareCoverUrl: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/share.png',
 	// 配后端数据的接收方式application/json;charset=UTF-8或者application/x-www-form-urlencoded;charset=UTF-8
 	contentType: 'application/json;charset=UTF-8',
 	// 后端返回状态码，如code,status

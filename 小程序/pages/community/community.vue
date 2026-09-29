@@ -65,7 +65,7 @@
         </view>
         <!-- <view class="" style="position: fixed;right: 30rpx;bottom: 10%;z-index: 1;"
             @click="$u.route('/pages/community/add')">
-            <u-image width="100" height="100" src="https://admin.circular-economy.cn/static/add.png"></u-image>
+            <u-image width="100" height="100" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/add.png"></u-image>
         </view> -->
         <u-gap height="120"></u-gap>
         <view class="submit-btn u-p-30">

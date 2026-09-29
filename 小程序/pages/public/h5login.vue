@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<view class="content">
-			<u-image :src="config.logo || 'https://admin.circular-economy.cn/static/logo.png'" width="300" height="300"></u-image>
+			<u-image :src="config.logo || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/logo.png'" width="300" height="300"></u-image>
 			<view class="u-font-32 u-font-bold u-content-color">{{ wxappName }}</view>
 		</view>
 

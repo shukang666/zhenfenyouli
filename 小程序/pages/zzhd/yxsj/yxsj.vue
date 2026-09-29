@@ -57,7 +57,7 @@
         <!-- <view class="" style="position: fixed;right: 30rpx;bottom: 10%;z-index: 1;"
             @click="navigator('/pages/zzhd/yxsj/add?type='+type)">
             <u-image width="100" height="100"
-                src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250514/b080e0cca2b8055339bf87e066485ce4.png"></u-image>
+                src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250514/b080e0cca2b8055339bf87e066485ce4.png"></u-image>
         </view> -->
         <u-gap height="120"></u-gap>
         <view class="submit-btn u-p-30">

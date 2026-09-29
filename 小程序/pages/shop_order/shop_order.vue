@@ -16,7 +16,7 @@
                     <u-line color="#F7F7F7" margin="30rpx 0" />
                     <view class="u-flex u-col-top u-m-b-30" v-for="(obj,val) in item.goods_list" :key="val">
                         <view class="u-m-r-20">
-                            <u-image :src="obj.thumb || 'https://admin.circular-economy.cn/static/errorImage.jpg'" width="160" height="160"
+                            <u-image :src="obj.thumb || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/errorImage.jpg'" width="160" height="160"
                                 border-radius="8"></u-image>
                         </view>
                         <view class="u-width-100">

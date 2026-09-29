@@ -2,11 +2,11 @@
 	<view class="container">
 		<view class="u-flex u-row-center" style="padding: 200rpx 0 0;">
 			<view class="u-w-500 u-text-center" v-if="info.status  == 1">
-				<image src="https://admin.circular-economy.cn/static/shz.png" class="u-w-432 u-h-440" mode="aspectFill"></image>
+				<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shz.png" class="u-w-432 u-h-440" mode="aspectFill"></image>
 				<view class="u-font-28 u-m-t-15">申请已提交审核，请您耐心等待</view>
 			</view>
 			<view class="u-w-500 u-text-center" v-if="info.status  == 3">
-				<image src="https://admin.circular-economy.cn/static/shsb.png" class="u-w-432 u-h-440" mode="aspectFill"></image>
+				<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/shsb.png" class="u-w-432 u-h-440" mode="aspectFill"></image>
 				<view class="u-font-28 u-m-t-15">申请未通过</view>
 				<view class="u-font-28 u-m-t-15 u-price-c">{{info.msg}}</view>
 			</view>

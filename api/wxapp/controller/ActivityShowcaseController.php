@@ -127,9 +127,7 @@ class ActivityShowcaseController extends AuthController
         if (empty($image)) {
             return '';
         }
-        if (preg_match('/^(http|https):\/\//', $image)) {
-            return $image;
-        }
+
         return cmf_get_asset_url($image);
     }
 }

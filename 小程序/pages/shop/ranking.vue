@@ -1,7 +1,7 @@
 <template>
     <view>
         <u-image width="100%" height="215"
-            src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/6e81c810b05addfb2bc42bb3fbdf567a.png"></u-image>
+            src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/6e81c810b05addfb2bc42bb3fbdf567a.png"></u-image>
         <view class="u-p-30 u-type-white-bg u-rela"
             style="margin-top: -30rpx;z-index: 9;border-radius: 20rpx 20rpx 0 0;">
             <view class="u-flex u-row-between">
@@ -24,13 +24,13 @@
                 v-for="(item,index) in goods_list" :key="index" @click="$u.route('/pages/shop/details?id='+item.id)">
                 <view class="u-abso" style="top: 0;left: 0;z-index: 9;">
                     <u-image width="40" height="40"
-                        src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/6d343cc15dfcd9365578b3138a41cb30.png"
+                        src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/6d343cc15dfcd9365578b3138a41cb30.png"
                         v-if="index==0"></u-image>
                     <u-image width="40" height="40"
-                        src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/02ebe49c185514c655d9821008f1961a.png"
+                        src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/02ebe49c185514c655d9821008f1961a.png"
                         v-if="index==1"></u-image>
                     <u-image width="40" height="40"
-                        src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/523680336b8ae0fdc718e7635c2ebbbb.png"
+                        src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/523680336b8ae0fdc718e7635c2ebbbb.png"
                         v-if="index==2"></u-image>
                 </view>
                 <u-image width="160" height="160" :src="item.thumb"></u-image>
@@ -40,7 +40,7 @@
                     </view>
                     <view class="u-type-error-light-bg u-radius-10" style="padding: 0rpx 20rpx;">
                         <u-icon
-                            name="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/9220f62fdfb0c76f5d42b175582f52a6.png"
+                            name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/9220f62fdfb0c76f5d42b175582f52a6.png"
                             :label="'已兑换'+item.sell_count+'件'" label-size="22" size="24" label-pos="left"
                             label-color="#F32927"></u-icon>
                     </view>

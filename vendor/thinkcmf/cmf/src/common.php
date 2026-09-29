@@ -845,10 +845,10 @@ function cmf_send_email($address, $subject, $message)
 function cmf_get_asset_url($file, $style = '')
 {
     if (!empty($file)) {
-        return doGetAssetUrl($file);
-    } else {
-        return '';
+        return cmf_finalize_public_asset_url(doGetAssetUrl($file, $style));
     }
+
+    return '';
 }
 
 /**
@@ -883,6 +883,96 @@ function cmf_get_public_site_root()
     return $base;
 }
 
+/** COS / CDN 公网根（无尾斜杠） */
+function cmf_get_cos_public_base_url()
+{
+    static $cached = null;
+    if ($cached !== null) {
+        return $cached;
+    }
+    $storage = cmf_get_option('storage');
+    if (!empty($storage['type']) && $storage['type'] === 'TencentCos') {
+        $cfg = cmf_get_plugin_config('TencentCos');
+        if (!empty($cfg['public_base_url'])) {
+            $cached = rtrim((string)$cfg['public_base_url'], '/');
+            return $cached;
+        }
+    }
+    $cached = 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com';
+
+    return $cached;
+}
+
+function cmf_is_cos_public_asset_url($url)
+{
+    if (!is_string($url) || $url === '') {
+        return false;
+    }
+
+    return (bool)preg_match('#^https?://[^/]+\.cos\.[a-z0-9-]+\.(myqcloud|tencentcos)\.cn(/|$)#i', $url);
+}
+
+function cmf_strip_upload_object_key_prefix($key)
+{
+    $key = ltrim(str_replace('\\', '/', (string)$key), '/');
+    if (strpos($key, 'upload/') === 0) {
+        $key = substr($key, 7);
+    }
+
+    return $key;
+}
+
+/** 旧 admin/upload、COS 误带 /upload/、相对路径 → 统一 COS 可读 URL */
+function cmf_finalize_public_asset_url($url)
+{
+    if (!is_string($url) || $url === '') {
+        return $url;
+    }
+    $url = trim($url);
+    $cosBase = cmf_get_cos_public_base_url();
+
+    $url = preg_replace(
+        '#(https?://[^/]+\.cos\.[a-z0-9-]+\.(?:myqcloud|tencentcos)\.cn)/upload/((?:xcxkf052|dz\d+|kf\d+)/)#iu',
+        '$1/$2',
+        $url
+    );
+    $url = preg_replace(
+        '#' . preg_quote($cosBase, '#') . '/upload/((?:xcxkf052|dz\d+|kf\d+)/)#iu',
+        $cosBase . '/$1',
+        $url
+    );
+
+    if (preg_match('#^https?://admin\.circular-economy\.cn/upload/(.+)$#iu', $url, $m)) {
+        return $cosBase . '/' . cmf_strip_upload_object_key_prefix($m[1]);
+    }
+    if (preg_match('#^https?://admin\.circular-economy\.cn/((?:xcxkf052|dz\d+|kf\d+)/.+)$#iu', $url, $m)) {
+        return $cosBase . '/' . cmf_strip_upload_object_key_prefix($m[1]);
+    }
+
+    return $url;
+}
+
+/** 仅本站域名缺 /upload/ 时补段；COS 不插入 upload */
+function cmf_should_insert_upload_in_public_url($url)
+{
+    if (!preg_match('#^https?://[^/]+/(upload/)?(xcxkf052/|dz\d+/|kf\d+/)#i', $url, $m)) {
+        return false;
+    }
+    if (!empty($m[1])) {
+        return false;
+    }
+    if (cmf_is_cos_public_asset_url($url)) {
+        return false;
+    }
+    $host = parse_url($url, PHP_URL_HOST);
+    $siteHost = parse_url(cmf_get_public_site_root(), PHP_URL_HOST);
+    if (!$host || !$siteHost) {
+        return false;
+    }
+
+    return strcasecmp((string)$host, (string)$siteHost) === 0;
+}
+
 /** 修正缺 /upload/ 的本站绝对地址（OSS 迁移后常见） */
 function cmf_normalize_public_file_url($url)
 {
@@ -892,18 +982,17 @@ function cmf_normalize_public_file_url($url)
     if (strpos($url, 'oss.ausite.cn') !== false) {
         return cmf_get_asset_url($url);
     }
-    if (preg_match('#^https?://[^/]+/(upload/)?(xcxkf052/|dz\d+/|kf\d+/)#i', $url, $m)) {
-        if (empty($m[1])) {
-            return preg_replace('#^(https?://[^/]+)/((?:xcxkf052|dz\d+|kf\d+)/)#i', '$1/upload/$2', $url);
-        }
+    if (cmf_should_insert_upload_in_public_url($url)) {
+        return preg_replace('#^(https?://[^/]+)/((?:xcxkf052|dz\d+|kf\d+)/)#i', '$1/upload/$2', $url);
     }
+
     return $url;
 }
 
 function doGetAssetUrl($file, $style = '')
 {
     if (strpos($file, "http") === 0) {
-        // 旧乙方 OSS 域名已下线，转为本地 upload 相对路径再拼站域名
+        // 旧乙方 OSS 域名已下线，转为相对路径再走存储驱动
         if (strpos($file, 'oss.ausite.cn') !== false) {
             $file = preg_replace('#^https?://[^/]+/#', '', $file);
             $file = preg_replace('/\?.*$/', '', $file);
@@ -917,15 +1006,24 @@ function doGetAssetUrl($file, $style = '')
     }
     if (strpos($file, "/") === 0) {
         if (strpos($file, '/upload/') === 0) {
-            return cmf_get_public_site_root() . $file;
+            $rel = cmf_strip_upload_object_key_prefix(substr($file, strlen('/upload/')));
+            $storage = Storage::instance();
+
+            return $storage->getUrl($rel, $style);
         }
         if (preg_match('#^/(xcxkf052/|dz\d+/|kf\d+/)#', $file)) {
-            return cmf_get_public_site_root() . '/upload' . $file;
+            $rel = ltrim($file, '/');
+            $storage = Storage::instance();
+
+            return $storage->getUrl($rel, $style);
         }
+
         return rtrim(cmf_get_public_site_root(), '/') . $file;
     }
     $storage = Storage::instance();
-    return cmf_normalize_public_file_url($storage->getUrl($file, $style));
+    $rel = cmf_strip_upload_object_key_prefix($file);
+
+    return cmf_normalize_public_file_url($storage->getUrl($rel, $style));
 }
 
 function get_true_asset_url($file)

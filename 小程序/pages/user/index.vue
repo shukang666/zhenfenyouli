@@ -53,7 +53,7 @@
 
 		<view class="me-sheet">
 			<view class="me-grow" v-if="!userInfo.is_environmental && isLogin">
-				<image src="https://admin.circular-economy.cn/static/images/jiankangdaren.png" class="me-grow__img" mode="aspectFill"></image>
+				<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/jiankangdaren.png" class="me-grow__img" mode="aspectFill"></image>
 				<view class="me-grow__body">
 					<view class="me-grow__top">
 						<text class="me-grow__title">环保达人</text>
@@ -72,25 +72,25 @@
 				<view class="me-grid">
 					<view class="me-grid__item" @click="navigator('/pages/points/points')">
 						<view class="me-grid__icon me-grid__icon--a">
-							<u-icon name="https://admin.circular-economy.cn/static/user-1.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-1.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">积分明细</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/activity/my_activity')">
 						<view class="me-grid__icon me-grid__icon--b">
-							<u-icon name="https://admin.circular-economy.cn/static/user-2.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-2.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">我的活动</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/order_list/order_list')">
 						<view class="me-grid__icon me-grid__icon--c">
-							<u-icon name="https://admin.circular-economy.cn/static/user-3.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-3.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">兑换订单</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/msg_list/msg_list')">
 						<view class="me-grid__icon me-grid__icon--d">
-							<u-icon name="https://admin.circular-economy.cn/static/user-4.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-4.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">消息通知</text>
 					</view>
@@ -98,15 +98,15 @@
 			</view>
 <!-- 下面暂时注释，应对审核 -->
 			<!-- <view class="me-shop" v-if="userInfo.shop_status==0">
-				<u-image width="100%" height="130" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
+				<u-image width="100%" height="130" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
 					@click="navigator('/pages/settled/settled')"></u-image>
 			</view>
 			<view class="me-shop" v-if="userInfo.shop_status==1||userInfo.shop_status==3">
-				<u-image width="100%" height="130" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
+				<u-image width="100%" height="130" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
 					@click="navigator('/pages/settled/state')"></u-image>
 			</view>
 			<view class="me-shop" v-if="userInfo.shop_status==2">
-				<u-image width="100%" height="130" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250610/3d7904797608c5d73cf85b06a2043fda.png"
+				<u-image width="100%" height="130" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250610/3d7904797608c5d73cf85b06a2043fda.png"
 					@click="navigator('/pages/store/store')"></u-image>
 			</view> -->
 
@@ -115,55 +115,55 @@
 				<view class="me-grid">
 					<view class="me-grid__item" @click="navigator('pages/my_comment/my_comment')" v-if="!setting.app_test">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-5.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-5.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">我的评论</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('pages/my_evaluation/my_evaluation')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-6.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-6.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">我的测评记录</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('pages/my_questionnaire/my_questionnaire')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-7.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-7.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">我的问卷</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('pages/my_reservation/my_reservation')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-8.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-8.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">我的预约</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('pages/community/record')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-9.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-9.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">健康生活社区</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/flhd/record')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-10.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-10.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">垃圾分类打卡</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/flhd/list')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">垃圾分类指导</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/answer/examine?id=1')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">答题考试</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/member/badge')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-9.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-9.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">我的徽章</text>
 					</view>
@@ -175,25 +175,25 @@
 				<view class="me-grid">
 					<view class="me-grid__item" @click="navigator('/pages/coupon/my_coupon')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-11.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-11.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">优惠券</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/address/index')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-12.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-12.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">地址管理</text>
 					</view>
 					<view class="me-grid__item" @click="openKf">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-13.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-13.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">联系客服</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/member/info')">
 						<view class="me-grid__icon">
-							<u-icon name="https://admin.circular-economy.cn/static/user-14.png" :size="50"></u-icon>
+							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-14.png" :size="50"></u-icon>
 						</view>
 						<text class="me-grid__name">个人信息</text>
 					</view>

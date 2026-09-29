@@ -75,7 +75,7 @@
         <view class="u-p-30 u-type-white-bg u-m-t-30">
             <view class="u-flex u-row-center">
                 <u-image width="447" height="28"
-                    src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/b5fb7df0b75ce7d4f0f8a7ba800f9d66.png"></u-image>
+                    src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/b5fb7df0b75ce7d4f0f8a7ba800f9d66.png"></u-image>
             </view>
             <view class="u-m-t-30">
                 <u-parse :html="goods.content"></u-parse>

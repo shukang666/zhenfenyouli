@@ -4,7 +4,7 @@
 			<image class="qrcode__ic" :src="shareImg" mode="widthFix"></image>
 			<view class="share__box" :style="{ paddingTop: height + 50 + 'px' }">
 				<view class="avatar">
-					<u-avatar :src="userInfo.avatar || 'https://admin.circular-economy.cn/static/user/avatar.png'" size="165"></u-avatar>
+					<u-avatar :src="userInfo.avatar || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user/avatar.png'" size="165"></u-avatar>
 				</view>
 				<view class="share__tip">快来看看我为你精心准备的神秘礼物</view>
 				<view class="imgcode">
@@ -27,7 +27,7 @@
 		data() {
 			return {
 				shareImg: prodUrl + '/web/poster.png',
-				avatar: 'https://admin.circular-economy.cn/static/user/avatar.png',
+				avatar: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user/avatar.png',
 				imgCode: '',
 				height: 20,
 				winWidth: uni.upx2px(560 * 2),

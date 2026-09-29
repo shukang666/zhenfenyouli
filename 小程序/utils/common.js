@@ -1,7 +1,7 @@
 // 全局公共方法
 import { staticUploadBase } from '@/common/settings'
 
-const ASSET_UPLOAD_BASE = staticUploadBase || 'https://admin.circular-economy.cn/upload/'
+const ASSET_UPLOAD_BASE = staticUploadBase || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/'
 const ASSET_SITE_ORIGIN = ASSET_UPLOAD_BASE.replace(/\/upload\/?$/i, '')
 
 function shouldFixAssetString(s) {

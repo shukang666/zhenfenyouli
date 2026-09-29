@@ -1,14 +1,14 @@
 <template>
     <view class="">
         <u-image width="100%" height="300"
-            src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/c2a5b61d874f21529810c3b53067a04f.png"></u-image>
+            src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/c2a5b61d874f21529810c3b53067a04f.png"></u-image>
         <view class="u-p-30 u-type-white-bg u-radius-10 u-rela" style="margin-top: -60rpx; z-index: 9;">
             <block v-if="accuracy_list.length">
                 <view class="u-flex u-row-between u-col-bottom">
                     <view class="u-type-warning-light-bg u-radius-10 u-text-center u-shrink-no u-w-208"
                         style="padding: 0rpx 30rpx 30rpx;">
                         <view class="u-flex u-row-center">
-                            <u-image width="108" height="35" src="https://admin.circular-economy.cn/static/ranking-2.png"></u-image>
+                            <u-image width="108" height="35" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/ranking-2.png"></u-image>
                         </view>
                         <u-gap height="15"></u-gap>
                         <u-avatar :src="accuracy_list[1].avatar" size="70"></u-avatar>
@@ -22,7 +22,7 @@
                     <view class="u-type-warning-light-bg u-radius-10 u-text-center u-w-208 u-shrink-no"
                         style="padding: 0rpx 30rpx 30rpx;">
                         <view class="u-flex u-row-center">
-                            <u-image width="108" height="35" src="https://admin.circular-economy.cn/static/ranking-1.png"></u-image>
+                            <u-image width="108" height="35" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/ranking-1.png"></u-image>
                         </view>
                         <u-gap height="15"></u-gap>
                         <u-avatar :src="accuracy_list[0].avatar" size="70"></u-avatar>
@@ -36,7 +36,7 @@
                     <view class="u-type-warning-light-bg u-radius-10 u-text-center u-shrink-no u-w-208"
                         style="padding: 0rpx 30rpx 30rpx;">
                         <view class="u-flex u-row-center">
-                            <u-image width="108" height="35" src="https://admin.circular-economy.cn/static/ranking-3.png"></u-image>
+                            <u-image width="108" height="35" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/ranking-3.png"></u-image>
                         </view>
                         <u-gap height="15"></u-gap>
                         <u-avatar :src="accuracy_list[2].avatar" size="70"></u-avatar>

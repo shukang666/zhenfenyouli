@@ -2,11 +2,11 @@
 	<view>
 		<view class="content">
 			<!-- #ifdef APP-PLUS -->
-			<u-avatar size="260" mode="square" :src="setting.app_logo || 'https://admin.circular-economy.cn/static/logo.png'" @longpress="showWorkLogin = true"></u-avatar>
+			<u-avatar size="260" mode="square" :src="setting.app_logo || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/logo.png'" @longpress="showWorkLogin = true"></u-avatar>
 			<view class="u-font-12 u-tips-color u-m-t-10">长按头像可使用工作账号登录</view>
 			<!-- #endif -->
 			<!-- #ifndef APP-PLUS -->
-			<u-avatar size="260" mode="square" :src="setting.app_logo || 'https://admin.circular-economy.cn/static/logo.png'"></u-avatar>
+			<u-avatar size="260" mode="square" :src="setting.app_logo || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/logo.png'"></u-avatar>
 			<!-- #endif -->
 			<view class="u-font-32 u-font-bold u-type-warning u-m-t-30">{{ setting.app_name}}</view>
 		</view>

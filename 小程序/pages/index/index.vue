@@ -14,7 +14,7 @@
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
 				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(244,247,245,0.96)'}" :border-bottom="false">
-					<image src="https://admin.circular-economy.cn/static/images/logo.png" class="home-logo" mode="aspectFill"></image>
+					<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/logo.png" class="home-logo" mode="aspectFill"></image>
 				</u-navbar>
 				<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			</template>
@@ -52,7 +52,7 @@
 				<view class="hello-card__orb hello-card__orb--b"></view>
 				<view class="hello-card__main" @click="$u.route({type:'switchTab', url:'/pages/user/index'})">
 					<view class="hello-card__avatar">
-						<u-image :src="userInfo.avatar || 'https://admin.circular-economy.cn/static/images/default-avatar.png'" width="80" height="80" shape="circle" mode="aspectFill"></u-image>
+						<u-image :src="userInfo.avatar || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/default-avatar.png'" width="80" height="80" shape="circle" mode="aspectFill"></u-image>
 					</view>
 					<view class="hello-card__text">
 						<view class="hello-card__greet-row">
@@ -284,10 +284,10 @@ export default {
 				],
 				// 首页核心入口：一行四个SVG图标
 				entry_list: [
-					{ key: 'active', name: '社区活动', url: '/pages/low_carbon/low_carbon', type: 'switchTab', svgIcon: 'https://admin.circular-economy.cn/upload/image/1.svg' },
-					{ key: 'health', name: '健康测试', url: '/pages/health/health', type: 'switchTab', svgIcon: 'https://admin.circular-economy.cn/upload/image/2.svg' },
-					{ key: 'mall', name: '积分商城', url: '/pages/mall/mall', type: 'switchTab', svgIcon: 'https://admin.circular-economy.cn/upload/image/3.svg' },
-					{ key: 'community', name: '社区互动', url: '/pages/sjhd/sjhd', type: 'navigateTo', svgIcon: 'https://admin.circular-economy.cn/upload/image/4.svg' }
+					{ key: 'active', name: '社区活动', url: '/pages/low_carbon/low_carbon', type: 'switchTab', svgIcon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/1.svg' },
+					{ key: 'health', name: '健康测试', url: '/pages/health/health', type: 'switchTab', svgIcon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/2.svg' },
+					{ key: 'mall', name: '积分商城', url: '/pages/mall/mall', type: 'switchTab', svgIcon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/3.svg' },
+					{ key: 'community', name: '社区互动', url: '/pages/sjhd/sjhd', type: 'navigateTo', svgIcon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/4.svg' }
 				],
 				// 签到状态
 				signStatus: {

@@ -7,7 +7,7 @@
                         <cl-upload v-model="form.photos" :action="uploadUrl" @onSuccess="onSuccess($event,1)"
                             fileType="image">
                             <template v-slot:addImg>
-                                <u-image width="138" height="138" src="https://admin.circular-economy.cn/static/upload.png"></u-image>
+                                <u-image width="138" height="138" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/upload.png"></u-image>
                             </template>
                         </cl-upload>
                     </u-form-item>
@@ -52,7 +52,7 @@
                         <cl-upload v-model="form.image" :action="uploadUrl" @onSuccess="onSuccess($event,2)"
                             fileType="image">
                             <template v-slot:addImg>
-                                <u-image width="138" height="138" src="https://admin.circular-economy.cn/static/upload.png"></u-image>
+                                <u-image width="138" height="138" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/upload.png"></u-image>
                             </template>
                         </cl-upload>
                     </u-form-item>

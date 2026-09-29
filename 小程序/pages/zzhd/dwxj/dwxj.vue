@@ -86,7 +86,7 @@
 
 					<view v-if="item.status == 2">
 
-						<u-image width="88" height="88" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250515/79bccb4b03e46c6019872696dce5ca29.png"></u-image>
+						<u-image width="88" height="88" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250515/79bccb4b03e46c6019872696dce5ca29.png"></u-image>
 
 					</view>
 
@@ -261,7 +261,7 @@
 
 							<template v-slot:addImg>
 
-								<u-image width="138" height="138" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250512/9ff646dc41e88127a05c7f0ebde61896.png"></u-image>
+								<u-image width="138" height="138" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250512/9ff646dc41e88127a05c7f0ebde61896.png"></u-image>
 
 							</template>
 

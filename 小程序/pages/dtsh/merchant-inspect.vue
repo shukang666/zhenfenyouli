@@ -16,7 +16,7 @@
 				<u-upload :custom-btn="true" width="690" height="372" :action="uploadUrl" @on-success="uploadImages($event,'image_one',true)" :fileList="image_one"
 					@on-remove="removeImages($event,'image_one',true)" max-count="1">
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -28,7 +28,7 @@
 				<u-upload :custom-btn="true" width="690" height="372" :action="uploadUrl" @on-success="uploadImages($event,'image_two',true)" :fileList="image_two"
 					@on-remove="removeImages($event,'image_two',true)" max-count="1">
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -40,7 +40,7 @@
 				<u-upload :custom-btn="true" width="690" height="372" :action="uploadUrl" @on-success="uploadImages($event,'image_three',true)" :fileList="image_three"
 					@on-remove="removeImages($event,'image_three',true)" max-count="1">
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -52,7 +52,7 @@
 				<u-upload :custom-btn="true" width="690" height="372" :action="uploadUrl" @on-success="uploadImages($event,'image_four',true)" :fileList="image_four"
 					@on-remove="removeImages($event,'image_four',true)" max-count="1">
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>
@@ -64,7 +64,7 @@
 				<u-upload :custom-btn="true" width="690" height="372" :action="uploadUrl" @on-success="uploadImages($event,'image_five',true)" :fileList="image_five"
 					@on-remove="removeImages($event,'image_five',true)" max-count="1">
 					<view slot="addBtn" class="u-type-white-bg u-w-690 u-h-372 u-text-center " style="padding: 80rpx 0;">
-						<image src="https://admin.circular-economy.cn/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
+						<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/upload-img.png" class="u-w-138 u-h-138" mode="aspectFill"> </image>
 						<view class="u-font-28 u-font-bold u-m-t-30">点击上传照片</view>
 					</view>
 				</u-upload>

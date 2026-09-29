@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<u-image width="100%" height="204" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250509/9a136b34b098cd4fe1b4d002372a6f04.png"></u-image>
+		<u-image width="100%" height="204" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250509/9a136b34b098cd4fe1b4d002372a6f04.png"></u-image>
 		<view class="u-p-30">
 			<view class="u-m-b-30" v-for="(item,index) in 3" :key="index">
 				<view class="u-font-bold">

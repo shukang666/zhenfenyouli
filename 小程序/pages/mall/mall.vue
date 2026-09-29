@@ -26,7 +26,7 @@
 
 			<!-- 优惠券 -->
 			<view class="u-m-b-30 u-rela" v-if="coupon_list.length">
-				<u-image width="100%" height="210" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/b8d12662e66f63e36234f3b08e119731.png"></u-image>
+				<u-image width="100%" height="210" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/b8d12662e66f63e36234f3b08e119731.png"></u-image>
 				<view class="u-abso u-abso-t-0 u-abso-l-0 u-abso-r-0" style="z-index: 1;">
 					<view class="u-p-20">
 						<view class="u-text-right" @click="$u.route('/pages/coupon/coupon')">
@@ -144,10 +144,10 @@
 		</view>
 
 		<view class="mall-float-btn" @click="$u.route('/pages/shop/cart')">
-			<u-image width="100" height="100" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/0ee9d98c2273efcb512c5ea5abc876f1.png"></u-image>
+			<u-image width="100" height="100" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/0ee9d98c2273efcb512c5ea5abc876f1.png"></u-image>
 		</view>
 		<view class="mall-float-btn mall-float-btn--rank" @click="$u.route('/pages/shop/ranking')">
-			<u-image width="100" height="100" src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250521/4c26a124df730861668dd53ab9842f27.png"></u-image>
+			<u-image width="100" height="100" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/4c26a124df730861668dd53ab9842f27.png"></u-image>
 		</view>
 		<view class="tabbar-placeholder"></view>
 		<page-guide page="mall"></page-guide>

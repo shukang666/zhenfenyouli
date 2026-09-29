@@ -113,13 +113,13 @@
 				<view class="">
 					<view class="u-flex u-row-center">
 						<u-image width="560" height="87"
-							src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250605/3b586d2ee96e1dca6941c8430d1f9360.png"></u-image>
+							src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250605/3b586d2ee96e1dca6941c8430d1f9360.png"></u-image>
 					</view>
 					<view class="u-w-560 u-radius-10 u-type-white-bg u-text-center">
 						<u-gap height="80"></u-gap>
 						<view class="u-flex u-row-center">
 							<u-image width="200" height="200"
-								src="https://admin.circular-economy.cn/upload/xcxkf052/admin/20250514/d4c1251c3c10fc8f0c4d912bf81cb167.png"></u-image>
+								src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250514/d4c1251c3c10fc8f0c4d912bf81cb167.png"></u-image>
 						</view>
 						<view class="u-font-32 u-font-bold">
 							{{msg}}
