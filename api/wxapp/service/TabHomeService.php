@@ -121,15 +121,17 @@ class TabHomeService
             'forum_page_size' => $pageSize,
         ];
         if ($page === 1 && $keyword === '') {
-            $cfg = cmf_get_option('set_config');
+            $cfg = cmf_get_new_option('set_config');
             if (!is_array($cfg)) {
                 $cfg = [];
             }
-            $minLogo = $cfg['min_logo'] ?? '';
+            $minLogo = isset($cfg['min_logo']) ? (string)$cfg['min_logo'] : '';
+            if ($minLogo !== '') {
+                $minLogo = cmf_replace_content_file_url(htmlspecialchars_decode($minLogo));
+                $minLogo = cmf_get_asset_url($minLogo);
+            }
             $data['page_setting'] = [
-                'min_logo' => $minLogo !== '' ? cmf_get_asset_url($minLogo) : '',
-                'app_test' => $cfg['app_test'] ?? 0,
-                'video_id' => $cfg['video_id'] ?? '',
+                'min_logo' => $minLogo,
             ];
         }
         return $data;

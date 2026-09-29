@@ -12,7 +12,7 @@
 		<skeleton-screen :show="isLoading" type="health"></skeleton-screen>
 		<u-navbar title-color="#fff" is-fixed :is-back="false" background="transparent" :borderBottom="false">
 			<view class="u-m-l-30">
-				<u-image width="231" height="64" :src="setting.min_logo"></u-image>
+				<u-image width="231" height="64" :src="healthNavLogo" mode="aspectFit"></u-image>
 			</view>
 		</u-navbar>
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
@@ -46,7 +46,7 @@
 				</view>
 			</view>
 		</view> -->
-		<view class="u-radius-10 u-m-t-30" id="guide-health-life" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);" v-if="!setting.app_test">
+		<view class="u-radius-10 u-m-t-30" id="guide-health-life" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
 			<view class="u-font-36 u-p-20 white u-flex u-row-between">
 				<view class="">
 					健康生活社区
@@ -115,6 +115,13 @@
 			SkeletonScreen
 		},
 		mixins: [careGesture],
+		computed: {
+			healthNavLogo() {
+				const logo = this.setting && this.setting.min_logo
+				if (logo) return logo
+				return 'https://admin.circular-economy.cn/static/images/logo.png'
+			}
+		},
 		data() {
 			return {
 				isLoading: true,
@@ -178,8 +185,10 @@
 				keyword: this.keyword || ''
 			}).then(res => {
 				const d = res.data || {}
-				if (d.page_setting) {
-					this.$u.vuex('setting', Object.assign({}, this.setting || {}, d.page_setting))
+				if (d.page_setting && d.page_setting.min_logo) {
+					this.$u.vuex('setting', Object.assign({}, this.setting || {}, {
+						min_logo: d.page_setting.min_logo
+					}))
 				}
 				const list = d.forum_list || []
 				if (page === 1) {
