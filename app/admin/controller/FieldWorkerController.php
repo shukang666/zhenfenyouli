@@ -259,7 +259,7 @@ class FieldWorkerController extends BaseController
 
         $this->assignWorker();
         $this->assign('lastCommunityId', $lastCommunityId);
-        $this->assign('asset_upload_base_json', json_encode($this->getPublicUploadBase() . '/', JSON_UNESCAPED_SLASHES));
+        $this->assign('asset_upload_base_json', json_encode($this->getAssetPublicBaseForJs() . '/', JSON_UNESCAPED_SLASHES));
         return $this->fetch('field_worker/monitor');
     }
 
@@ -449,7 +449,7 @@ class FieldWorkerController extends BaseController
 
         $rel = $this->normalizeUploadRelativePath($result['filepath'] ?? ($result['url'] ?? ''));
         $result['filepath'] = $rel;
-        $result['url']        = $this->publicUploadUrl($rel);
+        $result['url']      = cmf_get_asset_url($rel);
 
         unset($result['name'], $result['id'], $result['preview_url']);
         // 注意：BaseController::success($msg, $url, $data)，数据必须放第三参数
@@ -724,35 +724,29 @@ class FieldWorkerController extends BaseController
         return array_values((array) $result);
     }
 
-    /** 站点对外 upload 根（含 /upload，无尾斜杠） */
-    protected function getPublicUploadBase(): string
+    /**
+     * 前端相对键拼预览 URL 用的公网根（COS 优先，与 cmf_get_asset_url 一致）
+     */
+    protected function getAssetPublicBaseForJs(): string
     {
-        $site = cmf_get_option('site_info');
-        $base = !empty($site['site_url']) ? rtrim((string)$site['site_url'], '/') : rtrim(cmf_get_domain(), '/');
-        if ($this->request->isSsl()) {
-            $base = preg_replace('#^http://#i', 'https://', $base);
+        if (cmf_tencent_cos_plugin_ready()) {
+            return rtrim(cmf_get_cos_public_base_url(), '/');
         }
-        return $base . '/upload';
+
+        return rtrim(cmf_get_public_site_root(), '/') . '/upload';
     }
 
-    /** 相对 upload 路径 → 可浏览器访问的完整 URL（Pad 回显用） */
+    /** 库内相对键或历史 URL → 浏览器可读地址（Pad 回显 / 记录列表） */
     protected function publicUploadUrl($filePath): string
     {
         if ($filePath === null || $filePath === '') {
             return '';
         }
-        $filePath = str_replace('\\', '/', trim((string)$filePath));
-        if (strpos($filePath, 'http://') === 0 || strpos($filePath, 'https://') === 0) {
-            return cmf_get_asset_url($filePath);
-        }
-        $rel = $this->normalizeUploadRelativePath($filePath);
-        if ($rel === '') {
-            return '';
-        }
-        return $this->getPublicUploadBase() . '/' . $rel;
+
+        return cmf_get_asset_url($this->normalizeUploadRelativePath($filePath));
     }
 
-    /** 统一为库内相对路径 xcxkf052/... */
+    /** 统一为库内相对路径 xcxkf052/...（不含 upload/ 前缀） */
     protected function normalizeUploadRelativePath($urlOrPath): string
     {
         if ($urlOrPath === null || $urlOrPath === '') {
@@ -760,14 +754,12 @@ class FieldWorkerController extends BaseController
         }
         $p = str_replace('\\', '/', trim((string)$urlOrPath));
         if (preg_match('#^https?://[^/]+/(?:upload/)?(.+)$#i', $p, $m)) {
-            return ltrim($m[1], '/');
+            return cmf_strip_upload_object_key_prefix($m[1]);
         }
         if (strpos($p, '/upload/') === 0) {
-            return ltrim(substr($p, 8), '/');
+            return cmf_strip_upload_object_key_prefix(substr($p, 8));
         }
-        if (strpos($p, 'upload/') === 0) {
-            return ltrim(substr($p, 7), '/');
-        }
-        return ltrim($p, '/');
+
+        return cmf_strip_upload_object_key_prefix($p);
     }
 }
