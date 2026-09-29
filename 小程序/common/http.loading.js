@@ -5,7 +5,8 @@ let pending = 0
 let shown = false
 
 const SILENT = [
-	'find_setting'
+	'find_setting',
+	'get_activity_tab_home',
 ]
 
 const TAB_ROUTES = [

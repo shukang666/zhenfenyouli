@@ -24,6 +24,7 @@ use app\admin\model\forum\ForumCommentModel;
 use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\goods\GoodsModel;
 use app\admin\model\member\MemberModel;
+use app\admin\model\SlideItemModel;
 use think\facade\Db;
 
 class ActiveController extends AuthController
@@ -332,17 +333,7 @@ class ActiveController extends AuthController
      * )
      */
     public function get_active_tags_list(){
-        $allTags = ActiveModel::where('type', 1)->where('status', 1)->where('delete_time', 0)->whereNotNull('tags')->where('tags', '<>', '')->column('tags');
-        $tagSet = [];
-        foreach ($allTags as $tagStr) {
-            $tags = array_filter(array_map('trim', explode(',', $tagStr)));
-            foreach ($tags as $t) {
-                $tagSet[$t] = true;
-            }
-        }
-        $tagList = array_keys($tagSet);
-        sort($tagList);
-        $this->success('请求成功', $tagList);
+        $this->success('请求成功', $this->collectActiveTagList());
     }
 
     /**
@@ -448,7 +439,44 @@ class ActiveController extends AuthController
     }
 
     /**
+     * 活动 Tab 首页聚合：Banner、标签、三块推荐、底部活动列表（首屏一次请求）
+     * 分页 / 按标签筛列表时传 page、tag，仅返回 active_list 等列表字段（不传 blocks）
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_activity_tab_home",
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_activity_tab_home()
+    {
+        $page = max(1, (int)$this->request->param('page', 1));
+        $tag = trim((string)$this->request->param('tag', ''));
+        $pageSize = max(1, min(50, (int)$this->request->param('page_size', 10)));
+        $withBlocks = ($page === 1 && $tag === '');
+
+        $data = ['active_page' => $page];
+
+        if ($withBlocks) {
+            $data['banner_list'] = $this->fetchActivityTabBannerList(9);
+            $data['tag_list'] = $this->collectActiveTagList();
+            $sections = $this->buildActivityPageSections();
+            $data['weekly_list'] = $sections['weekly_list'];
+            $data['light_list'] = $sections['light_list'];
+            $data['recent_list'] = $sections['recent_list'];
+        }
+
+        $pager = $this->paginateActiveListForTab($page, $pageSize, $tag);
+        $data['active_list'] = $pager['list'];
+        $data['active_total'] = $pager['total'];
+        $data['active_page_size'] = $pageSize;
+
+        $this->success('请求成功', $data);
+    }
+
+    /**
      * 活动 Tab 页三块推荐区（本周推荐 / 轻活动 / 近期活动）一次返回，避免重复请求列表接口
+     * @deprecated 活动 Tab 请用 get_activity_tab_home
      * @OA\Get (
      *tags={"新版活动"},
      *path="/wxapp/active/get_activity_page_sections",
@@ -458,22 +486,7 @@ class ActiveController extends AuthController
      */
     public function get_activity_page_sections()
     {
-        $where = $this->activeListPublicWhere();
-        $lightTag = '轻活动';
-
-        $weeklyQuery = ActiveModel::where($where)->where('is_month_recommend', '=', 1);
-        $lightQuery = ActiveModel::where($where)->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
-        $recentQuery = ActiveModel::where($where)->whereRaw(
-            '(tags IS NULL OR tags = "" OR NOT FIND_IN_SET(?, tags))',
-            [$lightTag]
-        );
-
-        $data = [
-            'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
-            'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
-            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'date desc, id desc'),
-        ];
-        $this->success('请求成功', $data);
+        $this->success('请求成功', $this->buildActivityPageSections());
     }
 
     /**
@@ -1235,6 +1248,80 @@ class ActiveController extends AuthController
             $out[] = $this->applyActiveListItemFields($item);
         }
         return $out;
+    }
+
+    /** 活动 Tab 轮播（slide_id=9） */
+    private function fetchActivityTabBannerList($slideId = 9)
+    {
+        $slideId = (int)$slideId;
+        if ($slideId <= 0) {
+            return [];
+        }
+        $items = (new SlideItemModel())
+            ->field('image,url,title,target')
+            ->where(['slide_id' => $slideId, 'status' => 1])
+            ->order('list_order')
+            ->select();
+        $out = [];
+        foreach ($items as $row) {
+            $item = is_array($row) ? $row : $row->toArray();
+            $item['image'] = CommonModel::getOneImageFullUrl($item['image']);
+            $out[] = $item;
+        }
+        return $out;
+    }
+
+    /** 活动标签去重列表 */
+    private function collectActiveTagList()
+    {
+        $allTags = ActiveModel::where('type', 1)->where('status', 1)->where('delete_time', 0)
+            ->whereNotNull('tags')->where('tags', '<>', '')->column('tags');
+        $tagSet = [];
+        foreach ($allTags as $tagStr) {
+            $tags = array_filter(array_map('trim', explode(',', $tagStr)));
+            foreach ($tags as $t) {
+                $tagSet[$t] = true;
+            }
+        }
+        $tagList = array_keys($tagSet);
+        sort($tagList);
+        return $tagList;
+    }
+
+    /** 本周推荐 / 轻活动 / 近期活动 */
+    private function buildActivityPageSections()
+    {
+        $where = $this->activeListPublicWhere();
+        $lightTag = '轻活动';
+
+        $weeklyQuery = ActiveModel::where($where)->where('is_month_recommend', '=', 1);
+        $lightQuery = ActiveModel::where($where)->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
+        $recentQuery = ActiveModel::where($where)->whereRaw(
+            '(tags IS NULL OR tags = "" OR NOT FIND_IN_SET(?, tags))',
+            [$lightTag]
+        );
+
+        return [
+            'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
+            'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
+            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'date desc, id desc'),
+        ];
+    }
+
+    /** 活动 Tab 底部列表分页（与 get_new_active_list 公共条件一致，支持 tag） */
+    private function paginateActiveListForTab($page, $pageSize, $tag = '')
+    {
+        $query = ActiveModel::where($this->activeListPublicWhere());
+        if ($tag !== '') {
+            $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
+        }
+        $total = (clone $query)->count();
+        $rows = $query->order('list_order asc, id desc')->page($page, $pageSize)->select();
+        $list = [];
+        foreach ($rows as $item) {
+            $list[] = $this->applyActiveListItemFields($item);
+        }
+        return ['list' => $list, 'total' => $total];
     }
 
     /** 单条活动列表项字段补全（列表/分页/聚合接口共用） */

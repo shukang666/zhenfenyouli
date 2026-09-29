@@ -681,13 +681,11 @@ export default {
     },
     async loadAllData() {
       const startTime = Date.now();
+      this.active_list = [];
+      this.active_page = 1;
+      this.active_total = 0;
       try {
-        await Promise.all([
-          this.loadBanners(),
-          this.loadActivitySections(),
-          this.loadTags(),
-          this.loadAllActivities(),
-        ]);
+        await this.fetchActivityTabHome({ page: 1 });
       } catch (e) {
         console.log("数据加载失败:", e);
       } finally {
@@ -702,21 +700,38 @@ export default {
       }
     },
 
-    // 活动 Tab 三块推荐区：一次接口返回 weekly / light / recent
-    loadActivitySections() {
-      return this.$u.api
-        .get_activity_page_sections()
-        .then((res) => {
-          const data = res.data || {};
+    /**
+     * 活动 Tab 唯一数据口：首屏带 banner/标签/推荐区；分页或筛标签只增量列表字段
+     */
+    fetchActivityTabHome({ page = 1, tag = "" } = {}) {
+      const params = { page, page_size: 10 };
+      if (tag) params.tag = tag;
+      return this.$u.api.get_activity_tab_home(params).then((res) => {
+        const data = res.data || {};
+        if (Object.prototype.hasOwnProperty.call(data, "banner_list")) {
+          this.banner_list = data.banner_list || [];
+        }
+        if (Object.prototype.hasOwnProperty.call(data, "tag_list")) {
+          this.tag_list = data.tag_list || [];
+        }
+        if (Object.prototype.hasOwnProperty.call(data, "weekly_list")) {
           this.weekly_list = data.weekly_list || [];
+        }
+        if (Object.prototype.hasOwnProperty.call(data, "light_list")) {
           this.light_list = data.light_list || [];
+        }
+        if (Object.prototype.hasOwnProperty.call(data, "recent_list")) {
           this.recent_list = data.recent_list || [];
-        })
-        .catch(() => {
-          this.weekly_list = [];
-          this.light_list = [];
-          this.recent_list = [];
-        });
+        }
+        const list = data.active_list || [];
+        if (page === 1) {
+          this.active_list = list;
+        } else {
+          this.active_list.push(...list);
+        }
+        this.active_total = data.active_total != null ? data.active_total : list.length;
+        this.active_page = page;
+      });
     },
 
     // 轻活动"更多" → 全部活动列表（选中"轻活动"筛选）
@@ -735,63 +750,18 @@ export default {
       });
     },
 
-    // 加载 Banner（slide group id=9 活动页Banner）
-    loadBanners() {
-      return this.$u.api
-        .find_slide({ id: 9 })
-        .then((res) => {
-          this.banner_list = res.data || [];
-        })
-        .catch(() => {
-          this.banner_list = [];
-        });
-    },
-
-    // 加载活动标签（去重）
-    loadTags() {
-      return this.$u.api
-        .get_active_tags_list()
-        .then((res) => {
-          this.tag_list = res.data || [];
-        })
-        .catch(() => {
-          this.tag_list = [];
-        });
-    },
-
-    // 底部「全部活动」：不按热门筛，标签栏隐藏时 current_tab 一直是 0
-    loadAllActivities() {
-      this.active_list = [];
-      this.active_page = 1;
-      this.active_total = 0;
-      this.loadActiveList();
-    },
-
-    // 加载活动列表（标签栏隐藏时拉全部；若再打开标签才按 tab 过滤）
     loadActiveList() {
       if (this.active_loading) return;
       this.active_loading = true;
 
-      const params = { page: this.active_page };
+      let tag = "";
       if (this.current_tab > 0) {
-        const tag = this.tag_list[this.current_tab - 1];
-        if (tag) params.tag = tag;
+        tag = this.tag_list[this.current_tab - 1] || "";
       }
 
-      this.$u.api
-        .get_new_active_list(params)
-        .then((res) => {
-          let data = res.data || {};
-          let list = data.data || [];
-          if (this.active_page == 1) {
-            this.active_list = list;
-          } else {
-            this.active_list.push(...list);
-          }
-          this.active_total = data.total || list.length;
-        })
+      this.fetchActivityTabHome({ page: this.active_page, tag })
         .catch((err) => {
-          this.$u.toast(err.msg);
+          this.$u.toast(err.msg || "加载失败");
         })
         .finally(() => {
           this.active_loading = false;
