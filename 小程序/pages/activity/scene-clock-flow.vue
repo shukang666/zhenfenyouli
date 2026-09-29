@@ -121,36 +121,12 @@
 			</view>
 		</view>
 
-		<!-- 家庭：为什么要分（promo 卡片 + 四格要点，与场景选择页同风格） -->
-		<view class="scf-body" v-if="flowStep === 'why'">
-			<view class="scf-promo" :class="'scf-promo--' + hubPromoSkin">
-				<text class="scf-promo-line">{{ whyIntroLead }}</text>
-				<text class="scf-promo-line scf-promo-line--sub">{{ whyIntroSummary }}</text>
-				<view class="scf-promo-pillars scf-promo-pillars--grid">
-					<view class="scf-promo-pillar scf-promo-pillar--tile" v-for="block in introInsightCards" :key="block.id">
-						<text class="scf-promo-pillar-ico">{{ block.icon }}</text>
-						<text class="scf-promo-pillar-lab">{{ block.title }}</text>
-						<text class="scf-promo-pillar-desc">{{ block.body }}</text>
-					</view>
-				</view>
-				<view class="scf-promo-pillars scf-promo-pillars--mini">
-					<view class="scf-promo-pillar" v-for="(p, i) in themePillars" :key="'tp' + i">
-						<text class="scf-promo-pillar-ico">{{ p.icon }}</text>
-						<text class="scf-promo-pillar-lab">{{ p.label }}</text>
-					</view>
-				</view>
-			</view>
-			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="goBinSetupStep">明白了，去摆桶</view>
-			</view>
-		</view>
-
-		<!-- 首次：设置分类打卡点（仅家庭/亲子） -->
+		<!-- 首次：设置分类打卡点（家庭；含一句「为什么要分」） -->
 		<view class="scf-body" v-if="flowStep === 'setup'">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
-				<text class="scf-promo-line">{{ binSetupLead }}</text>
+				<text class="scf-promo-line" v-if="isResidentialHub">{{ setupPromoWhyLine }}</text>
+				<text class="scf-promo-line" :class="{ 'scf-promo-line--sub': isResidentialHub }">{{ binSetupLead }}</text>
 				<text class="scf-promo-line scf-promo-line--sub">{{ binSetupLeadNote }}</text>
-				<text class="scf-promo-line scf-promo-line--sub">{{ introDisplaySummary }}</text>
 			</view>
 			<view class="scf-room-list" v-if="isResidentialHub && binLayoutExamples.length">
 				<view class="zf-scene-card scf-room-card" v-for="(ex, eIdx) in binLayoutExamples" :key="eIdx">
@@ -224,8 +200,7 @@
 				</view>
 			</view>
 			<view class="scf-skip-link" v-if="isResidentialHub && points.length" @tap="flowStep = 'cate'">位置已设好，直接去选种类 ›</view>
-			<view class="scf-foot" :class="{ 'scf-foot--single': !isResidentialHub }">
-				<view class="scf-btn scf-btn--ghost" v-if="isResidentialHub" hover-class="scf-card--press" @tap="flowStep = 'why'">上一步</view>
+			<view class="scf-foot scf-foot--single">
 				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">{{ isResidentialHub ? '保存，去选种类' : '保存，去选位置拍照' }}</view>
 			</view>
 		</view>
@@ -604,7 +579,6 @@
 		getStepTitles,
 		getIntroLead,
 		getIntroSummary,
-		getIntroBlocks,
 		getSetupIntroLine,
 		getCommunityEmptyTitle,
 		getCommunityEmptyDesc,
@@ -626,11 +600,10 @@
 		getThemeBriefTaskTitle,
 		getThemeBriefTasks,
 		getThemeBriefCta,
-		getWhyIntroLead,
-		getWhyIntroSummary,
 		getBinLayoutExamples,
 		getBinSetupLead,
 		getBinSetupLeadNote,
+		getSetupPromoWhyLine,
 		getAccumDurationOptions,
 		getSortDurationOptions,
 		getClockSuccessNextTitle,
@@ -693,6 +666,7 @@
 				binLayoutExamples: [],
 				binSetupLead: getBinSetupLead(),
 				binSetupLeadNote: getBinSetupLeadNote(),
+				setupPromoWhyLine: getSetupPromoWhyLine(),
 				accumDuration: '',
 				sortDuration: '',
 				accumDurationOptions: getAccumDurationOptions(),
@@ -708,16 +682,6 @@
 			pendingHubLabel() {
 				const card = (this.sceneHubCards || []).find(c => c.hub === this.pendingHubKey)
 				return (card && card.title) || '未选择'
-			},
-			introBlocks() {
-				return getIntroBlocks()
-			},
-			introInsightCards() {
-				const iconMap = { what: '📦', benefit: '♻️', policy: '🤝', vision: '⭐' }
-				return (this.introBlocks || []).map(b => ({
-					...b,
-					icon: iconMap[b.id] || '💡',
-				}))
 			},
 			hubPromoSkin() {
 				if (this.hubKey === 'office') return 'office'
@@ -845,20 +809,14 @@
 			visibleStepLabels() {
 				if (['points', 'manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
 				if (this.isResidentialHub) {
-					return ['为什么分', '摆好桶', '选种类', '上传成果']
+					return ['摆好桶', '选种类', '上传成果']
 				}
 				if (['setup'].indexOf(this.flowStep) >= 0) return []
 				return ['怎么扔', '小窍门', '拍照']
 			},
-			whyIntroLead() {
-				return getWhyIntroLead()
-			},
-			whyIntroSummary() {
-				return getWhyIntroSummary()
-			},
 			stepIndex() {
 				if (this.isResidentialHub) {
-					const order = ['why', 'setup', 'cate', 'learn']
+					const order = ['setup', 'cate', 'learn']
 					const i = order.indexOf(this.flowStep)
 					return i >= 0 ? i : 0
 				}
@@ -905,7 +863,7 @@
 			}
 			if (['theme_intro', 'theme_brief'].indexOf(this.flowStep) >= 0) return
 			if (!this.hub) return
-			const editing = ['why', 'setup', 'cate', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
+			const editing = ['setup', 'cate', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
 			if (editing) return
 			this.ensureExamGate().then(ok => {
 				if (ok) this.initUserPoints()
@@ -1081,8 +1039,11 @@
 				})
 				return true
 			},
-			goBinSetupStep() {
-				this.goSetupStep()
+			enterResidentialSetupFlow() {
+				if (!this.hydrateSetupRowsFromPoints()) {
+					this.prefillSetupRowsFromExamples()
+				}
+				this.flowStep = 'setup'
 			},
 			cateIndexByKeyword(keyword) {
 				const list = this.cateList || []
@@ -1143,8 +1104,12 @@
 			},
 			initUserPoints(keepFlow) {
 				if (!this.isLogin) {
-					if (this.isResidentialHub) this.flowStep = 'why'
-					else this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
+					if (this.isResidentialHub) {
+						this.prefillSetupRowsFromExamples()
+						this.flowStep = 'setup'
+					} else {
+						this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
+					}
 					return Promise.resolve()
 				}
 				if (!this.userInfo.community_id) {
@@ -1179,11 +1144,10 @@
 						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'learn') {
 							return
 						}
-						if (['why', 'setup', 'cate', 'learn'].indexOf(this.flowStep) >= 0) {
+						if (['setup', 'cate', 'learn'].indexOf(this.flowStep) >= 0) {
 							return
 						}
-						this.flowStep = 'why'
-						this.prefillSetupRowsFromExamples()
+						this.enterResidentialSetupFlow()
 						return
 					}
 					if (this.flowStep === 'setup' || this.flowStep === 'manage') {

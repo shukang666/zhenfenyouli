@@ -33,6 +33,11 @@ export function getWhyIntroSummary() {
 	return '今天先弄清「为啥要分」，再摆好家里各处的桶，选种类、拍成果就能打卡。'
 }
 
+/** 摆桶页顶部：一句带过「为什么要分」（与摆桶说明合并，不再单独一页） */
+export function getSetupPromoWhyLine() {
+	return '分开扔，少污染、少浪费，也方便清运'
+}
+
 /** 建议家里各房间放什么桶（引导页展示，非强制） */
 export function getBinLayoutExamples() {
 	return [
