@@ -312,7 +312,7 @@
     </view>
 
     <!-- 本周推荐：大图海报横滑，和下面两块刻意做成不同版式 -->
-    <view class="fb-section fb-weekly-rec" v-if="weekly_list.length > 0">
+    <view class="fb-section fb-weekly-rec" v-if="weekly_display_list.length > 0">
       <view class="fb-section-header">
         <view class="fb-hd">
           <view class="fb-hd-bar fb-hd-bar--gold"></view>
@@ -326,13 +326,19 @@
         <view class="fb-weekly-list">
           <view
             class="fb-weekly-card"
-            v-for="item in weekly_list"
-            :key="item.id"
+            :class="{ 'fb-weekly-card--clock': item.is_clock_pin }"
+            v-for="item in weekly_display_list"
+            :key="item.is_clock_pin ? 'clock-pin' : item.id"
             hover-class="fb-press"
             :hover-stay-time="80"
-            @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
+            @click="onWeeklyCardTap(item)"
           >
+            <view v-if="item.is_clock_pin" class="fb-weekly-clock-bg">
+              <text class="fb-weekly-clock-emoji">♻️</text>
+              <text class="fb-weekly-clock-bg-t">垃圾分类真分打卡</text>
+            </view>
             <u-image
+              v-else
               width="520"
               height="320"
               :src="item.thumb"
@@ -341,9 +347,11 @@
             <view class="fb-weekly-hatch"></view>
             <view class="fb-weekly-mask"></view>
             <view class="fb-weekly-tag">
-              <text class="fb-weekly-tag-text">本周精选</text>
+              <text class="fb-weekly-tag-text">{{
+                item.is_clock_pin ? "真分打卡" : "本周精选"
+              }}</text>
             </view>
-            <view class="fb-weekly-badge" v-if="item.active_count > 0">
+            <view class="fb-weekly-badge" v-if="!item.is_clock_pin && item.active_count > 0">
               <text class="fb-weekly-badge-text"
                 >{{ item.active_count }}人参与</text
               >
@@ -556,6 +564,14 @@ import { checkCommunity } from "@/common/communityCheck.mixin.js";
 import careGesture from "@/common/care-gesture.mixin.js";
 import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 
+/** 本周推荐横滑第一项：固定真分打卡（不走后台 is_month_recommend） */
+const WEEKLY_CLOCK_PIN = {
+  id: "__clock_pin__",
+  is_clock_pin: true,
+  name: "真分打卡",
+  active_count: 0,
+};
+
 export default {
   components: { SkeletonScreen },
   mixins: [careGesture],
@@ -613,6 +629,11 @@ export default {
       ],
     };
   },
+  computed: {
+    weekly_display_list() {
+      return [WEEKLY_CLOCK_PIN].concat(this.weekly_list || []);
+    },
+  },
   onLoad(options) {
     this.loadAllData();
   },
@@ -622,7 +643,18 @@ export default {
     if (!this.isLogin) return;
   },
   methods: {
+    onWeeklyCardTap(item) {
+      if (item && item.is_clock_pin) {
+        this.$u.route("/pages/activity/scene-clock-flow?mode=theme");
+        return;
+      }
+      if (!item || !item.id) return;
+      this.$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`);
+    },
     formatActiveDate(item) {
+      if (item && item.is_clock_pin) {
+        return "选场景 · 摆桶 · 拍照";
+      }
       if (Number(item.is_date_pending) === 1) {
         return "时间待定";
       }
@@ -1831,6 +1863,34 @@ export default {
     6% 100%,
     0 90%
   );
+}
+.fb-weekly-card--clock {
+  background: linear-gradient(145deg, #3d9b5c 0%, #2a7d48 55%, #1f6b3a 100%);
+  box-shadow: 0 14rpx 32rpx rgba(42, 125, 72, 0.28);
+}
+.fb-weekly-clock-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+.fb-weekly-clock-emoji {
+  font-size: 72rpx;
+  line-height: 1;
+}
+.fb-weekly-clock-bg-t {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 2rpx;
 }
 .fb-weekly-hatch {
   position: absolute;
