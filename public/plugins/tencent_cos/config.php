@@ -1,0 +1,57 @@
+<?php
+return [
+    'secret_id' => [
+        'title'   => 'SecretId',
+        'type'    => 'text',
+        'value'   => '',
+        'rule'    => ['require' => true],
+        'message' => ['require' => 'SecretId 不能为空'],
+        'tip'     => '腾讯云访问管理 → API 密钥',
+    ],
+    'secret_key' => [
+        'title'   => 'SecretKey',
+        'type'    => 'text',
+        'value'   => '',
+        'rule'    => ['require' => true],
+        'message' => ['require' => 'SecretKey 不能为空'],
+        'tip'     => '',
+    ],
+    'region' => [
+        'title'   => '地域 Region',
+        'type'    => 'text',
+        'value'   => 'ap-shanghai',
+        'rule'    => ['require' => true],
+        'message' => ['require' => 'region 不能为空'],
+        'tip'     => '如 ap-shanghai',
+    ],
+    'bucket' => [
+        'title'   => '存储桶 Bucket',
+        'type'    => 'text',
+        'value'   => 'shukang-budget-1319203539',
+        'rule'    => ['require' => true],
+        'message' => ['require' => 'bucket 不能为空'],
+        'tip'     => '含 APPID 的完整桶名',
+    ],
+    'public_base_url' => [
+        'title'   => '公网访问根 URL',
+        'type'    => 'text',
+        'value'   => 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com',
+        'rule'    => ['require' => true],
+        'message' => ['require' => '公网 URL 不能为空'],
+        'tip'     => '无尾斜杠；对象 URL 为 {根}/{xcxkf052/...}',
+    ],
+    'delete_local_after_upload' => [
+        'title'   => '上传 COS 后删除本地副本',
+        'type'    => 'select',
+        'options' => ['1' => '是', '0' => '否'],
+        'value'   => '1',
+        'tip'     => '切 COS 后建议选「是」',
+    ],
+    'curl_ssl_verify' => [
+        'title'   => 'curl 校验 SSL',
+        'type'    => 'select',
+        'options' => ['1' => '是', '0' => '否'],
+        'value'   => '0',
+        'tip'     => 'Windows 开发机可关；生产 Linux 建议开',
+    ],
+];

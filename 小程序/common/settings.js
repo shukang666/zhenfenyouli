@@ -11,8 +11,8 @@ module.exports = {
 	devUrl: 'https://admin.circular-economy.cn/api',
 	// 线上环境接口Url
 	prodUrl: 'https://admin.circular-economy.cn/api',
-	// 静态资源（public/upload，原 oss.ausite.cn 已迁移）
-	staticUploadBase: 'https://admin.circular-economy.cn/upload/',
+	// 静态资源（腾讯云 COS，键为 xcxkf052/...，无 /upload/ 段）
+	staticUploadBase: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/',
 	// H5授权登陆Url
 	// loginUrl: 'https://xcxkf052.aubye.com/api/common/public/h5_login',
 	// 上传接口完整地址（uni.uploadFile / u-upload 直接用，勿再拼 /wxapp/public/upload_asset）

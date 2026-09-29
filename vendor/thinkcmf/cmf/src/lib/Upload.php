@@ -334,6 +334,13 @@ class Upload
                 if ($ossAk === '' || $ossSk === '' || $ossBucket === '') {
                     $storage['type'] = 'Local';
                 }
+            } elseif ($storage['type'] === 'TencentCos') {
+                $cosId = isset($remotePluginCfg['secret_id']) ? trim((string)$remotePluginCfg['secret_id']) : '';
+                $cosSk = isset($remotePluginCfg['secret_key']) ? trim((string)$remotePluginCfg['secret_key']) : '';
+                $cosBucket = isset($remotePluginCfg['bucket']) ? trim((string)$remotePluginCfg['bucket']) : '';
+                if ($cosId === '' || $cosSk === '' || $cosBucket === '') {
+                    $storage['type'] = 'Local';
+                }
             }
         }
 
