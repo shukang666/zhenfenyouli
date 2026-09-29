@@ -149,6 +149,7 @@
 		<view class="scf-body" v-if="flowStep === 'setup'">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
 				<text class="scf-promo-line">{{ binSetupLead }}</text>
+				<text class="scf-promo-line scf-promo-line--sub">{{ binSetupLeadNote }}</text>
 				<text class="scf-promo-line scf-promo-line--sub">{{ introDisplaySummary }}</text>
 			</view>
 			<view class="scf-room-list" v-if="isResidentialHub && binLayoutExamples.length">
@@ -170,40 +171,58 @@
 				<text class="scf-promo-line scf-promo-line--dark">{{ introDisplayLead }}</text>
 				<text class="scf-promo-line scf-promo-line--subdark">{{ introDisplaySummary }}</text>
 			</view>
-			<view class="scf-setup-list">
-				<view class="scf-bin-card" v-for="(row, idx) in setupRows" :key="idx">
-					<view class="scf-bin-photo" hover-class="scf-card--press" @tap="chooseSetupPhoto(idx)">
-						<image v-if="row.point_image_url" class="scf-bin-photo-img" :src="row.point_image_url" mode="aspectFill"></image>
-						<view v-else class="scf-bin-photo-empty">
-							<text class="scf-photo-add-icon">📷</text>
-							<text class="scf-photo-add-t">点这里拍桶的位置</text>
-						</view>
-						<view class="scf-bin-photo-shade"></view>
-						<view class="scf-bin-photo-cap">
-							<text class="scf-bin-photo-name">{{ row.point_name || '给这个桶起个名字' }}</text>
-							<view class="scf-bin-photo-badge" :class="'scf-bin-photo-badge--' + cateTone(setupCateName(row))">
-								<text>{{ setupCateName(row) || '选种类' }}</text>
+			<view class="scf-bin-grid">
+				<view
+					class="scf-bin-tile"
+					v-for="(row, idx) in setupRows"
+					:key="idx"
+					:class="'scf-bin-tile--' + cateTone(setupCateName(row))"
+				>
+					<view class="scf-bin-tile-head">
+						<view class="scf-bin-tile-photo" hover-class="scf-card--press" @tap="chooseSetupPhoto(idx)">
+							<image v-if="row.point_image_url" class="scf-bin-tile-photo-img" :src="row.point_image_url" mode="aspectFill"></image>
+							<view v-else class="scf-bin-tile-photo-empty">
+								<text class="scf-bin-tile-photo-ico">📷</text>
+								<text class="scf-bin-tile-photo-lab">拍桶照</text>
 							</view>
+							<text class="scf-bin-tile-photo-badge" v-if="row.point_image_url">换图</text>
+							<text class="scf-bin-tile-photo-badge scf-bin-tile-photo-badge--need" v-else>必填</text>
 						</view>
-						<text class="scf-bin-photo-tip">{{ row.point_image_url ? '点击更换照片' : '照片必填' }}</text>
+						<text class="scf-bin-tile-emoji">{{ cateEmoji(setupCateName(row)) }}</text>
+						<text
+							class="scf-bin-tile-rm"
+							v-if="setupRows.length > 1"
+							@tap.stop="removeSetupRow(idx)"
+						>×</text>
 					</view>
-					<view class="scf-bin-fields">
-						<view class="scf-bin-row">
-							<text class="scf-bin-label">名称</text>
-							<input class="scf-bin-input" v-model="row.point_name" placeholder="如：厨房厨余桶" maxlength="16" />
-						</view>
-						<view class="scf-bin-row">
-							<text class="scf-bin-label">种类</text>
-							<picker class="scf-bin-picker-wrap" mode="selector" :range="catePickerLabels" :value="row.cate_index" @change="onSetupCateChange(idx, $event)">
-								<view class="scf-bin-picker">{{ catePickerLabels[row.cate_index] || '选择四分类' }}</view>
-							</picker>
-						</view>
-						<text class="scf-bin-hint">{{ cateHintLines(row) }}</text>
-						<text class="scf-bin-del" v-if="setupRows.length > 1" @tap="removeSetupRow(idx)">删除本点位</text>
+					<view class="scf-bin-tile-body">
+						<input
+							class="scf-bin-tile-input"
+							v-model="row.point_name"
+							placeholder="名称，如厨房桶"
+							maxlength="16"
+						/>
+						<picker
+							class="scf-bin-tile-picker"
+							mode="selector"
+							:range="catePickerLabels"
+							:value="row.cate_index"
+							@change="onSetupCateChange(idx, $event)"
+						>
+							<view class="scf-bin-tile-cate">
+								<text class="scf-bin-tile-cate-t">{{ catePickerLabels[row.cate_index] || '选四分类' }}</text>
+								<text class="scf-bin-tile-cate-arrow">▾</text>
+							</view>
+						</picker>
+						<text class="scf-bin-tile-hint">{{ cateHintLines(row) }}</text>
 					</view>
 				</view>
+				<view class="scf-bin-tile scf-bin-tile--add" hover-class="scf-card--press" @tap="addSetupRow">
+					<text class="scf-bin-tile-add-ico">＋</text>
+					<text class="scf-bin-tile-add-lab">再添一处</text>
+					<text class="scf-bin-tile-add-sub">扔垃圾的位置</text>
+				</view>
 			</view>
-			<view class="scf-setup-add" @tap="addSetupRow">+ 再添一个扔垃圾的地方</view>
 			<view class="scf-skip-link" v-if="isResidentialHub && points.length" @tap="flowStep = 'cate'">位置已设好，直接去选种类 ›</view>
 			<view class="scf-foot" :class="{ 'scf-foot--single': !isResidentialHub }">
 				<view class="scf-btn scf-btn--ghost" v-if="isResidentialHub" hover-class="scf-card--press" @tap="flowStep = 'why'">上一步</view>
@@ -298,44 +317,60 @@
 
 		<!-- 管理打卡点 -->
 		<view class="scf-body" v-if="flowStep === 'manage'">
-			<text class="scf-hint">可以改名字、种类或照片；删掉后以前交过的记录还在。</text>
-			<view class="scf-point-grid">
-				<view class="scf-bin-card" v-for="(p, mIdx) in points" :key="p.id">
-					<view class="scf-bin-photo" hover-class="scf-card--press" @tap="chooseManagePhoto(mIdx)">
-						<image v-if="p._edit_image_url" class="scf-bin-photo-img" :src="p._edit_image_url" mode="aspectFill"></image>
-						<view v-else class="scf-bin-photo-empty">
-							<text class="scf-photo-add-icon">📷</text>
-							<text class="scf-photo-add-t">点这里拍桶的位置</text>
-						</view>
-						<view class="scf-bin-photo-shade"></view>
-						<view class="scf-bin-photo-cap">
-							<text class="scf-bin-photo-name">{{ p._edit_name || p.point_name || '给这个桶起个名字' }}</text>
-							<view class="scf-bin-photo-badge" :class="'scf-bin-photo-badge--' + cateTone(manageCateName(p))">
-								<text>{{ manageCateName(p) || '选种类' }}</text>
+			<view class="scf-promo scf-promo--compact scf-promo--light">
+				<text class="scf-promo-line scf-promo-line--dark">改名字、种类或照片</text>
+				<text class="scf-promo-line scf-promo-line--subdark">删掉位置后，以前交过的记录还在</text>
+			</view>
+			<view class="scf-bin-grid">
+				<view
+					class="scf-bin-tile"
+					v-for="(p, mIdx) in points"
+					:key="p.id"
+					:class="'scf-bin-tile--' + cateTone(manageCateName(p))"
+				>
+					<view class="scf-bin-tile-head">
+						<view class="scf-bin-tile-photo" hover-class="scf-card--press" @tap="chooseManagePhoto(mIdx)">
+							<image v-if="p._edit_image_url" class="scf-bin-tile-photo-img" :src="p._edit_image_url" mode="aspectFill"></image>
+							<view v-else class="scf-bin-tile-photo-empty">
+								<text class="scf-bin-tile-photo-ico">📷</text>
+								<text class="scf-bin-tile-photo-lab">拍桶照</text>
 							</view>
+							<text class="scf-bin-tile-photo-badge">换图</text>
 						</view>
-						<text class="scf-bin-photo-tip">点击更换照片</text>
+						<text class="scf-bin-tile-emoji">{{ cateEmoji(manageCateName(p)) }}</text>
 					</view>
-					<view class="scf-bin-fields">
-						<view class="scf-bin-row">
-							<text class="scf-bin-label">名称</text>
-							<input class="scf-bin-input" :value="p._edit_name" placeholder="如：厨房厨余桶" maxlength="16" @input="onManageNameInput(mIdx, $event)" />
-						</view>
-						<view class="scf-bin-row">
-							<text class="scf-bin-label">种类</text>
-							<picker class="scf-bin-picker-wrap" mode="selector" :range="catePickerLabels" :value="p._edit_cate_index" @change="onManageCateChangeByIndex(mIdx, $event)">
-								<view class="scf-bin-picker">{{ catePickerLabels[p._edit_cate_index] || p.cate_name || '选择四分类' }}</view>
-							</picker>
-						</view>
-						<text class="scf-bin-hint">{{ cateHintByName(manageCateName(p)) }}</text>
-						<view class="scf-bin-foot-actions">
-							<view class="scf-bin-save" hover-class="scf-card--press" @tap="savePointEditByIndex(mIdx)">保存修改</view>
-							<text class="scf-bin-del scf-bin-del--inline" @tap="deletePointById(p.id)">删除</text>
+					<view class="scf-bin-tile-body">
+						<input
+							class="scf-bin-tile-input"
+							:value="p._edit_name"
+							placeholder="名称，如厨房桶"
+							maxlength="16"
+							@input="onManageNameInput(mIdx, $event)"
+						/>
+						<picker
+							class="scf-bin-tile-picker"
+							mode="selector"
+							:range="catePickerLabels"
+							:value="p._edit_cate_index"
+							@change="onManageCateChangeByIndex(mIdx, $event)"
+						>
+							<view class="scf-bin-tile-cate">
+								<text class="scf-bin-tile-cate-t">{{ catePickerLabels[p._edit_cate_index] || p.cate_name || '选四分类' }}</text>
+								<text class="scf-bin-tile-cate-arrow">▾</text>
+							</view>
+						</picker>
+						<text class="scf-bin-tile-hint">{{ cateHintByName(manageCateName(p)) }}</text>
+						<view class="scf-bin-tile-foot">
+							<view class="scf-bin-tile-save" hover-class="scf-card--press" @tap="savePointEditByIndex(mIdx)">保存</view>
+							<text class="scf-bin-tile-rmtxt" @tap="deletePointById(p.id)">删除</text>
 						</view>
 					</view>
 				</view>
+				<view class="scf-bin-tile scf-bin-tile--add" hover-class="scf-card--press" @tap="addPointInManage">
+					<text class="scf-bin-tile-add-ico">＋</text>
+					<text class="scf-bin-tile-add-lab">新增点位</text>
+				</view>
 			</view>
-			<view class="scf-setup-add" @tap="addPointInManage">+ 新增点位</view>
 			<view class="scf-foot scf-foot--single">
 				<view class="scf-btn scf-btn--ghost" @tap="backFromManage">返回选位置</view>
 			</view>
@@ -595,6 +630,7 @@
 		getWhyIntroSummary,
 		getBinLayoutExamples,
 		getBinSetupLead,
+		getBinSetupLeadNote,
 		getAccumDurationOptions,
 		getSortDurationOptions,
 		getClockSuccessNextTitle,
@@ -656,6 +692,7 @@
 				pendingHubKey: '',
 				binLayoutExamples: [],
 				binSetupLead: getBinSetupLead(),
+				binSetupLeadNote: getBinSetupLeadNote(),
 				accumDuration: '',
 				sortDuration: '',
 				accumDurationOptions: getAccumDurationOptions(),
@@ -1871,149 +1908,210 @@
 	flex-shrink: 0;
 	margin-top: 0;
 }
-.scf-bin-card {
+.scf-bin-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14rpx;
+	margin-bottom: 8rpx;
+}
+.scf-bin-tile {
 	background: #fff;
-	border-radius: 20rpx;
+	border-radius: 18rpx;
 	overflow: hidden;
-	box-shadow: 0 8rpx 28rpx rgba(20, 40, 28, 0.08);
-	margin-bottom: 20rpx;
+	box-shadow: 0 6rpx 22rpx rgba(20, 40, 28, 0.07);
+	border: 2rpx solid #e8eeea;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
 }
-.scf-bin-photo {
+.scf-bin-tile--recycle { border-color: rgba(21, 106, 144, 0.28); }
+.scf-bin-tile--food { border-color: rgba(26, 122, 50, 0.28); }
+.scf-bin-tile--harm { border-color: rgba(154, 51, 102, 0.28); }
+.scf-bin-tile--other { border-color: rgba(74, 85, 104, 0.22); }
+.scf-bin-tile-head {
 	position: relative;
-	height: 360rpx;
-	background: #e8eee9;
 }
-.scf-bin-photo-img {
+.scf-bin-tile-photo {
+	position: relative;
+	height: 188rpx;
+	background: linear-gradient(165deg, #eef3ef 0%, #dfe8e2 100%);
+}
+.scf-bin-tile-photo-img {
 	width: 100%;
 	height: 100%;
 	display: block;
 }
-.scf-bin-photo-empty {
+.scf-bin-tile-photo-empty {
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 8rpx;
+	gap: 6rpx;
 }
-.scf-bin-photo-shade {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	height: 55%;
-	background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(20, 32, 24, 0.72) 100%);
-	pointer-events: none;
+.scf-bin-tile-photo-ico {
+	font-size: 40rpx;
+	line-height: 1;
 }
-.scf-bin-photo-cap {
-	position: absolute;
-	left: 24rpx;
-	right: 24rpx;
-	bottom: 48rpx;
-	z-index: 1;
-	pointer-events: none;
-}
-.scf-bin-photo-name {
-	display: block;
-	font-size: 34rpx;
-	font-weight: 700;
-	color: #fff;
-	text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.35);
-	line-height: 1.35;
-}
-.scf-bin-photo-badge {
-	display: inline-block;
-	margin-top: 12rpx;
-	padding: 6rpx 18rpx;
-	border-radius: 999rpx;
-	font-size: 24rpx;
-	font-weight: 600;
-	color: #fff;
-	background: rgba(255, 255, 255, 0.25);
-}
-.scf-bin-photo-badge--recycle { background: rgba(21, 106, 144, 0.92); }
-.scf-bin-photo-badge--food { background: rgba(26, 122, 50, 0.92); }
-.scf-bin-photo-badge--harm { background: rgba(154, 51, 102, 0.92); }
-.scf-bin-photo-badge--other { background: rgba(74, 85, 104, 0.92); }
-.scf-bin-photo-tip {
-	position: absolute;
-	top: 16rpx;
-	right: 16rpx;
-	z-index: 1;
+.scf-bin-tile-photo-lab {
 	font-size: 22rpx;
+	color: #5a6a60;
+	font-weight: 600;
+}
+.scf-bin-tile-photo-badge {
+	position: absolute;
+	top: 10rpx;
+	right: 10rpx;
+	z-index: 1;
+	font-size: 20rpx;
 	color: #fff;
-	background: rgba(0, 0, 0, 0.45);
-	padding: 6rpx 14rpx;
+	background: rgba(0, 0, 0, 0.42);
+	padding: 4rpx 12rpx;
 	border-radius: 999rpx;
 }
-.scf-bin-fields {
-	padding: 20rpx 24rpx 24rpx;
+.scf-bin-tile-photo-badge--need {
+	background: rgba(196, 92, 92, 0.88);
 }
-.scf-bin-row {
-	display: flex;
-	align-items: center;
-	gap: 16rpx;
-	padding: 14rpx 0;
-	border-bottom: 1rpx solid #eef2ef;
-}
-.scf-bin-label {
-	flex-shrink: 0;
-	width: 72rpx;
-	font-size: 28rpx;
-	font-weight: 600;
-	color: #4a564e;
-}
-.scf-bin-input {
-	flex: 1;
-	min-width: 0;
-	font-size: 30rpx;
-	color: #142018;
-}
-.scf-bin-picker-wrap {
-	flex: 1;
-	min-width: 0;
-}
-.scf-bin-picker {
-	font-size: 30rpx;
-	color: #142018;
-	padding: 8rpx 0;
-}
-.scf-bin-hint {
-	display: block;
-	margin-top: 14rpx;
-	font-size: 24rpx;
-	line-height: 1.45;
-	color: #6a756c;
-}
-.scf-bin-del {
-	display: block;
-	margin-top: 16rpx;
+.scf-bin-tile-emoji {
+	position: absolute;
+	left: 10rpx;
+	bottom: -22rpx;
+	z-index: 2;
+	width: 52rpx;
+	height: 52rpx;
+	line-height: 52rpx;
 	text-align: center;
+	font-size: 28rpx;
+	background: #fff;
+	border-radius: 16rpx;
+	box-shadow: 0 4rpx 14rpx rgba(20, 40, 28, 0.12);
+}
+.scf-bin-tile-rm {
+	position: absolute;
+	top: 8rpx;
+	left: 8rpx;
+	z-index: 2;
+	width: 44rpx;
+	height: 44rpx;
+	line-height: 40rpx;
+	text-align: center;
+	font-size: 36rpx;
+	font-weight: 300;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.38);
+	border-radius: 50%;
+}
+.scf-bin-tile-body {
+	padding: 28rpx 12rpx 14rpx;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+.scf-bin-tile-input {
+	width: 100%;
+	box-sizing: border-box;
 	font-size: 26rpx;
-	color: #c45c5c;
+	font-weight: 600;
+	color: #142018;
+	padding: 10rpx 12rpx;
+	background: #f4f7f5;
+	border-radius: 12rpx;
 }
-.scf-bin-del--inline {
-	margin-top: 0;
-	text-align: right;
-	flex-shrink: 0;
+.scf-bin-tile-picker {
+	width: 100%;
+	margin-top: 8rpx;
 }
-.scf-bin-foot-actions {
+.scf-bin-tile-cate {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-top: 20rpx;
-	gap: 16rpx;
+	gap: 8rpx;
+	padding: 10rpx 12rpx;
+	border-radius: 12rpx;
+	background: #eef8f0;
 }
-.scf-bin-save {
+.scf-bin-tile--recycle .scf-bin-tile-cate { background: #e8f2f8; }
+.scf-bin-tile--food .scf-bin-tile-cate { background: #e8f9ee; }
+.scf-bin-tile--harm .scf-bin-tile-cate { background: #fceef4; }
+.scf-bin-tile--other .scf-bin-tile-cate { background: #eef0f3; }
+.scf-bin-tile-cate-t {
+	flex: 1;
+	min-width: 0;
+	font-size: 24rpx;
+	font-weight: 600;
+	color: #243028;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.scf-bin-tile-cate-arrow {
+	flex-shrink: 0;
+	font-size: 22rpx;
+	color: #18af38;
+}
+.scf-bin-tile-hint {
+	margin-top: 8rpx;
+	font-size: 20rpx;
+	line-height: 1.45;
+	color: #6a756c;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	flex: 1;
+}
+.scf-bin-tile-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10rpx;
+	margin-top: 12rpx;
+}
+.scf-bin-tile-save {
 	flex: 1;
 	text-align: center;
-	height: 80rpx;
-	line-height: 80rpx;
-	border-radius: 40rpx;
-	font-size: 28rpx;
-	font-weight: 600;
+	height: 64rpx;
+	line-height: 64rpx;
+	border-radius: 32rpx;
+	font-size: 24rpx;
+	font-weight: 700;
 	color: #fff;
 	background: linear-gradient(90deg, #45c56a, #38b061);
+}
+.scf-bin-tile-rmtxt {
+	flex-shrink: 0;
+	font-size: 24rpx;
+	color: #c45c5c;
+	padding: 8rpx;
+}
+.scf-bin-tile--add {
+	min-height: 280rpx;
+	border: 2rpx dashed #b8dfc4;
+	background: linear-gradient(165deg, #f8fcf9 0%, #eef8f1 100%);
+	box-shadow: none;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 20rpx 16rpx;
+	box-sizing: border-box;
+}
+.scf-bin-tile-add-ico {
+	font-size: 48rpx;
+	font-weight: 300;
+	color: #38b061;
+	line-height: 1;
+}
+.scf-bin-tile-add-lab {
+	margin-top: 10rpx;
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #18af38;
+}
+.scf-bin-tile-add-sub {
+	margin-top: 6rpx;
+	font-size: 22rpx;
+	color: #6a756c;
 }
 .scf-point-photo {
 	width: 100%;
@@ -2372,11 +2470,6 @@
 	font-size: 26rpx;
 	color: #18af38;
 	font-weight: 600;
-}
-.scf-setup-list {
-	display: flex;
-	flex-direction: column;
-	gap: 12rpx;
 }
 .scf-setup-row,
 .scf-manage-card {

@@ -44,7 +44,11 @@ export function getBinLayoutExamples() {
 }
 
 export function getBinSetupLead() {
-	return '请对照下面建议，把各处的桶摆到位（名字和种类可以按您家习惯改）'
+	return '请对照下面建议，把各处的桶摆到位'
+}
+
+export function getBinSetupLeadNote() {
+	return '名字和种类可以按您家习惯改'
 }
 
 export function getAccumDurationOptions() {
