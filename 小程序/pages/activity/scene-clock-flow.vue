@@ -58,10 +58,17 @@
 			<text class="zf-scene-arrow">›</text>
 		</view>
 		<view class="zf-promo">
-			<text class="zf-promo-line">{{ themePromoLines[0] }}</text>
-			<text class="zf-promo-line" v-if="themePromoLines[1]">{{ themePromoLines[1] }}</text>
-			<view class="zf-promo-pillars">
-				<view class="zf-promo-pillar" v-for="(p, i) in themePillars" :key="i">
+			<text class="zf-promo-line">{{ whyIntroLead }}</text>
+			<text class="zf-promo-line zf-promo-line--sub">{{ whyIntroSummary }}</text>
+			<view class="zf-promo-pillars zf-promo-pillars--grid">
+				<view class="zf-promo-pillar zf-promo-pillar--tile" v-for="block in introInsightCards" :key="block.id">
+					<text class="zf-promo-pillar-ico">{{ block.icon }}</text>
+					<text class="zf-promo-pillar-lab">{{ block.title }}</text>
+					<text class="zf-promo-pillar-desc">{{ block.body }}</text>
+				</view>
+			</view>
+			<view class="zf-promo-pillars zf-promo-pillars--mini">
+				<view class="zf-promo-pillar" v-for="(p, i) in themePillars" :key="'tp' + i">
 					<text class="zf-promo-pillar-ico">{{ p.icon }}</text>
 					<text class="zf-promo-pillar-lab">{{ p.label }}</text>
 				</view>
@@ -579,7 +586,10 @@
 		getStepTitles,
 		getIntroLead,
 		getIntroSummary,
+		getIntroBlocks,
 		getSetupIntroLine,
+		getWhyIntroLead,
+		getWhyIntroSummary,
 		getCommunityEmptyTitle,
 		getCommunityEmptyDesc,
 		getCommunityIntroLead,
@@ -593,7 +603,6 @@
 		getScenePickNavTitle,
 		getScenePickHint,
 		getSceneHubCards,
-		getThemePromoHeadline,
 		getThemePromoPillars,
 		getThemeIntroHeroSlogan,
 		getThemeBriefTagline,
@@ -655,7 +664,6 @@
 				scenePickHint: getScenePickHint(),
 				sceneHubCards: getSceneHubCards(),
 				themePillars: getThemePromoPillars(),
-				themePromoLines: getThemePromoHeadline().split('\n'),
 				themeHeroSlogan: getThemeIntroHeroSlogan(),
 				themeBriefTagline: getThemeBriefTagline(),
 				themeBriefTaskTitle: getThemeBriefTaskTitle(),
@@ -680,6 +688,22 @@
 			pendingHubLabel() {
 				const card = (this.sceneHubCards || []).find(c => c.hub === this.pendingHubKey)
 				return (card && card.title) || '未选择'
+			},
+			introBlocks() {
+				return getIntroBlocks()
+			},
+			introInsightCards() {
+				const iconMap = { what: '📦', benefit: '♻️', policy: '🤝', vision: '⭐' }
+				return (this.introBlocks || []).map(b => ({
+					...b,
+					icon: iconMap[b.id] || '💡',
+				}))
+			},
+			whyIntroLead() {
+				return getWhyIntroLead()
+			},
+			whyIntroSummary() {
+				return getWhyIntroSummary()
 			},
 			hubPromoSkin() {
 				if (this.hubKey === 'office') return 'office'
@@ -3230,6 +3254,12 @@
 	color: #fff;
 	line-height: 1.45;
 }
+.zf-promo-line--sub {
+	margin-top: 10rpx;
+	font-size: 24rpx;
+	font-weight: 500;
+	opacity: 0.92;
+}
 .zf-promo-pillars {
 	display: flex;
 	justify-content: space-between;
@@ -3237,19 +3267,54 @@
 	padding-top: 24rpx;
 	border-top: 1rpx solid rgba(255, 255, 255, 0.25);
 }
+.zf-promo-pillars--grid {
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 16rpx 0;
+	border-top: none;
+	padding-top: 24rpx;
+	margin-top: 24rpx;
+}
+.zf-promo-pillars--mini {
+	margin-top: 20rpx;
+	padding-top: 20rpx;
+}
 .zf-promo-pillar {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
+.zf-promo-pillar--tile {
+	flex: 0 0 48%;
+	align-items: flex-start;
+	background: rgba(255, 255, 255, 0.14);
+	border-radius: 18rpx;
+	padding: 18rpx 16rpx 20rpx;
+	box-sizing: border-box;
+}
 .zf-promo-pillar-ico {
 	font-size: 36rpx;
 }
 .zf-promo-pillar-lab {
 	margin-top: 8rpx;
+	font-size: 24rpx;
+	font-weight: 700;
+	color: rgba(255, 255, 255, 0.98);
+	line-height: 1.35;
+}
+.zf-promo-pillar-desc {
+	margin-top: 8rpx;
 	font-size: 22rpx;
-	color: rgba(255, 255, 255, 0.92);
+	color: rgba(255, 255, 255, 0.88);
+	line-height: 1.45;
+}
+.zf-promo-pillar--tile .zf-promo-pillar-lab {
+	font-size: 24rpx;
+}
+.zf-promo-pillars--mini .zf-promo-pillar-lab {
+	font-size: 22rpx;
+	font-weight: 600;
 }
 
 .zf-brief {

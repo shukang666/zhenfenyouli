@@ -211,7 +211,7 @@ export function getThemeIntroHeroSlogan() {
 }
 
 export function getThemePromoHeadline() {
-	return '分开扔，少污染、少浪费，也方便清运\n从一次认真分类开始，绿色就会慢慢融进日常'
+	return '从一次认真分类开始\n绿色就会慢慢融进日常'
 }
 
 export function getThemePromoPillars() {
