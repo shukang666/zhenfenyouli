@@ -97,7 +97,11 @@ class Upload
             $app = 'default';
         }
 
-        $fileImage    = $this->request->file($this->formName);
+        $fileImage = $this->request->file($this->formName);
+        if (empty($fileImage)) {
+            $this->error = '请选择要上传的文件';
+            return false;
+        }
         $originalName = $fileImage->getOriginalName();
 
         $arrAllowedExtensions = explode(',', $arrFileTypes[$fileType]['extensions']);
@@ -361,7 +365,12 @@ class Upload
 
             if ($needUploadToRemoteStorage) {
                 session_write_close();
-                $result = $storage->upload($arrInfo["file_path"], $uploadPath . $arrInfo["file_path"], $fileType);
+                try {
+                    $result = $storage->upload($arrInfo["file_path"], $uploadPath . $arrInfo["file_path"], $fileType);
+                } catch (\Throwable $e) {
+                    $this->error = '云存储上传失败：' . $e->getMessage();
+                    return false;
+                }
                 if (!empty($result)) {
                     $localUploaded = $uploadPath . $arrInfo['file_path'];
                     if (is_file($localUploaded)) {
@@ -378,6 +387,8 @@ class Upload
                         'url'         => $assetUrl,
                     ], $result);
                 }
+                $this->error = '云存储上传失败，请稍后重试';
+                return false;
             } else {
                 $previewUrl = $fileType == 'image' ? $storage->getPreviewUrl($arrInfo["file_path"]) : $storage->getFileDownloadUrl($arrInfo["file_path"]);
                 $url        = $fileType == 'image' ? $storage->getImageUrl($arrInfo["file_path"], $watermark['styles_watermark']) : $storage->getFileDownloadUrl($arrInfo["file_path"]);

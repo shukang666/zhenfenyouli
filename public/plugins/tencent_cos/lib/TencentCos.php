@@ -14,7 +14,19 @@ class TencentCos
     {
         $pluginClass = cmf_get_plugin_class('TencentCos');
         $this->plugin = new $pluginClass();
-        $this->config = is_array($config) && !empty($config) ? $config : $this->plugin->getConfig();
+        $pluginCfg = $this->plugin->getConfig();
+        if (!is_array($pluginCfg)) {
+            $pluginCfg = [];
+        }
+        if (!is_array($config)) {
+            $config = [];
+        }
+        // cmf_option.storage 里 storages.TencentCos 通常只有 driver/name，密钥在 cmf_plugin.config
+        $merged = array_merge($pluginCfg, $config);
+        if (empty($merged['secret_id']) || empty($merged['bucket'])) {
+            $merged = $pluginCfg;
+        }
+        $this->config = $merged;
     }
 
     public function upload($file, $filePath = '', $fileType = 'image', $param = null)

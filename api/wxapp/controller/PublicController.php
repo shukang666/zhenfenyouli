@@ -542,13 +542,18 @@ class PublicController extends AuthController
         // $this->checkUser();
         session('user.id', 1);
         if ($this->request->isPost()) {
-            $uploader = new Upload();
-            $fileType = $this->request->param('filetype', 'image');
-            $uploader->setFileType($fileType);
+            try {
+                $uploader = new Upload();
+                $fileType = $this->request->param('filetype', 'image');
+                $uploader->setFileType($fileType);
 
-            $result = $uploader->upload();
-            if ($result === false) {
-                $this->error($uploader->getError());
+                $result = $uploader->upload();
+            } catch (\Throwable $e) {
+                Log::error('upload_asset: ' . $e->getMessage());
+                $this->error('上传失败：' . $e->getMessage());
+            }
+            if ($result === false || !is_array($result)) {
+                $this->error($uploader->getError() ?: '上传失败');
             } else {
                 if (!empty($result['filepath'])) {
                     $result['url'] = cmf_get_image_url($result['filepath']);
