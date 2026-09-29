@@ -121,8 +121,35 @@
 			</view>
 		</view>
 
+		<!-- 家庭/亲子：为什么要分 -->
+		<view class="scf-body" v-if="flowStep === 'why'">
+			<view class="scf-intro scf-intro--open">
+				<text class="scf-intro-lead">{{ whyIntroLead }}</text>
+				<text class="scf-intro-summary">{{ whyIntroSummary }}</text>
+				<view class="scf-intro-detail scf-intro-detail--always">
+					<view class="scf-intro-block" v-for="block in introBlocks" :key="block.id">
+						<text class="scf-intro-block-title">{{ block.title }}</text>
+						<text class="scf-intro-block-body">{{ block.body }}</text>
+					</view>
+				</view>
+			</view>
+			<view class="scf-foot scf-foot--single">
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="goBinSetupStep">明白了，去摆桶</view>
+			</view>
+		</view>
+
 		<!-- 首次：设置分类打卡点（仅家庭/亲子） -->
 		<view class="scf-body" v-if="flowStep === 'setup'">
+			<view class="scf-bin-guide" v-if="isResidentialHub && binLayoutExamples.length">
+				<text class="scf-bin-guide-title">{{ binSetupLead }}</text>
+				<view class="scf-bin-example" v-for="(ex, eIdx) in binLayoutExamples" :key="eIdx">
+					<text class="scf-bin-example-emoji">{{ ex.emoji }}</text>
+					<view class="scf-bin-example-copy">
+						<text class="scf-bin-example-room">{{ ex.room }} · {{ ex.cate }}</text>
+						<text class="scf-bin-example-tip">{{ ex.tip }}</text>
+					</view>
+				</view>
+			</view>
 			<view class="scf-intro">
 				<text class="scf-intro-lead">{{ introDisplayLead }}</text>
 				<text class="scf-intro-summary">{{ introDisplaySummary }}</text>
@@ -168,8 +195,32 @@
 				</view>
 			</view>
 			<view class="scf-setup-add" @tap="addSetupRow">+ 再添一个扔垃圾的地方</view>
-			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">保存，去选位置拍照</view>
+			<view class="scf-skip-link" v-if="isResidentialHub && points.length" @tap="flowStep = 'cate'">位置已设好，直接去选种类 ›</view>
+			<view class="scf-foot" :class="{ 'scf-foot--single': !isResidentialHub }">
+				<view class="scf-btn scf-btn--ghost" v-if="isResidentialHub" hover-class="scf-card--press" @tap="flowStep = 'why'">上一步</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">{{ isResidentialHub ? '保存，去选种类' : '保存，去选位置拍照' }}</view>
+			</view>
+		</view>
+
+		<!-- 家庭/亲子：四分类选择 -->
+		<view class="scf-body" v-if="flowStep === 'cate'">
+			<text class="scf-hint">这次要打卡哪一类？点选后继续上传分类成果。</text>
+			<view class="scf-cate-grid">
+				<view
+					v-for="c in cateList"
+					:key="c.id"
+					class="scf-cate-pick"
+					:class="{ 'scf-cate-pick--on': Number(cateId) === Number(c.id), ['scf-cate-pick--' + cateTone(c.name)]: true }"
+					hover-class="scf-card--press"
+					@tap="pickResidentialCate(c)"
+				>
+					<text class="scf-cate-pick-name">{{ c.name }}</text>
+					<text class="scf-cate-pick-sub">{{ cateHintByName(c.name) }}</text>
+				</view>
+			</view>
+			<view class="scf-foot">
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'setup'">上一步</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="goResidentialUpload">选好了，去上传</view>
 			</view>
 		</view>
 
@@ -329,8 +380,8 @@
 				<text class="scf-clock-desc">{{ clockPhotoIntro }}</text>
 
 				<view class="scf-clock-photo-head scf-clock-photo-head--row">
-					<text class="scf-clock-photo-title">按顺序拍 3 张照片</text>
-					<text class="scf-clock-photo-progress">{{ clockSlotFilledCount }}/3</text>
+					<text class="scf-clock-photo-title">{{ isResidentialHub ? '上传分类成果照片' : '按顺序拍 3 张照片' }}</text>
+					<text class="scf-clock-photo-progress">{{ clockSlotFilledCount }}/{{ clockPhotoSlotMeta.length }}</text>
 				</view>
 
 				<view class="scf-slot-row">
@@ -373,6 +424,33 @@
 				</view>
 				<text class="scf-clock-photo-foot">{{ clockPhotoFootnote }}</text>
 
+				<view class="scf-duration-block" v-if="isResidentialHub">
+					<text class="scf-duration-label">这些垃圾大概积累了多久？</text>
+					<view class="scf-tip-list scf-tip-list--wrap">
+						<view
+							v-for="(opt, idx) in accumDurationOptions"
+							:key="'a' + idx"
+							class="scf-tip-chip"
+							:class="{ 'scf-tip-chip--on': accumDuration === opt }"
+							@tap="accumDuration = opt"
+						>
+							<text>{{ opt }}</text>
+						</view>
+					</view>
+					<text class="scf-duration-label">分出这个效果大概用了多久？</text>
+					<view class="scf-tip-list scf-tip-list--wrap">
+						<view
+							v-for="(opt, idx) in sortDurationOptions"
+							:key="'s' + idx"
+							class="scf-tip-chip"
+							:class="{ 'scf-tip-chip--on': sortDuration === opt }"
+							@tap="sortDuration = opt"
+						>
+							<text>{{ opt }}</text>
+						</view>
+					</view>
+				</view>
+
 				<view class="scf-clock-note">
 					<text class="scf-clock-note-label">补充说明（选填）</text>
 					<textarea
@@ -396,7 +474,7 @@
 				</view>
 			</view>
 			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'survey'">上一步</view>
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="backFromLearn">{{ isResidentialHub ? '上一步' : '上一步' }}</view>
 			</view>
 		</view>
 
@@ -406,12 +484,21 @@
 				<text class="scf-success-emoji">✓</text>
 				<text class="scf-success-title">{{ clockSuccessMsg || '打卡成功' }}</text>
 				<text class="scf-success-sub">记得投进对的桶；积分到账可能稍有延迟，请稍后在「我的积分」查看。</text>
+				<text class="scf-success-other" v-if="isResidentialHub">{{ clockOtherCateHint }}</text>
+				<view class="scf-promo-act" v-if="clockPromoActivity" hover-class="scf-card--press" @tap="goPromoActivity">
+					<text class="scf-promo-act-k">推荐参加</text>
+					<text class="scf-promo-act-title">{{ clockPromoActivity.title || clockPromoActivity.name }}</text>
+					<text class="scf-promo-act-go">去看看 ›</text>
+				</view>
+				<view class="scf-promo-more" v-if="clockPromoList.length > 1" hover-class="scf-card--press" @tap="goActivityList">
+					<text>还有 {{ clockPromoList.length - 1 }} 个热门活动可参加</text>
+				</view>
 				<view class="scf-habit-box" v-if="clockHabitTip">
 					<text class="scf-habit-kicker">养成好习惯</text>
 					<text class="scf-habit-text">{{ clockHabitTip }}</text>
 				</view>
 				<view class="scf-success-actions">
-					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">再选位置拍照</view>
+					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">{{ isResidentialHub ? '再选种类打卡' : '再选位置拍照' }}</view>
 					<view class="scf-btn scf-btn--ghost scf-btn--block scf-success-back" @tap="goActivityTab">返回活动</view>
 				</view>
 			</view>
@@ -456,6 +543,12 @@
 		getThemeBriefTaskTitle,
 		getThemeBriefTasks,
 		getThemeBriefCta,
+		getWhyIntroLead,
+		getWhyIntroSummary,
+		getBinLayoutExamples,
+		getBinSetupLead,
+		getAccumDurationOptions,
+		getSortDurationOptions,
 	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
@@ -506,9 +599,20 @@
 				themeBriefTasks: getThemeBriefTasks(),
 				themeBriefCta: getThemeBriefCta(),
 				pendingHubKey: '',
+				binLayoutExamples: [],
+				binSetupLead: getBinSetupLead(),
+				accumDuration: '',
+				sortDuration: '',
+				accumDurationOptions: getAccumDurationOptions(),
+				sortDurationOptions: getSortDurationOptions(),
+				clockPromoActivity: null,
+				clockPromoList: [],
 			}
 		},
 		computed: {
+			isResidentialHub() {
+				return this.hubKey === 'home' || this.hubKey === 'qinzi'
+			},
 			pendingHubLabel() {
 				const card = (this.sceneHubCards || []).find(c => c.hub === this.pendingHubKey)
 				return (card && card.title) || '未选择'
@@ -540,11 +644,18 @@
 			clockPhotoIntro() {
 				const sk = this.hub && this.hub.sceneKey ? this.hub.sceneKey : this.hubKey
 				const cateLine = buildSceneCateSubtitle(sk, this.activeCateName)
-				const tail = '下面按顺序拍 3 张：手里的垃圾、对准桶口、已经扔进去。'
+				if (this.isCommunityHub) {
+					const tail = '下面按顺序拍 3 张：手里的垃圾、对准桶口、已经扔进去。'
+					return (cateLine ? cateLine + '。' : '') + tail
+				}
+				const tail = '请拍清楚本次「' + (this.activeCateName || '分类') + '」的分好成果，不必拍分之前的混装样。'
 				return (cateLine ? cateLine + '。' : '') + tail
 			},
 			clockPhotoFootnote() {
-				return '三张都拍清楚再点提交，方便社区帮您核对。'
+				if (this.isCommunityHub) {
+					return '三张都拍清楚再点提交，方便社区帮您核对。'
+				}
+				return '至少上传 1 张分类成果图；第二张投放入桶为选填。'
 			},
 			clockPhotoSlotMeta() {
 				if (this.isCommunityHub) {
@@ -555,10 +666,15 @@
 					]
 				}
 				return [
-					{ key: 'before', title: '扔之前', hint: '垃圾分好的样', emoji: '🗑️' },
-					{ key: 'sorted', title: '分好了', hint: '袋子或桶口', emoji: '♻️' },
-					{ key: 'after', title: '进桶了', hint: '已经在桶里', emoji: '✅' },
+					{ key: 'result', title: '分类成果', hint: '分好的垃圾拍清楚', emoji: '♻️', required: true },
+					{ key: 'inbin', title: '投放入桶', hint: '选填：投进对应桶后', emoji: '✅', required: false },
 				]
+			},
+			clockOtherCateHint() {
+				const cur = this.activeCateName || ''
+				const all = (this.cateList || []).map(c => c.name).filter(n => n && n !== cur)
+				if (!all.length) return '今天还可以换种类继续打卡，把四类都练一遍。'
+				return '今天还可以打卡：' + all.join('、') + ' 等，换种类再来一次即可。'
 			},
 			clockSlotFilledCount() {
 				return (this.clockSlotUrls || []).filter(u => !!String(u || '').trim()).length
@@ -602,10 +718,25 @@
 				return getScenePickNavTitle()
 			},
 			visibleStepLabels() {
-				if (['setup', 'points', 'manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
+				if (['points', 'manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
+				if (this.isResidentialHub) {
+					return ['为什么分', '摆好桶', '选种类', '上传成果']
+				}
+				if (['setup'].indexOf(this.flowStep) >= 0) return []
 				return ['怎么扔', '小窍门', '拍照']
 			},
+			whyIntroLead() {
+				return getWhyIntroLead(this.hubKey)
+			},
+			whyIntroSummary() {
+				return getWhyIntroSummary(this.hubKey)
+			},
 			stepIndex() {
+				if (this.isResidentialHub) {
+					const order = ['why', 'setup', 'cate', 'learn']
+					const i = order.indexOf(this.flowStep)
+					return i >= 0 ? i : 0
+				}
 				const order = ['guide', 'survey', 'learn']
 				const i = order.indexOf(this.flowStep)
 				return i >= 0 ? i : 0
@@ -635,7 +766,7 @@
 			const opt = option || {}
 			const mode = String(opt.mode || opt.entry || '').trim()
 			if (mode === 'theme' || mode === 'intro') {
-				this.flowStep = 'theme_intro'
+				this.flowStep = 'theme_scenes'
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
 				return
 			}
@@ -643,9 +774,13 @@
 			this.bootstrapHub(hubKey)
 		},
 		onShow() {
-			if (['theme_intro', 'theme_scenes', 'theme_brief'].indexOf(this.flowStep) >= 0) return
+			if (this.flowStep === 'theme_scenes') {
+				this.ensureThemeSceneGate()
+				return
+			}
+			if (['theme_intro', 'theme_brief'].indexOf(this.flowStep) >= 0) return
 			if (!this.hub) return
-			const editing = ['setup', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
+			const editing = ['why', 'setup', 'cate', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
 			if (editing) return
 			this.ensureExamGate().then(ok => {
 				if (ok) this.initUserPoints()
@@ -660,6 +795,7 @@
 					setTimeout(() => uni.navigateBack(), 800)
 					return
 				}
+				this.binLayoutExamples = getBinLayoutExamples(hubKey)
 				uni.setNavigationBarTitle({ title: this.hub.title })
 				this.subKey = ''
 				this.loadCateList().then(() => {
@@ -667,6 +803,38 @@
 						if (ok) this.initUserPoints()
 					})
 				})
+			},
+			ensureThemeSceneGate() {
+				if (!this.isLogin) return
+				this.$u.api.getUserInfo().then(res => {
+					const info = res.data || {}
+					this.$u.vuex('userInfo', info)
+					if (!info.is_learn) {
+						uni.showModal({
+							title: '还差一步',
+							content: '第一次打卡前，需要先看一遍垃圾分类说明（大约几分钟）。看完就能回来继续。',
+							showCancel: false,
+							confirmText: '去学习',
+							confirmColor: '#38B061',
+							success: (r) => {
+								if (r.confirm) this.$u.route('/pages/flhd/list')
+							},
+						})
+						return
+					}
+					if (!info.is_answer) {
+						uni.showModal({
+							title: '再答几道题',
+							content: '说明已经看完了，做一套简单选择题通过后即可打卡攒积分。',
+							showCancel: false,
+							confirmText: '去答题',
+							confirmColor: '#38B061',
+							success: (r) => {
+								if (r.confirm) this.$u.route('/pages/answer/examine?id=1')
+							},
+						})
+					}
+				}).catch(() => {})
 			},
 			async onThemeStart() {
 				if (!this.isLogin) {
@@ -708,9 +876,10 @@
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
 			},
 			pickThemeHub(hub) {
-				this.pendingHubKey = hub
-				this.flowStep = 'theme_brief'
-				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
+				if (!this.isLogin) {
+					return this.$u.route('/pages/public/login')
+				}
+				this.bootstrapHub(hub)
 			},
 			startHubFlow() {
 				if (!this.pendingHubKey) {
@@ -749,9 +918,61 @@
 			},
 			goSetupStep() {
 				if (!this.setupRows.length) {
-					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
+					this.prefillSetupRowsFromExamples()
 				}
 				this.flowStep = 'setup'
+			},
+			goBinSetupStep() {
+				this.goSetupStep()
+			},
+			cateIndexByKeyword(keyword) {
+				const list = this.cateList || []
+				for (let i = 0; i < list.length; i++) {
+					const name = list[i].name || ''
+					if (name.indexOf(keyword) >= 0) return i
+				}
+				return 0
+			},
+			prefillSetupRowsFromExamples() {
+				if ((this.setupRows || []).some(r => r.point_name && String(r.point_name).trim())) {
+					return
+				}
+				const presets = [
+					{ point_name: '厨房厨余桶', kw: '厨余' },
+					{ point_name: '客厅可回收桶', kw: '可回收' },
+				]
+				this.setupRows = presets.map(p => ({
+					point_name: p.point_name,
+					cate_index: this.cateIndexByKeyword(p.kw),
+					point_image: '',
+					point_image_url: '',
+				}))
+			},
+			pickResidentialCate(c) {
+				if (!c || !c.id) return
+				this.cateId = c.id
+				this.activeCateName = c.name || ''
+				this.cateLabel = guideCateLabelFromName(c.name)
+				const match = (this.points || []).find(p => Number(p.cate_id) === Number(c.id))
+				this.pointId = match ? match.id : 0
+				this.pointName = match ? match.point_name : ''
+			},
+			goResidentialUpload() {
+				if (!this.cateId) return this.$u.toast('请先选择一种垃圾')
+				this.subKey = this.guideSubKeyForHub()
+				this.loadGuide()
+				this.accumDuration = ''
+				this.sortDuration = ''
+				this.resetClockSlots()
+				this.clockContent = ''
+				this.flowStep = 'learn'
+			},
+			backFromLearn() {
+				if (this.isResidentialHub) {
+					this.flowStep = 'cate'
+					return
+				}
+				this.flowStep = 'survey'
 			},
 			guideSubKeyForHub() {
 				return this.hubKey === 'office' ? 'zhenfenjiao' : ''
@@ -763,7 +984,8 @@
 			},
 			initUserPoints(keepFlow) {
 				if (!this.isLogin) {
-					this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
+					if (this.isResidentialHub) this.flowStep = 'why'
+					else this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
 					return Promise.resolve()
 				}
 				if (!this.userInfo.community_id) {
@@ -788,6 +1010,17 @@
 					}
 					if (this.isCommunityHub) {
 						this.flowStep = this.points.length ? 'points' : 'hub_empty'
+						return
+					}
+					if (this.isResidentialHub) {
+						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'learn') {
+							return
+						}
+						if (['why', 'setup', 'cate', 'learn'].indexOf(this.flowStep) >= 0) {
+							return
+						}
+						this.flowStep = 'why'
+						this.prefillSetupRowsFromExamples()
 						return
 					}
 					if (this.flowStep === 'setup' || this.flowStep === 'manage') {
@@ -888,6 +1121,10 @@
 					}
 					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
 					this.$u.toast('已保存')
+					if (this.isResidentialHub) {
+						this.flowStep = 'cate'
+						return
+					}
 					await this.initUserPoints('points')
 				} catch (e) {
 					this.$u.toast((e && e.msg) || '保存失败，请重试')
@@ -1031,7 +1268,8 @@
 				return 'home'
 			},
 			resetClockSlots() {
-				this.clockSlotUrls = ['', '', '']
+				const n = this.isCommunityHub ? 3 : 2
+				this.clockSlotUrls = Array(n).fill('')
 			},
 			onClockSlotTap(slotIdx) {
 				const url = this.clockSlotUrls[slotIdx]
@@ -1086,6 +1324,7 @@
 			missingClockSlotLabel() {
 				const meta = this.clockPhotoSlotMeta
 				for (let i = 0; i < meta.length; i++) {
+					if (meta[i].required === false) continue
 					if (!String(this.clockSlotUrls[i] || '').trim()) {
 						return meta[i].title
 					}
@@ -1097,6 +1336,10 @@
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类')
+				if (this.isResidentialHub) {
+					if (!this.accumDuration) return this.$u.toast('请选择积累了多久')
+					if (!this.sortDuration) return this.$u.toast('请选择分拣用了多久')
+				}
 				const missing = this.missingClockSlotLabel()
 				if (missing) return this.$u.toast('请拍摄「' + missing + '」照片')
 				const that = this
@@ -1109,12 +1352,57 @@
 					},
 				})
 			},
+			buildClockContentText() {
+				const parts = []
+				const note = String(this.clockContent || '').trim()
+				if (note) parts.push(note)
+				if (this.isResidentialHub) {
+					if (this.accumDuration) parts.push('积累时长：' + this.accumDuration)
+					if (this.sortDuration) parts.push('分拣用时：' + this.sortDuration)
+				}
+				return parts.join('\n')
+			},
+			loadClockPromoActivities() {
+				this.clockPromoActivity = null
+				this.clockPromoList = []
+				this.$u.api.get_activity_tab_home({ page: 1, page_size: 10 }).then(res => {
+					const data = res.data || {}
+					const merged = []
+					;(data.weekly_list || []).forEach(a => merged.push(a))
+					;(data.light_list || []).forEach(a => merged.push(a))
+					;(data.active_list || []).forEach(a => merged.push(a))
+					const seen = {}
+					const uniq = merged.filter(a => {
+						const id = a.id || a.active_id
+						if (!id || seen[id]) return false
+						seen[id] = true
+						return true
+					})
+					this.clockPromoList = uniq
+					if (uniq.length) {
+						const idx = Math.floor(Math.random() * Math.min(uniq.length, 5))
+						this.clockPromoActivity = uniq[idx]
+					}
+				}).catch(() => {})
+			},
+			goPromoActivity() {
+				const a = this.clockPromoActivity
+				if (!a) return
+				const id = a.id || a.active_id
+				if (!id) return
+				this.clockSuccessShow = false
+				this.$u.route('/pages/activity/lsxf/details-new?id=' + id)
+			},
+			goActivityList() {
+				this.clockSuccessShow = false
+				this.$u.route('/pages/activity/active-list')
+			},
 			doSubmitClock() {
 				this.clockSubmitting = true
 				this.$u.api.add_forum({
 					type: 2,
 					cate_id: this.cateId,
-					content: this.clockContent,
+					content: this.buildClockContentText(),
 					image: this.clockImages,
 					clock_scene: this.resolveClockScene(),
 					clock_sub_scene: '',
@@ -1122,6 +1410,7 @@
 				}).then(res => {
 					this.clockSuccessMsg = res.msg || '打卡成功'
 					this.clockHabitTip = pickRandomHabitTip()
+					this.loadClockPromoActivities()
 					this.clockSuccessShow = true
 					this.$u.api.getUserInfo().then(r => {
 						this.$u.vuex('userInfo', r.data || {})
@@ -1136,6 +1425,12 @@
 				this.clockSuccessShow = false
 				this.resetClockSlots()
 				this.clockContent = ''
+				this.accumDuration = ''
+				this.sortDuration = ''
+				if (this.isResidentialHub) {
+					this.flowStep = 'cate'
+					return
+				}
 				this.flowStep = 'points'
 			},
 			goActivityTab() {
@@ -1397,6 +1692,138 @@
 	font-size: 28rpx;
 	color: #5a665e;
 	line-height: 1.55;
+}
+.scf-intro-detail--always {
+	margin-top: 16rpx;
+}
+.scf-bin-guide {
+	margin: 0 24rpx 20rpx;
+	padding: 24rpx;
+	background: #fff;
+	border-radius: 20rpx;
+	box-shadow: 0 8rpx 24rpx rgba(20, 40, 28, 0.06);
+}
+.scf-bin-guide-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #1a2e22;
+	margin-bottom: 16rpx;
+	line-height: 1.45;
+}
+.scf-bin-example {
+	display: flex;
+	align-items: flex-start;
+	gap: 16rpx;
+	padding: 16rpx 0;
+	border-bottom: 1rpx solid #eef2ef;
+}
+.scf-bin-example:last-child {
+	border-bottom: none;
+}
+.scf-bin-example-emoji {
+	font-size: 40rpx;
+	line-height: 1.2;
+}
+.scf-bin-example-room {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #243528;
+}
+.scf-bin-example-tip {
+	display: block;
+	font-size: 26rpx;
+	color: #5f7166;
+	margin-top: 6rpx;
+	line-height: 1.45;
+}
+.scf-cate-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+	padding: 0 24rpx 24rpx;
+}
+.scf-cate-pick {
+	padding: 24rpx;
+	border-radius: 20rpx;
+	background: #fff;
+	border: 2rpx solid #e8ece9;
+}
+.scf-cate-pick--on {
+	border-color: #38b061;
+	box-shadow: 0 8rpx 20rpx rgba(56, 176, 97, 0.15);
+}
+.scf-cate-pick-name {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #1a2e22;
+}
+.scf-cate-pick-sub {
+	display: block;
+	font-size: 26rpx;
+	color: #5f7166;
+	margin-top: 8rpx;
+	line-height: 1.4;
+}
+.scf-duration-block {
+	margin-top: 24rpx;
+}
+.scf-duration-label {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #243528;
+	margin: 16rpx 0 12rpx;
+}
+.scf-tip-list--wrap {
+	flex-wrap: wrap;
+}
+.scf-skip-link {
+	text-align: center;
+	font-size: 28rpx;
+	color: #38b061;
+	padding: 16rpx 24rpx 8rpx;
+}
+.scf-success-other {
+	display: block;
+	font-size: 26rpx;
+	color: #5f7166;
+	margin: 16rpx 0 0;
+	line-height: 1.5;
+	text-align: center;
+}
+.scf-promo-act {
+	margin-top: 20rpx;
+	padding: 20rpx 24rpx;
+	background: #f0faf3;
+	border-radius: 16rpx;
+	border: 1rpx solid #c8ebd4;
+}
+.scf-promo-act-k {
+	display: block;
+	font-size: 24rpx;
+	color: #38b061;
+}
+.scf-promo-act-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 600;
+	color: #1a2e22;
+	margin-top: 6rpx;
+}
+.scf-promo-act-go {
+	display: block;
+	font-size: 26rpx;
+	color: #38b061;
+	margin-top: 8rpx;
+}
+.scf-promo-more {
+	margin-top: 12rpx;
+	text-align: center;
+	font-size: 26rpx;
+	color: #38b061;
 }
 .scf-setup-block {
 	margin-bottom: 20rpx;

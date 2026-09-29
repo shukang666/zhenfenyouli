@@ -10,27 +10,65 @@ export const COMMUNITY_POINT_LABEL = '社区投放点'
 export function getStepTitles() {
 	return {
 		hub_empty: '请稍等',
-		setup: '设置' + HOME_POINT_LABEL,
+		why: '为什么要分',
+		setup: '摆好分类桶',
 		points: '选' + HOME_POINT_LABEL_SHORT,
 		manage: '改' + HOME_POINT_LABEL_SHORT,
 		cate: '选垃圾种类',
-		guide: '这一步怎么扔',
+		guide: '为什么要分',
 		survey: '您的投放习惯',
-		learn: '拍照提交',
+		learn: '上传分类成果',
 	}
 }
 
 export function getIntroLead(hubKey) {
-	if (hubKey === 'qinzi') return '带着孩子，先把垃圾分清楚再扔'
-	return '先把垃圾分清楚，再扔进对应的桶'
+	if (hubKey === 'qinzi') return '分开扔，是为了少污染、少浪费、孩子也能从小养成习惯'
+	return '分开扔，是为了少污染、少浪费，也方便社区清运'
+}
+
+export function getWhyIntroLead(hubKey) {
+	if (hubKey === 'qinzi') {
+		return '为什么要分？混装一袋，后面很难再利用；分开后厨余能堆肥、可回收能再生，孩子也能明白「扔哪里」'
+	}
+	return '为什么要分？混装一袋，后面很难再利用；分开后厨余能堆肥、可回收能再生，有害也能单独处理'
+}
+
+export function getWhyIntroSummary(hubKey) {
+	if (hubKey === 'qinzi') {
+		return '今天先弄清「为啥要分」，再摆好家里各处的桶，选种类、拍成果就能打卡。'
+	}
+	return '今天先弄清「为啥要分」，再摆好家里各处的桶，选种类、拍成果就能打卡。'
+}
+
+/** 建议家里各房间放什么桶（引导页展示，非强制） */
+export function getBinLayoutExamples(hubKey) {
+	const qinziNote = hubKey === 'qinzi' ? '（可以让孩子帮忙贴标签）' : ''
+	return [
+		{ room: '厨房', cate: '厨余垃圾', emoji: '🍳', tip: '菜叶、剩饭、果皮放这里，别和塑料袋混一起' + qinziNote },
+		{ room: '客厅', cate: '可回收物', emoji: '🛋️', tip: '纸箱、瓶罐、旧杂志，干燥干净再投放' },
+		{ room: '卫生间', cate: '其他垃圾', emoji: '🚿', tip: '用过的纸巾、一次性用品等' },
+		{ room: '固定一处', cate: '有害垃圾', emoji: '⚠️', tip: '电池、灯管、过期药品，少量攒够再投' },
+	]
+}
+
+export function getBinSetupLead() {
+	return '请对照下面建议，把各处的桶摆到位（名字和种类可以按您家习惯改）'
+}
+
+export function getAccumDurationOptions() {
+	return ['1 天以内', '2～3 天', '大约一周', '更久']
+}
+
+export function getSortDurationOptions() {
+	return ['5 分钟以内', '约 15 分钟', '半小时左右', '更久']
 }
 
 /** 设置页：一句话说清要做什么 */
 export function getSetupIntroLine(hubKey) {
 	if (hubKey === 'qinzi') {
-		return '先添一个平时扔垃圾的地方（比如装菜叶的桶）。起个容易记的名字、选种类、给桶拍张照就行。'
+		return '厨房放厨余桶、客厅放可回收桶……添好名字和种类，给桶拍张照，方便以后打卡对照。'
 	}
-	return '先添一个平时扔垃圾的地方（比如厨房桶、装瓶罐的袋子）。起个名字、选种类、给桶拍张照就行。'
+	return '厨房放厨余桶、客厅放可回收桶……添好名字和种类，给桶拍张照，方便以后打卡对照。'
 }
 
 /** 选择页：还没有位置时 */
@@ -49,18 +87,23 @@ export function getIntroBlocks(hubKey) {
 	return [
 		{
 			id: 'what',
-			title: '为啥要分开扔',
-			body: '菜叶剩饭、瓶罐纸板、电池药品等要分开，别混在一个袋子里。投进对应颜色的桶，小区更干净，也不容易投错。',
+			title: '混装会带来什么',
+			body: '一袋混装，后面很难分拣再利用；厨余混进其他垃圾还容易发臭、招虫，处理成本也更高。',
+		},
+		{
+			id: 'benefit',
+			title: '分开之后的好处',
+			body: '厨余可以专门处理，纸箱瓶罐能回收再造，电池药品单独收更安全。小区更干净，资源也少浪费。',
 		},
 		{
 			id: 'policy',
-			title: '社区的要求',
+			title: '社区一起参与',
 			body: '现在都要做垃圾分类。' + local,
 		},
 		{
 			id: 'vision',
-			title: '这个小程序帮什么忙',
-			body: '教怎么分、提醒别乱扔，用得勤有积分，大家一起把环境搞好。',
+			title: '打卡在记录什么',
+			body: '不是考你会不会分，而是记录您认真分类的成果，用得勤有积分，邻里一起把习惯留住。',
 		},
 	]
 }

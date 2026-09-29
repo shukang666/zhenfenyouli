@@ -5,7 +5,23 @@ const ASSET_UPLOAD_BASE = staticUploadBase || 'https://shukang-budget-1319203539
 const ASSET_SITE_ORIGIN = ASSET_UPLOAD_BASE.replace(/\/upload\/?$/i, '')
 
 function isCosPublicAssetUrl(url) {
-	return /^https?:\/\/[^/]+\.cos\.[a-z0-9-]+\.(myqcloud|tencentcos)\.cn(\/|$)/i.test(url)
+	return /^https?:\/\/[a-z0-9][a-z0-9-]*\.cos\.[a-z0-9-]+\.(myqcloud|tencentcos)\.cn(\/|$)/i.test(url)
+}
+
+/** 后端 bucket 为空时会出现 https://.cos.region...，用 settings 里的 COS 根替换 */
+function repairBrokenCosHostUrl(url) {
+	if (typeof url !== 'string' || !url) return url
+	if (!/^https?:\/\/\.cos\./i.test(url) && !/^https?:\/\/[^/]*\.cos\.[a-z0-9-]+\.(myqcloud|tencentcos)\.cn/i.test(url)) {
+		return url
+	}
+	try {
+		const u = new URL(url)
+		if (/^[a-z0-9][a-z0-9-]*\.cos\./i.test(u.hostname)) return url
+		const base = (ASSET_SITE_ORIGIN || ASSET_UPLOAD_BASE.replace(/\/$/, '')).replace(/\/$/, '')
+		return base + u.pathname + (u.search || '')
+	} catch (e) {
+		return url
+	}
 }
 
 /** COS 键为 xcxkf052/...，去掉误插的 /upload/ 段 */
@@ -48,6 +64,7 @@ function resolveAssetUrl(url) {
 	if (typeof url !== 'string') return ''
 	url = url.trim()
 	if (/^https?:\/\//i.test(url)) {
+		url = repairBrokenCosHostUrl(url)
 		url = stripErroneousUploadInCosUrl(url)
 		if (isCosPublicAssetUrl(url)) {
 			return url

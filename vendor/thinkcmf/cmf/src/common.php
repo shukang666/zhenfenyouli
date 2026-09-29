@@ -953,6 +953,52 @@ function cmf_storage_for_assets()
     return new \cmf\lib\Storage($type, $driverConfig);
 }
 
+/** COS 公网根 URL 是否含有效桶名（拒绝 https://.cos.region...） */
+function cmf_cos_public_base_url_is_valid($base)
+{
+    if (!is_string($base) || $base === '') {
+        return false;
+    }
+    $host = parse_url($base, PHP_URL_HOST);
+    if (!is_string($host) || $host === '' || $host[0] === '.') {
+        return false;
+    }
+
+    return (bool)preg_match('#^[a-z0-9][a-z0-9-]*\.cos\.[a-z0-9-]+\.(myqcloud|tencentcos)\.cn$#i', $host);
+}
+
+/**
+ * 从 TencentCos 插件配置解析公网根（无尾斜杠）；无效时按 bucket 拼或站点默认桶
+ * @param array|null $cfg cmf_get_plugin_config('TencentCos')
+ */
+function cmf_cos_effective_public_base_url($cfg = null)
+{
+    $fallback = 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com';
+    if ($cfg === null && cmf_tencent_cos_plugin_ready()) {
+        $cfg = cmf_get_plugin_config('TencentCos');
+    }
+    if (!is_array($cfg)) {
+        $cfg = [];
+    }
+    $base = rtrim(trim((string)($cfg['public_base_url'] ?? '')), '/');
+    if ($base !== '' && cmf_cos_public_base_url_is_valid($base)) {
+        return $base;
+    }
+    $bucket = trim((string)($cfg['bucket'] ?? ''));
+    $region = trim((string)($cfg['region'] ?? 'ap-shanghai'));
+    if ($region === '') {
+        $region = 'ap-shanghai';
+    }
+    if ($bucket !== '' && strpos($bucket, 'xxx') === false) {
+        $built = 'https://' . $bucket . '.cos.' . $region . '.myqcloud.com';
+        if (cmf_cos_public_base_url_is_valid($built)) {
+            return $built;
+        }
+    }
+
+    return $fallback;
+}
+
 /** COS / CDN 公网根（无尾斜杠） */
 function cmf_get_cos_public_base_url()
 {
@@ -962,15 +1008,42 @@ function cmf_get_cos_public_base_url()
     }
     $storage = cmf_get_option('storage');
     if (!empty($storage['type']) && $storage['type'] === 'TencentCos') {
-        $cfg = cmf_get_plugin_config('TencentCos');
-        if (!empty($cfg['public_base_url'])) {
-            $cached = rtrim((string)$cfg['public_base_url'], '/');
-            return $cached;
-        }
+        $cached = cmf_cos_effective_public_base_url();
+    } else {
+        $cached = cmf_cos_effective_public_base_url([]);
     }
-    $cached = 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com';
 
     return $cached;
+}
+
+/** 修复已落库/缓存的残缺 COS 域名（桶名为空时生成 https://.cos.xxx） */
+function cmf_repair_broken_cos_public_url($url)
+{
+    if (!is_string($url) || $url === '') {
+        return $url;
+    }
+    $url = trim($url);
+    if (!preg_match('#^https?://#i', $url)) {
+        return $url;
+    }
+    $host = parse_url($url, PHP_URL_HOST);
+    if (!is_string($host) || $host === '') {
+        return $url;
+    }
+    if (cmf_cos_public_base_url_is_valid('https://' . $host)) {
+        return $url;
+    }
+    if (strpos($host, '.cos.') === false) {
+        return $url;
+    }
+    $path = parse_url($url, PHP_URL_PATH);
+    $query = parse_url($url, PHP_URL_QUERY);
+    $fixed = rtrim(cmf_get_cos_public_base_url(), '/') . ($path ?: '');
+    if ($query !== null && $query !== '') {
+        $fixed .= '?' . $query;
+    }
+
+    return $fixed;
 }
 
 function cmf_is_cos_public_asset_url($url)
@@ -999,6 +1072,7 @@ function cmf_finalize_public_asset_url($url)
         return $url;
     }
     $url = trim($url);
+    $url = cmf_repair_broken_cos_public_url($url);
     $cosBase = cmf_get_cos_public_base_url();
 
     $url = preg_replace(
