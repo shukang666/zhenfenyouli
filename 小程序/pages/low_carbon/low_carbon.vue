@@ -65,22 +65,6 @@
       </swiper>
     </view>
 
-    <!-- 垃圾分类主题活动 → 真分打卡引导（原型 Banner 落地页，与轮播配置可并存） -->
-    <view
-      class="fb-zhenfen-theme"
-      hover-class="fb-zhenfen-theme--press"
-      :hover-stay-time="80"
-      @click="gotoThemeZhenfen"
-    >
-      <view class="fb-zhenfen-theme-bg"></view>
-      <view class="fb-zhenfen-theme-inner">
-        <text class="fb-zhenfen-theme-kicker">主题活动</text>
-        <text class="fb-zhenfen-theme-title">垃圾分类主题活动</text>
-        <text class="fb-zhenfen-theme-sub">真分打卡 · 选场景 · 拍照记录</text>
-        <text class="fb-zhenfen-theme-go">进入 ›</text>
-      </view>
-    </view>
-
     <!-- 垃圾分类工作台：独立主推位（与场景快捷入口分离） -->
     <view class="fb-dtsh-spotlight" id="guide-fb-dtsh-hub">
       <view
@@ -836,11 +820,6 @@ export default {
       this.$u.route("/pages/dtsh/dtsh");
     },
 
-    /** 真分打卡主题流（Banner / 主题活动入口，带 mode=theme） */
-    gotoThemeZhenfen() {
-      this.$u.route("/pages/activity/scene-clock-flow?mode=theme");
-    },
-
     // 家庭场景：直达打卡流，不经过主题引导页
     gotoHomeScene() {
       this.$u.route("/pages/activity/scene-clock-flow?hub=home");
@@ -962,66 +941,6 @@ export default {
 .fb-banner-item {
   width: 100%;
   height: 100%;
-}
-
-.fb-zhenfen-theme {
-  position: relative;
-  margin: 16rpx 24rpx 8rpx;
-  border-radius: 24rpx;
-  overflow: hidden;
-  min-height: 160rpx;
-}
-.fb-zhenfen-theme--press {
-  opacity: 0.96;
-}
-.fb-zhenfen-theme-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(125deg, #5ecf85 0%, #38b061 45%, #2a8f4a 100%);
-}
-.fb-zhenfen-theme-bg::after {
-  content: "";
-  position: absolute;
-  right: -20rpx;
-  bottom: -40rpx;
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-}
-.fb-zhenfen-theme-inner {
-  position: relative;
-  padding: 28rpx 32rpx;
-}
-.fb-zhenfen-theme-kicker {
-  display: inline-block;
-  font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.2);
-  padding: 4rpx 16rpx;
-  border-radius: 999rpx;
-  margin-bottom: 12rpx;
-}
-.fb-zhenfen-theme-title {
-  display: block;
-  font-size: 34rpx;
-  font-weight: 700;
-  color: #fff;
-}
-.fb-zhenfen-theme-sub {
-  display: block;
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.92);
-}
-.fb-zhenfen-theme-go {
-  position: absolute;
-  right: 28rpx;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #fff;
 }
 
 /* ===== 主题活动：一行五个圆钮 ===== */

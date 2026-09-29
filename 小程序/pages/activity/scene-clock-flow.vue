@@ -85,7 +85,7 @@
 			</view>
 		</view>
 		<view class="zf-brief-scene">
-			<text class="zf-brief-scene-k">当前场景</text>
+			<text class="zf-brief-scene-k">您选的场景</text>
 			<text class="zf-brief-scene-v">{{ pendingHubLabel }}</text>
 		</view>
 		<view class="zf-foot zf-foot--inline">
@@ -282,17 +282,17 @@
 				</view>
 				<text v-if="pointName" class="scf-guide-point-name">{{ pointName }}</text>
 				<view class="scf-info-block">
-					<text class="scf-info-title">如何处理</text>
+					<text class="scf-info-title">这一步怎么做</text>
 					<text class="scf-info-text">{{ guide.handle_guide }}</text>
 				</view>
 				<view class="scf-info-block scf-info-block--time">
-					<text class="scf-info-title">建议投放时间</text>
+					<text class="scf-info-title">什么时候扔合适</text>
 					<text class="scf-info-text">{{ guide.dispose_time }}</text>
 				</view>
 			</view>
 			<view class="scf-foot">
 				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="backFromGuide">上一步</view>
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="flowStep = 'survey'">下一步</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="flowStep = 'survey'">看明白了，继续</view>
 			</view>
 		</view>
 
@@ -311,12 +311,12 @@
 				</view>
 			</view>
 			<view class="scf-custom">
-				<text class="scf-custom-label">或写下您的分类小技巧</text>
-				<textarea class="scf-textarea" v-model="customTip" placeholder="选填" maxlength="200" />
+				<text class="scf-custom-label">也可以写一句您自己的小窍门（选填）</text>
+				<textarea class="scf-textarea" v-model="customTip" placeholder="比如：外卖盒先冲一下再扔" maxlength="200" />
 			</view>
 			<view class="scf-foot">
 				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'guide'">上一步</view>
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="goLearnStep">下一步</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="goLearnStep">选好了，去拍照</view>
 			</view>
 		</view>
 
@@ -329,7 +329,7 @@
 				<text class="scf-clock-desc">{{ clockPhotoIntro }}</text>
 
 				<view class="scf-clock-photo-head scf-clock-photo-head--row">
-					<text class="scf-clock-photo-title">分三步拍照片</text>
+					<text class="scf-clock-photo-title">按顺序拍 3 张照片</text>
 					<text class="scf-clock-photo-progress">{{ clockSlotFilledCount }}/3</text>
 				</view>
 
@@ -388,7 +388,7 @@
 					:class="{ 'scf-clock-submit--disabled': clockSubmitting }"
 					hover-class="scf-card--press"
 					@tap="submitClock"
-				>{{ clockSubmitting ? '提交中…' : '提交' }}</view>
+				>{{ clockSubmitting ? '提交中…' : '提交本次打卡' }}</view>
 
 				<view class="scf-learn-link" hover-class="scf-card--press" @tap="goLearn">
 					<text>还想学分类知识？</text>
@@ -405,7 +405,7 @@
 			<view class="scf-success-dialog" @tap.stop="">
 				<text class="scf-success-emoji">✓</text>
 				<text class="scf-success-title">{{ clockSuccessMsg || '打卡成功' }}</text>
-				<text class="scf-success-sub">请不要忘记正确投递哦~</text>
+				<text class="scf-success-sub">记得投进对的桶；积分到账可能稍有延迟，请稍后在「我的积分」查看。</text>
 				<view class="scf-habit-box" v-if="clockHabitTip">
 					<text class="scf-habit-kicker">养成好习惯</text>
 					<text class="scf-habit-text">{{ clockHabitTip }}</text>
@@ -540,11 +540,11 @@
 			clockPhotoIntro() {
 				const sk = this.hub && this.hub.sceneKey ? this.hub.sceneKey : this.hubKey
 				const cateLine = buildSceneCateSubtitle(sk, this.activeCateName)
-				const tail = '下面三个格各拍一张：扔之前、对准桶、扔完了。'
+				const tail = '下面按顺序拍 3 张：手里的垃圾、对准桶口、已经扔进去。'
 				return (cateLine ? cateLine + '。' : '') + tail
 			},
 			clockPhotoFootnote() {
-				return '三张都拍好再点提交；拍糊了社区可能看不清楚。'
+				return '三张都拍清楚再点提交，方便社区帮您核对。'
 			},
 			clockPhotoSlotMeta() {
 				if (this.isCommunityHub) {
@@ -603,7 +603,7 @@
 			},
 			visibleStepLabels() {
 				if (['setup', 'points', 'manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
-				return ['指引', '小技巧', '拍照']
+				return ['怎么扔', '小窍门', '拍照']
 			},
 			stepIndex() {
 				const order = ['guide', 'survey', 'learn']
@@ -680,10 +680,10 @@
 				} catch (e) {}
 				if (!info.is_learn) {
 					uni.showModal({
-						title: '提示',
-						content: '请先学习垃圾分类指导，通过答题考试后可参与真分打卡',
+						title: '还差一步',
+						content: '第一次打卡前，需要先看一遍垃圾分类说明（大约几分钟）。看完就能回来继续。',
 						showCancel: false,
-						confirmText: '立即学习',
+						confirmText: '去学习',
 						confirmColor: '#38B061',
 						success: (res) => {
 							if (res.confirm) this.$u.route('/pages/flhd/list')
@@ -693,10 +693,10 @@
 				}
 				if (!info.is_answer) {
 					uni.showModal({
-						title: '提示',
-						content: '学习已完成，请通过垃圾分类答题考试后即可打卡',
+						title: '再答几道题',
+						content: '说明已经看完了，做一套简单选择题通过后即可打卡攒积分。',
 						showCancel: false,
-						confirmText: '去考试',
+						confirmText: '去答题',
 						confirmColor: '#38B061',
 						success: (res) => {
 							if (res.confirm) this.$u.route('/pages/answer/examine?id=1')
@@ -714,7 +714,7 @@
 			},
 			startHubFlow() {
 				if (!this.pendingHubKey) {
-					this.$u.toast('请先选择打卡场景')
+					this.$u.toast('请先选一个场景')
 					this.flowStep = 'theme_scenes'
 					return
 				}
@@ -725,7 +725,7 @@
 				return this.$u.api.getUserInfo().then(res => {
 					this.$u.vuex('userInfo', res.data || {})
 					if (Number(res.data.is_answer) !== 1) {
-						this.$u.toast('请先完成分类介绍与测验')
+						this.$u.toast('请先看完分类说明并通过小测验')
 						setTimeout(() => this.$u.route('/pages/flhd/ljfldk'), 500)
 						return false
 					}
