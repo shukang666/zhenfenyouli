@@ -30,7 +30,7 @@ export function getWhyIntroLead() {
 }
 
 export function getWhyIntroSummary() {
-	return '今天先弄清「为啥要分」，再摆好家里各处的桶，选种类、拍成果就能打卡。'
+	return '先看上面要点，再在下方点选您今天的场景，跟着提示摆桶、打卡即可。'
 }
 
 /** 建议家里各房间放什么桶（引导页展示，非强制） */

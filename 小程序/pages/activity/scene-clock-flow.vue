@@ -36,29 +36,9 @@
 		</view>
 	</view>
 
-	<!-- 原型 Screen 4：选择打卡场景 -->
+	<!-- 原型 Screen 4：先读「为什么要分」，再点选场景 -->
 	<view v-else-if="flowStep === 'theme_scenes'" class="zf-scenes">
-		<text class="zf-scenes-hint">{{ scenePickHint }}</text>
-		<view class="zf-scene-row">
-			<view
-				class="zf-scene-card zf-scene-card--pick"
-				v-for="item in sceneHubCards"
-				:key="item.hub"
-				:class="'zf-scene-card--' + item.theme"
-				hover-class="zf-scene-card--press"
-				:hover-stay-time="80"
-				@tap="pickThemeHub(item.hub)"
-			>
-				<view class="zf-scene-icon-wrap">
-					<text class="zf-scene-icon">{{ item.emoji }}</text>
-				</view>
-				<view class="zf-scene-copy">
-					<text class="zf-scene-title">{{ item.title }}</text>
-					<text class="zf-scene-desc">{{ item.desc }}</text>
-				</view>
-			</view>
-		</view>
-		<view class="zf-promo">
+		<view class="zf-promo zf-promo--scene-head">
 			<text class="zf-promo-line">{{ whyIntroLead }}</text>
 			<text class="zf-promo-line zf-promo-line--sub">{{ whyIntroSummary }}</text>
 			<view class="zf-promo-pillars zf-promo-pillars--grid">
@@ -72,6 +52,29 @@
 				<view class="zf-promo-pillar" v-for="(p, i) in themePillars" :key="'tp' + i">
 					<text class="zf-promo-pillar-ico">{{ p.icon }}</text>
 					<text class="zf-promo-pillar-lab">{{ p.label }}</text>
+				</view>
+			</view>
+		</view>
+		<view class="zf-scenes-pick">
+			<text class="zf-scenes-kicker">选场景</text>
+			<text class="zf-scenes-hint">{{ scenePickHint }}</text>
+			<view class="zf-scene-row">
+				<view
+					class="zf-scene-card zf-scene-card--pick"
+					v-for="(item, sIdx) in sceneHubCards"
+					:key="item.hub"
+					:class="'zf-scene-card--' + item.theme"
+					hover-class="zf-scene-card--press"
+					:hover-stay-time="80"
+					@tap="pickThemeHubByIndex(sIdx)"
+				>
+					<view class="zf-scene-icon-wrap">
+						<text class="zf-scene-icon">{{ item.emoji }}</text>
+					</view>
+					<view class="zf-scene-copy">
+						<text class="zf-scene-title">{{ item.title }}</text>
+						<text class="zf-scene-desc">{{ item.desc }}</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -986,6 +989,11 @@
 					return this.$u.route('/pages/public/login')
 				}
 				this.bootstrapHub(hub)
+			},
+			pickThemeHubByIndex(sIdx) {
+				const card = (this.sceneHubCards || [])[sIdx]
+				if (!card || !card.hub) return
+				this.pickThemeHub(card.hub)
 			},
 			startHubFlow() {
 				if (!this.pendingHubKey) {
@@ -3175,13 +3183,35 @@
 	padding: 24rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
 	box-sizing: border-box;
 }
+.zf-promo--scene-head {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+.zf-scenes-pick {
+	margin-top: 28rpx;
+	padding: 24rpx 20rpx 20rpx;
+	background: #fff;
+	border-radius: 24rpx;
+	box-shadow: 0 10rpx 32rpx rgba(20, 40, 28, 0.08);
+}
+.zf-scenes-kicker {
+	display: block;
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #18af38;
+	margin-bottom: 8rpx;
+	letter-spacing: 2rpx;
+}
 .zf-scenes-hint {
 	display: block;
-	font-size: 28rpx;
-	font-weight: 600;
-	color: #333;
-	margin-bottom: 16rpx;
-	padding-left: 4rpx;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #142018;
+	margin-bottom: 20rpx;
+	line-height: 1.45;
+}
+.zf-scenes-pick .zf-scene-row {
+	margin-bottom: 0;
 }
 .zf-scene-row {
 	display: flex;
