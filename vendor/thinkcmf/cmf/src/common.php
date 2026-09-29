@@ -948,6 +948,9 @@ function cmf_finalize_public_asset_url($url)
     if (preg_match('#^https?://admin\.circular-economy\.cn/((?:xcxkf052|dz\d+|kf\d+)/.+)$#iu', $url, $m)) {
         return $cosBase . '/' . cmf_strip_upload_object_key_prefix($m[1]);
     }
+    if (preg_match('#^https?://[^/]+/upload/((?:xcxkf052|dz\d+|kf\d+)/.+)$#iu', $url, $m)) {
+        return $cosBase . '/' . cmf_strip_upload_object_key_prefix($m[1]);
+    }
 
     return $url;
 }

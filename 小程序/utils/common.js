@@ -4,11 +4,39 @@ import { staticUploadBase } from '@/common/settings'
 const ASSET_UPLOAD_BASE = staticUploadBase || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/'
 const ASSET_SITE_ORIGIN = ASSET_UPLOAD_BASE.replace(/\/upload\/?$/i, '')
 
+function isCosPublicAssetUrl(url) {
+	return /^https?:\/\/[^/]+\.cos\.[a-z0-9-]+\.(myqcloud|tencentcos)\.cn(\/|$)/i.test(url)
+}
+
+/** COS 键为 xcxkf052/...，去掉误插的 /upload/ 段 */
+function stripErroneousUploadInCosUrl(url) {
+	if (typeof url !== 'string' || !url) return url
+	return url.replace(
+		/(https?:\/\/[^/]+\.cos\.[a-z0-9-]+\.(?:myqcloud|tencentcos)\.cn)\/upload\/((?:xcxkf052|dz\d+|kf\d+)\/)/gi,
+		'$1/$2'
+	)
+}
+
+function shouldInsertUploadSegment(url) {
+	if (!/^https?:\/\//i.test(url) || url.indexOf('/upload/') !== -1) return false
+	if (isCosPublicAssetUrl(url)) return false
+	if (!/^https?:\/\/[^/]+\/(upload\/)?(xcxkf052\/|dz\d+\/|kf\d+\/)/i.test(url)) return false
+	try {
+		const host = new URL(url).hostname.toLowerCase()
+		const origin = ASSET_SITE_ORIGIN || 'https://admin.circular-economy.cn'
+		const siteHost = new URL(origin.startsWith('http') ? origin : `https://${origin}`).hostname.toLowerCase()
+		return host === siteHost
+	} catch (e) {
+		return false
+	}
+}
+
 function shouldFixAssetString(s) {
 	if (typeof s !== 'string' || !s) return false
 	const t = s.trim()
 	if (t[0] === '{' || t[0] === '[') return false
-	if (/^https?:\/\/[^/]+\/(upload\/)?(xcxkf052\/|dz\d+\/|kf\d+\/)/i.test(t) && t.indexOf('/upload/') === -1) return true
+	if (stripErroneousUploadInCosUrl(t) !== t) return true
+	if (shouldInsertUploadSegment(t)) return true
 	if (/^(xcxkf052\/|dz\d+\/|kf\d+\/)/i.test(t)) return true
 	if (t.indexOf('/upload/') === 0) return true
 	return false
@@ -20,21 +48,32 @@ function resolveAssetUrl(url) {
 	if (typeof url !== 'string') return ''
 	url = url.trim()
 	if (/^https?:\/\//i.test(url)) {
-		if (/^https?:\/\/[^/]+\/(upload\/)?(xcxkf052\/|dz\d+\/|kf\d+\/)/i.test(url) && url.indexOf('/upload/') === -1) {
-			return url.replace(/^(https?:\/\/[^/]+)\/((?:xcxkf052|dz\d+|kf\d+)\/)/i, '$1/upload/$2')
+		url = stripErroneousUploadInCosUrl(url)
+		if (isCosPublicAssetUrl(url)) {
+			return url
 		}
-		return url
+		if (shouldInsertUploadSegment(url)) {
+			url = url.replace(/^(https?:\/\/[^/]+)\/((?:xcxkf052|dz\d+|kf\d+)\/)/i, '$1/upload/$2')
+		}
+		return stripErroneousUploadInCosUrl(url)
 	}
 	if (url.indexOf('/upload/') === 0) {
-		return ASSET_SITE_ORIGIN + url
+		return stripErroneousUploadInCosUrl(
+			ASSET_UPLOAD_BASE + url.replace(/^\/upload\/?/i, '').replace(/^\/+/, '')
+		)
 	}
-	return ASSET_UPLOAD_BASE + url.replace(/^\/+/, '').replace(/^upload\//, '')
+	return stripErroneousUploadInCosUrl(
+		ASSET_UPLOAD_BASE + url.replace(/^\/+/, '').replace(/^upload\//i, '')
+	)
 }
 
 function deepResolveAssetUrls(value) {
 	if (value == null) return value
 	if (typeof value === 'string') {
-		return shouldFixAssetString(value) ? resolveAssetUrl(value) : value
+		const t = value.trim()
+		if (t[0] === '{' || t[0] === '[') return value
+		const out = shouldFixAssetString(value) ? resolveAssetUrl(value) : value
+		return typeof out === 'string' ? stripErroneousUploadInCosUrl(out) : out
 	}
 	if (Array.isArray(value)) {
 		return value.map(deepResolveAssetUrls)
