@@ -883,6 +883,76 @@ function cmf_get_public_site_root()
     return $base;
 }
 
+/** 腾讯云 COS 插件是否已配置可用 */
+function cmf_tencent_cos_plugin_ready()
+{
+    if (!function_exists('cmf_get_plugin_class')) {
+        return false;
+    }
+    $class = cmf_get_plugin_class('TencentCos');
+    if (!class_exists($class)) {
+        return false;
+    }
+    $cfg = cmf_get_plugin_config('TencentCos');
+    $id = trim((string)($cfg['secret_id'] ?? ''));
+    $sk = trim((string)($cfg['secret_key'] ?? ''));
+    $bucket = trim((string)($cfg['bucket'] ?? ''));
+
+    return $id !== '' && $sk !== '' && $bucket !== '' && strpos($id, 'xxx') === false;
+}
+
+/**
+ * 解析文件存储驱动（生产默认 TencentCos；插件未配置则 Local）
+ */
+function cmf_resolve_storage_setting()
+{
+    static $resolved = null;
+    if ($resolved !== null) {
+        return $resolved;
+    }
+    $storage = cmf_get_option('storage');
+    if (!is_array($storage)) {
+        $storage = [];
+    }
+    if (empty($storage['storages']['Local'])) {
+        $storage['storages']['Local'] = ['name' => '本地'];
+    }
+    $storage['storages']['TencentCos'] = [
+        'name'   => '腾讯云 COS',
+        'driver' => '\\plugins\\tencent_cos\\lib\\TencentCos',
+    ];
+    if (cmf_tencent_cos_plugin_ready()) {
+        if (empty($storage['type']) || $storage['type'] === 'Local' || $storage['type'] === 'Oss') {
+            $storage['type'] = 'TencentCos';
+        }
+    } elseif (empty($storage['type'])) {
+        $storage['type'] = 'Local';
+    }
+    if ($storage['type'] === 'TencentCos' && !cmf_tencent_cos_plugin_ready()) {
+        $storage['type'] = 'Local';
+    }
+    if ($storage['type'] === 'Oss') {
+        $ossCfg = cmf_get_plugin_config('Oss');
+        $ossAk = trim((string)($ossCfg['accessKey'] ?? ''));
+        if ($ossAk === '' && cmf_tencent_cos_plugin_ready()) {
+            $storage['type'] = 'TencentCos';
+        }
+    }
+    $resolved = $storage;
+
+    return $resolved;
+}
+
+/** 读写业务图片用的 Storage 实例（随 cmf_resolve_storage_setting，非单例缓存 Local） */
+function cmf_storage_for_assets()
+{
+    $setting = cmf_resolve_storage_setting();
+    $type = $setting['type'] ?? 'Local';
+    $driverConfig = $setting['storages'][$type] ?? [];
+
+    return new \cmf\lib\Storage($type, $driverConfig);
+}
+
 /** COS / CDN 公网根（无尾斜杠） */
 function cmf_get_cos_public_base_url()
 {
@@ -1010,20 +1080,20 @@ function doGetAssetUrl($file, $style = '')
     if (strpos($file, "/") === 0) {
         if (strpos($file, '/upload/') === 0) {
             $rel = cmf_strip_upload_object_key_prefix(substr($file, strlen('/upload/')));
-            $storage = Storage::instance();
+            $storage = cmf_storage_for_assets();
 
             return $storage->getUrl($rel, $style);
         }
         if (preg_match('#^/(xcxkf052/|dz\d+/|kf\d+/)#', $file)) {
             $rel = ltrim($file, '/');
-            $storage = Storage::instance();
+            $storage = cmf_storage_for_assets();
 
             return $storage->getUrl($rel, $style);
         }
 
         return rtrim(cmf_get_public_site_root(), '/') . $file;
     }
-    $storage = Storage::instance();
+    $storage = cmf_storage_for_assets();
     $rel = cmf_strip_upload_object_key_prefix($file);
 
     return cmf_normalize_public_file_url($storage->getUrl($rel, $style));
@@ -1050,37 +1120,7 @@ function cmf_get_image_url($file, $style = '')
         return '';
     }
 
-    if (strpos($file, "http") === 0) {
-        if (strpos($file, 'oss.ausite.cn') !== false) {
-            $file = preg_replace('#^https?://[^/]+/#', '', $file);
-            $file = preg_replace('/\?.*$/', '', $file);
-            $file = ltrim($file, '/');
-            if (strpos($file, 'upload/') === 0) {
-                $file = substr($file, 7);
-            }
-        } else {
-            return cmf_normalize_public_file_url($file);
-        }
-    } else if (strpos($file, "/") === 0) {
-        if (strpos($file, '/upload/') === 0) {
-            return cmf_get_public_site_root() . $file;
-        }
-        if (preg_match('#^/(xcxkf052/|dz\d+/|kf\d+/)#', $file)) {
-            return cmf_get_public_site_root() . '/upload' . $file;
-        }
-        return rtrim(cmf_get_public_site_root(), '/') . $file;
-    } else {
-//        $storage = cmf_get_option('storage');
-//        if (empty($storage['type'])) {
-//            $storage['type'] = 'Local';
-//        }
-//        if ($storage['type'] != 'Local') {
-//            $watermark = cmf_get_plugin_config($storage['type']);
-//            $style     = empty($style) ? $watermark['styles_watermark'] : $style;
-//        }
-        $storage = Storage::instance();
-        return cmf_normalize_public_file_url($storage->getImageUrl($file, $style));
-    }
+    return cmf_get_asset_url($file, $style);
 }
 
 /**
@@ -1108,15 +1148,17 @@ function cmf_get_file_download_url($file, $expires = 3600)
     }
 
     if (strpos($file, "http") === 0) {
-        return $file;
-    } else if (strpos($file, "/") === 0) {
-        return $file;
-    } else if (strpos($file, "#") === 0) {
-        return $file;
-    } else {
-        $storage = Storage::instance();
-        return $storage->getFileDownloadUrl($file, $expires);
+        return cmf_finalize_public_asset_url($file);
     }
+    if (strpos($file, "/") === 0) {
+        return cmf_get_asset_url($file);
+    }
+    if (strpos($file, "#") === 0) {
+        return $file;
+    }
+    $storage = cmf_storage_for_assets();
+
+    return cmf_finalize_public_asset_url($storage->getFileDownloadUrl($file, $expires));
 }
 
 /**
@@ -2114,7 +2156,7 @@ function cmf_replace_content_file_url($content, $isForDbSave = false)
     \phpQuery::newDocumentHTML($content);
     $pq = pq(null);
 
-    $storage = Storage::instance();
+    $storage = cmf_storage_for_assets();
     $localStorage = new cmf\lib\storage\Local([]);
     $storageDomain = $storage->getDomain();
     $domain = request()->host();

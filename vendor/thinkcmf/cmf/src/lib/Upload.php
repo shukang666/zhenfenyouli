@@ -319,30 +319,7 @@ class Upload
         $assetModel = new AssetModel();
         $objAsset   = $assetModel->where(["user_id" => $userId, "file_key" => $arrInfo["file_key"]])->find();
 
-        $storage = cmf_get_option('storage');
-
-        if (empty($storage['type'])) {
-            $storage['type'] = 'Local';
-        }
-        // 已改本地存储或 OSS 密钥未配置时，禁止走云存储（否则报 access key id is empty）
-        if ($storage['type'] !== 'Local') {
-            $remotePluginCfg = cmf_get_plugin_config($storage['type']);
-            if ($storage['type'] === 'Oss') {
-                $ossAk = isset($remotePluginCfg['accessKey']) ? trim((string)$remotePluginCfg['accessKey']) : '';
-                $ossSk = isset($remotePluginCfg['secretKey']) ? trim((string)$remotePluginCfg['secretKey']) : '';
-                $ossBucket = isset($remotePluginCfg['bucket']) ? trim((string)$remotePluginCfg['bucket']) : '';
-                if ($ossAk === '' || $ossSk === '' || $ossBucket === '') {
-                    $storage['type'] = 'Local';
-                }
-            } elseif ($storage['type'] === 'TencentCos') {
-                $cosId = isset($remotePluginCfg['secret_id']) ? trim((string)$remotePluginCfg['secret_id']) : '';
-                $cosSk = isset($remotePluginCfg['secret_key']) ? trim((string)$remotePluginCfg['secret_key']) : '';
-                $cosBucket = isset($remotePluginCfg['bucket']) ? trim((string)$remotePluginCfg['bucket']) : '';
-                if ($cosId === '' || $cosSk === '' || $cosBucket === '') {
-                    $storage['type'] = 'Local';
-                }
-            }
-        }
+        $storage = cmf_resolve_storage_setting();
 
         $needUploadToRemoteStorage = false;//是否要上传到云存储
         if ($objAsset && $storage['type'] == 'Local') {
@@ -386,17 +363,19 @@ class Upload
                 session_write_close();
                 $result = $storage->upload($arrInfo["file_path"], $uploadPath . $arrInfo["file_path"], $fileType);
                 if (!empty($result)) {
-
-                    if(file_exists('./upload/'.$arrInfo["file_path"])){
-                        unlink('./upload/'.$arrInfo["file_path"]);
+                    $localUploaded = $uploadPath . $arrInfo['file_path'];
+                    if (is_file($localUploaded)) {
+                        @unlink($localUploaded);
                     }
+
+                    $assetUrl = cmf_get_asset_url($arrInfo['file_path']);
 
                     return array_merge([
                         'filepath'    => $arrInfo["file_path"],
                         "name"        => $arrInfo["filename"],
                         'id'          => $strId,
-                        'preview_url' => cmf_get_root() . '/upload/' . $arrInfo["file_path"],
-                        'url'         => cmf_get_root() . '/upload/' . $arrInfo["file_path"],
+                        'preview_url' => $assetUrl,
+                        'url'         => $assetUrl,
                     ], $result);
                 }
             } else {
