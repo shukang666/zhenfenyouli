@@ -39,23 +39,24 @@
 	<!-- 原型 Screen 4：选择打卡场景 -->
 	<view v-else-if="flowStep === 'theme_scenes'" class="zf-scenes">
 		<text class="zf-scenes-hint">{{ scenePickHint }}</text>
-		<view
-			class="zf-scene-card"
-			v-for="item in sceneHubCards"
-			:key="item.hub"
-			:class="'zf-scene-card--' + item.theme"
-			hover-class="zf-scene-card--press"
-			:hover-stay-time="80"
-			@tap="pickThemeHub(item.hub)"
-		>
-			<view class="zf-scene-icon-wrap">
-				<text class="zf-scene-icon">{{ item.emoji }}</text>
+		<view class="zf-scene-row">
+			<view
+				class="zf-scene-card zf-scene-card--pick"
+				v-for="item in sceneHubCards"
+				:key="item.hub"
+				:class="'zf-scene-card--' + item.theme"
+				hover-class="zf-scene-card--press"
+				:hover-stay-time="80"
+				@tap="pickThemeHub(item.hub)"
+			>
+				<view class="zf-scene-icon-wrap">
+					<text class="zf-scene-icon">{{ item.emoji }}</text>
+				</view>
+				<view class="zf-scene-copy">
+					<text class="zf-scene-title">{{ item.title }}</text>
+					<text class="zf-scene-desc">{{ item.desc }}</text>
+				</view>
 			</view>
-			<view class="zf-scene-copy">
-				<text class="zf-scene-title">{{ item.title }}</text>
-				<text class="zf-scene-desc">{{ item.desc }}</text>
-			</view>
-			<text class="zf-scene-arrow">›</text>
 		</view>
 		<view class="zf-promo">
 			<text class="zf-promo-line">{{ whyIntroLead }}</text>
@@ -3176,11 +3177,53 @@
 }
 .zf-scenes-hint {
 	display: block;
-	font-size: 30rpx;
+	font-size: 28rpx;
 	font-weight: 600;
 	color: #333;
-	margin-bottom: 28rpx;
-	padding-left: 8rpx;
+	margin-bottom: 16rpx;
+	padding-left: 4rpx;
+}
+.zf-scene-row {
+	display: flex;
+	align-items: stretch;
+	gap: 12rpx;
+	margin-bottom: 20rpx;
+}
+.zf-scene-card--pick {
+	flex: 1;
+	min-width: 0;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	padding: 18rpx 10rpx 16rpx;
+	margin-bottom: 0;
+}
+.zf-scene-card--pick .zf-scene-icon-wrap {
+	width: 72rpx;
+	height: 72rpx;
+	border-radius: 18rpx;
+	margin-right: 0;
+	margin-bottom: 10rpx;
+}
+.zf-scene-card--pick .zf-scene-icon {
+	font-size: 38rpx;
+}
+.zf-scene-card--pick .zf-scene-copy {
+	width: 100%;
+}
+.zf-scene-card--pick .zf-scene-title {
+	font-size: 24rpx;
+	line-height: 1.35;
+}
+.zf-scene-card--pick .zf-scene-desc {
+	margin-top: 6rpx;
+	font-size: 20rpx;
+	line-height: 1.35;
+	color: #888;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
 }
 .zf-scene-card {
 	display: flex;
