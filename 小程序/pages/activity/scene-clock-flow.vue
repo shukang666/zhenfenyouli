@@ -121,12 +121,12 @@
 			</view>
 		</view>
 
-		<!-- 首次：设置分类打卡点（家庭；含一句「为什么要分」） -->
+		<!-- 首次：设置分类打卡点（仅家庭/办公等摆桶，不含「为什么要分」） -->
 		<view class="scf-body" v-if="flowStep === 'setup'">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
-				<text class="scf-promo-line" v-if="isResidentialHub">{{ setupPromoWhyLine }}</text>
-				<text class="scf-promo-line" :class="{ 'scf-promo-line--sub': isResidentialHub }">{{ binSetupLead }}</text>
+				<text class="scf-promo-line">{{ binSetupLead }}</text>
 				<text class="scf-promo-line scf-promo-line--sub">{{ binSetupLeadNote }}</text>
+				<text class="scf-promo-line scf-promo-line--sub" v-if="isResidentialHub">{{ introDisplaySummary }}</text>
 			</view>
 			<view class="scf-room-list" v-if="isResidentialHub && binLayoutExamples.length">
 				<view class="zf-scene-card scf-room-card" v-for="(ex, eIdx) in binLayoutExamples" :key="eIdx">
@@ -603,7 +603,6 @@
 		getBinLayoutExamples,
 		getBinSetupLead,
 		getBinSetupLeadNote,
-		getSetupPromoWhyLine,
 		getAccumDurationOptions,
 		getSortDurationOptions,
 		getClockSuccessNextTitle,
@@ -666,7 +665,6 @@
 				binLayoutExamples: [],
 				binSetupLead: getBinSetupLead(),
 				binSetupLeadNote: getBinSetupLeadNote(),
-				setupPromoWhyLine: getSetupPromoWhyLine(),
 				accumDuration: '',
 				sortDuration: '',
 				accumDurationOptions: getAccumDurationOptions(),
