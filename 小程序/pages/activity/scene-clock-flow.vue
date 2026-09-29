@@ -494,14 +494,38 @@
 				<text class="scf-success-emoji">✓</text>
 				<text class="scf-success-title">{{ clockSuccessMsg || '打卡成功' }}</text>
 				<text class="scf-success-sub">记得投进对的桶；积分到账可能稍有延迟，请稍后在「我的积分」查看。</text>
-				<text class="scf-success-other" v-if="isResidentialHub">{{ clockOtherCateHint }}</text>
-				<view class="scf-promo-act" v-if="clockPromoActivity" hover-class="scf-card--press" @tap="goPromoActivity">
-					<text class="scf-promo-act-k">推荐参加</text>
-					<text class="scf-promo-act-title">{{ clockPromoActivity.title || clockPromoActivity.name }}</text>
-					<text class="scf-promo-act-go">去看看 ›</text>
-				</view>
-				<view class="scf-promo-more" v-if="clockPromoList.length > 1" hover-class="scf-card--press" @tap="goActivityList">
-					<text>还有 {{ clockPromoList.length - 1 }} 个热门活动可参加</text>
+
+				<view class="scf-success-next">
+					<text class="scf-success-next-k">{{ clockSuccessNextTitle }}</text>
+
+					<view class="scf-success-tip">
+						<text class="scf-success-tip-h">{{ clockSuccessOtherCateTitle }}</text>
+						<text class="scf-success-tip-p">{{ clockOtherCateHint }}</text>
+						<view class="scf-success-cate-chips" v-if="clockSuccessOtherCates.length">
+							<view
+								v-for="c in clockSuccessOtherCates"
+								:key="c.id"
+								class="scf-success-cate-chip"
+								hover-class="scf-card--press"
+								@tap="clockSuccessJumpOtherCate(c)"
+							>
+								<text>去打卡 {{ c.name }}</text>
+							</view>
+						</view>
+					</view>
+
+					<view class="scf-success-tip">
+						<text class="scf-success-tip-h">{{ clockSuccessPromoTitle }}</text>
+						<text class="scf-success-tip-p">{{ clockPromoIntro }}</text>
+						<view class="scf-promo-act" v-if="clockPromoActivity" hover-class="scf-card--press" @tap="goPromoActivity">
+							<text class="scf-promo-act-badge">为您推荐</text>
+							<text class="scf-promo-act-title">{{ clockPromoActivity.title || clockPromoActivity.name }}</text>
+							<text class="scf-promo-act-go">了解活动详情 ›</text>
+						</view>
+						<view class="scf-promo-more" v-if="clockPromoMoreLabel" hover-class="scf-card--press" @tap="goActivityList">
+							<text>{{ clockPromoMoreLabel }}</text>
+						</view>
+					</view>
 				</view>
 				<view class="scf-habit-box" v-if="clockHabitTip">
 					<text class="scf-habit-kicker">养成好习惯</text>
@@ -559,6 +583,13 @@
 		getBinSetupLead,
 		getAccumDurationOptions,
 		getSortDurationOptions,
+		getClockSuccessNextTitle,
+		getClockSuccessOtherCateTitle,
+		getClockSuccessOtherCateBody,
+		getClockSuccessPromoTitle,
+		getClockSuccessPromoBody,
+		getClockSuccessPromoEmptyBody,
+		getClockSuccessPromoMoreLabel,
 	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
@@ -680,11 +711,32 @@
 					{ key: 'inbin', title: '投放入桶', hint: '选填：投进对应桶后', emoji: '✅', required: false },
 				]
 			},
+			clockSuccessNextTitle() {
+				return getClockSuccessNextTitle()
+			},
+			clockSuccessOtherCateTitle() {
+				return getClockSuccessOtherCateTitle()
+			},
+			clockSuccessPromoTitle() {
+				return getClockSuccessPromoTitle()
+			},
 			clockOtherCateHint() {
 				const cur = this.activeCateName || ''
-				const all = (this.cateList || []).map(c => c.name).filter(n => n && n !== cur)
-				if (!all.length) return '今天还可以换种类继续打卡，把四类都练一遍。'
-				return '今天还可以打卡：' + all.join('、') + ' 等，换种类再来一次即可。'
+				const all = (this.cateList || []).map(c => c.name).filter(Boolean)
+				return getClockSuccessOtherCateBody(cur, all)
+			},
+			clockSuccessOtherCates() {
+				const curId = Number(this.cateId)
+				return (this.cateList || []).filter(c => c && c.id && Number(c.id) !== curId)
+			},
+			clockPromoIntro() {
+				return this.clockPromoActivity
+					? getClockSuccessPromoBody()
+					: getClockSuccessPromoEmptyBody()
+			},
+			clockPromoMoreLabel() {
+				if (!this.clockPromoActivity || this.clockPromoList.length <= 1) return ''
+				return getClockSuccessPromoMoreLabel(this.clockPromoList.length - 1)
 			},
 			clockSlotFilledCount() {
 				return (this.clockSlotUrls || []).filter(u => !!String(u || '').trim()).length
@@ -1443,6 +1495,20 @@
 				}
 				this.flowStep = 'points'
 			},
+			clockSuccessJumpOtherCate(c) {
+				this.clockSuccessShow = false
+				this.resetClockSlots()
+				this.clockContent = ''
+				this.accumDuration = ''
+				this.sortDuration = ''
+				if (this.isResidentialHub) {
+					this.pickResidentialCate(c)
+					this.flowStep = 'cate'
+					return
+				}
+				this.pickResidentialCate(c)
+				this.flowStep = 'points'
+			},
 			goActivityTab() {
 				this.clockSuccessShow = false
 				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
@@ -1937,41 +2003,88 @@
 	color: #38b061;
 	padding: 16rpx 24rpx 8rpx;
 }
-.scf-success-other {
+.scf-success-next {
+	margin-top: 24rpx;
+	padding-top: 8rpx;
+	text-align: left;
+}
+.scf-success-next-k {
 	display: block;
-	font-size: 26rpx;
-	color: #5f7166;
-	margin: 16rpx 0 0;
-	line-height: 1.5;
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #142018;
+	margin-bottom: 16rpx;
 	text-align: center;
 }
-.scf-promo-act {
-	margin-top: 20rpx;
-	padding: 20rpx 24rpx;
-	background: #f0faf3;
+.scf-success-tip {
+	margin-bottom: 20rpx;
+	padding: 20rpx 22rpx;
+	background: #f7faf8;
 	border-radius: 16rpx;
-	border: 1rpx solid #c8ebd4;
+	border: 1rpx solid #e8efe9;
 }
-.scf-promo-act-k {
+.scf-success-tip-h {
 	display: block;
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #243528;
+}
+.scf-success-tip-p {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 26rpx;
+	color: #5f7166;
+	line-height: 1.55;
+}
+.scf-success-cate-chips {
+	margin-top: 16rpx;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12rpx;
+}
+.scf-success-cate-chip {
+	padding: 10rpx 20rpx;
+	border-radius: 999rpx;
+	background: #fff;
+	border: 1rpx solid #c8ebd4;
 	font-size: 24rpx;
-	color: #38b061;
+	color: #2d8a4a;
+	font-weight: 600;
+}
+.scf-promo-act {
+	margin-top: 16rpx;
+	padding: 20rpx 22rpx;
+	background: #fff;
+	border-radius: 14rpx;
+	border: 1rpx solid #d4eadc;
+	box-shadow: 0 4rpx 16rpx rgba(56, 176, 97, 0.08);
+	text-align: left;
+}
+.scf-promo-act-badge {
+	display: inline-block;
+	font-size: 22rpx;
+	color: #fff;
+	background: #38b061;
+	padding: 4rpx 14rpx;
+	border-radius: 8rpx;
 }
 .scf-promo-act-title {
 	display: block;
 	font-size: 30rpx;
 	font-weight: 600;
 	color: #1a2e22;
-	margin-top: 6rpx;
+	margin-top: 12rpx;
+	line-height: 1.4;
 }
 .scf-promo-act-go {
 	display: block;
 	font-size: 26rpx;
 	color: #38b061;
-	margin-top: 8rpx;
+	margin-top: 10rpx;
+	font-weight: 600;
 }
 .scf-promo-more {
-	margin-top: 12rpx;
+	margin-top: 14rpx;
 	text-align: center;
 	font-size: 26rpx;
 	color: #38b061;

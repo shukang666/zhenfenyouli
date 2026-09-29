@@ -44,7 +44,7 @@ export function getWhyIntroSummary(hubKey) {
 export function getBinLayoutExamples(hubKey) {
 	const qinziNote = hubKey === 'qinzi' ? '（可以让孩子帮忙贴标签）' : ''
 	return [
-		{ room: '厨房', cate: '厨余垃圾', emoji: '🍳', tip: '菜叶、剩饭、果皮放这里，别和塑料袋混一起' + qinziNote },
+		{ room: '厨房', cate: '厨余垃圾、其他垃圾', emoji: '🍳', tip: '菜叶、剩饭、果皮放这里，别和塑料袋混一起' + qinziNote },
 		{ room: '客厅', cate: '可回收物', emoji: '🛋️', tip: '纸箱、瓶罐、旧杂志，干燥干净再投放' },
 		{ room: '卫生间', cate: '其他垃圾', emoji: '🚿', tip: '用过的纸巾、一次性用品等' },
 		{ room: '固定一处', cate: '有害垃圾', emoji: '⚠️', tip: '电池、灯管、过期药品，少量攒够再投' },
@@ -232,4 +232,44 @@ export function getThemePromoPillars() {
 		{ icon: '🌿', label: '更环保' },
 		{ icon: '🤝', label: '邻里共建' },
 	]
+}
+
+/** 打卡成功弹层：下一步引导 */
+export function getClockSuccessNextTitle() {
+	return '接下来您可以'
+}
+
+export function getClockSuccessOtherCateTitle() {
+	return '换一类，再练一次'
+}
+
+export function getClockSuccessOtherCateBody(activeName, otherNames) {
+	const cur = (activeName || '').trim()
+	const others = (otherNames || []).filter(n => n && n !== cur)
+	if (!others.length) {
+		return '四类垃圾都可以打卡，习惯是慢慢养成的。想再练一次，点下面按钮选种类就行。'
+	}
+	const sample = others.slice(0, 3).join('、')
+	const tail = others.length > 3 ? ' 等' : ''
+	if (cur) {
+		return `这次记的是「${cur}」。还可以试试 ${sample}${tail}，有害垃圾、可回收物换着练，分类会更熟练。`
+	}
+	return `还可以试试 ${sample}${tail}，换种类再来一次，积分同样会记上。`
+}
+
+export function getClockSuccessPromoTitle() {
+	return '顺路参加社区活动'
+}
+
+export function getClockSuccessPromoBody() {
+	return '打卡之余，社区里也有不少活动可以参与，既能长知识也能攒积分。给您挑了一个热门的：'
+}
+
+export function getClockSuccessPromoEmptyBody() {
+	return '也可以打开「活动」页，看看最近有什么线下体验、轻活动，有空参加一下。'
+}
+
+export function getClockSuccessPromoMoreLabel(count) {
+	if (count <= 0) return ''
+	return `还有 ${count} 个活动可以看看`
 }
