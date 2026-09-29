@@ -161,6 +161,27 @@ class BasicController extends AuthController
 
     }
 
+    /**
+     * 首页 Tab 聚合（Banner + 热门活动 + 风采 + 入口配置 + 登录态问候/签到）
+     */
+    public function get_index_tab_home()
+    {
+        $uid = (int)$this->user_id;
+        $cacheKey = ['v' => 1];
+        $service = new \api\wxapp\service\TabHomeService($this);
+        $ttl = $uid > 0 ? \api\wxapp\support\TabHomeCache::TTL_USER : \api\wxapp\support\TabHomeCache::TTL_PUBLIC;
+        $data = \api\wxapp\support\TabHomeCache::remember(
+            'index_tab',
+            $uid,
+            $cacheKey,
+            $ttl,
+            function () use ($service) {
+                return $service->buildIndexTabHome();
+            }
+        );
+        $this->success('获取成功', $data);
+    }
+
     public function getValue($option_name){
         $value = cmf_get_new_option($option_name);
 

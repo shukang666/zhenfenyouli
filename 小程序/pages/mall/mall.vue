@@ -247,11 +247,10 @@
 			},
 			async loadAllData() {
 				const startTime = Date.now()
+				this.page = 1
+				this.goods_list = []
 				try {
-					await Promise.all([
-						this.get_shop_coupon_list(),
-						this.get_category()
-					])
+					await this.fetchMallTabHome({ page: 1 })
 				} catch (e) {
 					console.log('数据加载失败:', e)
 				} finally {
@@ -267,13 +266,39 @@
 					this.$nextTick(() => this.refreshZoneCollapseHeight())
 				}
 			},
-			get_category() {
-				return this.$u.api.get_category({
-					geo_zone: 1
-				}).then(res => {
-					this.cate_list = [{ id: 0, cate_name: '全部' }, ...(res.data || [])]
-					return this.get_goods_list()
+			fetchMallTabHome({ page = 1, secondCate = 0 } = {}) {
+				const zoneId = secondCate || (this.cate_list[this.cate_type]?.id || 0)
+				const params = {
+					page,
+					keyword: this.keyword || ''
+				}
+				if (zoneId) params.second_cate = zoneId
+				return this.$u.api.get_mall_tab_home(params).then(res => {
+					const d = res.data || {}
+					if (Object.prototype.hasOwnProperty.call(d, 'coupon_list')) {
+						this.coupon_list = d.coupon_list || []
+					}
+					if (Object.prototype.hasOwnProperty.call(d, 'cate_list')) {
+						this.cate_list = [{ id: 0, cate_name: '全部' }, ...(d.cate_list || [])]
+					}
+					const list = d.goods_list || []
+					if (page === 1) {
+						this.goods_list = list
+					} else {
+						this.goods_list = this.goods_list.concat(list)
+					}
+					this.total = d.goods_total || 0
+					this.page = page
+				}).catch(err => {
+					this.$u.toast(err.msg)
+				}).finally(() => {
+					this.loadingGoods = false
 				})
+			},
+			get_category() {
+				this.page = 1
+				this.goods_list = []
+				return this.fetchMallTabHome({ page: 1 })
 			},
 			onZonePanelToggle(e) {
 				this.zonePanelOpen = !!e.show
@@ -308,26 +333,10 @@
 			get_goods_list() {
 				if (this.loadingGoods) return Promise.resolve()
 				this.loadingGoods = true
-				const params = {
-					keyword: this.keyword,
-					page: this.page,
-				}
 				const zoneId = this.cate_list[this.cate_type]?.id || 0
-				if (zoneId) {
-					params.second_cate = zoneId
-				}
-				return this.$u.api.get_goods_list(params).then(res => {
-					const list = res.data?.data || []
-					if (this.page === 1) {
-						this.goods_list = list
-					} else {
-						this.goods_list = this.goods_list.concat(list)
-					}
-					this.total = res.data?.total || 0
-				}).catch(err => {
-					this.$u.toast(err.msg)
-				}).finally(() => {
-					this.loadingGoods = false
+				return this.fetchMallTabHome({
+					page: this.page,
+					secondCate: zoneId
 				})
 			},
 			receive_coupon(item) {
@@ -342,11 +351,7 @@
 				})
 			},
 			get_shop_coupon_list() {
-				return this.$u.api.get_shop_coupon_list({
-					page: 1,
-				}).then(res => {
-					this.coupon_list = res.data?.data || []
-				})
+				return this.fetchMallTabHome({ page: 1 })
 			},
 			updateTabBarSelected(index) {
 				const tabBar = this.$mp?.page?.getTabBar && this.$mp.page.getTabBar()

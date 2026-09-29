@@ -727,4 +727,26 @@ class GoodsController extends AuthController
 
     }
 
+    /**
+     * 积分商城 Tab 首页聚合（优惠券 + 产区分类 + 商品列表）
+     */
+    public function get_mall_tab_home()
+    {
+        $page = max(1, (int)$this->request->param('page', 1));
+        $secondCate = max(0, (int)$this->request->param('second_cate', 0));
+        $keyword = trim((string)$this->request->param('keyword', ''));
+        $cacheKey = ['page' => $page, 'cate' => $secondCate, 'kw' => $keyword];
+        $service = new \api\wxapp\service\TabHomeService($this);
+        $data = \api\wxapp\support\TabHomeCache::remember(
+            'mall_tab',
+            (int)$this->user_id,
+            $cacheKey,
+            \api\wxapp\support\TabHomeCache::TTL_USER,
+            function () use ($service, $page, $secondCate, $keyword) {
+                return $service->buildMallTabHome($page, $secondCate, $keyword);
+            }
+        );
+        $this->success('获取成功', $data);
+    }
+
 }

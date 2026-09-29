@@ -258,8 +258,7 @@
 			if (checkCommunity(this)) return
 			if (this.isLogin) {
 				if (shouldTabRefresh('user-profile')) {
-					this.getUserInfo()
-					this.get_new_badge_list()
+					this.fetchUserTabHome()
 				} else {
 					this.isLoading = false
 				}
@@ -268,6 +267,20 @@
 			}
 		},
 		methods: {
+			fetchUserTabHome(opts = {}) {
+				const params = opts.refresh ? { refresh: 1 } : {}
+				return this.$u.api.get_user_tab_home(params).then(res => {
+					const d = res.data || {}
+					if (!d.logged_in) return
+					this.$u.vuex('userInfo', d.user_info || {})
+					this.badge_list = d.badge_list || []
+				}).catch(e => {
+					console.log(e)
+					if (e && e.msg) this.$u.toast(e.msg)
+				}).finally(() => {
+					this.isLoading = false
+				})
+			},
 			updateTabBarSelected(index) {
 				const tabBar = this.$mp?.page?.getTabBar && this.$mp.page.getTabBar()
 				if (tabBar) {

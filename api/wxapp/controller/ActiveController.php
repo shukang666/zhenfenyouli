@@ -453,24 +453,17 @@ class ActiveController extends AuthController
         $page = max(1, (int)$this->request->param('page', 1));
         $tag = trim((string)$this->request->param('tag', ''));
         $pageSize = max(1, min(50, (int)$this->request->param('page_size', 10)));
-        $withBlocks = ($page === 1 && $tag === '');
-
-        $data = ['active_page' => $page];
-
-        if ($withBlocks) {
-            $data['banner_list'] = $this->fetchActivityTabBannerList(9);
-            $data['tag_list'] = $this->collectActiveTagList();
-            $sections = $this->buildActivityPageSections();
-            $data['weekly_list'] = $sections['weekly_list'];
-            $data['light_list'] = $sections['light_list'];
-            $data['recent_list'] = $sections['recent_list'];
-        }
-
-        $pager = $this->paginateActiveListForTab($page, $pageSize, $tag);
-        $data['active_list'] = $pager['list'];
-        $data['active_total'] = $pager['total'];
-        $data['active_page_size'] = $pageSize;
-
+        $cacheKey = ['page' => $page, 'tag' => $tag, 'ps' => $pageSize];
+        $service = new \api\wxapp\service\TabHomeService($this);
+        $data = \api\wxapp\support\TabHomeCache::remember(
+            'activity_tab',
+            (int)$this->user_id,
+            $cacheKey,
+            \api\wxapp\support\TabHomeCache::TTL_USER,
+            function () use ($service, $page, $tag, $pageSize) {
+                return $service->buildActivityTabHome($page, $tag, $pageSize);
+            }
+        );
         $this->success('请求成功', $data);
     }
 

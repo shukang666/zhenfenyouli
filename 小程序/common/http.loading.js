@@ -6,7 +6,11 @@ let shown = false
 
 const SILENT = [
 	'find_setting',
+	'get_index_tab_home',
 	'get_activity_tab_home',
+	'get_health_tab_home',
+	'get_mall_tab_home',
+	'get_user_tab_home',
 ]
 
 const TAB_ROUTES = [

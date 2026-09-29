@@ -136,8 +136,9 @@
 		// 加载数据，完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
 		async loadAllData() {
 			const startTime = Date.now()
+			this.page = 1
 			try {
-				await this.get_forum_list()
+				await this.fetchHealthTabHome({ page: 1 })
 			} catch (e) {
 				console.log('数据加载失败:', e)
 			} finally {
@@ -171,17 +172,26 @@
 				})
 			},
 		// 列表
-		get_forum_list() {
-			return this.$u.api.get_forum_list({
-				keyword: this.keyword,
-				type: 1,
-				page: this.page
+		fetchHealthTabHome({ page = 1 } = {}) {
+			return this.$u.api.get_health_tab_home({
+				page,
+				keyword: this.keyword || ''
 			}).then(res => {
-				this.forum_list = res.data?.data || []
-				this.total = res.data?.total || 0
+				const d = res.data || {}
+				const list = d.forum_list || []
+				if (page === 1) {
+					this.forum_list = list
+				} else {
+					this.forum_list = this.forum_list.concat(list)
+				}
+				this.total = d.forum_total || 0
+				this.page = page
 			}).catch(err => {
 				this.$u.toast(err.msg)
 			})
+		},
+		get_forum_list() {
+			return this.fetchHealthTabHome({ page: this.page })
 		},
 			// 更新自定义tabbar选中索引
 			updateTabBarSelected(index) {

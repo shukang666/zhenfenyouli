@@ -46,22 +46,60 @@ class UserController extends AuthController
     {
         $this->checkUser();
         CommonModel::ensureDefaultMemberCommunity($this->user_id);
+        $this->success('获取成功', $this->composeUserProfile());
+    }
+
+    /**
+     * 我的 Tab 首页聚合（用户信息 + 徽章），支持 TabHomeCache
+     */
+    public function get_user_tab_home()
+    {
+        $uid = (int)$this->user_id;
+        if ($uid <= 0) {
+            $this->success('获取成功', ['logged_in' => false]);
+            return;
+        }
+        $data = \api\wxapp\support\TabHomeCache::remember(
+            'user_tab',
+            $uid,
+            [],
+            \api\wxapp\support\TabHomeCache::TTL_USER,
+            function () {
+                $this->checkUser();
+                CommonModel::ensureDefaultMemberCommunity($this->user_id);
+                $badges = \app\admin\model\active\MemberBadgeModel::where('user_id', $this->user_id)
+                    ->order('id desc')->select()->each(function ($item) {
+                        $item['image'] = empty($item['image']) ? '' : cmf_get_asset_url($item['image']);
+                        return $item;
+                    });
+                return [
+                    'logged_in' => true,
+                    'user_info' => $this->composeUserProfile(),
+                    'badge_list' => $badges ? $badges->toArray() : [],
+                ];
+            }
+        );
+        $this->success('获取成功', $data);
+    }
+
+    /** @return array|\think\Model */
+    protected function composeUserProfile()
+    {
         $memberModel = new MemberModel();
         $CommunityModel = new CommunityModel();
         $AnswerModel = new AnswerModel();
         $CheckModel = new CheckModel();
         $user = $memberModel->where(['id' => $this->user_id])
-            ->field('id,nickname,true_name,mobile,avatar,openid,level,community_id
+            ->field('id,nickname,true_name,mobile,avatar,openid,level,community_id,type
             ,shop_balance_total,shop_balance,point,shop_balance balance,is_environmental,is_supervisor,is_merchant,community_parent_id
             ')->find();
         $user['community'] = $CommunityModel->where(['id' => $user['community_id']])->value('name');
         $user['community_parent'] = CommunityParentModel::where(['id' => $user['community_parent_id']])->value('name');
-        $user['is_answer'] = $AnswerModel//垃圾分类答题考试 是否及格
-        ->where('status', 3)
+        $user['is_answer'] = $AnswerModel
+            ->where('status', 3)
             ->where('type', 1)
             ->where(['user_id' => $user['id']])
             ->count() ? 1 : 0;
-        //是否学完所有垃圾分类指导内容（user_count >= waste_count 且 waste_count > 0）
         $waste_count = WasteModel::count();
         $user_count = WasteUserModel::where('user_id', $user['id'])->count();
         $user['is_learn'] = ($waste_count > 0 && $user_count >= $waste_count) ? 1 : 0;
@@ -77,32 +115,27 @@ class UserController extends AuthController
         }
 
         $HealthHomeModel = new HealthHomeModel();
-        $Healthids = $HealthHomeModel->where('type',1)->column('id');
+        $Healthids = $HealthHomeModel->where('type', 1)->column('id');
         $user['is_exam'] = Db::name('exam_gift')
-            ->where('exam_id','in', $Healthids)
+            ->where('exam_id', 'in', $Healthids)
             ->where(['openid' => $user['openid']])->count() ? 1 : 0;
-
 
         $setting = cmf_get_option('set_config');
         $user['continuous_check'] = $setting['continuous_check'];
-        //当前还不是环保达人
-        if($this->user_info['is_environmental'] == 0){
-            //判断是否连续天数达标
+        if ($this->user_info['is_environmental'] == 0) {
             $array = ForumModel::where(['type' => 2, 'user_id' => $this->user_id])->column('create_time');
             $clock_count = $this->getNowContinueSignDays($array);
         }
         $user['clock_count'] = $clock_count ?? 0;
         $user['remaining_count'] = $user['continuous_check'] - $user['clock_count'];
         $user['junk_clock_days'] = $this->countJunkClockDistinctDays((int)$user['id']);
-        /** 垃圾打卡累计自然日（不必连续），践行真分 hub 顶栏展示 */
         $user['clock_total_days'] = (int)$user['junk_clock_days'];
         $user['supervisor_invite'] = $this->buildSupervisorInvite((int)$user['id']);
 
         if (!empty($user['avatar'])) {
             $user['avatar'] = cmf_get_asset_url($user['avatar']);
         }
-
-        $this->success('获取成功', $user);
+        return $user;
     }
 
 

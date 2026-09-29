@@ -1102,4 +1102,25 @@ class ForumController extends AuthController
 
         return $maxDays;
     }
+
+    /**
+     * 健康 Tab 首页聚合（社区动态 type=1 列表）
+     */
+    public function get_health_tab_home()
+    {
+        $page = max(1, (int)$this->request->param('page', 1));
+        $keyword = trim((string)$this->request->param('keyword', ''));
+        $cacheKey = ['page' => $page, 'kw' => $keyword];
+        $service = new \api\wxapp\service\TabHomeService($this);
+        $data = \api\wxapp\support\TabHomeCache::remember(
+            'health_tab',
+            (int)$this->user_id,
+            $cacheKey,
+            \api\wxapp\support\TabHomeCache::TTL_USER,
+            function () use ($service, $page, $keyword) {
+                return $service->buildHealthTabHome($page, $keyword);
+            }
+        );
+        $this->success('请求成功', $data);
+    }
 }

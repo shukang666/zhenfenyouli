@@ -454,8 +454,7 @@ export default {
 			this.loadAllData()
 			// 已登录则拉取用户成长信息（问候模块+打卡卡片）
 			if (this.isLogin) {
-				this.getUserInfoForGrowth()
-				this.getSignStatus()
+				this.fetchIndexTabHome()
 			}
 		},
 		onShow() {
@@ -464,10 +463,9 @@ export default {
 			uni.$on('pause-new-user-guide', this.pauseGuideOverlay)
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(0)
-			// 已登录则刷新用户成长数据（节流，避免 Tab 切换频繁请求）
+			// 已登录则刷新用户成长数据（节流，走首页聚合接口 refresh=1）
 			if (this.isLogin && shouldTabRefresh('index-user-growth')) {
-				this.getUserInfoForGrowth()
-				this.getSignStatus()
+				this.fetchIndexTabHome({ refresh: 1 })
 			}
 		},
 		onHide() {
@@ -566,17 +564,10 @@ export default {
 		async loadAllData() {
 			const startTime = Date.now()
 			try {
-				await Promise.all([
-					this.getBannerList(),
-					this.get_new_active_list(),
-					this.getShowcaseList(),
-					this.getHomeEntries(),
-					this.getHomeNotice()
-				])
+				await this.fetchIndexTabHome()
 			} catch (e) {
 				console.log('数据加载失败:', e)
 			} finally {
-				// 确保骨架屏最少显示 400ms，防止加载过快导致闪烁
 				const elapsed = Date.now() - startTime
 				const minDelay = 400
 				if (elapsed < minDelay) {
@@ -588,59 +579,54 @@ export default {
 				}
 			}
 		},
-		// 拉首页入口配置（后台 home_entries），保留默认 svgIcon（后台未配置图标时使用默认）
-		async getHomeEntries() {
-			try {
-				let res = await this.$u.api.findSetting({ name: 'home_entries' })
-				let list = res.data || []
-				if (list.length === 0) return
-				// 按 key 匹配合并，保留 fallback 的 svgIcon 等字段
-				let merged = this.entry_list.map(fb => {
-					let cfg = list.find(c => c.key === fb.key)
-					if (cfg) {
-						// 后台没配 svgIcon 则保留默认
-						return Object.assign({}, fb, cfg, { svgIcon: cfg.svgIcon || fb.svgIcon })
-					}
-					return fb
-				})
-				// 如果后台配了4个，也要确保每个都有 svgIcon
-				if (list.length === 4) {
-					merged = list.map(item => {
-						let fb = this.entry_list.find(f => f.key === item.key)
-						return Object.assign({}, fb || {}, item, { svgIcon: item.svgIcon || (fb && fb.svgIcon) || '' })
-					})
+		fetchIndexTabHome(opts = {}) {
+			const params = opts.refresh ? { refresh: 1 } : {}
+			return this.$u.api.get_index_tab_home(params).then(res => {
+				const d = res.data || {}
+				this.bannerList = d.banner_list || []
+				this.active_list = d.active_list || []
+				this.showcaseList = d.showcase_list || []
+				this.homeNotice = (d.home_notice || '').toString()
+				this.mergeHomeEntries(d.home_entries || [])
+				if (d.sign_status) {
+					this.signStatus = d.sign_status
 				}
-				this.entry_list = merged
-			} catch (e) {
-				// 接口失败不影响，保留 fallback
-			}
+				if (d.user_info && Object.keys(d.user_info).length) {
+					this.$u.vuex('userInfo', Object.assign({}, this.userInfo, d.user_info))
+					this.applyIndexUserGrowth(d.user_info)
+				}
+			})
 		},
-			// 活动风采（首页展示最新 6 条）
-			async getShowcaseList() {
-				try {
-					let res = await this.$u.api.getActivityShowcaseList({ page: 1, limit: 6 });
-					if (res.code == 1) {
-						this.showcaseList = (res.data && res.data.list) || [];
-					}
-				} catch (e) {
-					// 接口失败不显示板块
+		mergeHomeEntries(list) {
+			if (!list || list.length === 0) return
+			let merged = this.entry_list.map(fb => {
+				let cfg = list.find(c => c.key === fb.key)
+				if (cfg) {
+					return Object.assign({}, fb, cfg, { svgIcon: cfg.svgIcon || fb.svgIcon })
 				}
-			},
+				return fb
+			})
+			if (list.length === 4) {
+				merged = list.map(item => {
+					let fb = this.entry_list.find(f => f.key === item.key)
+					return Object.assign({}, fb || {}, item, { svgIcon: item.svgIcon || (fb && fb.svgIcon) || '' })
+				})
+			}
+			this.entry_list = merged
+		},
+		applyIndexUserGrowth(info) {
+			const streak = info.clock_days || info.clock_count || info.continuous_days || 0
+			this.todayTask.show = true
+			this.todayTask.streak = streak
+			this.todayTask.progress = Math.min((streak % 7) / 7 * 100, 100)
+			this.todayTask.daysToGoal = 7 - (streak % 7)
+			if (this.todayTask.daysToGoal === 7) this.todayTask.daysToGoal = 0
+		},
 			goShowcaseList() {
 				this.$u.route('/pages/activity/showcase-list');
 			},
 			goShowcaseDetail(id) {
 				this.$u.route('/pages/activity/showcase-detail?id=' + id);
-			},
-			// 拉首页走马灯通知（后台 home_notice 配置，留空则不显示）
-			async getHomeNotice() {
-				try {
-					let res = await this.$u.api.findSetting({ name: 'home_notice' })
-					let data = res.data || {}
-					this.homeNotice = (data.text || '').toString()
-				} catch (e) {
-					// 接口失败不显示通知栏
-				}
 			},
 			// 切换内容区 tab
 			switchContentTab(index) {
@@ -673,20 +659,6 @@ export default {
 				}
 				this.$u.route({ type: item.type, url: item.url })
 			},
-			// 获取活动列表（首页"热门活动"取后台"首页展示"is_put，最多 12 条）
-			async get_new_active_list() {
-				try {
-					let params = {
-						is_put: 1,
-						page_size: 12
-					}
-					let res = await this.$u.api.get_new_active_list(params)
-					this.active_list = res.data?.data || []
-				} catch (e) {
-					console.log(e);
-					this.$u.toast(e.msg)
-				}
-			},
 			switchTab(url) {
 				uni.switchTab({
 					url: url
@@ -705,18 +677,6 @@ export default {
 				} catch (e) {
 					console.log(e);
 					this.$refs.paging.complete([]);
-				}
-			},
-			// 获取轮播图
-			async getBannerList() {
-				try {
-					let params = {
-						id: 1
-					}
-					let res = await this.$u.api.find_slide(params)
-					this.bannerList = res.data || []
-				} catch (e) {
-					console.log(e);
 				}
 			},
 			// 轮播图点击跳转
