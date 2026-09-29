@@ -312,7 +312,12 @@ class TabHomeService
             ->where(['status' => 1, 'parent_id' => $parentId])
             ->order('list_order')
             ->select();
-        return getFullData($list);
+        $list = getFullData($list);
+        $out = [];
+        foreach ($list as $item) {
+            $out[] = is_array($item) ? $item : $item->toArray();
+        }
+        return $out;
     }
 
     protected function fetchShopCouponList(): array
