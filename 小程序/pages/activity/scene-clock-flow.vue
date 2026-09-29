@@ -362,7 +362,7 @@
 						<text class="scf-bin-tile-hint">{{ cateHintByName(manageCateName(p)) }}</text>
 						<view class="scf-bin-tile-foot">
 							<view class="scf-bin-tile-save" hover-class="scf-card--press" @tap="savePointEditByIndex(mIdx)">保存</view>
-							<text class="scf-bin-tile-rmtxt" @tap="deletePointById(p.id)">删除</text>
+							<text class="scf-bin-tile-rmtxt" @tap.stop="deletePointById(p.id)">删除</text>
 						</view>
 					</view>
 				</view>
@@ -1259,8 +1259,47 @@
 					},
 				})
 			},
+			confirmDeleteScenePoint(id, onRemoved) {
+				const pointId = Number(id)
+				if (!pointId) {
+					if (typeof onRemoved === 'function') onRemoved()
+					return
+				}
+				uni.showModal({
+					title: '提示',
+					content: '确定删掉这个位置？删掉后下次进来不会再显示。',
+					success: async (res) => {
+						if (!res.confirm) return
+						try {
+							await this.$u.api.delete_clock_scene_point({ id: pointId })
+							this.points = (this.points || []).filter(p => Number(p.id) !== pointId)
+							this.$u.toast('已删除')
+							if (typeof onRemoved === 'function') onRemoved()
+						} catch (e) {
+							this.$u.toast((e && e.msg) || '删除失败，请重试')
+						}
+					},
+				})
+			},
 			removeSetupRow(idx) {
-				this.setupRows.splice(idx, 1)
+				const row = this.setupRows[idx]
+				if (!row) return
+				const removeLocal = () => {
+					this.setupRows.splice(idx, 1)
+					if (!this.setupRows.length) {
+						this.setupRows.push({
+							point_name: '',
+							cate_index: 0,
+							point_image: '',
+							point_image_url: '',
+						})
+					}
+				}
+				if (!row.id) {
+					removeLocal()
+					return
+				}
+				this.confirmDeleteScenePoint(row.id, removeLocal)
 			},
 			onSetupCateChange(idx, e) {
 				const v = parseInt(e.detail.value, 10)
@@ -1354,17 +1393,8 @@
 				this.initUserPoints('manage')
 			},
 			deletePointById(id) {
-				const pointId = Number(id)
-				if (!pointId) return
-				uni.showModal({
-					title: '提示',
-					content: '确定删掉这个位置？',
-					success: async (res) => {
-						if (!res.confirm) return
-						await this.$u.api.delete_clock_scene_point({ id: pointId })
-						this.$u.toast('已删除')
-						this.initUserPoints('manage')
-					},
+				this.confirmDeleteScenePoint(id, () => {
+					this.initUserPoints('manage')
 				})
 			},
 			addPointInManage() {
