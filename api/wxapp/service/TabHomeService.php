@@ -8,6 +8,9 @@ use app\admin\model\active\ActiveClockModel;
 use app\admin\model\active\ActiveModel;
 use app\admin\model\active\ActiveSIgnModel;
 use app\admin\model\active\MemberBadgeModel;
+use api\wxapp\model\AnswerModel;
+use app\admin\model\active\WasteModel;
+use app\admin\model\active\WasteUserModel;
 use app\admin\model\forum\ForumModel;
 use app\admin\model\goods\GoodsCategoryModel;
 use app\admin\model\goods\GoodsModel;
@@ -244,7 +247,7 @@ class TabHomeService
     protected function fetchIndexUserBrief(): array
     {
         $member = MemberModel::where('id', $this->userId)
-            ->field('id,nickname,avatar,point,is_learn,is_answer,is_environmental')
+            ->field('id,nickname,avatar,point,is_environmental')
             ->find();
         if (empty($member)) {
             return [];
@@ -253,6 +256,14 @@ class TabHomeService
         if (!empty($row['avatar'])) {
             $row['avatar'] = cmf_get_asset_url($row['avatar']);
         }
+        $row['is_answer'] = (new AnswerModel())
+            ->where('status', 3)
+            ->where('type', 1)
+            ->where('user_id', $this->userId)
+            ->count() ? 1 : 0;
+        $waste_count = WasteModel::count();
+        $user_count = WasteUserModel::where('user_id', $this->userId)->count();
+        $row['is_learn'] = ($waste_count > 0 && $user_count >= $waste_count) ? 1 : 0;
         $forumTimes = ForumModel::where(['type' => 2, 'user_id' => $this->userId])->column('create_time');
         $row['clock_count'] = $this->calcNowContinueSignDays($forumTimes);
         $row['clock_days'] = $row['clock_count'];
