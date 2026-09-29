@@ -440,46 +440,40 @@ class ActiveController extends AuthController
         if(!empty($tag)) {
             $query = $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
         }
-        $list = $query->order('list_order asc, id desc')->paginate($page_size)->each(function ($item){
-            $item['thumb'] = empty($item['thumb'])?'':cmf_get_asset_url($item['thumb']);
-            $item['badge_image'] = empty($item['badge_image'])?'':cmf_get_asset_url($item['badge_image']);
-            $item['content'] = htmlspecialchars_decode($item['content']);
-            $item['send_point'] = $item['send_point'] ?? 0;
-
-            //参与人数
-            $active_count = ActiveSIgnModel::where('active_id', $item['id'])->count();
-            $item['active_count'] = $active_count;
-            $avatar_array = ActiveSIgnModel::alias('a')
-                ->join('member b','a.user_id=b.id')
-                ->where('a.active_id', $item['id'])->limit(5)->column('b.avatar');
-            foreach($avatar_array as &$value){
-                $value = empty($value)?'':cmf_get_asset_url($value);
-            }
-            $item['avatar_array'] = $avatar_array;
-
-            //是否报名
-            $sign_info = ActiveSIgnModel::where('active_id', $item['id'])->where('user_id', $this->user_id)->find();
-            $item['sign_id'] = empty($sign_info)?0:$sign_info['id'];
-            $item['is_sign'] = empty($sign_info)?0:1;
-
-
-            $date_time = strtotime(date('Y-m-d 00:00:00'));
-            //是否打卡
-            $where = [];
-            $where[] = ['active_id', '=', $item['id']];
-            $where[] = ['user_id', '=', $this->user_id];
-            $where[] = ['sign_id', '=', $item['sign_id'] ];
-            $where[] = ['date_time', '=', $date_time];
-            $clock_info = ActiveClockModel::where($where)->find();
-            $item['is_sign_clock'] = empty($clock_info)?0:1;
-
-//            $item['sign_id'] = empty($sign_info)?'':$sign_info['id'];
-
-            $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
-            $item['is_end'] = ActiveModel::resolveIsEnd($item);
-            return $item;
+        $controller = $this;
+        $list = $query->order('list_order asc, id desc')->paginate($page_size)->each(function ($item) use ($controller) {
+            return $controller->applyActiveListItemFields($item);
         });
         $this->success('请求成功', $list);
+    }
+
+    /**
+     * 活动 Tab 页三块推荐区（本周推荐 / 轻活动 / 近期活动）一次返回，避免重复请求列表接口
+     * @OA\Get (
+     *tags={"新版活动"},
+     *path="/wxapp/active/get_activity_page_sections",
+     *@OA\Response(response="200", description="An example resource"),
+     *@OA\Response(response="default", description="An example resource")
+     * )
+     */
+    public function get_activity_page_sections()
+    {
+        $where = $this->activeListPublicWhere();
+        $lightTag = '轻活动';
+
+        $weeklyQuery = ActiveModel::where($where)->where('is_month_recommend', '=', 1);
+        $lightQuery = ActiveModel::where($where)->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
+        $recentQuery = ActiveModel::where($where)->whereRaw(
+            '(tags IS NULL OR tags = "" OR NOT FIND_IN_SET(?, tags))',
+            [$lightTag]
+        );
+
+        $data = [
+            'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
+            'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
+            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'date desc, id desc'),
+        ];
+        $this->success('请求成功', $data);
     }
 
     /**
@@ -1219,6 +1213,64 @@ class ActiveController extends AuthController
         }
 
         return $maxDays;
+    }
+
+    /** 小程序活动列表公共筛选（与 get_new_active_list 一致） */
+    private function activeListPublicWhere()
+    {
+        return [
+            ['type', '=', 1],
+            ['status', '=', 1],
+            ['delete_time', '=', 0],
+            ['join_type', '=', 1],
+        ];
+    }
+
+    /** 拉取限定条数的活动列表并补全展示字段 */
+    private function fetchActiveListSlice($query, $limit, $order = 'list_order asc, id desc')
+    {
+        $rows = $query->order($order)->limit($limit)->select();
+        $out = [];
+        foreach ($rows as $item) {
+            $out[] = $this->applyActiveListItemFields($item);
+        }
+        return $out;
+    }
+
+    /** 单条活动列表项字段补全（列表/分页/聚合接口共用） */
+    private function applyActiveListItemFields($item)
+    {
+        $item['thumb'] = empty($item['thumb']) ? '' : cmf_get_asset_url($item['thumb']);
+        $item['badge_image'] = empty($item['badge_image']) ? '' : cmf_get_asset_url($item['badge_image']);
+        $item['content'] = htmlspecialchars_decode($item['content']);
+        $item['send_point'] = $item['send_point'] ?? 0;
+
+        $active_count = ActiveSIgnModel::where('active_id', $item['id'])->count();
+        $item['active_count'] = $active_count;
+        $avatar_array = ActiveSIgnModel::alias('a')
+            ->join('member b', 'a.user_id=b.id')
+            ->where('a.active_id', $item['id'])->limit(5)->column('b.avatar');
+        foreach ($avatar_array as &$value) {
+            $value = empty($value) ? '' : cmf_get_asset_url($value);
+        }
+        $item['avatar_array'] = $avatar_array;
+
+        $sign_info = ActiveSIgnModel::where('active_id', $item['id'])->where('user_id', $this->user_id)->find();
+        $item['sign_id'] = empty($sign_info) ? 0 : $sign_info['id'];
+        $item['is_sign'] = empty($sign_info) ? 0 : 1;
+
+        $date_time = strtotime(date('Y-m-d 00:00:00'));
+        $clockWhere = [];
+        $clockWhere[] = ['active_id', '=', $item['id']];
+        $clockWhere[] = ['user_id', '=', $this->user_id];
+        $clockWhere[] = ['sign_id', '=', $item['sign_id']];
+        $clockWhere[] = ['date_time', '=', $date_time];
+        $clock_info = ActiveClockModel::where($clockWhere)->find();
+        $item['is_sign_clock'] = empty($clock_info) ? 0 : 1;
+
+        $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
+        $item['is_end'] = ActiveModel::resolveIsEnd($item);
+        return $item;
     }
 
 }

@@ -684,9 +684,7 @@ export default {
       try {
         await Promise.all([
           this.loadBanners(),
-          this.loadWeeklyRec(),
-          this.loadLightAct(),
-          this.loadRecentAct(),
+          this.loadActivitySections(),
           this.loadTags(),
           this.loadAllActivities(),
         ]);
@@ -704,35 +702,20 @@ export default {
       }
     },
 
-    // 加载本周推荐活动（is_month_recommend=1，最多取 10 条）
-    loadWeeklyRec() {
+    // 活动 Tab 三块推荐区：一次接口返回 weekly / light / recent
+    loadActivitySections() {
       return this.$u.api
-        .get_new_active_list({
-          is_month_recommend: 1,
-          page_size: 10,
-          page: 1,
-        })
+        .get_activity_page_sections()
         .then((res) => {
-          this.weekly_list = res.data?.data || [];
+          const data = res.data || {};
+          this.weekly_list = data.weekly_list || [];
+          this.light_list = data.light_list || [];
+          this.recent_list = data.recent_list || [];
         })
         .catch(() => {
           this.weekly_list = [];
-        });
-    },
-
-    // 加载轻活动（tag=轻活动，取最新 3 条）
-    loadLightAct() {
-      return this.$u.api
-        .get_new_active_list({
-          tag: "轻活动",
-          page_size: 3,
-          page: 1,
-        })
-        .then((res) => {
-          this.light_list = res.data?.data || [];
-        })
-        .catch(() => {
           this.light_list = [];
+          this.recent_list = [];
         });
     },
 
@@ -742,24 +725,6 @@ export default {
         url: "/pages/activity/active-list",
         params: { filter: "light" },
       });
-    },
-
-    // 加载近期活动（非轻活动，按时间倒序取最新2条）
-    loadRecentAct() {
-      return this.$u.api
-        .get_new_active_list({
-          tag: "轻活动",
-          exclude_tag: 1,
-          page_size: 2,
-          page: 1,
-          order: "start_time desc",
-        })
-        .then((res) => {
-          this.recent_list = res.data?.data || [];
-        })
-        .catch(() => {
-          this.recent_list = [];
-        });
     },
 
     // 近期活动"更多" → 全部活动列表（选中"线下活动"筛选）
