@@ -258,7 +258,7 @@
 				</view>
 			</view>
 			<view class="scf-foot">
-				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="flowStep = 'setup'">上一步</view>
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="goSetupStep">上一步</view>
 				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="goResidentialUpload">选好了，去上传</view>
 			</view>
 		</view>
@@ -596,7 +596,7 @@
 
 <script>
 	import { uploadUrl } from '@/common/settings'
-	import { parseUploadAssetResponse } from '@/common/uploadAsset.js'
+	import { parseUploadAssetResponse, urlToRelativePath, resolveAssetShowUrl } from '@/common/uploadAsset.js'
 	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
 	import { getHub, mergeGuide, normalizeClockHubKey } from '@/common/sceneClockHub.js'
 	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind, SECTION_HINTS } from '@/common/clockScene.js'
@@ -1042,10 +1042,44 @@
 				return this.cateHintByName(this.setupCateName(row))
 			},
 			goSetupStep() {
+				if (this.hydrateSetupRowsFromPoints()) {
+					this.flowStep = 'setup'
+					return
+				}
 				if (!this.setupRows.length) {
 					this.prefillSetupRowsFromExamples()
 				}
 				this.flowStep = 'setup'
+			},
+			normalizeScenePoint(p) {
+				if (!p) return p
+				const raw = String(p.point_image_raw || urlToRelativePath(p.point_image || '') || '').trim()
+				let display = String(p.point_image || '').trim()
+				if (!display && raw) display = resolveAssetShowUrl(raw)
+				else if (display && !/^https?:\/\//i.test(display) && raw) display = resolveAssetShowUrl(raw)
+				return { ...p, point_image_raw: raw, point_image: display }
+			},
+			hydrateSetupRowsFromPoints() {
+				const list = (this.points || []).filter(p => p && String(p.point_name || '').trim())
+				if (!list.length) return false
+				this.setupRows = list.map(p => {
+					const np = this.normalizeScenePoint(p)
+					let idx = 0
+					for (let i = 0; i < this.cateList.length; i++) {
+						if (Number(this.cateList[i].id) === Number(np.cate_id)) {
+							idx = i
+							break
+						}
+					}
+					return {
+						id: np.id,
+						point_name: np.point_name,
+						cate_index: idx,
+						point_image: np.point_image_raw || '',
+						point_image_url: np.point_image || resolveAssetShowUrl(np.point_image_raw),
+					}
+				})
+				return true
 			},
 			goBinSetupStep() {
 				this.goSetupStep()
@@ -1119,7 +1153,7 @@
 				}
 				this.pointsLoading = true
 				return this.$u.api.list_clock_scene_point({ hub_key: this.hubKey }).then(res => {
-					this.points = res.data || []
+					this.points = (res.data || []).map(p => this.normalizeScenePoint(p))
 					this.pointsBootstrapped = true
 					if (keepFlow === 'manage') {
 						this.points = this.points.map(p => this.decoratePointForEdit(p))
@@ -1131,6 +1165,10 @@
 						return
 					}
 					if (keepFlow === 'setup') {
+						this.hydrateSetupRowsFromPoints()
+						return
+					}
+					if (keepFlow === 'cate') {
 						return
 					}
 					if (this.isCommunityHub) {
@@ -1238,23 +1276,26 @@
 						if (!cate) return this.$u.toast('请选择垃圾种类')
 						const img = String(row.point_image || '').trim()
 						if (!img) return this.$u.toast('请为每个点位上传照片')
-						const res = await this.$u.api.save_clock_scene_point({
+						const payload = {
 							hub_key: this.hubKey,
 							point_name: String(row.point_name).trim(),
 							cate_id: cate.id,
 							point_image: img,
-						})
+						}
+						if (row.id) payload.id = row.id
+						const res = await this.$u.api.save_clock_scene_point(payload)
 						const saved = (res && res.data) || {}
 						if (!saved.point_image_raw && !saved.point_image) {
 							console.warn('save_clock_scene_point: point_image empty in response', saved)
 						}
 					}
-					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
 					this.$u.toast('已保存')
 					if (this.isResidentialHub) {
+						await this.initUserPoints('cate')
 						this.flowStep = 'cate'
 						return
 					}
+					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
 					await this.initUserPoints('points')
 				} catch (e) {
 					this.$u.toast((e && e.msg) || '保存失败，请重试')
@@ -1265,18 +1306,19 @@
 				this.flowStep = 'manage'
 			},
 			decoratePointForEdit(p) {
+				const np = this.normalizeScenePoint(p)
 				let idx = 0
 				for (let i = 0; i < this.cateList.length; i++) {
-					if (Number(this.cateList[i].id) === Number(p.cate_id)) {
+					if (Number(this.cateList[i].id) === Number(np.cate_id)) {
 						idx = i
 						break
 					}
 				}
-				const raw = p.point_image_raw || ''
-				const display = p.point_image || ''
+				const raw = np.point_image_raw || ''
+				const display = np.point_image || resolveAssetShowUrl(raw)
 				return {
-					...p,
-					_edit_name: p.point_name,
+					...np,
+					_edit_name: np.point_name,
 					_edit_cate_index: idx,
 					_edit_image: raw,
 					_edit_image_url: display,

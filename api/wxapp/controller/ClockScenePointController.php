@@ -32,7 +32,11 @@ class ClockScenePointController extends AuthController
         }
         $list = $query->order('list_order asc,id asc')->select()->toArray();
         foreach ($list as &$item) {
-            $img = $this->normalizePointImageStored(trim((string)($item['point_image'] ?? '')));
+            $stored = trim((string)($item['point_image'] ?? ''));
+            $img = $this->normalizePointImageStored($stored);
+            if ($img !== '' && $stored !== '' && $img !== $stored) {
+                Db::name('clock_scene_point')->where('id', (int)$item['id'])->update(['point_image' => $img]);
+            }
             $item['point_image_raw'] = $img;
             $item['point_image'] = $img === '' ? '' : cmf_get_asset_url($img);
         }

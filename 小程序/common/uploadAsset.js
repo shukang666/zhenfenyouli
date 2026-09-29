@@ -1,3 +1,5 @@
+import { staticUploadBase } from '@/common/settings.js'
+
 /**
  * 解析小程序 upload_asset 返回值：库内存 filepath，界面展示 url
  */
@@ -26,4 +28,14 @@ export function urlToRelativePath(url) {
 		path = path.slice(7)
 	}
 	return path
+}
+
+/** 相对路径 → 可展示的完整 URL（与后端 cmf_get_asset_url 一致走 COS） */
+export function resolveAssetShowUrl(pathOrUrl) {
+	const p = (pathOrUrl || '').trim()
+	if (!p) return ''
+	if (/^https?:\/\//i.test(p)) return p
+	const base = (staticUploadBase || '').replace(/\/+$/, '')
+	if (!base) return p
+	return base + '/' + p.replace(/^\/+/, '')
 }
