@@ -165,32 +165,35 @@
 				</view>
 			</view>
 			<view class="scf-setup-list">
-				<view class="scf-setup-block" v-for="(row, idx) in setupRows" :key="idx">
-					<view class="scf-point-card scf-point-card--preview">
-						<image v-if="row.point_image_url" class="scf-point-photo" :src="row.point_image_url" mode="aspectFill"></image>
-						<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(setupCateName(row))">
-							<text class="scf-cate-hero-kicker">垃圾分类</text>
-							<text class="scf-cate-hero-name">{{ setupCateName(row) || '请选择类型' }}</text>
+				<view class="scf-bin-card" v-for="(row, idx) in setupRows" :key="idx">
+					<view class="scf-bin-photo" hover-class="scf-card--press" @tap="chooseSetupPhoto(idx)">
+						<image v-if="row.point_image_url" class="scf-bin-photo-img" :src="row.point_image_url" mode="aspectFill"></image>
+						<view v-else class="scf-bin-photo-empty">
+							<text class="scf-photo-add-icon">📷</text>
+							<text class="scf-photo-add-t">点这里拍桶的位置</text>
 						</view>
-						<text class="scf-cate-desc-lines">{{ cateHintLines(row) }}</text>
-						<text class="scf-point-name">{{ row.point_name || '点位名称（如厨房桶）' }}</text>
-					</view>
-					<view class="scf-setup-form">
-						<text class="scf-setup-label">点位名称</text>
-						<input class="scf-setup-input scf-setup-input--block" v-model="row.point_name" placeholder="如：厨房厨余桶、客厅可回收" maxlength="16" />
-						<text class="scf-setup-label">垃圾类型</text>
-						<picker mode="selector" :range="catePickerLabels" :value="row.cate_index" @change="onSetupCateChange(idx, $event)">
-							<view class="scf-setup-picker scf-setup-picker--block">{{ catePickerLabels[row.cate_index] || '选择四分类之一' }}</view>
-						</picker>
-						<text class="scf-setup-label">点位照片（必填）</text>
-						<view class="scf-point-upload" @tap="chooseSetupPhoto(idx)">
-							<image v-if="row.point_image_url" class="scf-point-upload-img" :src="row.point_image_url" mode="aspectFill"></image>
-							<view v-else class="scf-point-upload-placeholder">
-								<text class="scf-photo-add-icon">📷</text>
-								<text class="scf-photo-add-t">拍摄/上传点位环境</text>
+						<view class="scf-bin-photo-shade"></view>
+						<view class="scf-bin-photo-cap">
+							<text class="scf-bin-photo-name">{{ row.point_name || '给这个桶起个名字' }}</text>
+							<view class="scf-bin-photo-badge" :class="'scf-bin-photo-badge--' + cateTone(setupCateName(row))">
+								<text>{{ setupCateName(row) || '选种类' }}</text>
 							</view>
 						</view>
-						<text class="scf-setup-del" v-if="setupRows.length > 1" @tap="removeSetupRow(idx)">删除本点位</text>
+						<text class="scf-bin-photo-tip">{{ row.point_image_url ? '点击更换照片' : '照片必填' }}</text>
+					</view>
+					<view class="scf-bin-fields">
+						<view class="scf-bin-row">
+							<text class="scf-bin-label">名称</text>
+							<input class="scf-bin-input" v-model="row.point_name" placeholder="如：厨房厨余桶" maxlength="16" />
+						</view>
+						<view class="scf-bin-row">
+							<text class="scf-bin-label">种类</text>
+							<picker class="scf-bin-picker-wrap" mode="selector" :range="catePickerLabels" :value="row.cate_index" @change="onSetupCateChange(idx, $event)">
+								<view class="scf-bin-picker">{{ catePickerLabels[row.cate_index] || '选择四分类' }}</view>
+							</picker>
+						</view>
+						<text class="scf-bin-hint">{{ cateHintLines(row) }}</text>
+						<text class="scf-bin-del" v-if="setupRows.length > 1" @tap="removeSetupRow(idx)">删除本点位</text>
 					</view>
 				</view>
 			</view>
@@ -290,30 +293,37 @@
 		<view class="scf-body" v-if="flowStep === 'manage'">
 			<text class="scf-hint">可以改名字、种类或照片；删掉后以前交过的记录还在。</text>
 			<view class="scf-point-grid">
-				<view class="scf-setup-block" v-for="(p, mIdx) in points" :key="p.id">
-					<view class="scf-point-card scf-point-card--preview">
-						<image v-if="p._edit_image_url" class="scf-point-photo" :src="p._edit_image_url" mode="aspectFill"></image>
-						<view class="scf-cate-hero" :class="'scf-cate-hero--' + cateTone(manageCateName(p))">
-							<text class="scf-cate-hero-kicker">垃圾分类</text>
-							<text class="scf-cate-hero-name">{{ manageCateName(p) }}</text>
+				<view class="scf-bin-card" v-for="(p, mIdx) in points" :key="p.id">
+					<view class="scf-bin-photo" hover-class="scf-card--press" @tap="chooseManagePhoto(mIdx)">
+						<image v-if="p._edit_image_url" class="scf-bin-photo-img" :src="p._edit_image_url" mode="aspectFill"></image>
+						<view v-else class="scf-bin-photo-empty">
+							<text class="scf-photo-add-icon">📷</text>
+							<text class="scf-photo-add-t">点这里拍桶的位置</text>
 						</view>
-						<text class="scf-cate-desc-lines">{{ cateHintByName(manageCateName(p)) }}</text>
-						<text class="scf-point-name">{{ p._edit_name || p.point_name }}</text>
-					</view>
-					<view class="scf-setup-form">
-						<input class="scf-setup-input scf-setup-input--block" :value="p._edit_name" placeholder="点位名称" maxlength="16" @input="onManageNameInput(mIdx, $event)" />
-						<picker mode="selector" :range="catePickerLabels" :value="p._edit_cate_index" @change="onManageCateChangeByIndex(mIdx, $event)">
-							<view class="scf-setup-picker scf-setup-picker--block">{{ catePickerLabels[p._edit_cate_index] || p.cate_name }}</view>
-						</picker>
-						<view class="scf-point-upload" @tap="chooseManagePhoto(mIdx)">
-							<image v-if="p._edit_image_url" class="scf-point-upload-img" :src="p._edit_image_url" mode="aspectFill"></image>
-							<view v-else class="scf-point-upload-placeholder">
-								<text class="scf-photo-add-t">更新点位照片</text>
+						<view class="scf-bin-photo-shade"></view>
+						<view class="scf-bin-photo-cap">
+							<text class="scf-bin-photo-name">{{ p._edit_name || p.point_name || '给这个桶起个名字' }}</text>
+							<view class="scf-bin-photo-badge" :class="'scf-bin-photo-badge--' + cateTone(manageCateName(p))">
+								<text>{{ manageCateName(p) || '选种类' }}</text>
 							</view>
 						</view>
-						<view class="scf-manage-actions">
-							<text class="scf-manage-save" @tap="savePointEditByIndex(mIdx)">保存</text>
-							<text class="scf-manage-del" @tap="deletePointById(p.id)">删除</text>
+						<text class="scf-bin-photo-tip">点击更换照片</text>
+					</view>
+					<view class="scf-bin-fields">
+						<view class="scf-bin-row">
+							<text class="scf-bin-label">名称</text>
+							<input class="scf-bin-input" :value="p._edit_name" placeholder="如：厨房厨余桶" maxlength="16" @input="onManageNameInput(mIdx, $event)" />
+						</view>
+						<view class="scf-bin-row">
+							<text class="scf-bin-label">种类</text>
+							<picker class="scf-bin-picker-wrap" mode="selector" :range="catePickerLabels" :value="p._edit_cate_index" @change="onManageCateChangeByIndex(mIdx, $event)">
+								<view class="scf-bin-picker">{{ catePickerLabels[p._edit_cate_index] || p.cate_name || '选择四分类' }}</view>
+							</picker>
+						</view>
+						<text class="scf-bin-hint">{{ cateHintByName(manageCateName(p)) }}</text>
+						<view class="scf-bin-foot-actions">
+							<view class="scf-bin-save" hover-class="scf-card--press" @tap="savePointEditByIndex(mIdx)">保存修改</view>
+							<text class="scf-bin-del scf-bin-del--inline" @tap="deletePointById(p.id)">删除</text>
 						</view>
 					</view>
 				</view>
@@ -1606,8 +1616,149 @@
 	flex-shrink: 0;
 	margin-top: 0;
 }
-.scf-point-card--preview {
-	margin-bottom: 12rpx;
+.scf-bin-card {
+	background: #fff;
+	border-radius: 20rpx;
+	overflow: hidden;
+	box-shadow: 0 8rpx 28rpx rgba(20, 40, 28, 0.08);
+	margin-bottom: 20rpx;
+}
+.scf-bin-photo {
+	position: relative;
+	height: 360rpx;
+	background: #e8eee9;
+}
+.scf-bin-photo-img {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+.scf-bin-photo-empty {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8rpx;
+}
+.scf-bin-photo-shade {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 55%;
+	background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(20, 32, 24, 0.72) 100%);
+	pointer-events: none;
+}
+.scf-bin-photo-cap {
+	position: absolute;
+	left: 24rpx;
+	right: 24rpx;
+	bottom: 48rpx;
+	z-index: 1;
+	pointer-events: none;
+}
+.scf-bin-photo-name {
+	display: block;
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #fff;
+	text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.35);
+	line-height: 1.35;
+}
+.scf-bin-photo-badge {
+	display: inline-block;
+	margin-top: 12rpx;
+	padding: 6rpx 18rpx;
+	border-radius: 999rpx;
+	font-size: 24rpx;
+	font-weight: 600;
+	color: #fff;
+	background: rgba(255, 255, 255, 0.25);
+}
+.scf-bin-photo-badge--recycle { background: rgba(21, 106, 144, 0.92); }
+.scf-bin-photo-badge--food { background: rgba(26, 122, 50, 0.92); }
+.scf-bin-photo-badge--harm { background: rgba(154, 51, 102, 0.92); }
+.scf-bin-photo-badge--other { background: rgba(74, 85, 104, 0.92); }
+.scf-bin-photo-tip {
+	position: absolute;
+	top: 16rpx;
+	right: 16rpx;
+	z-index: 1;
+	font-size: 22rpx;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.45);
+	padding: 6rpx 14rpx;
+	border-radius: 999rpx;
+}
+.scf-bin-fields {
+	padding: 20rpx 24rpx 24rpx;
+}
+.scf-bin-row {
+	display: flex;
+	align-items: center;
+	gap: 16rpx;
+	padding: 14rpx 0;
+	border-bottom: 1rpx solid #eef2ef;
+}
+.scf-bin-label {
+	flex-shrink: 0;
+	width: 72rpx;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #4a564e;
+}
+.scf-bin-input {
+	flex: 1;
+	min-width: 0;
+	font-size: 30rpx;
+	color: #142018;
+}
+.scf-bin-picker-wrap {
+	flex: 1;
+	min-width: 0;
+}
+.scf-bin-picker {
+	font-size: 30rpx;
+	color: #142018;
+	padding: 8rpx 0;
+}
+.scf-bin-hint {
+	display: block;
+	margin-top: 14rpx;
+	font-size: 24rpx;
+	line-height: 1.45;
+	color: #6a756c;
+}
+.scf-bin-del {
+	display: block;
+	margin-top: 16rpx;
+	text-align: center;
+	font-size: 26rpx;
+	color: #c45c5c;
+}
+.scf-bin-del--inline {
+	margin-top: 0;
+	text-align: right;
+	flex-shrink: 0;
+}
+.scf-bin-foot-actions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 20rpx;
+	gap: 16rpx;
+}
+.scf-bin-save {
+	flex: 1;
+	text-align: center;
+	height: 80rpx;
+	line-height: 80rpx;
+	border-radius: 40rpx;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #fff;
+	background: linear-gradient(90deg, #45c56a, #38b061);
 }
 .scf-point-photo {
 	width: 100%;
