@@ -12,7 +12,7 @@ use think\facade\Db;
 class ClockScenePointController extends AuthController
 {
     /** @var string[] */
-    private $userHubs = ['home', 'qinzi'];
+    private $userHubs = ['home'];
 
     /** @var string[] */
     private $listHubs = ['home', 'qinzi', 'street', 'office'];
@@ -24,12 +24,13 @@ class ClockScenePointController extends AuthController
         if ($hub === '') {
             $this->error('场景参数无效');
         }
-        $list = Db::name('clock_scene_point')
-            ->where('user_id', $this->user_id)
-            ->where('hub_key', $hub)
-            ->order('list_order asc,id asc')
-            ->select()
-            ->toArray();
+        $query = Db::name('clock_scene_point')->where('user_id', $this->user_id);
+        if ($hub === 'home') {
+            $query->whereIn('hub_key', ['home', 'qinzi']);
+        } else {
+            $query->where('hub_key', $hub);
+        }
+        $list = $query->order('list_order asc,id asc')->select()->toArray();
         foreach ($list as &$item) {
             $img = $this->normalizePointImageStored(trim((string)($item['point_image'] ?? '')));
             $item['point_image_raw'] = $img;
@@ -77,11 +78,15 @@ class ClockScenePointController extends AuthController
             $row['point_image'] = $pointImage;
         }
         if ($id > 0) {
-            $exists = Db::name('clock_scene_point')
+            $existsQuery = Db::name('clock_scene_point')
                 ->where('id', $id)
-                ->where('user_id', $this->user_id)
-                ->where('hub_key', $hub)
-                ->find();
+                ->where('user_id', $this->user_id);
+            if ($hub === 'home') {
+                $existsQuery->whereIn('hub_key', ['home', 'qinzi']);
+            } else {
+                $existsQuery->where('hub_key', $hub);
+            }
+            $exists = $existsQuery->find();
             if (empty($exists)) {
                 $this->error('点位不存在');
             }
@@ -156,6 +161,9 @@ class ClockScenePointController extends AuthController
     private function normalizeUserHub($hub): string
     {
         $hub = ClockSceneGuideModel::normalizeHub(trim((string)$hub));
+        if ($hub === 'qinzi') {
+            $hub = 'home';
+        }
         return in_array($hub, $this->userHubs, true) ? $hub : '';
     }
 

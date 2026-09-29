@@ -10,13 +10,6 @@ export const HUB_META = {
 		theme: 'scf--home',
 		subs: null,
 	},
-	qinzi: {
-		title: '亲子场景',
-		sceneKey: 'qinzi',
-		theme: 'scf--qinzi',
-		subs: null,
-		cates: ['可回收', '有害'],
-	},
 	office: {
 		title: '办公场景',
 		sceneKey: 'zhenfenjiao',
@@ -156,8 +149,15 @@ export function guideKey(hub, subKey, cateLabel) {
 	return `${hub}|${subKey || ''}|${cateLabel}`
 }
 
+/** 亲子已并入家庭；旧链接 hub=qinzi 仍兼容 */
+export function normalizeClockHubKey(hubKey) {
+	const k = String(hubKey || '').trim()
+	return k === 'qinzi' ? 'home' : k
+}
+
 export function getHub(hubKey) {
-	return HUB_META[hubKey] || null
+	const key = normalizeClockHubKey(hubKey)
+	return HUB_META[key] || null
 }
 
 export function getDefaultGuide(hub, subKey, cateLabel) {

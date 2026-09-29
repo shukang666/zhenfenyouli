@@ -33,6 +33,9 @@ class ClockSceneGuideModel extends Model
     public static function normalizeHub($hub)
     {
         $hub = trim((string)$hub);
+        if ($hub === 'qinzi') {
+            return 'home';
+        }
         $allowed = array_keys(self::hubLabels());
         return in_array($hub, $allowed, true) ? $hub : '';
     }

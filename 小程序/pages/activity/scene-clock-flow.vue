@@ -549,7 +549,7 @@
 	import { uploadUrl } from '@/common/settings'
 	import { parseUploadAssetResponse } from '@/common/uploadAsset.js'
 	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
-	import { getHub, mergeGuide } from '@/common/sceneClockHub.js'
+	import { getHub, mergeGuide, normalizeClockHubKey } from '@/common/sceneClockHub.js'
 	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind, SECTION_HINTS } from '@/common/clockScene.js'
 	import {
 		getStepTitles,
@@ -652,24 +652,24 @@
 		},
 		computed: {
 			isResidentialHub() {
-				return this.hubKey === 'home' || this.hubKey === 'qinzi'
+				return this.hubKey === 'home'
 			},
 			pendingHubLabel() {
 				const card = (this.sceneHubCards || []).find(c => c.hub === this.pendingHubKey)
 				return (card && card.title) || '未选择'
 			},
 			introBlocks() {
-				return getIntroBlocks(this.hubKey)
+				return getIntroBlocks()
 			},
 			introDisplayLead() {
 				if (this.flowStep === 'points' && this.isCommunityHub) {
 					return getCommunityIntroLead(this.isStreetHub)
 				}
-				return getIntroLead(this.hubKey)
+				return getIntroLead()
 			},
 			introDisplaySummary() {
 				if (this.flowStep === 'setup') {
-					return getSetupIntroLine(this.hubKey)
+					return getSetupIntroLine()
 				}
 				if (this.flowStep === 'points' && this.isCommunityHub) {
 					return getCommunityPointsDesc()
@@ -677,7 +677,7 @@
 				if (this.flowStep === 'points' && this.points.length) {
 					return getPointsPickSummary()
 				}
-				return getIntroSummary(this.hubKey)
+				return getIntroSummary()
 			},
 			pointsStepHint() {
 				return getPointsStepHint(this.isCommunityHub)
@@ -788,10 +788,10 @@
 				return ['怎么扔', '小窍门', '拍照']
 			},
 			whyIntroLead() {
-				return getWhyIntroLead(this.hubKey)
+				return getWhyIntroLead()
 			},
 			whyIntroSummary() {
-				return getWhyIntroSummary(this.hubKey)
+				return getWhyIntroSummary()
 			},
 			stepIndex() {
 				if (this.isResidentialHub) {
@@ -832,7 +832,7 @@
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
 				return
 			}
-			const hubKey = opt.hub ? String(opt.hub) : 'home'
+			const hubKey = normalizeClockHubKey(opt.hub ? String(opt.hub) : 'home')
 			this.bootstrapHub(hubKey)
 		},
 		onShow() {
@@ -850,14 +850,14 @@
 		},
 		methods: {
 			bootstrapHub(hubKey) {
-				this.hubKey = hubKey
-				this.hub = getHub(hubKey)
+				this.hubKey = normalizeClockHubKey(hubKey)
+				this.hub = getHub(this.hubKey)
 				if (!this.hub) {
 					this.$u.toast('场景无效')
 					setTimeout(() => uni.navigateBack(), 800)
 					return
 				}
-				this.binLayoutExamples = getBinLayoutExamples(hubKey)
+				this.binLayoutExamples = getBinLayoutExamples()
 				uni.setNavigationBarTitle({ title: this.hub.title })
 				this.subKey = ''
 				this.loadCateList().then(() => {
@@ -1326,7 +1326,7 @@
 				const k = this.hub && this.hub.sceneKey ? String(this.hub.sceneKey) : ''
 				if (k === 'home') return 'home'
 				if (k === 'zhenfenjiao' || this.hubKey === 'office') return 'zhenfenjiao'
-				if (k === 'qinzi' || k === 'street') return k
+				if (k === 'street') return k
 				return 'home'
 			},
 			resetClockSlots() {

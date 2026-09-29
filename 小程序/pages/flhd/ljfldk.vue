@@ -125,16 +125,9 @@
 					{
 						key: 'home',
 						name: '家庭',
-						desc: '厨房、客厅、卫生间里的日常投放',
+						desc: '厨房、客厅、卫生间，全家日常投放',
 						layout: 'entry',
 						icon: 'home-fill',
-					},
-					{
-						key: 'qinzi',
-						name: '亲子',
-						desc: '家长带孩子一起学分类、动手投放',
-						layout: 'entry',
-						icon: 'plus-people-fill',
 					},
 					{
 						key: 'office',

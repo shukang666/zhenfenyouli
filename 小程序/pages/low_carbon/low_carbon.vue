@@ -100,13 +100,13 @@
       </view>
     </view>
 
-    <!-- 场景快捷入口：家庭 · 亲子 · 办公 · 沿街商铺 -->
+    <!-- 场景快捷入口：家庭 · 办公 · 沿街商铺 -->
     <view class="fb-entry-stage" id="guide-fb-entry">
       <view class="fb-entry-kicker">
         <view class="fb-entry-kicker-dot"></view>
         <text class="fb-entry-kicker-text">场景快捷入口</text>
       </view>
-      <view class="fb-entry-row">
+      <view class="fb-entry-row fb-entry-row--triple">
         <view
           class="fb-entry-card fb-entry-home"
           hover-class="fb-press"
@@ -118,27 +118,9 @@
             <text class="fb-entry-emoji">🏠</text>
             <view class="fb-entry-text">
               <text class="fb-entry-title">家庭场景</text>
-              <text class="fb-entry-sub">厨房客厅日常投放</text>
+              <text class="fb-entry-sub">厨房客厅，全家日常投放</text>
             </view>
             <view class="fb-entry-go fb-entry-go--dark">
-              <text class="fb-entry-arrow">›</text>
-            </view>
-          </view>
-        </view>
-        <view
-          class="fb-entry-card fb-entry-xsd"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoXsdld"
-        >
-          <text class="fb-entry-mark">02 亲子</text>
-          <view class="fb-entry-main">
-            <text class="fb-entry-emoji">🤝</text>
-            <view class="fb-entry-text">
-              <text class="fb-entry-title">亲子场景</text>
-              <text class="fb-entry-sub">家长带孩子学分类</text>
-            </view>
-            <view class="fb-entry-go">
               <text class="fb-entry-arrow">›</text>
             </view>
           </view>
@@ -149,7 +131,7 @@
           :hover-stay-time="80"
           @click="gotoOfficeBuilding"
         >
-          <text class="fb-entry-mark">03 办公</text>
+          <text class="fb-entry-mark">02 办公</text>
           <view class="fb-entry-main">
             <text class="fb-entry-emoji">🏢</text>
             <view class="fb-entry-text">
@@ -167,7 +149,7 @@
           :hover-stay-time="80"
           @click="gotoStreetShop"
         >
-          <text class="fb-entry-mark">04 沿街</text>
+          <text class="fb-entry-mark">03 沿街</text>
           <view class="fb-entry-main">
             <text class="fb-entry-emoji">🏪</text>
             <view class="fb-entry-text">
@@ -827,11 +809,6 @@ export default {
 
     gotoDtshPage(url) {
       this.$u.route(url);
-    },
-
-    // 小手拉大手
-    gotoXsdld() {
-      this.$u.route("/pages/activity/scene-clock-flow?hub=qinzi");
     },
 
     // 办公场景（占位页，后续再补内容）

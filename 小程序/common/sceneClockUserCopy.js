@@ -21,30 +21,22 @@ export function getStepTitles() {
 	}
 }
 
-export function getIntroLead(hubKey) {
-	if (hubKey === 'qinzi') return '分开扔，是为了少污染、少浪费、孩子也能从小养成习惯'
+export function getIntroLead() {
 	return '分开扔，是为了少污染、少浪费，也方便社区清运'
 }
 
-export function getWhyIntroLead(hubKey) {
-	if (hubKey === 'qinzi') {
-		return '为什么要分？混装一袋，后面很难再利用；分开后厨余能堆肥、可回收能再生，孩子也能明白「扔哪里」'
-	}
+export function getWhyIntroLead() {
 	return '为什么要分？混装一袋，后面很难再利用；分开后厨余能堆肥、可回收能再生，有害也能单独处理'
 }
 
-export function getWhyIntroSummary(hubKey) {
-	if (hubKey === 'qinzi') {
-		return '今天先弄清「为啥要分」，再摆好家里各处的桶，选种类、拍成果就能打卡。'
-	}
+export function getWhyIntroSummary() {
 	return '今天先弄清「为啥要分」，再摆好家里各处的桶，选种类、拍成果就能打卡。'
 }
 
 /** 建议家里各房间放什么桶（引导页展示，非强制） */
-export function getBinLayoutExamples(hubKey) {
-	const qinziNote = hubKey === 'qinzi' ? '（可以让孩子帮忙贴标签）' : ''
+export function getBinLayoutExamples() {
 	return [
-		{ room: '厨房', cate: '厨余垃圾、其他垃圾', emoji: '🍳', tip: '菜叶、剩饭、果皮放这里，别和塑料袋混一起' + qinziNote },
+		{ room: '厨房', cate: '厨余垃圾、其他垃圾', emoji: '🍳', tip: '菜叶、剩饭、果皮放这里，别和塑料袋混一起' },
 		{ room: '客厅', cate: '可回收物', emoji: '🛋️', tip: '纸箱、瓶罐、旧杂志，干燥干净再投放' },
 		{ room: '卫生间', cate: '其他垃圾', emoji: '🚿', tip: '用过的纸巾、一次性用品等' },
 		{ room: '固定一处', cate: '有害垃圾', emoji: '⚠️', tip: '电池、灯管、过期药品，少量攒够再投' },
@@ -64,25 +56,19 @@ export function getSortDurationOptions() {
 }
 
 /** 设置页：一句话说清要做什么 */
-export function getSetupIntroLine(hubKey) {
-	if (hubKey === 'qinzi') {
-		return '厨房放厨余桶、客厅放可回收桶……添好名字和种类，给桶拍张照，方便以后打卡对照。'
-	}
+export function getSetupIntroLine() {
 	return '厨房放厨余桶、客厅放可回收桶……添好名字和种类，给桶拍张照，方便以后打卡对照。'
 }
 
 /** 选择页：还没有位置时 */
-export function getIntroSummary(hubKey) {
-	if (hubKey === 'qinzi') return '在家固定好「扔哪儿」，扔的时候按提示拍几张照片就可以。'
+export function getIntroSummary() {
 	return '在家固定好「扔哪儿」，扔的时候按提示拍几张照片就可以。'
 }
 
 /** 展开「了解更多」 */
-export function getIntroBlocks(hubKey) {
+export function getIntroBlocks() {
 	const local =
-		hubKey === 'qinzi'
-			? '在七贤岭：手机上学会怎么分，扔对了拍个照还能攒积分；带孩子一起做，记得更牢。'
-			: '在七贤岭：手机上学会怎么分，扔对了拍个照还能攒积分。'
+		'在七贤岭：手机上学会怎么分，扔对了拍个照还能攒积分；全家一起动手，记得更牢。'
 
 	return [
 		{
@@ -150,7 +136,7 @@ export function getThemeIntroSteps() {
 		{
 			num: '1',
 			title: '选对场景',
-			desc: '在家、带孩子、上班或店里——选您今天主要在哪儿扔垃圾。',
+			desc: '在家、上班或店里——选您今天主要在哪儿扔垃圾。',
 			icon: '🏠',
 		},
 		{
@@ -189,8 +175,7 @@ export function getScenePickHint() {
 
 export function getSceneHubCards() {
 	return [
-		{ hub: 'home', emoji: '🏠', title: '在家', desc: '厨房、客厅、卫生间日常垃圾', theme: 'home' },
-		{ hub: 'qinzi', emoji: '👨‍👩‍👧', title: '带孩子一起', desc: '边分边教，孩子记得更牢', theme: 'qinzi' },
+		{ hub: 'home', emoji: '🏠', title: '家庭场景', desc: '厨房、客厅、卫生间，全家日常投放', theme: 'home' },
 		{ hub: 'office', emoji: '🏢', title: '上班 / 楼宇', desc: '工位、茶水间、办公区', theme: 'office' },
 		{ hub: 'street', emoji: '🏪', title: '沿街商铺', desc: '门店前后堂产生的垃圾', theme: 'street' },
 	]
