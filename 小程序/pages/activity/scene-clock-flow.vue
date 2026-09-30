@@ -169,6 +169,64 @@
 					</view>
 				</view>
 				<text class="scf-pick-mask-hint">{{ residentialPickMaskHint }}</text>
+				<view class="scf-settings-fold" v-if="points.length">
+					<view
+						class="scf-settings-fold-head"
+						hover-class="scf-card--press"
+						@tap.stop="toggleResidentialBinSettings"
+					>
+						<view class="scf-settings-fold-head-l">
+							<text class="scf-settings-fold-title">{{ residentialBinSettingsFoldTitle }}</text>
+							<text class="scf-settings-fold-hint">{{ residentialBinSettingsFoldHint }}</text>
+						</view>
+						<text class="scf-settings-fold-arrow">{{ residentialBinSettingsOpen ? '收起 ▴' : '展开 ▾' }}</text>
+					</view>
+					<view class="scf-settings-fold-body" v-if="residentialBinSettingsOpen" @tap.stop="stopTapBubble">
+						<view class="scf-bin-grid scf-bin-grid--manage-inline">
+							<view
+								class="scf-bin-tile scf-bin-tile--compact"
+								v-for="(p, mIdx) in points"
+								:key="p.id"
+								:class="'scf-bin-tile--' + cateTone(manageCateName(p))"
+							>
+								<view class="scf-bin-tile-head">
+									<view class="scf-bin-tile-photo" hover-class="scf-card--press" @tap="chooseManagePhoto(mIdx)">
+										<image v-if="p._edit_image_url" class="scf-bin-tile-photo-img" :src="p._edit_image_url" mode="aspectFill"></image>
+										<view v-else class="scf-bin-tile-photo-empty">
+											<text class="scf-bin-tile-photo-ico">📷</text>
+										</view>
+									</view>
+									<text class="scf-bin-tile-rm" @tap.stop="deleteResidentialPointByIndex(mIdx)">×</text>
+								</view>
+								<view class="scf-bin-tile-body">
+									<input
+										class="scf-bin-tile-input"
+										:value="p._edit_name"
+										placeholder="名称"
+										maxlength="16"
+										@input="onManageNameInput(mIdx, $event)"
+									/>
+									<picker
+										mode="selector"
+										:range="catePickerLabels"
+										:value="p._edit_cate_index"
+										@change="onManageCateChangeByIndex(mIdx, $event)"
+									>
+										<view class="scf-bin-tile-cate">
+											<text class="scf-bin-tile-cate-t">{{ catePickerLabels[p._edit_cate_index] || '选种类' }}</text>
+											<text class="scf-bin-tile-cate-arrow">▾</text>
+										</view>
+									</picker>
+									<view class="scf-bin-tile-save scf-bin-tile-save--inline" hover-class="scf-card--press" @tap="savePointEditByIndex(mIdx)">保存此项</view>
+								</view>
+							</view>
+						</view>
+						<view class="scf-settings-fold-actions">
+							<view class="scf-settings-fold-add" hover-class="scf-card--press" @tap="addPointInResidentialSettings">＋ 添加桶位</view>
+							<view class="scf-settings-fold-done" hover-class="scf-card--press" @tap="closeResidentialBinSettings">完成，返回选桶</view>
+						</view>
+					</view>
+				</view>
 			</block>
 			<block v-else>
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
@@ -244,7 +302,7 @@
 			</view>
 			<view class="scf-section-kicker" v-if="isResidentialHub">
 				<text class="scf-section-kicker-t">拍下您家的桶</text>
-				<text class="scf-section-kicker-s">名称和种类可随时改</text>
+				<text class="scf-section-kicker-s">仅首次需要设置，以后在选桶页「展开」里增删改</text>
 			</view>
 			<view class="scf-promo scf-promo--compact scf-promo--light" v-else-if="!isResidentialHub">
 				<text class="scf-promo-line scf-promo-line--dark">{{ introDisplayLead }}</text>
@@ -302,7 +360,8 @@
 					<text class="scf-bin-tile-add-sub">扔垃圾的位置</text>
 				</view>
 			</view>
-			<view class="scf-foot scf-foot--single">
+			<view class="scf-foot scf-foot--single scf-foot--setup">
+				<text class="scf-setup-foot-hint" v-if="isResidentialHub">{{ residentialSetupFootnote }}</text>
 				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">{{ isResidentialHub ? residentialSetupNextCta : '保存，去选位置拍照' }}</view>
 			</view>
 			</block>
@@ -693,6 +752,9 @@
 		getResidentialPickLead,
 		getResidentialPickSub,
 		getResidentialSetupNextCta,
+		getResidentialSetupFootnote,
+		getResidentialBinSettingsFoldTitle,
+		getResidentialBinSettingsFoldHint,
 		getResidentialPickMaskHint,
 		getClockSuccessPromoTitle,
 		getClockSuccessPromoBody,
@@ -710,6 +772,7 @@
 				points: [],
 				pointsLoading: false,
 				residentialPickMode: false,
+				residentialBinSettingsOpen: false,
 				setupRows: [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }],
 				cateList: [],
 				pointId: 0,
@@ -869,6 +932,15 @@
 			},
 			residentialSetupNextCta() {
 				return getResidentialSetupNextCta()
+			},
+			residentialSetupFootnote() {
+				return getResidentialSetupFootnote()
+			},
+			residentialBinSettingsFoldTitle() {
+				return getResidentialBinSettingsFoldTitle()
+			},
+			residentialBinSettingsFoldHint() {
+				return getResidentialBinSettingsFoldHint()
 			},
 			residentialPickMaskHint() {
 				return getResidentialPickMaskHint()
@@ -1209,9 +1281,34 @@
 				return true
 			},
 			enterResidentialSetupFlow() {
+				this.residentialPickMode = false
+				this.residentialBinSettingsOpen = false
 				if (!this.hydrateSetupRowsFromPoints()) {
 					this.prefillSetupRowsFromExamples()
 				}
+				this.flowStep = 'setup'
+			},
+			stopTapBubble() {},
+			toggleResidentialBinSettings() {
+				this.residentialBinSettingsOpen = !this.residentialBinSettingsOpen
+				if (this.residentialBinSettingsOpen) {
+					this.points = (this.points || []).map(p => this.decoratePointForEdit(p))
+				}
+			},
+			deleteResidentialPointByIndex(mIdx) {
+				const p = (this.points || [])[mIdx]
+				if (!p || p.id == null) return
+				this.deletePointById(p.id)
+			},
+			closeResidentialBinSettings() {
+				this.residentialBinSettingsOpen = false
+				this.initUserPoints('pick')
+			},
+			addPointInResidentialSettings() {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				this.residentialBinSettingsOpen = false
+				this.residentialPickMode = false
+				this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
 				this.flowStep = 'setup'
 			},
 			cateIndexByKeyword(keyword) {
@@ -1239,14 +1336,16 @@
 			},
 			enterResidentialPickMode() {
 				if (!this.points.length) {
-					this.$u.toast('请先保存分类桶')
+					this.$u.toast('请先设置分类桶')
 					return
 				}
 				this.residentialPickMode = true
+				this.residentialBinSettingsOpen = false
 				this.flowStep = 'setup'
 			},
 			exitResidentialPickMode() {
 				this.residentialPickMode = false
+				this.residentialBinSettingsOpen = false
 			},
 			pickResidentialPoint(p) {
 				if (!p || p.id == null) return
@@ -1339,10 +1438,22 @@
 						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'points' || keepFlow === 'learn') {
 							return
 						}
+						if (keepFlow === 'pick') {
+							this.flowStep = 'setup'
+							this.residentialPickMode = true
+							this.residentialBinSettingsOpen = false
+							return
+						}
 						if (['setup', 'points', 'learn'].indexOf(this.flowStep) >= 0) {
 							return
 						}
-						this.enterResidentialSetupFlow()
+						if (this.points.length > 0) {
+							this.flowStep = 'setup'
+							this.residentialPickMode = true
+							this.residentialBinSettingsOpen = false
+						} else {
+							this.enterResidentialSetupFlow()
+						}
 						return
 					}
 					if (this.flowStep === 'setup' || this.flowStep === 'manage') {
@@ -1489,8 +1600,7 @@
 					}
 					this.$u.toast('已保存')
 					if (this.isResidentialHub) {
-						await this.initUserPoints('points')
-						this.enterResidentialPickMode()
+						await this.initUserPoints('pick')
 						return
 					}
 					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
@@ -1549,10 +1659,32 @@
 					point_image: img,
 				})
 				this.$u.toast('已保存')
+				if (this.isResidentialHub && this.residentialPickMode) {
+					this.initUserPoints('pick').then(() => {
+						if (this.residentialBinSettingsOpen) {
+							this.points = (this.points || []).map(p => this.decoratePointForEdit(p))
+						}
+					})
+					return
+				}
 				this.initUserPoints('manage')
 			},
 			deletePointById(id) {
 				this.confirmDeleteScenePoint(id, () => {
+					if (this.isResidentialHub && this.residentialPickMode) {
+						this.initUserPoints('pick').then(() => {
+							if (!this.points.length) {
+								this.residentialPickMode = false
+								this.residentialBinSettingsOpen = false
+								this.enterResidentialSetupFlow()
+								return
+							}
+							if (this.residentialBinSettingsOpen) {
+								this.points = (this.points || []).map(p => this.decoratePointForEdit(p))
+							}
+						})
+						return
+					}
 					this.initUserPoints('manage')
 				})
 			},
@@ -1562,6 +1694,12 @@
 				this.flowStep = 'setup'
 			},
 			backFromManage() {
+				if (this.isResidentialHub) {
+					this.flowStep = 'setup'
+					this.residentialPickMode = this.points.length > 0
+					this.residentialBinSettingsOpen = false
+					return
+				}
 				this.flowStep = this.points.length ? 'points' : 'setup'
 			},
 			pickClusterPoint(gIdx, pIdx) {
@@ -2335,6 +2473,106 @@
 	color: rgba(255, 255, 255, 0.92);
 	line-height: 1.5;
 	padding: 0 32rpx;
+}
+.scf-settings-fold {
+	position: relative;
+	z-index: 502;
+	margin-top: 28rpx;
+	border-radius: 18rpx;
+	background: rgba(255, 255, 255, 0.96);
+	overflow: hidden;
+	box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.12);
+}
+.scf-settings-fold-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 22rpx 24rpx;
+}
+.scf-settings-fold-head-l {
+	flex: 1;
+	min-width: 0;
+	padding-right: 16rpx;
+}
+.scf-settings-fold-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #142018;
+}
+.scf-settings-fold-hint {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 24rpx;
+	color: #6a756c;
+	line-height: 1.4;
+}
+.scf-settings-fold-arrow {
+	flex-shrink: 0;
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #18af38;
+}
+.scf-settings-fold-body {
+	padding: 0 20rpx 20rpx;
+	border-top: 1rpx solid #e8ece9;
+}
+.scf-bin-grid--manage-inline {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+	max-height: 48vh;
+	overflow-y: auto;
+	padding-top: 16rpx;
+}
+.scf-bin-tile--compact {
+	box-shadow: 0 4rpx 16rpx rgba(36, 48, 40, 0.08);
+}
+.scf-bin-tile-save--inline {
+	margin-top: 12rpx;
+	padding: 12rpx 0;
+	text-align: center;
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #18af38;
+	background: rgba(24, 175, 56, 0.1);
+	border-radius: 10rpx;
+}
+.scf-settings-fold-actions {
+	margin-top: 16rpx;
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
+}
+.scf-settings-fold-add,
+.scf-settings-fold-done {
+	padding: 18rpx;
+	text-align: center;
+	border-radius: 12rpx;
+	font-size: 28rpx;
+	font-weight: 600;
+}
+.scf-settings-fold-add {
+	color: #18af38;
+	background: rgba(24, 175, 56, 0.08);
+	border: 2rpx dashed rgba(24, 175, 56, 0.35);
+}
+.scf-settings-fold-done {
+	color: #fff;
+	background: linear-gradient(141deg, #a4db88 0%, #18af38 100%);
+}
+.scf-foot--setup {
+	flex-direction: column;
+	align-items: stretch;
+}
+.scf-setup-foot-hint {
+	display: block;
+	margin-bottom: 16rpx;
+	padding: 0 8rpx;
+	text-align: center;
+	font-size: 26rpx;
+	line-height: 1.55;
+	color: #6a756c;
 }
 .scf-res-bin-list {
 	display: flex;

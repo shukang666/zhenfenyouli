@@ -11,7 +11,7 @@ export function getStepTitles() {
 	return {
 		hub_empty: '请稍等',
 		why: '为什么要分',
-		setup: '摆好分类桶',
+		setup: '设置分类桶',
 		points: '选桶打卡',
 		manage: '改' + HOME_POINT_LABEL_SHORT,
 		cate: '选桶打卡',
@@ -75,11 +75,11 @@ export function getHomePlanFoot() {
 }
 
 export function getBinSetupLead() {
-	return '请对照下面建议，把各处的桶摆到位'
+	return '首次使用：请设置您家里的分类桶'
 }
 
 export function getBinSetupLeadNote() {
-	return '名字和种类可以按您家习惯改'
+	return '这是「设置」不是每次打卡都要做；保存后下次进来直接选桶即可'
 }
 
 export function getAccumDurationOptions() {
@@ -154,19 +154,31 @@ export function getPointsPickSummary() {
 
 /** 家庭：选桶（种类已在摆桶时绑定） */
 export function getResidentialPickLead() {
-	return '今天先打卡哪一只桶？'
+	return '今天打卡哪一只桶？'
 }
 
 export function getResidentialPickSub() {
-	return '点选位置即可，种类跟您摆桶时设的一样'
+	return '点选桶位上传成果即可；不必每个桶每天都打，可以次日再来'
 }
 
 export function getResidentialSetupNextCta() {
-	return '保存，去选桶打卡'
+	return '开始打卡'
+}
+
+export function getResidentialSetupFootnote() {
+	return '保存桶位后，下次进来会直接到这里选桶；今天不必每个桶都打卡，可以次日再来'
+}
+
+export function getResidentialBinSettingsFoldTitle() {
+	return '管理家里分类桶'
+}
+
+export function getResidentialBinSettingsFoldHint() {
+	return '增删改桶位（一般不用每次打开）'
 }
 
 export function getResidentialPickMaskHint() {
-	return '点击高亮的桶开始打卡；点击暗处返回修改'
+	return '点击高亮的桶开始打卡；点击暗处关闭'
 }
 
 export function getPointsStepHint(isCommunityHub) {
