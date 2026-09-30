@@ -164,7 +164,7 @@
 
 					<text class="add-card-title">现场留证</text>
 
-					<text class="add-card-sub">补充图片，证明您已完成上述工作（可点图放大）</text>
+					<text class="add-card-sub">点位环境照片必填，分类指引与桶位可选（可点图放大）</text>
 
 				</view>
 
@@ -204,7 +204,9 @@
 
 						</view>
 
-						<text class="photo-col-label">{{ sec.title }}</text>
+						<text class="photo-col-label">
+							{{ sec.title }}<text v-if="sec.required" class="photo-required">*</text>
+						</text>
 
 					</view>
 
@@ -476,7 +478,7 @@
 
 				photoSections: [
 
-					{ key: 'image_one', title: '点位环境' },
+					{ key: 'image_one', title: '点位环境', required: true },
 
 					{ key: 'image_two', title: '分类指引' },
 
@@ -1026,19 +1028,19 @@
 
 			submit() {
 
+				if (!(this.form.image_one || '').trim()) {
+
+					uni.showToast({ title: '请上传点位环境照片', icon: 'none' })
+
+					return
+
+				}
+
 				if (this.form.has_rectify === 1) {
 
 					if (!(this.form.rectify_remark || '').trim()) {
 
 						uni.showToast({ title: '请填写整改意见', icon: 'none' })
-
-						return
-
-					}
-
-					if (!this.firstInspectPhotoUrl()) {
-
-						uni.showToast({ title: '同步随手拍需至少上传一张留证照片', icon: 'none' })
 
 						return
 
@@ -1419,6 +1421,16 @@
 	line-height: 1.35;
 
 	width: 100%;
+
+}
+
+.photo-required {
+
+	margin-left: 2rpx;
+
+	color: #e54d42;
+
+	font-weight: 600;
 
 }
 

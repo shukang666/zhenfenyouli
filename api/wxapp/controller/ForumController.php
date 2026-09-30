@@ -212,6 +212,10 @@ class ForumController extends AuthController
                 $cate_info = CommunityCateModel::where('id',$cate_id)->find();
                 if(empty($cate_info)) $this->error('点位不能为空');
 
+                $imageOne = trim((string)($params['image_one'] ?? ''));
+                if ($imageOne === '') {
+                    $this->error('请上传点位环境照片');
+                }
 
                 $map = [];
                 $map[] = ['type', '=', $type];
