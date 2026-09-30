@@ -135,6 +135,10 @@ export function getResidentialSetupNextCta() {
 	return '保存，去选桶打卡'
 }
 
+export function getResidentialPickMaskHint() {
+	return '点击高亮的桶开始打卡；点击暗处返回修改'
+}
+
 export function getPointsStepHint(isCommunityHub) {
 	if (isCommunityHub) return '选这次要用的投放点'
 	return '点一下您这次要用的桶或位置'
