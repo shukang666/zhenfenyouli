@@ -15,6 +15,7 @@ const home = {
 	// 活动 Tab 首页聚合（Banner + 标签 + 推荐区 + 活动列表）
 	get_activity_tab_home: (params = {}) => uni.$u.post('/wxapp/active/get_activity_tab_home', params),
 	get_new_active_detail: (params = {}) => uni.$u.post('/wxapp/active/get_new_active_detail', params),
+	issue_web_context: (params = {}) => uni.$u.post('/wxapp/active/issue_web_context', params),
 	// 活动签到排行榜 
 	get_new_active_ranking: (params = {}) => uni.$u.post('/wxapp/active/get_new_active_ranking', params),
 	// 活动报名 

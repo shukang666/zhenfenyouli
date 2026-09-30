@@ -25,6 +25,7 @@ use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\goods\GoodsModel;
 use app\admin\model\member\MemberModel;
 use app\admin\model\SlideItemModel;
+use api\wxapp\service\ActiveWebContext;
 use think\facade\Db;
 
 class ActiveController extends AuthController
@@ -569,13 +570,7 @@ class ActiveController extends AuthController
 
         $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
         $item['is_end'] = ActiveModel::resolveIsEnd($item);
-        $item['display_mode'] = (int)($item['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
-        $item['web_url'] = trim((string)($item['web_url'] ?? ''));
-        if (ActiveModel::isWebDisplay($item)) {
-            $item['web_page_url'] = ActiveModel::buildWebActivityUrl($item['web_url'], (int)$item['id']);
-        } else {
-            $item['web_page_url'] = '';
-        }
+        $this->attachWebLaunchFields($item);
         $pwdConfigured = 0;
         if (ActiveModel::isOfflineEvent($item)) {
             $pwdRow = ActiveModel::where('id', $item['id'])->value('offline_sign_password');
@@ -1357,14 +1352,56 @@ class ActiveController extends AuthController
 
         $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
         $item['is_end'] = ActiveModel::resolveIsEnd($item);
+        $this->attachWebLaunchFields($item);
+        return $item;
+    }
+
+    /**
+     * 小程序打开 Web 式活动前签发 web_ctx（需登录，Header openid）
+     */
+    public function issue_web_context()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        if ($activeId <= 0) {
+            $this->error('缺少活动 ID');
+        }
+        $item = ActiveModel::where('id', $activeId)->where('delete_time', 0)->find();
+        if (empty($item)) {
+            $this->error('活动不存在');
+        }
+        if (!ActiveModel::isWebDisplay($item)) {
+            $this->error('该活动不是 Web 式');
+        }
+        $token = ActiveWebContext::issue((int)$this->user_id, $activeId);
+        $launch = ActiveModel::buildWebActivityUrl((string)$item['web_url'], $activeId);
+        $launch = ActiveWebContext::appendQueryParam($launch, 'web_ctx', $token);
+        $this->success('请求成功', [
+            'web_ctx' => $token,
+            'web_launch_url' => $launch,
+            'expires_in' => ActiveWebContext::TTL,
+        ]);
+    }
+
+    /** Web 式：web_page_url + 已登录时带 web_ctx 的 web_launch_url */
+    protected function attachWebLaunchFields(&$item): void
+    {
         $item['display_mode'] = (int)($item['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
         $item['web_url'] = trim((string)($item['web_url'] ?? ''));
-        if (ActiveModel::isWebDisplay($item)) {
-            $item['web_page_url'] = ActiveModel::buildWebActivityUrl($item['web_url'], (int)$item['id']);
-        } else {
-            $item['web_page_url'] = '';
+        $item['web_page_url'] = '';
+        $item['web_launch_url'] = '';
+        if (!ActiveModel::isWebDisplay($item)) {
+            return;
         }
-        return $item;
+        $activeId = (int)$item['id'];
+        $base = ActiveModel::buildWebActivityUrl($item['web_url'], $activeId);
+        $item['web_page_url'] = $base;
+        $launch = $base;
+        if (!empty($this->user_id)) {
+            $token = ActiveWebContext::issue((int)$this->user_id, $activeId);
+            $launch = ActiveWebContext::appendQueryParam($launch, 'web_ctx', $token);
+        }
+        $item['web_launch_url'] = $launch;
     }
 
 }

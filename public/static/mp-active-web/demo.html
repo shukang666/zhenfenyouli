@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Web 式活动演示</title>
+  <script src="./sdk.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -21,6 +22,7 @@
       margin-bottom: 16px;
     }
     h1 { font-size: 22px; line-height: 1.35; margin-bottom: 8px; }
+    h2 { font-size: 16px; margin: 16px 0 8px; color: #2d6a4f; }
     .tag {
       display: inline-block;
       font-size: 12px;
@@ -32,6 +34,10 @@
     }
     p { font-size: 15px; line-height: 1.65; color: #40916c; margin-bottom: 10px; }
     .meta { font-size: 13px; color: #74c69d; word-break: break-all; }
+    .err { color: #c1121f; }
+    .user-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; background: #d8f3dc; object-fit: cover; }
+    .stat { font-size: 14px; color: #1b4332; line-height: 1.5; }
     button {
       width: 100%;
       border: none;
@@ -44,6 +50,7 @@
       margin-top: 8px;
     }
     button:active { opacity: .85; }
+    button:disabled { opacity: .5; }
     .toast {
       position: fixed;
       left: 50%;
@@ -64,30 +71,67 @@
 <body>
   <div class="card">
     <span class="tag">Web 式活动 · 测试页</span>
-    <h1>自定义 H5 活动页</h1>
-    <p>本页由站点 <code>/static/mp-active-web/demo.html</code> 托管，在后台将活动的「显示形式」设为 Web 式并填写此 URL 后，小程序会通过 web-view 打开。</p>
-    <p>业务逻辑（报名、打卡、动画等）可在此 H5 内自行实现；也可通过 URL 参数与后端接口交互。</p>
+    <h1 id="title">加载中…</h1>
+    <p id="hint">正在通过 web_ctx 拉取用户与活动信息…</p>
     <p class="meta" id="meta"></p>
-    <button type="button" id="btn">模拟完成一次互动</button>
+    <div id="user-block" hidden>
+      <h2>当前用户（bootstrap）</h2>
+      <div class="user-row">
+        <img class="avatar" id="avatar" alt="" />
+        <div class="stat" id="user-stat"></div>
+      </div>
+      <h2>本次活动</h2>
+      <p class="stat" id="active-stat"></p>
+    </div>
+    <p class="err" id="err" hidden></p>
+    <button type="button" id="btn" disabled>模拟完成一次互动</button>
   </div>
   <div class="toast" id="toast"></div>
   <script>
     (function () {
-      var qs = new URLSearchParams(location.search);
-      var activeId = qs.get('active_id') || '(未传 active_id)';
-      document.getElementById('meta').textContent = 'active_id=' + activeId + ' · 打开时间 ' + new Date().toLocaleString();
+      var state = { ctx: null };
       var toast = document.getElementById('toast');
       function showToast(msg) {
         toast.textContent = msg;
         toast.classList.add('show');
         setTimeout(function () { toast.classList.remove('show'); }, 2000);
       }
-      document.getElementById('btn').addEventListener('click', function () {
-        showToast('演示成功：Web 式活动页可正常交互');
-      });
-      if (typeof wx !== 'undefined' && wx.miniProgram) {
-        wx.miniProgram.postMessage({ data: { type: 'active_web_demo', active_id: activeId } });
+
+      function renderError(msg) {
+        document.getElementById('hint').hidden = true;
+        document.getElementById('err').hidden = false;
+        document.getElementById('err').textContent = msg;
+        document.getElementById('title').textContent = '无法加载用户上下文';
       }
+
+      ActiveWebSdk.bootstrap().then(function (data) {
+        state.ctx = data;
+        var u = data.user || {};
+        var a = data.active || {};
+        document.getElementById('title').textContent = a.name || 'Web 式活动演示';
+        document.getElementById('hint').textContent = '已通过短期票据 web_ctx 识别用户，可在本页继续调 /api/wxapp/*（Header openid）。';
+        document.getElementById('meta').textContent =
+          'user_id=' + u.id + ' · active_id=' + a.id + ' · 票据至 ' + new Date((data.expires_at || 0) * 1000).toLocaleString();
+        document.getElementById('user-block').hidden = false;
+        document.getElementById('avatar').src = u.avatar || '';
+        document.getElementById('user-stat').innerHTML =
+          '<div><strong>' + (u.nickname || u.true_name || '用户') + '</strong></div>' +
+          '<div>积分 ' + (u.point != null ? u.point : '-') + ' · 等级 ' + (u.level != null ? u.level : '-') + '</div>' +
+          (u.mobile_mask ? '<div>' + u.mobile_mask + '</div>' : '');
+        document.getElementById('active-stat').innerHTML =
+          '已报名：' + (a.is_sign ? '是' : '否') + ' · 参与人数 ' + (a.active_count != null ? a.active_count : '-');
+        document.getElementById('btn').disabled = false;
+      }).catch(function (e) {
+        renderError(e.message || String(e));
+      });
+
+      document.getElementById('btn').addEventListener('click', function () {
+        if (!state.ctx || !state.ctx.session) {
+          showToast('请先成功 bootstrap');
+          return;
+        }
+        showToast('演示成功：可在此用 ActiveWebSdk.apiPost 调业务接口');
+      });
     })();
   </script>
 </body>

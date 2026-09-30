@@ -946,7 +946,8 @@
 				}).then(res => {
 					const data = res.data || {}
 					if (this.$u.func.isWebDisplayActive(data)) {
-						const path = this.$u.func.buildActiveOpenPath(data)
+						const pageUrl = this.$u.func.resolveWebActivityPageUrl(data, this.id)
+						const path = this.$u.func.buildH5WrapperPath(pageUrl)
 						uni.redirectTo({ url: path })
 						return
 					}

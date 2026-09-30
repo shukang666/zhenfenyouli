@@ -22,6 +22,8 @@ use think\Model;
 use wxapp\aes\WXBizDataCrypt;
 use think\Validate;
 use api\wxapp\model\CommonModel;
+use api\wxapp\service\ActiveWebContext;
+use app\admin\model\active\ActiveSIgnModel;
 use cmf\lib\Upload;
 use think\Image;
 
@@ -1062,5 +1064,70 @@ HTML;
         return $html;
     }
 
+    /**
+     * Web 式活动 H5 -bootstrap：凭 URL 中的 web_ctx 换取用户摘要、活动摘要及后续调 API 用的 openid
+     * 无需 Header openid；票据过期需从小程序重新进入
+     */
+    public function active_web_bootstrap()
+    {
+        $webCtx = trim((string)$this->request->param('web_ctx', ''));
+        $activeIdParam = (int)$this->request->param('active_id', 0);
+        $payload = ActiveWebContext::resolve($webCtx, $activeIdParam > 0 ? $activeIdParam : null);
+        if ($payload === null) {
+            $this->error('登录上下文无效或已过期，请关闭后从小程序重新打开活动');
+        }
+        $activeId = (int)$payload['aid'];
+        $userId = (int)$payload['uid'];
+
+        $active = ActiveModel::where('id', $activeId)->where('delete_time', 0)->find();
+        if (empty($active) || !ActiveModel::isWebDisplay($active)) {
+            $this->error('活动不存在或不是 Web 式活动');
+        }
+
+        $member = MemberModel::where('id', $userId)->field('id,openid,nickname,true_name,avatar,mobile,community_id,point,level,status')->find();
+        if (empty($member) || (int)$member['status'] === 2) {
+            $this->error('用户不可用');
+        }
+
+        $sign = ActiveSIgnModel::where(['active_id' => $activeId, 'user_id' => $userId])->find();
+        $activeCount = ActiveSIgnModel::where('active_id', $activeId)->count();
+
+        $mobile = trim((string)$member['mobile']);
+        $mobileMask = '';
+        if (strlen($mobile) >= 11) {
+            $mobileMask = substr($mobile, 0, 3) . '****' . substr($mobile, -4);
+        }
+
+        $apiBase = rtrim(cmf_get_domain(), '/') . '/api';
+
+        $this->success('请求成功', [
+            'expires_at' => (int)$payload['exp'],
+            'user' => [
+                'id' => (int)$member['id'],
+                'nickname' => (string)($member['nickname'] ?? ''),
+                'true_name' => (string)($member['true_name'] ?? ''),
+                'avatar' => empty($member['avatar']) ? '' : cmf_get_asset_url($member['avatar']),
+                'point' => (float)($member['point'] ?? 0),
+                'level' => (int)($member['level'] ?? 0),
+                'community_id' => (int)($member['community_id'] ?? 0),
+                'mobile_mask' => $mobileMask,
+            ],
+            'session' => [
+                'openid' => (string)$member['openid'],
+            ],
+            'active' => [
+                'id' => $activeId,
+                'name' => (string)$active['name'],
+                'thumb' => empty($active['thumb']) ? '' : cmf_get_asset_url($active['thumb']),
+                'is_sign' => empty($sign) ? 0 : 1,
+                'sign_id' => empty($sign) ? 0 : (int)$sign['id'],
+                'active_count' => (int)$activeCount,
+            ],
+            'api' => [
+                'base' => $apiBase,
+                'auth_header' => 'openid',
+            ],
+        ]);
+    }
 
 }

@@ -1,6 +1,12 @@
 // 全局公共方法
 import { staticUploadBase } from '@/common/settings'
-import { buildActiveOpenPath, openActiveDetail, isWebDisplayActive } from '@/common/activeOpen.js'
+import {
+	buildActiveOpenPath,
+	buildH5WrapperPath,
+	isWebDisplayActive,
+	openActiveDetailWithContext,
+	resolveWebActivityPageUrl,
+} from '@/common/activeOpen.js'
 
 const ASSET_UPLOAD_BASE = staticUploadBase || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/'
 const ASSET_SITE_ORIGIN = ASSET_UPLOAD_BASE.replace(/\/upload\/?$/i, '')
@@ -123,6 +129,23 @@ const install = (Vue, vm) => {
 			return false
 		}
 		return true
+	}
+
+	const openActiveDetail = (itemOrId, extra) => {
+		const item = typeof itemOrId === 'object' && itemOrId !== null ? itemOrId : { id: itemOrId, ...(extra || {}) }
+		const id = item.id || itemOrId
+		if (!isWebDisplayActive(item)) {
+			vm.$u.route('/pages/activity/lsxf/details-new?id=' + id)
+			return
+		}
+		if (!vm.isLogin || !vm.userInfo?.openid) {
+			if (!checkLogin()) return
+		}
+		const issueContext = (activeId) =>
+			vm.$u.post('/wxapp/active/issue_web_context', { active_id: activeId }).then((res) => res.data || {})
+		openActiveDetailWithContext(item, extra, issueContext, () => {
+			checkLogin()
+		})
 	}
 
 	// 校验是否是H5页面
@@ -705,8 +728,10 @@ const install = (Vue, vm) => {
 		checkLogin,
 		checkH5,
 		buildActiveOpenPath,
+		buildH5WrapperPath,
 		openActiveDetail,
 		isWebDisplayActive,
+		resolveWebActivityPageUrl,
 		paramsToObj,
 		refreshPage,
 		prePage,
