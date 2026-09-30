@@ -23,8 +23,6 @@ use app\admin\model\member\MemberModel;
 use app\admin\model\order\OrderQrcodeModel;
 use app\admin\model\order\ScanLogModel;
 use app\admin\model\shop\ShopModel;
-use app\admin\model\active\WasteModel;
-use app\admin\model\active\WasteUserModel;
 use cmf\lib\Storage;
 use think\facade\Db;
 use think\Model;
@@ -91,7 +89,7 @@ class UserController extends AuthController
         $CheckModel = new CheckModel();
         $user = $memberModel->where(['id' => $this->user_id])
             ->field('id,nickname,true_name,mobile,avatar,openid,level,community_id,type
-            ,shop_balance_total,shop_balance,point,shop_balance balance,is_environmental,is_supervisor,is_merchant,community_parent_id
+            ,shop_balance_total,shop_balance,point,shop_balance balance,is_environmental,is_supervisor,is_merchant,community_parent_id,clock_pre_learn
             ')->find();
         $user['community'] = $CommunityModel->where(['id' => $user['community_id']])->value('name');
         $user['community_parent'] = CommunityParentModel::where(['id' => $user['community_parent_id']])->value('name');
@@ -100,9 +98,8 @@ class UserController extends AuthController
             ->where('type', 1)
             ->where(['user_id' => $user['id']])
             ->count() ? 1 : 0;
-        $waste_count = WasteModel::count();
-        $user_count = WasteUserModel::where('user_id', $user['id'])->count();
-        $user['is_learn'] = ($waste_count > 0 && $user_count >= $waste_count) ? 1 : 0;
+        $user['is_learn'] = !empty($user['clock_pre_learn']) ? 1 : 0;
+        unset($user['clock_pre_learn']);
         $user['check_status'] = $CheckModel->where('user_id', $user['id'])->value('status') ?? 0;
         $user['min_app_id'] = $this->get_config['min_app_id'];
         $shop_info = ShopModel::where('user_id', $user['id'])->field('status,msg')->find();

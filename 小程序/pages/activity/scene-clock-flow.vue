@@ -1052,12 +1052,12 @@
 					if (!info.is_learn) {
 						uni.showModal({
 							title: '还差一步',
-							content: '第一次打卡前，需要先看一遍垃圾分类说明（大约几分钟）。看完就能回来继续。',
+							content: '第一次打卡前，需要先看一遍打卡说明（大约几分钟）。看完并通过小测验即可继续。',
 							showCancel: false,
 							confirmText: '去学习',
 							confirmColor: '#38B061',
 							success: (r) => {
-								if (r.confirm) this.$u.route('/pages/flhd/list')
+								if (r.confirm) this.$u.route('/pages/flhd/ljfldk')
 							},
 						})
 						return
@@ -1089,12 +1089,12 @@
 				if (!info.is_learn) {
 					uni.showModal({
 						title: '还差一步',
-						content: '第一次打卡前，需要先看一遍垃圾分类说明（大约几分钟）。看完就能回来继续。',
+						content: '第一次打卡前，需要先看一遍打卡说明（大约几分钟）。看完并通过小测验即可继续。',
 						showCancel: false,
 						confirmText: '去学习',
 						confirmColor: '#38B061',
 						success: (res) => {
-							if (res.confirm) this.$u.route('/pages/flhd/list')
+							if (res.confirm) this.$u.route('/pages/flhd/ljfldk')
 						},
 					})
 					return
@@ -1137,9 +1137,15 @@
 			ensureExamGate() {
 				if (!this.isLogin) return Promise.resolve(true)
 				return this.$u.api.getUserInfo().then(res => {
-					this.$u.vuex('userInfo', res.data || {})
-					if (Number(res.data.is_answer) !== 1) {
-						this.$u.toast('请先看完分类说明并通过小测验')
+					const info = res.data || {}
+					this.$u.vuex('userInfo', info)
+					if (Number(info.is_learn) !== 1) {
+						this.$u.toast('请先完成打卡前学习')
+						setTimeout(() => this.$u.route('/pages/flhd/ljfldk'), 500)
+						return false
+					}
+					if (Number(info.is_answer) !== 1) {
+						this.$u.toast('请先通过分类小测验')
 						setTimeout(() => this.$u.route('/pages/flhd/ljfldk'), 500)
 						return false
 					}

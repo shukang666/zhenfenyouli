@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use api\wxapp\service\ClockPreLearnService;
 use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\active\ActiveUserModel;
@@ -118,6 +119,31 @@ class ForumController extends AuthController
             'create_time'  => time(),
         ]);
         $this->success('感谢分享');
+    }
+
+    /**
+     * 打卡前统一学习（固定三节，不读 waste 列表）
+     */
+    public function get_clock_pre_learn()
+    {
+        $done = 0;
+        if (!empty($this->user_id)) {
+            $done = (int)MemberModel::where('id', $this->user_id)->value('clock_pre_learn');
+        }
+        $this->success('请求成功', [
+            'sections' => ClockPreLearnService::getSections(),
+            'done'     => $done ? 1 : 0,
+        ]);
+    }
+
+    /**
+     * 标记已完成打卡前学习
+     */
+    public function complete_clock_pre_learn()
+    {
+        $this->checkUser();
+        MemberModel::where('id', $this->user_id)->update(['clock_pre_learn' => 1]);
+        $this->success('已完成学习', ['done' => 1]);
     }
 
     /**

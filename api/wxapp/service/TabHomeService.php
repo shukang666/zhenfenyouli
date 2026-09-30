@@ -9,8 +9,6 @@ use app\admin\model\active\ActiveModel;
 use app\admin\model\active\ActiveSIgnModel;
 use app\admin\model\active\MemberBadgeModel;
 use api\wxapp\model\AnswerModel;
-use app\admin\model\active\WasteModel;
-use app\admin\model\active\WasteUserModel;
 use app\admin\model\forum\ForumCommentModel;
 use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\forum\ForumModel;
@@ -295,7 +293,7 @@ class TabHomeService
     protected function fetchIndexUserBrief(): array
     {
         $member = MemberModel::where('id', $this->userId)
-            ->field('id,nickname,avatar,point,is_environmental')
+            ->field('id,nickname,avatar,point,is_environmental,clock_pre_learn')
             ->find();
         if (empty($member)) {
             return [];
@@ -309,9 +307,8 @@ class TabHomeService
             ->where('type', 1)
             ->where('user_id', $this->userId)
             ->count() ? 1 : 0;
-        $waste_count = WasteModel::count();
-        $user_count = WasteUserModel::where('user_id', $this->userId)->count();
-        $row['is_learn'] = ($waste_count > 0 && $user_count >= $waste_count) ? 1 : 0;
+        $row['is_learn'] = !empty($row['clock_pre_learn']) ? 1 : 0;
+        unset($row['clock_pre_learn']);
         $forumTimes = ForumModel::where(['type' => 2, 'user_id' => $this->userId])->column('create_time');
         $row['clock_count'] = $this->calcNowContinueSignDays($forumTimes);
         $row['clock_days'] = $row['clock_count'];

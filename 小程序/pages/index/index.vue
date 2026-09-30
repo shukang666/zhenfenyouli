@@ -805,16 +805,16 @@ export default {
 				} catch (e) {
 					console.log('刷新用户状态失败:', e)
 				}
-				// 1. 尚未学完全部垃圾分类指导 → 引导学习
+				// 1. 尚未完成打卡前学习 → 引导学习
 				if (!info.is_learn) {
 					uni.showModal({
 						title: '提示',
-						content: '请先学习垃圾分类指导，通过答题考试后可参与活动',
+						content: '请先完成打卡前学习，通过答题考试后可参与垃圾分类打卡',
 						showCancel: false,
-						confirmText: '立即学习',
+						confirmText: '去学习',
 						confirmColor: '#39BF3E',
 						success: (res) => {
-							if (res.confirm) this.$u.route('/pages/flhd/list')
+							if (res.confirm) this.$u.route('/pages/flhd/ljfldk')
 						}
 					})
 					return

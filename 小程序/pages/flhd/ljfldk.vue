@@ -18,8 +18,8 @@
 
 		<!-- 新用户：真分介绍 + 考试一体；通过后下方打卡 -->
 		<view class="dk-block dk-block--intro" v-if="showLearnHub">
-			<text class="dk-block-t">了解践行真分</text>
-			<text class="dk-block-hint">请先阅读介绍、意义与收获，再完成下方小测验</text>
+			<text class="dk-block-t">打卡前学习</text>
+			<text class="dk-block-hint">请阅读以下三部分说明，确认后再参加分类小测验</text>
 			<scroll-view scroll-y class="dk-intro-scroll" :show-scrollbar="false">
 				<view class="dk-intro-card" v-for="(sec, si) in introSections" :key="'intro-' + si">
 					<text class="dk-intro-name">{{ sec.name }}</text>
@@ -28,19 +28,19 @@
 						<u-parse :html="sec.contentHtml"></u-parse>
 					</view>
 				</view>
-				<view class="dk-intro-empty" v-if="introLoaded && !introSections.length">介绍内容加载失败，请稍后重试或联系社区管理员</view>
+				<view class="dk-intro-empty" v-if="introLoaded && !introSections.length">学习内容加载失败，请稍后重试</view>
 			</scroll-view>
 			<view
 				class="dk-intro-ack"
 				:class="{ 'dk-intro-ack--done': introAcknowledged }"
 				@tap="ackIntro"
 			>
-				<text>{{ introAcknowledged ? '已完成阅读' : '我已阅读以上介绍' }}</text>
+				<text>{{ introAcknowledged ? '已完成学习' : '我已阅读以上内容' }}</text>
 			</view>
 			<view class="dk-exam-block dk-exam-block--inline">
 				<text class="dk-block-t dk-exam-block-t">分类小测验</text>
 				<view class="dk-exam-card" :class="{ 'dk-exam-card--locked': !introAcknowledged, 'dk-exam-card--ready': introAcknowledged }">
-					<text class="dk-exam-desc" v-if="!introAcknowledged">阅读并确认上方介绍后，即可开始答题。</text>
+					<text class="dk-exam-desc" v-if="!introAcknowledged">阅读并确认上方内容后，即可开始答题。</text>
 					<text class="dk-exam-desc" v-else>通过测验后即可选择场景打卡；也可稍后再答。</text>
 					<view
 						class="dk-scene-btn"
@@ -49,7 +49,7 @@
 						:hover-stay-time="80"
 						@tap="onExamTap"
 					>
-						<text class="dk-scene-btn-t">{{ introAcknowledged ? '开始答题' : '请先阅读介绍' }}</text>
+						<text class="dk-scene-btn-t">{{ introAcknowledged ? '开始答题' : '请先完成学习' }}</text>
 					</view>
 				</view>
 			</view>
@@ -108,12 +108,6 @@
 		isSupervisorBannerHidden,
 		shouldShowSupervisorInvite,
 	} from '@/common/supervisorInvite.js'
-	import {
-		ZHENFEN_INTRO_NAMES,
-		isIntroAcknowledged,
-		setIntroAcknowledged,
-	} from '@/common/zhenfenIntro.js'
-
 	export default {
 		data() {
 			return {
@@ -178,60 +172,56 @@
 		},
 		onShow() {
 			this.supervisorBannerLocalHide = isSupervisorBannerHidden()
-			this.introAcknowledged = isIntroAcknowledged()
 			this.refreshUser().then(() => {
 				if (!this.isLogin) return
+				this.syncIntroAckFromUser()
 				if (this.showLearnHub) {
 					this.loadIntroSections()
 				}
 			})
 		},
 		methods: {
+			syncIntroAckFromUser() {
+				const u = this.userInfo || {}
+				this.introAcknowledged = Number(u.is_learn) === 1
+			},
 			loadIntroSections() {
 				this.introLoaded = false
-				return this.$u.api.get_waste_list({ page: 1 }).then(res => {
-					const list = (res.data && res.data.list && res.data.list.data) || []
-					const byName = {}
-					list.forEach(item => {
-						if (item && item.name) byName[item.name] = item
-					})
-					const ordered = ZHENFEN_INTRO_NAMES.map(name => byName[name]).filter(Boolean)
-					const tasks = ordered.map(item =>
-						this.$u.api.get_waste_list({ id: item.id }).then(detail => {
-							const row = detail.data || {}
-							return {
-								id: item.id,
-								name: row.name || item.name,
-								desc: row.desc || item.desc || '',
-								contentHtml: this.$u.func.formatRichText(row.content || ''),
-							}
-						}).catch(() => ({
-							id: item.id,
-							name: item.name,
-							desc: item.desc || '',
-							contentHtml: '',
-						})),
-					)
-					return Promise.all(tasks).then(sections => {
-						this.introSections = sections
-						this.introLoaded = true
-					})
+				return this.$u.api.get_clock_pre_learn().then(res => {
+					const data = res.data || {}
+					const list = data.sections || []
+					this.introSections = list.map(sec => ({
+						id: sec.id,
+						name: sec.title || '',
+						desc: '',
+						contentHtml: this.$u.func.formatRichText(sec.content || ''),
+					}))
+					if (Number(data.done) === 1) {
+						this.introAcknowledged = true
+					}
+					this.introLoaded = true
 				}).catch(() => {
 					this.introLoaded = true
 				})
 			},
 			ackIntro() {
-				this.introAcknowledged = true
-				setIntroAcknowledged()
-				this.introSections.forEach(sec => {
-					if (sec && sec.id) {
-						this.$u.api.get_waste_list({ id: sec.id }).catch(() => {})
-					}
+				if (!this.isLogin) {
+					return this.$u.route('/pages/public/login')
+				}
+				if (this.introAcknowledged) return
+				this.$u.api.complete_clock_pre_learn().then(() => {
+					this.introAcknowledged = true
+					return this.refreshUser()
+				}).then(() => {
+					this.syncIntroAckFromUser()
+					this.$u.toast('学习已完成')
+				}).catch(err => {
+					this.$u.toast((err && err.msg) || '提交失败，请重试')
 				})
 			},
 			onExamTap() {
 				if (!this.introAcknowledged) {
-					return this.$u.toast('请先阅读并确认真分介绍')
+					return this.$u.toast('请先阅读并确认以上内容')
 				}
 				this.goExam()
 			},
@@ -247,7 +237,7 @@
 			navigateScene(sceneKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.showSceneHub) {
-					return this.$u.toast('请先完成介绍阅读并通过分类测验')
+					return this.$u.toast('请先完成打卡前学习并通过分类测验')
 				}
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				const scene = this.scenes.find(s => s.key === sceneKey)
