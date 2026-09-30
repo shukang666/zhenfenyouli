@@ -12,10 +12,9 @@ export function getStepTitles() {
 		hub_empty: '请稍等',
 		why: '为什么要分',
 		setup: '摆好分类桶',
-		points: '选' + HOME_POINT_LABEL_SHORT,
+		points: '选桶打卡',
 		manage: '改' + HOME_POINT_LABEL_SHORT,
 		cate: '选桶打卡',
-		points: '选桶打卡',
 		guide: '为什么要分',
 		survey: '您的投放习惯',
 		learn: '上传分类成果',
@@ -23,7 +22,7 @@ export function getStepTitles() {
 }
 
 export function getIntroLead() {
-	return '分开扔，是为了少污染、少浪费，也方便社区清运'
+	return '分开扔，少污染、少浪费，也方便社区清运'
 }
 
 export function getWhyIntroLead() {
@@ -31,14 +30,14 @@ export function getWhyIntroLead() {
 }
 
 export function getWhyIntroSummary() {
-	return '先看上面要点，再在下方点选您今天的场景，跟着提示摆桶、打卡即可。'
+	return '先看下面要点，再选您今天的场景，跟着提示摆桶、打卡即可'
 }
 
 /** 建议家里各房间放什么桶（引导页展示，非强制） */
 export function getBinLayoutExamples() {
 	return [
 		{ room: '厨房', cate: '厨余垃圾、其他垃圾', emoji: '🍳', tip: '菜叶、剩饭、果皮放这里，别和塑料袋混一起' },
-		{ room: '客厅', cate: '可回收物', emoji: '🛋️', tip: '纸箱、瓶罐、旧杂志，干燥干净再投放' },
+		{ room: '客厅', cate: '可回收物', emoji: '🛋️', tip: '纸箱、瓶罐、旧杂志，干燥干净再投' },
 		{ room: '卫生间', cate: '其他垃圾', emoji: '🚿', tip: '用过的纸巾、一次性用品等' },
 		{ room: '固定一处', cate: '有害垃圾', emoji: '⚠️', tip: '电池、灯管、过期药品，少量攒够再投' },
 	]
@@ -62,7 +61,7 @@ export function getSortDurationOptions() {
 
 /** 设置页：一句话说清要做什么 */
 export function getSetupIntroLine() {
-	return '厨房放厨余桶、客厅放可回收桶……添好名字和种类，给桶拍张照，方便以后打卡对照。'
+	return '厨房放厨余桶、客厅放可回收桶…添好名字和种类，给桶拍张照，方便以后打卡对照。'
 }
 
 /** 选择页：还没有位置时 */
@@ -73,18 +72,18 @@ export function getIntroSummary() {
 /** 展开「了解更多」 */
 export function getIntroBlocks() {
 	const local =
-		'在七贤岭：手机上学会怎么分，扔对了拍个照还能攒积分；全家一起动手，记得更牢。'
+		'在七贤岭：手机上学怎么分，扔对了拍照还能攒积分；全家一起动手，记得更牢。'
 
 	return [
 		{
 			id: 'what',
 			title: '混装会带来什么',
-			body: '一袋混装，后面很难分拣再利用；厨余混进其他垃圾还容易发臭、招虫，处理成本也更高。',
+			body: '一袋混装，后面很难分拣再利用；厨余混进其他垃圾还容易发臭、招虫，处理成本更高。',
 		},
 		{
 			id: 'benefit',
 			title: '分开之后的好处',
-			body: '厨余可以专门处理，纸箱瓶罐能回收再造，电池药品单独收更安全。小区更干净，资源也少浪费。',
+			body: '厨余专门处理，纸箱瓶罐能回收再造，电池药品单独收更安全，小区更干净、少浪费。',
 		},
 		{
 			id: 'policy',
@@ -94,7 +93,7 @@ export function getIntroBlocks() {
 		{
 			id: 'vision',
 			title: '打卡在记录什么',
-			body: '不是考你会不会分，而是记录您认真分类的成果，用得勤有积分，邻里一起把习惯留住。',
+			body: '不是考你会不会分，而是记录您认真分类的成果；用得勤有积分，邻里一起把习惯留住。',
 		},
 	]
 }
@@ -164,19 +163,19 @@ export function getThemeIntroSteps() {
 		{
 			num: '2',
 			title: '分清种类',
-			desc: '厨余、可回收、有害、其他要分开。拿不准可以回看分类说明。',
+			desc: '厨余、可回收、有害、其他要分开。拿不准可回看分类说明。',
 			icon: '♻️',
 		},
 		{
 			num: '3',
 			title: '动手投放',
-			desc: '按提示扔进对应颜色的桶，别混装、别投错桶。',
+			desc: '按提示投进对应颜色的桶，别混装、别投错桶。',
 			icon: '🗑️',
 		},
 		{
 			num: '4',
 			title: '拍照留记录',
-			desc: '拍清楚本次投放，提交后可得积分，坚持做更容易坚持。',
+			desc: '拍清楚本次投放，提交后可得积分。',
 			icon: '📷',
 		},
 	]

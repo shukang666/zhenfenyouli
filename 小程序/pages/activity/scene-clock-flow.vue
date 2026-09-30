@@ -1771,13 +1771,13 @@
 	padding: 28rpx 28rpx 16rpx;
 }
 .scf-hero-kicker {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #6a756c;
 }
 .scf-hero-title {
 	display: block;
 	margin-top: 8rpx;
-	font-size: 40rpx;
+	font-size: 44rpx;
 	font-weight: 800;
 	color: #142018;
 }
@@ -1804,12 +1804,12 @@
 	box-shadow: 0 4rpx 12rpx rgba(20, 32, 24, 0.08);
 }
 .scf-step-num {
-	font-size: 20rpx;
+	font-size: 24rpx;
 	font-weight: 700;
 	color: #18af38;
 }
 .scf-step-lab {
-	font-size: 20rpx;
+	font-size: 24rpx;
 	color: #3d4a42;
 }
 .scf-body {
@@ -1845,14 +1845,14 @@
 .scf-promo-line {
 	display: block;
 	text-align: center;
-	font-size: 30rpx;
+	font-size: 34rpx;
 	font-weight: 700;
 	color: #fff;
 	line-height: 1.45;
 }
 .scf-promo-line--sub {
 	margin-top: 10rpx;
-	font-size: 24rpx;
+	font-size: 28rpx;
 	font-weight: 500;
 	opacity: 0.92;
 }
@@ -1861,7 +1861,7 @@
 }
 .scf-promo-line--subdark {
 	color: #5f7166;
-	font-size: 24rpx;
+	font-size: 28rpx;
 	font-weight: 500;
 	margin-top: 8rpx;
 }
@@ -1975,7 +1975,7 @@
 }
 .scf-hint {
 	display: block;
-	font-size: 28rpx;
+	font-size: 30rpx;
 	color: #4a564e;
 	margin-bottom: 16rpx;
 	line-height: 1.55;
@@ -2021,7 +2021,7 @@
 }
 .scf-pick-lead-t {
 	display: block;
-	font-size: 34rpx;
+	font-size: 38rpx;
 	font-weight: 700;
 	color: #fff;
 	line-height: 1.4;
@@ -2029,7 +2029,7 @@
 .scf-pick-lead-s {
 	display: block;
 	margin-top: 10rpx;
-	font-size: 26rpx;
+	font-size: 30rpx;
 	color: rgba(255, 255, 255, 0.88);
 	line-height: 1.45;
 }
@@ -2300,7 +2300,7 @@
 .scf-bin-tile-input {
 	width: 100%;
 	box-sizing: border-box;
-	font-size: 26rpx;
+	font-size: 30rpx;
 	font-weight: 600;
 	color: #142018;
 	padding: 10rpx 12rpx;
@@ -2327,7 +2327,7 @@
 .scf-bin-tile-cate-t {
 	flex: 1;
 	min-width: 0;
-	font-size: 24rpx;
+	font-size: 28rpx;
 	font-weight: 600;
 	color: #243028;
 	overflow: hidden;
@@ -2865,13 +2865,13 @@
 }
 .scf-info-title {
 	display: block;
-	font-size: 26rpx;
+	font-size: 30rpx;
 	font-weight: 700;
 	color: #243028;
 	margin-bottom: 8rpx;
 }
 .scf-info-text {
-	font-size: 26rpx;
+	font-size: 30rpx;
 	color: #4a564e;
 	line-height: 1.65;
 }
@@ -3179,9 +3179,9 @@
 .scf-btn {
 	flex: 1;
 	text-align: center;
-	padding: 22rpx 16rpx;
+	padding: 24rpx 16rpx;
 	border-radius: 14rpx;
-	font-size: 28rpx;
+	font-size: 32rpx;
 	font-weight: 600;
 }
 .scf-btn--block {
@@ -3346,7 +3346,7 @@
 	display: block;
 	margin-top: 12rpx;
 	margin-bottom: 28rpx;
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #888;
 	text-align: center;
 	line-height: 1.5;
@@ -3383,12 +3383,12 @@
 	margin-right: 8rpx;
 }
 .zf-intro-step-title {
-	font-size: 28rpx;
+	font-size: 32rpx;
 	font-weight: 600;
 	color: #222;
 }
 .zf-intro-step-desc {
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #666;
 	line-height: 1.55;
 }
@@ -3402,6 +3402,7 @@
 .zf-promo--scene-head {
 	margin-top: 0;
 	margin-bottom: 0;
+	padding: 28rpx 24rpx 32rpx;
 }
 .zf-scenes-pick {
 	margin-top: 28rpx;
@@ -3412,7 +3413,7 @@
 }
 .zf-scenes-kicker {
 	display: block;
-	font-size: 26rpx;
+	font-size: 28rpx;
 	font-weight: 700;
 	color: #18af38;
 	margin-bottom: 8rpx;
@@ -3420,7 +3421,7 @@
 }
 .zf-scenes-hint {
 	display: block;
-	font-size: 30rpx;
+	font-size: 34rpx;
 	font-weight: 700;
 	color: #142018;
 	margin-bottom: 20rpx;
@@ -3514,14 +3515,14 @@
 }
 .zf-scene-title {
 	display: block;
-	font-size: 32rpx;
+	font-size: 36rpx;
 	font-weight: 700;
 	color: #1a1a1a;
 }
 .zf-scene-desc {
 	display: block;
 	margin-top: 8rpx;
-	font-size: 24rpx;
+	font-size: 28rpx;
 	color: #888;
 }
 .zf-scene-arrow {
@@ -3538,14 +3539,14 @@
 .zf-promo-line {
 	display: block;
 	text-align: center;
-	font-size: 30rpx;
+	font-size: 34rpx;
 	font-weight: 700;
 	color: #fff;
 	line-height: 1.45;
 }
 .zf-promo-line--sub {
 	margin-top: 10rpx;
-	font-size: 24rpx;
+	font-size: 28rpx;
 	font-weight: 500;
 	opacity: 0.92;
 }
@@ -3587,22 +3588,22 @@
 }
 .zf-promo-pillar-lab {
 	margin-top: 8rpx;
-	font-size: 24rpx;
+	font-size: 28rpx;
 	font-weight: 700;
 	color: rgba(255, 255, 255, 0.98);
 	line-height: 1.35;
 }
 .zf-promo-pillar-desc {
 	margin-top: 8rpx;
-	font-size: 22rpx;
-	color: rgba(255, 255, 255, 0.88);
-	line-height: 1.45;
+	font-size: 26rpx;
+	color: rgba(255, 255, 255, 0.9);
+	line-height: 1.5;
 }
 .zf-promo-pillar--tile .zf-promo-pillar-lab {
-	font-size: 24rpx;
+	font-size: 28rpx;
 }
 .zf-promo-pillars--mini .zf-promo-pillar-lab {
-	font-size: 22rpx;
+	font-size: 26rpx;
 	font-weight: 600;
 }
 
