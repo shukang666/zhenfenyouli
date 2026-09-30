@@ -42,11 +42,97 @@
 
 					</view>
 
-					<u-form-item label="巡检点位" prop="cate_name" label-width="160" :border-bottom="true">
+					<u-form-item label="工作小区" prop="community_name" label-width="160" :border-bottom="true">
 
-						<u-input v-model="form.cate_name" placeholder="选择本次工作的点位" type="select" @click="cate_show = true" />
+						<u-input v-model="form.community_name" placeholder="请选择小区" type="select" @click="openCommunityPicker" />
 
 					</u-form-item>
+
+					<u-form-item label="巡检点位" prop="cate_name" label-width="160" :border-bottom="true">
+
+						<u-input v-model="form.cate_name" placeholder="选择本次工作的点位" type="select" @click="openPointPicker" />
+
+					</u-form-item>
+
+					<view class="inspect-field">
+
+						<text class="inspect-field-label">现场是否整洁</text>
+
+						<view class="seg-group u-flex">
+
+							<view
+
+								v-for="opt in hygieneOptions"
+
+								:key="opt.value"
+
+								class="seg-item"
+
+								:class="{ active: form.site_hygiene === opt.value }"
+
+								@click="form.site_hygiene = opt.value"
+
+							>{{ opt.label }}</view>
+
+						</view>
+
+					</view>
+
+					<view class="inspect-field">
+
+						<text class="inspect-field-label">有无整改意见</text>
+
+						<view class="seg-group u-flex">
+
+							<view
+
+								class="seg-item"
+
+								:class="{ active: form.has_rectify === 0 }"
+
+								@click="setHasRectify(0)"
+
+							>无</view>
+
+							<view
+
+								class="seg-item seg-item-warn"
+
+								:class="{ active: form.has_rectify === 1 }"
+
+								@click="setHasRectify(1)"
+
+							>有</view>
+
+						</view>
+
+						<view class="field-hint" v-if="form.has_rectify === 1">
+
+							提交后将同步至「随手拍问题反馈」，便于社区跟进整改
+
+						</view>
+
+					</view>
+
+					<view class="inspect-field inspect-field-last" v-if="form.has_rectify === 1">
+
+						<text class="inspect-field-label">整改意见</text>
+
+						<u-input
+
+							v-model="form.rectify_remark"
+
+							type="textarea"
+
+							height="160"
+
+							maxlength="500"
+
+							placeholder="请描述需要整改的问题（必填）"
+
+						/>
+
+					</view>
 
 					<u-form-item label="工作情况" prop="content" label-width="160" label-position="top" :border-bottom="false">
 
@@ -134,6 +220,56 @@
 
 
 
+		<view v-if="showCommunityDropdown" class="community-dropdown-mask" @click="showCommunityDropdown = false">
+
+			<view class="community-dropdown" @click.stop>
+
+				<view class="u-font-28 u-font-bold u-m-b-16">选择工作小区</view>
+
+				<view class="u-radius-5 u-p-lr-20" style="background-color: #f7f7f7;">
+
+					<u-input v-model="communityKeyword" type="text" placeholder="输入小区名称搜索" :clearable="true" @input="onCommunitySearch" />
+
+				</view>
+
+				<scroll-view scroll-y class="community-dropdown-list" @scrolltolower="loadMoreCommunity" lower-threshold="50">
+
+					<view v-if="!communityResults.length && !communityLoading" class="u-text-center u-p-30 u-font-24 u-type-info">
+
+						{{ communityKeyword ? '未找到相关小区' : '输入名称搜索，或下滑加载更多' }}
+
+					</view>
+
+					<view
+
+						v-for="item in communityResults"
+
+						:key="item.id"
+
+						class="u-p-lr-20 u-p-tb-15 community-dropdown-item"
+
+						@click="selectCommunity(item)"
+
+					>
+
+						<view class="u-font-28">{{ item.name }}</view>
+
+						<view class="u-font-24 u-type-info" v-if="item.parent_name">{{ item.parent_name }}</view>
+
+					</view>
+
+					<view v-if="communityLoading" class="u-text-center u-p-tb-20 u-font-24 u-type-info">加载中...</view>
+
+					<view v-if="communityNoMore && communityResults.length" class="u-text-center u-p-tb-20 u-font-24 u-type-info">没有更多了</view>
+
+				</scroll-view>
+
+			</view>
+
+		</view>
+
+
+
 		<u-mask :show="tipShow">
 
 			<view class="u-w-560 u-radius-10 u-type-white-bg u-abso-center u-p-30" v-if="showType == 1">
@@ -218,6 +354,8 @@
 
 	import { uploadUrl } from '@/common/settings'
 
+	const DWXJ_COMMUNITY_STORAGE_KEY = 'dwxj_last_inspect_community'
+
 	export default {
 
 		data() {
@@ -228,13 +366,23 @@
 
 				form: {
 
-					type: 6,
+					type: 3,
+
+					community_id: 0,
+
+					community_name: '',
 
 					cate_id: 0,
 
 					cate_name: '',
 
 					content: '',
+
+					site_hygiene: 'tidy',
+
+					has_rectify: 0,
+
+					rectify_remark: '',
 
 					image_one: '',
 
@@ -276,7 +424,41 @@
 
 					}],
 
+					community_name: [{
+
+						required: true,
+
+						message: '请选择工作小区',
+
+						trigger: ['change', 'blur'],
+
+					}],
+
 				},
+
+				hygieneOptions: [
+
+					{ label: '整洁', value: 'tidy' },
+
+					{ label: '一般', value: 'average' },
+
+					{ label: '较差', value: 'poor' },
+
+				],
+
+				showCommunityDropdown: false,
+
+				communityKeyword: '',
+
+				communityResults: [],
+
+				communityPage: 1,
+
+				communityLastPage: 1,
+
+				communityLoading: false,
+
+				communitySearchTimer: null,
 
 				cate_show: false,
 
@@ -307,6 +489,12 @@
 		},
 
 		computed: {
+
+			communityNoMore() {
+
+				return this.communityPage >= this.communityLastPage
+
+			},
 
 			pageTitle() {
 
@@ -348,11 +536,315 @@
 
 			})
 
-			this.get_community_cate_list()
+			this.initInspectCommunity()
 
 		},
 
 		methods: {
+
+			saveLastCommunity() {
+
+				if (!this.form.community_id) return
+
+				try {
+
+					uni.setStorageSync(DWXJ_COMMUNITY_STORAGE_KEY, {
+
+						id: this.form.community_id,
+
+						name: this.form.community_name,
+
+					})
+
+				} catch (e) {}
+
+			},
+
+			initInspectCommunity() {
+
+				let picked = null
+
+				try {
+
+					picked = uni.getStorageSync(DWXJ_COMMUNITY_STORAGE_KEY)
+
+				} catch (e) {}
+
+				if (picked && picked.id) {
+
+					this.form.community_id = picked.id
+
+					this.form.community_name = picked.name || ''
+
+				} else if (this.userInfo && this.userInfo.community_id) {
+
+					this.form.community_id = this.userInfo.community_id
+
+					this.form.community_name = this.userInfo.community || ''
+
+				}
+
+				if (this.form.community_id) {
+
+					this.loadPointList(this.form.community_id)
+
+				}
+
+			},
+
+			openCommunityPicker() {
+
+				this.showCommunityDropdown = true
+
+				this.communityKeyword = ''
+
+				this.communityPage = 1
+
+				this.communityResults = []
+
+				this.loadCommunityList('', true)
+
+			},
+
+			loadCommunityList(keyword, isReset = false) {
+
+				if (this.communityLoading) return
+
+				this.communityLoading = true
+
+				this.$u.api.search_community({ keyword, page: isReset ? 1 : this.communityPage, page_size: 20 }).then(res => {
+
+					const data = res.data || {}
+
+					const list = data.data || []
+
+					if (isReset) {
+
+						this.communityResults = list
+
+						this.communityPage = 1
+
+					} else {
+
+						this.communityResults = this.communityResults.concat(list)
+
+					}
+
+					this.communityLastPage = data.last_page || 1
+
+				}).catch(() => {}).finally(() => {
+
+					this.communityLoading = false
+
+				})
+
+			},
+
+			loadMoreCommunity() {
+
+				if (this.communityLoading || this.communityNoMore) return
+
+				this.communityPage++
+
+				this.loadCommunityList(this.communityKeyword.trim(), false)
+
+			},
+
+			onCommunitySearch(value) {
+
+				if (this.communitySearchTimer) clearTimeout(this.communitySearchTimer)
+
+				const keyword = (value || '').trim()
+
+				this.communitySearchTimer = setTimeout(() => {
+
+					this.loadCommunityList(keyword, true)
+
+				}, 300)
+
+			},
+
+			selectCommunity(item) {
+
+				if (!item || !item.id) return
+
+				this.form.community_id = item.id
+
+				this.form.community_name = item.name
+
+				this.form.cate_id = 0
+
+				this.form.cate_name = ''
+
+				this.showCommunityDropdown = false
+
+				this.loadPointList(item.id)
+
+			},
+
+			openPointPicker() {
+
+				if (!this.form.community_id) {
+
+					uni.showToast({ title: '请先选择工作小区', icon: 'none' })
+
+					this.openCommunityPicker()
+
+					return
+
+				}
+
+				if (!this.cate_list.length) {
+
+					this.loadPointList(this.form.community_id, () => {
+
+						if (!this.cate_list.length) {
+
+							uni.showToast({ title: '该小区暂无点位', icon: 'none' })
+
+							return
+
+						}
+
+						this.cate_show = true
+
+					})
+
+					return
+
+				}
+
+				this.cate_show = true
+
+			},
+
+			loadPointList(communityId, done) {
+
+				this.$u.api.get_community_cate_list({ community_id: communityId }).then(res => {
+
+					this.cate_list = res.data || []
+
+					if (typeof done === 'function') done()
+
+				}).catch(() => {
+
+					if (typeof done === 'function') done()
+
+				})
+
+			},
+
+			setHasRectify(val) {
+
+				this.form.has_rectify = val
+
+				if (val === 0) {
+
+					this.form.rectify_remark = ''
+
+				}
+
+			},
+
+			buildSubmitContent() {
+
+				const hygieneMap = { tidy: '整洁', average: '一般', poor: '较差' }
+
+				const lines = [
+
+					`现场整洁：${hygieneMap[this.form.site_hygiene] || this.form.site_hygiene}`,
+
+					`整改意见：${this.form.has_rectify === 1 ? '有' : '无'}`,
+
+				]
+
+				if (this.form.has_rectify === 1 && this.form.rectify_remark) {
+
+					lines.push(`整改说明：${this.form.rectify_remark.trim()}`)
+
+				}
+
+				const work = (this.form.content || '').trim()
+
+				if (work) {
+
+					lines.push('')
+
+					lines.push('工作情况：')
+
+					lines.push(work)
+
+				}
+
+				return lines.join('\n')
+
+			},
+
+			firstInspectPhotoUrl() {
+
+				const keys = ['image_one', 'image_two', 'image_three']
+
+				for (let i = 0; i < keys.length; i++) {
+
+					const k = keys[i]
+
+					if (this.form[k]) {
+
+						return this.photoPreviewUrl(k)
+
+					}
+
+				}
+
+				return ''
+
+			},
+
+			submitShotReportIfNeeded() {
+
+				if (this.form.has_rectify !== 1) {
+
+					return Promise.resolve()
+
+				}
+
+				const remark = (this.form.rectify_remark || '').trim()
+
+				const image = this.firstInspectPhotoUrl()
+
+				if (!remark || !image) {
+
+					return Promise.resolve()
+
+				}
+
+				const prefix = String(this.form.type) === '4' ? '【桶边督导整改意见】' : '【点位巡检整改意见】'
+
+				const loc = [this.form.community_name, this.form.cate_name].filter(Boolean).join('·')
+
+				return this.$u.api.postShotReport({
+
+					image,
+
+					remark: `${prefix}${loc ? '（' + loc + '）' : ''} ${remark}`,
+
+					location_type: 1,
+
+					community_id: this.form.community_id,
+
+					community_name: this.form.community_name,
+
+					point_id: this.form.cate_id,
+
+					point_name: this.form.cate_name,
+
+				}).catch(() => {
+
+					uni.showToast({ title: '工作记录已提交，随手拍同步失败请稍后在问题反馈补报', icon: 'none', duration: 3000 })
+
+				})
+
+			},
 
 			photoPreviewUrl(key) {
 
@@ -506,19 +998,11 @@
 
 			},
 
-			get_community_cate_list() {
-
-				this.$u.api.get_community_cate_list().then(res => {
-
-					this.cate_list = res.data
-
-				})
-
-			},
-
 			goBack() {
 
 				this.tipShow = false
+
+				this.saveLastCommunity()
 
 				uni.redirectTo({
 
@@ -530,11 +1014,45 @@
 
 			submit() {
 
+				if (this.form.has_rectify === 1) {
+
+					if (!(this.form.rectify_remark || '').trim()) {
+
+						uni.showToast({ title: '请填写整改意见', icon: 'none' })
+
+						return
+
+					}
+
+					if (!this.firstInspectPhotoUrl()) {
+
+						uni.showToast({ title: '同步随手拍需至少上传一张留证照片', icon: 'none' })
+
+						return
+
+					}
+
+				}
+
 				this.$refs.uForm.validate(valid => {
 
-					if (valid) {
+					if (!valid) return
 
-						this.$u.api.add_forum(this.form).then(res => {
+					const payload = {
+
+						...this.form,
+
+						content: this.buildSubmitContent(),
+
+						inspect_community_id: this.form.community_id,
+
+					}
+
+					this.$u.api.add_forum(payload).then(res => {
+
+						this.saveLastCommunity()
+
+						return this.submitShotReportIfNeeded().then(() => {
 
 							this.point = res.data.point
 
@@ -542,7 +1060,11 @@
 
 							this.tipShow = true
 
-						}).catch(res => {
+						})
+
+					}).catch(res => {
+
+						if (res && res.data && res.data.remaining_seconds) {
 
 							this.remaining_seconds = res.data.remaining_seconds
 
@@ -550,9 +1072,9 @@
 
 							this.tipShow = true
 
-						})
+						}
 
-					}
+					})
 
 				})
 
@@ -945,6 +1467,152 @@
 	font-size: 28rpx;
 
 	color: #18af38;
+
+}
+
+.inspect-field {
+
+	padding: 20rpx 0;
+
+	border-bottom: 1rpx solid #f0f2f0;
+
+}
+
+.inspect-field-last {
+
+	border-bottom: none;
+
+	padding-bottom: 8rpx;
+
+}
+
+.inspect-field-label {
+
+	display: block;
+
+	font-size: 28rpx;
+
+	color: #243028;
+
+	margin-bottom: 16rpx;
+
+}
+
+.seg-group {
+
+	flex-wrap: wrap;
+
+	gap: 16rpx;
+
+}
+
+.seg-item {
+
+	padding: 12rpx 28rpx;
+
+	font-size: 26rpx;
+
+	color: #666;
+
+	background: #f5f5f5;
+
+	border-radius: 8rpx;
+
+	border: 2rpx solid transparent;
+
+}
+
+.seg-item.active {
+
+	color: #18af38;
+
+	background: #e8f8ec;
+
+	border-color: #18af38;
+
+	font-weight: 600;
+
+}
+
+.seg-item-warn.active {
+
+	color: #e65100;
+
+	background: #fff3e0;
+
+	border-color: #ff9800;
+
+}
+
+.field-hint {
+
+	margin-top: 12rpx;
+
+	font-size: 22rpx;
+
+	color: #9aa59d;
+
+	line-height: 1.45;
+
+}
+
+.community-dropdown-mask {
+
+	position: fixed;
+
+	left: 0;
+
+	right: 0;
+
+	top: 0;
+
+	bottom: 0;
+
+	background-color: rgba(0, 0, 0, 0.35);
+
+	z-index: 999;
+
+	display: flex;
+
+	align-items: flex-start;
+
+	justify-content: center;
+
+}
+
+.community-dropdown {
+
+	margin-top: 200rpx;
+
+	width: 690rpx;
+
+	background-color: #fff;
+
+	border-radius: 16rpx;
+
+	padding: 24rpx;
+
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+
+}
+
+.community-dropdown-list {
+
+	max-height: 560rpx;
+
+	margin-top: 16rpx;
+
+}
+
+.community-dropdown-item {
+
+	border-bottom: 1rpx solid #f0f0f0;
+
+}
+
+.community-dropdown-item:last-child {
+
+	border-bottom: none;
 
 }
 

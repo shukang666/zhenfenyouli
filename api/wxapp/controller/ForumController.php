@@ -157,6 +157,23 @@ class ForumController extends AuthController
 
         $params['community_id'] = $this->user_info['subject_community_id'];
 
+        if (in_array((int)$type, [3, 4], true)) {
+            $inspectCommunityId = (int)$this->request->param('inspect_community_id', 0);
+            if ($inspectCommunityId <= 0) {
+                $inspectCommunityId = (int)$this->request->param('community_id', 0);
+            }
+            if ($inspectCommunityId > 0) {
+                $communityOk = \think\facade\Db::name('community')
+                    ->where('id', $inspectCommunityId)
+                    ->where('status', 1)
+                    ->count();
+                if (!$communityOk) {
+                    $this->error('所选小区不存在或已停用');
+                }
+                $params['subject_community_id'] = $inspectCommunityId;
+            }
+        }
+
         if ($type == 2 && isset($params['clock_scene'])) {
             $allowed = ['home', 'qinzi', 'street', 'zhenfenjiao', 'office', ''];
             $scene = trim((string)$params['clock_scene']);
@@ -191,7 +208,7 @@ class ForumController extends AuthController
         if (empty($params['id'])) {
             $params['user_id'] = $this->user_id;
 
-            if($type == 3){
+            if($type == 3 || $type == 4){
 
                 $cate_info = CommunityCateModel::where('id',$cate_id)->find();
                 if(empty($cate_info)) $this->error('点位不能为空');
@@ -486,12 +503,13 @@ class ForumController extends AuthController
                 ->where($where)
                 ->order('a.id desc')
                 ->field('a.id,title,a.type,image,a.status,a.create_time,user_id,nickname,
-                avatar,view_num,cate_id,content,like_total,a.point,b.community_id,a.image_one,a.image_two,a.image_three')
+                avatar,view_num,cate_id,content,like_total,a.point,b.community_id,a.subject_community_id,a.image_one,a.image_two,a.image_three')
                 ->paginate($this->page_size)->each(function ($item) use ($memberModel, $forumCateModel, $forumModel, $handleModel, $communityModel, $communityCateModel) {
                     $item['is_like'] = ForumLikeModel::where('rid', $item['id'])
                         ->where('user_id', $this->user_id)->where('type', 1)->count();
                     $item['comment_total'] = ForumCommentModel::where('info_id', $item['id'])->count();
-                    $item['community_name'] = $communityModel->where('id', $item['community_id'])->value('name');
+                    $displayCommunityId = !empty($item['subject_community_id']) ? (int)$item['subject_community_id'] : (int)$item['community_id'];
+                    $item['community_name'] = $communityModel->where('id', $displayCommunityId)->value('name');
 
                     if (empty($item['community_name'])) {
                         $community = $communityModel->where(['status' => 1])->find();
@@ -524,7 +542,8 @@ class ForumController extends AuthController
                 ->field('a.*,nickname,avatar,b.community_id')
                 ->where('a.id', $id)->find();
 //            $item['status_name'] = $forumModel->get_status()[$item['status']];
-            $item['community_name'] = $communityModel->where('id', $item['community_id'])->value('name');
+            $detailCommunityId = !empty($item['subject_community_id']) ? (int)$item['subject_community_id'] : (int)$item['community_id'];
+            $item['community_name'] = $communityModel->where('id', $detailCommunityId)->value('name');
             $item['cate_name'] = $forumCateModel->where('id', $item['cate_id'])->value('name');
             $item = CommonModel::getOne($item, ['thumb', 'avatar', 'image_one', 'image_two', 'image_three'], ['image']);
             $item['is_like'] = ForumLikeModel::where('rid', $item['id'])
@@ -535,7 +554,7 @@ class ForumController extends AuthController
             } elseif ($item['type'] == 2) {
                 $item['cate_name'] = SelectModel::where('id', $item['cate_id'])->value('name');
             } elseif ($item['type'] == 3 || $item['type'] == 4) {//定位巡检
-                $item['cate_name'] = $communityModel->where('id', $item['cate_id'])->value('name', '');
+                $item['cate_name'] = $communityCateModel->where('id', $item['cate_id'])->value('name', '');
                 $item['status_name'] = $forumModel->get_status()[$item['status']];
                 $handle = $handleModel->where('forum_id', $item['id'])->find();
                 if ($handle) {
