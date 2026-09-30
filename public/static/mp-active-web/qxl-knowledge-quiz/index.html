@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>七贤岭的知识小问答</title>
+  <script src="../sdk.js"></script>
+  <style>
+    :root {
+      --green: #2d6a4f;
+      --green-light: #40916c;
+      --bg: linear-gradient(165deg, #d8f3dc 0%, #f1faee 40%, #fff 100%);
+      --wrong: #c1121f;
+      --right: #2d6a4f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: #1b4332;
+      padding: 20px 16px 32px;
+    }
+    .hidden { display: none !important; }
+    .card {
+      background: rgba(255,255,255,.94);
+      border-radius: 18px;
+      padding: 22px 18px;
+      box-shadow: 0 10px 40px rgba(27,67,50,.1);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .kicker {
+      font-size: 12px;
+      color: var(--green-light);
+      letter-spacing: .08em;
+      margin-bottom: 6px;
+    }
+    h1 { font-size: 22px; line-height: 1.35; margin-bottom: 10px; }
+    .desc { font-size: 15px; line-height: 1.65; color: #40916c; margin-bottom: 16px; }
+    .pill {
+      display: inline-block;
+      font-size: 12px;
+      background: var(--green);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .meta { font-size: 13px; color: #74c69d; margin-bottom: 14px; }
+    .progress {
+      height: 6px;
+      background: #d8f3dc;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .progress i {
+      display: block;
+      height: 100%;
+      background: var(--green);
+      width: 0;
+      transition: width .3s;
+    }
+    .q-title { font-size: 17px; font-weight: 600; line-height: 1.5; margin-bottom: 16px; }
+    .opt {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 2px solid #b7e4c7;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 14px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      color: #1b4332;
+      line-height: 1.45;
+    }
+    .opt:active { transform: scale(.99); }
+    .opt.selected { border-color: var(--green); background: #f1faee; }
+    .opt.correct { border-color: var(--right); background: #d8f3dc; }
+    .opt.wrong { border-color: var(--wrong); background: #fff0f3; }
+    .opt:disabled { opacity: 1; }
+    .explain {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #f1faee;
+      border-left: 4px solid var(--green);
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1b4332;
+    }
+    .explain strong { color: var(--green); }
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 600;
+      background: var(--green);
+      color: #fff;
+      margin-top: 14px;
+    }
+    .btn:disabled { opacity: .45; }
+    .btn.secondary { background: #95d5b2; color: #1b4332; }
+    .score-big { font-size: 40px; font-weight: 700; text-align: center; margin: 12px 0; color: var(--green); }
+    .err { color: var(--wrong); font-size: 14px; margin-top: 10px; }
+    .reward {
+      text-align: center;
+      padding: 12px;
+      background: #fff3cd;
+      border-radius: 12px;
+      margin-top: 12px;
+      font-size: 15px;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div id="screen-loading" class="card">
+    <p class="meta">加载中…</p>
+  </div>
+
+  <div id="screen-intro" class="card hidden">
+    <span class="pill">发现七贤岭 · 线上小活动</span>
+    <h1 id="intro-title">七贤岭的知识小问答</h1>
+    <p class="desc">从题库随机抽取 <strong>5</strong> 道关于七贤岭地理位置、亲海游玩与社区常识的选择题。每题选完后会显示正确答案和简要知识点。<br><br>首次<strong>全部答对</strong>可获得积分奖励（仅一次）。</p>
+    <p class="meta" id="intro-meta"></p>
+    <button type="button" class="btn" id="btn-start">开始答题</button>
+    <p class="err hidden" id="intro-err"></p>
+  </div>
+
+  <div id="screen-quiz" class="card hidden">
+    <p class="kicker" id="quiz-step">第 1 / 5 题</p>
+    <div class="progress"><i id="quiz-bar"></i></div>
+    <p class="q-title" id="quiz-q"></p>
+    <div id="quiz-opts"></div>
+    <div class="explain hidden" id="quiz-explain"></div>
+    <button type="button" class="btn hidden" id="btn-next">下一题</button>
+  </div>
+
+  <div id="screen-result" class="card hidden">
+    <span class="pill">答题结束</span>
+    <h1>本次成绩</h1>
+    <p class="score-big" id="result-score"></p>
+    <p class="desc" id="result-msg"></p>
+    <div class="reward hidden" id="result-reward"></div>
+    <button type="button" class="btn" id="btn-retry">再来一次</button>
+  </div>
+
+  <script>
+    (function () {
+      var ctx = null;
+      var activeId = 0;
+      var openid = '';
+      var apiBase = '';
+      var statusData = null;
+      var questions = [];
+      var cur = 0;
+      var answers = [];
+      var session = { picked: null, revealed: false };
+
+      function $(id) { return document.getElementById(id); }
+      function show(id) {
+        ['screen-loading','screen-intro','screen-quiz','screen-result'].forEach(function (s) {
+          $(s).classList.add('hidden');
+        });
+        $(id).classList.remove('hidden');
+      }
+
+      function api(path, body) {
+        return ActiveWebSdk.apiPost(apiBase, openid, path, body || {}).then(function (res) {
+          if (!res || res.code !== 1) throw new Error((res && res.msg) || '请求失败');
+          return res.data;
+        });
+      }
+
+      function renderOptions(q) {
+        var wrap = $('quiz-opts');
+        wrap.innerHTML = '';
+        ['A','B','C','D'].forEach(function (key) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'opt';
+          btn.dataset.key = key;
+          btn.innerHTML = '<strong>' + key + '.</strong> ' + (q.options[key] || '');
+          btn.onclick = function () { onPick(key, btn); };
+          wrap.appendChild(btn);
+        });
+      }
+
+      function onPick(key, btnEl) {
+        if (session.revealed) return;
+        session.picked = key;
+        session.revealed = true;
+        var q = questions[cur];
+        var opts = $('quiz-opts').querySelectorAll('.opt');
+        opts.forEach(function (b) { b.disabled = true; });
+        btnEl.classList.add('selected');
+        api('/wxapp/active_web_quiz/reveal', {
+          active_id: activeId,
+          question_id: q.id
+        }).then(function (rev) {
+          var correct = rev.correct_option;
+          opts.forEach(function (b) {
+            var k = b.dataset.key;
+            if (k === correct) b.classList.add('correct');
+            else if (k === key && key !== correct) b.classList.add('wrong');
+          });
+          $('quiz-explain').classList.remove('hidden');
+          $('quiz-explain').innerHTML = '<strong>正确答案：' + correct + '</strong><br/>' + (rev.explain || '');
+          answers[cur] = { question_id: q.id, answer: key };
+          $('btn-next').classList.remove('hidden');
+          $('btn-next').textContent = (cur >= questions.length - 1) ? '查看成绩' : '下一题';
+        }).catch(function (e) {
+          alert(e.message || e);
+          session.revealed = false;
+          session.picked = null;
+          opts.forEach(function (b) { b.disabled = false; b.classList.remove('selected','wrong','correct'); });
+        });
+      }
+
+      function showQuestion() {
+        var q = questions[cur];
+        session = { picked: null, revealed: false };
+        $('quiz-step').textContent = '第 ' + (cur + 1) + ' / ' + questions.length + ' 题';
+        $('quiz-bar').style.width = (((cur) / questions.length) * 100) + '%';
+        $('quiz-q').textContent = q.title;
+        $('quiz-explain').classList.add('hidden');
+        $('btn-next').classList.add('hidden');
+        renderOptions(q);
+      }
+
+      function finishQuiz() {
+        api('/wxapp/active_web_quiz/submit', {
+          active_id: activeId,
+          answers: answers
+        }).then(function (data) {
+          $('quiz-bar').style.width = '100%';
+          show('screen-result');
+          $('result-score').textContent = data.correct_count + ' / ' + data.total_count;
+          var msg = '';
+          if (data.is_perfect) {
+            msg = '太棒了，全部正确！';
+          } else {
+            msg = '还有提升空间，可以再挑战一次～';
+          }
+          $('result-msg').textContent = msg;
+          var rw = $('result-reward');
+          if (data.point_awarded > 0) {
+            rw.classList.remove('hidden');
+            rw.textContent = '🎉 首次满分，已获得 ' + data.point_awarded + ' 积分';
+          } else if (data.is_perfect && data.already_claimed_reward) {
+            rw.classList.remove('hidden');
+            rw.textContent = '已是满分！积分奖励此前已领取过';
+          } else {
+            rw.classList.add('hidden');
+          }
+        }).catch(function (e) {
+          alert(e.message || e);
+        });
+      }
+
+      function startQuiz() {
+        $('btn-start').disabled = true;
+        api('/wxapp/active_web_quiz/start', { active_id: activeId }).then(function (data) {
+          questions = data.questions || [];
+          answers = [];
+          cur = 0;
+          if (questions.length < 1) throw new Error('未抽到题目');
+          show('screen-quiz');
+          showQuestion();
+        }).catch(function (e) {
+          $('intro-err').classList.remove('hidden');
+          $('intro-err').textContent = e.message || String(e);
+        }).finally(function () {
+          $('btn-start').disabled = false;
+        });
+      }
+
+      $('btn-start').onclick = startQuiz;
+      $('btn-next').onclick = function () {
+        if (cur < questions.length - 1) {
+          cur++;
+          showQuestion();
+        } else {
+          finishQuiz();
+        }
+      };
+      $('btn-retry').onclick = function () {
+        api('/wxapp/active_web_quiz/status', { active_id: activeId }).then(function (st) {
+          statusData = st;
+          show('screen-intro');
+          var meta = '奖励：首次满分 ' + (st.reward_point || 0) + ' 积分';
+          if (st.has_claimed_reward) meta += ' · 您已领取过满分奖励';
+          $('intro-meta').textContent = meta;
+        });
+      };
+
+      ActiveWebSdk.bootstrap().then(function (data) {
+        ctx = data;
+        openid = data.session.openid;
+        apiBase = data.api.base;
+        activeId = parseInt(data.active.id, 10) || parseInt(ActiveWebSdk.getQuery().get('active_id'), 10);
+        if (!activeId) throw new Error('缺少 active_id');
+        return api('/wxapp/active_web_quiz/status', { active_id: activeId });
+      }).then(function (st) {
+        statusData = st;
+        $('intro-title').textContent = st.active_name || '七贤岭的知识小问答';
+        var meta = '奖励：首次满分 ' + (st.reward_point || 0) + ' 积分';
+        if (st.has_claimed_reward) meta += ' · 您已领取过满分奖励';
+        $('intro-meta').textContent = meta;
+        show('screen-intro');
+      }).catch(function (e) {
+        show('screen-loading');
+        $('screen-loading').innerHTML = '<p class="err">' + (e.message || e) + '</p><p class="meta">请从小程序登录后进入本活动</p>';
+      });
+    })();
+  </script>
+</body>
+</html>

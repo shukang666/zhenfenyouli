@@ -196,3 +196,35 @@ PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'web_url');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `web_url` varchar(500) NOT NULL DEFAULT '''' COMMENT ''Web式活动H5完整URL'' AFTER `display_mode`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+-- Web 式活动绑定的选择题库与答题记录
+CREATE TABLE IF NOT EXISTS `cmf_active_web_quiz_question` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '活动ID',
+  `title` varchar(500) NOT NULL DEFAULT '' COMMENT '题干',
+  `option_a` varchar(255) NOT NULL DEFAULT '',
+  `option_b` varchar(255) NOT NULL DEFAULT '',
+  `option_c` varchar(255) NOT NULL DEFAULT '',
+  `option_d` varchar(255) NOT NULL DEFAULT '',
+  `correct_option` char(1) NOT NULL DEFAULT 'A' COMMENT 'A/B/C/D',
+  `explain_text` varchar(800) NOT NULL DEFAULT '' COMMENT '答案简要解释',
+  `list_order` int(10) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_active` (`active_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Web式活动选择题库';
+
+CREATE TABLE IF NOT EXISTS `cmf_active_web_quiz_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `correct_count` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `total_count` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `is_perfect` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `point_awarded` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `detail` text COMMENT 'JSON',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_active` (`user_id`,`active_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Web式活动答题记录';
