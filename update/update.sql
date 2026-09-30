@@ -228,3 +228,49 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_quiz_log` (
   PRIMARY KEY (`id`),
   KEY `idx_user_active` (`user_id`,`active_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Web式活动答题记录';
+
+-- Web 式活动：七贤岭影像分享（照片 / 点赞 / 周报）
+CREATE TABLE IF NOT EXISTS `cmf_active_web_photo` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `image` varchar(500) NOT NULL DEFAULT '',
+  `intro` varchar(500) NOT NULL DEFAULT '',
+  `category` varchar(20) NOT NULL DEFAULT 'other' COMMENT 'humanity/scenery/food/other',
+  `status` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0待审1通过2拒绝',
+  `like_count` int(10) unsigned NOT NULL DEFAULT 0,
+  `period_key` varchar(16) NOT NULL DEFAULT '' COMMENT '周期如2026-W13',
+  `point_awarded` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `bonus_point_awarded` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT '高赞额外积分',
+  `share_token` varchar(32) NOT NULL DEFAULT '',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `audit_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_active_status` (`active_id`,`status`),
+  KEY `idx_user_day` (`user_id`,`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Web活动用户上传照片';
+
+CREATE TABLE IF NOT EXISTS `cmf_active_web_photo_like` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `photo_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_photo_user` (`photo_id`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Web活动照片点赞';
+
+CREATE TABLE IF NOT EXISTS `cmf_active_web_photo_report` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `period_key` varchar(16) NOT NULL DEFAULT '',
+  `title` varchar(200) NOT NULL DEFAULT '',
+  `summary_html` mediumtext,
+  `cover_image` varchar(500) NOT NULL DEFAULT '',
+  `photo_ids` varchar(500) NOT NULL DEFAULT '' COMMENT 'JSON id列表',
+  `share_token` varchar(32) NOT NULL DEFAULT '',
+  `is_home_featured` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1活动首页置顶周报',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_active_period` (`active_id`,`period_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Web活动周期影像周报';

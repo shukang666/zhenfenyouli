@@ -1,0 +1,79 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('index')}">照片审核</a></li>
+        <li><a href="{:url('report_index')}">周期周报</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('index')}">
+        <div class="form-group">
+            <label>状态：</label>
+            <select name="status" class="form-control">
+                <option value="">全部</option>
+                <option value="0" <if condition="$status eq '0'">selected="selected"</if>>待审核</option>
+                <option value="1" <if condition="$status eq '1'">selected="selected"</if>>已通过</option>
+                <option value="2" <if condition="$status eq '2'">selected="selected"</if>>已拒绝</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>活动ID：</label>
+            <input type="number" class="form-control" name="active_id" value="{$active_id|default=''}" style="width:100px;">
+        </div>
+        <div class="form-group">
+            <input type="text" class="form-control" name="keyword" value="{$keyword|default=''}" placeholder="介绍关键词">
+        </div>
+        <button type="submit" class="btn btn-primary">搜索</button>
+    </form>
+    <table class="table table-hover table-bordered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>活动</th>
+            <th>用户</th>
+            <th>分类</th>
+            <th>图片</th>
+            <th>介绍</th>
+            <th>赞</th>
+            <th>状态</th>
+            <th>时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.active_id}</td>
+                <td>{$vo.nickname}<br><small>{$vo.mobile}</small></td>
+                <td>{$vo.category}</td>
+                <td>
+                    <notempty name="vo.image">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.image)}');">
+                            <img src="{:cmf_get_image_preview_url($vo.image)}" style="width:60px;height:60px;object-fit:cover;">
+                        </a>
+                    </notempty>
+                </td>
+                <td style="max-width:220px;">{$vo.intro}</td>
+                <td>{$vo.like_count}</td>
+                <td>
+                    <if condition="$vo.status == 0"><span class="label label-warning">待审</span>
+                    <elseif condition="$vo.status == 1"/><span class="label label-success">通过</span>
+                    <else/><span class="label label-danger">拒绝</span></if>
+                </td>
+                <td>{:date('Y-m-d H:i',$vo.create_time)}</td>
+                <td>
+                    <if condition="$vo.status == 0">
+                        <a class="btn btn-xs btn-success js-ajax-dialog-btn" data-msg="确认通过？" href="{:url('pass',['id'=>$vo.id])}">通过</a>
+                        <a class="btn btn-xs btn-danger js-ajax-dialog-btn" data-msg="确认拒绝？" href="{:url('reject',['id'=>$vo.id])}">拒绝</a>
+                    </if>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
