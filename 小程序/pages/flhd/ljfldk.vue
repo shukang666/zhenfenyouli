@@ -149,11 +149,11 @@
 				const n = Number(u.clock_total_days ?? u.junk_clock_days ?? 0)
 				return n >= 0 ? n : 0
 			},
-			/** 已通过分类测验，展示打卡入口 */
+			/** 学完且考过，展示打卡入口 */
 			showSceneHub() {
-				if (!this.isLogin) return true
+				if (!this.isLogin) return false
 				const u = this.userInfo || {}
-				return Number(u.is_answer) === 1
+				return Number(u.is_learn) === 1 && Number(u.is_answer) === 1
 			},
 			showLearnHub() {
 				if (!this.isLogin) return false

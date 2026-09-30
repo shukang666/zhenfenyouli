@@ -503,6 +503,12 @@
 						"navigationBarTitleText": "详情"
 					}
 				},
+				{
+					"path": "pre_learn",
+					"style": {
+						"navigationBarTitleText": "打卡前学习"
+					}
+				},
 			{
 				"path": "ljfldk",
 				"style": {

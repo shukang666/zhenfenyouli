@@ -1057,7 +1057,7 @@
 							confirmText: '去学习',
 							confirmColor: '#38B061',
 							success: (r) => {
-								if (r.confirm) this.$u.route('/pages/flhd/ljfldk')
+								if (r.confirm) uni.navigateTo({ url: '/pages/flhd/pre_learn' })
 							},
 						})
 						return
@@ -1094,7 +1094,7 @@
 						confirmText: '去学习',
 						confirmColor: '#38B061',
 						success: (res) => {
-							if (res.confirm) this.$u.route('/pages/flhd/ljfldk')
+							if (res.confirm) uni.navigateTo({ url: '/pages/flhd/pre_learn' })
 						},
 					})
 					return
@@ -1141,12 +1141,12 @@
 					this.$u.vuex('userInfo', info)
 					if (Number(info.is_learn) !== 1) {
 						this.$u.toast('请先完成打卡前学习')
-						setTimeout(() => this.$u.route('/pages/flhd/ljfldk'), 500)
+						setTimeout(() => uni.navigateTo({ url: '/pages/flhd/pre_learn' }), 500)
 						return false
 					}
 					if (Number(info.is_answer) !== 1) {
 						this.$u.toast('请先通过分类小测验')
-						setTimeout(() => this.$u.route('/pages/flhd/ljfldk'), 500)
+						setTimeout(() => uni.navigateTo({ url: '/pages/answer/examine?id=1' }), 500)
 						return false
 					}
 					return true

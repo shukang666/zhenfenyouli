@@ -78,18 +78,24 @@
 			navigator(url, type) {
 				console.log(url, type);
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				if (!this.userInfo.is_answer && type == 1) {
+				if (type == 1 && (!this.userInfo.is_learn || !this.userInfo.is_answer)) {
 					var that = this
+					const needLearn = !this.userInfo.is_learn
 					uni.showModal({
 						title: '提示',
-						content: '请先学习垃圾分类指导，通过答题考试后可参与活动',
+						content: needLearn
+							? '请先完成打卡前学习，通过答题考试后可参与垃圾分类打卡'
+							: '请通过垃圾分类答题考试后即可打卡',
 						showCancel: false,
-						confirmText: '立即学习',
+						confirmText: needLearn ? '去学习' : '去考试',
 						confirmColor: '#39BF3E',
 						success: function(res) {
-							if (res.confirm) {
-								that.$u.route('/pages/flhd/list')
-							} else if (res.cancel) {}
+							if (!res.confirm) return
+							if (needLearn) {
+								uni.navigateTo({ url: '/pages/flhd/pre_learn' })
+							} else {
+								uni.navigateTo({ url: '/pages/answer/examine?id=1' })
+							}
 						}
 					});
 				} else if (type == 3) {

@@ -183,7 +183,7 @@ export function getDefaultGuide(hub, subKey, cateLabel) {
 		dispose_time: row.dispose_time,
 		survey_question: row.survey_question || '您平时怎么分类？',
 		preset_tips: tips,
-		learn_path: row.learn_path || '/pages/flhd/list',
+		learn_path: row.learn_path || '/pages/flhd/pre_learn',
 	}
 }
 
@@ -204,6 +204,6 @@ export function mergeGuide(apiRow, hub, subKey, cateLabel) {
 		dispose_time: apiRow.dispose_time || def.dispose_time,
 		survey_question: apiRow.survey_question || def.survey_question,
 		preset_tips: tips,
-		learn_path: apiRow.learn_path || def.learn_path || '/pages/flhd/list',
+		learn_path: apiRow.learn_path || def.learn_path || '/pages/flhd/pre_learn',
 	}
 }

@@ -814,7 +814,7 @@ export default {
 						confirmText: '去学习',
 						confirmColor: '#39BF3E',
 						success: (res) => {
-							if (res.confirm) this.$u.route('/pages/flhd/ljfldk')
+							if (res.confirm) uni.navigateTo({ url: '/pages/flhd/pre_learn' })
 						}
 					})
 					return
