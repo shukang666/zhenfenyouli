@@ -106,8 +106,11 @@
 
   <script>
     var app = {
-      activeId: 0, openid: '', apiBase: '', bannerReportId: 0,
+      activeId: 0, openid: '', apiBase: '', bannerReportId: 0, guest: false,
       currentPhoto: null, currentReport: null,
+      needLoginTip: function() {
+        alert('请通过微信小程序打开「我所了解的七贤岭」后再上传或点赞');
+      },
       api: function(path, body) {
         return ActiveWebSdk.apiPost(app.apiBase, app.openid, path, body || {}).then(function(res) {
           if (!res || res.code !== 1) throw new Error((res && res.msg) || '失败');
@@ -115,19 +118,26 @@
         });
       },
       init: function() {
-        ActiveWebSdk.bootstrap().then(function(data) {
-          app.openid = data.session.openid;
+        ActiveWebSdk.bootstrap({ allowGuest: true }).then(function(data) {
+          app.guest = !!data.guest;
           app.apiBase = data.api.base;
+          app.openid = (data.session && data.session.openid) || '';
           app.activeId = parseInt(data.active.id, 10) || parseInt(ActiveWebSdk.getQuery().get('active_id'), 10);
           if (!app.activeId) throw new Error('缺少活动 ID');
           return app.api('/wxapp/active_web_photo/home', { active_id: app.activeId });
         }).then(function(h) {
           document.getElementById('hdr-title').textContent = h.active_name || '我所了解的七贤岭';
-          app.renderLimits(h.limits);
+          if (app.guest) {
+            document.getElementById('home-limits').textContent =
+              '访客模式：可浏览与查看分享的作品 · 上传/点赞请从小程序进入活动';
+            document.getElementById('fab-upload').classList.add('hidden');
+          } else {
+            app.renderLimits(h.limits);
+            document.getElementById('fab-upload').classList.remove('hidden');
+          }
           if (h.latest_report) app.showReportBanner(h.latest_report);
           app.loadPhotos();
           app.routeFromHash();
-          document.getElementById('fab-upload').classList.remove('hidden');
         }).catch(function(e) {
           var el = document.getElementById('home-err');
           el.textContent = e.message || String(e);
@@ -163,6 +173,10 @@
         if (app.bannerReportId) location.hash = 'report/' + app.bannerReportId;
       },
       switchTab: function(tab) {
+        if (app.guest && (tab === 'upload' || tab === 'mine')) {
+          app.needLoginTip();
+          return;
+        }
         ['view-home','view-upload','view-mine','view-detail','view-report'].forEach(function(id) {
           document.getElementById(id).classList.add('hidden');
         });
@@ -255,6 +269,7 @@
         });
       },
       doUpload: function() {
+        if (app.guest) { app.needLoginTip(); return; }
         var file = document.getElementById('up-file').files[0];
         var intro = document.getElementById('up-intro').value.trim();
         var cat = document.getElementById('up-category').value;
@@ -286,6 +301,7 @@
         });
       },
       doLike: function() {
+        if (app.guest) { app.needLoginTip(); return; }
         if (!app.currentPhoto) return;
         app.api('/wxapp/active_web_photo/like', {
           active_id: app.activeId, photo_id: app.currentPhoto.id

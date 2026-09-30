@@ -29,6 +29,15 @@
     var webCtx = params.get('web_ctx') || '';
     var activeId = params.get('active_id') || '';
     if (!webCtx) {
+      if (opts.allowGuest) {
+        var baseGuest = (opts.apiBase || defaultApiBase()).replace(/\/$/, '');
+        return Promise.resolve({
+          guest: true,
+          active: { id: activeId },
+          api: { base: baseGuest, auth_header: 'openid' },
+          session: { openid: '' },
+        });
+      }
       return Promise.reject(new Error('缺少 web_ctx，请从小程序内打开本活动'));
     }
     var base = (opts.apiBase || defaultApiBase()).replace(/\/$/, '');
