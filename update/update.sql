@@ -188,3 +188,11 @@ WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_clock_scene_point' AND COLUMN_NAME = 'point_image');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_clock_scene_point` ADD COLUMN `point_image` varchar(255) NOT NULL DEFAULT '''' COMMENT ''真分点环境照片'' AFTER `cate_name`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+-- 活动显示形式：1配置式 2Web式（H5 + 小程序 web-view）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'display_mode');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `display_mode` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT ''1配置式 2Web式'' AFTER `join_type`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'web_url');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `web_url` varchar(500) NOT NULL DEFAULT '''' COMMENT ''Web式活动H5完整URL'' AFTER `display_mode`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;

@@ -944,7 +944,13 @@
 				this.$u.api.get_new_active_detail({
 					active_id: id
 				}).then(res => {
-					this.info = res.data
+					const data = res.data || {}
+					if (this.$u.func.isWebDisplayActive(data)) {
+						const path = this.$u.func.buildActiveOpenPath(data)
+						uni.redirectTo({ url: path })
+						return
+					}
+					this.info = data
 				})
 			},
 			// 上传图片

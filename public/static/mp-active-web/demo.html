@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Web 式活动演示</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(165deg, #e8f5e9 0%, #f1f8e9 45%, #fff 100%);
+      min-height: 100vh;
+      color: #1b4332;
+      padding: 24px 20px 40px;
+    }
+    .card {
+      background: rgba(255,255,255,.92);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(27, 67, 50, .08);
+      margin-bottom: 16px;
+    }
+    h1 { font-size: 22px; line-height: 1.35; margin-bottom: 8px; }
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      background: #2d6a4f;
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    p { font-size: 15px; line-height: 1.65; color: #40916c; margin-bottom: 10px; }
+    .meta { font-size: 13px; color: #74c69d; word-break: break-all; }
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      background: #2d6a4f;
+      color: #fff;
+      margin-top: 8px;
+    }
+    button:active { opacity: .85; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 80px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.75);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity .25s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="tag">Web 式活动 · 测试页</span>
+    <h1>自定义 H5 活动页</h1>
+    <p>本页由站点 <code>/static/mp-active-web/demo.html</code> 托管，在后台将活动的「显示形式」设为 Web 式并填写此 URL 后，小程序会通过 web-view 打开。</p>
+    <p>业务逻辑（报名、打卡、动画等）可在此 H5 内自行实现；也可通过 URL 参数与后端接口交互。</p>
+    <p class="meta" id="meta"></p>
+    <button type="button" id="btn">模拟完成一次互动</button>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    (function () {
+      var qs = new URLSearchParams(location.search);
+      var activeId = qs.get('active_id') || '(未传 active_id)';
+      document.getElementById('meta').textContent = 'active_id=' + activeId + ' · 打开时间 ' + new Date().toLocaleString();
+      var toast = document.getElementById('toast');
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(function () { toast.classList.remove('show'); }, 2000);
+      }
+      document.getElementById('btn').addEventListener('click', function () {
+        showToast('演示成功：Web 式活动页可正常交互');
+      });
+      if (typeof wx !== 'undefined' && wx.miniProgram) {
+        wx.miniProgram.postMessage({ data: { type: 'active_web_demo', active_id: activeId } });
+      }
+    })();
+  </script>
+</body>
+</html>

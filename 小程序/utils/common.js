@@ -1,5 +1,6 @@
 // 全局公共方法
 import { staticUploadBase } from '@/common/settings'
+import { buildActiveOpenPath, openActiveDetail, isWebDisplayActive } from '@/common/activeOpen.js'
 
 const ASSET_UPLOAD_BASE = staticUploadBase || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/'
 const ASSET_SITE_ORIGIN = ASSET_UPLOAD_BASE.replace(/\/upload\/?$/i, '')
@@ -703,6 +704,9 @@ const install = (Vue, vm) => {
 	Vue.prototype.$u.func = {
 		checkLogin,
 		checkH5,
+		buildActiveOpenPath,
+		openActiveDetail,
+		isWebDisplayActive,
 		paramsToObj,
 		refreshPage,
 		prePage,

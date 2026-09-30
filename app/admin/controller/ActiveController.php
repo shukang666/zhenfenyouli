@@ -246,6 +246,22 @@ class ActiveController extends ToolController
                 $this->error('请填写活动截止日期，或勾选「时间待定」');
             }
 
+            $params['display_mode'] = (int)($params['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
+            if (!in_array($params['display_mode'], [ActiveModel::DISPLAY_MODE_CONFIG, ActiveModel::DISPLAY_MODE_WEB], true)) {
+                $params['display_mode'] = ActiveModel::DISPLAY_MODE_CONFIG;
+            }
+            $params['web_url'] = trim((string)($params['web_url'] ?? ''));
+            if ($params['display_mode'] === ActiveModel::DISPLAY_MODE_WEB) {
+                if ($params['web_url'] === '') {
+                    $this->error('Web 式活动请填写 H5 地址');
+                }
+                if (!preg_match('#^https?://#i', $params['web_url'])) {
+                    $this->error('Web 式活动 H5 地址须以 http:// 或 https:// 开头');
+                }
+            } else {
+                $params['web_url'] = '';
+            }
+
             $params = $this->setParamData($params);
             $share_url = 'pages/activity/lsxf/details-new';
             if (empty($params['id'])) {

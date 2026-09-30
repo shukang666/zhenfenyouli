@@ -99,7 +99,7 @@
 				<view class="u-flex">
 					<view class="active-card" v-for="item in active_list" :key="item.id"
 						hover-class="press-scale" :hover-stay-time="80"
-						@click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)">
+						@click="$u.func.openActiveDetail(item)">
 						<view class="active-card-cover">
 							<u-image width="500" height="260" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
 						</view>

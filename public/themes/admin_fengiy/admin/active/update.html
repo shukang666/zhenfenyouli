@@ -76,6 +76,28 @@
             </div>
         </div>
 
+        <php>
+            $display_mode_val = isset($item['display_mode']) ? intval($item['display_mode']) : 1;
+        </php>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>显示形式:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="display_mode" id="display_mode" lay-filter="display_mode">
+                    <option value="1" <if condition="$display_mode_val == 1">selected</if>>配置式（小程序详情页 + 下方各项配置）</option>
+                    <option value="2" <if condition="$display_mode_val == 2">selected</if>>Web式（仅 H5 地址，小程序 web-view 打开）</option>
+                </select>
+                <p class="help-block">Web 式适合复杂交互或快速上线：在 H5 内实现全部逻辑，此处只需封面、列表展示字段与 URL。</p>
+            </div>
+        </div>
+        <div class="form-group active-web-url-row" id="active-web-url-row">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>Web 活动地址:</label>
+            <div class="col-md-8 col-sm-10">
+                <input type="url" class="form-control" name="web_url" id="web_url" maxlength="500"
+                       value="{$item.web_url|default=''}" placeholder="https://你的域名/static/mp-active-web/demo.html">
+                <p class="help-block">须为已在微信小程序后台配置的业务域名下的 https 地址。保存后小程序会自动追加 <code>active_id</code> 查询参数（若 URL 中尚未包含）。</p>
+            </div>
+        </div>
+
         <if condition="$params.type == 1">
         <php>
             $event_kind_val = isset($item['event_kind']) ? intval($item['event_kind']) : 1;
@@ -683,11 +705,39 @@
     }
     window.__toggleEventKind = toggleEventKind;
 
+    function toggleDisplayMode(val) {
+        val = parseInt(val, 10) || 1;
+        var $row = $('#active-web-url-row');
+        if (val === 2) {
+            $row.show();
+            $('#web_url').prop('required', true);
+        } else {
+            $row.hide();
+            $('#web_url').prop('required', false);
+        }
+    }
+    window.__toggleDisplayMode = toggleDisplayMode;
+
 </script>
 <script>
     layui.use(['form'], function(){
         var form = layui.form;
         form.render('select');
+
+        var displayModeVal = $('#display_mode').val() || '1';
+        if (window.__toggleDisplayMode) {
+            window.__toggleDisplayMode(displayModeVal);
+        }
+        form.on('select(display_mode)', function (data) {
+            if (window.__toggleDisplayMode) {
+                window.__toggleDisplayMode(data.value);
+            }
+        });
+        $('#display_mode').on('change', function () {
+            if (window.__toggleDisplayMode) {
+                window.__toggleDisplayMode($(this).val());
+            }
+        });
 
         var eventKindVal = $('#event_kind').val() || '1';
         if (window.__toggleEventKind) {

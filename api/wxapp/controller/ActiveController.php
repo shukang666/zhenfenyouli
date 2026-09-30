@@ -569,6 +569,13 @@ class ActiveController extends AuthController
 
         $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
         $item['is_end'] = ActiveModel::resolveIsEnd($item);
+        $item['display_mode'] = (int)($item['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
+        $item['web_url'] = trim((string)($item['web_url'] ?? ''));
+        if (ActiveModel::isWebDisplay($item)) {
+            $item['web_page_url'] = ActiveModel::buildWebActivityUrl($item['web_url'], (int)$item['id']);
+        } else {
+            $item['web_page_url'] = '';
+        }
         $pwdConfigured = 0;
         if (ActiveModel::isOfflineEvent($item)) {
             $pwdRow = ActiveModel::where('id', $item['id'])->value('offline_sign_password');
@@ -1350,6 +1357,13 @@ class ActiveController extends AuthController
 
         $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
         $item['is_end'] = ActiveModel::resolveIsEnd($item);
+        $item['display_mode'] = (int)($item['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
+        $item['web_url'] = trim((string)($item['web_url'] ?? ''));
+        if (ActiveModel::isWebDisplay($item)) {
+            $item['web_page_url'] = ActiveModel::buildWebActivityUrl($item['web_url'], (int)$item['id']);
+        } else {
+            $item['web_page_url'] = '';
+        }
         return $item;
     }
 

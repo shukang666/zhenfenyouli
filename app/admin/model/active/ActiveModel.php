@@ -11,6 +11,38 @@ class ActiveModel extends \think\Model
     /** 线下活动：报名 + 限时定位/口令签到 */
     const EVENT_KIND_OFFLINE = 2;
 
+    /** 显示形式：配置式（现有详情页 + 后台各项开关） */
+    const DISPLAY_MODE_CONFIG = 1;
+    /** 显示形式：Web 式（仅配置 H5 URL，小程序 web-view 打开） */
+    const DISPLAY_MODE_WEB = 2;
+
+    public static function displayModeOptions(): array
+    {
+        return [
+            self::DISPLAY_MODE_CONFIG => '配置式',
+            self::DISPLAY_MODE_WEB => 'Web式',
+        ];
+    }
+
+    public static function isWebDisplay($active): bool
+    {
+        return (int)($active['display_mode'] ?? self::DISPLAY_MODE_CONFIG) === self::DISPLAY_MODE_WEB
+            && trim((string)($active['web_url'] ?? '')) !== '';
+    }
+
+    /** 小程序 web-view 最终打开的地址（附带 active_id 便于 H5 调接口） */
+    public static function buildWebActivityUrl(string $webUrl, int $activeId): string
+    {
+        $webUrl = trim($webUrl);
+        if ($webUrl === '') {
+            return '';
+        }
+        if (preg_match('/[?&]active_id=/', $webUrl)) {
+            return $webUrl;
+        }
+        return $webUrl . (strpos($webUrl, '?') !== false ? '&' : '?') . 'active_id=' . rawurlencode((string)$activeId);
+    }
+
     public static function eventKindOptions(): array
     {
         return [
