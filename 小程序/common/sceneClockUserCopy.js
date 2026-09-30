@@ -14,7 +14,8 @@ export function getStepTitles() {
 		setup: '摆好分类桶',
 		points: '选' + HOME_POINT_LABEL_SHORT,
 		manage: '改' + HOME_POINT_LABEL_SHORT,
-		cate: '选垃圾种类',
+		cate: '选桶打卡',
+		points: '选桶打卡',
 		guide: '为什么要分',
 		survey: '您的投放习惯',
 		learn: '上传分类成果',
@@ -119,6 +120,23 @@ export function getCommunityPointsDesc() {
 
 export function getPointsPickSummary() {
 	return '点您这次要用的桶或位置，跟着提示一步步拍照即可。'
+}
+
+/** 家庭：选桶（种类已在摆桶时绑定） */
+export function getResidentialPickLead() {
+	return '今天先打卡哪一只桶？'
+}
+
+export function getResidentialPickSub() {
+	return '点选位置即可，种类跟您摆桶时设的一样'
+}
+
+export function getResidentialSetupNextCta() {
+	return '保存，去选桶打卡'
+}
+
+export function getResidentialSkipToPickLabel() {
+	return '位置已设好，直接去选桶 ›'
 }
 
 export function getPointsStepHint(isCommunityHub) {
@@ -230,6 +248,24 @@ export function getClockSuccessNextTitle() {
 
 export function getClockSuccessOtherCateTitle() {
 	return '换一类，再练一次'
+}
+
+export function getClockSuccessOtherBinTitle() {
+	return '换一只桶，再记一次'
+}
+
+export function getClockSuccessOtherBinBody(activeBinName, otherBinNames) {
+	const cur = (activeBinName || '').trim()
+	const others = (otherBinNames || []).filter(n => n && n !== cur)
+	if (!others.length) {
+		return '家里几只桶都可以轮流打卡，习惯是慢慢养成的。'
+	}
+	const sample = others.slice(0, 3).join('、')
+	const tail = others.length > 3 ? ' 等' : ''
+	if (cur) {
+		return `这次记的是「${cur}」。还可以试试 ${sample}${tail}，换着练分类更熟练。`
+	}
+	return `还可以试试 ${sample}${tail}，点一下就能继续上传。`
 }
 
 export function getClockSuccessOtherCateBody(activeName, otherNames) {

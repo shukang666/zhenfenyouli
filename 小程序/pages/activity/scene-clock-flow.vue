@@ -210,56 +210,43 @@
 					<text class="scf-bin-tile-add-sub">扔垃圾的位置</text>
 				</view>
 			</view>
-			<view class="scf-skip-link" v-if="isResidentialHub && points.length" @tap="flowStep = 'cate'">位置已设好，直接去选种类 ›</view>
+			<view class="scf-skip-link" v-if="isResidentialHub && points.length" @tap="goResidentialPickStep">{{ residentialSkipToPickLabel }}</view>
 			<view class="scf-foot scf-foot--single">
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">{{ isResidentialHub ? '保存，去选种类' : '保存，去选位置拍照' }}</view>
-			</view>
-		</view>
-
-		<!-- 家庭：四分类选择 -->
-		<view class="scf-body" v-if="flowStep === 'cate'">
-			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
-				<text class="scf-promo-line">这次打卡哪一类？</text>
-				<text class="scf-promo-line scf-promo-line--sub">点选一种，接着上传分类成果</text>
-			</view>
-			<view class="scf-cate-scene-list">
-				<view
-					v-for="c in cateList"
-					:key="c.id"
-					class="zf-scene-card scf-cate-scene-card"
-					:class="{ 'scf-cate-scene-card--on': Number(cateId) === Number(c.id), ['scf-cate-scene-card--' + cateTone(c.name)]: true }"
-					hover-class="zf-scene-card--press"
-					:hover-stay-time="80"
-					@tap="pickResidentialCate(c)"
-				>
-					<view class="zf-scene-icon-wrap" :class="'scf-cate-icon--' + cateTone(c.name)">
-						<text class="zf-scene-icon">{{ cateEmoji(c.name) }}</text>
-					</view>
-					<view class="zf-scene-copy">
-						<text class="zf-scene-title">{{ c.name }}</text>
-						<text class="zf-scene-desc">{{ cateHintByName(c.name) }}</text>
-					</view>
-					<text class="scf-cate-check" v-if="Number(cateId) === Number(c.id)">✓</text>
-					<text class="zf-scene-arrow" v-else>›</text>
-				</view>
-			</view>
-			<view class="scf-foot">
-				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="goSetupStep">上一步</view>
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="goResidentialUpload">选好了，去上传</view>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">{{ isResidentialHub ? residentialSetupNextCta : '保存，去选位置拍照' }}</view>
 			</view>
 		</view>
 
 		<!-- 打卡点列表（打卡入口） -->
 		<view class="scf-body" v-if="flowStep === 'points'">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
-				<text class="scf-promo-line">{{ introDisplayLead }}</text>
-				<text class="scf-promo-line scf-promo-line--sub">{{ introDisplaySummary }}</text>
+				<text class="scf-promo-line">{{ isResidentialHub ? residentialPickLead : introDisplayLead }}</text>
+				<text class="scf-promo-line scf-promo-line--sub">{{ isResidentialHub ? residentialPickSub : introDisplaySummary }}</text>
 			</view>
 			<view class="scf-points-head">
 				<text class="scf-hint scf-hint--inline">{{ pointsStepHint }}</text>
 				<text class="scf-manage-link" v-if="!isCommunityHub" @tap="enterManage">改分类位置</text>
 			</view>
-			<view class="scf-point-grid">
+			<view class="scf-res-bin-list" v-if="isResidentialHub && points.length">
+				<view
+					v-for="p in points"
+					:key="p.id"
+					class="scf-res-bin-card"
+					:class="'scf-res-bin-card--' + cateTone(p.cate_name)"
+					hover-class="scf-card--press"
+					@tap="pickResidentialPoint(p)"
+				>
+					<image v-if="p.point_image" class="scf-res-bin-photo" :src="p.point_image" mode="aspectFill"></image>
+					<view v-else class="scf-res-bin-photo scf-res-bin-photo--empty">
+						<text class="scf-res-bin-photo-t">{{ cateEmoji(p.cate_name) }}</text>
+					</view>
+					<view class="scf-res-bin-body">
+						<text class="scf-res-bin-name">{{ p.point_name }}</text>
+						<text class="scf-res-bin-cate">{{ p.cate_name }}</text>
+						<text class="scf-res-bin-go">上传成果 ›</text>
+					</view>
+				</view>
+			</view>
+			<view class="scf-point-grid" v-else>
 				<view
 					v-for="(group, gIdx) in pointGroups"
 					:key="group.key"
@@ -295,6 +282,9 @@
 						</view>
 					</view>
 				</view>
+			</view>
+			<view class="scf-foot" v-if="isResidentialHub && points.length">
+				<view class="scf-btn scf-btn--ghost" hover-class="scf-card--press" @tap="goSetupStep">上一步</view>
 			</view>
 			<view class="scf-foot scf-foot--single" v-if="!points.length && !isCommunityHub">
 				<view class="scf-btn scf-btn--primary" @tap="goSetupStep">去设置家里分类位置</view>
@@ -534,17 +524,17 @@
 					<text class="scf-success-next-k">{{ clockSuccessNextTitle }}</text>
 
 					<view class="scf-success-tip">
-						<text class="scf-success-tip-h">{{ clockSuccessOtherCateTitle }}</text>
-						<text class="scf-success-tip-p">{{ clockOtherCateHint }}</text>
-						<view class="scf-success-cate-chips" v-if="clockSuccessOtherCates.length">
+						<text class="scf-success-tip-h">{{ clockSuccessOtherPickTitle }}</text>
+						<text class="scf-success-tip-p">{{ clockOtherPickHint }}</text>
+						<view class="scf-success-cate-chips" v-if="clockSuccessOtherPickList.length">
 							<view
-								v-for="c in clockSuccessOtherCates"
-								:key="c.id"
+								v-for="item in clockSuccessOtherPickList"
+								:key="item.key"
 								class="scf-success-cate-chip"
 								hover-class="scf-card--press"
-								@tap="clockSuccessJumpOtherCate(c)"
+								@tap="clockSuccessJumpOtherPick(item)"
 							>
-								<text>去打卡 {{ c.name }}</text>
+								<text>去打卡 {{ item.label }}</text>
 							</view>
 						</view>
 					</view>
@@ -567,7 +557,7 @@
 					<text class="scf-habit-text">{{ clockHabitTip }}</text>
 				</view>
 				<view class="scf-success-actions">
-					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">{{ isResidentialHub ? '再选种类打卡' : '再选位置拍照' }}</view>
+					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">{{ isResidentialHub ? '再选桶打卡' : '再选位置拍照' }}</view>
 					<view class="scf-btn scf-btn--ghost scf-btn--block scf-success-back" @tap="goActivityTab">返回活动</view>
 				</view>
 			</view>
@@ -621,6 +611,12 @@
 		getClockSuccessNextTitle,
 		getClockSuccessOtherCateTitle,
 		getClockSuccessOtherCateBody,
+		getClockSuccessOtherBinTitle,
+		getClockSuccessOtherBinBody,
+		getResidentialPickLead,
+		getResidentialPickSub,
+		getResidentialSetupNextCta,
+		getResidentialSkipToPickLabel,
 		getClockSuccessPromoTitle,
 		getClockSuccessPromoBody,
 		getClockSuccessPromoEmptyBody,
@@ -773,14 +769,52 @@
 			clockSuccessPromoTitle() {
 				return getClockSuccessPromoTitle()
 			},
-			clockOtherCateHint() {
+			residentialPickLead() {
+				return getResidentialPickLead()
+			},
+			residentialPickSub() {
+				return getResidentialPickSub()
+			},
+			residentialSetupNextCta() {
+				return getResidentialSetupNextCta()
+			},
+			residentialSkipToPickLabel() {
+				return getResidentialSkipToPickLabel()
+			},
+			clockSuccessOtherPickTitle() {
+				return this.isResidentialHub ? getClockSuccessOtherBinTitle() : getClockSuccessOtherCateTitle()
+			},
+			clockOtherPickHint() {
+				if (this.isResidentialHub) {
+					const cur = this.pointName || this.activeCateName || ''
+					const all = (this.points || []).map(p => p.point_name).filter(Boolean)
+					return getClockSuccessOtherBinBody(cur, all)
+				}
 				const cur = this.activeCateName || ''
 				const all = (this.cateList || []).map(c => c.name).filter(Boolean)
 				return getClockSuccessOtherCateBody(cur, all)
 			},
-			clockSuccessOtherCates() {
+			clockSuccessOtherPickList() {
+				if (this.isResidentialHub) {
+					const curId = Number(this.pointId)
+					return (this.points || [])
+						.filter(p => p && p.id && Number(p.id) !== curId)
+						.map(p => ({
+							key: 'bin-' + p.id,
+							kind: 'bin',
+							label: p.point_name || p.cate_name || '桶',
+							raw: p,
+						}))
+				}
 				const curId = Number(this.cateId)
-				return (this.cateList || []).filter(c => c && c.id && Number(c.id) !== curId)
+				return (this.cateList || [])
+					.filter(c => c && c.id && Number(c.id) !== curId)
+					.map(c => ({
+						key: 'cate-' + c.id,
+						kind: 'cate',
+						label: c.name,
+						raw: c,
+					}))
 			},
 			clockPromoIntro() {
 				return this.clockPromoActivity
@@ -833,16 +867,17 @@
 				return getScenePickNavTitle()
 			},
 			visibleStepLabels() {
-				if (['points', 'manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
+				if (['manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
+				if (this.flowStep === 'points' && !this.isResidentialHub) return []
 				if (this.isResidentialHub) {
-					return ['摆好桶', '选种类', '上传成果']
+					return ['摆好桶', '选桶打卡', '上传成果']
 				}
 				if (['setup'].indexOf(this.flowStep) >= 0) return []
 				return ['怎么扔', '小窍门', '拍照']
 			},
 			stepIndex() {
 				if (this.isResidentialHub) {
-					const order = ['setup', 'cate', 'learn']
+					const order = ['setup', 'points', 'learn']
 					const i = order.indexOf(this.flowStep)
 					return i >= 0 ? i : 0
 				}
@@ -889,7 +924,7 @@
 			}
 			if (['theme_intro', 'theme_brief'].indexOf(this.flowStep) >= 0) return
 			if (!this.hub) return
-			const editing = ['setup', 'cate', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
+			const editing = ['setup', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
 			if (editing) return
 			this.ensureExamGate().then(ok => {
 				if (ok) this.initUserPoints()
@@ -1099,17 +1134,21 @@
 					point_image_url: '',
 				}))
 			},
-			pickResidentialCate(c) {
-				if (!c || !c.id) return
-				this.cateId = c.id
-				this.activeCateName = c.name || ''
-				this.cateLabel = guideCateLabelFromName(c.name)
-				const match = (this.points || []).find(p => Number(p.cate_id) === Number(c.id))
-				this.pointId = match ? match.id : 0
-				this.pointName = match ? match.point_name : ''
+			goResidentialPickStep() {
+				if (!this.points.length) {
+					this.$u.toast('请先设置分类桶')
+					this.goSetupStep()
+					return
+				}
+				this.flowStep = 'points'
 			},
-			goResidentialUpload() {
-				if (!this.cateId) return this.$u.toast('请先选择一种垃圾')
+			pickResidentialPoint(p) {
+				if (!p || p.id == null) return
+				this.pointId = p.id
+				this.pointName = p.point_name || ''
+				this.cateId = p.cate_id
+				this.activeCateName = p.cate_name || ''
+				this.cateLabel = guideCateLabelFromName(p.cate_name)
 				this.subKey = this.guideSubKeyForHub()
 				this.loadGuide()
 				this.accumDuration = ''
@@ -1118,9 +1157,22 @@
 				this.clockContent = ''
 				this.flowStep = 'learn'
 			},
+			pickResidentialCate(c) {
+				if (!c || !c.id) return
+				const match = (this.points || []).find(p => Number(p.cate_id) === Number(c.id))
+				if (match) {
+					this.pickResidentialPoint(match)
+					return
+				}
+				this.cateId = c.id
+				this.activeCateName = c.name || ''
+				this.cateLabel = guideCateLabelFromName(c.name)
+				this.pointId = 0
+				this.pointName = ''
+			},
 			backFromLearn() {
 				if (this.isResidentialHub) {
-					this.flowStep = 'cate'
+					this.flowStep = 'points'
 					return
 				}
 				this.flowStep = 'survey'
@@ -1164,7 +1216,10 @@
 						this.hydrateSetupRowsFromPoints()
 						return
 					}
-					if (keepFlow === 'cate') {
+					if (keepFlow === 'cate' || keepFlow === 'points') {
+						if (keepFlow === 'points' && this.isResidentialHub) {
+							this.flowStep = this.points.length ? 'points' : 'setup'
+						}
 						return
 					}
 					if (this.isCommunityHub) {
@@ -1172,10 +1227,10 @@
 						return
 					}
 					if (this.isResidentialHub) {
-						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'learn') {
+						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'points' || keepFlow === 'learn') {
 							return
 						}
-						if (['setup', 'cate', 'learn'].indexOf(this.flowStep) >= 0) {
+						if (['setup', 'points', 'learn'].indexOf(this.flowStep) >= 0) {
 							return
 						}
 						this.enterResidentialSetupFlow()
@@ -1325,8 +1380,8 @@
 					}
 					this.$u.toast('已保存')
 					if (this.isResidentialHub) {
-						await this.initUserPoints('cate')
-						this.flowStep = 'cate'
+						await this.initUserPoints('points')
+						this.flowStep = this.points.length ? 'points' : 'setup'
 						return
 					}
 					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
@@ -1405,6 +1460,10 @@
 				const group = groups[gIdx]
 				const p = group && group.items && group.items[pIdx]
 				if (!p || p.id == null) return
+				if (this.isResidentialHub) {
+					this.pickResidentialPoint(p)
+					return
+				}
 				this.pickPointById(p.id)
 			},
 			pickPointById(id) {
@@ -1624,25 +1683,23 @@
 				this.clockContent = ''
 				this.accumDuration = ''
 				this.sortDuration = ''
-				if (this.isResidentialHub) {
-					this.flowStep = 'cate'
-					return
-				}
 				this.flowStep = 'points'
 			},
-			clockSuccessJumpOtherCate(c) {
+			clockSuccessJumpOtherPick(item) {
+				if (!item) return
 				this.clockSuccessShow = false
 				this.resetClockSlots()
 				this.clockContent = ''
 				this.accumDuration = ''
 				this.sortDuration = ''
-				if (this.isResidentialHub) {
-					this.pickResidentialCate(c)
-					this.flowStep = 'cate'
+				if (item.kind === 'bin' && item.raw) {
+					this.pickResidentialPoint(item.raw)
 					return
 				}
-				this.pickResidentialCate(c)
-				this.flowStep = 'points'
+				if (item.kind === 'cate' && item.raw) {
+					this.pickResidentialCate(item.raw)
+					this.flowStep = 'points'
+				}
 			},
 			goActivityTab() {
 				this.clockSuccessShow = false
@@ -1907,6 +1964,59 @@
 }
 .scf-manage-link {
 	font-size: 26rpx;
+	color: #18af38;
+}
+.scf-res-bin-list {
+	display: flex;
+	flex-direction: column;
+	gap: 20rpx;
+}
+.scf-res-bin-card {
+	display: flex;
+	align-items: stretch;
+	background: #fff;
+	border-radius: 18rpx;
+	overflow: hidden;
+	box-shadow: 0 8rpx 24rpx rgba(20, 40, 28, 0.08);
+	border: 2rpx solid rgba(24, 175, 56, 0.12);
+}
+.scf-res-bin-photo {
+	width: 200rpx;
+	min-height: 160rpx;
+	flex-shrink: 0;
+	background: #f0f4f1;
+}
+.scf-res-bin-photo--empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.scf-res-bin-photo-t {
+	font-size: 56rpx;
+}
+.scf-res-bin-body {
+	flex: 1;
+	min-width: 0;
+	padding: 24rpx 24rpx 20rpx;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+.scf-res-bin-name {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #142018;
+	line-height: 1.35;
+}
+.scf-res-bin-cate {
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	color: #5a665e;
+}
+.scf-res-bin-go {
+	margin-top: 16rpx;
+	font-size: 26rpx;
+	font-weight: 600;
 	color: #18af38;
 }
 .scf-point-grid {
