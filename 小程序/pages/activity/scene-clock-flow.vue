@@ -146,7 +146,7 @@
 				<view class="scf-bin-grid scf-bin-grid--pick">
 					<view
 						class="scf-bin-tile scf-bin-tile--pick-spot"
-						v-for="p in points"
+						v-for="p in residentialPickPoints"
 						:key="p.id"
 						:class="'scf-bin-tile--' + cateTone(p.cate_name)"
 						hover-class="scf-card--press"
@@ -186,8 +186,8 @@
 							<view
 								class="scf-bin-tile scf-bin-tile--compact"
 								v-for="(p, mIdx) in points"
-								:key="p.id"
-								:class="'scf-bin-tile--' + cateTone(manageCateName(p))"
+								:key="p._draftKey || p.id"
+								:class="['scf-bin-tile--' + cateTone(manageCateName(p)), p._isDraft ? 'scf-bin-tile--draft' : '']"
 							>
 								<view class="scf-bin-tile-head">
 									<view class="scf-bin-tile-photo" hover-class="scf-card--press" @tap="chooseManagePhoto(mIdx)">
@@ -217,7 +217,7 @@
 											<text class="scf-bin-tile-cate-arrow">▾</text>
 										</view>
 									</picker>
-									<view class="scf-bin-tile-save scf-bin-tile-save--inline" hover-class="scf-card--press" @tap="savePointEditByIndex(mIdx)">保存此项</view>
+									<view class="scf-bin-tile-save scf-bin-tile-save--inline" hover-class="scf-card--press" @tap="savePointEditByIndex(mIdx)">{{ p._isDraft ? '保存新桶位' : '保存此项' }}</view>
 								</view>
 							</view>
 						</view>
@@ -828,6 +828,10 @@
 			isResidentialHub() {
 				return this.hubKey === 'home'
 			},
+			/** 选桶高亮区：不含折叠里未保存的草稿 */
+			residentialPickPoints() {
+				return (this.points || []).filter(p => p && p.id && !p._isDraft)
+			},
 			binLayoutExamplesTop() {
 				const list = this.binLayoutExamples || []
 				return list.filter(ex => ex.planId === 'kitchen' || ex.planId === 'bath')
@@ -1297,19 +1301,44 @@
 			},
 			deleteResidentialPointByIndex(mIdx) {
 				const p = (this.points || [])[mIdx]
-				if (!p || p.id == null) return
+				if (!p) return
+				if (p._isDraft || !p.id) {
+					this.points.splice(mIdx, 1)
+					return
+				}
 				this.deletePointById(p.id)
 			},
+			createResidentialDraftPoint() {
+				return {
+					id: 0,
+					_isDraft: true,
+					_draftKey: 'd' + Date.now(),
+					point_name: '',
+					cate_id: 0,
+					cate_name: '',
+					point_image: '',
+					point_image_raw: '',
+					_edit_name: '',
+					_edit_cate_index: 0,
+					_edit_image: '',
+					_edit_image_url: '',
+				}
+			},
 			closeResidentialBinSettings() {
+				if ((this.points || []).some(p => p && p._isDraft)) {
+					this.points = (this.points || []).filter(p => !p._isDraft)
+				}
 				this.residentialBinSettingsOpen = false
 				this.initUserPoints('pick')
 			},
 			addPointInResidentialSettings() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				this.residentialBinSettingsOpen = false
-				this.residentialPickMode = false
-				this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
-				this.flowStep = 'setup'
+				if ((this.points || []).some(p => p && p._isDraft)) {
+					return this.$u.toast('请先保存或取消当前新桶位')
+				}
+				this.residentialBinSettingsOpen = true
+				this.residentialPickMode = true
+				this.points = [...(this.points || []), this.createResidentialDraftPoint()]
 			},
 			cateIndexByKeyword(keyword) {
 				const list = this.cateList || []
@@ -1651,19 +1680,21 @@
 				if (!cate) return this.$u.toast('请选择种类')
 				const img = String(p._edit_image || p.point_image || '').trim()
 				if (!img) return this.$u.toast('请上传点位照片')
-				await this.$u.api.save_clock_scene_point({
-					id: p.id,
+				const payload = {
 					hub_key: this.hubKey,
 					point_name: name,
 					cate_id: cate.id,
 					point_image: img,
-				})
+				}
+				if (p.id && !p._isDraft) {
+					payload.id = p.id
+				}
+				await this.$u.api.save_clock_scene_point(payload)
 				this.$u.toast('已保存')
 				if (this.isResidentialHub && this.residentialPickMode) {
 					this.initUserPoints('pick').then(() => {
-						if (this.residentialBinSettingsOpen) {
-							this.points = (this.points || []).map(p => this.decoratePointForEdit(p))
-						}
+						this.residentialBinSettingsOpen = true
+						this.points = (this.points || []).map(item => this.decoratePointForEdit(item))
 					})
 					return
 				}
@@ -2527,6 +2558,9 @@
 }
 .scf-bin-tile--compact {
 	box-shadow: 0 4rpx 16rpx rgba(36, 48, 40, 0.08);
+}
+.scf-bin-tile--draft {
+	border: 2rpx dashed rgba(24, 175, 56, 0.55);
 }
 .scf-bin-tile-save--inline {
 	margin-top: 12rpx;
