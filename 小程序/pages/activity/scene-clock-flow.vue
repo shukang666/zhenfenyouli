@@ -178,21 +178,66 @@
 			</view>
 			<view class="scf-home-plan" v-if="isResidentialHub && binLayoutExamples.length">
 				<text class="scf-home-plan-title">{{ homePlanTitle }}</text>
-				<view class="scf-home-plan-board">
-					<view
-						v-for="ex in binLayoutExamples"
-						:key="ex.planId || ex.room"
-						class="scf-plan-room"
-						:class="'scf-plan-room--' + (ex.planId || 'other')"
-					>
-						<text class="scf-plan-room-emoji">{{ ex.emoji }}</text>
-						<text class="scf-plan-room-name">{{ ex.room }}</text>
-						<text class="scf-plan-room-cate">{{ ex.cate }}</text>
-						<text class="scf-plan-room-tip">{{ ex.tip }}</text>
+				<view class="scf-floor">
+					<view class="scf-floor-shell">
+						<view class="scf-floor-row">
+							<view
+								v-for="ex in binLayoutExamplesTop"
+								:key="ex.planId"
+								class="scf-floor-room"
+								:class="'scf-floor-room--' + ex.planId"
+							>
+								<text class="scf-floor-room-name">{{ ex.room }}</text>
+								<view class="scf-floor-bins">
+									<text
+										v-for="(tag, ti) in ex.tags"
+										:key="ti"
+										class="scf-floor-bin"
+										:class="'scf-floor-bin--' + tag.tone"
+									>{{ tag.label }}</text>
+								</view>
+							</view>
+						</view>
+						<view class="scf-floor-row scf-floor-row--living">
+							<view class="scf-floor-room scf-floor-room--living">
+								<text class="scf-floor-room-name">{{ binLayoutLiving.room }}</text>
+								<view class="scf-floor-bins">
+									<text
+										v-for="(tag, ti) in binLayoutLiving.tags"
+										:key="ti"
+										class="scf-floor-bin"
+										:class="'scf-floor-bin--' + tag.tone"
+									>{{ tag.label }}</text>
+								</view>
+							</view>
+						</view>
+						<view class="scf-floor-row scf-floor-row--bottom">
+							<view class="scf-floor-room scf-floor-room--fixed">
+								<text class="scf-floor-room-name">{{ binLayoutFixed.room }}</text>
+								<view class="scf-floor-bins">
+									<text
+										v-for="(tag, ti) in binLayoutFixed.tags"
+										:key="ti"
+										class="scf-floor-bin"
+										:class="'scf-floor-bin--' + tag.tone"
+									>{{ tag.label }}</text>
+								</view>
+							</view>
+							<view class="scf-floor-room scf-floor-room--entry">
+								<text class="scf-floor-room-name scf-floor-room-name--entry">玄关</text>
+								<text class="scf-floor-entry-hint">入户</text>
+							</view>
+						</view>
+						<view class="scf-floor-door-mark">
+							<text class="scf-floor-door-ico">⌵</text>
+							<text class="scf-floor-door-t">门</text>
+						</view>
 					</view>
-					<view class="scf-plan-nook">
-						<text class="scf-plan-nook-ico">🚪</text>
-						<text class="scf-plan-nook-t">入户</text>
+					<view class="scf-floor-legend">
+						<view class="scf-floor-legend-item" v-for="ex in binLayoutExamples" :key="'lg-' + ex.planId">
+							<text class="scf-floor-legend-dot" :class="'scf-floor-legend-dot--' + ex.planId"></text>
+							<text class="scf-floor-legend-text"><text class="scf-floor-legend-room">{{ ex.room }}：</text>{{ ex.tip }}</text>
+						</view>
 					</view>
 				</view>
 				<text class="scf-home-plan-foot">{{ homePlanFoot }}</text>
@@ -719,6 +764,18 @@
 		computed: {
 			isResidentialHub() {
 				return this.hubKey === 'home'
+			},
+			binLayoutExamplesTop() {
+				const list = this.binLayoutExamples || []
+				return list.filter(ex => ex.planId === 'kitchen' || ex.planId === 'bath')
+			},
+			binLayoutLiving() {
+				const list = this.binLayoutExamples || []
+				return list.find(ex => ex.planId === 'living') || { room: '客厅', tags: [] }
+			},
+			binLayoutFixed() {
+				const list = this.binLayoutExamples || []
+				return list.find(ex => ex.planId === 'fixed') || { room: '固定一处', tags: [] }
 			},
 			pendingHubLabel() {
 				const card = (this.sceneHubCards || []).find(c => c.hub === this.pendingHubKey)
@@ -1960,125 +2017,178 @@
 	line-height: 1.5;
 	text-align: center;
 }
-.scf-home-plan-board {
-	position: relative;
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	grid-template-rows: auto auto auto;
-	gap: 14rpx;
-	padding: 28rpx 24rpx 24rpx;
-	border-radius: 24rpx;
-	background: linear-gradient(165deg, #faf6ef 0%, #ebe4d6 48%, #e2ddd2 100%);
-	border: 3rpx solid #d8d0c4;
-	box-shadow: inset 0 0 0 2rpx rgba(255, 255, 255, 0.65), 0 10rpx 32rpx rgba(60, 48, 32, 0.08);
+.scf-floor {
+	border-radius: 20rpx;
+	overflow: hidden;
+	background: #f7f4ee;
+	box-shadow: 0 8rpx 28rpx rgba(48, 40, 28, 0.07);
 }
-.scf-home-plan-board::before {
-	content: '';
-	position: absolute;
-	left: 50%;
-	top: 18rpx;
-	bottom: 18rpx;
-	width: 2rpx;
-	background: repeating-linear-gradient(
-		180deg,
-		rgba(120, 100, 80, 0.35) 0,
-		rgba(120, 100, 80, 0.35) 8rpx,
-		transparent 8rpx,
-		transparent 16rpx
-	);
-	transform: translateX(-50%);
-	pointer-events: none;
-}
-.scf-plan-room {
+.scf-floor-shell {
 	position: relative;
-	border-radius: 18rpx;
-	padding: 20rpx 18rpx 18rpx;
-	border: 2rpx solid rgba(255, 255, 255, 0.85);
-	box-shadow: 0 6rpx 16rpx rgba(40, 32, 24, 0.06);
-	min-height: 120rpx;
+	padding: 20rpx 20rpx 28rpx;
+	border: 5rpx solid #3d342c;
+	border-radius: 6rpx;
+	margin: 16rpx 16rpx 0;
+	background: #faf7f2;
+	background-image: linear-gradient(
+			90deg,
+			rgba(61, 52, 44, 0.03) 1px,
+			transparent 1px
+		),
+		linear-gradient(rgba(61, 52, 44, 0.03) 1px, transparent 1px);
+	background-size: 24rpx 24rpx;
+}
+.scf-floor-row {
+	display: flex;
+	width: 100%;
+}
+.scf-floor-row--living {
+	margin-top: 0;
+}
+.scf-floor-row--bottom {
+	margin-top: 0;
+}
+.scf-floor-room {
+	flex: 1;
+	min-height: 128rpx;
+	padding: 18rpx 16rpx 16rpx;
 	box-sizing: border-box;
+	border: 3rpx solid #3d342c;
+	margin: -1.5rpx;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
-.scf-plan-room--kitchen {
-	grid-column: 1;
-	grid-row: 1;
-	background: linear-gradient(145deg, #fff8ef 0%, #ffe8cc 100%);
+.scf-floor-room--kitchen {
+	background: rgba(255, 248, 240, 0.92);
 }
-.scf-plan-room--bath {
-	grid-column: 2;
-	grid-row: 1;
-	background: linear-gradient(145deg, #f0f8ff 0%, #dceaf5 100%);
+.scf-floor-room--bath {
+	background: rgba(240, 246, 252, 0.92);
 }
-.scf-plan-room--living {
-	grid-column: 1 / 3;
-	grid-row: 2;
-	min-height: 132rpx;
-	background: linear-gradient(145deg, #eef8f0 0%, #d4ecd9 100%);
+.scf-floor-room--living {
+	flex: none;
+	width: 100%;
+	min-height: 112rpx;
+	background: rgba(238, 248, 240, 0.92);
 }
-.scf-plan-room--fixed {
-	grid-column: 1;
-	grid-row: 3;
-	background: linear-gradient(145deg, #fff5f0 0%, #ffe0cc 100%);
+.scf-floor-room--fixed {
+	background: rgba(255, 244, 236, 0.92);
 }
-.scf-plan-nook {
-	grid-column: 2;
-	grid-row: 3;
+.scf-floor-room--entry {
+	background: rgba(245, 242, 236, 0.75);
+	align-items: center;
+}
+.scf-floor-room-name {
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #2c2824;
+	letter-spacing: 2rpx;
+}
+.scf-floor-room-name--entry {
+	font-size: 24rpx;
+	color: #6a6258;
+}
+.scf-floor-entry-hint {
+	margin-top: 8rpx;
+	font-size: 22rpx;
+	color: #9a9084;
+}
+.scf-floor-bins {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8rpx;
+	margin-top: 12rpx;
+}
+.scf-floor-bin {
+	padding: 4rpx 12rpx;
+	border-radius: 6rpx;
+	font-size: 20rpx;
+	font-weight: 600;
+	line-height: 1.35;
+	border: 2rpx solid rgba(0, 0, 0, 0.08);
+}
+.scf-floor-bin--kitchen {
+	color: #5c4a12;
+	background: #f5e6a8;
+}
+.scf-floor-bin--other {
+	color: #4a4a4a;
+	background: #e8e6e2;
+}
+.scf-floor-bin--recycle {
+	color: #1e5c32;
+	background: #c8ebd4;
+}
+.scf-floor-bin--hazard {
+	color: #8a3b12;
+	background: #ffd4b8;
+}
+.scf-floor-door-mark {
+	position: absolute;
+	left: 62%;
+	bottom: -14rpx;
+	transform: translateX(-50%);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
-	border-radius: 18rpx;
-	border: 2rpx dashed #c9c0b4;
-	background: rgba(255, 255, 255, 0.45);
-	min-height: 100rpx;
+	padding: 0 12rpx;
+	background: #f7f4ee;
 }
-.scf-plan-nook-ico {
-	font-size: 40rpx;
-	opacity: 0.85;
-}
-.scf-plan-nook-t {
-	margin-top: 6rpx;
-	font-size: 24rpx;
-	color: #8a7f72;
-}
-.scf-plan-room-emoji {
-	position: absolute;
-	top: 14rpx;
-	right: 16rpx;
-	font-size: 36rpx;
-	opacity: 0.92;
-}
-.scf-plan-room-name {
-	display: block;
-	font-size: 30rpx;
-	font-weight: 800;
-	color: #2a342e;
-	padding-right: 48rpx;
-}
-.scf-plan-room-cate {
-	display: inline-block;
-	margin-top: 10rpx;
-	padding: 4rpx 14rpx;
-	border-radius: 999rpx;
+.scf-floor-door-ico {
 	font-size: 22rpx;
-	font-weight: 600;
-	color: #2d6b3f;
-	background: rgba(255, 255, 255, 0.72);
+	line-height: 1;
+	color: #3d342c;
+	font-weight: 700;
 }
-.scf-plan-room--bath .scf-plan-room-cate {
-	color: #3a6a8a;
+.scf-floor-door-t {
+	font-size: 20rpx;
+	color: #6a6258;
+	margin-top: 2rpx;
 }
-.scf-plan-room--living .scf-plan-room-cate {
-	color: #2d6b3f;
+.scf-floor-legend {
+	padding: 20rpx 24rpx 22rpx;
+	border-top: 2rpx solid #e5dfd4;
+	background: #fff;
 }
-.scf-plan-room--fixed .scf-plan-room-cate {
-	color: #b45309;
+.scf-floor-legend-item {
+	display: flex;
+	align-items: flex-start;
+	margin-bottom: 12rpx;
 }
-.scf-plan-room-tip {
-	display: block;
+.scf-floor-legend-item:last-child {
+	margin-bottom: 0;
+}
+.scf-floor-legend-dot {
+	flex-shrink: 0;
+	width: 12rpx;
+	height: 12rpx;
+	border-radius: 50%;
 	margin-top: 12rpx;
+	margin-right: 14rpx;
+	background: #9a9084;
+}
+.scf-floor-legend-dot--kitchen {
+	background: #c9a227;
+}
+.scf-floor-legend-dot--bath {
+	background: #6a9ec4;
+}
+.scf-floor-legend-dot--living {
+	background: #3d9a5c;
+}
+.scf-floor-legend-dot--fixed {
+	background: #d97840;
+}
+.scf-floor-legend-text {
+	flex: 1;
 	font-size: 24rpx;
 	color: #5a665e;
-	line-height: 1.45;
+	line-height: 1.5;
+}
+.scf-floor-legend-room {
+	font-weight: 700;
+	color: #2a342e;
+	margin-right: 8rpx;
 }
 .scf-cate-scene-list {
 	display: flex;

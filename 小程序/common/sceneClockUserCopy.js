@@ -36,10 +36,33 @@ export function getWhyIntroSummary() {
 /** 建议家里各房间放什么桶（户型示意用 planId 定位格子） */
 export function getBinLayoutExamples() {
 	return [
-		{ planId: 'kitchen', room: '厨房', cate: '厨余 · 其他', emoji: '🍳', tip: '菜叶剩饭、果皮，别和塑料袋混装' },
-		{ planId: 'bath', room: '卫生间', cate: '其他垃圾', emoji: '🚿', tip: '纸巾、一次性用品等' },
-		{ planId: 'living', room: '客厅', cate: '可回收物', emoji: '🛋️', tip: '纸箱、瓶罐、旧杂志，干净干燥再投' },
-		{ planId: 'fixed', room: '固定一处', cate: '有害垃圾', emoji: '⚠️', tip: '电池、灯管、过期药品，攒够再投' },
+		{
+			planId: 'kitchen',
+			room: '厨房',
+			tags: [
+				{ label: '厨余', tone: 'kitchen' },
+				{ label: '其他', tone: 'other' },
+			],
+			tip: '菜叶剩饭、果皮，别和塑料袋混装',
+		},
+		{
+			planId: 'bath',
+			room: '卫生间',
+			tags: [{ label: '其他', tone: 'other' }],
+			tip: '纸巾、一次性用品等',
+		},
+		{
+			planId: 'living',
+			room: '客厅',
+			tags: [{ label: '可回收', tone: 'recycle' }],
+			tip: '纸箱、瓶罐、旧杂志，干净干燥再投',
+		},
+		{
+			planId: 'fixed',
+			room: '固定一处',
+			tags: [{ label: '有害', tone: 'hazard' }],
+			tip: '电池、灯管、过期药品，攒够再投',
+		},
 	]
 }
 
