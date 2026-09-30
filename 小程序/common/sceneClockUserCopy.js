@@ -135,10 +135,6 @@ export function getResidentialSetupNextCta() {
 	return '保存，去选桶打卡'
 }
 
-export function getResidentialSkipToPickLabel() {
-	return '位置已设好，直接去选桶 ›'
-}
-
 export function getPointsStepHint(isCommunityHub) {
 	if (isCommunityHub) return '选这次要用的投放点'
 	return '点一下您这次要用的桶或位置'

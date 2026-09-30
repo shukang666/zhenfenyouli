@@ -210,7 +210,6 @@
 					<text class="scf-bin-tile-add-sub">扔垃圾的位置</text>
 				</view>
 			</view>
-			<view class="scf-skip-link" v-if="isResidentialHub && points.length" @tap="goResidentialPickStep">{{ residentialSkipToPickLabel }}</view>
 			<view class="scf-foot scf-foot--single">
 				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">{{ isResidentialHub ? residentialSetupNextCta : '保存，去选位置拍照' }}</view>
 			</view>
@@ -616,7 +615,6 @@
 		getResidentialPickLead,
 		getResidentialPickSub,
 		getResidentialSetupNextCta,
-		getResidentialSkipToPickLabel,
 		getClockSuccessPromoTitle,
 		getClockSuccessPromoBody,
 		getClockSuccessPromoEmptyBody,
@@ -777,9 +775,6 @@
 			},
 			residentialSetupNextCta() {
 				return getResidentialSetupNextCta()
-			},
-			residentialSkipToPickLabel() {
-				return getResidentialSkipToPickLabel()
 			},
 			clockSuccessOtherPickTitle() {
 				return this.isResidentialHub ? getClockSuccessOtherBinTitle() : getClockSuccessOtherCateTitle()
@@ -1133,14 +1128,6 @@
 					point_image: '',
 					point_image_url: '',
 				}))
-			},
-			goResidentialPickStep() {
-				if (!this.points.length) {
-					this.$u.toast('请先设置分类桶')
-					this.goSetupStep()
-					return
-				}
-				this.flowStep = 'points'
 			},
 			pickResidentialPoint(p) {
 				if (!p || p.id == null) return
@@ -2460,12 +2447,6 @@
 }
 .scf-tip-list--wrap {
 	flex-wrap: wrap;
-}
-.scf-skip-link {
-	text-align: center;
-	font-size: 28rpx;
-	color: #38b061;
-	padding: 16rpx 24rpx 8rpx;
 }
 .scf-success-next {
 	margin-top: 24rpx;
