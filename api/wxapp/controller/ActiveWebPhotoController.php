@@ -123,9 +123,7 @@ class ActiveWebPhotoController extends AuthController
             $this->error('内容不存在');
         }
         if ((int)$row['status'] !== 1) {
-            if (!$this->user_id || (int)$row['user_id'] !== (int)$this->user_id) {
-                $this->error('内容审核中或不可用');
-            }
+            $this->error('内容不可用');
         }
         if ($share !== '' && $share !== (string)$row['share_token']) {
             $this->error('分享链接无效');
@@ -171,28 +169,40 @@ class ActiveWebPhotoController extends AuthController
 
         $now = time();
         $token = ActiveWebPhotoService::newShareToken();
+        $point = ActiveWebPhotoService::grantPoints(
+            (int)$this->user_id,
+            $activeId,
+            ActiveWebPhotoService::POINT_ON_APPROVE,
+            '七贤岭摄影·上传展示'
+        );
         $id = Db::name(ActiveWebPhotoService::photoTable())->insertGetId([
             'active_id' => $activeId,
             'user_id' => $this->user_id,
             'image' => $image,
             'intro' => $intro,
             'category' => $category,
-            'status' => 0,
+            'status' => 1,
             'like_count' => 0,
             'period_key' => ActiveWebPhotoService::periodKey($now),
-            'point_awarded' => 0,
+            'point_awarded' => $point,
             'bonus_point_awarded' => 0,
             'share_token' => $token,
             'create_time' => $now,
-            'audit_time' => 0,
+            'audit_time' => $now,
         ]);
+        ActiveWebPhotoService::maybeAwardBadge((int)$this->user_id, $activeId, '七贤岭影像达人');
 
         $share = $this->buildShareUrls($activeId, $token, '#photo/' . $id, ['photo_id' => $id]);
-        $this->success('上传成功，请等待审核', [
+        $msg = '上传成功，已公开展示';
+        if ($point > 0) {
+            $msg .= '，已获得 ' . $point . ' 积分';
+        }
+        $this->success('上传成功', [
             'photo_id' => $id,
-            'status' => 0,
+            'status' => 1,
+            'point_awarded' => $point,
             'share' => $share,
-            'message' => '审核通过后将展示在专题区，并可获积分（每日有上限）',
+            'message' => $msg,
         ]);
     }
 
@@ -207,7 +217,7 @@ class ActiveWebPhotoController extends AuthController
         $row = Db::name(ActiveWebPhotoService::photoTable())
             ->where('id', $photoId)->where('active_id', $activeId)->where('status', 1)->find();
         if (empty($row)) {
-            $this->error('照片不存在或未通过审核');
+            $this->error('照片不存在');
         }
         if ((int)$row['user_id'] === (int)$this->user_id) {
             $this->error('不能给自己的作品点赞');

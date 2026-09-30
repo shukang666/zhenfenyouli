@@ -60,7 +60,7 @@
   </div>
 
   <div id="view-upload" class="hidden panel">
-    <p style="font-size:14px;line-height:1.6">上传你在七贤岭的人文、景观、美食等照片，并附简短介绍。审核通过后公开展示，可分享获赞；每日上传与积分均有上限。</p>
+    <p style="font-size:14px;line-height:1.6">上传你在七贤岭的人文、景观、美食等照片，并附简短介绍。上传后即可公开展示、分享获赞；每日上传与积分均有上限。</p>
     <select id="up-category">
       <option value="humanity">人文（大集、民俗等）</option>
       <option value="scenery">美景（栈道、观海等）</option>
@@ -69,7 +69,7 @@
     </select>
     <input type="file" id="up-file" accept="image/*" />
     <textarea id="up-intro" rows="4" placeholder="简单介绍拍摄地点与故事（500字内）"></textarea>
-    <button class="btn" id="btn-upload">提交审核</button>
+    <button class="btn" id="btn-upload">发布作品</button>
     <p class="err hidden" id="up-err"></p>
   </div>
 
@@ -273,7 +273,7 @@
             active_id: app.activeId, image: path, intro: intro, category: cat
           });
         }).then(function(res) {
-          alert(res.message || '提交成功，等待审核');
+          alert(res.message || '发布成功');
           document.getElementById('up-intro').value = '';
           document.getElementById('up-file').value = '';
           app.api('/wxapp/active_web_photo/home', { active_id: app.activeId }).then(function(h) {
