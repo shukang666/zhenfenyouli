@@ -176,16 +176,26 @@
 				<text class="scf-promo-line scf-promo-line--sub">{{ binSetupLeadNote }}</text>
 				<text class="scf-promo-line scf-promo-line--sub" v-if="isResidentialHub">{{ introDisplaySummary }}</text>
 			</view>
-			<view class="scf-room-list" v-if="isResidentialHub && binLayoutExamples.length">
-				<view class="zf-scene-card scf-room-card" v-for="(ex, eIdx) in binLayoutExamples" :key="eIdx">
-					<view class="zf-scene-icon-wrap scf-room-icon">
-						<text class="zf-scene-icon">{{ ex.emoji }}</text>
+			<view class="scf-home-plan" v-if="isResidentialHub && binLayoutExamples.length">
+				<text class="scf-home-plan-title">{{ homePlanTitle }}</text>
+				<view class="scf-home-plan-board">
+					<view
+						v-for="ex in binLayoutExamples"
+						:key="ex.planId || ex.room"
+						class="scf-plan-room"
+						:class="'scf-plan-room--' + (ex.planId || 'other')"
+					>
+						<text class="scf-plan-room-emoji">{{ ex.emoji }}</text>
+						<text class="scf-plan-room-name">{{ ex.room }}</text>
+						<text class="scf-plan-room-cate">{{ ex.cate }}</text>
+						<text class="scf-plan-room-tip">{{ ex.tip }}</text>
 					</view>
-					<view class="zf-scene-copy">
-						<text class="zf-scene-title">{{ ex.room }}</text>
-						<text class="zf-scene-desc">{{ ex.cate }} · {{ ex.tip }}</text>
+					<view class="scf-plan-nook">
+						<text class="scf-plan-nook-ico">🚪</text>
+						<text class="scf-plan-nook-t">入户</text>
 					</view>
 				</view>
+				<text class="scf-home-plan-foot">{{ homePlanFoot }}</text>
 			</view>
 			<view class="scf-section-kicker" v-if="isResidentialHub">
 				<text class="scf-section-kicker-t">拍下您家的桶</text>
@@ -624,6 +634,8 @@
 		getThemeBriefTasks,
 		getThemeBriefCta,
 		getBinLayoutExamples,
+		getHomePlanTitle,
+		getHomePlanFoot,
 		getBinSetupLead,
 		getBinSetupLeadNote,
 		getAccumDurationOptions,
@@ -694,6 +706,8 @@
 				binLayoutExamples: [],
 				binSetupLead: getBinSetupLead(),
 				binSetupLeadNote: getBinSetupLeadNote(),
+				homePlanTitle: getHomePlanTitle(),
+				homePlanFoot: getHomePlanFoot(),
 				accumDuration: '',
 				sortDuration: '',
 				accumDurationOptions: getAccumDurationOptions(),
@@ -1928,15 +1942,143 @@
 	font-size: 24rpx;
 	color: #6a756c;
 }
-.scf-room-list {
-	margin-bottom: 20rpx;
+.scf-home-plan {
+	margin-bottom: 28rpx;
 }
-.scf-room-card {
+.scf-home-plan-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #243028;
 	margin-bottom: 16rpx;
-	box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.05);
 }
-.scf-room-icon {
-	background: linear-gradient(145deg, #e8f9ee 0%, #c8ead4 100%) !important;
+.scf-home-plan-foot {
+	display: block;
+	margin-top: 16rpx;
+	font-size: 26rpx;
+	color: #6a756c;
+	line-height: 1.5;
+	text-align: center;
+}
+.scf-home-plan-board {
+	position: relative;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: auto auto auto;
+	gap: 14rpx;
+	padding: 28rpx 24rpx 24rpx;
+	border-radius: 24rpx;
+	background: linear-gradient(165deg, #faf6ef 0%, #ebe4d6 48%, #e2ddd2 100%);
+	border: 3rpx solid #d8d0c4;
+	box-shadow: inset 0 0 0 2rpx rgba(255, 255, 255, 0.65), 0 10rpx 32rpx rgba(60, 48, 32, 0.08);
+}
+.scf-home-plan-board::before {
+	content: '';
+	position: absolute;
+	left: 50%;
+	top: 18rpx;
+	bottom: 18rpx;
+	width: 2rpx;
+	background: repeating-linear-gradient(
+		180deg,
+		rgba(120, 100, 80, 0.35) 0,
+		rgba(120, 100, 80, 0.35) 8rpx,
+		transparent 8rpx,
+		transparent 16rpx
+	);
+	transform: translateX(-50%);
+	pointer-events: none;
+}
+.scf-plan-room {
+	position: relative;
+	border-radius: 18rpx;
+	padding: 20rpx 18rpx 18rpx;
+	border: 2rpx solid rgba(255, 255, 255, 0.85);
+	box-shadow: 0 6rpx 16rpx rgba(40, 32, 24, 0.06);
+	min-height: 120rpx;
+	box-sizing: border-box;
+}
+.scf-plan-room--kitchen {
+	grid-column: 1;
+	grid-row: 1;
+	background: linear-gradient(145deg, #fff8ef 0%, #ffe8cc 100%);
+}
+.scf-plan-room--bath {
+	grid-column: 2;
+	grid-row: 1;
+	background: linear-gradient(145deg, #f0f8ff 0%, #dceaf5 100%);
+}
+.scf-plan-room--living {
+	grid-column: 1 / 3;
+	grid-row: 2;
+	min-height: 132rpx;
+	background: linear-gradient(145deg, #eef8f0 0%, #d4ecd9 100%);
+}
+.scf-plan-room--fixed {
+	grid-column: 1;
+	grid-row: 3;
+	background: linear-gradient(145deg, #fff5f0 0%, #ffe0cc 100%);
+}
+.scf-plan-nook {
+	grid-column: 2;
+	grid-row: 3;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	border-radius: 18rpx;
+	border: 2rpx dashed #c9c0b4;
+	background: rgba(255, 255, 255, 0.45);
+	min-height: 100rpx;
+}
+.scf-plan-nook-ico {
+	font-size: 40rpx;
+	opacity: 0.85;
+}
+.scf-plan-nook-t {
+	margin-top: 6rpx;
+	font-size: 24rpx;
+	color: #8a7f72;
+}
+.scf-plan-room-emoji {
+	position: absolute;
+	top: 14rpx;
+	right: 16rpx;
+	font-size: 36rpx;
+	opacity: 0.92;
+}
+.scf-plan-room-name {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #2a342e;
+	padding-right: 48rpx;
+}
+.scf-plan-room-cate {
+	display: inline-block;
+	margin-top: 10rpx;
+	padding: 4rpx 14rpx;
+	border-radius: 999rpx;
+	font-size: 22rpx;
+	font-weight: 600;
+	color: #2d6b3f;
+	background: rgba(255, 255, 255, 0.72);
+}
+.scf-plan-room--bath .scf-plan-room-cate {
+	color: #3a6a8a;
+}
+.scf-plan-room--living .scf-plan-room-cate {
+	color: #2d6b3f;
+}
+.scf-plan-room--fixed .scf-plan-room-cate {
+	color: #b45309;
+}
+.scf-plan-room-tip {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 24rpx;
+	color: #5a665e;
+	line-height: 1.45;
 }
 .scf-cate-scene-list {
 	display: flex;

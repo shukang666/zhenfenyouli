@@ -33,14 +33,22 @@ export function getWhyIntroSummary() {
 	return '先看下面要点，再选您今天的场景，跟着提示摆桶、打卡即可'
 }
 
-/** 建议家里各房间放什么桶（引导页展示，非强制） */
+/** 建议家里各房间放什么桶（户型示意用 planId 定位格子） */
 export function getBinLayoutExamples() {
 	return [
-		{ room: '厨房', cate: '厨余垃圾、其他垃圾', emoji: '🍳', tip: '菜叶、剩饭、果皮放这里，别和塑料袋混一起' },
-		{ room: '客厅', cate: '可回收物', emoji: '🛋️', tip: '纸箱、瓶罐、旧杂志，干燥干净再投' },
-		{ room: '卫生间', cate: '其他垃圾', emoji: '🚿', tip: '用过的纸巾、一次性用品等' },
-		{ room: '固定一处', cate: '有害垃圾', emoji: '⚠️', tip: '电池、灯管、过期药品，少量攒够再投' },
+		{ planId: 'kitchen', room: '厨房', cate: '厨余 · 其他', emoji: '🍳', tip: '菜叶剩饭、果皮，别和塑料袋混装' },
+		{ planId: 'bath', room: '卫生间', cate: '其他垃圾', emoji: '🚿', tip: '纸巾、一次性用品等' },
+		{ planId: 'living', room: '客厅', cate: '可回收物', emoji: '🛋️', tip: '纸箱、瓶罐、旧杂志，干净干燥再投' },
+		{ planId: 'fixed', room: '固定一处', cate: '有害垃圾', emoji: '⚠️', tip: '电池、灯管、过期药品，攒够再投' },
 	]
+}
+
+export function getHomePlanTitle() {
+	return '常见家里布局（参考）'
+}
+
+export function getHomePlanFoot() {
+	return '您家户型不同也没关系，按实际情况在下方添加桶即可'
 }
 
 export function getBinSetupLead() {
