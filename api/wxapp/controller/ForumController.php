@@ -163,9 +163,8 @@ class ForumController extends AuthController
                 $inspectCommunityId = (int)$this->request->param('community_id', 0);
             }
             if ($inspectCommunityId > 0) {
-                $communityOk = \think\facade\Db::name('community')
-                    ->where('id', $inspectCommunityId)
-                    ->where('status', 1)
+                $communityOk = CommunityModel::where('id', $inspectCommunityId)
+                    ->where('delete_time', 0)
                     ->count();
                 if (!$communityOk) {
                     $this->error('所选小区不存在或已停用');
