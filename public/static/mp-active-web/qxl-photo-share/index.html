@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>我所了解的七贤岭</title>
+  <script src="../sdk.js"></script>
+  <style>
+    :root { --g:#2d6a4f; --gl:#40916c; --bg:#f1faee; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:#1b4332;padding-bottom:72px}
+    .hidden{display:none!important}
+    header{padding:16px;background:linear-gradient(135deg,#2d6a4f,#40916c);color:#fff}
+    header h1{font-size:20px}
+    header p{font-size:13px;opacity:.9;margin-top:6px}
+    .tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:#fff;border-top:1px solid #d8f3dc;z-index:20}
+    .tabs button{flex:1;border:none;background:none;padding:12px 4px;font-size:13px;color:#40916c}
+    .tabs button.on{color:var(--g);font-weight:600}
+    .banner{margin:12px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+    .banner img{width:100%;height:140px;object-fit:cover;display:block;background:#d8f3dc}
+    .banner .bbody{padding:12px}
+    .banner h3{font-size:16px;margin-bottom:4px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 12px}
+    .card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.05)}
+    .card img{width:100%;height:120px;object-fit:cover;background:#eee}
+    .card .cbody{padding:8px;font-size:12px}
+    .tag{display:inline-block;font-size:10px;background:#d8f3dc;padding:2px 6px;border-radius:4px;margin-bottom:4px}
+    .fab{position:fixed;right:16px;bottom:80px;width:52px;height:52px;border-radius:50%;background:var(--g);color:#fff;border:none;font-size:28px;line-height:1;box-shadow:0 4px 16px rgba(45,106,79,.4);z-index:15}
+    .panel{padding:12px}
+    .btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--g);color:#fff;font-size:15px;margin-top:10px}
+    .btn.sec{background:#95d5b2;color:#1b4332}
+    textarea,input,select{width:100%;padding:10px;border:1px solid #b7e4c7;border-radius:10px;font-size:14px;margin-top:8px}
+    .detail-img{width:100%;border-radius:12px;margin:12px 0;background:#eee;min-height:120px}
+    .like-row{display:flex;align-items:center;gap:12px;margin:12px 0}
+    .like-btn{padding:10px 20px;border-radius:999px;border:2px solid var(--g);background:#fff;color:var(--g);font-size:15px}
+    .like-btn.done{background:var(--g);color:#fff}
+    .err{color:#c1121f;font-size:13px;margin-top:8px}
+    .limits{font-size:12px;color:#74c69d;margin-top:8px}
+    .empty{padding:24px;text-align:center;color:#74c69d;font-size:14px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="hdr-title">我所了解的七贤岭</h1>
+    <p id="hdr-sub">人文 · 美景 · 美食 · 分享点赞</p>
+  </header>
+
+  <div id="view-home">
+    <div id="report-banner" class="banner hidden" onclick="app.openReportFromBanner()">
+      <img id="report-cover" alt="" />
+      <div class="bbody">
+        <h3 id="report-title"></h3>
+        <p style="font-size:13px;color:#40916c">点击查看本周影像周报 · 可分享好友或朋友圈</p>
+      </div>
+    </div>
+    <div class="limits panel" id="home-limits"></div>
+    <div class="grid" id="photo-grid"></div>
+    <p class="empty hidden" id="home-empty">暂无作品，快来上传第一张七贤岭照片吧</p>
+    <p class="panel err hidden" id="home-err"></p>
+  </div>
+
+  <div id="view-upload" class="hidden panel">
+    <p style="font-size:14px;line-height:1.6">上传你在七贤岭的人文、景观、美食等照片，并附简短介绍。审核通过后公开展示，可分享获赞；每日上传与积分均有上限。</p>
+    <select id="up-category">
+      <option value="humanity">人文（大集、民俗等）</option>
+      <option value="scenery">美景（栈道、观海等）</option>
+      <option value="food">美食</option>
+      <option value="other">其他</option>
+    </select>
+    <input type="file" id="up-file" accept="image/*" />
+    <textarea id="up-intro" rows="4" placeholder="简单介绍拍摄地点与故事（500字内）"></textarea>
+    <button class="btn" id="btn-upload">提交审核</button>
+    <p class="err hidden" id="up-err"></p>
+  </div>
+
+  <div id="view-mine" class="hidden panel">
+    <div id="mine-list"></div>
+  </div>
+
+  <div id="view-detail" class="hidden panel">
+    <img class="detail-img" id="dt-img" alt="" />
+    <p class="tag" id="dt-cat"></p>
+    <p id="dt-intro" style="line-height:1.6;font-size:15px"></p>
+    <p style="font-size:13px;color:#74c69d;margin-top:8px" id="dt-author"></p>
+    <div class="like-row">
+      <button type="button" class="like-btn" id="btn-like">👍 点赞 <span id="dt-likes">0</span></button>
+    </div>
+    <button class="btn sec" id="btn-copy-share">复制分享链接</button>
+    <button class="btn sec" id="btn-back-home">返回首页</button>
+  </div>
+
+  <div id="view-report" class="hidden panel">
+    <h2 id="rp-title" style="margin-bottom:12px"></h2>
+    <div id="rp-html" style="line-height:1.7;font-size:14px"></div>
+    <div class="grid" id="rp-photos" style="margin-top:16px;padding:0"></div>
+    <button class="btn sec" id="btn-copy-report">复制周报分享链接</button>
+    <button class="btn sec" id="btn-back-home2">返回首页</button>
+  </div>
+
+  <button type="button" class="fab hidden" id="fab-upload" title="上传">+</button>
+  <nav class="tabs">
+    <button type="button" data-tab="home" class="on">发现</button>
+    <button type="button" data-tab="upload">上传</button>
+    <button type="button" data-tab="mine">我的</button>
+  </nav>
+
+  <script>
+    var app = {
+      activeId: 0, openid: '', apiBase: '', bannerReportId: 0,
+      currentPhoto: null, currentReport: null,
+      api: function(path, body) {
+        return ActiveWebSdk.apiPost(app.apiBase, app.openid, path, body || {}).then(function(res) {
+          if (!res || res.code !== 1) throw new Error((res && res.msg) || '失败');
+          return res.data;
+        });
+      },
+      init: function() {
+        ActiveWebSdk.bootstrap().then(function(data) {
+          app.openid = data.session.openid;
+          app.apiBase = data.api.base;
+          app.activeId = parseInt(data.active.id, 10) || parseInt(ActiveWebSdk.getQuery().get('active_id'), 10);
+          if (!app.activeId) throw new Error('缺少活动 ID');
+          return app.api('/wxapp/active_web_photo/home', { active_id: app.activeId });
+        }).then(function(h) {
+          document.getElementById('hdr-title').textContent = h.active_name || '我所了解的七贤岭';
+          app.renderLimits(h.limits);
+          if (h.latest_report) app.showReportBanner(h.latest_report);
+          app.loadPhotos();
+          app.routeFromHash();
+          document.getElementById('fab-upload').classList.remove('hidden');
+        }).catch(function(e) {
+          var el = document.getElementById('home-err');
+          el.textContent = e.message || String(e);
+          el.classList.remove('hidden');
+        });
+
+        document.querySelectorAll('.tabs button').forEach(function(b) {
+          b.onclick = function() { app.switchTab(b.getAttribute('data-tab')); };
+        });
+        document.getElementById('fab-upload').onclick = function() { app.switchTab('upload'); };
+        document.getElementById('btn-upload').onclick = app.doUpload;
+        document.getElementById('btn-like').onclick = app.doLike;
+        document.getElementById('btn-copy-share').onclick = app.copyPhotoShare;
+        document.getElementById('btn-copy-report').onclick = app.copyReportShare;
+        document.getElementById('btn-back-home').onclick = document.getElementById('btn-back-home2').onclick = function() {
+          location.hash = '';
+          app.switchTab('home');
+        };
+        window.addEventListener('hashchange', app.routeFromHash);
+      },
+      renderLimits: function(l) {
+        if (!l) return;
+        document.getElementById('home-limits').textContent =
+          '今日还可上传 ' + l.upload_left_today + ' 张 · 今日积分剩余额度 ' + l.points_left_today;
+      },
+      showReportBanner: function(r) {
+        document.getElementById('report-banner').classList.remove('hidden');
+        document.getElementById('report-title').textContent = r.title;
+        if (r.cover_image) document.getElementById('report-cover').src = r.cover_image;
+        app.bannerReportId = r.id;
+      },
+      openReportFromBanner: function() {
+        if (app.bannerReportId) location.hash = 'report/' + app.bannerReportId;
+      },
+      switchTab: function(tab) {
+        ['view-home','view-upload','view-mine','view-detail','view-report'].forEach(function(id) {
+          document.getElementById(id).classList.add('hidden');
+        });
+        document.querySelectorAll('.tabs button').forEach(function(b) {
+          b.classList.toggle('on', b.getAttribute('data-tab') === tab);
+        });
+        if (tab === 'home') document.getElementById('view-home').classList.remove('hidden');
+        if (tab === 'upload') document.getElementById('view-upload').classList.remove('hidden');
+        if (tab === 'mine') { document.getElementById('view-mine').classList.remove('hidden'); app.loadMine(); }
+      },
+      loadPhotos: function() {
+        app.api('/wxapp/active_web_photo/list_photos', { active_id: app.activeId, page_size: 20 }).then(function(d) {
+          var g = document.getElementById('photo-grid');
+          var list = d.list || [];
+          g.innerHTML = '';
+          document.getElementById('home-empty').classList.toggle('hidden', list.length > 0);
+          list.forEach(function(p) {
+            var el = document.createElement('div');
+            el.className = 'card';
+            el.innerHTML = '<img src="' + p.image + '" alt=""/><div class="cbody"><span class="tag">' + p.category_label + '</span><div>' +
+              (p.intro.length > 36 ? p.intro.slice(0, 36) + '…' : p.intro) + '</div><div style="margin-top:4px;color:#74c69d">👍 ' + p.like_count + '</div></div>';
+            el.onclick = function() { location.hash = 'photo/' + p.id; };
+            g.appendChild(el);
+          });
+        }).catch(function(e) {
+          document.getElementById('home-err').textContent = e.message || e;
+          document.getElementById('home-err').classList.remove('hidden');
+        });
+      },
+      loadMine: function() {
+        app.api('/wxapp/active_web_photo/my_list', { active_id: app.activeId }).then(function(d) {
+          var box = document.getElementById('mine-list');
+          box.innerHTML = '';
+          (d.list || []).forEach(function(p) {
+            var div = document.createElement('div');
+            div.className = 'card';
+            div.style.marginBottom = '10px';
+            div.innerHTML = '<img src="' + p.image + '" style="width:100%;height:100px;object-fit:cover"/><div class="cbody">' +
+              p.status_text + ' · 👍' + p.like_count + '<br/>' + p.intro + '</div>';
+            div.onclick = function() { if (p.status == 1) location.hash = 'photo/' + p.id; };
+            box.appendChild(div);
+          });
+        });
+      },
+      routeFromHash: function() {
+        var h = (location.hash || '').replace(/^#/, '');
+        if (!h) return;
+        var m = h.match(/^photo\/(\d+)/);
+        if (m) { app.openPhoto(parseInt(m[1], 10)); return; }
+        m = h.match(/^report\/(\d+)/);
+        if (m) { app.openReport(parseInt(m[1], 10)); }
+      },
+      openPhoto: function(id) {
+        var share = ActiveWebSdk.getQuery().get('share') || '';
+        app.api('/wxapp/active_web_photo/detail', { active_id: app.activeId, photo_id: id, share: share }).then(function(p) {
+          app.currentPhoto = p;
+          ['view-home','view-upload','view-mine','view-report'].forEach(function(v) {
+            document.getElementById(v).classList.add('hidden');
+          });
+          document.getElementById('view-detail').classList.remove('hidden');
+          document.getElementById('dt-img').src = p.image;
+          document.getElementById('dt-cat').textContent = p.category_label;
+          document.getElementById('dt-intro').textContent = p.intro;
+          document.getElementById('dt-author').textContent = (p.author_nickname || '') + ' · 👍 ' + p.like_count;
+          document.getElementById('dt-likes').textContent = p.like_count;
+          var lb = document.getElementById('btn-like');
+          lb.classList.toggle('done', p.liked == 1);
+          lb.disabled = p.liked == 1;
+        });
+      },
+      openReport: function(id) {
+        var share = ActiveWebSdk.getQuery().get('share') || '';
+        app.api('/wxapp/active_web_photo/report_detail', { active_id: app.activeId, report_id: id, share: share }).then(function(r) {
+          app.currentReport = r;
+          ['view-home','view-upload','view-mine','view-detail'].forEach(function(v) {
+            document.getElementById(v).classList.add('hidden');
+          });
+          document.getElementById('view-report').classList.remove('hidden');
+          document.getElementById('rp-title').textContent = r.title;
+          document.getElementById('rp-html').innerHTML = r.summary_html;
+          var g = document.getElementById('rp-photos');
+          g.innerHTML = '';
+          (r.photos || []).forEach(function(p) {
+            var c = document.createElement('div');
+            c.className = 'card';
+            c.innerHTML = '<img src="' + p.image + '"/><div class="cbody">' + p.intro.slice(0, 30) + '</div>';
+            c.onclick = function() { location.hash = 'photo/' + p.id; };
+            g.appendChild(c);
+          });
+        });
+      },
+      doUpload: function() {
+        var file = document.getElementById('up-file').files[0];
+        var intro = document.getElementById('up-intro').value.trim();
+        var cat = document.getElementById('up-category').value;
+        var err = document.getElementById('up-err');
+        err.classList.add('hidden');
+        if (!file) { err.textContent = '请选择照片'; err.classList.remove('hidden'); return; }
+        if (!intro) { err.textContent = '请填写介绍'; err.classList.remove('hidden'); return; }
+        var fd = new FormData();
+        fd.append('file', file);
+        fetch(app.apiBase + '/wxapp/public/upload_asset?filetype=image', {
+          method: 'POST', headers: { openid: app.openid }, body: fd
+        }).then(function(r) { return r.json(); }).then(function(up) {
+          if (!up || up.code !== 1) throw new Error((up && up.msg) || '上传失败');
+          var path = (up.data && (up.data.filepath || up.data.url)) || '';
+          return app.api('/wxapp/active_web_photo/submit', {
+            active_id: app.activeId, image: path, intro: intro, category: cat
+          });
+        }).then(function(res) {
+          alert(res.message || '提交成功，等待审核');
+          document.getElementById('up-intro').value = '';
+          document.getElementById('up-file').value = '';
+          app.api('/wxapp/active_web_photo/home', { active_id: app.activeId }).then(function(h) {
+            app.renderLimits(h.limits);
+          });
+          app.switchTab('mine');
+        }).catch(function(e) {
+          err.textContent = e.message || e;
+          err.classList.remove('hidden');
+        });
+      },
+      doLike: function() {
+        if (!app.currentPhoto) return;
+        app.api('/wxapp/active_web_photo/like', {
+          active_id: app.activeId, photo_id: app.currentPhoto.id
+        }).then(function(d) {
+          document.getElementById('dt-likes').textContent = d.like_count;
+          document.getElementById('btn-like').classList.add('done');
+          document.getElementById('btn-like').disabled = true;
+        }).catch(function(e) { alert(e.message || e); });
+      },
+      copyPhotoShare: function() {
+        var url = app.currentPhoto && app.currentPhoto.share && app.currentPhoto.share.h5_url;
+        if (url) app.copyText(url, '链接已复制，可发给好友；朋友圈可用右上角菜单分享');
+      },
+      copyReportShare: function() {
+        var url = app.currentReport && app.currentReport.share && app.currentReport.share.h5_url;
+        if (url) app.copyText(url, '周报链接已复制');
+      },
+      copyText: function(t, msg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(t).then(function() { alert(msg); });
+        } else {
+          prompt('复制链接', t);
+        }
+      }
+    };
+    app.init();
+  </script>
+</body>
+</html>
