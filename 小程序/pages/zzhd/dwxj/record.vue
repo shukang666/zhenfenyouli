@@ -90,10 +90,18 @@
 			};
 		},
 		onLoad(option) {
-			this.type = option.type
-			this.get_forum_list()
+			this.type = option.type || 3
+			uni.setNavigationBarTitle({ title: '我的提交记录' })
+		},
+		onShow() {
+			this.reloadList()
 		},
 		methods: {
+			reloadList() {
+				this.page = 1
+				this.forum_list = []
+				this.get_forum_list()
+			},
 			previewImage(urls, current = 0) {
 				uni.previewImage({
 					urls,

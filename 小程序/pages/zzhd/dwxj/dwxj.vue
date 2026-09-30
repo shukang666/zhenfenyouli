@@ -395,7 +395,7 @@
 
 		onLoad(option) {
 
-			this.type = option.type
+			this.type = option.type || 3
 
 			uni.setNavigationBarTitle({
 
@@ -403,7 +403,11 @@
 
 			})
 
-			this.get_forum_list()
+		},
+
+		onShow() {
+
+			this.search()
 
 		},
 
@@ -499,7 +503,7 @@
 
 					page: this.page,
 
-					type: 3,
+					type: this.type,
 
 					is_my: 1,
 

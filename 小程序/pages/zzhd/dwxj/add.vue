@@ -1004,9 +1004,21 @@
 
 				this.saveLastCommunity()
 
-				uni.redirectTo({
+				const type = this.form.type
 
-					url: `/pages/zzhd/dwxj/record?type=${this.form.type}`,
+				uni.navigateBack({
+
+					delta: 1,
+
+					fail: () => {
+
+						uni.redirectTo({
+
+							url: `/pages/zzhd/dwxj/dwxj?type=${type}`,
+
+						})
+
+					},
 
 				})
 
