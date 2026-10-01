@@ -790,6 +790,12 @@ export default {
     handleBannerTap(banner) {
       const url = (banner.url || "").trim();
       const target = banner.target || "";
+      console.log("[SCF-DEBUG] low_carbon handleBannerTap", {
+        url,
+        target,
+        isLogin: this.isLogin,
+        community_id: this.userInfo && this.userInfo.community_id,
+      });
       if (!url) return;
 
       const sceneEntry = parseBannerSceneClockEntry(url);
@@ -835,6 +841,10 @@ export default {
 
     // 等同选场景页点「家庭」：与 Banner 总入口同一套 scene-clock-flow
     gotoHomeScene() {
+      console.log("[SCF-DEBUG] low_carbon gotoHomeScene", {
+        isLogin: this.isLogin,
+        community_id: this.userInfo && this.userInfo.community_id,
+      });
       openSceneClockHub(this, "home");
     },
 
@@ -843,10 +853,12 @@ export default {
     },
 
     gotoOfficeBuilding() {
+      console.log("[SCF-DEBUG] low_carbon gotoOfficeBuilding", { isLogin: this.isLogin });
       openSceneClockHub(this, "office");
     },
 
     gotoStreetShop() {
+      console.log("[SCF-DEBUG] low_carbon gotoStreetShop", { isLogin: this.isLogin });
       openSceneClockHub(this, "street");
     },
 

@@ -1081,32 +1081,64 @@
 		onLoad(option) {
 			const opt = option || {}
 			const mode = String(opt.mode || opt.entry || '').trim()
+			console.log('[SCF-DEBUG] scene-clock-flow onLoad', {
+				rawOption: opt,
+				mode,
+				hub: opt.hub,
+				isLogin: this.isLogin,
+				flowStepBefore: this.flowStep,
+			})
 			if (mode === 'theme' || mode === 'intro') {
 				this.flowStep = 'theme_scenes'
+				console.log('[SCF-DEBUG] scene-clock-flow → theme_scenes')
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
 				return
 			}
 			const hubKey = normalizeClockHubKey(opt.hub ? String(opt.hub) : 'home')
+			console.log('[SCF-DEBUG] scene-clock-flow onLoad bootstrapHub', hubKey)
 			this.bootstrapHub(hubKey)
 		},
 		onShow() {
+			console.log('[SCF-DEBUG] scene-clock-flow onShow', {
+				flowStep: this.flowStep,
+				hubKey: this.hubKey,
+				hasHub: !!this.hub,
+				isLogin: this.isLogin,
+				community_id: this.userInfo && this.userInfo.community_id,
+			})
 			if (this.flowStep === 'theme_scenes') {
 				this.ensureThemeSceneGate()
 				return
 			}
 			if (['theme_intro', 'theme_brief'].indexOf(this.flowStep) >= 0) return
-			if (!this.hub) return
+			if (!this.hub) {
+				console.log('[SCF-DEBUG] scene-clock-flow onShow skip: no hub')
+				return
+			}
 			const editing = ['setup', 'manage', 'guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0
-			if (editing) return
+			if (editing) {
+				console.log('[SCF-DEBUG] scene-clock-flow onShow skip: editing step', this.flowStep)
+				return
+			}
 			this.ensureExamGate().then(ok => {
+				console.log('[SCF-DEBUG] scene-clock-flow onShow ensureExamGate', ok)
 				if (ok) this.initUserPoints()
 			})
 		},
 		methods: {
+			scfDbg(label, payload) {
+				console.log('[SCF-DEBUG] scene-clock-flow', label, payload || '')
+			},
 			bootstrapHub(hubKey) {
 				this.hubKey = normalizeClockHubKey(hubKey)
 				this.hub = getHub(this.hubKey)
+				this.scfDbg('bootstrapHub start', {
+					hubKey: this.hubKey,
+					hubTitle: this.hub && this.hub.title,
+					flowStep: this.flowStep,
+				})
 				if (!this.hub) {
+					this.scfDbg('bootstrapHub invalid hub')
 					this.$u.toast('场景无效')
 					setTimeout(() => uni.navigateBack(), 800)
 					return
@@ -1115,7 +1147,9 @@
 				uni.setNavigationBarTitle({ title: this.hub.title })
 				this.subKey = ''
 				this.loadCateList().then(() => {
+					this.scfDbg('bootstrapHub loadCateList done', { cateCount: (this.cateList || []).length })
 					this.ensureExamGate().then(ok => {
+						this.scfDbg('bootstrapHub ensureExamGate', ok)
 						if (ok) this.initUserPoints()
 					})
 				})
@@ -1192,6 +1226,7 @@
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
 			},
 			pickThemeHub(hub) {
+				this.scfDbg('pickThemeHub', { hub, isLogin: this.isLogin })
 				if (!this.isLogin) {
 					return this.$u.route('/pages/public/login')
 				}
@@ -1211,22 +1246,36 @@
 				this.bootstrapHub(this.pendingHubKey)
 			},
 			ensureExamGate() {
-				if (!this.isLogin) return Promise.resolve(true)
+				if (!this.isLogin) {
+					this.scfDbg('ensureExamGate skip (not login) → pass')
+					return Promise.resolve(true)
+				}
 				return this.$u.api.getUserInfo().then(res => {
 					const info = res.data || {}
 					this.$u.vuex('userInfo', info)
+					this.scfDbg('ensureExamGate user', {
+						is_learn: info.is_learn,
+						is_answer: info.is_answer,
+						community_id: info.community_id,
+					})
 					if (Number(info.is_learn) !== 1) {
+						this.scfDbg('ensureExamGate BLOCK → pre_learn')
 						this.$u.toast('请先完成打卡前学习')
 						setTimeout(() => uni.navigateTo({ url: '/pages/flhd/pre_learn' }), 500)
 						return false
 					}
 					if (Number(info.is_answer) !== 1) {
+						this.scfDbg('ensureExamGate BLOCK → examine')
 						this.$u.toast('请先通过分类小测验')
 						setTimeout(() => uni.navigateTo({ url: '/pages/answer/examine?id=1' }), 500)
 						return false
 					}
+					this.scfDbg('ensureExamGate pass')
 					return true
-				}).catch(() => true)
+				}).catch((e) => {
+					this.scfDbg('ensureExamGate api error → pass', e && e.message)
+					return true
+				})
 			},
 			setupCateName(row) {
 				const cate = this.cateList[row.cate_index]
@@ -1422,6 +1471,13 @@
 				}).catch(() => {})
 			},
 			initUserPoints(keepFlow) {
+				this.scfDbg('initUserPoints start', {
+					keepFlow,
+					hubKey: this.hubKey,
+					isResidentialHub: this.isResidentialHub,
+					isCommunityHub: this.isCommunityHub,
+					flowStepBefore: this.flowStep,
+				})
 				if (!this.isLogin) {
 					if (this.isResidentialHub) {
 						this.prefillSetupRowsFromExamples()
@@ -1429,9 +1485,11 @@
 					} else {
 						this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
 					}
+					this.scfDbg('initUserPoints not login → flowStep', this.flowStep)
 					return Promise.resolve()
 				}
 				if (!this.userInfo.community_id) {
+					this.scfDbg('initUserPoints BLOCK → member/info (no community)')
 					this.$u.route('/pages/member/info')
 					return Promise.resolve()
 				}
@@ -1492,11 +1550,17 @@
 					if (this.flowStep === 'setup' && !this.setupRows.length) {
 						this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
 					}
-				}).catch(() => {
+				}).catch((err) => {
+					this.scfDbg('initUserPoints list_clock_scene_point error', err && (err.msg || err.message))
 					if (keepFlow === 'manage' || keepFlow === 'setup') return
 					this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
 				}).finally(() => {
 					this.pointsLoading = false
+					this.scfDbg('initUserPoints done', {
+						flowStep: this.flowStep,
+						residentialPickMode: this.residentialPickMode,
+						pointsCount: (this.points || []).length,
+					})
 				})
 			},
 			cateTone(name) {
