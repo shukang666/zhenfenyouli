@@ -29,7 +29,10 @@
     var webCtx = params.get('web_ctx') || '';
     var activeId = params.get('active_id') || '';
     if (!webCtx) {
-      if (opts.allowGuest) {
+      var path = (global.location.pathname || '') + (global.location.href || '');
+      var autoGuest = /qxl-photo-share/i.test(path)
+        || (params.get('share') && (params.get('photo_id') || params.get('report_id')));
+      if (opts.allowGuest || autoGuest) {
         var baseGuest = (opts.apiBase || defaultApiBase()).replace(/\/$/, '');
         return Promise.resolve({
           guest: true,
@@ -68,9 +71,21 @@
     });
   }
 
+  function guestSession(activeId, apiBase) {
+    var baseGuest = (apiBase || defaultApiBase()).replace(/\/$/, '');
+    return {
+      guest: true,
+      active: { id: activeId || '' },
+      api: { base: baseGuest, auth_header: 'openid' },
+      session: { openid: '' },
+    };
+  }
+
   global.ActiveWebSdk = {
     bootstrap: bootstrap,
     apiPost: apiPost,
     getQuery: qs,
+    defaultApiBase: defaultApiBase,
+    guestSession: guestSession,
   };
 })(typeof window !== 'undefined' ? window : this);

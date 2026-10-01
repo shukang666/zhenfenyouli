@@ -116,12 +116,19 @@ class ActiveWebPhotoController extends AuthController
         $activeId = (int)$this->request->param('active_id');
         $photoId = (int)$this->request->param('photo_id');
         $share = trim((string)$this->request->param('share', ''));
-        $this->requireWebPhotoActive($activeId);
+        if ($photoId <= 0) {
+            $this->error('缺少照片 ID');
+        }
 
-        $row = Db::name(ActiveWebPhotoService::photoTable())->where('id', $photoId)->where('active_id', $activeId)->find();
+        $row = Db::name(ActiveWebPhotoService::photoTable())->where('id', $photoId)->find();
         if (empty($row)) {
             $this->error('内容不存在');
         }
+        if ($activeId > 0 && (int)$row['active_id'] !== $activeId) {
+            $this->error('内容与活动不匹配');
+        }
+        $activeId = (int)$row['active_id'];
+        $this->requireWebPhotoActive($activeId);
         if ((int)$row['status'] !== 1) {
             $this->error('内容不可用');
         }
@@ -135,6 +142,7 @@ class ActiveWebPhotoController extends AuthController
             $item['liked'] = Db::name(ActiveWebPhotoService::likeTable())
                 ->where('photo_id', $photoId)->where('user_id', $this->user_id)->count() ? 1 : 0;
         }
+        $item['active_id'] = $activeId;
         $item['share'] = $this->buildShareUrls($activeId, (string)$row['share_token'], '#photo/' . $photoId, ['photo_id' => $photoId]);
         $this->success('请求成功', $item);
     }

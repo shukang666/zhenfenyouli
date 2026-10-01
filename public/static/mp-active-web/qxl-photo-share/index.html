@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>我所了解的七贤岭</title>
-  <script src="../sdk.js"></script>
+  <script src="../sdk.js?v=202604011"></script>
   <style>
     :root { --g:#2d6a4f; --gl:#40916c; --bg:#f1faee; }
     *{box-sizing:border-box;margin:0;padding:0}
@@ -117,13 +117,42 @@
           return res.data;
         });
       },
+      resolveApiBase: function() {
+        if (ActiveWebSdk.defaultApiBase) return ActiveWebSdk.defaultApiBase();
+        var o = location.origin;
+        return o ? o + '/api' : 'https://admin.circular-economy.cn/api';
+      },
+      startSession: function() {
+        var params = ActiveWebSdk.getQuery();
+        var webCtx = (params.get('web_ctx') || '').trim();
+        app.apiBase = app.resolveApiBase();
+        if (!webCtx) {
+          var data = ActiveWebSdk.guestSession
+            ? ActiveWebSdk.guestSession(params.get('active_id'), app.apiBase)
+            : { guest: true, session: { openid: '' }, active: { id: params.get('active_id') }, api: { base: app.apiBase } };
+          return Promise.resolve(data);
+        }
+        return ActiveWebSdk.bootstrap({ allowGuest: true, apiBase: app.apiBase });
+      },
       init: function() {
-        ActiveWebSdk.bootstrap({ allowGuest: true }).then(function(data) {
+        app.startSession().then(function(data) {
           app.guest = !!data.guest;
-          app.apiBase = data.api.base;
+          app.apiBase = (data.api && data.api.base) || app.apiBase;
           app.openid = (data.session && data.session.openid) || '';
           app.activeId = parseInt(data.active.id, 10) || parseInt(ActiveWebSdk.getQuery().get('active_id'), 10);
-          if (!app.activeId) throw new Error('缺少活动 ID');
+          var q = ActiveWebSdk.getQuery();
+          var pid = parseInt(q.get('photo_id'), 10);
+          var sh = q.get('share') || '';
+          if (!app.activeId && pid && sh) {
+            return app.api('/wxapp/active_web_photo/detail', {
+              active_id: 0, photo_id: pid, share: sh
+            }).then(function(p) {
+              app.activeId = parseInt(p.active_id, 10);
+              if (!app.activeId) throw new Error('无法识别分享的活动');
+              return app.api('/wxapp/active_web_photo/home', { active_id: app.activeId });
+            });
+          }
+          if (!app.activeId) throw new Error('链接缺少活动 ID，请重新复制分享链接');
           return app.api('/wxapp/active_web_photo/home', { active_id: app.activeId });
         }).then(function(h) {
           document.getElementById('hdr-title').textContent = h.active_name || '我所了解的七贤岭';
