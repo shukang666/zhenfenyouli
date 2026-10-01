@@ -108,6 +108,7 @@
 		isSupervisorBannerHidden,
 		shouldShowSupervisorInvite,
 	} from '@/common/supervisorInvite.js'
+	import { openSceneClockHub } from '@/common/sceneClockEntry.js'
 	export default {
 		data() {
 			return {
@@ -243,7 +244,7 @@
 				const scene = this.scenes.find(s => s.key === sceneKey)
 				if (!scene) return
 				const hub = sceneKey === 'office' ? 'office' : sceneKey
-				this.$u.route('/pages/activity/scene-clock-flow?hub=' + encodeURIComponent(hub))
+				openSceneClockHub(this, hub)
 			},
 			goMy() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')

@@ -556,6 +556,12 @@
 
 <script>
 import { checkCommunity } from "@/common/communityCheck.mixin.js";
+import {
+  openSceneClockTheme,
+  openSceneClockHub,
+  parseBannerSceneClockEntry,
+  openSceneClockFromBannerEntry,
+} from "@/common/sceneClockEntry.js";
 import careGesture from "@/common/care-gesture.mixin.js";
 import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 
@@ -642,7 +648,7 @@ export default {
       const item = list[wIdx];
       if (!item) return;
       if (item.isWeeklyPin) {
-        this.$u.route("/pages/activity/scene-clock-flow?mode=theme");
+        openSceneClockTheme(this);
         return;
       }
       if (!item.id) return;
@@ -786,19 +792,8 @@ export default {
       const target = banner.target || "";
       if (!url) return;
 
-      // 垃圾分类主题活动 / 真分打卡（原型：Banner → 引导页 → 选场景 → 打卡流）
-      if (
-        url === "scene-clock-intro" ||
-        url === "zhenfen" ||
-        url.indexOf("scene-clock-intro") >= 0
-      ) {
-        this.$u.route("/pages/activity/scene-clock-flow?mode=theme");
-        return;
-      }
-
-      // 旧配置若直接链到打卡流，统一先走主题引导（同页 mode=theme）
-      if (url.indexOf("scene-clock-flow") >= 0 && url.indexOf("mode=theme") < 0) {
-        this.$u.route("/pages/activity/scene-clock-flow?mode=theme");
+      const sceneEntry = parseBannerSceneClockEntry(url);
+      if (sceneEntry && openSceneClockFromBannerEntry(this, sceneEntry)) {
         return;
       }
 
@@ -838,22 +833,21 @@ export default {
       this.$u.route("/pages/dtsh/dtsh");
     },
 
-    // 家庭场景：直达打卡流，不经过主题引导页
+    // 等同选场景页点「家庭」：与 Banner 总入口同一套 scene-clock-flow
     gotoHomeScene() {
-      this.$u.route("/pages/activity/scene-clock-flow?hub=home");
+      openSceneClockHub(this, "home");
     },
 
     gotoDtshPage(url) {
       this.$u.route(url);
     },
 
-    // 办公场景（占位页，后续再补内容）
     gotoOfficeBuilding() {
-      this.$u.route("/pages/activity/scene-clock-flow?hub=office");
+      openSceneClockHub(this, "office");
     },
 
     gotoStreetShop() {
-      this.$u.route("/pages/activity/scene-clock-flow?hub=street");
+      openSceneClockHub(this, "street");
     },
 
     // 我和七贤岭入口
