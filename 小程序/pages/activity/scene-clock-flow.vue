@@ -1522,7 +1522,7 @@
 						return
 					}
 					if (this.isResidentialHub) {
-						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'points' || keepFlow === 'learn') {
+						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'learn') {
 							return
 						}
 						if (keepFlow === 'pick') {
@@ -1531,9 +1531,15 @@
 							this.residentialBinSettingsOpen = false
 							return
 						}
-						if (['setup', 'points', 'learn'].indexOf(this.flowStep) >= 0) {
+						if (keepFlow === 'points') {
+							this.flowStep = 'setup'
+							this.residentialPickMode = this.points.length > 0
 							return
 						}
+						if (this.flowStep === 'learn') return
+						if (this.flowStep === 'manage') return
+						if (this.flowStep === 'setup' && this.residentialPickMode) return
+						// data 默认 flowStep=points，家庭场景不展示 points 页，此处勿因 points 提前 return
 						if (this.points.length > 0) {
 							this.flowStep = 'setup'
 							this.residentialPickMode = true
