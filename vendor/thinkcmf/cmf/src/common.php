@@ -694,7 +694,7 @@ function cmf_get_upload_setting()
         $uploadSetting = [
             'file_types' => [
                 'image' => [
-                    'upload_max_filesize' => '5120',//单位KB
+                    'upload_max_filesize' => '204800',//单位KB，默认 200MB；实际上传图片上限见 Upload 类与 PHP ini
                     'extensions' => 'jpg,jpeg,png,gif,bmp4'
                 ],
                 'video' => [
@@ -730,6 +730,23 @@ function cmf_get_upload_setting()
         }
 
         $uploadSetting['upload_max_filesize'] = $uploadMaxFileSizeSetting;
+    }
+
+    if (class_exists(\app\cmf\UploadLimit::class)) {
+        $maxB = \app\cmf\UploadLimit::imageMaxBytes();
+        $imageKb = (string)(int)ceil($maxB / 1024);
+        if (!empty($uploadSetting['file_types']['image'])) {
+            $uploadSetting['file_types']['image']['upload_max_filesize'] = $imageKb;
+        }
+        if (!empty($uploadSetting['upload_max_filesize']) && is_array($uploadSetting['upload_max_filesize'])) {
+            $imageExts = explode(',', (string)($uploadSetting['file_types']['image']['extensions'] ?? 'jpg,jpeg,png,gif,bmp'));
+            foreach ($imageExts as $ext) {
+                $ext = trim(strtolower($ext));
+                if ($ext !== '') {
+                    $uploadSetting['upload_max_filesize'][$ext] = $maxB;
+                }
+            }
+        }
     }
 
     return $uploadSetting;
