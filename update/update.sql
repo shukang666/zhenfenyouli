@@ -274,3 +274,47 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_photo_report` (
   PRIMARY KEY (`id`),
   KEY `idx_active_period` (`active_id`,`period_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Web活动周期影像周报';
+
+-- 七贤岭绿色二手集市
+CREATE TABLE IF NOT EXISTS `cmf_flea_market_session` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `title` varchar(120) NOT NULL DEFAULT '',
+  `address` varchar(255) NOT NULL DEFAULT '',
+  `date_text` varchar(64) NOT NULL DEFAULT '',
+  `brief` varchar(500) NOT NULL DEFAULT '',
+  `start_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `end_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `list_order` int(10) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`), KEY `idx_active` (`active_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `cmf_flea_market_vendor` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `session_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `contact_name` varchar(64) NOT NULL DEFAULT '',
+  `contact_mobile` varchar(20) NOT NULL DEFAULT '',
+  `status` tinyint(1) NOT NULL DEFAULT 0,
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `audit_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`), UNIQUE KEY `uk_session_user` (`session_id`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `cmf_flea_market_highlight` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `session_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `vendor_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `image` varchar(500) NOT NULL DEFAULT '',
+  `price_text` varchar(120) NOT NULL DEFAULT '',
+  `exchange_text` varchar(120) NOT NULL DEFAULT '',
+  `point_spent` decimal(10,2) NOT NULL DEFAULT 0,
+  `status` tinyint(1) NOT NULL DEFAULT 0,
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`), KEY `idx_session` (`session_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

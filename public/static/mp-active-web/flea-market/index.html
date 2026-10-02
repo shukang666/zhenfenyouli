@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>七贤岭绿色二手集市</title>
+  <script src="../sdk.js?v=202604013"></script>
+  <style>
+    :root { --g:#2d6a4f; --o:#bc6c25; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,sans-serif;background:#f1faee;color:#1b4332;padding-bottom:24px}
+    .hidden{display:none!important}
+    header{padding:18px 16px;background:linear-gradient(135deg,#2d6a4f,#52b788);color:#fff}
+    header h1{font-size:20px}
+    header p{font-size:13px;opacity:.92;margin-top:6px;line-height:1.5}
+    .panel{margin:12px;background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+    .links a{display:block;padding:12px 0;border-bottom:1px solid #d8f3dc;color:var(--g);font-size:15px;text-decoration:none}
+    .links a:last-child{border:none}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{border:1px solid #b7e4c7;padding:10px 6px;text-align:center;vertical-align:middle}
+    th{background:#d8f3dc}
+    .btn-link{color:var(--g);font-weight:600;text-decoration:underline;background:none;border:none;font-size:13px;cursor:pointer}
+    .btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--g);color:#fff;font-size:16px;margin-top:12px}
+    .btn.sec{background:#95d5b2;color:#1b4332}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .item-card{background:#f8fff9;border-radius:10px;padding:10px;text-align:center;font-size:13px}
+    .item-card img{width:100%;height:90px;object-fit:cover;border-radius:8px;background:#eee}
+    .tag-opt{display:inline-block;background:#fff3cd;color:#856404;font-size:12px;padding:4px 8px;border-radius:6px;margin:8px 0}
+    input,textarea{width:100%;padding:10px;margin-top:8px;border:1px solid #b7e4c7;border-radius:8px;font-size:14px}
+    label{font-size:14px;display:flex;align-items:center;gap:8px;margin-top:12px}
+    .err{color:#c1121f;font-size:13px;margin-top:8px}
+    .back{color:var(--g);font-size:14px;margin-bottom:8px;display:inline-block}
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="title">七贤岭绿色二手集市</h1>
+    <p id="subtitle">减少浪费 · 资源循环 · 七贤岭跳蚤市场文化</p>
+  </header>
+
+  <div id="view-home" class="panel">
+    <div class="links">
+      <a id="link-rules" href="rules.html" target="_blank">📋 活动规则</a>
+      <a id="link-safety" href="safety.html" target="_blank">⚠️ 安全注意事项</a>
+    </div>
+    <h2 style="font-size:16px;margin:16px 0 8px">活动展示</h2>
+    <table>
+      <thead><tr><th>项目名称</th><th>地点</th><th>活动日期</th><th>摊主申请</th></tr></thead>
+      <tbody id="session-rows"></tbody>
+    </table>
+    <p class="err hidden" id="home-err"></p>
+  </div>
+
+  <div id="view-session" class="panel hidden">
+    <a class="back" href="javascript:app.goHome()">‹ 返回主页</a>
+    <h2 id="sess-title" style="font-size:18px;margin-bottom:8px"></h2>
+    <p id="sess-meta" style="font-size:14px;color:#40916c;line-height:1.6"></p>
+    <p id="sess-brief" style="font-size:14px;margin-top:10px;line-height:1.6"></p>
+    <h3 style="font-size:15px;margin:16px 0 8px">贵重品展示</h3>
+    <div class="grid" id="highlights"></div>
+    <p id="sess-empty" class="hidden" style="text-align:center;color:#74c69d;padding:16px">暂无展示，欢迎摊主报名并选择宣传</p>
+    <button class="btn" id="btn-to-apply">摊主申请</button>
+    <p id="sess-status" style="font-size:13px;color:#40916c;margin-top:10px;text-align:center"></p>
+  </div>
+
+  <div id="view-apply" class="panel hidden">
+    <a class="back" href="javascript:app.openSession(app.sessionId)">‹ 返回场次</a>
+    <h2 style="font-size:17px">摊主申请</h2>
+    <p style="font-size:14px;line-height:1.6;margin-top:8px">请确认参与本场二手集市。以下「贵重品宣传」均为<strong>可选</strong>，选择后将消耗 <span id="cost-point">10</span> 积分，审核通过后在活动主页展示。</p>
+    <span class="tag-opt">可选 · 非必填</span>
+    <label><input type="checkbox" id="want-promote" /> 我要宣传一件贵重/特色物品（消耗积分）</label>
+    <div id="promote-fields" class="hidden">
+      <input type="file" id="up-image" accept="image/*" />
+      <input type="text" id="price-text" placeholder="售价，如：500 元" />
+      <input type="text" id="exchange-text" placeholder="或想换取的物品，如：铁锹/锄头" />
+    </div>
+    <input type="text" id="contact-name" placeholder="联系人（选填）" />
+    <input type="tel" id="contact-mobile" placeholder="联系电话（选填）" />
+    <button class="btn" id="btn-submit">完成并报名</button>
+    <p class="err hidden" id="apply-err"></p>
+  </div>
+
+  <script>
+    var app = {
+      activeId: 0, openid: '', apiBase: '', sessionId: 0, homeData: null,
+      resolveApiBase: function() {
+        return ActiveWebSdk.defaultApiBase ? ActiveWebSdk.defaultApiBase() : (location.origin + '/api');
+      },
+      startSession: function() {
+        var params = ActiveWebSdk.getQuery();
+        var webCtx = (params.get('web_ctx') || '').trim();
+        app.apiBase = app.resolveApiBase();
+        if (!webCtx) {
+          return Promise.resolve(ActiveWebSdk.guestSession
+            ? ActiveWebSdk.guestSession(params.get('active_id'), app.apiBase)
+            : { guest: true, session: { openid: '' }, active: { id: params.get('active_id') }, api: { base: app.apiBase } });
+        }
+        return ActiveWebSdk.bootstrap({ apiBase: app.apiBase });
+      },
+      api: function(path, body) {
+        return ActiveWebSdk.apiPost(app.apiBase, app.openid, path, body || {}).then(function(res) {
+          if (!res || res.code !== 1) throw new Error((res && res.msg) || '失败');
+          return res.data;
+        });
+      },
+      init: function() {
+        app.startSession().then(function(data) {
+          app.openid = (data.session && data.session.openid) || '';
+          app.guest = !!data.guest;
+          app.activeId = parseInt(data.active.id, 10) || parseInt(ActiveWebSdk.getQuery().get('active_id'), 10);
+          if (!app.activeId) throw new Error('缺少活动 ID');
+          return app.api('/wxapp/flea_market/home', { active_id: app.activeId });
+        }).then(function(h) {
+          app.homeData = h;
+          document.getElementById('title').textContent = h.active_name || '七贤岭绿色二手集市';
+          if (h.rules_url) document.getElementById('link-rules').href = h.rules_url;
+          if (h.safety_url) document.getElementById('link-safety').href = h.safety_url;
+          app.renderSessions(h.sessions || [], h.my_apply_status || {});
+          var hash = (location.hash || '').replace(/^#/, '');
+          var m = hash.match(/^session\/(\d+)/);
+          if (m) app.openSession(parseInt(m[1], 10));
+        }).catch(function(e) {
+          document.getElementById('home-err').textContent = e.message || e;
+          document.getElementById('home-err').classList.remove('hidden');
+        });
+
+        document.getElementById('want-promote').onchange = function() {
+          document.getElementById('promote-fields').classList.toggle('hidden', !this.checked);
+        };
+        document.getElementById('btn-to-apply').onclick = app.goApply;
+        document.getElementById('btn-submit').onclick = app.submitApply;
+      },
+      renderSessions: function(sessions, myStatus) {
+        var tb = document.getElementById('session-rows');
+        tb.innerHTML = '';
+        sessions.forEach(function(s) {
+          var tr = document.createElement('tr');
+          var st = myStatus[s.id];
+          var stText = st === 0 ? '（待审）' : (st === 1 ? '（已通过）' : (st === 2 ? '（未通过）' : ''));
+          tr.innerHTML = '<td>' + s.title + stText + '</td><td>' + s.address + '</td><td>' + s.date_text + '</td>' +
+            '<td><button type="button" class="btn-link">摊主申请</button></td>';
+          tr.querySelector('button').onclick = function() { app.openSession(s.id); };
+          tb.appendChild(tr);
+        });
+      },
+      goHome: function() {
+        location.hash = '';
+        document.getElementById('view-session').classList.add('hidden');
+        document.getElementById('view-apply').classList.add('hidden');
+        document.getElementById('view-home').classList.remove('hidden');
+      },
+      openSession: function(id) {
+        app.sessionId = id;
+        location.hash = 'session/' + id;
+        app.api('/wxapp/flea_market/session_detail', { session_id: id }).then(function(d) {
+          var s = d.session;
+          document.getElementById('view-home').classList.add('hidden');
+          document.getElementById('view-apply').classList.add('hidden');
+          document.getElementById('view-session').classList.remove('hidden');
+          document.getElementById('sess-title').textContent = s.title;
+          document.getElementById('sess-meta').textContent = '地点：' + s.address + '\n时间：' + s.date_text;
+          document.getElementById('sess-brief').textContent = s.brief || '';
+          document.getElementById('cost-point').textContent = d.promote_point_cost || 10;
+          var g = document.getElementById('highlights');
+          g.innerHTML = '';
+          var list = d.highlights || [];
+          document.getElementById('sess-empty').classList.toggle('hidden', list.length > 0);
+          list.forEach(function(h) {
+            var c = document.createElement('div');
+            c.className = 'item-card';
+            var line = h.price_text ? ('售价 ' + h.price_text) : '';
+            if (h.exchange_text) line += (line ? ' / ' : '') + ('换取 ' + h.exchange_text);
+            c.innerHTML = '<img src="' + h.image + '" alt=""/><p style="margin-top:6px">' + line + '</p>';
+            g.appendChild(c);
+          });
+          var st = d.my_apply_status;
+          var stEl = document.getElementById('sess-status');
+          if (st === 0) stEl.textContent = '您已报名，等待审核';
+          else if (st === 1) stEl.textContent = '您的摊主申请已通过';
+          else if (st === 2) stEl.textContent = '您的申请未通过，如有疑问请联系社区';
+          else stEl.textContent = '';
+          document.getElementById('btn-to-apply').style.display = (st >= 0) ? 'none' : 'block';
+        });
+      },
+      goApply: function() {
+        if (app.guest || !app.openid) {
+          alert('请先登录微信小程序，从活动入口进入后再申请摊主');
+          return;
+        }
+        document.getElementById('view-session').classList.add('hidden');
+        document.getElementById('view-apply').classList.remove('hidden');
+      },
+      submitApply: function() {
+        if (app.guest || !app.openid) {
+          alert('请先登录小程序');
+          return;
+        }
+        var want = document.getElementById('want-promote').checked ? 1 : 0;
+        var err = document.getElementById('apply-err');
+        err.classList.add('hidden');
+        var payload = {
+          session_id: app.sessionId,
+          want_promote: want,
+          contact_name: document.getElementById('contact-name').value.trim(),
+          contact_mobile: document.getElementById('contact-mobile').value.trim(),
+          price_text: document.getElementById('price-text').value.trim(),
+          exchange_text: document.getElementById('exchange-text').value.trim()
+        };
+        var doSubmit = function(imagePath) {
+          payload.image = imagePath || '';
+          app.api('/wxapp/flea_market/apply_submit', payload).then(function(res) {
+            alert(res.message || '报名成功');
+            app.openSession(app.sessionId);
+          }).catch(function(e) {
+            err.textContent = e.message || e;
+            err.classList.remove('hidden');
+          });
+        };
+        if (!want) {
+          doSubmit('');
+          return;
+        }
+        var file = document.getElementById('up-image').files[0];
+        if (!file) { err.textContent = '请上传宣传照片'; err.classList.remove('hidden'); return; }
+        var fd = new FormData();
+        fd.append('file', file);
+        fetch(app.apiBase + '/wxapp/public/upload_asset?filetype=image', {
+          method: 'POST', headers: { openid: app.openid }, body: fd
+        }).then(function(r) { return r.json(); }).then(function(up) {
+          if (!up || up.code !== 1) throw new Error((up && up.msg) || '上传失败');
+          doSubmit((up.data && (up.data.filepath || up.data.url)) || '');
+        }).catch(function(e) {
+          err.textContent = e.message || e;
+          err.classList.remove('hidden');
+        });
+      }
+    };
+    app.init();
+  </script>
+</body>
+</html>

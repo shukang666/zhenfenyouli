@@ -31,6 +31,7 @@
     if (!webCtx) {
       var path = (global.location.pathname || '') + (global.location.href || '');
       var autoGuest = /qxl-photo-share/i.test(path)
+        || /flea-market/i.test(path)
         || (params.get('share') && (params.get('photo_id') || params.get('report_id')));
       if (opts.allowGuest || autoGuest) {
         var baseGuest = (opts.apiBase || defaultApiBase()).replace(/\/$/, '');

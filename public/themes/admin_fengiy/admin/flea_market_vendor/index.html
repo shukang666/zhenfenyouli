@@ -1,0 +1,68 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('index')}">二手集市摊主审核</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('index')}">
+        <div class="form-group">
+            <label>状态：</label>
+            <select name="status" class="form-control">
+                <option value="">全部</option>
+                <option value="0" <if condition="$status eq '0'">selected="selected"</if>>待审核</option>
+                <option value="1" <if condition="$status eq '1'">selected="selected"</if>>已通过</option>
+                <option value="2" <if condition="$status eq '2'">selected="selected"</if>>已拒绝</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>场次：</label>
+            <select name="session_id" class="form-control">
+                <option value="0">全部</option>
+                <foreach name="sessions" item="stitle" key="sid">
+                    <option value="{$sid}" <if condition="$session_id eq $sid">selected="selected"</if>>{$stitle}</option>
+                </foreach>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">筛选</button>
+    </form>
+    <table class="table table-bordered table-hover">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>场次</th>
+            <th>用户</th>
+            <th>联系人</th>
+            <th>状态</th>
+            <th>报名时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.session_title}<br><small>{$vo.date_text} {$vo.address}</small></td>
+                <td>{$vo.nickname}<br><small>{$vo.mobile}</small></td>
+                <td>{$vo.contact_name} {$vo.contact_mobile}</td>
+                <td>
+                    <if condition="$vo.status == 0"><span class="label label-warning">待审</span>
+                    <elseif condition="$vo.status == 1"/><span class="label label-success">通过</span>
+                    <else/><span class="label label-danger">拒绝</span></if>
+                </td>
+                <td>{:date('Y-m-d H:i',$vo.create_time)}</td>
+                <td>
+                    <if condition="$vo.status == 0">
+                        <a class="btn btn-xs btn-success js-ajax-dialog-btn" data-msg="确认通过？" href="{:url('pass',['id'=>$vo.id])}">通过</a>
+                        <a class="btn btn-xs btn-danger js-ajax-dialog-btn" data-msg="确认拒绝？宣传积分将退回" href="{:url('reject',['id'=>$vo.id])}">拒绝</a>
+                    </if>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
