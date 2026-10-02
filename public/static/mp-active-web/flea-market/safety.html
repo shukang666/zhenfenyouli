@@ -12,6 +12,7 @@
   </style>
 </head>
 <body>
+  <p style="margin-bottom:16px"><a id="back-link" href="index.html" style="color:#bc6c25;font-size:15px;text-decoration:none">‹ 返回活动主页</a></p>
   <h1>安全注意事项</h1>
   <ul>
     <li>注意人身与财物安全，贵重物品请自行看管，建议结伴前往。</li>
@@ -22,5 +23,12 @@
     <li>遵守消防安全规定，摊位区域内禁止明火。</li>
     <li>关注天气变化，极端天气以平台现场通知为准。</li>
   </ul>
+  <script>
+    (function() {
+      var q = location.search || '';
+      var back = document.getElementById('back-link');
+      if (back) back.href = 'index.html' + q;
+    })();
+  </script>
 </body>
 </html>

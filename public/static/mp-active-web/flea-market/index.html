@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>七贤岭绿色二手集市</title>
-  <script src="../sdk.js?v=202604013"></script>
+  <script src="../sdk.js?v=202604014"></script>
   <style>
     :root { --g:#2d6a4f; --o:#bc6c25; }
     *{box-sizing:border-box;margin:0;padding:0}
@@ -40,8 +40,8 @@
 
   <div id="view-home" class="panel">
     <div class="links">
-      <a id="link-rules" href="rules.html" target="_blank">📋 活动规则</a>
-      <a id="link-safety" href="safety.html" target="_blank">⚠️ 安全注意事项</a>
+      <a id="link-rules" href="rules.html">📋 活动规则</a>
+      <a id="link-safety" href="safety.html">⚠️ 安全注意事项</a>
     </div>
     <h2 style="font-size:16px;margin:16px 0 8px">活动展示</h2>
     <table>
@@ -103,7 +103,23 @@
           return res.data;
         });
       },
+      /** 小程序 web-view 不支持 target=_blank，需同页跳转并保留 query */
+      bindDocLinks: function() {
+        var suffix = location.search || '';
+        ['link-rules', 'link-safety'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.removeAttribute('target');
+          el.onclick = function(e) {
+            e.preventDefault();
+            var raw = (el.getAttribute('href') || '').split('?')[0];
+            if (!raw) return;
+            location.assign(raw + suffix);
+          };
+        });
+      },
       init: function() {
+        app.bindDocLinks();
         app.startSession().then(function(data) {
           app.openid = (data.session && data.session.openid) || '';
           app.guest = !!data.guest;
@@ -113,8 +129,9 @@
         }).then(function(h) {
           app.homeData = h;
           document.getElementById('title').textContent = h.active_name || '七贤岭绿色二手集市';
-          if (h.rules_url) document.getElementById('link-rules').href = h.rules_url;
-          if (h.safety_url) document.getElementById('link-safety').href = h.safety_url;
+          if (h.rules_url) document.getElementById('link-rules').href = String(h.rules_url).split('?')[0];
+          if (h.safety_url) document.getElementById('link-safety').href = String(h.safety_url).split('?')[0];
+          app.bindDocLinks();
           app.renderSessions(h.sessions || [], h.my_apply_status || {});
           var hash = (location.hash || '').replace(/^#/, '');
           var m = hash.match(/^session\/(\d+)/);

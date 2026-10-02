@@ -13,6 +13,7 @@
   </style>
 </head>
 <body>
+  <p style="margin-bottom:16px"><a id="back-link" href="index.html" style="color:#2d6a4f;font-size:15px;text-decoration:none">‹ 返回活动主页</a></p>
   <h1>七贤岭绿色二手集市 · 活动规则</h1>
   <p>欢迎参与平台组织的线下二手集市，请在规定区域、规定时间内开展闲置物品售卖或交换。</p>
   <h2>摊主资格</h2>
@@ -37,5 +38,12 @@
     <li>活动结束后自行清理摊位及垃圾，践行垃圾分类。</li>
   </ul>
   <p style="margin-top:24px;color:#74c69d;font-size:13px">平台保留对规则的解释与活动调整权利。</p>
+  <script>
+    (function() {
+      var q = location.search || '';
+      var back = document.getElementById('back-link');
+      if (back) back.href = 'index.html' + q;
+    })();
+  </script>
 </body>
 </html>
