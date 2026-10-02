@@ -506,6 +506,8 @@ class ActiveController extends AuthController
         $item['duration']    = strval($item['duration'] ?? '');
         $item['flow']        = htmlspecialchars_decode($item['flow'] ?? '');
         $item['gain']        = htmlspecialchars_decode($item['gain'] ?? '');
+        $item['doc_rules_field']  = ActiveModel::parseDocFieldToken((string)($item['rules_url'] ?? ''));
+        $item['doc_safety_field'] = ActiveModel::parseDocFieldToken((string)($item['safety_url'] ?? ''));
 
         //是否报名
         $where = [];

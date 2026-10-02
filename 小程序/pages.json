@@ -236,6 +236,12 @@
 					}
 				},
 				{
+					"path": "lsxf/active-doc",
+					"style": {
+						"navigationBarTitleText": "活动说明"
+					}
+				},
+				{
 					"path": "lsxf/list",
 					"style": {
 						"navigationBarTitleText": "查看作品"

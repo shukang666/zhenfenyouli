@@ -347,6 +347,8 @@ class ActiveController extends ToolController
             }
 
             $params['web_url'] = trim((string)($params['web_url'] ?? ''));
+            $params['rules_url'] = trim((string)($params['rules_url'] ?? ''));
+            $params['safety_url'] = trim((string)($params['safety_url'] ?? ''));
             if ($isWebDisplay) {
                 if ($params['web_url'] === '') {
                     $this->error('Web 式活动请填写 H5 地址');

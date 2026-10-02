@@ -321,3 +321,10 @@ CREATE TABLE IF NOT EXISTS `cmf_flea_market_highlight` (
 
 -- Web 式活动不参与配置式「线下活动」签到，历史误标 event_kind=2 的纠正为正常活动
 UPDATE `cmf_active` SET `event_kind` = 1 WHERE `display_mode` = 2 AND `event_kind` = 2 AND `delete_time` = 0;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'rules_url');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `rules_url` varchar(500) NOT NULL DEFAULT '''' COMMENT ''活动规则独立页URL'' AFTER `web_url`');
+PREPARE stmt FROM @__sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'safety_url');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `safety_url` varchar(500) NOT NULL DEFAULT '''' COMMENT ''安全注意事项独立页URL'' AFTER `rules_url`');
+PREPARE stmt FROM @__sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;

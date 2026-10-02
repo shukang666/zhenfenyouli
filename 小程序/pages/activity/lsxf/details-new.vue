@@ -77,6 +77,20 @@
 			</view>
 		</view>
 
+		<!-- 配置式：规则/安全独立子页（field:flow 等，非 Web 式 H5） -->
+		<view class="doc-links glass-card" v-if="info.doc_rules_field || info.doc_safety_field">
+			<view class="doc-link-item" v-if="info.doc_rules_field" @click="openActiveDoc(info.doc_rules_field, '活动规则')">
+				<text class="doc-link-icon">📋</text>
+				<text class="doc-link-text">活动规则</text>
+				<text class="info-arrow">›</text>
+			</view>
+			<view class="doc-link-item" v-if="info.doc_safety_field" @click="openActiveDoc(info.doc_safety_field, '安全注意事项')">
+				<text class="doc-link-icon">⚠️</text>
+				<text class="doc-link-text">安全注意事项</text>
+				<text class="info-arrow">›</text>
+			</view>
+		</view>
+
 		<!-- 打卡兑礼：礼品列表 -->
 		<view class="redeem-goods glass-card" v-if="info.is_clock_challenge == 1 && redeemGoodsList.length">
 			<view class="section-header">
@@ -134,8 +148,8 @@
 			</view>
 		</view>
 
-		<!-- 活动流程（后台富文本配置） -->
-		<view class="desc-card glass-card" v-if="info.flow">
+		<!-- 活动流程（后台富文本配置；若已作规则独立子页则主页不重复展示） -->
+		<view class="desc-card glass-card" v-if="info.flow && info.doc_rules_field !== 'flow'">
 			<view class="section-header">
 				<view class="section-bar"></view>
 				<text class="section-title">活动流程</text>
@@ -145,8 +159,8 @@
 			</view>
 		</view>
 
-		<!-- 你将获得（后台富文本配置） -->
-		<view class="desc-card glass-card gain-card" v-if="info.gain">
+		<!-- 你将获得（后台富文本配置；若已作安全须知独立子页则主页不重复展示） -->
+		<view class="desc-card glass-card gain-card" v-if="info.gain && info.doc_safety_field !== 'gain'">
 			<view class="section-header">
 				<view class="section-bar section-bar--gold"></view>
 				<text class="section-title">你将获得</text>
@@ -206,7 +220,7 @@
 					:disabled="info.is_end == 1"
 					@click="handleSign"
 				>
-					{{ info.is_end == 1 ? '活动已结束' : '立即报名' }}
+					{{ info.is_end == 1 ? '活动已结束' : '我要报名' }}
 				</u-button>
 				<u-button v-else-if="info.is_sign_clock == 1" class="action-btn success-btn" disabled>
 					已签到 ✓
@@ -229,7 +243,7 @@
 					:disabled="info.is_end == 1"
 					@click="handleSign"
 				>
-					{{info.is_end == 1 ? '活动已结束' : (isScanJoin ? '立即签到' : '立即报名')}}
+					{{info.is_end == 1 ? '活动已结束' : (isScanJoin ? '立即签到' : '我要报名')}}
 				</u-button>
 				<u-button 
 					v-else
@@ -897,6 +911,14 @@
 					address: item.address
 				})
 			},
+			openActiveDoc(field, title) {
+				const f = String(field || '').trim()
+				if (!f || !this.info.id) return
+				const t = encodeURIComponent(title || '说明')
+				uni.navigateTo({
+					url: `/pages/activity/lsxf/active-doc?active_id=${this.info.id}&field=${f}&title=${t}`
+				})
+			},
 			// 活动报名
 			async post_new_active_sign() {
 				if (!this.$u.func.checkLogin()) return
@@ -1198,6 +1220,34 @@
 		font-size: 36rpx;
 		color: #b0bdb3;
 		margin-left: 12rpx;
+	}
+
+	.doc-links {
+		padding: 8rpx 28rpx;
+		margin-top: 24rpx;
+
+		.doc-link-item {
+			display: flex;
+			align-items: center;
+			padding: 26rpx 0;
+			border-bottom: 1rpx solid #eef3ef;
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+
+		.doc-link-icon {
+			font-size: 34rpx;
+			margin-right: 16rpx;
+		}
+
+		.doc-link-text {
+			flex: 1;
+			font-size: 30rpx;
+			color: #1b4332;
+			font-weight: 500;
+		}
 	}
 
 	.info-card {

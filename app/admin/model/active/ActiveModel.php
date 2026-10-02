@@ -31,6 +31,19 @@ class ActiveModel extends \think\Model
     }
 
     /** 小程序 web-view 最终打开的地址（附带 active_id 便于 H5 调接口） */
+    /**
+     * 配置式活动：规则/安全独立子页，后台 rules_url/safety_url 填 field:flow / field:gain 等
+     * （走小程序原生页，不是 Web 式活动）
+     */
+    public static function parseDocFieldToken(string $token): string
+    {
+        $token = trim($token);
+        if (preg_match('/^field:(flow|gain|content)$/', $token, $m)) {
+            return $m[1];
+        }
+        return '';
+    }
+
     public static function buildWebActivityUrl(string $webUrl, int $activeId): string
     {
         $webUrl = trim($webUrl);

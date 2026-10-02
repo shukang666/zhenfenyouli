@@ -97,6 +97,22 @@
                 <p class="help-block">须为已在微信小程序后台配置的业务域名下的 https 地址。保存后小程序会自动追加 <code>active_id</code> 查询参数（若 URL 中尚未包含）。</p>
             </div>
         </div>
+        <div class="form-group active-config-doc-row">
+            <label class="col-sm-2 control-label">规则独立页:</label>
+            <div class="col-md-8 col-sm-10">
+                <input type="text" class="form-control" name="rules_url" maxlength="500"
+                       value="{$item.rules_url|default=''}" placeholder="配置式填 field:flow（用下方「活动流程」富文本作规则子页）">
+                <p class="help-block">仅<strong>配置式</strong>活动：填 <code>field:flow</code> / <code>field:gain</code> / <code>field:content</code> 时，详情页显示入口并在小程序子页打开，<strong>不是</strong> Web 式活动。</p>
+            </div>
+        </div>
+        <div class="form-group active-config-doc-row">
+            <label class="col-sm-2 control-label">安全须知独立页:</label>
+            <div class="col-md-8 col-sm-10">
+                <input type="text" class="form-control" name="safety_url" maxlength="500"
+                       value="{$item.safety_url|default=''}" placeholder="例如 field:gain（用「你将获得」富文本作安全须知子页）">
+            </div>
+        </div>
+
         <div class="form-group active-web-hint" id="active-web-hint" style="display:none;">
             <div class="col-sm-offset-2 col-md-8 col-sm-10">
                 <div class="alert alert-info" style="margin-bottom:0;padding:12px 15px;">
@@ -737,6 +753,12 @@
                 $block.find('input,select,textarea,button').prop('disabled', false);
             }
         });
+        $('.active-config-doc-row').toggle(!isWeb);
+        if (isWeb) {
+            $('.active-config-doc-row input').prop('disabled', true);
+        } else {
+            $('.active-config-doc-row input').prop('disabled', false);
+        }
         if (!isWeb && window.__toggleEventKind) {
             window.__toggleEventKind($('#event_kind').val() || '1');
         }
