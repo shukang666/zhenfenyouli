@@ -244,6 +244,7 @@ class ActiveController extends ToolController
         if (empty($params['is_date_pending']) && empty($params['date'])) {
             $params['is_date_pending'] = 1;
         }
+        $params['event_kind'] = ActiveModel::EVENT_KIND_NORMAL;
         return $params;
     }
 
@@ -267,6 +268,10 @@ class ActiveController extends ToolController
             }
             if ($isWebDisplay && empty($params['id'])) {
                 $params = $this->applyWebActiveCreateDefaults($params);
+            }
+            if ($isWebDisplay) {
+                // Web 式与配置式「正常/线下」无关，统一按正常活动存库，避免误触线下签到校验
+                $params['event_kind'] = ActiveModel::EVENT_KIND_NORMAL;
             }
 
             if (isset($params['role']) && is_array($params['role'])) {

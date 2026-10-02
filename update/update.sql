@@ -318,3 +318,6 @@ CREATE TABLE IF NOT EXISTS `cmf_flea_market_highlight` (
   `create_time` int(10) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`), KEY `idx_session` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Web 式活动不参与配置式「线下活动」签到，历史误标 event_kind=2 的纠正为正常活动
+UPDATE `cmf_active` SET `event_kind` = 1 WHERE `display_mode` = 2 AND `event_kind` = 2 AND `delete_time` = 0;

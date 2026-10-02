@@ -51,8 +51,15 @@ class ActiveModel extends \think\Model
         ];
     }
 
+    /**
+     * 是否走「配置式详情页 + 线下定位/口令签到」链路。
+     * Web 式活动一律为 false：用户只进 H5，不参与 event_kind 划分。
+     */
     public static function isOfflineEvent($active): bool
     {
+        if (self::isWebDisplay($active)) {
+            return false;
+        }
         return (int)($active['event_kind'] ?? self::EVENT_KIND_NORMAL) === self::EVENT_KIND_OFFLINE;
     }
 
