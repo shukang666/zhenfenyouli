@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>七贤岭绿色二手集市</title>
-  <script src="../sdk.js?v=202604014"></script>
+  <script src="../sdk.js?v=202604015"></script>
   <style>
     :root { --g:#2d6a4f; --o:#bc6c25; }
     *{box-sizing:border-box;margin:0;padding:0}
@@ -28,8 +28,40 @@
     .tag-opt{display:inline-block;background:#fff3cd;color:#856404;font-size:12px;padding:4px 8px;border-radius:6px;margin:8px 0}
     input,textarea{width:100%;padding:10px;margin-top:8px;border:1px solid #b7e4c7;border-radius:8px;font-size:14px}
     label{font-size:14px;display:flex;align-items:center;gap:8px;margin-top:12px}
-    .err{color:#c1121f;font-size:13px;margin-top:8px}
-    .back{color:var(--g);font-size:14px;margin-bottom:8px;display:inline-block}
+    .err{color:#c1121f;font-size:13px;margin-top:8px;padding:10px 12px;background:#fde8e8;border-radius:10px}
+    .back{color:var(--g);font-size:14px;margin-bottom:8px;display:inline-block;text-decoration:none}
+    .apply-head{margin:4px 0 16px}
+    .apply-head h2{font-size:20px;font-weight:700;color:#1b4332;letter-spacing:.02em}
+    .apply-head p{font-size:13px;color:#40916c;margin-top:6px}
+    .apply-tip{background:linear-gradient(135deg,#e8f5e9,#f1faee);border:1px solid #b7e4c7;border-radius:12px;padding:14px 14px 14px 16px;font-size:14px;line-height:1.65;color:#2d6a4f}
+    .apply-tip strong{color:#1b4332}
+    .apply-tip .point-badge{display:inline-block;margin-top:8px;font-size:12px;background:#fff;color:#bc6c25;border:1px solid #f4d03f;padding:4px 10px;border-radius:20px;font-weight:600}
+    .apply-section{margin-top:18px}
+    .apply-section-title{font-size:13px;font-weight:600;color:#74c69d;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+    .promote-card{display:flex;align-items:flex-start;gap:12px;padding:14px;border:2px solid #d8f3dc;border-radius:14px;background:#fafdfb;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+    .promote-card.on{border-color:#52b788;background:#f0fdf4;box-shadow:0 0 0 3px rgba(82,183,136,.15)}
+    .promote-card input[type=checkbox]{width:20px;height:20px;margin-top:2px;accent-color:var(--g);flex-shrink:0}
+    .promote-card-text{flex:1;min-width:0}
+    .promote-card-text .t{font-size:15px;font-weight:600;color:#1b4332;line-height:1.4}
+    .promote-card-text .d{font-size:12px;color:#40916c;margin-top:4px;line-height:1.5}
+    .promote-panel{margin-top:12px;padding:14px;background:#f8fff9;border:1px dashed #95d5b2;border-radius:12px}
+    .promote-panel .field-label{font-size:13px;color:#40916c;margin:12px 0 6px;display:block}
+    .promote-panel .field-label:first-child{margin-top:0}
+    .upload-box{position:relative;border:2px dashed #b7e4c7;border-radius:12px;background:#fff;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;cursor:pointer;overflow:hidden}
+    .upload-box.has-img{border-style:solid;padding:0;min-height:0}
+    .upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-box .upload-hint{font-size:13px;color:#74c69d;line-height:1.5;pointer-events:none}
+    .upload-box .upload-hint b{display:block;font-size:15px;color:var(--g);margin-bottom:4px;font-weight:600}
+    .upload-box img{width:100%;max-height:180px;object-fit:cover;display:block;pointer-events:none}
+    .field-row{margin-bottom:12px}
+    .field-row:last-child{margin-bottom:0}
+    .field-row label{display:block;font-size:13px;color:#40916c;margin-bottom:6px}
+    .field-row input{width:100%;padding:12px 14px;margin-top:0;border:1px solid #b7e4c7;border-radius:10px;font-size:15px;background:#fff;color:#1b4332;-webkit-appearance:none}
+    .field-row input::placeholder{color:#95d5b2}
+    .field-row input:focus{outline:none;border-color:#52b788;box-shadow:0 0 0 3px rgba(82,183,136,.12)}
+    .apply-submit-wrap{margin-top:24px;padding-top:8px}
+    .btn-submit{box-shadow:0 4px 14px rgba(45,106,79,.35);font-weight:600;letter-spacing:.04em}
+    .btn-submit:active{transform:scale(.98);opacity:.95}
   </style>
 </head>
 <body>
@@ -65,19 +97,58 @@
 
   <div id="view-apply" class="panel hidden">
     <a class="back" href="javascript:app.openSession(app.sessionId)">‹ 返回场次</a>
-    <h2 style="font-size:17px">摊主申请</h2>
-    <p style="font-size:14px;line-height:1.6;margin-top:8px">请确认参与本场二手集市。以下「贵重品宣传」均为<strong>可选</strong>，选择后将消耗 <span id="cost-point">10</span> 积分，审核通过后在活动主页展示。</p>
-    <span class="tag-opt">可选 · 非必填</span>
-    <label><input type="checkbox" id="want-promote" /> 我要宣传一件贵重/特色物品（消耗积分）</label>
-    <div id="promote-fields" class="hidden">
-      <input type="file" id="up-image" accept="image/*" />
-      <input type="text" id="price-text" placeholder="售价，如：500 元" />
-      <input type="text" id="exchange-text" placeholder="或想换取的物品，如：铁锹/锄头" />
+    <div class="apply-head">
+      <h2>摊主申请</h2>
+      <p id="apply-session-hint">确认参与本场二手集市</p>
     </div>
-    <input type="text" id="contact-name" placeholder="联系人（选填）" />
-    <input type="tel" id="contact-mobile" placeholder="联系电话（选填）" />
-    <button class="btn" id="btn-submit">完成并报名</button>
-    <p class="err hidden" id="apply-err"></p>
+    <div class="apply-tip">
+      报名后由平台审核，通过即可现场设摊。下方<strong>贵重品宣传为可选</strong>，勾选后消耗 <span id="cost-point">10</span> 积分，审核通过可在场次页展示，吸引更多人流。
+      <span class="point-badge">可选 · 非必填</span>
+    </div>
+
+    <div class="apply-section">
+      <div class="apply-section-title">可选宣传</div>
+      <div class="promote-card" id="promote-card" role="button" tabindex="0">
+        <input type="checkbox" id="want-promote" aria-hidden="true" />
+        <div class="promote-card-text">
+          <div class="t">宣传一件贵重 / 特色物品</div>
+          <div class="d">上传照片并填写售价或交换意向，消耗 <span class="cost-inline">10</span> 积分</div>
+        </div>
+      </div>
+      <div id="promote-fields" class="promote-panel hidden">
+        <span class="field-label">物品照片</span>
+        <div class="upload-box" id="upload-box">
+          <input type="file" id="up-image" accept="image/*" />
+          <div class="upload-hint" id="upload-hint"><b>点击上传照片</b>支持 JPG、PNG</div>
+          <img id="upload-preview" class="hidden" alt="" />
+        </div>
+        <div class="field-row">
+          <label for="price-text">售价（选填其一）</label>
+          <input type="text" id="price-text" placeholder="例如：500 元" autocomplete="off" />
+        </div>
+        <div class="field-row">
+          <label for="exchange-text">想换取的物品（选填其一）</label>
+          <input type="text" id="exchange-text" placeholder="例如：铁锹 / 锄头" autocomplete="off" />
+        </div>
+      </div>
+    </div>
+
+    <div class="apply-section">
+      <div class="apply-section-title">联系信息</div>
+      <div class="field-row">
+        <label for="contact-name">联系人</label>
+        <input type="text" id="contact-name" placeholder="选填，便于现场联系" autocomplete="name" />
+      </div>
+      <div class="field-row">
+        <label for="contact-mobile">联系电话</label>
+        <input type="tel" id="contact-mobile" placeholder="选填，便于现场联系" autocomplete="tel" />
+      </div>
+    </div>
+
+    <div class="apply-submit-wrap">
+      <button class="btn btn-submit" type="button" id="btn-submit">完成并报名</button>
+      <p class="err hidden" id="apply-err"></p>
+    </div>
   </div>
 
   <script>
@@ -141,11 +212,65 @@
           document.getElementById('home-err').classList.remove('hidden');
         });
 
-        document.getElementById('want-promote').onchange = function() {
-          document.getElementById('promote-fields').classList.toggle('hidden', !this.checked);
-        };
+        app.bindApplyUi();
         document.getElementById('btn-to-apply').onclick = app.goApply;
         document.getElementById('btn-submit').onclick = app.submitApply;
+      },
+      bindApplyUi: function() {
+        var card = document.getElementById('promote-card');
+        var cb = document.getElementById('want-promote');
+        var syncPromote = function() {
+          var on = cb.checked;
+          document.getElementById('promote-fields').classList.toggle('hidden', !on);
+          card.classList.toggle('on', on);
+        };
+        cb.onchange = syncPromote;
+        cb.onclick = function(e) { e.stopPropagation(); };
+        card.onclick = function(e) {
+          if (e.target.id === 'up-image') return;
+          cb.checked = !cb.checked;
+          syncPromote();
+        };
+        var fileInput = document.getElementById('up-image');
+        fileInput.onchange = function() {
+          var f = fileInput.files && fileInput.files[0];
+          var box = document.getElementById('upload-box');
+          var prev = document.getElementById('upload-preview');
+          var hint = document.getElementById('upload-hint');
+          if (!f) {
+            prev.classList.add('hidden');
+            hint.classList.remove('hidden');
+            box.classList.remove('has-img');
+            prev.removeAttribute('src');
+            return;
+          }
+          var url = URL.createObjectURL(f);
+          prev.src = url;
+          prev.classList.remove('hidden');
+          hint.classList.add('hidden');
+          box.classList.add('has-img');
+        };
+      },
+      resetApplyForm: function() {
+        document.getElementById('want-promote').checked = false;
+        document.getElementById('promote-fields').classList.add('hidden');
+        document.getElementById('promote-card').classList.remove('on');
+        document.getElementById('price-text').value = '';
+        document.getElementById('exchange-text').value = '';
+        document.getElementById('contact-name').value = '';
+        document.getElementById('contact-mobile').value = '';
+        document.getElementById('up-image').value = '';
+        var prev = document.getElementById('upload-preview');
+        prev.classList.add('hidden');
+        prev.removeAttribute('src');
+        document.getElementById('upload-hint').classList.remove('hidden');
+        document.getElementById('upload-box').classList.remove('has-img');
+        document.getElementById('apply-err').classList.add('hidden');
+      },
+      syncApplyCost: function(cost) {
+        var n = cost || 10;
+        document.getElementById('cost-point').textContent = n;
+        document.querySelectorAll('.cost-inline').forEach(function(el) { el.textContent = n; });
       },
       renderSessions: function(sessions, myStatus) {
         var tb = document.getElementById('session-rows');
@@ -177,7 +302,9 @@
           document.getElementById('sess-title').textContent = s.title;
           document.getElementById('sess-meta').textContent = '地点：' + s.address + '\n时间：' + s.date_text;
           document.getElementById('sess-brief').textContent = s.brief || '';
-          document.getElementById('cost-point').textContent = d.promote_point_cost || 10;
+          app.syncApplyCost(d.promote_point_cost || 10);
+          var hint = document.getElementById('apply-session-hint');
+          if (hint) hint.textContent = s.title + ' · ' + s.date_text;
           var g = document.getElementById('highlights');
           g.innerHTML = '';
           var list = d.highlights || [];
@@ -204,6 +331,8 @@
           alert('请先登录微信小程序，从活动入口进入后再申请摊主');
           return;
         }
+        app.resetApplyForm();
+        app.syncApplyCost(parseInt(document.getElementById('cost-point').textContent, 10) || 10);
         document.getElementById('view-session').classList.add('hidden');
         document.getElementById('view-apply').classList.remove('hidden');
       },
