@@ -180,30 +180,109 @@ class ActiveController extends ToolController
         return $this->fetch();
     }
 
+    /**
+     * Web 式活动编辑：折叠字段未提交或为空时保留库内原值，避免只改封面时被清空。
+     */
+    protected function mergeWebActiveEditParams(array $params, array $existing): array
+    {
+        $copyKeys = [
+            'event_kind', 'offline_sign_start', 'offline_sign_end', 'offline_sign_password',
+            'is_clock', 'is_clock_challenge', 'clock_challenge_days', 'clock_challenge_point',
+            'clock_start_time', 'clock_end_time', 'send_point', 'role', 'sign_day', 'is_badge',
+            'badge_name', 'badge_image', 'point', 'share_point', 'phone', 'address', 'lat', 'lng',
+            'flow', 'gain', 'suit_people', 'duration', 'day_type', 'area_range', 'content', 'date', 'is_date_pending',
+            'is_month_recommend',
+        ];
+        foreach ($copyKeys as $key) {
+            if (!array_key_exists($key, $params)) {
+                if (array_key_exists($key, $existing)) {
+                    $params[$key] = $existing[$key];
+                }
+                continue;
+            }
+            if ($params[$key] === '' || $params[$key] === null) {
+                if (in_array($key, ['phone', 'address', 'lat', 'lng', 'content', 'flow', 'gain', 'badge_name', 'day_type', 'area_range', 'suit_people', 'duration'], true)
+                    && isset($existing[$key]) && $existing[$key] !== '' && $existing[$key] !== null) {
+                    $params[$key] = $existing[$key];
+                }
+            }
+        }
+        if (!array_key_exists('role', $params) && !empty($existing['role'])) {
+            $params['role'] = $existing['role'];
+        }
+        if (($params['date'] ?? '') === '' && empty($params['is_date_pending']) && !empty($existing['date'])) {
+            $params['date'] = $existing['date'];
+        }
+        if (!array_key_exists('is_date_pending', $params) && array_key_exists('is_date_pending', $existing)) {
+            $params['is_date_pending'] = $existing['is_date_pending'];
+        }
+        return $params;
+    }
+
+    protected function applyWebActiveCreateDefaults(array $params): array
+    {
+        if (!isset($params['point']) || $params['point'] === '') {
+            $params['point'] = 0;
+        }
+        if (!isset($params['share_point']) || $params['share_point'] === '') {
+            $params['share_point'] = 0;
+        }
+        if (empty($params['content'])) {
+            $params['content'] = '<p></p>';
+        }
+        if (empty($params['is_date_pending']) && empty($params['date'])) {
+            $params['is_date_pending'] = 1;
+        }
+        return $params;
+    }
+
     //操作功能
     public function updatePost()
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            if(isset($params['role'])) $params['role'] = implode(',',$params['role']);
-            if(!empty($params['clock_start_time'])) $params['clock_start_time'] = strtotime($params['clock_start_time']);
-            if(!empty($params['clock_end_time'])) $params['clock_end_time'] = strtotime($params['clock_end_time']);
+
+            $params['display_mode'] = (int)($params['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
+            if (!in_array($params['display_mode'], [ActiveModel::DISPLAY_MODE_CONFIG, ActiveModel::DISPLAY_MODE_WEB], true)) {
+                $params['display_mode'] = ActiveModel::DISPLAY_MODE_CONFIG;
+            }
+            $isWebDisplay = $params['display_mode'] === ActiveModel::DISPLAY_MODE_WEB;
+            $existingRow = null;
+            if (!empty($params['id'])) {
+                $existingRow = ActiveModel::where('id', (int)$params['id'])->find();
+            }
+            if ($isWebDisplay && $existingRow) {
+                $params = $this->mergeWebActiveEditParams($params, $existingRow->toArray());
+            }
+            if ($isWebDisplay && empty($params['id'])) {
+                $params = $this->applyWebActiveCreateDefaults($params);
+            }
+
+            if (isset($params['role']) && is_array($params['role'])) {
+                $params['role'] = implode(',', $params['role']);
+            }
+            if (!empty($params['clock_start_time']) && !is_numeric($params['clock_start_time'])) {
+                $params['clock_start_time'] = strtotime($params['clock_start_time']);
+            }
+            if (!empty($params['clock_end_time']) && !is_numeric($params['clock_end_time'])) {
+                $params['clock_end_time'] = strtotime($params['clock_end_time']);
+            }
             $params['event_kind'] = (int)($params['event_kind'] ?? ActiveModel::EVENT_KIND_NORMAL);
             if (!in_array($params['event_kind'], [ActiveModel::EVENT_KIND_NORMAL, ActiveModel::EVENT_KIND_OFFLINE], true)) {
                 $params['event_kind'] = ActiveModel::EVENT_KIND_NORMAL;
             }
-            if (!empty($params['offline_sign_start'])) {
+            if (!empty($params['offline_sign_start']) && !is_numeric($params['offline_sign_start'])) {
                 $params['offline_sign_start'] = strtotime($params['offline_sign_start']);
-            } else {
+            } elseif (empty($params['offline_sign_start'])) {
                 $params['offline_sign_start'] = 0;
             }
-            if (!empty($params['offline_sign_end'])) {
+            if (!empty($params['offline_sign_end']) && !is_numeric($params['offline_sign_end'])) {
                 $params['offline_sign_end'] = strtotime($params['offline_sign_end']);
-            } else {
+            } elseif (empty($params['offline_sign_end'])) {
                 $params['offline_sign_end'] = 0;
             }
             $params['offline_sign_password'] = trim((string)($params['offline_sign_password'] ?? ''));
-            if ($params['event_kind'] === ActiveModel::EVENT_KIND_OFFLINE) {
+            if (!$isWebDisplay && $params['event_kind'] === ActiveModel::EVENT_KIND_OFFLINE) {
                 $params['is_clock'] = 0;
                 $params['is_clock_challenge'] = 0;
                 $params['clock_challenge_days'] = 0;
@@ -221,7 +300,7 @@ class ActiveController extends ToolController
             }
             $params['is_clock_challenge'] = empty($params['is_clock_challenge']) ? 0 : 1;
             $params['clock_challenge_days'] = max(0, (int)($params['clock_challenge_days'] ?? 0));
-            if ($params['event_kind'] !== ActiveModel::EVENT_KIND_OFFLINE && $params['is_clock_challenge']) {
+            if (!$isWebDisplay && $params['event_kind'] !== ActiveModel::EVENT_KIND_OFFLINE && $params['is_clock_challenge']) {
                 $params['is_clock'] = 1;
                 $params['clock_challenge_point'] = 0;
                 if ($params['clock_challenge_days'] < 1) {
@@ -243,15 +322,16 @@ class ActiveController extends ToolController
                     $params['date'] = 0;
                 }
             } elseif (empty($params['date'])) {
-                $this->error('请填写活动截止日期，或勾选「时间待定」');
+                if ($isWebDisplay) {
+                    $params['is_date_pending'] = 1;
+                    $params['date'] = 0;
+                } else {
+                    $this->error('请填写活动截止日期，或勾选「时间待定」');
+                }
             }
 
-            $params['display_mode'] = (int)($params['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
-            if (!in_array($params['display_mode'], [ActiveModel::DISPLAY_MODE_CONFIG, ActiveModel::DISPLAY_MODE_WEB], true)) {
-                $params['display_mode'] = ActiveModel::DISPLAY_MODE_CONFIG;
-            }
             $params['web_url'] = trim((string)($params['web_url'] ?? ''));
-            if ($params['display_mode'] === ActiveModel::DISPLAY_MODE_WEB) {
+            if ($isWebDisplay) {
                 if ($params['web_url'] === '') {
                     $this->error('Web 式活动请填写 H5 地址');
                 }

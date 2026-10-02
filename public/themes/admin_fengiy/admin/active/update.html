@@ -97,8 +97,16 @@
                 <p class="help-block">须为已在微信小程序后台配置的业务域名下的 https 地址。保存后小程序会自动追加 <code>active_id</code> 查询参数（若 URL 中尚未包含）。</p>
             </div>
         </div>
+        <div class="form-group active-web-hint" id="active-web-hint" style="display:none;">
+            <div class="col-sm-offset-2 col-md-8 col-sm-10">
+                <div class="alert alert-info" style="margin-bottom:0;padding:12px 15px;">
+                    <strong>Web 式活动</strong>：交互在 H5 内完成。通常只需维护 <strong>封面、名称、H5 地址</strong>，以及下方的「列表展示」项；打卡、地图、详情等配置式字段已折叠，保存时<strong>不会清空</strong>库内已有数据。
+                </div>
+            </div>
+        </div>
 
         <if condition="$params.type == 1">
+        <div class="active-config-only">
         <php>
             $event_kind_val = isset($item['event_kind']) ? intval($item['event_kind']) : 1;
             $offline_start_val = '';
@@ -163,6 +171,7 @@
                 </div>
             </div>
         </div>
+        </div>
         </if>
 
         <if condition="!empty($item['join_type'])">
@@ -210,7 +219,7 @@
 
         <if condition="$params.type == 1">
 
-            <div class="form-group">
+            <div class="form-group active-web-list-field">
                 <label class="col-sm-2 control-label"><span class="form-required" id="date-required-mark">*</span>活动截止日期:</label>
                 <div class="col-md-2 col-sm-10">
                     <input type="date" class="form-control" name="date" id="active_date_input"
@@ -220,10 +229,11 @@
                     <input type="checkbox" lay-skin="primary" lay-filter="is_date_pending" name="is_date_pending" id="is_date_pending" value="1"
                            title="时间待定"
                            <if condition="!empty($item.is_date_pending) && $item.is_date_pending==1">checked</if>>
-                    <p class="help-block">勾选「时间待定」可不填截止日期；小程序将显示「时间待定」提示，且不会因日期过期自动变为已结束。</p>
+                    <p class="help-block">勾选「时间待定」可不填截止日期；小程序将显示「时间待定」提示，且不会因日期过期自动变为已结束。Web 式活动可勾选「时间待定」后仅改封面保存。</p>
                 </div>
             </div>
 
+            <div class="active-config-only">
             <div class="form-group">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>报名所需积分:</label>
                 <div class="col-md-6 col-sm-10">
@@ -340,7 +350,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group active-web-list-field">
                 <label class="col-sm-2 control-label">本周推荐:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="checkbox" lay-skin="switch" class="form-control" name="is_month_recommend" value="1" <if condition="!empty($item.is_month_recommend) && $item.is_month_recommend==1">checked</if> lay-text="是|否">
@@ -348,35 +358,35 @@
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group active-config-only">
                 <label class="col-sm-2 control-label">适合人群:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="text" class="form-control" name="suit_people" value="{$item.suit_people|default=''}" placeholder="如：青少年 / 全年龄段 / 亲子家庭">
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group active-config-only">
                 <label class="col-sm-2 control-label">活动时长:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="text" class="form-control" name="duration" value="{$item.duration|default=''}" placeholder="如：2小时 / 半天 / 上午9:00-11:30">
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group active-config-only">
                 <label class="col-sm-2 control-label">活动流程:</label>
                 <div class="col-md-6 col-sm-10">
                     <script type="text/plain" id="flow" name="flow">{$item.flow|default=''}</script>
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group active-config-only">
                 <label class="col-sm-2 control-label">你将获得:</label>
                 <div class="col-md-6 col-sm-10">
                     <script type="text/plain" id="gain" name="gain">{$item.gain|default=''}</script>
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group active-config-only">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>联系方式:</label>
                 <div class="col-md-6 col-sm-10">
                     <input type="number" class="form-control" name="phone" value="{$item.phone|default=''}" required>
@@ -384,7 +394,7 @@
             </div>
 
 
-            <div class="form-group">
+            <div class="form-group active-config-only">
                 <label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>地址</label>
 
                 <div class="col-md-6 col-sm-10">
@@ -398,7 +408,7 @@
                     <div id="container" style="margin-top:10px;width:600px;height:300px;"></div>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group active-config-only">
                 <label class="col-sm-2 control-label">经纬度</label>
                 <input type="hidden" value="{$item.lng??''}" name="lng" id="lng">
                 <input type="hidden" value="{$item.lat??''}" name="lat" id="lat">
@@ -413,10 +423,11 @@
                     </p>
                 </div>
             </div>
+            </div>
 
             <else>
 
-                <div class="form-group">
+                <div class="form-group active-web-list-field">
                     <label class="col-sm-2 control-label"><span class="form-required" id="date-required-mark-alt">*</span>活动日期:</label>
                     <div class="col-md-2 col-sm-10">
                         <input type="date" class="form-control" name="date" id="active_date_input_alt"
@@ -429,6 +440,7 @@
                     </div>
                 </div>
 
+                <div class="active-config-only">
                 <div class="form-group">
                     <label class="col-sm-2 control-label"><span class="form-required">*</span>时间说明:</label>
                     <div class="col-md-6 col-sm-10">
@@ -445,10 +457,11 @@
                                value="{$item.area_range|default=''}" required placeholder="如：全市">
                     </div>
                 </div>
+                </div>
 
         </if>
 
-        <div class="form-group">
+        <div class="form-group active-config-only">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>详情:</label>
             <div class="col-md-6 col-sm-10">
                 <script type="text/plain" id="content" name="content">{$item.content|default=''}</script>
@@ -618,6 +631,9 @@
         });
         // 点保存前强制解析一次，格式错误则阻止提交
         $(".js-ajax-submit").on('click', function () {
+            if (parseInt($('#display_mode').val(), 10) === 2) {
+                return true;
+            }
             return parseLngLatInput();
         });
     });
@@ -707,13 +723,25 @@
 
     function toggleDisplayMode(val) {
         val = parseInt(val, 10) || 1;
-        var $row = $('#active-web-url-row');
-        if (val === 2) {
-            $row.show();
-            $('#web_url').prop('required', true);
-        } else {
-            $row.hide();
-            $('#web_url').prop('required', false);
+        var isWeb = val === 2;
+        $('#active-web-url-row').toggle(isWeb);
+        $('#active-web-hint').toggle(isWeb);
+        $('#web_url').prop('required', isWeb);
+        $('.active-config-only').each(function () {
+            var $block = $(this);
+            if (isWeb) {
+                $block.hide();
+                $block.find('input,select,textarea,button').prop('disabled', true).prop('required', false);
+            } else {
+                $block.show();
+                $block.find('input,select,textarea,button').prop('disabled', false);
+            }
+        });
+        if (!isWeb && window.__toggleEventKind) {
+            window.__toggleEventKind($('#event_kind').val() || '1');
+        }
+        if (typeof toggleDatePendingWeb === 'function') {
+            toggleDatePendingWeb(isWeb);
         }
     }
     window.__toggleDisplayMode = toggleDisplayMode;
@@ -755,12 +783,25 @@
         });
 
         function toggleDatePending() {
+            var isWeb = parseInt($('#display_mode').val(), 10) === 2;
             var pending = $('#is_date_pending').prop('checked')
                 || $('#is_date_pending_alt').prop('checked')
                 || $('.is-date-pending-cb').prop('checked');
-            $('#active_date_input,#active_date_input_alt').prop('required', !pending);
-            $('#date-required-mark,#date-required-mark-alt').toggle(!pending);
+            var needDate = !pending && !isWeb;
+            $('#active_date_input,#active_date_input_alt').prop('required', needDate);
+            $('#date-required-mark,#date-required-mark-alt').toggle(needDate);
         }
+        window.toggleDatePendingWeb = function (isWeb) {
+            if (typeof isWeb === 'undefined') {
+                isWeb = parseInt($('#display_mode').val(), 10) === 2;
+            }
+            if (isWeb) {
+                $('#active_date_input,#active_date_input_alt').prop('required', false);
+                $('#date-required-mark,#date-required-mark-alt').hide();
+            } else {
+                toggleDatePending();
+            }
+        };
         toggleDatePending();
         form.on('checkbox(is_date_pending)', function () {
             toggleDatePending();
