@@ -219,6 +219,17 @@ class ActiveController extends ToolController
         return $params;
     }
 
+    /** 生成活动小程序码；失败时不抛错，避免仅改封面等保存被阻断 */
+    protected function tryGenerateActiveQrCode(string $scene, int $activeId, string $shareUrl): string
+    {
+        try {
+            $path = CommonModel::setShareImage($scene, 'active_' . $activeId, 'dz1111', $shareUrl);
+            return (is_string($path) && $path !== '') ? $path : '';
+        } catch (\Throwable $e) {
+            return '';
+        }
+    }
+
     protected function applyWebActiveCreateDefaults(array $params): array
     {
         if (!isset($params['point']) || $params['point'] === '') {
@@ -346,16 +357,19 @@ class ActiveController extends ToolController
             $share_url = 'pages/activity/lsxf/details-new';
             if (empty($params['id'])) {
                 $result = ActiveModel::create($params);
-                //生成小程序码
                 $scene = (string)$result['id'];
-                $qr_code = CommonModel::setShareImage($scene,'active_'.$result['id'],'dz1111',$share_url);
-                $this->model->where('id',$result['id'])->update(['qr_code' => $qr_code]);
+                $qr_code = $this->tryGenerateActiveQrCode($scene, (int)$result['id'], $share_url);
+                if ($qr_code !== '') {
+                    $this->model->where('id', $result['id'])->update(['qr_code' => $qr_code]);
+                }
             } else {
-                $item = ActiveModel::where('id',$params['id'])->find();
+                $item = ActiveModel::where('id', $params['id'])->find();
                 if (empty($item['qr_code'])) {
-                    //生成小程序码
                     $scene = (string)$params['id'];
-                    $params['qr_code'] = CommonModel::setShareImage($scene,'active_'.$params['id'],'dz1111',$share_url);
+                    $qr_code = $this->tryGenerateActiveQrCode($scene, (int)$params['id'], $share_url);
+                    if ($qr_code !== '') {
+                        $params['qr_code'] = $qr_code;
+                    }
                 }
                 $result = $this->setEditPost($params);
             }

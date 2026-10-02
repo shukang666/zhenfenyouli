@@ -467,13 +467,25 @@ class CommonModel extends Model
      * @param $file_path
      * @return bool
      */
+    /** public/upload 绝对路径（避免后台保存时 CWD 不在 public 导致 mkdir 权限错误） */
+    protected static function publicUploadDir(string $subdir = ''): string
+    {
+        $root = defined('WEB_ROOT') ? WEB_ROOT : (app()->getRootPath() . 'public/');
+        $path = rtrim(str_replace('\\', '/', $root), '/') . '/upload/';
+        if ($subdir !== '') {
+            $path .= trim(str_replace('\\', '/', $subdir), '/') . '/';
+        }
+        return $path;
+    }
+
     static function setShareImage($scene, $image_name, $dz = 'dz1111', string $shareUrl = 'pages/index/index', $dir = 'userShare', $env_version = 'release', $width = '430')
     {
         $access_token = self::getAccessToken();
-        if (!file_exists('upload/' . $dir)) mkdir('upload/' . $dir);
-        $full_dir = 'upload/' . $dir . '/' . date('Ymd');
-        if (!file_exists($full_dir)) mkdir($full_dir);
-        $local_file = $full_dir . '/' . $image_name;
+        $full_dir = self::publicUploadDir($dir . '/' . date('Ymd'));
+        if (!is_dir($full_dir) && !@mkdir($full_dir, 0775, true) && !is_dir($full_dir)) {
+            return '';
+        }
+        $local_file = $full_dir . $image_name;
         $imgUrl = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=" . $access_token;
         $res = [
             'scene' => $scene,
