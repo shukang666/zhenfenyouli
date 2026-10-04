@@ -115,6 +115,10 @@ class Upload
 
         $fileUploadMaxFileSize = $uploadSetting['upload_max_filesize'][$strFileExtension];
         $fileUploadMaxFileSize = empty($fileUploadMaxFileSize) ? 2097152 : $fileUploadMaxFileSize;//默认2M
+        // 图片不卡 5MB 业务限制，实际上限仍受 php.ini upload_max_filesize 约束
+        if ($fileType === 'image') {
+            $fileUploadMaxFileSize = 200 * 1024 * 1024;
+        }
 
         $strWebPath = "";//"upload" . DS;
         $strId      = $this->request->param("id");
