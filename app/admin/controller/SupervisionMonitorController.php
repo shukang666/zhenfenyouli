@@ -2,7 +2,6 @@
 
 namespace app\admin\controller;
 
-use api\wxapp\model\CommonModel;
 use cmf\controller\AdminBaseController;
 use think\facade\Db;
 
@@ -134,45 +133,112 @@ class SupervisionMonitorController extends AdminBaseController
     }
 
     /**
-     * 导出（与 index 筛选条件一致）
+     * 导出（与 index 筛选条件一致；流式 CSV，不加载照片字段、不占满内存）
      */
     public function outData()
     {
-        @ini_set('memory_limit', '-1');
+        // 流式导出：固定内存占用，允许全量；仅放宽执行时间，不设 memory_limit=-1
         @set_time_limit(0);
+        @ini_set('memory_limit', '128M');
+        if (function_exists('session_write_close')) {
+            session_write_close();
+        }
 
         $where = $this->buildWhere();
 
-        $list = Db::name('supervision_monitor')->alias('r')
-            ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
-            ->field('r.*, m.nickname, m.mobile, r.submitter_name')
-            ->where($where)
-            ->order('r.id desc')
-            ->select()->toArray();
-
-        $unit_type_list = [1 => '公共机构', 2 => '经营场所', 3 => '沿街商铺', 4 => '经营区域'];
-        foreach ($list as &$item) {
-            $item['unit_type_name'] = isset($unit_type_list[$item['unit_type']]) ? $unit_type_list[$item['unit_type']] : '';
-            $item['yes_no_has_waste'] = $item['has_waste'] == 1 ? '是' : '否';
-            $item['yes_no_waste_correct'] = $item['waste_correct'] == 1 ? '是' : '否';
-            $item['yes_no_inner_qualified'] = $item['inner_qualified'] == 1 ? '是' : '否';
-            $item['yes_no_need_rectify'] = $item['need_rectify'] == 1 ? '是' : '否';
-            $item['yes_no_point_qualified'] = $item['point_qualified'] == 1 ? '是' : '否';
-            $item['yes_no_manage_qualified'] = $item['manage_qualified'] == 1 ? '是' : '否';
-            $item['create_time'] = $item['create_time'] ? date('Y-m-d H:i:s', $item['create_time']) : '';
-            $item['display_submitter'] = !empty($item['submitter_name']) ? $item['submitter_name'] : (!empty($item['nickname']) ? $item['nickname'] : '已删除');
+        if (!$this->exportBaseQuery()->where($where)->limit(1)->value('r.id')) {
+            $this->error('当前筛选条件下没有可导出的数据');
         }
-        unset($item);
 
         $filename = '督导监测' . date('Y-m-d');
         $head = ['ID', '提交人', '手机号', '所属社区', '单位名称', '单位类型', '检查日期', '地址', '联系人', '联系电话',
             '是否产生厨余垃圾', '厨余垃圾是否正确分出', '厨余垃圾流向', '内部环境是否合格', '是否需要整改',
             '投放点是否合格', '点位管理是否合格', '总体评价', '提交时间'];
-        $keys = ['id', 'display_submitter', 'mobile', 'community_name', 'unit_name', 'unit_type_name', 'check_date', 'address', 'contact', 'contact_phone',
-            'yes_no_has_waste', 'yes_no_waste_correct', 'waste_flow', 'yes_no_inner_qualified', 'yes_no_need_rectify',
-            'yes_no_point_qualified', 'yes_no_manage_qualified', 'overall_evaluation', 'create_time'];
-        // 必须静态调用，否则 ThinkPHP Model __call 会转发到查询构造器导致 cmf_common_model 表报错
-        CommonModel::outData($filename, $list, $head, $keys);
+
+        $unit_type_list = [1 => '公共机构', 2 => '经营场所', 3 => '沿街商铺', 4 => '经营区域'];
+
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+        header('Content-Type: text/csv; charset=UTF-8');
+        $encodedName = rawurlencode($filename . '.csv');
+        header('Content-Disposition: attachment; filename="supervision_monitor.csv"; filename*=UTF-8\'\'' . $encodedName);
+        header('Cache-Control: max-age=0');
+        header('X-Accel-Buffering: no');
+
+        $fp = fopen('php://output', 'w');
+        fwrite($fp, "\xEF\xBB\xBF");
+        fputcsv($fp, $head);
+
+        $cursor = $this->exportBaseQuery()
+            ->where($where)
+            ->order('r.id desc')
+            ->cursor();
+
+        $rowNum = 0;
+        foreach ($cursor as $row) {
+            $item = $this->mapExportRow((array) $row, $unit_type_list);
+            fputcsv($fp, [
+                $item['id'],
+                $item['display_submitter'],
+                $item['mobile'],
+                $item['community_name'],
+                $item['unit_name'],
+                $item['unit_type_name'],
+                $item['check_date'],
+                $item['address'],
+                $item['contact'],
+                $item['contact_phone'],
+                $item['yes_no_has_waste'],
+                $item['yes_no_waste_correct'],
+                $item['waste_flow'],
+                $item['yes_no_inner_qualified'],
+                $item['yes_no_need_rectify'],
+                $item['yes_no_point_qualified'],
+                $item['yes_no_manage_qualified'],
+                $item['overall_evaluation'],
+                $item['create_time'],
+            ]);
+            $rowNum++;
+            if ($rowNum % 500 === 0) {
+                fflush($fp);
+                if (function_exists('flush')) {
+                    flush();
+                }
+            }
+        }
+
+        fclose($fp);
+        exit;
+    }
+
+    /**
+     * 导出查询：不含各照片 JSON 字段，避免大结果集撑爆内存
+     */
+    private function exportBaseQuery()
+    {
+        return Db::name('supervision_monitor')->alias('r')
+            ->join('cmf_member m', 'm.id = r.user_id', 'LEFT')
+            ->field('r.id,r.submitter_name,r.community_name,r.unit_name,r.unit_type,r.check_date,r.address,r.contact,r.contact_phone,'
+                . 'r.has_waste,r.waste_correct,r.waste_flow,r.inner_qualified,r.need_rectify,r.point_qualified,r.manage_qualified,'
+                . 'r.overall_evaluation,r.create_time,m.nickname,m.mobile');
+    }
+
+    private function mapExportRow(array $item, array $unit_type_list): array
+    {
+        $item['unit_type_name'] = isset($unit_type_list[$item['unit_type']]) ? $unit_type_list[$item['unit_type']] : '';
+        $item['yes_no_has_waste'] = (int) $item['has_waste'] === 1 ? '是' : '否';
+        $item['yes_no_waste_correct'] = (int) $item['waste_correct'] === 1 ? '是' : '否';
+        $item['yes_no_inner_qualified'] = (int) $item['inner_qualified'] === 1 ? '是' : '否';
+        $item['yes_no_need_rectify'] = (int) $item['need_rectify'] === 1 ? '是' : '否';
+        $item['yes_no_point_qualified'] = (int) $item['point_qualified'] === 1 ? '是' : '否';
+        $item['yes_no_manage_qualified'] = (int) $item['manage_qualified'] === 1 ? '是' : '否';
+        $item['create_time'] = !empty($item['create_time']) ? date('Y-m-d H:i:s', (int) $item['create_time']) : '';
+        $item['display_submitter'] = !empty($item['submitter_name'])
+            ? $item['submitter_name']
+            : (!empty($item['nickname']) ? $item['nickname'] : '已删除');
+
+        return $item;
     }
 
     /**
