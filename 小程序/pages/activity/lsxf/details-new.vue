@@ -560,6 +560,8 @@
 		}
 	},
 		onLoad(option) {
+			// 避免 onLoad 与紧随其后的 onShow 各请求一次详情（打卡活动会触发重复自动报名）
+			this._skipDetailShowRefresh = true
 			const scene = option.scene ? String(option.scene) : ''
 			let sceneVal = scene
 			try {
@@ -579,6 +581,10 @@
 			this.tipShow = false
 		},
 		onShow() {
+			if (this._skipDetailShowRefresh) {
+				this._skipDetailShowRefresh = false
+				return
+			}
 			if (this.id) {
 				this.get_new_active_detail(this.id)
 			}

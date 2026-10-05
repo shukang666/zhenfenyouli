@@ -485,8 +485,7 @@ class TabHomeService
         $item['content'] = htmlspecialchars_decode($item['content']);
         $item['send_point'] = $item['send_point'] ?? 0;
 
-        $active_count = ActiveSIgnModel::where('active_id', $item['id'])->count();
-        $item['active_count'] = $active_count;
+        $item['active_count'] = ActiveSIgnModel::countParticipants((int) $item['id']);
         $avatar_array = ActiveSIgnModel::alias('a')
             ->join('member b', 'a.user_id=b.id')
             ->where('a.active_id', $item['id'])->limit(5)->column('b.avatar');

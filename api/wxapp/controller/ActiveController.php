@@ -517,21 +517,19 @@ class ActiveController extends AuthController
         // 只有打卡活动（is_clock=1）才自动报名，非打卡活动需用户手动报名
         $autoClockJoin = intval($item['is_clock']) === 1 || intval($item['is_clock_challenge'] ?? 0) === 1;
         if (empty($sign_info) && $this->user_id && $autoClockJoin && !ActiveModel::isOfflineEvent($item)) {
-            // 自动创建报名记录，跳过角色条件校验和积分扣除
-            $sign_data = [];
-            $sign_data['user_id'] = $this->user_id;
-            $sign_data['active_id'] = $item['id'];
-            $sign_data['type'] = 2;
-            $sign_data['start_time'] = $item['clock_start_time'];
-            $sign_data['end_time'] = $item['clock_end_time'];
-            ActiveSIgnModel::create($sign_data);
+            // 自动创建报名记录，跳过角色条件校验和积分扣除（详情 onLoad/onShow 并发时需防重）
+            ActiveSIgnModel::ensureClockAutoSign((int) $this->user_id, (int) $item['id'], [
+                'type'        => 2,
+                'start_time'  => $item['clock_start_time'],
+                'end_time'    => $item['clock_end_time'],
+            ]);
             $sign_info = ActiveSIgnModel::where($where)->find();
         }
         $item['sign_id'] = empty($sign_info)?0:$sign_info['id'];
         $item['is_sign'] = empty($sign_info)?0:1;
 
         //参与人数
-        $item['active_count'] = ActiveSIgnModel::where('active_id', $item['id'])->count();
+        $item['active_count'] = ActiveSIgnModel::countParticipants((int) $item['id']);
 
         $item['event_kind'] = (int)($item['event_kind'] ?? ActiveModel::EVENT_KIND_NORMAL);
         $item['offline_sign_start'] = (int)($item['offline_sign_start'] ?? 0);
@@ -1329,8 +1327,7 @@ class ActiveController extends AuthController
         $item['content'] = htmlspecialchars_decode($item['content']);
         $item['send_point'] = $item['send_point'] ?? 0;
 
-        $active_count = ActiveSIgnModel::where('active_id', $item['id'])->count();
-        $item['active_count'] = $active_count;
+        $item['active_count'] = ActiveSIgnModel::countParticipants((int) $item['id']);
         $avatar_array = ActiveSIgnModel::alias('a')
             ->join('member b', 'a.user_id=b.id')
             ->where('a.active_id', $item['id'])->limit(5)->column('b.avatar');

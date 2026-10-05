@@ -1090,7 +1090,7 @@ HTML;
         }
 
         $sign = ActiveSIgnModel::where(['active_id' => $activeId, 'user_id' => $userId])->find();
-        $activeCount = ActiveSIgnModel::where('active_id', $activeId)->count();
+        $activeCount = ActiveSIgnModel::countParticipants((int) $activeId);
 
         $mobile = trim((string)$member['mobile']);
         $mobileMask = '';
