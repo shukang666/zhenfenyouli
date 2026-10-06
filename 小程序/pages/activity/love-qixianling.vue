@@ -42,7 +42,12 @@
 					<view class="qxl-act-card" v-for="act in cate.activities" :key="act.id"
 						@click="gotoDetail(act.id)">
 						<view class="qxl-act-cover">
-							<u-image width="100%" height="100%" :src="act.thumb" mode="aspectFill"></u-image>
+							<image
+								class="qxl-act-cover__img"
+								:src="act.thumb"
+								mode="aspectFit"
+								lazy-load
+							></image>
 							<view class="qxl-act-badge" v-if="act.active_count > 0">
 								<text>{{act.active_count}}人参与</text>
 							</view>
@@ -93,20 +98,16 @@
 				// 装饰字段（emoji / accent / bgColor）从前端装饰贴条 QXL_CATE_DECOR 合并
 				qxl_categories: [],
 				heroBgImage: '',
-				statusBarHeight: 20,
-				navBarHeight: 88,
 				learnPassed: 0,
 				learnTotal: 0,
 			};
 		},
 	computed: {
-		// 导航栏绝对定位在 Hero 顶部，Hero 只需 padding-top 留出安全区+导航栏高度
 		heroBgStyle() {
-			const padTopPx = this.statusBarHeight + 44
 			if (this.heroBgImage) {
-				return `background-image: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center; padding-top: ${padTopPx}px;`
+				return `background-image: linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center;`
 			}
-			return `padding-top: ${padTopPx}px;`
+			return ''
 		},
 		learnProgressWidth() {
 			if (!this.learnTotal) return '12%';
@@ -119,8 +120,6 @@
 		}
 	},
 		onLoad() {
-			const sys = uni.getSystemInfoSync()
-			this.statusBarHeight = sys.statusBarHeight || 20
 			this.loadHeroBg()
 			this.loadQxlCategories()
 		},
@@ -246,9 +245,8 @@
 	align-items: center;
 	justify-content: center;
 	color: #fff;
-	/* margin-top / padding-top 由 heroBgStyle 计算属性动态写入（含安全区补偿） */
 }
-.qxl-hero-content{
+.qxl-hero-content {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -304,7 +302,7 @@
 	font-size: 22rpx; color: #8A8A8A; margin-left: 4rpx;
 }
 
-/* ===== 活动卡片（横向一行） ===== */
+/* ===== 活动卡片（左图右文；封面 aspectFit 完整显示、无单独灰底框） ===== */
 .qxl-section-list {
 	display: flex;
 	flex-direction: column;
@@ -312,6 +310,7 @@
 }
 .qxl-act-card {
 	display: flex;
+	align-items: stretch;
 	background: #FAFBFC;
 	border-radius: 16rpx;
 	overflow: hidden;
@@ -319,18 +318,38 @@
 }
 .qxl-act-card:active { opacity: 0.88; }
 .qxl-act-cover {
-	width: 200rpx; height: 160rpx;
-	position: relative; flex-shrink: 0; background: #F0F2F5;
+	width: 200rpx;
+	height: 160rpx;
+	flex-shrink: 0;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+}
+.qxl-act-cover__img {
+	width: 200rpx;
+	height: 160rpx;
+	display: block;
 }
 .qxl-act-badge {
-	position: absolute; left: 8rpx; bottom: 8rpx;
-	height: 30rpx; padding: 0 12rpx;
-	background: rgba(0,0,0,0.55); border-radius: 15rpx;
-	font-size: 18rpx; color: #fff; line-height: 30rpx;
+	position: absolute;
+	left: 8rpx;
+	bottom: 8rpx;
+	height: 30rpx;
+	padding: 0 12rpx;
+	background: rgba(0, 0, 0, 0.55);
+	border-radius: 15rpx;
+	font-size: 18rpx;
+	color: #fff;
+	line-height: 30rpx;
 }
 .qxl-act-body {
-	flex: 1; padding: 16rpx 18rpx;
-	display: flex; flex-direction: column; justify-content: space-between;
+	flex: 1;
+	padding: 16rpx 18rpx;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 	min-width: 0;
 }
 .qxl-act-title {
