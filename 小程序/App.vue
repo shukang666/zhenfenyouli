@@ -56,10 +56,11 @@
 
 <style lang="scss">
     page {
-        background: #EFF9F1
+        background: #eef2ef;
     }
 
     @import 'uview-ui/index.scss';
+    @import '@/static/styles/glass-ui.scss';
     /*每个页面公共css */
     @import '@/common/common.style.scss';
     /*toast字体图标*/

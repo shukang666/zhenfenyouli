@@ -1,5 +1,5 @@
 <template>
-	<view class="container" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
+	<view class="container glass-page" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="index"></skeleton-screen>
 		
@@ -13,17 +13,17 @@
 		<z-paging ref='paging' v-model='dataList' @query='queryList' @scroll="onZPagingScroll" :use-page-scroll="true" :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="currentTab === 1" :loading-more-enabled="false" :refresher-enabled="false">
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
-				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(244,247,245,0.96)'}" :border-bottom="false">
+				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(238,242,239,0)'}" :border-bottom="false">
 					<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/logo.png" class="home-logo" mode="aspectFill"></image>
 				</u-navbar>
 				<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			</template>
 
-			<view class="home-top-glow"></view>
+			<view class="glass-page__ambient"></view>
 
 			<!-- 活动搜索 + 扫码入口（点击进活动搜索页，右侧扫码直达活动详情） -->
 			<view id="guide-search" class="home-search-wrap">
-				<view class="home-search-box" @click="$u.route('/pages/activity/active-search')">
+				<view class="home-search-box glass-search" @click="$u.route('/pages/activity/active-search')">
 					<view class="home-search-ico">
 						<u-icon name="search" size="28" color="#18AF38"></u-icon>
 					</view>
@@ -862,10 +862,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+	@import '@/static/styles/glass-ui.scss';
+
 	$brand: #18AF38;
 	$brand-dark: #12962e;
 	$brand-soft: #e8f7ec;
-	$page-bg: #f4f7f5;
 	$surface: #ffffff;
 	$text: #1a2e22;
 	$text-sub: #5f7166;
@@ -877,19 +878,6 @@ export default {
 
 	.container {
 		position: relative;
-		min-height: 100vh;
-		background: $page-bg;
-	}
-
-	.home-top-glow {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 520rpx;
-		background: linear-gradient(180deg, #e3f3e8 0%, rgba(244, 247, 245, 0) 100%);
-		pointer-events: none;
-		z-index: 0;
 	}
 
 	.home-logo {
@@ -903,34 +891,6 @@ export default {
 		transform: scale(0.985);
 	}
 
-	/* 关怀版下拉提示层 */
-	.care-pull-layer {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		background: linear-gradient(180deg, #E8F5EE 0%, rgba(232, 245, 238, 0.9) 100%);
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
-		padding-bottom: 16rpx;
-		z-index: 9998;
-		pointer-events: none;
-		
-		.care-pull-content {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 8rpx;
-			
-			.care-pull-text {
-				font-size: 28rpx;
-				color: #18AF38;
-				font-weight: 500;
-			}
-		}
-	}
-
 	.home-search-wrap {
 		position: relative;
 		z-index: 1;
@@ -942,11 +902,6 @@ export default {
 		align-items: center;
 		height: 84rpx;
 		padding: 0 10rpx 0 20rpx;
-		background: rgba(255, 255, 255, 0.92);
-		border: 1rpx solid rgba(24, 175, 56, 0.08);
-		border-radius: 42rpx;
-		box-shadow: $shadow-card;
-		backdrop-filter: blur(12rpx);
 	}
 
 	.home-search-ico {
@@ -1150,6 +1105,7 @@ export default {
 		padding: 24rpx 30rpx 0;
 	}
 	.entry-item {
+		@include glass-surface(0.76, 20px);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -1157,11 +1113,7 @@ export default {
 		flex: 1;
 		padding: 24rpx 0;
 		margin: 0 8rpx;
-		background: rgba(255, 255, 255, 0.72);
 		border-radius: 28rpx;
-		backdrop-filter: blur(20rpx);
-		-webkit-backdrop-filter: blur(20rpx);
-		box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06), inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
 		box-sizing: border-box;
 	}
 	.entry-item:first-child {

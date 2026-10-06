@@ -1,0 +1,216 @@
+/**
+ * Tab 页毛玻璃设计 tokens + 可复用 class / mixin
+ * 用法：App.vue 已全局 @import；scoped 页内可 @import 使用 mixin
+ * 不建议上 Tailwind：uni-app 小程序需额外构建链，体积与 purge 成本高于精简 SCSS
+ */
+
+$glass-brand: #18af38;
+$glass-brand-soft: rgba(24, 175, 56, 0.12);
+$glass-health: #3974f2;
+$glass-page-bg: #eef2ef;
+$glass-text: #1c1c1e;
+$glass-text-secondary: #636366;
+$glass-text-tertiary: #8e8e93;
+$glass-radius-md: 20rpx;
+$glass-radius-lg: 24rpx;
+$glass-radius-xl: 32rpx;
+$glass-tabbar-space: calc(140rpx + env(safe-area-inset-bottom));
+
+@mixin glass-surface($alpha: 0.72, $blur: 20px) {
+  background: rgba(255, 255, 255, $alpha);
+  border: 1rpx solid rgba(255, 255, 255, 0.62);
+  box-shadow:
+    0 8rpx 32rpx rgba(0, 0, 0, 0.04),
+    0 1rpx 0 rgba(255, 255, 255, 0.85) inset;
+  backdrop-filter: saturate(180%) blur($blur);
+  -webkit-backdrop-filter: saturate(180%) blur($blur);
+}
+
+@mixin glass-surface-strong($blur: 24px) {
+  @include glass-surface(0.82, $blur);
+}
+
+@mixin glass-nav-bar {
+  @include glass-surface-strong(24px);
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.03);
+}
+
+@mixin glass-search-field {
+  @include glass-surface(0.65, 16px);
+  border-radius: 999rpx;
+}
+
+@mixin glass-sticky-bar {
+  @include glass-nav-bar;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.04);
+}
+
+@mixin glass-press {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  &:active {
+    opacity: 0.92;
+    transform: scale(0.985);
+  }
+}
+
+/* ===== 页面壳 ===== */
+.glass-page {
+  position: relative;
+  min-height: 100vh;
+  background: $glass-page-bg;
+  padding-bottom: $glass-tabbar-space;
+  box-sizing: border-box;
+}
+
+.glass-page__ambient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 520rpx;
+  background: linear-gradient(
+    180deg,
+    rgba(24, 175, 56, 0.14) 0%,
+    rgba(238, 242, 239, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass-page--health {
+  background: #eef1f8;
+
+  .glass-page__ambient {
+    background: linear-gradient(
+      180deg,
+      rgba(57, 116, 242, 0.16) 0%,
+      rgba(238, 241, 248, 0) 100%
+    );
+  }
+}
+
+.glass-page__content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== 卡片 / 搜索 / 导航（全局 class，模板直接挂） ===== */
+.glass-card {
+  @include glass-surface;
+  border-radius: $glass-radius-lg;
+  overflow: hidden;
+}
+
+.glass-card--strong {
+  @include glass-surface-strong;
+  border-radius: $glass-radius-lg;
+}
+
+.glass-card--tint-brand {
+  @include glass-surface(0.78, 20px);
+  border-radius: $glass-radius-lg;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(232, 247, 236, 0.75) 100%
+  );
+}
+
+.glass-card--tint-blue {
+  @include glass-surface(0.78, 20px);
+  border-radius: $glass-radius-lg;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(230, 238, 255, 0.72) 100%
+  );
+}
+
+.glass-nav {
+  @include glass-nav-bar;
+}
+
+.glass-search {
+  @include glass-search-field;
+}
+
+.glass-section-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.glass-section-head__bar {
+  width: 6rpx;
+  height: 28rpx;
+  border-radius: 4rpx;
+  background: $glass-brand;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.glass-section-head__title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: $glass-text;
+  letter-spacing: -0.3rpx;
+}
+
+.glass-section-head__more {
+  margin-left: auto;
+  font-size: 24rpx;
+  color: $glass-text-tertiary;
+}
+
+.glass-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  color: $glass-brand;
+  background: $glass-brand-soft;
+  border: 1rpx solid rgba(24, 175, 56, 0.12);
+}
+
+.glass-press {
+  @include glass-press;
+}
+
+/* ===== 关怀版下拉（Tab 页共用，勿在各页重复写） ===== */
+.care-pull-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(232, 245, 238, 0.95) 0%,
+    rgba(232, 245, 238, 0.75) 100%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 16rpx;
+  z-index: 9998;
+  pointer-events: none;
+
+  .care-pull-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8rpx;
+  }
+
+  .care-pull-text {
+    font-size: 28rpx;
+    color: $glass-brand;
+    font-weight: 500;
+  }
+}

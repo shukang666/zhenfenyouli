@@ -1,5 +1,7 @@
 <template>
-	<view class="u-p-30" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
+	<view class="glass-page glass-page--health u-p-30" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
+		<view class="glass-page__ambient"></view>
+		<view class="glass-page__content">
 		
 		<!-- 关怀版下拉提示 -->
 		<view class="care-pull-layer" :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }" v-if="showCareHint">
@@ -16,9 +18,6 @@
 			</view>
 		</u-navbar>
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
-		<view class="u-abso u-h-552" style="z-index: -1;top: 0;left: 0;right: 0;background: linear-gradient(180deg, #3974F2 0%, #EFF4FF 100%);">
-			<!-- <u-image width="100%" height="527" src="/static/index-bg.png"></u-image> -->
-		</view>
 
 		<!-- 为了通过小程序审核，先注释掉下面 -->
 		<!-- <view class="u-radius-10" id="guide-health-diag" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
@@ -46,17 +45,16 @@
 				</view>
 			</view>
 		</view> -->
-		<view class="u-radius-10 u-m-t-30" id="guide-health-life" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
-			<view class="u-font-36 u-p-20 white u-flex u-row-between">
-				<view class="">
-					健康生活社区
+		<view class="glass-card glass-card--tint-blue health-community u-m-t-30" id="guide-health-life">
+			<view class="health-community__head u-flex u-row-between">
+				<view class="glass-section-head">
+					<view class="glass-section-head__bar" style="background:#3974F2;"></view>
+					<text class="glass-section-head__title">健康生活社区</text>
 				</view>
-				<view class="">
-					<u-icon name="arrow-right" label="更多" label-size="22" label-color="#fff" color="#fff" label-pos="left" size="22" @click="$u.route('/pages/community/community')"></u-icon>
-				</view>
+				<u-icon name="arrow-right" label="更多" label-size="22" label-color="#636366" color="#636366" label-pos="left" size="22" @click="$u.route('/pages/community/community')"></u-icon>
 			</view>
-			<view class="u-type-white-bg u-radius-10 u-p-20">
-				<view class="u-type-info-light-bg u-radius-10 u-p-20 u-m-b-20" v-for="(item,index) in forum_list" :key="index"
+			<view class="health-community__body">
+				<view class="glass-card health-forum-item u-m-b-20" v-for="(item,index) in forum_list" :key="index"
 					@click="$u.route('/pages/community/details?id='+item.id+'&index='+index)">
 					<view class="u-flex u-row-between">
 						<view class="u-flex">
@@ -99,6 +97,7 @@
 					</view>
 				</view>
 			</view>
+		</view>
 		</view>
 		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->
 		<view style="height: 172rpx; flex-shrink: 0;"></view>
@@ -236,36 +235,28 @@
 </script>
 
 <style lang="scss">
+@import '@/static/styles/glass-ui.scss';
+
 .content-text {
     white-space: pre-line;
     word-break: break-all;
 }
 
-/* 关怀版下拉提示层 */
-.care-pull-layer {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	background: linear-gradient(180deg, #E8F5EE 0%, rgba(232, 245, 238, 0.9) 100%);
-	display: flex;
-	align-items: flex-end;
-	justify-content: center;
-	padding-bottom: 16rpx;
-	z-index: 9998;
-	pointer-events: none;
-	
-	.care-pull-content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 8rpx;
-		
-		.care-pull-text {
-			font-size: 28rpx;
-			color: #18AF38;
-			font-weight: 500;
-		}
-	}
+.health-community {
+	padding: 24rpx;
+}
+
+.health-community__head {
+	align-items: center;
+	margin-bottom: 20rpx;
+}
+
+.health-community__body {
+	padding: 0;
+}
+
+.health-forum-item {
+	padding: 24rpx;
+	border-radius: 20rpx;
 }
 </style>

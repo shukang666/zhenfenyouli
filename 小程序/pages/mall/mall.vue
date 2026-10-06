@@ -1,5 +1,6 @@
 <template>
-	<view class="mall-page" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
+	<view class="mall-page glass-page" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
+		<view class="glass-page__ambient"></view>
 		
 		<!-- 关怀版下拉提示 -->
 		<view class="care-pull-layer" :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }" v-if="showCareHint">
@@ -17,9 +18,7 @@
 			</view>
 		</u-navbar>
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
-		<view class="mall-bg"></view>
-
-		<view class="u-p-30 mall-body">
+		<view class="u-p-30 mall-body glass-page__content">
 			<view class="u-p-b-20" id="guide-mall-search">
 				<u-search placeholder="搜索商品名称" v-model="keyword" border-color="#18AF38" search-icon-color="#18AF38" bg-color="#fff"></u-search>
 			</view>
@@ -63,7 +62,7 @@
 			</view>
 
 			<!-- 地理产区：可折叠，选完自动收起 -->
-			<view class="zone-panel" id="guide-mall-cate">
+			<view class="zone-panel glass-card" id="guide-mall-cate">
 				<u-collapse
 					ref="zoneCollapse"
 					:accordion="true"
@@ -370,31 +369,18 @@
 </script>
 
 <style lang="scss">
-	.mall-page {
-		min-height: 100vh;
-		position: relative;
-	}
+	@import '@/static/styles/glass-ui.scss';
 
-	.mall-bg {
-		position: absolute;
-		z-index: -1;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 420rpx;
-		background: linear-gradient(to bottom, #2fb74c, #EFF9F1);
+	.mall-page {
+		position: relative;
 	}
 
 	.mall-body {
 		position: relative;
-		z-index: 1;
 	}
 
 	.zone-panel {
-		background: #fff;
-		border-radius: 24rpx;
 		padding: 8rpx 24rpx 8rpx;
-		box-shadow: 0 8rpx 32rpx rgba(24, 175, 56, 0.12);
 		margin-bottom: 30rpx;
 	}
 
@@ -533,12 +519,11 @@
 	}
 
 	.goods-card {
+		@include glass-surface(0.82, 18px);
 		width: 334rpx;
 		margin-bottom: 30rpx;
-		background: #fff;
 		border-radius: 20rpx;
 		overflow: hidden;
-		box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
 	}
 
 	.goods-card__body {
@@ -607,32 +592,5 @@
 	.tabbar-placeholder {
 		height: 172rpx;
 		flex-shrink: 0;
-	}
-	
-	.care-pull-layer {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		background: linear-gradient(180deg, #E8F5EE 0%, rgba(232, 245, 238, 0.9) 100%);
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
-		padding-bottom: 16rpx;
-		z-index: 9998;
-		pointer-events: none;
-		
-		.care-pull-content {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 8rpx;
-			
-			.care-pull-text {
-				font-size: 28rpx;
-				color: #18AF38;
-				font-weight: 500;
-			}
-		}
 	}
 </style>

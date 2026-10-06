@@ -1,10 +1,11 @@
 <template>
   <view
-    class="container"
+    class="container glass-page"
     @touchstart="onCareTouchStart"
     @touchmove="onCareTouchMove"
     @touchend="onCareTouchEnd"
   >
+    <view class="glass-page__ambient"></view>
     <!-- 关怀版下拉提示 -->
     <view
       class="care-pull-layer"
@@ -23,9 +24,9 @@
       </view>
     </view>
     <!-- 自定义顶部导航：搜索栏 -->
-    <view class="fb-navbar">
+    <view class="fb-navbar glass-nav">
       <view class="fb-navbar-inner">
-        <view class="fb-search-box" id="guide-fb-search" @click="gotoSearch">
+        <view class="fb-search-box glass-search" id="guide-fb-search" @click="gotoSearch">
           <view class="fb-search-ico">
             <u-icon name="search" size="28" color="#18AF38"></u-icon>
           </view>
@@ -896,9 +897,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/glass-ui.scss';
+
 .container {
-  min-height: 100vh;
-  background: #eef4f0;
+  position: relative;
+  z-index: 0;
 }
 
 .fb-press {
@@ -911,7 +914,6 @@ export default {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: #fff;
   padding: 16rpx 24rpx;
   padding-top: calc(env(safe-area-inset-top) + 16rpx);
 }
@@ -924,8 +926,6 @@ export default {
   display: flex;
   align-items: center;
   height: 76rpx;
-  background: #f3f8f4;
-  border-radius: 38rpx;
   padding: 0 10rpx 0 12rpx;
 }
 .fb-search-ico {
@@ -1735,12 +1735,10 @@ export default {
 
 /* ===== 标签栏 ===== */
 .fb-tab-bar {
+  @include glass-sticky-bar;
   position: sticky;
   top: 0;
   z-index: 20;
-  background: #fff;
-  border-top: 1rpx solid #e4e6eb;
-  border-bottom: 1rpx solid #e4e6eb;
 }
 .fb-tab-scroll {
   white-space: nowrap;
@@ -1760,20 +1758,22 @@ export default {
   padding: 0 24rpx;
   margin-right: 8rpx;
   border-radius: 28rpx;
-  background: #f0f2f5;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1rpx solid rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
   transition: all 0.2s;
 }
 .fb-tab-active {
-  background: #e7f0fe;
+  background: rgba(24, 175, 56, 0.14);
+  border-color: rgba(24, 175, 56, 0.2);
 }
 .fb-tab-active .fb-tab-text {
-  color: #1877f2;
+  color: #18af38;
   font-weight: 600;
 }
 .fb-tab-text {
   font-size: 26rpx;
-  color: #65676b;
+  color: #636366;
 }
 
 /* ===== 通用板块 ===== */
@@ -2033,7 +2033,7 @@ export default {
   clip-path: polygon(0 0, 100% 0, 100% 82%, 0 100%);
 }
 .fb-light-info {
-  background: #fff;
+  @include glass-surface(0.85, 16px);
   padding: 16rpx 16rpx 8rpx;
 }
 .fb-light-name {
@@ -2071,12 +2071,11 @@ export default {
   pointer-events: none;
 }
 .fb-recent-card {
+  @include glass-surface(0.78, 18px);
   display: flex;
   align-items: center;
-  background: #fff;
   padding: 16rpx 18rpx 16rpx 16rpx;
   margin-bottom: 16rpx;
-  box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.06);
   clip-path: polygon(0 0, 100% 0, 100% 100%, 3% 100%, 0 72%);
   position: relative;
 }
@@ -2157,10 +2156,9 @@ export default {
   padding-right: 0;
 }
 .fb-act-card {
-  background: #fff;
+  @include glass-surface(0.8, 20px);
   margin-bottom: 20rpx;
   overflow: hidden;
-  box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.07);
   clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
 }
 .fb-act-card:active {
@@ -2264,35 +2262,4 @@ export default {
   color: #65676b;
 }
 
-/* 关怀版下拉提示层 */
-.care-pull-layer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(
-    180deg,
-    #e8f5ee 0%,
-    rgba(232, 245, 238, 0.9) 100%
-  );
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 16rpx;
-  z-index: 9998;
-  pointer-events: none;
-
-  .care-pull-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8rpx;
-
-    .care-pull-text {
-      font-size: 28rpx;
-      color: #18af38;
-      font-weight: 500;
-    }
-  }
-}
 </style>

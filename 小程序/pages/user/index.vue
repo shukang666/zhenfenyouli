@@ -1,5 +1,6 @@
 <template>
-	<view class="me-page" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
+	<view class="me-page glass-page" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
+		<view class="glass-page__ambient"></view>
 
 		<view class="care-pull-layer" :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }" v-if="showCareHint">
 			<view class="care-pull-content">
@@ -51,7 +52,7 @@
 			</view>
 		</view>
 
-		<view class="me-sheet">
+		<view class="me-sheet glass-page__content">
 			<view class="me-grow" v-if="!userInfo.is_environmental && isLogin">
 				<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/jiankangdaren.png" class="me-grow__img" mode="aspectFill"></image>
 				<view class="me-grow__body">
@@ -67,7 +68,7 @@
 				</view>
 			</view>
 
-			<view class="me-card" id="guide-me-common">
+			<view class="me-card glass-card" id="guide-me-common">
 				<text class="me-card__title">常用功能</text>
 				<view class="me-grid">
 					<view class="me-grid__item" @click="navigator('/pages/points/points')">
@@ -328,9 +329,10 @@
 </script>
 
 <style lang="scss" scoped>
+	@import '@/static/styles/glass-ui.scss';
+
 	.me-page {
-		min-height: 100vh;
-		background: #eef4f0;
+		position: relative;
 	}
 
 	.me-hero {
@@ -416,15 +418,14 @@
 	}
 
 	.me-stat {
+		@include glass-surface-strong(22px);
 		margin-top: 28rpx;
-		background: #fff;
 		border-radius: 24rpx;
 		padding: 22rpx 28rpx;
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
-		box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.1);
 	}
 	.me-stat__left {
 		display: flex;
@@ -483,14 +484,13 @@
 	}
 
 	.me-grow {
+		@include glass-surface(0.8, 20px);
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		background: #fff;
 		border-radius: 28rpx;
 		padding: 24rpx;
 		margin-bottom: 20rpx;
-		box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.06);
 	}
 	.me-grow__img {
 		width: 110rpx;
@@ -537,10 +537,8 @@
 	}
 
 	.me-card {
-		background: #fff;
 		border-radius: 28rpx;
 		margin-bottom: 20rpx;
-		box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.06);
 		overflow: hidden;
 	}
 	.me-card__title {
@@ -666,32 +664,5 @@
 
 	.me-tabbar-space {
 		height: 172rpx;
-	}
-
-	.care-pull-layer {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		background: linear-gradient(180deg, #E8F5EE 0%, rgba(232, 245, 238, 0.9) 100%);
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
-		padding-bottom: 16rpx;
-		z-index: 9998;
-		pointer-events: none;
-
-		.care-pull-content {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 8rpx;
-
-			.care-pull-text {
-				font-size: 28rpx;
-				color: #18AF38;
-				font-weight: 500;
-			}
-		}
 	}
 </style>
