@@ -338,7 +338,7 @@
 	.me-hero {
 		position: relative;
 		overflow: hidden;
-		background: linear-gradient(165deg, #18af38 0%, #12962e 58%, #0e7f26 100%);
+		background: linear-gradient(165deg, rgba(24, 175, 56, 0.92) 0%, rgba(18, 150, 46, 0.88) 100%);
 		padding: 120rpx 32rpx 88rpx;
 	}
 	.me-hero__bg {
@@ -418,7 +418,7 @@
 	}
 
 	.me-stat {
-		@include glass-surface-strong(22px);
+		@include glass-surface-strong(48px);
 		margin-top: 28rpx;
 		border-radius: 24rpx;
 		padding: 22rpx 28rpx;
@@ -484,7 +484,7 @@
 	}
 
 	.me-grow {
-		@include glass-surface(0.8, 20px);
+		@include glass-sheet;
 		display: flex;
 		flex-direction: row;
 		align-items: center;

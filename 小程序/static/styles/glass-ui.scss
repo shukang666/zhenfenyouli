@@ -1,63 +1,104 @@
 /**
- * Tab 页毛玻璃设计 tokens + 可复用 class / mixin
- * 用法：App.vue 已全局 @import；scoped 页内可 @import 使用 mixin
- * 不建议上 Tailwind：uni-app 小程序需额外构建链，体积与 purge 成本高于精简 SCSS
+ * Tab 页视觉体系 v2 — 克制 / 大厂 / 强毛玻璃
+ * 全局：App.vue @import；scoped 页：@import 后使用 mixin
  */
 
 $glass-brand: #18af38;
-$glass-brand-soft: rgba(24, 175, 56, 0.12);
+$glass-brand-dark: #12962e;
+$glass-brand-soft: rgba(24, 175, 56, 0.1);
+$glass-brand-line: rgba(24, 175, 56, 0.35);
 $glass-health: #3974f2;
-$glass-page-bg: #eef2ef;
-$glass-text: #1c1c1e;
-$glass-text-secondary: #636366;
+$glass-page-bg: #e4e8e5;
+$glass-page-bg-health: #e8ebf2;
+$glass-text: #1d1d1f;
+$glass-text-secondary: #3a3a3c;
 $glass-text-tertiary: #8e8e93;
+$glass-hairline: rgba(0, 0, 0, 0.06);
+$glass-radius-sm: 16rpx;
 $glass-radius-md: 20rpx;
 $glass-radius-lg: 24rpx;
 $glass-radius-xl: 32rpx;
-$glass-tabbar-space: calc(140rpx + env(safe-area-inset-bottom));
+$glass-tabbar-space: calc(148rpx + env(safe-area-inset-bottom));
 
-@mixin glass-surface($alpha: 0.72, $blur: 20px) {
-  background: rgba(255, 255, 255, $alpha);
-  border: 1rpx solid rgba(255, 255, 255, 0.62);
+@mixin glass-frost-core($bg, $blur: 40px) {
+  background: $bg;
+  border: 1rpx solid rgba(255, 255, 255, 0.72);
   box-shadow:
-    0 8rpx 32rpx rgba(0, 0, 0, 0.04),
-    0 1rpx 0 rgba(255, 255, 255, 0.85) inset;
-  backdrop-filter: saturate(180%) blur($blur);
-  -webkit-backdrop-filter: saturate(180%) blur($blur);
+    0 12rpx 40rpx rgba(0, 0, 0, 0.06),
+    0 1rpx 0 rgba(255, 255, 255, 0.92) inset,
+    0 0 0 1rpx rgba(0, 0, 0, 0.03);
+  backdrop-filter: saturate(200%) blur($blur);
+  -webkit-backdrop-filter: saturate(200%) blur($blur);
 }
 
-@mixin glass-surface-strong($blur: 24px) {
-  @include glass-surface(0.82, $blur);
+@mixin glass-surface($alpha: 0.58, $blur: 40px) {
+  @include glass-frost-core(rgba(255, 255, 255, $alpha), $blur);
+}
+
+@mixin glass-surface-strong($blur: 48px) {
+  @include glass-frost-core(rgba(255, 255, 255, 0.72), $blur);
+}
+
+@mixin glass-sheet {
+  @include glass-surface-strong(48px);
+  border-radius: $glass-radius-xl;
 }
 
 @mixin glass-nav-bar {
-  @include glass-surface-strong(24px);
+  @include glass-frost-core(rgba(255, 255, 255, 0.62), 48px);
   border-radius: 0;
   border-left: none;
   border-right: none;
   border-top: none;
-  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.03);
+  border-bottom: 1rpx solid $glass-hairline;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.04);
 }
 
 @mixin glass-search-field {
-  @include glass-surface(0.65, 16px);
+  @include glass-surface(0.52, 36px);
   border-radius: 999rpx;
+  box-shadow:
+    0 8rpx 28rpx rgba(0, 0, 0, 0.05),
+    0 1rpx 0 rgba(255, 255, 255, 0.9) inset;
 }
 
 @mixin glass-sticky-bar {
   @include glass-nav-bar;
-  border-bottom: 1rpx solid rgba(0, 0, 0, 0.04);
+}
+
+@mixin glass-segment-track {
+  @include glass-surface(0.42, 32px);
+  border-radius: $glass-radius-md;
+  padding: 6rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.55);
+}
+
+@mixin glass-segment-item-active {
+  @include glass-surface-strong(36px);
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
 @mixin glass-press {
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.22s ease, opacity 0.22s ease;
   &:active {
-    opacity: 0.92;
-    transform: scale(0.985);
+    opacity: 0.88;
+    transform: scale(0.982);
   }
 }
 
-/* ===== 页面壳 ===== */
+@mixin glass-accent-card($tint: rgba(24, 175, 56, 0.06)) {
+  @include glass-sheet;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    $tint 100%
+  );
+  border-left: 6rpx solid $glass-brand;
+  border-radius: $glass-radius-lg;
+}
+
+/* ===== 页面壳 + 环境光 ===== */
 .glass-page {
   position: relative;
   min-height: 100vh;
@@ -66,29 +107,57 @@ $glass-tabbar-space: calc(140rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
+.glass-page::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -30%;
+  width: 80%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(24, 175, 56, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass-page::after {
+  content: '';
+  position: fixed;
+  top: 10%;
+  right: -25%;
+  width: 70%;
+  height: 45%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .glass-page__ambient {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 520rpx;
+  height: 560rpx;
   background: linear-gradient(
     180deg,
-    rgba(24, 175, 56, 0.14) 0%,
-    rgba(238, 242, 239, 0) 100%
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(228, 232, 229, 0) 100%
   );
   pointer-events: none;
   z-index: 0;
 }
 
 .glass-page--health {
-  background: #eef1f8;
+  background: $glass-page-bg-health;
+
+  &::before {
+    background: radial-gradient(circle, rgba(57, 116, 242, 0.1) 0%, transparent 70%);
+  }
 
   .glass-page__ambient {
     background: linear-gradient(
       180deg,
-      rgba(57, 116, 242, 0.16) 0%,
-      rgba(238, 241, 248, 0) 100%
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(232, 235, 242, 0) 100%
     );
   }
 }
@@ -98,36 +167,29 @@ $glass-tabbar-space: calc(140rpx + env(safe-area-inset-bottom));
   z-index: 1;
 }
 
-/* ===== 卡片 / 搜索 / 导航（全局 class，模板直接挂） ===== */
+/* ===== 全局组件 class ===== */
 .glass-card {
-  @include glass-surface;
+  @include glass-surface(0.62, 40px);
   border-radius: $glass-radius-lg;
   overflow: hidden;
 }
 
 .glass-card--strong {
-  @include glass-surface-strong;
-  border-radius: $glass-radius-lg;
+  @include glass-sheet;
 }
 
 .glass-card--tint-brand {
-  @include glass-surface(0.78, 20px);
-  border-radius: $glass-radius-lg;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.88) 0%,
-    rgba(232, 247, 236, 0.75) 100%
-  );
+  @include glass-accent-card(rgba(24, 175, 56, 0.08));
 }
 
 .glass-card--tint-blue {
-  @include glass-surface(0.78, 20px);
-  border-radius: $glass-radius-lg;
+  @include glass-sheet;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(230, 238, 255, 0.72) 100%
+    rgba(255, 255, 255, 0.76) 0%,
+    rgba(230, 238, 255, 0.55) 100%
   );
+  border-left: 6rpx solid $glass-health;
 }
 
 .glass-nav {
@@ -141,65 +203,61 @@ $glass-tabbar-space: calc(140rpx + env(safe-area-inset-bottom));
 .glass-section-head {
   display: flex;
   align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 
 .glass-section-head__bar {
-  width: 6rpx;
-  height: 28rpx;
-  border-radius: 4rpx;
+  width: 4rpx;
+  height: 26rpx;
+  border-radius: 2rpx;
   background: $glass-brand;
-  margin-right: 12rpx;
+  margin-right: 14rpx;
   flex-shrink: 0;
 }
 
 .glass-section-head__title {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: $glass-text;
-  letter-spacing: -0.3rpx;
+  letter-spacing: 0.2rpx;
 }
 
 .glass-section-head__more {
   margin-left: auto;
   font-size: 24rpx;
   color: $glass-text-tertiary;
+  font-weight: 400;
 }
 
 .glass-chip {
   display: inline-flex;
   align-items: center;
-  padding: 6rpx 16rpx;
+  padding: 6rpx 14rpx;
   border-radius: 999rpx;
   font-size: 22rpx;
-  color: $glass-brand;
+  color: $glass-brand-dark;
   background: $glass-brand-soft;
-  border: 1rpx solid rgba(24, 175, 56, 0.12);
+  border: 1rpx solid rgba(24, 175, 56, 0.08);
 }
 
 .glass-press {
   @include glass-press;
 }
 
-/* ===== 关怀版下拉（Tab 页共用，勿在各页重复写） ===== */
 .care-pull-layer {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(232, 245, 238, 0.95) 0%,
-    rgba(232, 245, 238, 0.75) 100%
-  );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  @include glass-frost-core(rgba(255, 255, 255, 0.75), 32px);
   display: flex;
   align-items: flex-end;
   justify-content: center;
   padding-bottom: 16rpx;
   z-index: 9998;
   pointer-events: none;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
 
   .care-pull-content {
     display: flex;
@@ -209,8 +267,8 @@ $glass-tabbar-space: calc(140rpx + env(safe-area-inset-bottom));
   }
 
   .care-pull-text {
-    font-size: 28rpx;
-    color: $glass-brand;
+    font-size: 26rpx;
+    color: $glass-brand-dark;
     font-weight: 500;
   }
 }

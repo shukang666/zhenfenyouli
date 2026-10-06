@@ -19,8 +19,8 @@
 		</u-navbar>
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 		<view class="u-p-30 mall-body glass-page__content">
-			<view class="u-p-b-20" id="guide-mall-search">
-				<u-search placeholder="搜索商品名称" v-model="keyword" border-color="#18AF38" search-icon-color="#18AF38" bg-color="#fff"></u-search>
+			<view class="u-p-b-20 mall-search-wrap glass-search" id="guide-mall-search">
+				<u-search placeholder="搜索商品名称" v-model="keyword" border-color="transparent" search-icon-color="#18AF38" bg-color="transparent" :show-action="false"></u-search>
 			</view>
 
 			<!-- 优惠券 -->
@@ -122,7 +122,7 @@
 				</view>
 				<view class="goods-grid" v-if="goods_list.length">
 					<view class="goods-card" v-for="(item,index) in goods_list" :key="item.id || index" @click="$u.route('/pages/shop/details?id='+item.id)">
-						<u-image width="334" height="334" :src="item.thumb"></u-image>
+						<u-image width="100%" height="320" mode="aspectFill" :src="item.thumb"></u-image>
 						<view class="goods-card__body">
 							<view class="goods-card__zone" v-if="item.second_name">{{ item.second_name }}</view>
 							<view class="goods-card__name u-line-2">{{ item.goods_name }}</view>
@@ -379,9 +379,19 @@
 		position: relative;
 	}
 
+	.mall-search-wrap {
+		padding: 8rpx 16rpx;
+	}
+
 	.zone-panel {
 		padding: 8rpx 24rpx 8rpx;
 		margin-bottom: 30rpx;
+	}
+
+	.goods-section {
+		@include glass-sheet;
+		margin-top: 8rpx;
+		padding: 24rpx 20rpx 8rpx;
 	}
 
 	.zone-panel__head {
@@ -502,26 +512,28 @@
 	}
 
 	.goods-section__title {
-		font-size: 32rpx;
-		font-weight: 700;
-		color: #222;
+		font-size: 30rpx;
+		font-weight: 600;
+		color: $glass-text;
 	}
 
 	.goods-section__count {
 		font-size: 24rpx;
-		color: #999;
+		color: $glass-text-tertiary;
 	}
 
 	.goods-grid {
 		display: flex;
 		flex-wrap: wrap;
-		justify-content: space-between;
+		align-content: flex-start;
+		gap: 24rpx 16rpx;
 	}
 
 	.goods-card {
-		@include glass-surface(0.82, 18px);
-		width: 334rpx;
-		margin-bottom: 30rpx;
+		@include glass-surface(0.62, 40px);
+		box-sizing: border-box;
+		width: calc((100% - 16rpx) / 2);
+		flex: 0 0 calc((100% - 16rpx) / 2);
 		border-radius: 20rpx;
 		overflow: hidden;
 	}

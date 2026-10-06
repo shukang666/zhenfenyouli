@@ -1,11 +1,11 @@
-/* 悬浮胶囊 Tab：滑块默认无过渡，就位后再开位移，避免新页从首页滑过来 */
+/* 悬浮胶囊 Tab — 强毛玻璃 */
 
 .custom-tab-bar {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(16rpx + constant(safe-area-inset-bottom));
-  bottom: calc(16rpx + env(safe-area-inset-bottom));
+  bottom: calc(20rpx + constant(safe-area-inset-bottom));
+  bottom: calc(20rpx + env(safe-area-inset-bottom));
   z-index: 9999;
   background: transparent;
   pointer-events: none;
@@ -17,37 +17,39 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  height: 108rpx;
-  margin: 0 24rpx;
+  height: 104rpx;
+  margin: 0 28rpx;
   overflow: hidden;
-  border-radius: 54rpx;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1rpx solid rgba(255, 255, 255, 0.55);
+  border-radius: 52rpx;
+  background: rgba(255, 255, 255, 0.52);
+  border: 1rpx solid rgba(255, 255, 255, 0.78);
   box-shadow:
-    0 8rpx 32rpx rgba(0, 0, 0, 0.08),
-    0 1rpx 0 rgba(255, 255, 255, 0.7) inset;
-  backdrop-filter: saturate(180%) blur(24px);
-  -webkit-backdrop-filter: saturate(180%) blur(24px);
+    0 16rpx 48rpx rgba(0, 0, 0, 0.08),
+    0 1rpx 0 rgba(255, 255, 255, 0.95) inset,
+    0 0 0 1rpx rgba(0, 0, 0, 0.04);
+  backdrop-filter: saturate(200%) blur(48px);
+  -webkit-backdrop-filter: saturate(200%) blur(48px);
 }
 
 .tab-indicator {
   position: absolute;
   left: 0;
-  top: 8rpx;
-  bottom: 8rpx;
+  top: 10rpx;
+  bottom: 10rpx;
   width: 20%;
   z-index: 0;
   pointer-events: none;
   box-sizing: border-box;
   padding: 0 10rpx;
   background-clip: content-box;
-  background-color: rgba(24, 175, 56, 0.14);
+  background-color: rgba(255, 255, 255, 0.72);
   border-radius: 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
   transform: translate3d(0, 0, 0);
 }
 
 .tab-indicator--anim {
-  transition: transform 0.28s ease-out;
+  transition: transform 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .tab-item {
@@ -62,7 +64,7 @@
 }
 
 .tab-item--press {
-  opacity: 0.72;
+  opacity: 0.65;
 }
 
 .tab-icon-wrap {
@@ -76,7 +78,7 @@
 .tab-icon {
   width: 44rpx;
   height: 44rpx;
-  opacity: 0.42;
+  opacity: 0.38;
 }
 
 .tab-item.is-active .tab-icon {
@@ -89,10 +91,10 @@
   color: #8e8e93;
   line-height: 1.2;
   font-weight: 400;
-  letter-spacing: 0.2rpx;
+  letter-spacing: 0.4rpx;
 }
 
 .tab-item.is-active .tab-text {
-  color: #18af38;
+  color: #12962e;
   font-weight: 600;
 }

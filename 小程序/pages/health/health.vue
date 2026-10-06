@@ -256,7 +256,8 @@
 }
 
 .health-forum-item {
+	@include glass-surface(0.55, 40px);
 	padding: 24rpx;
-	border-radius: 20rpx;
+	border-radius: $glass-radius-md;
 }
 </style>

@@ -56,7 +56,9 @@
 
 <style lang="scss">
     page {
-        background: #eef2ef;
+        background: #e4e8e5;
+        color: #1d1d1f;
+        font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', sans-serif;
     }
 
     @import 'uview-ui/index.scss';

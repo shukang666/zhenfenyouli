@@ -59,7 +59,7 @@
 							<text class="hello-card__greet">{{ greetingText }}</text>
 							<view class="hello-card__sign" :class="{ 'hello-card__sign--done': signStatus.today_signed }"
 								hover-class="hello-card__sign--on" @click.stop="handleSign">
-								<u-icon :name="signStatus.today_signed ? 'checkbox-mark' : 'calendar'" size="28" color="#ffffff"></u-icon>
+								<u-icon :name="signStatus.today_signed ? 'checkbox-mark' : 'calendar'" size="28" color="#18AF38"></u-icon>
 								<text class="hello-card__sign-text">{{ signStatus.today_signed ? '已签到' : '签到' }}</text>
 								<text v-if="signStatus.continue_days > 0" class="hello-card__sign-days">{{ signStatus.continue_days }}天</text>
 							</view>
@@ -908,7 +908,7 @@ export default {
 		width: 52rpx;
 		height: 52rpx;
 		border-radius: 50%;
-		background: $brand-soft;
+		background: rgba(24, 175, 56, 0.08);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -926,21 +926,23 @@ export default {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 60rpx;
-		height: 60rpx;
+		width: 56rpx;
+		height: 56rpx;
 		margin-left: 10rpx;
 		border-radius: 50%;
-		background: linear-gradient(145deg, #34c759 0%, $brand 100%);
-		box-shadow: 0 8rpx 18rpx rgba(24, 175, 56, 0.25);
+		background: $brand;
+		box-shadow: 0 4rpx 12rpx rgba(24, 175, 56, 0.22);
 	}
 
 	.banner-wrap {
 		position: relative;
 		z-index: 1;
-		margin: 20rpx 30rpx 0;
-		border-radius: $radius-md;
+		margin: 24rpx 32rpx 0;
+		border-radius: $glass-radius-lg;
 		overflow: hidden;
-		box-shadow: $shadow-card;
+		@include glass-surface(0.35, 32px);
+		padding: 8rpx;
+		box-sizing: border-box;
 	}
 
 	.notice-bar-wrap {
@@ -951,42 +953,23 @@ export default {
 
 	.notice-bar-inner {
 		overflow: hidden;
-		border-radius: $radius-md;
-		background: linear-gradient(90deg, #fff8e6 0%, #fffdf6 100%);
-		border: 1rpx solid rgba(212, 168, 67, 0.12);
+		border-radius: $glass-radius-md;
+		@include glass-surface(0.55, 36px);
 	}
 
 	.hello-card {
+		@include glass-accent-card(rgba(24, 175, 56, 0.05));
 		position: relative;
 		z-index: 1;
 		overflow: hidden;
 		display: flex;
 		align-items: center;
-		margin: 20rpx 30rpx 0;
-		padding: 26rpx 22rpx 26rpx 26rpx;
-		background: linear-gradient(128deg, #2ecc5a 0%, $brand 52%, $brand-dark 100%);
-		border-radius: $radius-lg;
-		box-shadow: $shadow-float;
+		margin: 24rpx 32rpx 0;
+		padding: 28rpx 24rpx;
 		box-sizing: border-box;
 	}
 	.hello-card__orb {
-		position: absolute;
-		border-radius: 50%;
-		pointer-events: none;
-		background: rgba(255, 255, 255, 0.12);
-	}
-	.hello-card__orb--a {
-		width: 180rpx;
-		height: 180rpx;
-		top: -70rpx;
-		right: 120rpx;
-	}
-	.hello-card__orb--b {
-		width: 110rpx;
-		height: 110rpx;
-		bottom: -40rpx;
-		left: -20rpx;
-		background: rgba(255, 220, 80, 0.16);
+		display: none;
 	}
 	.hello-card__main {
 		position: relative;
@@ -1014,9 +997,9 @@ export default {
 	}
 	.hello-card__greet {
 		flex: 1;
-		font-size: 32rpx;
-		font-weight: 700;
-		color: #ffffff;
+		font-size: 30rpx;
+		font-weight: 600;
+		color: $glass-text;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -1026,12 +1009,14 @@ export default {
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
-		padding: 8rpx 18rpx;
-		background: rgba(255, 255, 255, 0.22);
-		border-radius: 32rpx;
+		padding: 8rpx 16rpx;
+		background: $glass-brand-soft;
+		border-radius: 999rpx;
+		border: 1rpx solid rgba(24, 175, 56, 0.12);
 	}
 	.hello-card__sign--done {
-		background: rgba(0, 0, 0, 0.16);
+		background: rgba(0, 0, 0, 0.04);
+		border-color: $glass-hairline;
 	}
 	.hello-card__sign--on {
 		transform: scale(0.92);
@@ -1040,31 +1025,31 @@ export default {
 	.hello-card__sign-text {
 		margin-left: 6rpx;
 		font-size: 22rpx;
-		font-weight: 600;
-		color: #ffffff;
+		font-weight: 500;
+		color: $glass-brand-dark;
 		line-height: 1.2;
 	}
 	.hello-card__sign-days {
 		margin-left: 6rpx;
 		font-size: 20rpx;
-		color: rgba(255, 255, 255, 0.85);
+		color: $glass-text-tertiary;
 		line-height: 1.2;
 	}
 	.hello-card__meta {
-		margin-top: 8rpx;
+		margin-top: 10rpx;
 		font-size: 22rpx;
-		color: rgba(255, 255, 255, 0.86);
+		color: $glass-text-secondary;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 	.hello-card__level {
-		color: #fff4b8;
+		color: $glass-text;
 		font-weight: 600;
 	}
 	.hello-card__dot {
 		margin: 0 6rpx;
-		color: rgba(255, 255, 255, 0.45);
+		color: $glass-text-tertiary;
 	}
 	.hello-card__btn {
 		position: relative;
@@ -1075,11 +1060,11 @@ export default {
 		align-items: center;
 		justify-content: center;
 		margin-left: 16rpx;
-		padding: 18rpx 24rpx;
-		min-width: 132rpx;
-		background: rgba(255, 255, 255, 0.96);
-		border-radius: 18rpx;
-		box-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.08);
+		padding: 18rpx 22rpx;
+		min-width: 128rpx;
+		background: $brand;
+		border-radius: $glass-radius-md;
+		box-shadow: 0 8rpx 20rpx rgba(24, 175, 56, 0.25);
 	}
 	.hello-card__btn--on {
 		opacity: 0.88;
@@ -1087,14 +1072,14 @@ export default {
 	}
 	.hello-card__btn-title {
 		font-size: 24rpx;
-		font-weight: 700;
-		color: #18af38;
+		font-weight: 600;
+		color: #fff;
 		line-height: 1.2;
 	}
 	.hello-card__btn-sub {
 		margin-top: 4rpx;
 		font-size: 18rpx;
-		color: #6a9a74;
+		color: rgba(255, 255, 255, 0.82);
 		line-height: 1.2;
 	}
 
@@ -1105,7 +1090,7 @@ export default {
 		padding: 24rpx 30rpx 0;
 	}
 	.entry-item {
-		@include glass-surface(0.76, 20px);
+		@include glass-surface(0.58, 40px);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -1205,13 +1190,11 @@ export default {
 	}
 
 	.showcase-section {
+		@include glass-sheet;
 		position: relative;
 		z-index: 1;
-		margin: 20rpx 30rpx 0;
-		padding: 24rpx 0 12rpx;
-		background: $surface;
-		border-radius: $radius-lg;
-		box-shadow: $shadow-card;
+		margin: 24rpx 32rpx 0;
+		padding: 28rpx 0 16rpx;
 		overflow: hidden;
 	}
 	.showcase-scroll {
@@ -1273,13 +1256,11 @@ export default {
 	}
 
 	.content-panel {
+		@include glass-sheet;
 		position: relative;
 		z-index: 1;
-		margin: 20rpx 30rpx 0;
-		padding: 20rpx 0 8rpx;
-		background: $surface;
-		border-radius: $radius-lg;
-		box-shadow: $shadow-card;
+		margin: 24rpx 32rpx 0;
+		padding: 24rpx 0 12rpx;
 		overflow: hidden;
 	}
 
@@ -1287,10 +1268,8 @@ export default {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin: 0 20rpx 12rpx;
-		padding: 6rpx;
-		background: #f0f4f1;
-		border-radius: 16rpx;
+		margin: 0 24rpx 16rpx;
+		@include glass-segment-track;
 	}
 	.tab-list {
 		display: flex;
@@ -1310,12 +1289,11 @@ export default {
 		font-weight: 500;
 	}
 	.tab-item--active {
-		background: $surface;
-		box-shadow: 0 4rpx 12rpx rgba(22, 53, 36, 0.06);
+		@include glass-segment-item-active;
 	}
 	.tab-item--active .tab-item__text {
-		color: $brand;
-		font-weight: 700;
+		color: $glass-text;
+		font-weight: 600;
 	}
 	.tab-more {
 		display: flex;
@@ -1335,13 +1313,12 @@ export default {
 		padding: 8rpx 0 20rpx 20rpx;
 	}
 	.active-card {
+		@include glass-surface(0.65, 36px);
 		flex-shrink: 0;
 		width: 500rpx;
 		margin-right: 16rpx;
-		background: #fafcfa;
-		border-radius: $radius-md;
+		border-radius: $glass-radius-lg;
 		overflow: hidden;
-		border: 1rpx solid rgba(24, 175, 56, 0.06);
 	}
 	.active-card-cover {
 		width: 500rpx;
@@ -1352,9 +1329,9 @@ export default {
 		padding: 20rpx 22rpx 22rpx;
 	}
 	.active-card-title {
-		font-size: 30rpx;
-		font-weight: 700;
-		color: $text;
+		font-size: 28rpx;
+		font-weight: 600;
+		color: $glass-text;
 		line-height: 1.45;
 		min-height: 86rpx;
 	}
@@ -1415,13 +1392,12 @@ export default {
 		margin-right: 0;
 	}
 	.goods-card {
+		@include glass-surface(0.62, 36px);
 		width: 100%;
 		margin-bottom: 16rpx;
-		background: #fafcfa;
-		border-radius: $radius-md;
+		border-radius: $glass-radius-lg;
 		overflow: hidden;
 		white-space: normal;
-		border: 1rpx solid rgba(24, 175, 56, 0.06);
 	}
 	.goods-card-body {
 		padding: 16rpx 18rpx 20rpx;
@@ -1508,11 +1484,11 @@ export default {
 		padding: 24rpx 30rpx calc(172rpx + env(safe-area-inset-bottom));
 	}
 	.sk-about {
+		@include glass-sheet;
 		position: relative;
 		overflow: hidden;
-		padding: 28rpx 28rpx 28rpx 32rpx;
-		background: linear-gradient(135deg, #1a3d2b 0%, #245a3d 100%);
-		border-radius: $radius-lg $radius-lg 0 0;
+		padding: 32rpx 32rpx 32rpx 36rpx;
+		border-radius: $glass-radius-xl $glass-radius-xl 0 0;
 	}
 	.sk-about-mark {
 		position: absolute;
@@ -1537,31 +1513,31 @@ export default {
 	.sk-about-kicker {
 		font-size: 20rpx;
 		letter-spacing: 0.12em;
-		color: rgba(187, 247, 208, 0.75);
-		font-weight: 600;
+		color: $glass-text-tertiary;
+		font-weight: 500;
 	}
 	.sk-about-title {
 		margin-top: 8rpx;
-		font-size: 32rpx;
-		font-weight: 800;
-		color: #f4fbf6;
+		font-size: 30rpx;
+		font-weight: 600;
+		color: $glass-text;
 		line-height: 1.35;
 	}
 	.sk-about-desc {
 		margin-top: 8rpx;
 		font-size: 24rpx;
 		line-height: 1.6;
-		color: rgba(226, 245, 232, 0.7);
+		color: $glass-text-secondary;
 	}
 	.sk-guide-cta {
 		position: relative;
 		display: flex;
 		align-items: center;
 		margin-top: 0;
-		padding: 24rpx 22rpx 24rpx 28rpx;
-		background: linear-gradient(118deg, $brand 0%, #34c759 100%);
-		border-radius: 0 0 $radius-lg $radius-lg;
-		box-shadow: $shadow-float;
+		padding: 24rpx 24rpx 24rpx 28rpx;
+		background: rgba(24, 175, 56, 0.92);
+		border-radius: 0 0 $glass-radius-xl $glass-radius-xl;
+		box-shadow: none;
 	}
 	.sk-guide-cta--on {
 		opacity: 0.94;

@@ -489,12 +489,12 @@
         <view class="fb-hd">
           <view class="fb-entry-kicker-dot"></view>
           <text class="fb-section-title">全部活动</text>
-          <text class="fb-entry-kicker-hint">继续往下看</text>
+          <text class="fb-entry-kicker-hint" v-if="active_total > 0">共 {{ active_total }} 场</text>
         </view>
       </view>
       <view
         class="fb-act-card"
-        v-for="item in active_list"
+        v-for="item in active_list_preview"
         :key="item.id"
         @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
       >
@@ -540,16 +540,16 @@
         </view>
       </view>
 
-      <!-- 空态/加载中：均不显示 -->
       <view
-        class="fb-load-tip"
-        v-if="
-          !active_loading &&
-          active_list.length > 0 &&
-          active_list.length >= active_total
-        "
-        >没有更多了</view
+        class="fb-act-more-wrap"
+        v-if="showActiveListMore && active_list_preview.length > 0"
+        @click="goMoreAll"
       >
+        <view class="fb-act-more-btn" hover-class="fb-act-more-btn--on">
+          <text class="fb-act-more-text">查看更多活动</text>
+          <u-icon name="arrow-right" size="24" color="#18AF38"></u-icon>
+        </view>
+      </view>
     </view>
     <page-guide page="low_carbon"></page-guide>
   </view>
@@ -572,6 +572,9 @@ const WEEKLY_ZHENFEN_PIN = {
   name: "真分打卡",
   active_count: 0,
 };
+
+/** 活动 Tab 底部「全部活动」仅预览条数，完整列表见 active-list */
+const ACTIVE_LIST_PREVIEW_SIZE = 2;
 
 export default {
   components: { SkeletonScreen },
@@ -633,6 +636,14 @@ export default {
   computed: {
     weekly_display_list() {
       return [WEEKLY_ZHENFEN_PIN].concat(this.weekly_list || []);
+    },
+    active_list_preview() {
+      return (this.active_list || []).slice(0, ACTIVE_LIST_PREVIEW_SIZE);
+    },
+    showActiveListMore() {
+      const total = Number(this.active_total) || 0;
+      if (total > ACTIVE_LIST_PREVIEW_SIZE) return true;
+      return (this.active_list || []).length > ACTIVE_LIST_PREVIEW_SIZE;
     },
   },
   onLoad(options) {
@@ -713,7 +724,7 @@ export default {
      * 活动 Tab 唯一数据口：首屏带 banner/标签/推荐区；分页或筛标签只增量列表字段
      */
     fetchActivityTabHome({ page = 1, tag = "" } = {}) {
-      const params = { page, page_size: 10 };
+      const params = { page, page_size: ACTIVE_LIST_PREVIEW_SIZE };
       if (tag) params.tag = tag;
       return this.$u.api.get_activity_tab_home(params).then((res) => {
         const data = res.data || {};
@@ -756,6 +767,21 @@ export default {
       this.$u.route({
         url: "/pages/activity/active-list",
         params: { filter: "all" },
+      });
+    },
+
+    /** 全部活动预览 → 完整列表（跟随当前标签筛选） */
+    goMoreAll() {
+      const params = { filter: "all" };
+      if (this.current_tab > 0) {
+        const tag = this.tag_list[this.current_tab - 1];
+        if (tag) {
+          params.filter = "tag:" + tag;
+        }
+      }
+      this.$u.route({
+        url: "/pages/activity/active-list",
+        params,
       });
     },
 
@@ -888,10 +914,7 @@ export default {
   },
 
   onReachBottom() {
-    if (this.active_list.length >= this.active_total) return;
-    if (this.active_loading) return;
-    this.active_page++;
-    this.loadActiveList();
+    /* 全部活动区仅展示预览，不在 Tab 页触底加载 */
   },
 };
 </script>
@@ -902,6 +925,12 @@ export default {
 .container {
   position: relative;
   z-index: 0;
+}
+
+/* 活动 Tab 不要右上角固定高光（glass-ui 的 ::after） */
+.container.glass-page::after {
+  content: none;
+  display: none;
 }
 
 .fb-press {
@@ -954,8 +983,11 @@ export default {
 .fb-banner-swiper {
   width: 100%;
   height: 330rpx;
-  border-radius: 24rpx;
+  border-radius: $glass-radius-xl;
   overflow: hidden;
+  @include glass-surface(0.35, 32px);
+  padding: 8rpx;
+  box-sizing: border-box;
 }
 .fb-banner-item {
   width: 100%;
@@ -1238,8 +1270,8 @@ export default {
 }
 .fb-entry-kicker-text {
   font-size: 28rpx;
-  font-weight: 700;
-  color: #142018;
+  font-weight: 600;
+  color: $glass-text;
 }
 .fb-entry-kicker-hint {
   margin-left: 12rpx;
@@ -1285,13 +1317,16 @@ export default {
   font-size: 28rpx;
 }
 .fb-entry-shot {
-  background: linear-gradient(145deg, #ffb88a 0%, #e86a3a 55%, #d45a28 100%);
+  border-left: 4rpx solid #e86a3a;
+  background: rgba(255, 255, 255, 0.58);
 }
 .fb-entry-quiz {
-  background: linear-gradient(145deg, #7eb8ff 0%, #3d7ee8 55%, #2a5fc4 100%);
+  border-left: 4rpx solid #3d7ee8;
+  background: rgba(255, 255, 255, 0.58);
 }
 .fb-entry-know {
-  background: linear-gradient(145deg, #6ee09a 0%, #22a85a 55%, #178f47 100%);
+  border-left: 4rpx solid #18af38;
+  background: rgba(255, 255, 255, 0.58);
 }
 .fb-entry-shot::after,
 .fb-entry-quiz::after,
@@ -1307,46 +1342,52 @@ export default {
   pointer-events: none;
 }
 .fb-entry-shot .fb-entry-title,
-.fb-entry-shot .fb-entry-sub,
-.fb-entry-shot .fb-entry-arrow,
-.fb-entry-shot .fb-entry-mark,
 .fb-entry-quiz .fb-entry-title,
-.fb-entry-quiz .fb-entry-sub,
-.fb-entry-quiz .fb-entry-arrow,
-.fb-entry-quiz .fb-entry-mark,
 .fb-entry-know .fb-entry-title,
-.fb-entry-know .fb-entry-sub,
+.fb-entry-shot .fb-entry-arrow,
+.fb-entry-quiz .fb-entry-arrow,
 .fb-entry-know .fb-entry-arrow,
+.fb-entry-shot .fb-entry-mark,
+.fb-entry-quiz .fb-entry-mark,
 .fb-entry-know .fb-entry-mark {
-  color: #fff;
+  color: $glass-text;
+}
+.fb-entry-shot .fb-entry-sub,
+.fb-entry-quiz .fb-entry-sub,
+.fb-entry-know .fb-entry-sub {
+  color: $glass-text-secondary;
 }
 .fb-entry-card {
+  @include glass-surface(0.58, 36px);
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 8rpx;
-  padding: 16rpx 14rpx 14rpx;
+  padding: 18rpx 16rpx 16rpx;
   min-height: 0;
-  border-radius: 16rpx;
-  box-shadow: 0 6rpx 18rpx rgba(16, 40, 24, 0.1);
+  border-radius: $glass-radius-md;
   position: relative;
   overflow: hidden;
-  color: #fff;
+  color: $glass-text;
+  box-shadow: none;
 }
 .fb-entry-home {
-  background: linear-gradient(145deg, #f8ecd0 0%, #e8c56a 55%, #d4a832 100%);
-  box-shadow: 0 6rpx 18rpx rgba(120, 90, 20, 0.14);
+  border-left: 4rpx solid #d4a832;
+  background: rgba(255, 255, 255, 0.58);
 }
 .fb-entry-xsd {
-  background: linear-gradient(145deg, #f5a89e 0%, #e85d7a 55%, #d94f6a 100%);
+  border-left: 4rpx solid #e85d7a;
+  background: rgba(255, 255, 255, 0.58);
 }
 .fb-entry-office {
-  background: linear-gradient(145deg, #8b9dc3 0%, #5c6b8a 55%, #4a5568 100%);
+  border-left: 4rpx solid #5c6b8a;
+  background: rgba(255, 255, 255, 0.58);
 }
 .fb-entry-street {
-  background: linear-gradient(145deg, #6fcf88 0%, #38b86a 55%, #1f9d52 100%);
+  border-left: 4rpx solid #18af38;
+  background: rgba(255, 255, 255, 0.58);
 }
 .fb-entry-home::after,
 .fb-entry-xsd::after,
@@ -1365,12 +1406,7 @@ export default {
 .fb-entry-home .fb-entry-title,
 .fb-entry-home .fb-entry-sub,
 .fb-entry-home .fb-entry-arrow,
-.fb-entry-home .fb-entry-mark {
-  color: #4a3d14;
-}
-.fb-entry-home .fb-entry-go--dark {
-  background: rgba(74, 61, 20, 0.12);
-}
+.fb-entry-home .fb-entry-mark,
 .fb-entry-xsd .fb-entry-title,
 .fb-entry-xsd .fb-entry-sub,
 .fb-entry-xsd .fb-entry-arrow,
@@ -1383,7 +1419,16 @@ export default {
 .fb-entry-street .fb-entry-sub,
 .fb-entry-street .fb-entry-arrow,
 .fb-entry-street .fb-entry-mark {
-  color: #fff;
+  color: $glass-text;
+}
+.fb-entry-home .fb-entry-sub,
+.fb-entry-xsd .fb-entry-sub,
+.fb-entry-office .fb-entry-sub,
+.fb-entry-street .fb-entry-sub {
+  color: $glass-text-secondary;
+}
+.fb-entry-home .fb-entry-go--dark {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 /* ===== 垃圾分类工作台 · 活动页独立主推位 ===== */
@@ -1391,42 +1436,17 @@ export default {
   padding: 12rpx 20rpx 8rpx;
 }
 .fb-dtsh-spotlight-card {
+  @include glass-accent-card(rgba(24, 175, 56, 0.06));
   position: relative;
   overflow: hidden;
-  border-radius: 20rpx;
-  padding: 28rpx 24rpx 26rpx;
-  background: linear-gradient(
-    128deg,
-    #0a3d6e 0%,
-    #1565b8 38%,
-    #1a8fd4 72%,
-    #5ec8ff 100%
-  );
-  box-shadow: 0 12rpx 32rpx rgba(10, 61, 110, 0.26),
-    0 2rpx 0 rgba(255, 255, 255, 0.14) inset;
+  padding: 32rpx 28rpx 28rpx;
 }
 .fb-dtsh-spotlight-press {
   opacity: 0.92;
   transform: scale(0.992);
 }
 .fb-dtsh-spotlight-glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  background: rgba(255, 255, 255, 0.14);
-}
-.fb-dtsh-spotlight-glow--a {
-  width: 200rpx;
-  height: 200rpx;
-  top: -72rpx;
-  right: -48rpx;
-}
-.fb-dtsh-spotlight-glow--b {
-  width: 140rpx;
-  height: 140rpx;
-  bottom: -56rpx;
-  left: -32rpx;
-  background: rgba(255, 255, 255, 0.08);
+  display: none;
 }
 .fb-dtsh-spotlight-inner {
   position: relative;
@@ -1450,17 +1470,17 @@ export default {
 }
 .fb-dtsh-spotlight-badge {
   font-size: 18rpx;
-  font-weight: 700;
-  color: #0a3d6e;
-  background: rgba(255, 255, 255, 0.92);
+  font-weight: 600;
+  color: #12962e;
+  background: $glass-brand-soft;
   padding: 4rpx 12rpx;
   border-radius: 999rpx;
-  letter-spacing: 2rpx;
+  letter-spacing: 1rpx;
 }
 .fb-dtsh-spotlight-kicker {
   font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.82);
-  letter-spacing: 1rpx;
+  color: $glass-text-tertiary;
+  letter-spacing: 0.5rpx;
 }
 .fb-dtsh-spotlight-title-row {
   display: flex;
@@ -1474,16 +1494,16 @@ export default {
   line-height: 1;
 }
 .fb-dtsh-spotlight-title {
-  font-size: 34rpx;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 1rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: $glass-text;
+  letter-spacing: 0.2rpx;
 }
 .fb-dtsh-spotlight-desc {
   display: block;
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.45;
+  color: $glass-text-secondary;
+  line-height: 1.5;
   margin-bottom: 14rpx;
 }
 .fb-dtsh-spotlight-tags {
@@ -1494,11 +1514,11 @@ export default {
 }
 .fb-dtsh-spotlight-tag {
   font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.95);
+  color: $glass-brand-dark;
   padding: 4rpx 14rpx;
   border-radius: 999rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.38);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1rpx solid rgba(24, 175, 56, 0.12);
+  background: $glass-brand-soft;
 }
 .fb-dtsh-spotlight-cta {
   flex-shrink: 0;
@@ -1507,23 +1527,23 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 4rpx;
-  width: 112rpx;
-  height: 112rpx;
+  width: 104rpx;
+  height: 104rpx;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  border: 2rpx solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+  background: #18af38;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.28);
 }
 .fb-dtsh-spotlight-cta-label {
   font-size: 20rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: #fff;
   line-height: 1.25;
   text-align: center;
   padding: 0 6rpx;
 }
 .fb-dtsh-spotlight-cta-arrow {
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 300;
   color: #fff;
   line-height: 1;
@@ -1535,29 +1555,17 @@ export default {
   padding: 8rpx 20rpx 16rpx;
 }
 .fb-qxl-spotlight-card {
+  @include glass-accent-card(rgba(24, 175, 56, 0.05));
   position: relative;
   overflow: hidden;
-  border-radius: 20rpx;
-  padding: 28rpx 24rpx 26rpx;
-  background: linear-gradient(
-    128deg,
-    #0d4d3a 0%,
-    #157a52 42%,
-    #1fa864 78%,
-    #3dd68c 100%
-  );
-  box-shadow: 0 12rpx 32rpx rgba(13, 77, 58, 0.28),
-    0 2rpx 0 rgba(255, 255, 255, 0.12) inset;
+  padding: 32rpx 28rpx 28rpx;
 }
 .fb-qxl-spotlight-press {
   opacity: 0.92;
   transform: scale(0.992);
 }
 .fb-qxl-spotlight-glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  background: rgba(255, 255, 255, 0.12);
+  display: none;
 }
 .fb-qxl-spotlight-glow--a {
   width: 200rpx;
@@ -1603,8 +1611,8 @@ export default {
 }
 .fb-qxl-spotlight-kicker {
   font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.78);
-  letter-spacing: 1rpx;
+  color: $glass-text-tertiary;
+  letter-spacing: 0.5rpx;
 }
 .fb-qxl-spotlight-title-row {
   display: flex;
@@ -1618,16 +1626,16 @@ export default {
   line-height: 1;
 }
 .fb-qxl-spotlight-title {
-  font-size: 36rpx;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 1rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: $glass-text;
+  letter-spacing: 0.2rpx;
 }
 .fb-qxl-spotlight-desc {
   display: block;
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.88);
-  line-height: 1.45;
+  color: $glass-text-secondary;
+  line-height: 1.5;
   margin-bottom: 14rpx;
 }
 .fb-qxl-spotlight-tags {
@@ -1638,11 +1646,11 @@ export default {
 }
 .fb-qxl-spotlight-tag {
   font-size: 20rpx;
-  color: rgba(255, 255, 255, 0.95);
+  color: $glass-brand-dark;
   padding: 4rpx 14rpx;
   border-radius: 999rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1rpx solid rgba(24, 175, 56, 0.12);
+  background: $glass-brand-soft;
 }
 .fb-qxl-spotlight-cta {
   flex-shrink: 0;
@@ -1651,22 +1659,22 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 4rpx;
-  width: 112rpx;
-  height: 112rpx;
+  width: 104rpx;
+  height: 104rpx;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  border: 2rpx solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.12);
+  background: #18af38;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.28);
 }
 .fb-qxl-spotlight-cta-label {
   font-size: 22rpx;
-  font-weight: 700;
+  font-weight: 600;
   color: #fff;
   line-height: 1.2;
   text-align: center;
 }
 .fb-qxl-spotlight-cta-arrow {
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 300;
   color: #fff;
   line-height: 1;
@@ -1991,18 +1999,9 @@ export default {
 
 /* ===== 现在就能参加：绿色行动宫格 ===== */
 .fb-light-act {
+  @include glass-sheet;
   margin: 24rpx 24rpx 8rpx;
-  padding: 24rpx 0 8rpx;
-  background-image:
-    repeating-linear-gradient(
-      -28deg,
-      rgba(24, 175, 56, 0) 0,
-      rgba(24, 175, 56, 0) 14rpx,
-      rgba(24, 175, 56, 0.06) 14rpx,
-      rgba(24, 175, 56, 0.06) 16rpx
-    ),
-    linear-gradient(180deg, #e7f8eb 0%, #f4fbf6 100%);
-  clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
+  padding: 24rpx 0 12rpx;
 }
 .fb-light-act .fb-section-header {
   padding: 0 24rpx 16rpx;
@@ -2154,6 +2153,27 @@ export default {
 .fb-act-list-hd {
   padding-left: 0;
   padding-right: 0;
+}
+.fb-act-more-wrap {
+  padding: 8rpx 0 24rpx;
+}
+.fb-act-more-btn {
+  @include glass-surface(0.55, 36px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  height: 88rpx;
+  border-radius: $glass-radius-lg;
+}
+.fb-act-more-btn--on {
+  opacity: 0.88;
+  transform: scale(0.985);
+}
+.fb-act-more-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: $glass-brand-dark;
 }
 .fb-act-card {
   @include glass-surface(0.8, 20px);
