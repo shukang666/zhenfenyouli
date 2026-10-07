@@ -331,7 +331,14 @@
 							<view class="scf-home-fix-card-mid">
 								<text class="scf-home-fix-card-desc">{{ slot.desc }}</text>
 								<view class="scf-home-fix-card-example">
-									<view class="scf-home-fix-card-example-ph">
+									<image
+										v-if="slot.exampleImgUrl && homeFixedExampleImgOk[slot.slotKey]"
+										class="scf-home-fix-card-example-img"
+										:src="slot.exampleImgUrl"
+										mode="aspectFit"
+										@error="onHomeFixedExampleImgError(slot.slotKey)"
+									/>
+									<view v-else class="scf-home-fix-card-example-ph">
 										<text class="scf-home-fix-card-example-ph-t">示例图</text>
 									</view>
 									<text class="scf-home-fix-card-example-cap">{{ slot.exampleCaption }}</text>
@@ -377,7 +384,14 @@
 							<view class="scf-home-fix-card-mid">
 								<text class="scf-home-fix-card-desc">{{ slot.desc }}</text>
 								<view class="scf-home-fix-card-example">
-									<view class="scf-home-fix-card-example-ph">
+									<image
+										v-if="slot.exampleImgUrl && homeFixedExampleImgOk[slot.slotKey]"
+										class="scf-home-fix-card-example-img"
+										:src="slot.exampleImgUrl"
+										mode="aspectFit"
+										@error="onHomeFixedExampleImgError(slot.slotKey)"
+									/>
+									<view v-else class="scf-home-fix-card-example-ph">
 										<text class="scf-home-fix-card-example-ph-t">示例图</text>
 									</view>
 									<text class="scf-home-fix-card-example-cap">{{ slot.exampleCaption }}</text>
@@ -1090,6 +1104,11 @@
 				homeFixedHeroImgOk: true,
 				/** URL 参数 home_setup=1 时强制进入布置页（后续改图入口用） */
 				homeFixedEditSetup: false,
+				homeFixedExampleImgOk: {
+					kitchen: true,
+					recycle: true,
+					hazard: true,
+				},
 			}
 		},
 		computed: {
@@ -1605,6 +1624,10 @@
 			onHomeFixedHeroImgError() {
 				this.homeFixedHeroImgOk = false
 			},
+			onHomeFixedExampleImgError(slotKey) {
+				if (!slotKey) return
+				this.$set(this.homeFixedExampleImgOk, slotKey, false)
+			},
 			onScenePickCardImgErrorEvt(e) {
 				const ds = (e && e.currentTarget && e.currentTarget.dataset) || {}
 				const key = ds.illusKey || ds['illus-key'] || ''
@@ -1735,16 +1758,20 @@
 			},
 			syncHomeFixedSlots() {
 				const defs = getHomeFixedSetupSlots()
+				const cosBase = this.scenePickCosBase
 				this.homeFixedSlots = defs.map(def => {
 					const np = this.findPointForHomeSlot(def)
 					const raw = np ? (np.point_image_raw || '') : ''
 					const show = np
 						? (np.point_image || resolveAssetShowUrl(np.point_image_raw))
 						: ''
+					const imgKey = def.exampleImgKey || ''
+					const exampleImgUrl = imgKey ? cosBase + imgKey + '.png' : ''
 					return Object.assign({}, def, {
 						id: np && np.id ? np.id : 0,
 						point_image: raw,
 						point_image_url: show,
+						exampleImgUrl,
 					})
 				})
 			},
@@ -3135,6 +3162,13 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+}
+.scf-home-fix-card-example-img {
+	width: 200rpx;
+	height: 160rpx;
+	border-radius: 12rpx;
+	background: #f5f8f6;
+	display: block;
 }
 .scf-home-fix-card-example-ph {
 	width: 200rpx;
