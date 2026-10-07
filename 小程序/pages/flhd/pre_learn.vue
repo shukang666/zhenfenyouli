@@ -225,12 +225,12 @@
 				})
 			},
 			goToSceneClockPick() {
-				const target = '/pages/activity/scene-clock-flow?mode=theme'
+				const target = '/pages/activity/scene-clock-pick?mode=theme'
 				const pages = getCurrentPages()
 				let backDelta = 0
 				for (let i = pages.length - 1; i >= 0; i--) {
 					const route = (pages[i] && pages[i].route) || ''
-					if (route.indexOf('scene-clock-flow') >= 0) {
+					if (route.indexOf('scene-clock-pick') >= 0 || route.indexOf('scene-clock-flow') >= 0) {
 						backDelta = pages.length - 1 - i
 						break
 					}

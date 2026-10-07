@@ -12,7 +12,10 @@ class StreetShopController extends AuthController
 {
     public function shop_types()
     {
-        $this->success('请求成功', StreetShopConfig::shopTypesForApi());
+        $this->success('请求成功', [
+            'list'   => StreetShopConfig::shopTypesForApi(),
+            'groups' => StreetShopConfig::shopTypeGroupsForApi(),
+        ]);
     }
 
     public function my_merchant()

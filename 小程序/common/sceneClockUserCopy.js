@@ -300,24 +300,36 @@ export function getSceneHubCards() {
 }
 
 /** 沿街：登记商铺 + 自传投放点照片（同家庭摆桶逻辑） */
+export function getStreetMerchantHeroTitle() {
+	return '店里也能真分'
+}
+
+export function getStreetMerchantHeroSub() {
+	return '分得好，店里更清爽'
+}
+
 export function getStreetClaimTitle() {
-	return '登记沿街商铺'
+	return '填写公司信息'
 }
 
 export function getStreetClaimLead() {
-	return '有门面的填店名、选类型，再拍一张店里投放点的照片，以后在这边打卡。'
+	return ''
 }
 
 export function getStreetClaimShopNamePh() {
-	return '写店名，与招牌一致即可'
+	return '请输入门店/公司名称'
+}
+
+export function getStreetClaimCompanyLabel() {
+	return '公司名称'
 }
 
 export function getStreetClaimTypeHint() {
-	return '选经营种类，系统会定好您店主要分哪一类。'
+	return '公司类型'
 }
 
 export function getStreetClaimSubmit() {
-	return '下一步，拍投放点'
+	return '点击开始布置店内投放点位'
 }
 
 export function getStreetSetupKicker() {

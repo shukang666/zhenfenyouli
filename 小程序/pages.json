@@ -318,6 +318,38 @@
 					}
 				},
 				{
+					"path": "scene-clock-pick",
+					"style": {
+						"navigationBarTitleText": "选择真分场景",
+						"navigationBarBackgroundColor": "#E8F7EE",
+						"navigationBarTextStyle": "black"
+					}
+				},
+				{
+					"path": "scene-clock-home",
+					"style": {
+						"navigationBarTitleText": "家庭场景",
+						"navigationBarBackgroundColor": "#E8F7EE",
+						"navigationBarTextStyle": "black"
+					}
+				},
+				{
+					"path": "scene-clock-office",
+					"style": {
+						"navigationBarTitleText": "办公场景",
+						"navigationBarBackgroundColor": "#E8F7EE",
+						"navigationBarTextStyle": "black"
+					}
+				},
+				{
+					"path": "scene-clock-street",
+					"style": {
+						"navigationBarTitleText": "沿街商铺",
+						"navigationBarBackgroundColor": "#E8F7EE",
+						"navigationBarTextStyle": "black"
+					}
+				},
+				{
 					"path": "street-shop",
 					"style": {
 						"navigationBarTitleText": "沿街商铺"

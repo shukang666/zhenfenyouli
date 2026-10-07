@@ -1,11 +1,14 @@
 /**
- * 活动 Tab / Banner / 低碳工作台 → 真分场景打卡流（scene-clock-flow）统一路由
- * 链路说明见 .cursor/skills/mp-home-activity/scene-clock-entry-routes.md
+ * 活动 Tab / Banner / 低碳工作台 → 真分场景打卡流统一路由
  */
 
 import { normalizeClockHubKey } from '@/common/sceneClockHub.js'
-
-const SCENE_CLOCK_PAGE = '/pages/activity/scene-clock-flow'
+import {
+	buildSceneClockPickUrl,
+	buildSceneClockHubUrl,
+	SCENE_CLOCK_PICK_PAGE,
+	SCENE_CLOCK_LEGACY_PAGE,
+} from '@/common/sceneClock/sceneClockRoutes.js'
 
 const DBG = '[SCF-DEBUG] sceneClockEntry'
 
@@ -14,13 +17,10 @@ function dbg(...args) {
 }
 
 export function buildSceneClockThemeUrl() {
-	return `${SCENE_CLOCK_PAGE}?mode=theme`
+	return buildSceneClockPickUrl({ mode: 'theme' })
 }
 
-export function buildSceneClockHubUrl(hub) {
-	const key = normalizeClockHubKey(hub)
-	return `${SCENE_CLOCK_PAGE}?hub=${encodeURIComponent(key)}`
-}
+export { buildSceneClockHubUrl }
 
 /**
  * 解析 Banner / 运营配置的 url 字段
@@ -47,14 +47,14 @@ export function parseBannerSceneClockEntry(bannerUrl) {
 		return { kind: 'theme' }
 	}
 
-	if (url.indexOf('scene-clock-flow') >= 0) {
+	if (url.indexOf('scene-clock-flow') >= 0 || url.indexOf('scene-clock-pick') >= 0) {
 		const hubQ = url.match(/[?&]hub=([^&]+)/)
 		if (hubQ) {
 			const out = { kind: 'hub', hub: normalizeClockHubKey(decodeURIComponent(hubQ[1])) }
 			dbg('parseBannerSceneClockEntry →', out)
 			return out
 		}
-		dbg('parseBannerSceneClockEntry → theme (scene-clock-flow default)')
+		dbg('parseBannerSceneClockEntry → theme (default pick)')
 		return { kind: 'theme' }
 	}
 
@@ -62,17 +62,14 @@ export function parseBannerSceneClockEntry(bannerUrl) {
 	return null
 }
 
-/** 总入口：选场景页（theme_scenes），等同 Banner / 本周推荐置顶卡 */
+/** 总入口：选场景页 */
 export function openSceneClockTheme(vm) {
 	const url = buildSceneClockThemeUrl()
 	dbg('openSceneClockTheme', { url, isLogin: !!(vm && vm.isLogin) })
 	return vm.$u.route(url)
 }
 
-/**
- * 场景深链：等同在选场景页点对应卡片后的 bootstrapHub(hub)
- * 与 pickThemeHub 一致：仅校验登录，学考门禁在 scene-clock-flow 内 ensureExamGate
- */
+/** 场景深链：家庭 / 办公 / 沿街独立页 */
 export function openSceneClockHub(vm, hub) {
 	const url = buildSceneClockHubUrl(hub)
 	dbg('openSceneClockHub', {
@@ -101,3 +98,5 @@ export function openSceneClockFromBannerEntry(vm, entry) {
 	}
 	return false
 }
+
+export { SCENE_CLOCK_PICK_PAGE, SCENE_CLOCK_LEGACY_PAGE }
