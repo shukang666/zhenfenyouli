@@ -154,6 +154,23 @@ class ForumController extends AuthController
         ]);
     }
 
+    /** 选场景首屏：是否已有场景真分打卡（forum type=2 且 clock_scene 有效） */
+    public function get_scene_clock_pick_state()
+    {
+        $has = 0;
+        if (!empty($this->user_id)) {
+            $sceneKeys = ['home', 'office', 'street', 'zhenfenjiao', 'qinzi'];
+            $cnt = \think\facade\Db::name('forum')
+                ->where('user_id', (int)$this->user_id)
+                ->where('type', 2)
+                ->where('delete_time', 0)
+                ->whereIn('clock_scene', $sceneKeys)
+                ->count();
+            $has = $cnt > 0 ? 1 : 0;
+        }
+        $this->success('请求成功', ['has_scene_clock' => $has]);
+    }
+
     /**
      * 学考一体：提交全部练一练答案，通过后写 clock_pre_learn + 答题及格记录
      */

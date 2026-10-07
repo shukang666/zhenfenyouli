@@ -240,6 +240,18 @@ export function getScenePickHint() {
 	return '选一个和今天最贴近的场景：家里、上班，还是店铺。后面再按场景引导您分类打卡'
 }
 
+/** 选场景首屏顶栏文案 */
+export function getScenePickWelcomeBanner(returning) {
+	if (returning) {
+		return '欢迎回来。开始今天的真分吧！'
+	}
+	return '欢迎参与真分。开始今天的真分吧！'
+}
+
+export function getScenePickMainTitle() {
+	return '选择你今日的真分场景吧！'
+}
+
 /** 选场景前：是否愿意参加真分（仅下方卡片区，上方「为什么要分」不动） */
 export function getThemeOptInEyebrow() {
 	return '真分打卡'
@@ -263,9 +275,27 @@ export function getThemeOptInLater() {
 
 export function getSceneHubCards() {
 	return [
-		{ hub: 'home', emoji: '🏠', title: '家庭场景', desc: '在家做饭、起居，全家日常分类', theme: 'home' },
-		{ hub: 'office', emoji: '🏢', title: '上班 / 楼宇', desc: '工位、茶水间、办公区里分类', theme: 'office' },
-		{ hub: 'street', emoji: '🏪', title: '沿街商铺', desc: '看店、前后堂经营时的分类', theme: 'street' },
+		{
+			hub: 'home',
+			illusKey: 'home',
+			title: '居民真分',
+			desc: '布置居家环境中的垃圾投放点位，正确分类垃圾，完成真分。',
+			theme: 'home',
+		},
+		{
+			hub: 'office',
+			illusKey: 'office',
+			title: '办公场所真分',
+			desc: '在办公区域设置的真分角正确投递可回收物，完成真分。',
+			theme: 'office',
+		},
+		{
+			hub: 'street',
+			illusKey: 'street',
+			title: '商户真分',
+			desc: '按店铺类别，布置对应垃圾投放点位，正确分类垃圾，完成真分。',
+			theme: 'street',
+		},
 	]
 }
 

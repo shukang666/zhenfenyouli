@@ -36,53 +36,58 @@
 		</view>
 	</view>
 
-	<!-- 原型 Screen 4：先读「为什么要分」，再点选场景 -->
-	<view v-else-if="flowStep === 'theme_scenes'" class="zf-scenes">
-		<view class="zf-promo zf-promo--scene-head">
-			<text class="zf-promo-line">{{ whyIntroLead }}</text>
-			<text class="zf-promo-line zf-promo-line--sub">{{ whyIntroSummary }}</text>
-			<view class="zf-promo-pillars zf-promo-pillars--grid">
-				<view class="zf-promo-pillar zf-promo-pillar--tile" v-for="block in introInsightCards" :key="block.id">
-					<text class="zf-promo-pillar-ico">{{ block.icon }}</text>
-					<text class="zf-promo-pillar-lab">{{ block.title }}</text>
-					<text class="zf-promo-pillar-desc">{{ block.body }}</text>
-				</view>
-			</view>
-			<view class="zf-promo-pillars zf-promo-pillars--mini">
-				<view class="zf-promo-pillar" v-for="(p, i) in themePillars" :key="'tp' + i">
-					<text class="zf-promo-pillar-ico">{{ p.icon }}</text>
-					<text class="zf-promo-pillar-lab">{{ p.label }}</text>
-				</view>
+	<!-- 选场景首屏（欢迎 + 三场景卡片，配图 COS 可后续替换） -->
+	<view v-else-if="flowStep === 'theme_scenes'" class="zf-scenes zf-scenes--pick">
+		<view class="zf-pick-welcome">
+			<image
+				v-if="scenePickWelcomeImgUrl"
+				class="zf-pick-welcome__img"
+				:src="scenePickWelcomeImgUrl"
+				mode="widthFix"
+				@error="onScenePickWelcomeImgError"
+			/>
+			<view v-else class="zf-pick-ph zf-pick-ph--welcome">
+				<text class="zf-pick-welcome__txt">{{ scenePickWelcomeBanner }}</text>
 			</view>
 		</view>
-		<view class="zf-scenes-pick">
-			<view class="zf-opt-in" :class="{ 'zf-opt-in--hide': themeOptInReveal }">
-				<text class="zf-opt-in-eyebrow">{{ themeOptInEyebrow }}</text>
-				<text class="zf-opt-in-title">{{ themeOptInTitle }}</text>
-				<text class="zf-opt-in-desc">{{ themeOptInDesc }}</text>
-				<view class="zf-opt-in-yes zf-btn zf-btn--primary" hover-class="zf-btn--press" @tap="confirmThemeOptIn">{{ themeOptInYes }}</view>
-				<view class="zf-opt-in-later" hover-class="zf-opt-in-later--press" @tap="declineThemeOptIn">{{ themeOptInLater }}</view>
-			</view>
-			<view class="zf-scenes-reveal" :class="{ 'zf-scenes-reveal--show': themeOptInReveal }">
-				<text class="zf-scenes-kicker">{{ scenePickKicker }}</text>
-				<text class="zf-scenes-hint">{{ scenePickHint }}</text>
-				<view class="zf-scene-row">
-					<view
-						class="zf-scene-card zf-scene-card--pick"
-						v-for="(item, sIdx) in sceneHubCards"
-						:key="item.hub"
-						:class="'zf-scene-card--' + item.theme"
-						hover-class="zf-scene-card--press"
-						:hover-stay-time="80"
-						@tap="pickThemeHubByIndex(sIdx)"
-					>
-						<view class="zf-scene-icon-wrap">
-							<text class="zf-scene-icon">{{ item.emoji }}</text>
-						</view>
-						<view class="zf-scene-copy">
-							<text class="zf-scene-title">{{ item.title }}</text>
-							<text class="zf-scene-desc">{{ item.desc }}</text>
-						</view>
+
+		<view class="zf-pick-title-block">
+			<image
+				v-if="scenePickImg.title"
+				class="zf-pick-title__img"
+				:src="scenePickImg.title"
+				mode="widthFix"
+				@error="onScenePickImgError('title')"
+			/>
+			<text v-else class="zf-pick-title__txt">{{ scenePickMainTitle }}</text>
+		</view>
+
+		<view class="zf-pick-list">
+			<view
+				class="zf-pick-card"
+				v-for="(item, sIdx) in sceneHubCards"
+				:key="item.hub"
+				hover-class="zf-pick-card--press"
+				:hover-stay-time="80"
+				@tap="pickThemeHubByIndex(sIdx)"
+			>
+				<view class="zf-pick-card__illus">
+					<image
+						v-if="scenePickCardImg(item.illusKey)"
+						class="zf-pick-card__img"
+						:src="scenePickCardImg(item.illusKey)"
+						mode="aspectFill"
+						@error="onScenePickImgError(item.illusKey)"
+					/>
+					<view v-else class="zf-pick-ph zf-pick-ph--card">
+						<text class="zf-pick-ph-label">场景配图</text>
+					</view>
+				</view>
+				<view class="zf-pick-card__body">
+					<text class="zf-pick-card__title">{{ item.title }}</text>
+					<text class="zf-pick-card__desc">{{ item.desc }}</text>
+					<view class="zf-pick-card__go" aria-hidden="true">
+						<text class="zf-pick-card__go-ico">›</text>
 					</view>
 				</view>
 			</view>
@@ -763,7 +768,7 @@
 </template>
 
 <script>
-	import { uploadUrl } from '@/common/settings'
+	import settings, { uploadUrl } from '@/common/settings'
 	import { parseUploadAssetResponse, urlToRelativePath, resolveAssetShowUrl } from '@/common/uploadAsset.js'
 	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
 	import { getHub, mergeGuide, normalizeClockHubKey } from '@/common/sceneClockHub.js'
@@ -789,6 +794,8 @@
 		getScenePickNavTitle,
 		getScenePickKicker,
 		getScenePickHint,
+		getScenePickWelcomeBanner,
+		getScenePickMainTitle,
 		getThemeOptInEyebrow,
 		getThemeOptInTitle,
 		getThemeOptInDesc,
@@ -884,7 +891,17 @@
 				themeCta: getThemeIntroCta(),
 				scenePickKicker: getScenePickKicker(),
 				scenePickHint: getScenePickHint(),
-				themeOptInReveal: false,
+				themeOptInReveal: true,
+				/** null=加载中，默认展示「欢迎回来」图；false=从未场景真分；true=已有记录 */
+				scenePickHasClock: null,
+				scenePickImgOk: {
+					welcomeNew: true,
+					welcomeBack: true,
+					title: false,
+					home: false,
+					office: false,
+					street: false,
+				},
 				themeOptInEyebrow: getThemeOptInEyebrow(),
 				themeOptInTitle: getThemeOptInTitle(),
 				themeOptInDesc: getThemeOptInDesc(),
@@ -927,6 +944,37 @@
 			}
 		},
 		computed: {
+			scenePickCosBase() {
+				const base = settings.staticAssetBase || ''
+				return base + (base.endsWith('/') ? '' : '/') + 'scene-pick/'
+			},
+			scenePickMainTitle() {
+				return getScenePickMainTitle()
+			},
+			scenePickWelcomeBanner() {
+				if (this.scenePickHasClock === false) {
+					return getScenePickWelcomeBanner(false)
+				}
+				return getScenePickWelcomeBanner(true)
+			},
+			scenePickWelcomeImgUrl() {
+				const ok = this.scenePickImgOk || {}
+				const base = this.scenePickCosBase
+				if (this.scenePickHasClock === false) {
+					return ok.welcomeNew ? base + 'welcome-new.png' : ''
+				}
+				if (ok.welcomeBack) {
+					return base + 'welcome-back.png'
+				}
+				return ''
+			},
+			scenePickImg() {
+				const ok = this.scenePickImgOk || {}
+				const base = this.scenePickCosBase
+				return {
+					title: ok.title ? base + 'title.png' : '',
+				}
+			},
 			isResidentialHub() {
 				return this.hubKey === 'home'
 			},
@@ -1255,6 +1303,7 @@
 				community_id: this.userInfo && this.userInfo.community_id,
 			})
 			if (this.flowStep === 'theme_scenes') {
+				this.loadScenePickWelcomeState()
 				this.ensureThemeSceneGate()
 				return
 			}
@@ -1349,10 +1398,33 @@
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
 			},
 			resetThemeOptIn() {
-				this.themeOptInReveal = false
+				this.themeOptInReveal = true
+			},
+			loadScenePickWelcomeState() {
+				if (!this.isLogin) {
+					this.scenePickHasClock = false
+					return Promise.resolve()
+				}
+				return this.$u.api.get_scene_clock_pick_state().then(res => {
+					const data = res.data || {}
+					this.scenePickHasClock = Number(data.has_scene_clock) === 1
+				}).catch(() => {})
+			},
+			onScenePickWelcomeImgError() {
+				const key = this.scenePickHasClock === false ? 'welcomeNew' : 'welcomeBack'
+				if (this.scenePickImgOk) {
+					this.$set(this.scenePickImgOk, key, false)
+				}
+			},
+			scenePickCardImg(key) {
+				if (!key || !this.scenePickImgOk || !this.scenePickImgOk[key]) return ''
+				return this.scenePickCosBase + key + '.png'
+			},
+			onScenePickImgError(key) {
+				if (!key || !this.scenePickImgOk) return
+				this.$set(this.scenePickImgOk, key, false)
 			},
 			confirmThemeOptIn() {
-				if (this.themeOptInReveal) return
 				this.themeOptInReveal = true
 			},
 			declineThemeOptIn() {
@@ -2326,6 +2398,7 @@
 				}
 				this.$u.api.add_forum(payload).then(res => {
 					this.clockSuccessMsg = res.msg || '打卡成功'
+					this.scenePickHasClock = true
 					this.clockHabitTip = pickRandomHabitTip()
 					this.loadClockPromoActivities()
 					this.clockSuccessShow = true
@@ -4503,6 +4576,140 @@
 	background: #f5f8f6;
 	padding: 24rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
 	box-sizing: border-box;
+}
+.zf-scenes--pick {
+	background: #faf7f0;
+	padding: 20rpx 28rpx calc(40rpx + env(safe-area-inset-bottom));
+}
+.zf-pick-welcome {
+	margin-bottom: 24rpx;
+	border-radius: 20rpx;
+	overflow: hidden;
+}
+.zf-pick-welcome__img {
+	display: block;
+	width: 100%;
+	vertical-align: top;
+}
+.zf-pick-ph {
+	box-sizing: border-box;
+}
+.zf-pick-ph--welcome {
+	min-height: 160rpx;
+	padding: 28rpx 24rpx;
+	background: linear-gradient(135deg, #6ecf7a 0%, #2aab4a 55%, #1d9438 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 20rpx;
+}
+.zf-pick-welcome__txt {
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #fff;
+	text-align: center;
+	line-height: 1.45;
+	text-shadow: 0 2rpx 8rpx rgba(0, 48, 16, 0.15);
+}
+.zf-pick-title-block {
+	margin-bottom: 28rpx;
+	text-align: center;
+}
+.zf-pick-title__img {
+	display: block;
+	width: 100%;
+	vertical-align: top;
+}
+.zf-pick-title__txt {
+	display: block;
+	font-size: 40rpx;
+	font-weight: 800;
+	color: #1a7a32;
+	line-height: 1.35;
+	letter-spacing: 1rpx;
+}
+.zf-pick-list {
+	display: flex;
+	flex-direction: column;
+	gap: 20rpx;
+}
+.zf-pick-card {
+	display: flex;
+	align-items: stretch;
+	background: #fff;
+	border-radius: 20rpx;
+	overflow: hidden;
+	box-shadow: 0 8rpx 28rpx rgba(28, 56, 36, 0.08);
+}
+.zf-pick-card--press {
+	opacity: 0.94;
+}
+.zf-pick-card__illus {
+	width: 220rpx;
+	flex-shrink: 0;
+	background: #eef6f0;
+}
+.zf-pick-card__img {
+	width: 100%;
+	height: 100%;
+	min-height: 200rpx;
+	display: block;
+}
+.zf-pick-ph--card {
+	min-height: 200rpx;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(160deg, #f0f8f2 0%, #dceee2 100%);
+}
+.zf-pick-ph-label {
+	font-size: 24rpx;
+	color: #8aa892;
+}
+.zf-pick-card__body {
+	flex: 1;
+	min-width: 0;
+	padding: 22rpx 20rpx 22rpx 16rpx;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+.zf-pick-card__title {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #1a7a32;
+	line-height: 1.35;
+	margin-bottom: 10rpx;
+}
+.zf-pick-card__desc {
+	display: block;
+	font-size: 24rpx;
+	color: #4a564e;
+	line-height: 1.5;
+	padding-right: 56rpx;
+}
+.zf-pick-card__go {
+	position: absolute;
+	right: 16rpx;
+	bottom: 20rpx;
+	width: 56rpx;
+	height: 56rpx;
+	border-radius: 999rpx;
+	background: linear-gradient(180deg, #5fe06f 0%, #18af38 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 6rpx 16rpx rgba(24, 175, 56, 0.35);
+}
+.zf-pick-card__go-ico {
+	font-size: 40rpx;
+	line-height: 1;
+	color: #fff;
+	font-weight: 300;
+	margin-top: -4rpx;
 }
 .zf-promo--scene-head {
 	margin-top: 0;
