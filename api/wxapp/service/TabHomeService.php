@@ -452,14 +452,12 @@ class TabHomeService
         $lightTag = '轻活动';
         $weeklyQuery = ActiveModel::where($where)->where('is_month_recommend', '=', 1);
         $lightQuery = ActiveModel::where($where)->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
-        $recentQuery = ActiveModel::where($where)->whereRaw(
-            '(tags IS NULL OR tags = "" OR NOT FIND_IN_SET(?, tags))',
-            [$lightTag]
-        );
+        // 近期活动：上架活动里按创建时间取最新 2 条（与活动 date、是否轻活动标签无关）
+        $recentQuery = ActiveModel::where($where);
         return [
             'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
             'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
-            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'date desc, id desc'),
+            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'create_time desc, id desc'),
         ];
     }
 
