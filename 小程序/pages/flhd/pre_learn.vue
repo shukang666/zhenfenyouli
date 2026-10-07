@@ -10,7 +10,7 @@
 			</view>
 
 			<block v-else>
-				<view v-for="(block, bi) in blocks" :key="'b-' + bi">
+				<view v-for="(block, bi) in blocks" :key="bi">
 					<!-- 头图 -->
 					<view v-if="block.type === 'hero'" class="cle-hero">
 						<view class="cle-hero-icon-wrap">
@@ -58,16 +58,16 @@
 						<text class="cle-quiz-tag">{{ block.tag || '练一练' }}</text>
 						<text class="cle-quiz-q">{{ block.question }}</text>
 						<view
-							v-for="opt in block.options"
-							:key="block.id + opt.key"
+							v-for="(opt, oi) in block.options"
+							:key="oi"
 							class="cle-opt"
-							:class="quizOptClass(block.id, opt.key)"
+							:class="quizOptClassByIndex(bi, oi)"
 							hover-class="cle-opt--press"
-							@tap="pickAnswer(block.id, opt.key)"
+							@tap="pickAnswerByIndex(bi, oi)"
 						>
 							<text>{{ opt.key }}. {{ opt.text }}</text>
 						</view>
-						<text v-if="wrongIds.indexOf(block.id) >= 0" class="cle-quiz-wrong">这题不对，请再选一次</text>
+						<text v-if="quizWrongAt(bi)" class="cle-quiz-wrong">这题不对，请再选一次</text>
 					</view>
 				</view>
 				<view class="cle-scroll-pad"></view>
@@ -136,6 +136,14 @@
 					this.loaded = true
 				})
 			},
+			pickAnswerByIndex(bi, oi) {
+				if (this.completed) return
+				const block = (this.blocks || [])[bi]
+				if (!block || block.type !== 'quiz' || !block.id) return
+				const opt = (block.options || [])[oi]
+				if (!opt || !opt.key) return
+				this.pickAnswer(block.id, opt.key)
+			},
 			pickAnswer(qid, key) {
 				if (this.completed) return
 				this.$set(this.answers, qid, key)
@@ -144,13 +152,24 @@
 					this.wrongIds.splice(wi, 1)
 				}
 			},
-			quizOptClass(qid, key) {
+			quizWrongAt(bi) {
+				const block = (this.blocks || [])[bi]
+				if (!block || !block.id) return false
+				return this.wrongIds.indexOf(block.id) >= 0
+			},
+			quizOptClassByIndex(bi, oi) {
+				const block = (this.blocks || [])[bi]
+				if (!block || block.type !== 'quiz') return ''
+				const opt = (block.options || [])[oi]
+				if (!opt) return ''
+				const qid = block.id
+				const key = opt.key
 				const picked = this.answers[qid]
 				const wrong = this.wrongIds.indexOf(qid) >= 0
-				return {
-					'cle-opt--on': picked === key,
-					'cle-opt--wrong': wrong && picked === key,
-				}
+				const cls = []
+				if (picked === key) cls.push('cle-opt--on')
+				if (wrong && picked === key) cls.push('cle-opt--wrong')
+				return cls.join(' ')
 			},
 			submitExam() {
 				if (!this.canSubmit || this.submitting) {
