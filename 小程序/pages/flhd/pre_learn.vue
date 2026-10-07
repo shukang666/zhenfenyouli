@@ -13,29 +13,47 @@
 				<view v-for="(block, bi) in blocks" :key="bi">
 					<!-- 头图 -->
 					<view v-if="block.type === 'hero'" class="cle-hero">
-						<view class="cle-hero-icon-wrap">
-							<text class="cle-hero-icon">{{ block.icon || '🌍' }}</text>
-						</view>
-						<text class="cle-hero-title">{{ block.title }}</text>
-						<text class="cle-hero-sub">{{ block.subtitle }}</text>
+						<image
+							class="cle-hero-img"
+							:src="preLearnImg.welcome"
+							mode="widthFix"
+						/>
 					</view>
 
-					<view v-else-if="block.type === 'why'" class="cle-card cle-card--soft">
-						<text class="cle-card-title">{{ block.title }}</text>
-						<text class="cle-card-body">{{ block.body }}</text>
+					<view v-else-if="block.type === 'why'" class="cle-card cle-card--soft cle-card--why">
+						<text class="cle-card-title cle-card-title--center">为什么要学习</text>
+						<text class="cle-card-body cle-card-body--center">学习帮助你识别四类垃圾、避开常见误区，并把正确分类落实到真实行动中</text>
 					</view>
 
-					<view v-else-if="block.type === 'steps'" class="cle-steps-wrap">
-						<text class="cle-steps-k">{{ block.title }}</text>
-						<view class="cle-steps">
-							<view class="cle-step" v-for="(st, si) in block.items" :key="'st' + si">
-								<view class="cle-step-ico-wrap">
-									<text class="cle-step-ico">{{ st.icon }}</text>
-								</view>
-								<text class="cle-step-lab">{{ st.label }}</text>
-								<text v-if="si < block.items.length - 1" class="cle-step-arrow">›</text>
-							</view>
+					<view v-else-if="block.type === 'steps'" class="cle-steps-section">
+						<view class="cle-steps-img-wrap">
+							<image
+								class="cle-steps-img"
+								:src="preLearnImg.steps"
+								mode="widthFix"
+							/>
 						</view>
+						<view class="cle-start-exam">
+							<view class="cle-start-exam__line" aria-hidden="true"></view>
+							<text class="cle-start-exam__pill">开始学习和考试</text>
+							<view class="cle-start-exam__line" aria-hidden="true"></view>
+						</view>
+					</view>
+
+					<view v-else-if="block.type === 'learn' && block.id === 'basic'" class="cle-learn-img-wrap">
+						<image
+							class="cle-learn-img"
+							:src="preLearnImg.basicKnowledge"
+							mode="widthFix"
+						/>
+					</view>
+
+					<view v-else-if="block.type === 'learn' && block.id === 'zhenfen'" class="cle-learn-img-wrap">
+						<image
+							class="cle-learn-img"
+							:src="preLearnImg.zhenfen"
+							mode="widthFix"
+						/>
 					</view>
 
 					<view v-else-if="block.type === 'learn'" class="cle-learn">
@@ -57,15 +75,17 @@
 					<view v-else-if="block.type === 'quiz'" class="cle-quiz">
 						<text class="cle-quiz-tag">{{ block.tag || '练一练' }}</text>
 						<text class="cle-quiz-q">{{ block.question }}</text>
-						<view
-							v-for="(opt, oi) in block.options"
-							:key="oi"
-							class="cle-opt"
-							:class="quizOptClassByIndex(bi, oi)"
-							hover-class="cle-opt--press"
-							@tap="pickAnswerByIndex(bi, oi)"
-						>
-							<text>{{ opt.key }}. {{ opt.text }}</text>
+						<view class="cle-opt-grid">
+							<view
+								v-for="(opt, oi) in block.options"
+								:key="oi"
+								class="cle-opt"
+								:class="quizOptClassByIndex(bi, oi)"
+								hover-class="cle-opt--press"
+								@tap="pickAnswerByIndex(bi, oi)"
+							>
+								<text class="cle-opt-text">{{ opt.key }}. {{ opt.text }}</text>
+							</view>
 						</view>
 						<text v-if="quizWrongAt(bi)" class="cle-quiz-wrong">这题不对，请再选一次</text>
 					</view>
@@ -88,6 +108,10 @@
 </template>
 
 <script>
+	import settings from '@/common/settings.js'
+
+	const PRE_LEARN_COS = settings.staticAssetBase + 'flhd/'
+
 	export default {
 		data() {
 			return {
@@ -100,6 +124,14 @@
 			}
 		},
 		computed: {
+			preLearnImg() {
+				return {
+					welcome: PRE_LEARN_COS + 'pre_learn_welcome.png',
+					steps: PRE_LEARN_COS + 'pre_learn_steps.png',
+					basicKnowledge: PRE_LEARN_COS + 'pre_learn_basic_knowledge.png',
+					zhenfen: PRE_LEARN_COS + 'pre_learn_zhenfen.png',
+				}
+			},
 			quizIds() {
 				return (this.blocks || [])
 					.filter(b => b && b.type === 'quiz' && b.id)
@@ -229,39 +261,14 @@
 }
 .cle-hero {
 	margin-top: 16rpx;
-	padding: 32rpx 24rpx 28rpx;
-	background: #fff;
+	overflow: hidden;
 	border-radius: 24rpx;
 	box-shadow: 0 10rpx 32rpx rgba(20, 48, 32, 0.08);
-	text-align: center;
 }
-.cle-hero-icon-wrap {
-	width: 160rpx;
-	height: 160rpx;
-	margin: 0 auto 20rpx;
-	border-radius: 50%;
-	background: linear-gradient(145deg, #e8f8ec 0%, #c8ecd4 100%);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-.cle-hero-icon {
-	font-size: 88rpx;
-	line-height: 1;
-}
-.cle-hero-title {
+.cle-hero-img {
 	display: block;
-	font-size: 44rpx;
-	font-weight: 800;
-	color: #142018;
-}
-.cle-hero-sub {
-	display: block;
-	margin-top: 16rpx;
-	font-size: 28rpx;
-	line-height: 1.6;
-	color: #5a6b62;
-	text-align: left;
+	width: 100%;
+	vertical-align: top;
 }
 .cle-card {
 	margin-top: 24rpx;
@@ -272,6 +279,9 @@
 .cle-card--soft {
 	background: rgba(255, 255, 255, 0.92);
 }
+.cle-card--why {
+	text-align: center;
+}
 .cle-card-title {
 	display: block;
 	font-size: 34rpx;
@@ -279,10 +289,59 @@
 	color: #18af38;
 	margin-bottom: 12rpx;
 }
+.cle-card-title--center {
+	text-align: center;
+}
 .cle-card-body {
 	font-size: 30rpx;
 	line-height: 1.65;
 	color: #3a4540;
+}
+.cle-card-body--center {
+	display: block;
+	text-align: center;
+	font-size: 28rpx;
+	line-height: 1.55;
+	color: #3a4540;
+}
+.cle-steps-section {
+	margin-top: 24rpx;
+}
+.cle-steps-img-wrap {
+	overflow: hidden;
+	border-radius: 20rpx;
+	box-shadow: 0 10rpx 32rpx rgba(20, 48, 32, 0.08);
+}
+.cle-steps-img {
+	display: block;
+	width: 100%;
+	vertical-align: top;
+}
+.cle-start-exam {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-top: 28rpx;
+	padding: 0 4rpx;
+}
+.cle-start-exam__line {
+	flex: 1;
+	height: 2rpx;
+	background: linear-gradient(90deg, transparent 0%, #c5d0ca 12%, #c5d0ca 88%, transparent 100%);
+}
+.cle-start-exam__pill {
+	flex-shrink: 0;
+	margin: 0 20rpx;
+	padding: 16rpx 40rpx;
+	border-radius: 999rpx;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #fff;
+	line-height: 1.2;
+	background: linear-gradient(180deg, #5fe06f 0%, #2ec84a 38%, #18af38 72%, #128f2e 100%);
+	box-shadow:
+		0 8rpx 20rpx rgba(24, 175, 56, 0.32),
+		inset 0 2rpx 0 rgba(255, 255, 255, 0.35);
 }
 .cle-steps-wrap {
 	margin-top: 24rpx;
@@ -333,6 +392,17 @@
 }
 .cle-step-arrow {
 	display: none;
+}
+.cle-learn-img-wrap {
+	margin-top: 24rpx;
+	overflow: hidden;
+	border-radius: 20rpx;
+	box-shadow: 0 10rpx 32rpx rgba(20, 48, 32, 0.08);
+}
+.cle-learn-img {
+	display: block;
+	width: 100%;
+	vertical-align: top;
 }
 .cle-learn {
 	margin-top: 24rpx;
@@ -415,23 +485,41 @@
 	line-height: 1.5;
 	margin-bottom: 20rpx;
 }
+.cle-opt-grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	row-gap: 16rpx;
+}
 .cle-opt {
-	padding: 22rpx 24rpx;
-	margin-bottom: 16rpx;
-	border-radius: 48rpx;
+	width: calc(50% - 10rpx);
+	box-sizing: border-box;
+	min-height: 88rpx;
+	padding: 18rpx 14rpx;
+	border-radius: 20rpx;
 	border: 2rpx solid #c8d4cc;
-	font-size: 28rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.cle-opt-text {
+	font-size: 26rpx;
+	line-height: 1.4;
 	color: #3a4540;
 	text-align: center;
 }
+.cle-opt--on .cle-opt-text {
+	color: #18af38;
+}
+.cle-opt--wrong .cle-opt-text {
+	color: #c0392b;
+}
 .cle-opt--on {
 	border-color: #18af38;
-	color: #18af38;
 	background: rgba(24, 175, 56, 0.08);
 }
 .cle-opt--wrong {
 	border-color: #e05a4f;
-	color: #c0392b;
 	background: rgba(224, 90, 79, 0.08);
 }
 .cle-opt--press {

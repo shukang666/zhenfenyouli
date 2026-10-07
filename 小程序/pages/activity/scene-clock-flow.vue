@@ -1310,7 +1310,7 @@
 					if (!info.is_learn || !info.is_answer) {
 						uni.showModal({
 							title: '还差一步',
-							content: '第一次打卡前，请先完成「学考一体」（学一点、考一点，大约几分钟）。',
+							content: '第一次打卡前，请先完成学习与考试（大约1分钟）。',
 							showCancel: false,
 							confirmText: '去学考',
 							confirmColor: '#38B061',
@@ -1334,7 +1334,7 @@
 				if (!info.is_learn || !info.is_answer) {
 					uni.showModal({
 						title: '还差一步',
-						content: '第一次打卡前，请先完成「学考一体」（学一点、考一点，大约几分钟）。',
+						content: '第一次打卡前，请先完成学习与考试（大约1分钟）。',
 						showCancel: false,
 						confirmText: '去学考',
 						confirmColor: '#38B061',

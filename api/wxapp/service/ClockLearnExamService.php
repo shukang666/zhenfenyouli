@@ -2,8 +2,8 @@
 
 namespace api\wxapp\service;
 
+use api\wxapp\model\AnswerModel;
 use app\admin\model\member\MemberModel;
-use think\facade\Db;
 
 /**
  * 真分打卡 · 学考一体（内容写死，判分服务端）
@@ -78,9 +78,10 @@ class ClockLearnExamService
         if ($learn <= 0) {
             return false;
         }
-        $passed = (int)Db::name('answer')
+        $answerModel = new AnswerModel();
+        $passed = (int)$answerModel
             ->where('user_id', $userId)
-            ->where('pid', self::EXAM_PID)
+            ->where('type', 1)
             ->where('status', 3)
             ->count();
         return $passed > 0;
@@ -88,16 +89,17 @@ class ClockLearnExamService
 
     private static function ensureExamPassRecord(int $userId): void
     {
-        $exists = Db::name('answer')
+        $answerModel = new AnswerModel();
+        $exists = $answerModel
             ->where('user_id', $userId)
-            ->where('pid', self::EXAM_PID)
+            ->where('type', 1)
             ->where('status', 3)
             ->find();
         if (!empty($exists)) {
             return;
         }
         $now = time();
-        Db::name('answer')->insert([
+        $answerModel->insert([
             'user_id'     => $userId,
             'exam_id'     => self::EXAM_PID,
             'pid'         => self::EXAM_PID,
@@ -121,8 +123,8 @@ class ClockLearnExamService
             ],
             [
                 'type'  => 'why',
-                'title' => '为什么要学？',
-                'body'  => '学一点、练一点，能分清常见垃圾，减少投错桶，把分类真正做到日常里。',
+                'title' => '为什么要学习',
+                'body'  => '学习帮助你识别四类垃圾、避开常见误区，并把正确分类落实到真实行动中',
             ],
             [
                 'type'  => 'steps',
@@ -188,10 +190,10 @@ class ClockLearnExamService
                 'tag'      => '练一练',
                 'question' => '「真分打卡」主要是指？',
                 'options'  => [
-                    ['key' => 'A', 'text' => '随便拍一张照片'],
-                    ['key' => 'B', 'text' => '分对类、投进对的桶并拍照留证'],
-                    ['key' => 'C', 'text' => '只学习不投放'],
-                    ['key' => 'D', 'text' => '把垃圾集中堆在一起'],
+                    ['key' => 'A', 'text' => '随便拍一张'],
+                    ['key' => 'B', 'text' => '分对类投桶并拍照'],
+                    ['key' => 'C', 'text' => '只学不投放'],
+                    ['key' => 'D', 'text' => '垃圾堆一起'],
                 ],
                 'answer'   => 'B',
             ],
@@ -201,10 +203,10 @@ class ClockLearnExamService
                 'tag'      => '练一练',
                 'question' => '坚持真分打卡，对您有什么好处？',
                 'options'  => [
-                    ['key' => 'A', 'text' => '养成分类习惯，方便社区收运，还可攒积分'],
-                    ['key' => 'B', 'text' => '可以随便混装'],
-                    ['key' => 'C', 'text' => '不用管桶的颜色'],
-                    ['key' => 'D', 'text' => '与社区环保无关'],
+                    ['key' => 'A', 'text' => '养成习惯攒积分'],
+                    ['key' => 'B', 'text' => '随便混装'],
+                    ['key' => 'C', 'text' => '不管桶颜色'],
+                    ['key' => 'D', 'text' => '与环保无关'],
                 ],
                 'answer'   => 'A',
             ],
@@ -214,10 +216,10 @@ class ClockLearnExamService
                 'tag'      => '练一练',
                 'question' => '下面哪种行为算「认真真分」？',
                 'options'  => [
-                    ['key' => 'A', 'text' => '厨余袋不沥干扔进可回收桶'],
-                    ['key' => 'B', 'text' => '电池扔进其他垃圾'],
-                    ['key' => 'C', 'text' => '干净纸箱压扁投可回收，并按要求拍照打卡'],
-                    ['key' => 'D', 'text' => '所有垃圾装一袋拍张照'],
+                    ['key' => 'A', 'text' => '厨余扔可回收'],
+                    ['key' => 'B', 'text' => '电池扔其他'],
+                    ['key' => 'C', 'text' => '纸箱投可回收并打卡'],
+                    ['key' => 'D', 'text' => '混装拍一张'],
                 ],
                 'answer'   => 'C',
             ],
