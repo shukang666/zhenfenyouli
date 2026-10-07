@@ -483,7 +483,7 @@
 						</view>
 					</view>
 					<view class="scf-floor-legend">
-						<view class="scf-floor-legend-item" v-for="ex in binLayoutExamples" :key="'lg-' + ex.planId">
+						<view class="scf-floor-legend-item" v-for="ex in binLayoutExamples" :key="ex.planId">
 							<text class="scf-floor-legend-dot" :class="'scf-floor-legend-dot--' + ex.planId"></text>
 							<text class="scf-floor-legend-text"><text class="scf-floor-legend-room">{{ ex.room }}：</text>{{ ex.tip }}</text>
 						</view>
@@ -934,20 +934,20 @@
 						<text class="scf-oc-form-label">{{ officeClockItemTitle }}</text>
 						<view class="scf-oc-chip-row">
 							<view
-								v-for="tag in officeClockItemTags"
-								:key="'it-' + tag"
+								v-for="(tag, itemTagIdx) in officeClockItemTags"
+								:key="itemTagIdx"
 								class="scf-oc-chip"
 								:class="{ 'scf-oc-chip--on': officeItemTags.indexOf(tag) >= 0 }"
-								@tap="toggleOfficeItemTag(tag)"
+								@tap="toggleOfficeItemTagByIndex(itemTagIdx)"
 							>{{ tag }}</view>
 						</view>
 						<view class="scf-oc-chip-row scf-oc-chip-row--sub">
 							<view
-								v-for="tag in officeClockVolumeTags"
-								:key="'vol-' + tag"
+								v-for="(tag, volTagIdx) in officeClockVolumeTags"
+								:key="volTagIdx"
 								class="scf-oc-chip scf-oc-chip--sm"
 								:class="{ 'scf-oc-chip--on': officeVolumeTag === tag }"
-								@tap="officeVolumeTag = tag"
+								@tap="pickOfficeVolumeTagByIndex(volTagIdx)"
 							>{{ tag }}</view>
 						</view>
 					</view>
@@ -959,11 +959,11 @@
 						<text class="scf-oc-form-label">{{ officeClockSaveTitle }}</text>
 						<view class="scf-oc-chip-row">
 							<view
-								v-for="opt in officeClockSaveOptions"
-								:key="'sv-' + opt"
+								v-for="(opt, saveOptIdx) in officeClockSaveOptions"
+								:key="saveOptIdx"
 								class="scf-oc-chip"
 								:class="{ 'scf-oc-chip--on': officeSaveDuration === opt }"
-								@tap="officeSaveDuration = opt"
+								@tap="pickOfficeSaveDurationByIndex(saveOptIdx)"
 							>{{ opt }}</view>
 						</view>
 					</view>
@@ -2286,6 +2286,24 @@
 				if (pos >= 0) list.splice(pos, 1)
 				else list.push(t)
 				this.officeItemTags = list
+			},
+			toggleOfficeItemTagByIndex(idx) {
+				const tags = this.officeClockItemTags || []
+				const tag = tags[idx]
+				if (tag == null) return
+				this.toggleOfficeItemTag(tag)
+			},
+			pickOfficeVolumeTagByIndex(idx) {
+				const tags = this.officeClockVolumeTags || []
+				const tag = tags[idx]
+				if (tag == null) return
+				this.officeVolumeTag = tag
+			},
+			pickOfficeSaveDurationByIndex(idx) {
+				const opts = this.officeClockSaveOptions || []
+				const opt = opts[idx]
+				if (opt == null) return
+				this.officeSaveDuration = opt
 			},
 			resetHomeClockForm() {
 				this.homeClockCateKey = ''
