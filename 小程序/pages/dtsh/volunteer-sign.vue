@@ -101,15 +101,21 @@
 					</view>
 				</view>
 
-				<view class="form-row">
-					<text class="form-label u-m-b-16">现场照片</text>
+				<view class="form-row form-row-photo">
+					<view class="photo-field-head">
+						<text class="form-label">现场照片</text>
+						<text class="photo-required">必填</text>
+					</view>
+					<text class="photo-require-sub">到场留证：须拍清所选点位的桶站环境与分类桶（或标识），现场实拍、光线充足、画面清晰。</text>
 					<view class="upload-area" @click="chooseImage">
 						<view v-if="!form.image" class="upload-placeholder">
 							<u-icon name="camera" size="56" color="#ccc"></u-icon>
-							<view class="u-m-t-10 u-font-24 u-type-info">点击拍照或选择图片</view>
+							<view class="u-m-t-10 u-font-24 u-type-info">点击拍照或选图</view>
+							<view class="upload-placeholder-hint">含桶位/桶站，勿用无关旧图</view>
 						</view>
 						<image v-else :src="form.image" mode="aspectFill" class="upload-image"></image>
 					</view>
+					<text class="field-hint">审核以照片判断到场情况；模糊、缺桶位或与点位不符可能驳回。</text>
 				</view>
 			</view>
 
@@ -631,6 +637,41 @@
 	margin-top: 12rpx;
 	font-size: 22rpx;
 	color: #999;
+	line-height: 1.45;
+}
+.form-row-photo {
+	padding-bottom: 8rpx;
+}
+.photo-field-head {
+	display: flex;
+	align-items: center;
+	margin-bottom: 12rpx;
+}
+.photo-field-head .form-label {
+	margin-bottom: 0;
+}
+.photo-required {
+	margin-left: 12rpx;
+	font-size: 20rpx;
+	color: #e65100;
+	background: #fff3e0;
+	padding: 4rpx 12rpx;
+	border-radius: 6rpx;
+}
+.photo-require-sub {
+	display: block;
+	margin-bottom: 16rpx;
+	font-size: 24rpx;
+	color: #666;
+	line-height: 1.5;
+}
+.upload-placeholder-hint {
+	margin-top: 8rpx;
+	font-size: 22rpx;
+	color: #aaa;
+	text-align: center;
+	padding: 0 24rpx;
+	line-height: 1.4;
 }
 .link-text {
 	color: #18af38;
