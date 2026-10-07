@@ -309,6 +309,7 @@
 							<view class="scf-home-fix-sect-line"></view>
 						</view>
 						<text class="scf-home-fix-reward">{{ homeFixedRewardHint }}</text>
+						<text class="scf-home-fix-required">{{ homeFixedRequiredHint }}</text>
 						<view
 							class="scf-home-fix-card"
 							v-for="slot in homeFixedSlotsStart"
@@ -344,6 +345,7 @@
 									mode="aspectFill"
 								></image>
 								<block v-else>
+									<text class="scf-home-fix-upload-required">必填</text>
 									<view class="scf-home-fix-upload-ico-wrap">
 										<text class="scf-home-fix-upload-ico">📷</text>
 									</view>
@@ -397,6 +399,7 @@
 									mode="aspectFill"
 								></image>
 								<block v-else>
+									<text class="scf-home-fix-upload-required">必填</text>
 									<view class="scf-home-fix-upload-ico-wrap">
 										<text class="scf-home-fix-upload-ico">📷</text>
 									</view>
@@ -410,7 +413,7 @@
 				<view class="scf-home-fix-foot">
 					<view
 						class="scf-home-fix-finish"
-						:class="{ 'scf-home-fix-finish--disabled': !homeFixedAllSlotsReady }"
+						:class="{ 'scf-home-fix-finish--disabled': !homeFixedCanFinishSetup }"
 						hover-class="scf-home-fix-finish--press"
 						@tap="onHomeFixedFinishAll"
 					>{{ homeFixedFinishCta }}</view>
@@ -987,6 +990,7 @@
 		getHomeFixedSectionRecycleTitle,
 		getHomeFixedSetupRewardHint,
 		getHomeFixedSetupFinishCta,
+		getHomeFixedSetupRequiredHint,
 	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
@@ -1087,6 +1091,7 @@
 				homeFixedSectionRecycleTitle: getHomeFixedSectionRecycleTitle(),
 				homeFixedRewardHint: getHomeFixedSetupRewardHint(),
 				homeFixedFinishCta: getHomeFixedSetupFinishCta(),
+				homeFixedRequiredHint: getHomeFixedSetupRequiredHint(),
 				homeFixedSavingKey: '',
 				homeFixedHeroImgOk: true,
 				/** URL 参数 home_setup=1 时强制进入布置页（后续改图入口用） */
@@ -1104,11 +1109,10 @@
 				const base = this.scenePickCosBase
 				return base + 'home-setup-hero.png'
 			},
-			/** 三处布置照片是否都已上传（含本地刚选未落库时以 slots 为准） */
-			homeFixedAllSlotsReady() {
-				const slots = this.homeFixedSlots || []
-				if (slots.length < 3) return false
-				return slots.every(s => String(s.point_image || s.point_image_url || '').trim())
+			/** 三处布置照片均已保存到服务端 */
+			homeFixedCanFinishSetup() {
+				if (this.homeFixedSavingKey) return false
+				return this.isHomeFixedSetupComplete()
 			},
 			/** 无任何家庭点位数据：必须先完成本页布置 */
 			homeFixedSetupMandatory() {
@@ -1185,12 +1189,15 @@
 				return (this.homeFixedSlots || []).filter(s => s.section === 'recycle_harm')
 			},
 			homeFixedPickPoints() {
+				if (!this.isHomeFixedSetupComplete()) {
+					return []
+				}
 				const defs = getHomeFixedSetupSlots()
 				const out = []
 				for (let i = 0; i < defs.length; i++) {
 					const def = defs[i]
-					const p = this.findPointForHomeSlot(def)
-					if (p && p.id && !p._isDraft && (p.point_image || p.point_image_raw)) {
+					const p = this.findPointForHomeSlot(def, true)
+					if (p && p.id && !p._isDraft) {
 						out.push(p)
 					}
 				}
@@ -1762,17 +1769,25 @@
 					})
 				})
 			},
-			findPointForHomeSlot(def) {
+			pointHasHomeFixedImage(p) {
+				if (!p) return false
+				const np = p.point_image_raw != null ? p : this.normalizeScenePoint(p)
+				return !!String(np.point_image_raw || '').trim()
+			},
+			findPointForHomeSlot(def, requireImage) {
 				if (!def) return null
 				const list = (this.points || []).filter(p => p && !p._isDraft)
 				const name = String(def.point_name || '').trim()
+				const accept = p => !requireImage || this.pointHasHomeFixedImage(p)
 				if (name) {
-					const exact = list.find(p => String(p.point_name || '').trim() === name)
+					const exact = list.find(p => accept(p) && String(p.point_name || '').trim() === name)
 					if (exact) return this.normalizeScenePoint(exact)
 				}
 				const kw = def.cateKw || ''
 				if (kw) {
-					const byCate = list.find(p => String(p.cate_name || '').indexOf(kw) >= 0)
+					const byCate = list.find(
+						p => accept(p) && String(p.cate_name || '').indexOf(kw) >= 0
+					)
 					if (byCate) return this.normalizeScenePoint(byCate)
 				}
 				return null
@@ -1780,19 +1795,34 @@
 			isHomeFixedSetupComplete() {
 				const defs = getHomeFixedSetupSlots()
 				for (let i = 0; i < defs.length; i++) {
-					const p = this.findPointForHomeSlot(defs[i])
-					const img = p ? String(p.point_image_raw || p.point_image || '').trim() : ''
-					if (!img) return false
+					if (!this.findPointForHomeSlot(defs[i], true)) {
+						return false
+					}
 				}
 				return true
 			},
+			homeFixedMissingSlotTitles() {
+				const defs = getHomeFixedSetupSlots()
+				const missing = []
+				for (let i = 0; i < defs.length; i++) {
+					if (!this.findPointForHomeSlot(defs[i], true)) {
+						missing.push(defs[i].title || defs[i].slotKey)
+					}
+				}
+				return missing
+			},
 			onHomeFixedFinishAll() {
-				if (!this.homeFixedAllSlotsReady) {
-					this.$u.toast('请先完成三处点位照片上传')
+				if (this.homeFixedSavingKey) {
+					this.$u.toast('照片保存中，请稍候')
 					return
 				}
 				if (!this.isHomeFixedSetupComplete()) {
-					this.$u.toast('照片保存中，请稍后再试')
+					const missing = this.homeFixedMissingSlotTitles()
+					if (missing.length) {
+						this.$u.toast('请先上传：' + missing.join('、'))
+					} else {
+						this.$u.toast('请先完成三处点位照片上传')
+					}
 					return
 				}
 				this.residentialPickMode = true
@@ -1937,6 +1967,11 @@
 			},
 			pickResidentialPoint(p) {
 				if (!p || p.id == null) return
+				if (this.isResidentialHub && !this.isHomeFixedSetupComplete()) {
+					this.$u.toast('请先完成三处点位布置照片')
+					this.enterResidentialSetupFlow()
+					return
+				}
 				this.residentialPickMode = false
 				this.pointId = p.id
 				this.pointName = p.point_name || ''
@@ -3079,8 +3114,26 @@
 	text-align: center;
 	font-size: 24rpx;
 	color: #6a8572;
-	margin: -8rpx 0 20rpx;
+	margin: -8rpx 0 8rpx;
 	line-height: 1.4;
+}
+.scf-home-fix-required {
+	display: block;
+	text-align: center;
+	font-size: 24rpx;
+	color: #e07a2a;
+	margin: 0 0 20rpx;
+	line-height: 1.4;
+	font-weight: 600;
+}
+.scf-home-fix-upload-required {
+	position: absolute;
+	top: 12rpx;
+	right: 16rpx;
+	font-size: 22rpx;
+	font-weight: 700;
+	color: #e85555;
+	line-height: 1;
 }
 .scf-home-fix-sect {
 	margin-bottom: 24rpx;

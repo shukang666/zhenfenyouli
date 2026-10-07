@@ -525,3 +525,7 @@ export function getHomeFixedSetupRewardHint() {
 export function getHomeFixedSetupFinishCta() {
 	return '完成全部上传开始今日真分'
 }
+
+export function getHomeFixedSetupRequiredHint() {
+	return '三处布置照片均需上传，缺一不可'
+}

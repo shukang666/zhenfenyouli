@@ -285,6 +285,11 @@ class ForumController extends AuthController
         }
         if ($type == 2) {
             $scene = trim((string)($params['clock_scene'] ?? ''));
+            if (in_array($scene, ['home', 'qinzi'], true)) {
+                if (!ClockScenePointController::isHomeFixedSetupComplete((int)$this->user_id)) {
+                    $this->error('请先完成厨房、可回收物、有害垃圾三处点位的布置照片');
+                }
+            }
             $merchantId = (int)$this->request->param('street_merchant_id', 0);
             if ($scene === 'street' || $merchantId > 0) {
                 $merchant = \think\facade\Db::name('street_shop_merchant')

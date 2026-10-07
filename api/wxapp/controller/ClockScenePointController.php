@@ -71,6 +71,9 @@ class ClockScenePointController extends AuthController
             $this->error('请选择垃圾种类');
         }
         $pointImage = $this->resolvePointImageParam();
+        if ($hub === 'home' && $pointImage === '') {
+            $this->error('请上传点位布置照片');
+        }
         if ($pointImage !== '' && mb_strlen($pointImage) > 255) {
             $this->error('点位照片路径过长，请重新上传');
         }
@@ -161,6 +164,67 @@ class ClockScenePointController extends AuthController
         }
         Db::name('clock_scene_point')->where('id', $id)->delete();
         $this->success('已删除');
+    }
+
+    /** 家庭场景三处固定点位是否均已上传布置照片 */
+    public static function isHomeFixedSetupComplete(int $userId): bool
+    {
+        if ($userId <= 0) {
+            return false;
+        }
+        $list = Db::name('clock_scene_point')
+            ->where('user_id', $userId)
+            ->whereIn('hub_key', ['home', 'qinzi'])
+            ->field('point_name,cate_name,point_image')
+            ->select()
+            ->toArray();
+        foreach (self::homeFixedSlotDefs() as $def) {
+            if (!self::matchHomeFixedSlotWithImage($list, $def)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /** @return list<array{point_name:string,cate_kw:string}> */
+    private static function homeFixedSlotDefs(): array
+    {
+        return [
+            ['point_name' => '厨房分类点位', 'cate_kw' => '厨余'],
+            ['point_name' => '可回收物点位', 'cate_kw' => '可回收'],
+            ['point_name' => '有害垃圾点位', 'cate_kw' => '有害'],
+        ];
+    }
+
+    /** @param list<array<string,mixed>> $list */
+    private static function matchHomeFixedSlotWithImage(array $list, array $def): bool
+    {
+        $wantName = trim((string)($def['point_name'] ?? ''));
+        $kw = trim((string)($def['cate_kw'] ?? ''));
+        foreach ($list as $p) {
+            $img = trim((string)($p['point_image'] ?? ''));
+            if ($img === '') {
+                continue;
+            }
+            if ($wantName !== '' && trim((string)($p['point_name'] ?? '')) === $wantName) {
+                return true;
+            }
+        }
+        if ($kw === '') {
+            return false;
+        }
+        foreach ($list as $p) {
+            $img = trim((string)($p['point_image'] ?? ''));
+            if ($img === '') {
+                continue;
+            }
+            if (strpos((string)($p['cate_name'] ?? ''), $kw) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function normalizeListHub($hub): string
