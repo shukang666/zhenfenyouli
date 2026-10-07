@@ -505,6 +505,10 @@ class ForumController extends AuthController
         $is_my = $this->request->param('is_my', 0);
         $status = $this->request->param('status');
         $keyword = $this->request->param('keyword');
+        $inspectCommunityId = (int)$this->request->param('inspect_community_id', 0);
+        if ($inspectCommunityId <= 0) {
+            $inspectCommunityId = (int)$this->request->param('community_id', 0);
+        }
         $where = [];
         if (empty($id)) {
 
@@ -514,7 +518,18 @@ class ForumController extends AuthController
 //            $where[] = ['a.status', '=', 2];
             if ($type == 3 || $type == 4) {
                 if (empty($is_my)) $where[] = ['user_id', '<>', $this->user_id];
-                if ($this->user_info['type'] == 1) {
+                if ($inspectCommunityId > 0) {
+                    $cid = $inspectCommunityId;
+                    $where[] = function ($query) use ($cid) {
+                        $query->where('a.subject_community_id', $cid)
+                            ->whereOr(function ($q) use ($cid) {
+                                $q->where(function ($q2) use ($cid) {
+                                    $q2->whereNull('a.subject_community_id')
+                                        ->whereOr('a.subject_community_id', 0);
+                                })->where('b.community_id', $cid);
+                            });
+                    };
+                } elseif ($this->user_info['type'] == 1) {
                     $where[] = ['b.community_id', '=', $this->user_info['community_id']];
                 }
             }

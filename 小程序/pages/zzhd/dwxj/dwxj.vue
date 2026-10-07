@@ -12,7 +12,7 @@
 
 
 
-		<view class="dwxj-search-wrap">
+		<view class="dwxj-search-wrap" v-if="!isCommunityInspectMode">
 
 			<u-search
 
@@ -31,6 +31,26 @@
 				@search="search"
 
 			></u-search>
+
+		</view>
+
+		<view class="dwxj-community-wrap" v-else>
+
+			<view class="dwxj-community-row" @click="openCommunityPicker">
+
+				<text class="dwxj-community-label">巡查小区</text>
+
+				<view class="dwxj-community-value u-flex u-col-center u-flex-1 u-row-right">
+
+					<text v-if="filterCommunityName" class="dwxj-community-text u-line-1">{{ filterCommunityName }}</text>
+
+					<text v-else class="dwxj-community-placeholder">请选择小区</text>
+
+					<u-icon name="arrow-right" size="24" color="#ccc" class="u-m-l-8"></u-icon>
+
+				</view>
+
+			</view>
 
 		</view>
 
@@ -221,7 +241,7 @@
 
 		<view v-if="forum_list.length == 0" class="dwxj-empty">
 
-			<u-empty text="完成巡检并提交记录后会显示在这里" mode="list"></u-empty>
+			<u-empty :text="emptyListText" mode="list"></u-empty>
 
 		</view>
 
@@ -291,6 +311,56 @@
 
 		</u-popup>
 
+
+
+		<view v-if="showCommunityDropdown" class="community-dropdown-mask" @click="showCommunityDropdown = false">
+
+			<view class="community-dropdown" @click.stop>
+
+				<view class="u-font-28 u-font-bold u-m-b-16">选择巡查小区</view>
+
+				<view class="u-radius-5 u-p-lr-20" style="background-color: #f7f7f7;">
+
+					<u-input v-model="communityKeyword" type="text" placeholder="输入小区名称搜索" :clearable="true" @input="onCommunitySearch" />
+
+				</view>
+
+				<scroll-view scroll-y class="community-dropdown-list" @scrolltolower="loadMoreCommunity" lower-threshold="50">
+
+					<view v-if="!communityResults.length && !communityLoading" class="u-text-center u-p-30 u-font-24 u-type-info">
+
+						{{ communityKeyword ? '未找到相关小区' : '输入名称搜索，或下滑加载更多' }}
+
+					</view>
+
+					<view
+
+						v-for="item in communityResults"
+
+						:key="item.id"
+
+						class="u-p-lr-20 u-p-tb-15 community-dropdown-item"
+
+						@click="selectFilterCommunity(item)"
+
+					>
+
+						<view class="u-font-28">{{ item.name }}</view>
+
+						<view class="u-font-24 u-type-info" v-if="item.parent_name">{{ item.parent_name }}</view>
+
+					</view>
+
+					<view v-if="communityLoading" class="u-text-center u-p-tb-20 u-font-24 u-type-info">加载中...</view>
+
+					<view v-if="communityNoMore && communityResults.length" class="u-text-center u-p-tb-20 u-font-24 u-type-info">没有更多了</view>
+
+				</scroll-view>
+
+			</view>
+
+		</view>
+
 	</view>
 
 </template>
@@ -298,6 +368,8 @@
 
 
 <script>
+
+	const DWXJ_COMMUNITY_STORAGE_KEY = 'dwxj_last_inspect_community'
 
 	import { uploadUrl } from '@/common/settings'
 
@@ -365,15 +437,59 @@
 
 				}],
 
+				filterCommunityId: 0,
+
+				filterCommunityName: '',
+
+				showCommunityDropdown: false,
+
+				communityKeyword: '',
+
+				communityResults: [],
+
+				communityPage: 1,
+
+				communityLastPage: 1,
+
+				communityLoading: false,
+
+				communitySearchTimer: null,
+
+				communityReady: false,
+
 			}
 
 		},
 
 		computed: {
 
+			isCommunityInspectMode() {
+
+				return Number(this.type) === 3
+
+			},
+
+			communityNoMore() {
+
+				return this.communityPage >= this.communityLastPage
+
+			},
+
+			emptyListText() {
+
+				if (this.isCommunityInspectMode && !this.filterCommunityId) {
+
+					return '请先选择巡查小区'
+
+				}
+
+				return '完成巡检并提交记录后会显示在这里'
+
+			},
+
 			pageTitle() {
 
-				return this.type == 4 ? '桶边督导' : '点位巡检'
+				return this.type == 4 ? '桶边督导' : '小区巡查'
 
 			},
 
@@ -399,13 +515,37 @@
 
 			uni.setNavigationBarTitle({
 
-				title: this.type == 4 ? '桶边督导' : '督导巡检',
+				title: this.type == 4 ? '桶边督导' : '小区巡查',
 
 			})
+
+			if (this.isCommunityInspectMode) {
+
+				this.initFilterCommunity().then(() => {
+
+					this.communityReady = true
+
+					this.search()
+
+				})
+
+			}
 
 		},
 
 		onShow() {
+
+			if (this.isCommunityInspectMode) {
+
+				if (this.communityReady && this.filterCommunityId) {
+
+					this.search()
+
+				}
+
+				return
+
+			}
 
 			this.search()
 
@@ -487,6 +627,18 @@
 
 			search() {
 
+				if (this.isCommunityInspectMode && !this.filterCommunityId) {
+
+					this.page = 1
+
+					this.forum_list = []
+
+					this.total = 0
+
+					return
+
+				}
+
 				this.page = 1
 
 				this.forum_list = []
@@ -497,9 +649,9 @@
 
 			get_forum_list() {
 
-				this.$u.api.get_forum_list({
+				const params = {
 
-					keyword: this.keyword,
+					keyword: this.isCommunityInspectMode ? '' : this.keyword,
 
 					page: this.page,
 
@@ -507,7 +659,15 @@
 
 					is_my: 1,
 
-				}).then(res => {
+				}
+
+				if (this.isCommunityInspectMode && this.filterCommunityId) {
+
+					params.inspect_community_id = this.filterCommunityId
+
+				}
+
+				this.$u.api.get_forum_list(params).then(res => {
 
 					this.forum_list.push(...res.data.data)
 
@@ -521,9 +681,175 @@
 
 			},
 
+			saveFilterCommunity() {
+
+				if (!this.filterCommunityId) return
+
+				try {
+
+					uni.setStorageSync(DWXJ_COMMUNITY_STORAGE_KEY, {
+
+						id: this.filterCommunityId,
+
+						name: this.filterCommunityName,
+
+					})
+
+				} catch (e) {}
+
+			},
+
+			initFilterCommunity() {
+
+				let picked = null
+
+				try {
+
+					picked = uni.getStorageSync(DWXJ_COMMUNITY_STORAGE_KEY)
+
+				} catch (e) {}
+
+				if (picked && picked.id) {
+
+					this.filterCommunityId = picked.id
+
+					this.filterCommunityName = picked.name || ''
+
+					return Promise.resolve()
+
+				}
+
+				if (this.userInfo && this.userInfo.community_id) {
+
+					this.filterCommunityId = this.userInfo.community_id
+
+					this.filterCommunityName = this.userInfo.community || ''
+
+					this.saveFilterCommunity()
+
+					return Promise.resolve()
+
+				}
+
+				return this.$u.api.search_community({ keyword: '', page: 1, page_size: 1 }).then(res => {
+
+					const first = (res.data && res.data.data && res.data.data[0]) || null
+
+					if (first && first.id) {
+
+						this.filterCommunityId = first.id
+
+						this.filterCommunityName = first.name || ''
+
+						this.saveFilterCommunity()
+
+					}
+
+				}).catch(() => {})
+
+			},
+
+			openCommunityPicker() {
+
+				this.showCommunityDropdown = true
+
+				this.communityKeyword = ''
+
+				this.communityPage = 1
+
+				this.communityResults = []
+
+				this.loadCommunityList('', true)
+
+			},
+
+			loadCommunityList(keyword, isReset = false) {
+
+				if (this.communityLoading) return
+
+				this.communityLoading = true
+
+				this.$u.api.search_community({
+
+					keyword,
+
+					page: isReset ? 1 : this.communityPage,
+
+					page_size: 20,
+
+				}).then(res => {
+
+					const data = res.data || {}
+
+					const list = data.data || []
+
+					if (isReset) {
+
+						this.communityResults = list
+
+						this.communityPage = 1
+
+					} else {
+
+						this.communityResults = this.communityResults.concat(list)
+
+					}
+
+					this.communityLastPage = data.last_page || 1
+
+				}).catch(() => {}).finally(() => {
+
+					this.communityLoading = false
+
+				})
+
+			},
+
+			loadMoreCommunity() {
+
+				if (this.communityLoading || this.communityNoMore) return
+
+				this.communityPage++
+
+				this.loadCommunityList(this.communityKeyword.trim(), false)
+
+			},
+
+			onCommunitySearch(value) {
+
+				if (this.communitySearchTimer) clearTimeout(this.communitySearchTimer)
+
+				const keyword = (value || '').trim()
+
+				this.communitySearchTimer = setTimeout(() => {
+
+					this.loadCommunityList(keyword, true)
+
+				}, 300)
+
+			},
+
+			selectFilterCommunity(item) {
+
+				if (!item || !item.id) return
+
+				this.filterCommunityId = item.id
+
+				this.filterCommunityName = item.name || ''
+
+				this.showCommunityDropdown = false
+
+				this.saveFilterCommunity()
+
+				this.search()
+
+			},
+
 		},
 
 		onReachBottom() {
+
+			if (this.isCommunityInspectMode && !this.filterCommunityId) return
 
 			if (this.forum_list.length >= this.total) return
 
@@ -632,6 +958,136 @@
 	position: relative;
 
 	z-index: 2;
+
+}
+
+.dwxj-community-wrap {
+
+	margin: -20rpx 24rpx 0;
+
+	padding: 8rpx 28rpx;
+
+	background: #fff;
+
+	border-radius: 20rpx;
+
+	box-shadow: 0 8rpx 32rpx rgba(20, 40, 28, 0.08);
+
+	position: relative;
+
+	z-index: 2;
+
+}
+
+.dwxj-community-row {
+
+	display: flex;
+
+	align-items: center;
+
+	padding: 20rpx 0;
+
+}
+
+.dwxj-community-label {
+
+	flex-shrink: 0;
+
+	width: 150rpx;
+
+	font-size: 28rpx;
+
+	color: #333;
+
+	font-weight: 600;
+
+}
+
+.dwxj-community-value {
+
+	min-width: 0;
+
+	justify-content: flex-end;
+
+}
+
+.dwxj-community-text {
+
+	font-size: 28rpx;
+
+	color: #333;
+
+	max-width: 420rpx;
+
+	text-align: right;
+
+}
+
+.dwxj-community-placeholder {
+
+	font-size: 28rpx;
+
+	color: #999;
+
+}
+
+.community-dropdown-mask {
+
+	position: fixed;
+
+	left: 0;
+
+	right: 0;
+
+	top: 0;
+
+	bottom: 0;
+
+	background-color: rgba(0, 0, 0, 0.35);
+
+	z-index: 999;
+
+	display: flex;
+
+	align-items: flex-start;
+
+	justify-content: center;
+
+}
+
+.community-dropdown {
+
+	margin-top: 200rpx;
+
+	width: 690rpx;
+
+	background-color: #fff;
+
+	border-radius: 16rpx;
+
+	padding: 24rpx;
+
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+
+}
+
+.community-dropdown-list {
+
+	max-height: 560rpx;
+
+	margin-top: 16rpx;
+
+}
+
+.community-dropdown-item {
+
+	border-bottom: 1rpx solid #f0f0f0;
+
+}
+
+.community-dropdown-item:last-child {
+
+	border-bottom: none;
 
 }
 
