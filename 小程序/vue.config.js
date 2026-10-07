@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const SKIP_PLACEHOLDER = { 'skeleton-screen': true }
+const SKIP_PLACEHOLDER = {}
 const SKIP_JSON = {
   'app.json': true,
   'project.config.json': true,
@@ -67,6 +67,16 @@ module.exports = {
             const platform = process.env.UNI_PLATFORM
             if (platform !== 'mp-weixin') return
 
+            const mpRoots = [
+              path.resolve(__dirname, 'unpackage/dist/dev/mp-weixin'),
+              path.resolve(__dirname, 'unpackage/dist/build/mp-weixin')
+            ]
+            mpRoots.forEach((mpRoot) => {
+              if (fs.existsSync(mpRoot)) {
+                injectPageComponentPlaceholders(mpRoot)
+              }
+            })
+
             const srcDir = path.resolve(__dirname, 'custom-tab-bar')
             const destDirs = [
               path.resolve(__dirname, 'unpackage/dist/dev/mp-weixin/custom-tab-bar'),
@@ -85,7 +95,6 @@ module.exports = {
                   fs.copyFileSync(src, dest)
                 }
               })
-              injectPageComponentPlaceholders(path.dirname(destDir))
             })
           })
         }

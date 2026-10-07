@@ -4,7 +4,8 @@
 		"custom": {
 			"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue",
 			"^care-pull-hint$": "@/components/care-pull-hint/care-pull-hint.vue",
-			"^page-guide$": "@/components/page-guide/index.vue"
+			"^page-guide$": "@/components/page-guide/index.vue",
+			"^skeleton-screen$": "@/components/skeleton-screen/index.vue"
 		}
 	},
 	"pages": [{
@@ -20,7 +21,8 @@
 					"u-notice-bar": "view",
 					"z-paging": "view",
 					"care-pull-hint": "view",
-					"new-user-guide": "view"
+					"new-user-guide": "view",
+					"skeleton-screen": "view"
 				}
 			}
 		}, {
@@ -37,7 +39,8 @@
 					"u-mask": "view",
 					"u-button": "view",
 					"care-pull-hint": "view",
-					"new-user-guide": "view"
+					"new-user-guide": "view",
+					"skeleton-screen": "view"
 				}
 			}
 		}, {
@@ -52,7 +55,8 @@
 					"u-avatar": "view",
 					"cl-upload": "view",
 					"care-pull-hint": "view",
-					"new-user-guide": "view"
+					"new-user-guide": "view",
+					"skeleton-screen": "view"
 				}
 			}
 		}, {
@@ -63,7 +67,8 @@
 					"u-icon": "view",
 					"u-image": "view",
 					"care-pull-hint": "view",
-					"new-user-guide": "view"
+					"new-user-guide": "view",
+					"skeleton-screen": "view"
 				}
 			}
 		}, {
@@ -80,7 +85,8 @@
 					"u-button": "view",
 					"u-tag": "view",
 					"care-pull-hint": "view",
-					"new-user-guide": "view"
+					"new-user-guide": "view",
+					"skeleton-screen": "view"
 				}
 			}
 		}, {
