@@ -1,15 +1,7 @@
 <template>
 	<view class="cle-page" v-if="!setting.app_test">
 		<scroll-view scroll-y class="cle-scroll" :show-scrollbar="false">
-			<!-- 已完成：老用户 / 已通过 -->
-			<view v-if="completed" class="cle-done">
-				<text class="cle-done-ico">✅</text>
-				<text class="cle-done-title">您已完成学考</text>
-				<text class="cle-done-sub">可以直接去真分打卡了</text>
-				<view class="cle-done-btn" hover-class="cle-btn--press" @tap="goBackAfterLearn">返回继续</view>
-			</view>
-
-			<block v-else>
+			<block v-if="!completed">
 				<view v-for="(block, bi) in blocks" :key="bi">
 					<!-- 头图 -->
 					<view v-if="block.type === 'hero'" class="cle-hero">
@@ -153,7 +145,7 @@
 			this.refreshUser().then(() => {
 				const u = this.userInfo || {}
 				if (Number(u.is_learn) === 1 && Number(u.is_answer) === 1) {
-					this.completed = true
+					this.goToSceneClockPick()
 					return
 				}
 				this.loadBlocks()
@@ -164,7 +156,11 @@
 				return this.$u.api.get_clock_learn_exam().then(res => {
 					const data = res.data || {}
 					this.blocks = data.blocks || []
-					this.completed = Number(data.completed) === 1
+					if (Number(data.completed) === 1) {
+						this.goToSceneClockPick()
+						return
+					}
+					this.completed = false
 					this.loaded = true
 				}).catch(() => {
 					this.loaded = true
@@ -213,10 +209,10 @@
 				this.submitting = true
 				this.wrongIds = []
 				this.$u.api.submit_clock_learn_exam({ answers: this.answers }).then(() => {
-					this.completed = true
 					return this.refreshUser()
 				}).then(() => {
 					this.$u.toast('学考完成')
+					this.goToSceneClockPick()
 				}).catch(err => {
 					const data = (err && err.data) || {}
 					const wrong = data.wrong_ids || data.wrongIds || []
@@ -228,13 +224,22 @@
 					this.submitting = false
 				})
 			},
-			goBackAfterLearn() {
+			goToSceneClockPick() {
+				const target = '/pages/activity/scene-clock-flow?mode=theme'
 				const pages = getCurrentPages()
-				if (pages.length > 1) {
-					uni.navigateBack()
+				let backDelta = 0
+				for (let i = pages.length - 1; i >= 0; i--) {
+					const route = (pages[i] && pages[i].route) || ''
+					if (route.indexOf('scene-clock-flow') >= 0) {
+						backDelta = pages.length - 1 - i
+						break
+					}
+				}
+				if (backDelta > 0) {
+					uni.navigateBack({ delta: backDelta })
 					return
 				}
-				uni.redirectTo({ url: '/pages/activity/scene-clock-flow' })
+				uni.redirectTo({ url: target })
 			},
 			refreshUser() {
 				return this.$u.api.getUserInfo().then(res => {
