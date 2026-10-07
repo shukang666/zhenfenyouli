@@ -278,7 +278,7 @@ export function getSceneHubCards() {
 		{
 			hub: 'home',
 			illusKey: 'home',
-			title: '居民真分',
+			title: '家庭真分',
 			desc: '布置居家环境中的垃圾投放点位，正确分类垃圾，完成真分。',
 			theme: 'home',
 		},

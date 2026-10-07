@@ -52,14 +52,23 @@
 		</view>
 
 		<view class="zf-pick-title-block">
-			<image
-				v-if="scenePickTitleImgSrc"
-				class="zf-pick-title__img"
-				:src="scenePickTitleImgSrc"
-				mode="widthFix"
-				@error="onScenePickTitleImgError"
-			/>
-			<text v-else class="zf-pick-title__txt">{{ scenePickMainTitle }}</text>
+			<view class="zf-pick-title-art">
+				<view class="zf-pick-title-deco zf-pick-title-deco--tl" aria-hidden="true"></view>
+				<view class="zf-pick-title-deco zf-pick-title-deco--br" aria-hidden="true"></view>
+				<view class="zf-pick-title-inner">
+					<view class="zf-pick-title-row zf-pick-title-row--1">
+						<text class="zf-pick-title-txt">选择你今日</text>
+						<view class="zf-pick-title-badge" aria-hidden="true">
+							<text class="zf-pick-title-badge-ico">✓</text>
+						</view>
+					</view>
+					<view class="zf-pick-title-row zf-pick-title-row--2">
+						<text class="zf-pick-title-txt">的真分场景吧！</text>
+						<view class="zf-pick-title-scribble" aria-hidden="true"></view>
+					</view>
+				</view>
+			</view>
+			<text v-if="scenePickHasClock === false" class="zf-pick-first-hint">开始第一次真分吧！</text>
 		</view>
 
 		<view class="zf-pick-list">
@@ -76,7 +85,7 @@
 						v-if="item.illusSrc"
 						class="zf-pick-card__img"
 						:src="item.illusSrc"
-						mode="aspectFill"
+						mode="aspectFit"
 						:data-illus-key="item.illusKey"
 						@error="onScenePickCardImgErrorEvt"
 					/>
@@ -85,8 +94,10 @@
 					</view>
 				</view>
 				<view class="zf-pick-card__body">
-					<text class="zf-pick-card__title">{{ item.title }}</text>
-					<text class="zf-pick-card__desc">{{ item.desc }}</text>
+					<view class="zf-pick-card__copy">
+						<text class="zf-pick-card__title">{{ item.title }}</text>
+						<text class="zf-pick-card__desc">{{ item.desc }}</text>
+					</view>
 					<view class="zf-pick-card__go" aria-hidden="true">
 						<text class="zf-pick-card__go-ico">›</text>
 					</view>
@@ -796,7 +807,6 @@
 		getScenePickKicker,
 		getScenePickHint,
 		getScenePickWelcomeBanner,
-		getScenePickMainTitle,
 		getThemeOptInEyebrow,
 		getThemeOptInTitle,
 		getThemeOptInDesc,
@@ -898,10 +908,9 @@
 				scenePickImgOk: {
 					welcomeNew: true,
 					welcomeBack: true,
-					title: false,
-					home: false,
-					office: false,
-					street: false,
+					home: true,
+					office: true,
+					street: true,
 				},
 				themeOptInEyebrow: getThemeOptInEyebrow(),
 				themeOptInTitle: getThemeOptInTitle(),
@@ -949,9 +958,6 @@
 				const base = settings.staticAssetBase || ''
 				return base + (base.endsWith('/') ? '' : '/') + 'scene-pick/'
 			},
-			scenePickMainTitle() {
-				return getScenePickMainTitle()
-			},
 			scenePickWelcomeBanner() {
 				if (this.scenePickHasClock === false) {
 					return getScenePickWelcomeBanner(false)
@@ -968,10 +974,6 @@
 					return base + 'welcome-back.png'
 				}
 				return ''
-			},
-			scenePickTitleImgSrc() {
-				const ok = this.scenePickImgOk || {}
-				return ok.title ? this.scenePickCosBase + 'title.png' : ''
 			},
 			sceneHubCardsForPick() {
 				const ok = this.scenePickImgOk || {}
@@ -1421,11 +1423,6 @@
 				const key = this.scenePickHasClock === false ? 'welcomeNew' : 'welcomeBack'
 				if (this.scenePickImgOk) {
 					this.$set(this.scenePickImgOk, key, false)
-				}
-			},
-			onScenePickTitleImgError() {
-				if (this.scenePickImgOk) {
-					this.$set(this.scenePickImgOk, 'title', false)
 				}
 			},
 			onScenePickCardImgErrorEvt(e) {
@@ -4588,7 +4585,7 @@
 	box-sizing: border-box;
 }
 .zf-scenes--pick {
-	background: #faf7f0;
+	background: #fdfcf0;
 	padding: 20rpx 28rpx calc(40rpx + env(safe-area-inset-bottom));
 }
 .zf-pick-welcome {
@@ -4623,55 +4620,174 @@
 }
 .zf-pick-title-block {
 	margin-bottom: 28rpx;
+	padding: 8rpx 0 12rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.zf-pick-first-hint {
+	display: block;
+	margin-top: 16rpx;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #18af38;
+	line-height: 1.4;
+	letter-spacing: 1rpx;
 	text-align: center;
 }
-.zf-pick-title__img {
-	display: block;
-	width: 100%;
-	vertical-align: top;
+.zf-pick-title-art {
+	position: relative;
+	display: inline-block;
+	max-width: 100%;
+	padding: 8rpx 12rpx 16rpx;
+	transform: rotate(-2.5deg);
 }
-.zf-pick-title__txt {
-	display: block;
-	font-size: 40rpx;
+.zf-pick-title-inner {
+	position: relative;
+	z-index: 1;
+	text-align: left;
+}
+.zf-pick-title-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	flex-wrap: nowrap;
+}
+.zf-pick-title-row--1 {
+	margin-bottom: 4rpx;
+}
+.zf-pick-title-row--2 {
+	position: relative;
+	padding-bottom: 12rpx;
+}
+.zf-pick-title-txt {
+	font-size: 44rpx;
 	font-weight: 800;
-	color: #1a7a32;
-	line-height: 1.35;
-	letter-spacing: 1rpx;
+	color: #065239;
+	line-height: 1.22;
+	letter-spacing: 2rpx;
+	text-shadow:
+		0 2rpx 0 rgba(255, 255, 255, 0.35),
+		0 4rpx 12rpx rgba(6, 82, 57, 0.12);
+}
+.zf-pick-title-row--2 .zf-pick-title-txt {
+	font-size: 46rpx;
+}
+.zf-pick-title-badge {
+	flex-shrink: 0;
+	width: 40rpx;
+	height: 40rpx;
+	margin-left: 10rpx;
+	margin-top: 4rpx;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #6ee07a 0%, #22b84a 100%);
+	box-shadow: 0 4rpx 10rpx rgba(34, 184, 74, 0.35);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.zf-pick-title-badge-ico {
+	font-size: 24rpx;
+	font-weight: 700;
+	color: #fff;
+	line-height: 1;
+	margin-top: -2rpx;
+}
+.zf-pick-title-scribble {
+	position: absolute;
+	left: 0;
+	right: -8rpx;
+	bottom: 0;
+	height: 12rpx;
+	border-radius: 50% 45% 55% 48% / 60% 55% 45% 50%;
+	background: linear-gradient(
+		90deg,
+		rgba(24, 175, 56, 0) 0%,
+		rgba(24, 175, 56, 0.45) 12%,
+		rgba(24, 175, 56, 0.65) 50%,
+		rgba(24, 175, 56, 0.5) 88%,
+		rgba(24, 175, 56, 0) 100%
+	);
+	transform: rotate(-1.5deg) scaleY(0.85);
+}
+.zf-pick-title-deco {
+	position: absolute;
+	z-index: 0;
+	background: #8ee06a;
+	opacity: 0.85;
+}
+.zf-pick-title-deco--tl {
+	width: 32rpx;
+	height: 20rpx;
+	left: -4rpx;
+	top: 6rpx;
+	border-radius: 0 70% 0 70%;
+	transform: rotate(-42deg);
+}
+.zf-pick-title-deco--br {
+	width: 22rpx;
+	height: 14rpx;
+	right: -6rpx;
+	bottom: 28rpx;
+	border-radius: 70% 0 70% 0;
+	transform: rotate(18deg);
+	background: #a8eb8c;
+}
+.zf-pick-title-deco--br::after {
+	content: '';
+	position: absolute;
+	width: 14rpx;
+	height: 10rpx;
+	right: -18rpx;
+	top: -16rpx;
+	border-radius: 0 80% 0 80%;
+	background: #7ed957;
+	transform: rotate(35deg);
+	opacity: 0.9;
 }
 .zf-pick-list {
 	display: flex;
 	flex-direction: column;
-	gap: 20rpx;
+	gap: 24rpx;
 }
 .zf-pick-card {
 	display: flex;
+	flex-direction: row;
 	align-items: stretch;
 	background: #fff;
-	border-radius: 20rpx;
-	overflow: hidden;
-	box-shadow: 0 8rpx 28rpx rgba(28, 56, 36, 0.08);
+	border-radius: 28rpx;
+	padding: 20rpx;
+	box-sizing: border-box;
+	box-shadow: 0 10rpx 36rpx rgba(32, 120, 64, 0.1);
 }
 .zf-pick-card--press {
-	opacity: 0.94;
+	transform: scale(0.985);
+	opacity: 0.96;
 }
 .zf-pick-card__illus {
-	width: 220rpx;
+	width: 208rpx;
+	height: 208rpx;
 	flex-shrink: 0;
-	background: #eef6f0;
+	border-radius: 20rpx;
+	overflow: hidden;
+	background: #f4faf5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 .zf-pick-card__img {
 	width: 100%;
 	height: 100%;
-	min-height: 200rpx;
 	display: block;
 }
 .zf-pick-ph--card {
-	min-height: 200rpx;
+	width: 100%;
 	height: 100%;
+	min-height: 208rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: linear-gradient(160deg, #f0f8f2 0%, #dceee2 100%);
+	background: linear-gradient(160deg, #f0f8f2 0%, #e8f2ea 100%);
 }
 .zf-pick-ph-label {
 	font-size: 24rpx;
@@ -4680,46 +4796,51 @@
 .zf-pick-card__body {
 	flex: 1;
 	min-width: 0;
-	padding: 22rpx 20rpx 22rpx 16rpx;
-	position: relative;
+	margin-left: 20rpx;
+	padding: 4rpx 0 4rpx;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	justify-content: space-between;
+	min-height: 208rpx;
+}
+.zf-pick-card__copy {
+	flex: 1;
+	min-width: 0;
 }
 .zf-pick-card__title {
 	display: block;
-	font-size: 32rpx;
+	font-size: 34rpx;
 	font-weight: 800;
-	color: #1a7a32;
+	color: #1c1c1c;
 	line-height: 1.35;
-	margin-bottom: 10rpx;
+	margin-bottom: 12rpx;
 }
 .zf-pick-card__desc {
 	display: block;
-	font-size: 24rpx;
-	color: #4a564e;
-	line-height: 1.5;
-	padding-right: 56rpx;
+	font-size: 26rpx;
+	color: #666;
+	line-height: 1.55;
 }
 .zf-pick-card__go {
-	position: absolute;
-	right: 16rpx;
-	bottom: 20rpx;
-	width: 56rpx;
-	height: 56rpx;
+	align-self: flex-end;
+	flex-shrink: 0;
+	width: 64rpx;
+	height: 64rpx;
+	margin-top: 12rpx;
 	border-radius: 999rpx;
-	background: linear-gradient(180deg, #5fe06f 0%, #18af38 100%);
+	background: linear-gradient(180deg, #4fd862 0%, #18af38 100%);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	box-shadow: 0 6rpx 16rpx rgba(24, 175, 56, 0.35);
+	box-shadow: 0 8rpx 20rpx rgba(24, 175, 56, 0.28);
 }
 .zf-pick-card__go-ico {
-	font-size: 40rpx;
+	font-size: 44rpx;
 	line-height: 1;
 	color: #fff;
 	font-weight: 300;
 	margin-top: -4rpx;
+	margin-left: 4rpx;
 }
 .zf-promo--scene-head {
 	margin-top: 0;
