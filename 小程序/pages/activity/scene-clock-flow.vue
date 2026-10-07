@@ -53,11 +53,11 @@
 
 		<view class="zf-pick-title-block">
 			<image
-				v-if="scenePickImg.title"
+				v-if="scenePickTitleImgSrc"
 				class="zf-pick-title__img"
-				:src="scenePickImg.title"
+				:src="scenePickTitleImgSrc"
 				mode="widthFix"
-				@error="onScenePickImgError('title')"
+				@error="onScenePickTitleImgError"
 			/>
 			<text v-else class="zf-pick-title__txt">{{ scenePickMainTitle }}</text>
 		</view>
@@ -65,7 +65,7 @@
 		<view class="zf-pick-list">
 			<view
 				class="zf-pick-card"
-				v-for="(item, sIdx) in sceneHubCards"
+				v-for="(item, sIdx) in sceneHubCardsForPick"
 				:key="item.hub"
 				hover-class="zf-pick-card--press"
 				:hover-stay-time="80"
@@ -73,11 +73,12 @@
 			>
 				<view class="zf-pick-card__illus">
 					<image
-						v-if="scenePickCardImg(item.illusKey)"
+						v-if="item.illusSrc"
 						class="zf-pick-card__img"
-						:src="scenePickCardImg(item.illusKey)"
+						:src="item.illusSrc"
 						mode="aspectFill"
-						@error="onScenePickImgError(item.illusKey)"
+						:data-illus-key="item.illusKey"
+						@error="onScenePickCardImgErrorEvt"
 					/>
 					<view v-else class="zf-pick-ph zf-pick-ph--card">
 						<text class="zf-pick-ph-label">场景配图</text>
@@ -968,12 +969,18 @@
 				}
 				return ''
 			},
-			scenePickImg() {
+			scenePickTitleImgSrc() {
+				const ok = this.scenePickImgOk || {}
+				return ok.title ? this.scenePickCosBase + 'title.png' : ''
+			},
+			sceneHubCardsForPick() {
 				const ok = this.scenePickImgOk || {}
 				const base = this.scenePickCosBase
-				return {
-					title: ok.title ? base + 'title.png' : '',
-				}
+				return (this.sceneHubCards || []).map(item => {
+					const key = item.illusKey || ''
+					const illusSrc = key && ok[key] ? base + key + '.png' : ''
+					return Object.assign({}, item, { illusSrc })
+				})
 			},
 			isResidentialHub() {
 				return this.hubKey === 'home'
@@ -1416,11 +1423,14 @@
 					this.$set(this.scenePickImgOk, key, false)
 				}
 			},
-			scenePickCardImg(key) {
-				if (!key || !this.scenePickImgOk || !this.scenePickImgOk[key]) return ''
-				return this.scenePickCosBase + key + '.png'
+			onScenePickTitleImgError() {
+				if (this.scenePickImgOk) {
+					this.$set(this.scenePickImgOk, 'title', false)
+				}
 			},
-			onScenePickImgError(key) {
+			onScenePickCardImgErrorEvt(e) {
+				const ds = (e && e.currentTarget && e.currentTarget.dataset) || {}
+				const key = ds.illusKey || ds['illus-key'] || ''
 				if (!key || !this.scenePickImgOk) return
 				this.$set(this.scenePickImgOk, key, false)
 			},
