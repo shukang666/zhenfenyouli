@@ -131,21 +131,8 @@
 	</view>
 
 	<view v-else-if="hub" :class="['scf-page', hubTheme]">
-		<view class="scf-hero">
-			<text class="scf-hero-kicker">{{ hub.title }}</text>
-			<text class="scf-hero-title">{{ stepTitle }}</text>
-			<view class="scf-steps" v-if="visibleStepLabels.length">
-				<view
-					v-for="(lab, idx) in visibleStepLabels"
-					:key="idx"
-					class="scf-step"
-					:class="{ 'scf-step--on': stepIndex >= idx, 'scf-step--cur': stepIndex === idx }"
-				>
-					<text class="scf-step-num">{{ idx + 1 }}</text>
-					<text class="scf-step-lab">{{ lab }}</text>
-				</view>
-			</view>
-		</view>
+		
+
 
 		<!-- 沿街：认领商铺（与家庭身份独立） -->
 		<view class="scf-body scf-body--street" v-if="isStreetHub && flowStep === 'street_merchant'">
