@@ -207,7 +207,7 @@ class TabHomeService
 
     protected function fetchHomePutActiveList(int $limit): array
     {
-        $query = ActiveModel::where($this->activeListPublicWhere())->where('is_put', '=', 1);
+        $query = ActiveModel::miniProgramVisible()->where('is_put', '=', 1);
         return $this->fetchActiveListSlice($query, $limit);
     }
 
@@ -410,16 +410,6 @@ class TabHomeService
         return ['list' => $list ?: [], 'total' => is_countable($list) ? count($list) : 0];
     }
 
-    protected function activeListPublicWhere(): array
-    {
-        return [
-            ['type', '=', 1],
-            ['status', '=', 1],
-            ['delete_time', '=', 0],
-            ['join_type', '=', 1],
-        ];
-    }
-
     protected function fetchActiveListSlice($query, $limit, $order = 'list_order asc, id desc'): array
     {
         $rows = $query->order($order)->limit($limit)->select();
@@ -432,7 +422,7 @@ class TabHomeService
 
     protected function collectActiveTagList(): array
     {
-        $allTags = ActiveModel::where('type', 1)->where('status', 1)->where('delete_time', 0)
+        $allTags = ActiveModel::miniProgramVisible()
             ->whereNotNull('tags')->where('tags', '<>', '')->column('tags');
         $tagSet = [];
         foreach ($allTags as $tagStr) {
@@ -448,12 +438,11 @@ class TabHomeService
 
     protected function buildActivityPageSections(): array
     {
-        $where = $this->activeListPublicWhere();
         $lightTag = '轻活动';
-        $weeklyQuery = ActiveModel::where($where)->where('is_month_recommend', '=', 1);
-        $lightQuery = ActiveModel::where($where)->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
-        // 近期活动：上架活动里按创建时间取最新 2 条（与活动 date、是否轻活动标签无关）
-        $recentQuery = ActiveModel::where($where);
+        $weeklyQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
+        $lightQuery = ActiveModel::miniProgramVisible()->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
+        // 近期活动：含 Web 式；按创建时间取最新 2 条
+        $recentQuery = ActiveModel::miniProgramVisible();
         return [
             'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
             'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
@@ -463,7 +452,7 @@ class TabHomeService
 
     protected function paginateActiveListForTab($page, $pageSize, $tag = ''): array
     {
-        $query = ActiveModel::where($this->activeListPublicWhere());
+        $query = ActiveModel::miniProgramVisible();
         if ($tag !== '') {
             $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
         }
@@ -507,6 +496,28 @@ class TabHomeService
 
         $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
         $item['is_end'] = ActiveModel::resolveIsEnd($item);
+        $this->attachWebLaunchFields($item);
         return $item;
+    }
+
+    /** 列表项附带 Web 式打开地址（与 ActiveController 详情逻辑一致） */
+    protected function attachWebLaunchFields(&$item): void
+    {
+        $item['display_mode'] = (int)($item['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
+        $item['web_url'] = trim((string)($item['web_url'] ?? ''));
+        $item['web_page_url'] = '';
+        $item['web_launch_url'] = '';
+        if (!ActiveModel::isWebDisplay($item)) {
+            return;
+        }
+        $activeId = (int)$item['id'];
+        $base = ActiveModel::buildWebActivityUrl($item['web_url'], $activeId);
+        $item['web_page_url'] = $base;
+        $launch = $base;
+        if ($this->userId > 0) {
+            $token = ActiveWebContext::issue((int)$this->userId, $activeId);
+            $launch = ActiveWebContext::appendQueryParam($launch, 'web_ctx', $token);
+        }
+        $item['web_launch_url'] = $launch;
     }
 }

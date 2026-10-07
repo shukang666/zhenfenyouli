@@ -383,7 +383,7 @@
           :key="item.id"
           hover-class="fb-press"
           :hover-stay-time="80"
-          @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
+          @click="$u.func.openActiveDetail(item)"
         >
           <view class="fb-light-cover">
             <u-image
@@ -426,7 +426,7 @@
           :key="item.id"
           hover-class="fb-press"
           :hover-stay-time="80"
-          @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
+          @click="$u.func.openActiveDetail(item)"
         >
           <view class="fb-recent-cal">
             <text class="fb-recent-cal-d">{{ formatRecentCalDay(item) }}</text>
@@ -496,7 +496,7 @@
         class="fb-act-card"
         v-for="item in active_list_preview"
         :key="item.id"
-        @click="$u.route(`/pages/activity/lsxf/details-new?id=${item.id}`)"
+        @click="$u.func.openActiveDetail(item)"
       >
         <view class="fb-act-cover">
           <u-image

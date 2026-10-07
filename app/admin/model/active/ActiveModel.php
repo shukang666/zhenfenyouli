@@ -82,6 +82,23 @@ class ActiveModel extends \think\Model
         return (int)($active['is_date_pending'] ?? 0) === 1;
     }
 
+    /**
+     * 小程序列表/推荐可见：开放浏览 join_type=1，或有效 Web 式（已填 web_url，不受 join_type 误配影响）
+     */
+    public function scopeMiniProgramVisible($query)
+    {
+        return $query->where([
+            ['type', '=', 1],
+            ['status', '=', 1],
+            ['delete_time', '=', 0],
+        ])->where(function ($q) {
+            $q->where('join_type', 1)->whereOr(function ($q2) {
+                $q2->where('display_mode', self::DISPLAY_MODE_WEB)
+                    ->where('web_url', '<>', '');
+            });
+        });
+    }
+
     /** 是否已结束（时间待定时不因截止日期自动结束） */
     public static function resolveIsEnd($active): int
     {

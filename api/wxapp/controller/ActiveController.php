@@ -408,16 +408,14 @@ class ActiveController extends AuthController
         $is_month_recommend = $this->request->param('is_month_recommend');
         $tag = $this->request->param('tag');
         $where = [];
-        $where[] = ['type', '=', 1];
-        $where[] = ['status', '=', 1];
-        $where[] = ['delete_time', '=', 0];
-        // 扫码参加(join_type=2)的活动不在小程序列表/搜索/推荐中展示，仅扫码可进入
-        $where[] = ['join_type', '=', 1];
         if(!empty($is_recommendation)) $where[] = ['is_recommendation', '=', 1];
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
         if(!empty($is_month_recommend)) $where[] = ['is_month_recommend', '=', 1];
         if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
-        $query = ActiveModel::where($where);
+        $query = ActiveModel::miniProgramVisible();
+        if (!empty($where)) {
+            $query = $query->where($where);
+        }
         // 分类过滤：兼容新旧字段（community_cate_id 为新分类系统，cate_id 为旧分类系统）
         if(!empty($community_cate_id)) {
             $query = $query->where(function($q) use ($community_cate_id) {
@@ -1223,17 +1221,6 @@ class ActiveController extends AuthController
         return $maxDays;
     }
 
-    /** 小程序活动列表公共筛选（与 get_new_active_list 一致） */
-    private function activeListPublicWhere()
-    {
-        return [
-            ['type', '=', 1],
-            ['status', '=', 1],
-            ['delete_time', '=', 0],
-            ['join_type', '=', 1],
-        ];
-    }
-
     /** 拉取限定条数的活动列表并补全展示字段 */
     private function fetchActiveListSlice($query, $limit, $order = 'list_order asc, id desc')
     {
@@ -1286,27 +1273,23 @@ class ActiveController extends AuthController
     /** 本周推荐 / 轻活动 / 近期活动 */
     private function buildActivityPageSections()
     {
-        $where = $this->activeListPublicWhere();
         $lightTag = '轻活动';
 
-        $weeklyQuery = ActiveModel::where($where)->where('is_month_recommend', '=', 1);
-        $lightQuery = ActiveModel::where($where)->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
-        $recentQuery = ActiveModel::where($where)->whereRaw(
-            '(tags IS NULL OR tags = "" OR NOT FIND_IN_SET(?, tags))',
-            [$lightTag]
-        );
+        $weeklyQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
+        $lightQuery = ActiveModel::miniProgramVisible()->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
+        $recentQuery = ActiveModel::miniProgramVisible();
 
         return [
             'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
             'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
-            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'date desc, id desc'),
+            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'create_time desc, id desc'),
         ];
     }
 
     /** 活动 Tab 底部列表分页（与 get_new_active_list 公共条件一致，支持 tag） */
     private function paginateActiveListForTab($page, $pageSize, $tag = '')
     {
-        $query = ActiveModel::where($this->activeListPublicWhere());
+        $query = ActiveModel::miniProgramVisible();
         if ($tag !== '') {
             $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
         }
@@ -1320,7 +1303,7 @@ class ActiveController extends AuthController
     }
 
     /** 单条活动列表项字段补全（列表/分页/聚合接口共用） */
-    private function applyActiveListItemFields($item)
+    protected function applyActiveListItemFields($item)
     {
         $item['thumb'] = empty($item['thumb']) ? '' : cmf_get_asset_url($item['thumb']);
         $item['badge_image'] = empty($item['badge_image']) ? '' : cmf_get_asset_url($item['badge_image']);
