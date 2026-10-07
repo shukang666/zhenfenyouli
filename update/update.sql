@@ -328,3 +328,63 @@ PREPARE stmt FROM @__sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'safety_url');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `safety_url` varchar(500) NOT NULL DEFAULT '''' COMMENT ''安全注意事项独立页URL'' AFTER `rules_url`');
 PREPARE stmt FROM @__sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- 沿街商铺：统一投放点 + 用户认领商户身份
+CREATE TABLE IF NOT EXISTS `cmf_street_shop_drop_point` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `shop_type` varchar(32) NOT NULL DEFAULT '' COMMENT '商铺类型 key，同类型可共用本点',
+  `shop_type_name` varchar(32) NOT NULL DEFAULT '' COMMENT '类型名称冗余',
+  `name` varchar(64) NOT NULL DEFAULT '' COMMENT '小程序展示名称',
+  `address` varchar(255) NOT NULL DEFAULT '' COMMENT '地址说明',
+  `lng` decimal(10,6) NOT NULL DEFAULT '0.000000',
+  `lat` decimal(10,6) NOT NULL DEFAULT '0.000000',
+  `cate_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'basic_select type=2',
+  `cate_name` varchar(32) NOT NULL DEFAULT '',
+  `list_order` int(11) NOT NULL DEFAULT '0',
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `create_time` int(11) NOT NULL DEFAULT '0',
+  `update_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_shop_type_status` (`shop_type`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='沿街统一投放点';
+
+CREATE TABLE IF NOT EXISTS `cmf_street_shop_merchant` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `shop_name` varchar(64) NOT NULL DEFAULT '' COMMENT '用户认领的商铺名',
+  `shop_type` varchar(32) NOT NULL DEFAULT '',
+  `shop_type_name` varchar(32) NOT NULL DEFAULT '',
+  `cate_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `cate_name` varchar(32) NOT NULL DEFAULT '',
+  `drop_point_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `create_time` int(11) NOT NULL DEFAULT '0',
+  `update_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user` (`user_id`),
+  KEY `idx_drop_point` (`drop_point_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='沿街商铺用户认领';
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
+        SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1
+    )), 0) + 2,
+    'admin','Forum','street_shop_drop_point_index','','沿街统一投放点','','按商铺类型配置经纬度与地址'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='street_shop_drop_point_index' LIMIT 1);
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
+        SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1
+    )), 0) + 3,
+    'admin','Forum','street_shop_merchant_index','','沿街认领商户','','用户认领商铺列表'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='street_shop_merchant_index' LIMIT 1);

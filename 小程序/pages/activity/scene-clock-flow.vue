@@ -64,7 +64,7 @@
 				<view class="zf-opt-in-later" hover-class="zf-opt-in-later--press" @tap="declineThemeOptIn">{{ themeOptInLater }}</view>
 			</view>
 			<view class="zf-scenes-reveal" :class="{ 'zf-scenes-reveal--show': themeOptInReveal }">
-				<text class="zf-scenes-kicker">选场景</text>
+				<text class="zf-scenes-kicker">{{ scenePickKicker }}</text>
 				<text class="zf-scenes-hint">{{ scenePickHint }}</text>
 				<view class="zf-scene-row">
 					<view
@@ -130,7 +130,70 @@
 			</view>
 		</view>
 
-		<!-- 沿街/办公：尚未配置统一回收点 -->
+		<!-- 沿街：认领商铺（与家庭身份独立） -->
+		<view class="scf-body scf-body--street" v-if="isStreetHub && flowStep === 'street_merchant'">
+			<view class="scf-panel scf-street-claim">
+				<text class="scf-street-claim-title">{{ streetClaimTitle }}</text>
+				<text class="scf-info-text scf-street-claim-lead">{{ streetClaimLead }}</text>
+				<view class="scf-street-field">
+					<text class="scf-street-label">商铺名称</text>
+					<input class="scf-street-input" v-model="streetFormShopName" :placeholder="streetClaimShopNamePh" maxlength="64" />
+				</view>
+				<view class="scf-street-field">
+					<text class="scf-street-label">商铺类型</text>
+					<text class="scf-street-field-hint">{{ streetClaimTypeHint }}</text>
+					<picker mode="selector" :range="streetShopTypeLabels" :value="streetFormTypeIndex" @change="onStreetTypePick">
+						<view class="scf-street-picker">{{ streetShopTypeLabels[streetFormTypeIndex] || '请选择类型' }}</view>
+					</picker>
+					<text class="scf-street-cate-tag" v-if="streetFormCateName">主要种类：{{ streetFormCateName }}</text>
+				</view>
+				<view class="scf-street-field">
+					<text class="scf-street-label">统一投放点</text>
+					<text class="scf-street-field-hint">{{ streetClaimDropHint }}</text>
+					<view v-if="streetDropPointsLoading" class="scf-street-loading">加载投放点…</view>
+					<view v-else-if="!streetDropPoints.length" class="scf-street-empty">{{ streetClaimNoDrop }}</view>
+					<view v-else class="scf-street-drop-list">
+						<view
+							v-for="(dp, di) in streetDropPoints"
+							:key="dp.id"
+							class="scf-street-drop-item"
+							:class="{ 'scf-street-drop-item--on': streetFormDropIndex === di }"
+							hover-class="scf-card--press"
+							@tap="streetFormDropIndex = di"
+						>
+							<text class="scf-street-drop-name">{{ dp.name }}</text>
+							<text class="scf-street-drop-addr">{{ dp.address }}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+			<view class="scf-foot scf-foot--single">
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="submitStreetClaim">{{ streetClaimSubmit }}</view>
+			</view>
+		</view>
+
+		<!-- 沿街：商铺主页（投放点 + 打卡入口） -->
+		<view class="scf-body scf-body--street" v-if="isStreetHub && flowStep === 'street_hub' && streetMerchant">
+			<view class="scf-panel scf-street-shop">
+				<text class="scf-street-shop-k">我的商铺</text>
+				<text class="scf-street-shop-name">{{ streetMerchant.shop_name }}</text>
+				<text class="scf-street-shop-meta">{{ streetMerchant.shop_type_name }} · {{ streetHubCateLabel }}：{{ streetMerchant.cate_name }}</text>
+			</view>
+			<view class="scf-panel scf-street-drop" v-if="streetMerchant && streetMerchant.drop_point">
+				<text class="scf-street-drop-title">{{ streetHubDropTitle }}</text>
+				<text class="scf-street-drop-main">{{ streetMerchant.drop_point.name }}</text>
+				<text class="scf-street-drop-sub">{{ streetMerchant.drop_point.address }}</text>
+				<view class="scf-street-drop-actions">
+					<view class="scf-btn scf-btn--ghost scf-btn--inline" hover-class="scf-card--press" @tap="openStreetDropNav">{{ streetHubNav }}</view>
+				</view>
+			</view>
+			<view class="scf-foot scf-foot--street-hub">
+				<text class="scf-link-muted" @tap="editStreetMerchant">{{ streetHubEdit }}</text>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="startStreetClockFromHub">{{ streetHubStartClock }}</view>
+			</view>
+		</view>
+
+		<!-- 办公：尚未配置统一回收点 -->
 		<view class="scf-body" v-if="flowStep === 'hub_empty'">
 			<view class="scf-panel scf-office-tip">
 				<text class="scf-office-tip-title">{{ communityEmptyTitle }}</text>
@@ -383,7 +446,7 @@
 		></view>
 
 		<!-- 打卡点列表（打卡入口，家庭场景在摆桶页蒙层选桶，不单独进此页） -->
-		<view class="scf-body" v-if="flowStep === 'points' && !isResidentialHub">
+		<view class="scf-body" v-if="flowStep === 'points' && !isResidentialHub && !isStreetHub">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
 				<text class="scf-promo-line">{{ isResidentialHub ? residentialPickLead : introDisplayLead }}</text>
 				<text class="scf-promo-line scf-promo-line--sub">{{ isResidentialHub ? residentialPickSub : introDisplaySummary }}</text>
@@ -738,6 +801,7 @@
 		getThemeIntroSteps,
 		getThemeIntroCta,
 		getScenePickNavTitle,
+		getScenePickKicker,
 		getScenePickHint,
 		getThemeOptInEyebrow,
 		getThemeOptInTitle,
@@ -745,6 +809,18 @@
 		getThemeOptInYes,
 		getThemeOptInLater,
 		getSceneHubCards,
+		getStreetClaimTitle,
+		getStreetClaimLead,
+		getStreetClaimShopNamePh,
+		getStreetClaimTypeHint,
+		getStreetClaimDropHint,
+		getStreetClaimSubmit,
+		getStreetClaimNoDrop,
+		getStreetHubDropTitle,
+		getStreetHubCateLabel,
+		getStreetHubNav,
+		getStreetHubStartClock,
+		getStreetHubEdit,
 		getThemePromoPillars,
 		getThemeIntroHeroSlogan,
 		getThemeBriefTagline,
@@ -816,6 +892,7 @@
 				themeSubline: getThemeIntroSubline(),
 				themeSteps: getThemeIntroSteps(),
 				themeCta: getThemeIntroCta(),
+				scenePickKicker: getScenePickKicker(),
 				scenePickHint: getScenePickHint(),
 				themeOptInReveal: false,
 				themeOptInEyebrow: getThemeOptInEyebrow(),
@@ -831,6 +908,25 @@
 				themeBriefTasks: getThemeBriefTasks(),
 				themeBriefCta: getThemeBriefCta(),
 				pendingHubKey: '',
+				streetMerchant: null,
+				streetShopTypes: [],
+				streetDropPoints: [],
+				streetDropPointsLoading: false,
+				streetFormShopName: '',
+				streetFormTypeIndex: 0,
+				streetFormDropIndex: 0,
+				streetClaimTitle: getStreetClaimTitle(),
+				streetClaimLead: getStreetClaimLead(),
+				streetClaimShopNamePh: getStreetClaimShopNamePh(),
+				streetClaimTypeHint: getStreetClaimTypeHint(),
+				streetClaimDropHint: getStreetClaimDropHint(),
+				streetClaimSubmit: getStreetClaimSubmit(),
+				streetClaimNoDrop: getStreetClaimNoDrop(),
+				streetHubDropTitle: getStreetHubDropTitle(),
+				streetHubCateLabel: getStreetHubCateLabel(),
+				streetHubNav: getStreetHubNav(),
+				streetHubStartClock: getStreetHubStartClock(),
+				streetHubEdit: getStreetHubEdit(),
 				binLayoutExamples: [],
 				binSetupLead: getBinSetupLead(),
 				binSetupLeadNote: getBinSetupLeadNote(),
@@ -1030,7 +1126,14 @@
 				return this.hubKey === 'street'
 			},
 			isCommunityHub() {
-				return this.isOfficeHub || this.isStreetHub
+				return this.isOfficeHub
+			},
+			streetShopTypeLabels() {
+				return (this.streetShopTypes || []).map(t => t.name || t.key)
+			},
+			streetFormCateName() {
+				const t = (this.streetShopTypes || [])[this.streetFormTypeIndex]
+				return (t && t.cate_name) || ''
 			},
 			communityEmptyTitle() {
 				return getCommunityEmptyTitle(this.isStreetHub, this.isOfficeHub)
@@ -1058,8 +1161,11 @@
 				return getScenePickNavTitle()
 			},
 			visibleStepLabels() {
-				if (['manage', 'hub_empty'].indexOf(this.flowStep) >= 0) return []
+				if (['manage', 'hub_empty', 'street_merchant', 'street_hub'].indexOf(this.flowStep) >= 0) return []
 				if (this.flowStep === 'points' && !this.isResidentialHub) return []
+				if (this.isStreetHub && ['guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0) {
+					return ['怎么扔', '小窍门', '拍照']
+				}
 				if (this.isResidentialHub) {
 					return ['摆好桶', '选桶打卡', '上传成果']
 				}
@@ -1505,6 +1611,10 @@
 					this.enterResidentialPickMode()
 					return
 				}
+				if (this.isStreetHub) {
+					this.flowStep = 'street_hub'
+					return
+				}
 				this.flowStep = 'survey'
 			},
 			guideSubKeyForHub() {
@@ -1514,6 +1624,156 @@
 				return this.$u.api.get_select_list({ type: 2 }).then(res => {
 					this.cateList = res.data || []
 				}).catch(() => {})
+			},
+			ensureStreetShopTypes() {
+				if ((this.streetShopTypes || []).length) {
+					return Promise.resolve(this.streetShopTypes)
+				}
+				return this.$u.api.street_shop_types().then(res => {
+					this.streetShopTypes = res.data || []
+					return this.streetShopTypes
+				}).catch(() => {
+					this.streetShopTypes = []
+					return []
+				})
+			},
+			loadStreetDropPointsForForm() {
+				const t = (this.streetShopTypes || [])[this.streetFormTypeIndex]
+				if (!t || !t.key) {
+					this.streetDropPoints = []
+					return Promise.resolve()
+				}
+				this.streetDropPointsLoading = true
+				return this.$u.api.street_shop_drop_points({ shop_type: t.key }).then(res => {
+					this.streetDropPoints = res.data || []
+					if (this.streetFormDropIndex >= this.streetDropPoints.length) {
+						this.streetFormDropIndex = 0
+					}
+				}).catch(() => {
+					this.streetDropPoints = []
+				}).finally(() => {
+					this.streetDropPointsLoading = false
+				})
+			},
+			onStreetTypePick(e) {
+				const idx = Number(e.detail.value)
+				this.streetFormTypeIndex = Number.isFinite(idx) ? idx : 0
+				this.streetFormDropIndex = 0
+				this.loadStreetDropPointsForForm()
+			},
+			fillStreetFormFromMerchant(merchant) {
+				if (!merchant) return
+				this.streetFormShopName = merchant.shop_name || ''
+				const types = this.streetShopTypes || []
+				let ti = types.findIndex(x => x.key === merchant.shop_type)
+				if (ti < 0) ti = 0
+				this.streetFormTypeIndex = ti
+				this.loadStreetDropPointsForForm().then(() => {
+					const di = (this.streetDropPoints || []).findIndex(d => Number(d.id) === Number(merchant.drop_point_id))
+					this.streetFormDropIndex = di >= 0 ? di : 0
+				})
+			},
+			applyStreetMerchantToSession(merchant) {
+				if (!merchant) return
+				this.streetMerchant = merchant
+				this.cateId = Number(merchant.cate_id) || 0
+				this.activeCateName = merchant.cate_name || ''
+				this.cateLabel = guideCateLabelFromName(merchant.cate_name)
+				this.subKey = ''
+				const dp = merchant.drop_point
+				this.pointId = dp && dp.id ? dp.id : Number(merchant.drop_point_id) || 0
+				this.pointName = dp && dp.name ? dp.name : ''
+			},
+			initStreetMerchantFlow(keepFlow) {
+				this.pointsLoading = true
+				return this.ensureStreetShopTypes().then(() => {
+					return this.$u.api.street_shop_my_merchant()
+				}).then(res => {
+					const merchant = res.data || null
+					if (merchant && merchant.id) {
+						this.applyStreetMerchantToSession(merchant)
+						if (keepFlow === 'learn' || this.flowStep === 'learn') {
+							return
+						}
+						if (keepFlow === 'guide' || keepFlow === 'survey') {
+							return
+						}
+						this.flowStep = 'street_hub'
+						return
+					}
+					this.streetMerchant = null
+					this.fillStreetFormFromMerchant(null)
+					this.flowStep = 'street_merchant'
+					if ((this.streetShopTypes || []).length) {
+						return this.loadStreetDropPointsForForm()
+					}
+				}).catch(err => {
+					this.scfDbg('initStreetMerchantFlow error', err && (err.msg || err.message))
+					this.flowStep = 'street_merchant'
+				}).finally(() => {
+					this.pointsLoading = false
+					this.pointsBootstrapped = true
+				})
+			},
+			submitStreetClaim() {
+				if (!this.isLogin) {
+					return this.$u.route('/pages/public/login')
+				}
+				const shopName = String(this.streetFormShopName || '').trim()
+				if (!shopName) {
+					return this.$u.toast('请填写商铺名称')
+				}
+				const t = (this.streetShopTypes || [])[this.streetFormTypeIndex]
+				if (!t || !t.key) {
+					return this.$u.toast('请选择商铺类型')
+				}
+				const dp = (this.streetDropPoints || [])[this.streetFormDropIndex]
+				if (!dp || !dp.id) {
+					return this.$u.toast('请选择统一投放点')
+				}
+				this.$u.api.street_shop_save_merchant({
+					shop_name: shopName,
+					shop_type: t.key,
+					drop_point_id: dp.id,
+				}).then(res => {
+					const merchant = res.data || null
+					if (!merchant) {
+						return this.$u.toast('保存失败')
+					}
+					this.applyStreetMerchantToSession(merchant)
+					this.flowStep = 'street_hub'
+					this.$u.toast(res.msg || '认领成功')
+				}).catch(e => {
+					this.$u.toast((e && e.msg) || '保存失败')
+				})
+			},
+			openStreetDropNav() {
+				const dp = this.streetMerchant && this.streetMerchant.drop_point
+				if (!dp || !dp.lat || !dp.lng) {
+					return this.$u.toast('暂无导航坐标')
+				}
+				uni.openLocation({
+					latitude: Number(dp.lat),
+					longitude: Number(dp.lng),
+					name: dp.name || '统一投放点',
+					address: dp.address || '',
+					scale: 16,
+				})
+			},
+			startStreetClockFromHub() {
+				if (!this.streetMerchant) return
+				this.applyStreetMerchantToSession(this.streetMerchant)
+				this.loadGuide()
+				this.accumDuration = ''
+				this.sortDuration = ''
+				this.resetClockSlots()
+				this.clockContent = ''
+				this.flowStep = 'guide'
+			},
+			editStreetMerchant() {
+				if (!this.streetMerchant) return
+				this.fillStreetFormFromMerchant(this.streetMerchant)
+				this.flowStep = 'street_merchant'
 			},
 			initUserPoints(keepFlow) {
 				this.scfDbg('initUserPoints start', {
@@ -1527,6 +1787,8 @@
 					if (this.isResidentialHub) {
 						this.prefillSetupRowsFromExamples()
 						this.flowStep = 'setup'
+					} else if (this.isStreetHub) {
+						this.flowStep = 'street_merchant'
 					} else {
 						this.flowStep = this.isCommunityHub ? 'hub_empty' : 'setup'
 					}
@@ -1537,6 +1799,9 @@
 					this.scfDbg('initUserPoints BLOCK → member/info (no community)')
 					this.$u.route('/pages/member/info')
 					return Promise.resolve()
+				}
+				if (this.isStreetHub) {
+					return this.initStreetMerchantFlow(keepFlow)
 				}
 				this.pointsLoading = true
 				return this.$u.api.list_clock_scene_point({ hub_key: this.hubKey }).then(res => {
@@ -1888,6 +2153,10 @@
 				}).catch(() => {})
 			},
 			backFromGuide() {
+				if (this.isStreetHub) {
+					this.flowStep = 'street_hub'
+					return
+				}
 				this.flowStep = 'points'
 			},
 			goLearnStep() {
@@ -2048,7 +2317,7 @@
 			},
 			doSubmitClock() {
 				this.clockSubmitting = true
-				this.$u.api.add_forum({
+				const payload = {
 					type: 2,
 					cate_id: this.cateId,
 					content: this.buildClockContentText(),
@@ -2056,7 +2325,11 @@
 					clock_scene: this.resolveClockScene(),
 					clock_sub_scene: '',
 					clock_point_id: this.pointId || 0,
-				}).then(res => {
+				}
+				if (this.isStreetHub && this.streetMerchant && this.streetMerchant.id) {
+					payload.street_merchant_id = this.streetMerchant.id
+				}
+				this.$u.api.add_forum(payload).then(res => {
 					this.clockSuccessMsg = res.msg || '打卡成功'
 					this.clockHabitTip = pickRandomHabitTip()
 					this.loadClockPromoActivities()
@@ -2080,6 +2353,10 @@
 					this.initUserPoints('points').then(() => {
 						this.enterResidentialPickMode()
 					})
+					return
+				}
+				if (this.isStreetHub) {
+					this.flowStep = 'street_hub'
 					return
 				}
 				this.flowStep = 'points'
@@ -2127,6 +2404,142 @@
 }
 .scf--street {
 	background: linear-gradient(180deg, #dff5e8 0%, #f4f7f5 280rpx);
+}
+.scf-street-claim-title {
+	display: block;
+	font-size: 40rpx;
+	font-weight: 800;
+	color: #142018;
+	margin-bottom: 12rpx;
+}
+.scf-street-claim-lead {
+	margin-bottom: 24rpx;
+}
+.scf-street-field {
+	margin-bottom: 28rpx;
+}
+.scf-street-label {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #142018;
+	margin-bottom: 8rpx;
+}
+.scf-street-field-hint {
+	display: block;
+	font-size: 26rpx;
+	color: #6a756c;
+	line-height: 1.5;
+	margin-bottom: 12rpx;
+}
+.scf-street-input,
+.scf-street-picker {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 22rpx 24rpx;
+	background: #f5f8f6;
+	border-radius: 16rpx;
+	font-size: 30rpx;
+	color: #142018;
+}
+.scf-street-cate-tag {
+	display: inline-block;
+	margin-top: 12rpx;
+	padding: 8rpx 16rpx;
+	background: rgba(24, 175, 56, 0.12);
+	color: #18af38;
+	border-radius: 999rpx;
+	font-size: 26rpx;
+}
+.scf-street-drop-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+}
+.scf-street-drop-item {
+	padding: 20rpx 22rpx;
+	border-radius: 16rpx;
+	border: 2rpx solid #e0e8e3;
+	background: #fff;
+}
+.scf-street-drop-item--on {
+	border-color: #18af38;
+	background: rgba(24, 175, 56, 0.06);
+}
+.scf-street-drop-name {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #142018;
+}
+.scf-street-drop-addr {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 26rpx;
+	color: #6a756c;
+	line-height: 1.45;
+}
+.scf-street-empty,
+.scf-street-loading {
+	font-size: 28rpx;
+	color: #8a9590;
+	padding: 16rpx 0;
+}
+.scf-street-shop-k {
+	font-size: 26rpx;
+	color: #18af38;
+	font-weight: 700;
+}
+.scf-street-shop-name {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 40rpx;
+	font-weight: 800;
+	color: #142018;
+}
+.scf-street-shop-meta {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 28rpx;
+	color: #5a6b62;
+}
+.scf-street-drop-title {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #142018;
+	margin-bottom: 12rpx;
+}
+.scf-street-drop-main {
+	display: block;
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #142018;
+}
+.scf-street-drop-sub {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 28rpx;
+	color: #6a756c;
+	line-height: 1.5;
+}
+.scf-street-drop-actions {
+	margin-top: 20rpx;
+}
+.scf-btn--inline {
+	display: inline-flex;
+	padding: 16rpx 28rpx;
+}
+.scf-foot--street-hub {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 16rpx;
+}
+.scf-link-muted {
+	text-align: center;
+	font-size: 28rpx;
+	color: #8a9590;
+	padding: 8rpx;
 }
 .scf-hero {
 	padding: 28rpx 28rpx 16rpx;

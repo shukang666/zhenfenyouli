@@ -226,6 +226,28 @@ class ForumController extends AuthController
                 }
             }
         }
+        if ($type == 2) {
+            $scene = trim((string)($params['clock_scene'] ?? ''));
+            $merchantId = (int)$this->request->param('street_merchant_id', 0);
+            if ($scene === 'street' || $merchantId > 0) {
+                $merchant = \think\facade\Db::name('street_shop_merchant')
+                    ->where('user_id', $this->user_id)
+                    ->where('status', 1)
+                    ->find();
+                if (empty($merchant)) {
+                    $this->error('请先认领沿街商铺');
+                }
+                if ($merchantId > 0 && (int)$merchant['id'] !== $merchantId) {
+                    $this->error('商户信息无效');
+                }
+                $params['clock_scene'] = 'street';
+                $params['clock_sub_scene'] = 'merchant_' . (int)$merchant['id'];
+                $params['clock_point_id'] = (int)$merchant['drop_point_id'];
+                if (empty($params['cate_id'])) {
+                    $params['cate_id'] = (int)$merchant['cate_id'];
+                }
+            }
+        }
 
         if (!empty($params['image'])) {
             $params['image'] = json_encode($params['image']);

@@ -18,6 +18,10 @@ const order = {
     list_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/list', params),
     save_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/save', params),
     delete_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/delete', params),
+    street_shop_types: (params = {}) => uni.$u.post('/wxapp/street_shop/shop_types', params),
+    street_shop_my_merchant: (params = {}) => uni.$u.post('/wxapp/street_shop/my_merchant', params),
+    street_shop_drop_points: (params = {}) => uni.$u.post('/wxapp/street_shop/drop_points', params),
+    street_shop_save_merchant: (params = {}) => uni.$u.post('/wxapp/street_shop/save_merchant', params),
     // 删除发布
     del_forum: (params = {}) => uni.$u.post('/wxapp/forum/del_forum', params),
     // 评论列表

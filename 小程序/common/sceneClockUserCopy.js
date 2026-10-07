@@ -30,7 +30,7 @@ export function getWhyIntroLead() {
 }
 
 export function getWhyIntroSummary() {
-	return '看下面要点，选今天场景，按提示打卡即可'
+	return '看下面要点，选好生活场景，按提示打卡即可'
 }
 
 /** 建议家里各房间放什么桶（户型示意用 planId 定位格子） */
@@ -227,13 +227,17 @@ export function getThemeIntroCta() {
 	return '我准备好了，开始'
 }
 
-/** 场景选择页（原型 Screen 4） */
+/** 场景选择页（原型 Screen 4）——场景指生活情境（家/上班/商铺），不是扔垃圾的物理点位 */
 export function getScenePickNavTitle() {
 	return '垃圾分类打卡'
 }
 
+export function getScenePickKicker() {
+	return '选生活场景'
+}
+
 export function getScenePickHint() {
-	return '您今天主要在哪儿扔垃圾？点选一个就行'
+	return '选一个和今天最贴近的场景：家里、上班，还是店铺。后面再按场景引导您分类打卡'
 }
 
 /** 选场景前：是否愿意参加真分（仅下方卡片区，上方「为什么要分」不动） */
@@ -246,7 +250,7 @@ export function getThemeOptInTitle() {
 }
 
 export function getThemeOptInDesc() {
-	return '真分就是分对类别、投进对的桶，并拍照留记录。点「愿意」后再选您今天主要在哪个场景投放。'
+	return '真分就是分对类别、投进对的桶，并拍照留记录。点「愿意」后，先选和今天最贴近的生活场景（家里、上班或店铺）。'
 }
 
 export function getThemeOptInYes() {
@@ -259,10 +263,59 @@ export function getThemeOptInLater() {
 
 export function getSceneHubCards() {
 	return [
-		{ hub: 'home', emoji: '🏠', title: '家庭场景', desc: '厨房、客厅、卫生间，全家日常投放', theme: 'home' },
-		{ hub: 'office', emoji: '🏢', title: '上班 / 楼宇', desc: '工位、茶水间、办公区', theme: 'office' },
-		{ hub: 'street', emoji: '🏪', title: '沿街商铺', desc: '门店前后堂产生的垃圾', theme: 'street' },
+		{ hub: 'home', emoji: '🏠', title: '家庭场景', desc: '在家做饭、起居，全家日常分类', theme: 'home' },
+		{ hub: 'office', emoji: '🏢', title: '上班 / 楼宇', desc: '工位、茶水间、办公区里分类', theme: 'office' },
+		{ hub: 'street', emoji: '🏪', title: '沿街商铺', desc: '看店、前后堂经营时的分类', theme: 'street' },
 	]
+}
+
+/** 沿街：认领商户 + 统一投放点 */
+export function getStreetClaimTitle() {
+	return '认领您的商铺'
+}
+
+export function getStreetClaimLead() {
+	return '家庭场景人人可用；沿街需额外绑定一个商户身份，与家庭互不影响。'
+}
+
+export function getStreetClaimShopNamePh() {
+	return '请填写招牌上的商铺名称'
+}
+
+export function getStreetClaimTypeHint() {
+	return '商铺类型决定主要打卡的垃圾种类（如餐馆→厨余，药房→有害）'
+}
+
+export function getStreetClaimDropHint() {
+	return '请选择社区为您这类商铺配置的统一投放点，邻近同类型店铺可共用'
+}
+
+export function getStreetClaimSubmit() {
+	return '确认认领'
+}
+
+export function getStreetClaimNoDrop() {
+	return '该类型暂无可用投放点，请联系社区工作人员配置'
+}
+
+export function getStreetHubDropTitle() {
+	return '统一投放点'
+}
+
+export function getStreetHubCateLabel() {
+	return '本店主要打卡种类'
+}
+
+export function getStreetHubNav() {
+	return '导航去投放点'
+}
+
+export function getStreetHubStartClock() {
+	return '开始分类打卡'
+}
+
+export function getStreetHubEdit() {
+	return '修改商铺信息'
 }
 
 /** 任务说明（原型 Screen 5） */
