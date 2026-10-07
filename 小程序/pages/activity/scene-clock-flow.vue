@@ -155,49 +155,9 @@
 					</picker>
 					<text class="scf-street-cate-tag" v-if="streetFormCateName">主要种类：{{ streetFormCateName }}</text>
 				</view>
-				<view class="scf-street-field">
-					<text class="scf-street-label">统一投放点</text>
-					<text class="scf-street-field-hint">{{ streetClaimDropHint }}</text>
-					<view v-if="streetDropPointsLoading" class="scf-street-loading">加载投放点…</view>
-					<view v-else-if="!streetDropPoints.length" class="scf-street-empty">{{ streetClaimNoDrop }}</view>
-					<view v-else class="scf-street-drop-list">
-						<view
-							v-for="(dp, di) in streetDropPoints"
-							:key="dp.id"
-							class="scf-street-drop-item"
-							:class="{ 'scf-street-drop-item--on': streetFormDropIndex === di }"
-							hover-class="scf-card--press"
-							@tap="streetFormDropIndex = di"
-						>
-							<text class="scf-street-drop-name">{{ dp.name }}</text>
-							<text class="scf-street-drop-addr">{{ dp.address }}</text>
-						</view>
-					</view>
-				</view>
 			</view>
 			<view class="scf-foot scf-foot--single">
 				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="submitStreetClaim">{{ streetClaimSubmit }}</view>
-			</view>
-		</view>
-
-		<!-- 沿街：商铺主页（投放点 + 打卡入口） -->
-		<view class="scf-body scf-body--street" v-if="isStreetHub && flowStep === 'street_hub' && streetMerchant">
-			<view class="scf-panel scf-street-shop">
-				<text class="scf-street-shop-k">我的商铺</text>
-				<text class="scf-street-shop-name">{{ streetMerchant.shop_name }}</text>
-				<text class="scf-street-shop-meta">{{ streetMerchant.shop_type_name }} · {{ streetHubCateLabel }}：{{ streetMerchant.cate_name }}</text>
-			</view>
-			<view class="scf-panel scf-street-drop" v-if="streetMerchant && streetMerchant.drop_point">
-				<text class="scf-street-drop-title">{{ streetHubDropTitle }}</text>
-				<text class="scf-street-drop-main">{{ streetMerchant.drop_point.name }}</text>
-				<text class="scf-street-drop-sub">{{ streetMerchant.drop_point.address }}</text>
-				<view class="scf-street-drop-actions">
-					<view class="scf-btn scf-btn--ghost scf-btn--inline" hover-class="scf-card--press" @tap="openStreetDropNav">{{ streetHubNav }}</view>
-				</view>
-			</view>
-			<view class="scf-foot scf-foot--street-hub">
-				<text class="scf-link-muted" @tap="editStreetMerchant">{{ streetHubEdit }}</text>
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="startStreetClockFromHub">{{ streetHubStartClock }}</view>
 			</view>
 		</view>
 
@@ -215,13 +175,18 @@
 		<!-- 首次：设置分类打卡点（仅家庭/办公等摆桶，不含「为什么要分」） -->
 		<view
 			class="scf-body scf-body--setup"
-			:class="{ 'scf-body--pick-active': isResidentialHub && residentialPickMode }"
+			:class="{ 'scf-body--pick-active': isOwnPointHub && residentialPickMode }"
 			v-if="flowStep === 'setup'"
 		>
-			<block v-if="isResidentialHub && residentialPickMode">
+			<view class="scf-street-shop-bar" v-if="isStreetHub && streetMerchant && !residentialPickMode">
+				<text class="scf-street-shop-bar-name">{{ streetMerchant.shop_name }}</text>
+				<text class="scf-street-shop-bar-meta">{{ streetMerchant.shop_type_name }} · {{ streetMerchant.cate_name }}</text>
+				<text class="scf-street-shop-bar-edit" @tap="editStreetMerchant">{{ streetEditShop }}</text>
+			</view>
+			<block v-if="isOwnPointHub && residentialPickMode">
 				<view class="scf-pick-lead">
-					<text class="scf-pick-lead-t">{{ residentialPickLead }}</text>
-					<text class="scf-pick-lead-s">{{ residentialPickSub }}</text>
+					<text class="scf-pick-lead-t">{{ ownPointPickLead }}</text>
+					<text class="scf-pick-lead-s">{{ ownPointPickSub }}</text>
 				</view>
 				<view class="scf-bin-grid scf-bin-grid--pick">
 					<view
@@ -248,7 +213,7 @@
 						</view>
 					</view>
 				</view>
-				<text class="scf-pick-mask-hint">{{ residentialPickMaskHint }}</text>
+				<text class="scf-pick-mask-hint">{{ ownPointPickMaskHint }}</text>
 				<view class="scf-settings-fold" v-if="points.length">
 					<view
 						class="scf-settings-fold-head"
@@ -256,8 +221,8 @@
 						@tap.stop="toggleResidentialBinSettings"
 					>
 						<view class="scf-settings-fold-head-l">
-							<text class="scf-settings-fold-title">{{ residentialBinSettingsFoldTitle }}</text>
-							<text class="scf-settings-fold-hint">{{ residentialBinSettingsFoldHint }}</text>
+							<text class="scf-settings-fold-title">{{ ownPointSettingsFoldTitle }}</text>
+							<text class="scf-settings-fold-hint">{{ ownPointSettingsFoldHint }}</text>
 						</view>
 						<text class="scf-settings-fold-arrow">{{ residentialBinSettingsOpen ? '收起 ▴' : '展开 ▾' }}</text>
 					</view>
@@ -286,7 +251,11 @@
 										maxlength="16"
 										@input="onManageNameInput(mIdx, $event)"
 									/>
+									<view v-if="isStreetHub" class="scf-bin-tile-cate scf-bin-tile-cate--locked">
+										<text class="scf-bin-tile-cate-t">{{ manageCateName(p) }}</text>
+									</view>
 									<picker
+										v-else
 										mode="selector"
 										:range="catePickerLabels"
 										:value="p._edit_cate_index"
@@ -302,7 +271,7 @@
 							</view>
 						</view>
 						<view class="scf-settings-fold-actions">
-							<view class="scf-settings-fold-add" hover-class="scf-card--press" @tap="addPointInResidentialSettings">＋ 添加桶位</view>
+							<view class="scf-settings-fold-add" v-if="!isStreetHub" hover-class="scf-card--press" @tap="addPointInResidentialSettings">＋ 添加桶位</view>
 							<view class="scf-settings-fold-done" hover-class="scf-card--press" @tap="closeResidentialBinSettings">完成，返回选桶</view>
 						</view>
 					</view>
@@ -384,7 +353,11 @@
 				<text class="scf-section-kicker-t">拍下您家的桶</text>
 				<text class="scf-section-kicker-s">仅首次需要设置，以后在选桶页「展开」里增删改</text>
 			</view>
-			<view class="scf-promo scf-promo--compact scf-promo--light" v-else-if="!isResidentialHub">
+			<view class="scf-section-kicker" v-else-if="isStreetHub">
+				<text class="scf-section-kicker-t">{{ streetSetupKicker }}</text>
+				<text class="scf-section-kicker-s">{{ streetSetupSub }}</text>
+			</view>
+			<view class="scf-promo scf-promo--compact scf-promo--light" v-else-if="!isResidentialHub && !isStreetHub">
 				<text class="scf-promo-line scf-promo-line--dark">{{ introDisplayLead }}</text>
 				<text class="scf-promo-line scf-promo-line--subdark">{{ introDisplaySummary }}</text>
 			</view>
@@ -416,10 +389,14 @@
 						<input
 							class="scf-bin-tile-input"
 							v-model="row.point_name"
-							placeholder="名称，如厨房桶"
+							:placeholder="isStreetHub ? streetSetupNamePh : '名称，如厨房桶'"
 							maxlength="16"
 						/>
+						<view v-if="isStreetHub" class="scf-bin-tile-cate scf-bin-tile-cate--locked">
+							<text class="scf-bin-tile-cate-t">{{ setupCateName(row) || streetMerchant.cate_name }}</text>
+						</view>
 						<picker
+							v-else
 							class="scf-bin-tile-picker"
 							mode="selector"
 							:range="catePickerLabels"
@@ -434,7 +411,7 @@
 						<text class="scf-bin-tile-hint">{{ cateHintLines(row) }}</text>
 					</view>
 				</view>
-				<view class="scf-bin-tile scf-bin-tile--add" hover-class="scf-card--press" @tap="addSetupRow">
+				<view class="scf-bin-tile scf-bin-tile--add" v-if="!isStreetHub" hover-class="scf-card--press" @tap="addSetupRow">
 					<text class="scf-bin-tile-add-ico">＋</text>
 					<text class="scf-bin-tile-add-lab">再添一处</text>
 					<text class="scf-bin-tile-add-sub">扔垃圾的位置</text>
@@ -442,13 +419,14 @@
 			</view>
 			<view class="scf-foot scf-foot--single scf-foot--setup">
 				<text class="scf-setup-foot-hint" v-if="isResidentialHub">{{ residentialSetupFootnote }}</text>
-				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">{{ isResidentialHub ? residentialSetupNextCta : '保存，去选位置拍照' }}</view>
+				<text class="scf-setup-foot-hint" v-else-if="isStreetHub">{{ streetSetupFootnote }}</text>
+				<view class="scf-btn scf-btn--primary" hover-class="scf-card--press" @tap="saveSetup">{{ setupSaveCta }}</view>
 			</view>
 			</block>
 		</view>
 
 		<view
-			v-if="isResidentialHub && residentialPickMode && flowStep === 'setup'"
+			v-if="isOwnPointHub && residentialPickMode && flowStep === 'setup'"
 			class="scf-pick-mask"
 			@tap="exitResidentialPickMode"
 		></view>
@@ -771,7 +749,7 @@
 					<text class="scf-habit-text">{{ clockHabitTip }}</text>
 				</view>
 				<view class="scf-success-actions">
-					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">{{ isResidentialHub ? '再选桶打卡' : '再选位置拍照' }}</view>
+					<view class="scf-btn scf-btn--primary scf-btn--block" @tap="clockSuccessContinue">{{ isOwnPointHub ? (isStreetHub ? '再选点打卡' : '再选桶打卡') : '再选位置拍照' }}</view>
 					<view class="scf-btn scf-btn--ghost scf-btn--block scf-success-back" @tap="goActivityTab">返回活动</view>
 				</view>
 			</view>
@@ -821,14 +799,18 @@
 		getStreetClaimLead,
 		getStreetClaimShopNamePh,
 		getStreetClaimTypeHint,
-		getStreetClaimDropHint,
 		getStreetClaimSubmit,
-		getStreetClaimNoDrop,
-		getStreetHubDropTitle,
-		getStreetHubCateLabel,
-		getStreetHubNav,
-		getStreetHubStartClock,
-		getStreetHubEdit,
+		getStreetSetupKicker,
+		getStreetSetupSub,
+		getStreetSetupNamePh,
+		getStreetSetupFootnote,
+		getStreetSetupNextCta,
+		getStreetPickLead,
+		getStreetPickSub,
+		getStreetPickMaskHint,
+		getStreetBinSettingsFoldTitle,
+		getStreetBinSettingsFoldHint,
+		getStreetEditShop,
 		getThemePromoPillars,
 		getThemeIntroHeroSlogan,
 		getThemeBriefTagline,
@@ -918,23 +900,19 @@
 				pendingHubKey: '',
 				streetMerchant: null,
 				streetShopTypes: [],
-				streetDropPoints: [],
-				streetDropPointsLoading: false,
 				streetFormShopName: '',
 				streetFormTypeIndex: 0,
-				streetFormDropIndex: 0,
 				streetClaimTitle: getStreetClaimTitle(),
 				streetClaimLead: getStreetClaimLead(),
 				streetClaimShopNamePh: getStreetClaimShopNamePh(),
 				streetClaimTypeHint: getStreetClaimTypeHint(),
-				streetClaimDropHint: getStreetClaimDropHint(),
 				streetClaimSubmit: getStreetClaimSubmit(),
-				streetClaimNoDrop: getStreetClaimNoDrop(),
-				streetHubDropTitle: getStreetHubDropTitle(),
-				streetHubCateLabel: getStreetHubCateLabel(),
-				streetHubNav: getStreetHubNav(),
-				streetHubStartClock: getStreetHubStartClock(),
-				streetHubEdit: getStreetHubEdit(),
+				streetSetupKicker: getStreetSetupKicker(),
+				streetSetupSub: getStreetSetupSub(),
+				streetSetupNamePh: getStreetSetupNamePh(),
+				streetSetupFootnote: getStreetSetupFootnote(),
+				streetSetupNextCta: getStreetSetupNextCta(),
+				streetEditShop: getStreetEditShop(),
 				binLayoutExamples: [],
 				binSetupLead: getBinSetupLead(),
 				binSetupLeadNote: getBinSetupLeadNote(),
@@ -951,6 +929,29 @@
 		computed: {
 			isResidentialHub() {
 				return this.hubKey === 'home'
+			},
+			isOwnPointHub() {
+				return this.isResidentialHub || (this.isStreetHub && !!this.streetMerchant)
+			},
+			setupSaveCta() {
+				if (this.isResidentialHub) return this.residentialSetupNextCta
+				if (this.isStreetHub) return this.streetSetupNextCta
+				return '保存，去选位置拍照'
+			},
+			ownPointPickLead() {
+				return this.isStreetHub ? getStreetPickLead() : this.residentialPickLead
+			},
+			ownPointPickSub() {
+				return this.isStreetHub ? getStreetPickSub() : this.residentialPickSub
+			},
+			ownPointPickMaskHint() {
+				return this.isStreetHub ? getStreetPickMaskHint() : this.residentialPickMaskHint
+			},
+			ownPointSettingsFoldTitle() {
+				return this.isStreetHub ? getStreetBinSettingsFoldTitle() : this.residentialBinSettingsFoldTitle
+			},
+			ownPointSettingsFoldHint() {
+				return this.isStreetHub ? getStreetBinSettingsFoldHint() : this.residentialBinSettingsFoldHint
 			},
 			/** 选桶高亮区：不含折叠里未保存的草稿 */
 			residentialPickPoints() {
@@ -1169,10 +1170,13 @@
 				return getScenePickNavTitle()
 			},
 			visibleStepLabels() {
-				if (['manage', 'hub_empty', 'street_merchant', 'street_hub'].indexOf(this.flowStep) >= 0) return []
+				if (['manage', 'hub_empty', 'street_merchant'].indexOf(this.flowStep) >= 0) return []
 				if (this.flowStep === 'points' && !this.isResidentialHub) return []
-				if (this.isStreetHub && ['guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0) {
+				if (this.isOwnPointHub && this.isStreetHub && ['guide', 'survey', 'learn'].indexOf(this.flowStep) >= 0) {
 					return ['怎么扔', '小窍门', '拍照']
+				}
+				if (this.isOwnPointHub && this.isStreetHub && (this.flowStep === 'setup' || this.residentialPickMode)) {
+					return ['设投放点', '选点打卡', '拍照提交']
 				}
 				if (this.isResidentialHub) {
 					return ['摆好桶', '选桶打卡', '上传成果']
@@ -1181,7 +1185,7 @@
 				return ['怎么扔', '小窍门', '拍照']
 			},
 			stepIndex() {
-				if (this.isResidentialHub) {
+				if (this.isOwnPointHub && (this.isResidentialHub || this.isStreetHub)) {
 					if (this.flowStep === 'learn') return 2
 					if (this.residentialPickMode) return 1
 					if (this.flowStep === 'setup') return 0
@@ -1620,7 +1624,8 @@
 					return
 				}
 				if (this.isStreetHub) {
-					this.flowStep = 'street_hub'
+					this.flowStep = 'setup'
+					this.residentialPickMode = (this.points || []).length > 0
 					return
 				}
 				this.flowStep = 'survey'
@@ -1645,29 +1650,9 @@
 					return []
 				})
 			},
-			loadStreetDropPointsForForm() {
-				const t = (this.streetShopTypes || [])[this.streetFormTypeIndex]
-				if (!t || !t.key) {
-					this.streetDropPoints = []
-					return Promise.resolve()
-				}
-				this.streetDropPointsLoading = true
-				return this.$u.api.street_shop_drop_points({ shop_type: t.key }).then(res => {
-					this.streetDropPoints = res.data || []
-					if (this.streetFormDropIndex >= this.streetDropPoints.length) {
-						this.streetFormDropIndex = 0
-					}
-				}).catch(() => {
-					this.streetDropPoints = []
-				}).finally(() => {
-					this.streetDropPointsLoading = false
-				})
-			},
 			onStreetTypePick(e) {
 				const idx = Number(e.detail.value)
 				this.streetFormTypeIndex = Number.isFinite(idx) ? idx : 0
-				this.streetFormDropIndex = 0
-				this.loadStreetDropPointsForForm()
 			},
 			fillStreetFormFromMerchant(merchant) {
 				if (!merchant) return
@@ -1676,10 +1661,6 @@
 				let ti = types.findIndex(x => x.key === merchant.shop_type)
 				if (ti < 0) ti = 0
 				this.streetFormTypeIndex = ti
-				this.loadStreetDropPointsForForm().then(() => {
-					const di = (this.streetDropPoints || []).findIndex(d => Number(d.id) === Number(merchant.drop_point_id))
-					this.streetFormDropIndex = di >= 0 ? di : 0
-				})
 			},
 			applyStreetMerchantToSession(merchant) {
 				if (!merchant) return
@@ -1688,9 +1669,50 @@
 				this.activeCateName = merchant.cate_name || ''
 				this.cateLabel = guideCateLabelFromName(merchant.cate_name)
 				this.subKey = ''
-				const dp = merchant.drop_point
-				this.pointId = dp && dp.id ? dp.id : Number(merchant.drop_point_id) || 0
-				this.pointName = dp && dp.name ? dp.name : ''
+			},
+			enterStreetSetupFlow() {
+				this.residentialPickMode = false
+				this.residentialBinSettingsOpen = false
+				let cateIdx = 0
+				const cid = this.streetMerchant && Number(this.streetMerchant.cate_id)
+				for (let i = 0; i < (this.cateList || []).length; i++) {
+					if (Number(this.cateList[i].id) === cid) {
+						cateIdx = i
+						break
+					}
+				}
+				if (!this.hydrateSetupRowsFromPoints()) {
+					this.setupRows = [{ point_name: '', cate_index: cateIdx, point_image: '', point_image_url: '' }]
+				} else {
+					this.setupRows = this.setupRows.map(r => ({ ...r, cate_index: cateIdx }))
+				}
+				this.flowStep = 'setup'
+			},
+			routeStreetAfterMerchantLoaded(keepFlow) {
+				if (keepFlow === 'learn' || this.flowStep === 'learn') return
+				if (keepFlow === 'guide' || keepFlow === 'survey') return
+				if (keepFlow === 'manage') {
+					this.points = (this.points || []).map(p => this.decoratePointForEdit(p))
+					this.flowStep = 'manage'
+					return
+				}
+				if (keepFlow === 'pick') {
+					this.flowStep = 'setup'
+					this.residentialPickMode = this.points.length > 0
+					this.residentialBinSettingsOpen = false
+					return
+				}
+				if (keepFlow === 'setup') {
+					this.enterStreetSetupFlow()
+					return
+				}
+				if (this.points.length > 0) {
+					this.flowStep = 'setup'
+					this.residentialPickMode = true
+					this.residentialBinSettingsOpen = false
+				} else {
+					this.enterStreetSetupFlow()
+				}
 			},
 			initStreetMerchantFlow(keepFlow) {
 				this.pointsLoading = true
@@ -1698,23 +1720,16 @@
 					return this.$u.api.street_shop_my_merchant()
 				}).then(res => {
 					const merchant = res.data || null
-					if (merchant && merchant.id) {
-						this.applyStreetMerchantToSession(merchant)
-						if (keepFlow === 'learn' || this.flowStep === 'learn') {
-							return
-						}
-						if (keepFlow === 'guide' || keepFlow === 'survey') {
-							return
-						}
-						this.flowStep = 'street_hub'
+					if (!merchant || !merchant.id) {
+						this.streetMerchant = null
+						this.flowStep = 'street_merchant'
 						return
 					}
-					this.streetMerchant = null
-					this.fillStreetFormFromMerchant(null)
-					this.flowStep = 'street_merchant'
-					if ((this.streetShopTypes || []).length) {
-						return this.loadStreetDropPointsForForm()
-					}
+					this.applyStreetMerchantToSession(merchant)
+					return this.$u.api.list_clock_scene_point({ hub_key: 'street' }).then(pr => {
+						this.points = (pr.data || []).map(p => this.normalizeScenePoint(p))
+						this.routeStreetAfterMerchantLoaded(keepFlow)
+					})
 				}).catch(err => {
 					this.scfDbg('initStreetMerchantFlow error', err && (err.msg || err.message))
 					this.flowStep = 'street_merchant'
@@ -1735,52 +1750,25 @@
 				if (!t || !t.key) {
 					return this.$u.toast('请选择商铺类型')
 				}
-				const dp = (this.streetDropPoints || [])[this.streetFormDropIndex]
-				if (!dp || !dp.id) {
-					return this.$u.toast('请选择统一投放点')
-				}
 				this.$u.api.street_shop_save_merchant({
 					shop_name: shopName,
 					shop_type: t.key,
-					drop_point_id: dp.id,
 				}).then(res => {
 					const merchant = res.data || null
 					if (!merchant) {
 						return this.$u.toast('保存失败')
 					}
 					this.applyStreetMerchantToSession(merchant)
-					this.flowStep = 'street_hub'
-					this.$u.toast(res.msg || '认领成功')
+					this.$u.toast(res.msg || '已保存')
+					return this.initStreetMerchantFlow('setup')
 				}).catch(e => {
 					this.$u.toast((e && e.msg) || '保存失败')
 				})
 			},
-			openStreetDropNav() {
-				const dp = this.streetMerchant && this.streetMerchant.drop_point
-				if (!dp || !dp.lat || !dp.lng) {
-					return this.$u.toast('暂无导航坐标')
-				}
-				uni.openLocation({
-					latitude: Number(dp.lat),
-					longitude: Number(dp.lng),
-					name: dp.name || '统一投放点',
-					address: dp.address || '',
-					scale: 16,
-				})
-			},
-			startStreetClockFromHub() {
-				if (!this.streetMerchant) return
-				this.applyStreetMerchantToSession(this.streetMerchant)
-				this.loadGuide()
-				this.accumDuration = ''
-				this.sortDuration = ''
-				this.resetClockSlots()
-				this.clockContent = ''
-				this.flowStep = 'guide'
-			},
 			editStreetMerchant() {
 				if (!this.streetMerchant) return
 				this.fillStreetFormFromMerchant(this.streetMerchant)
+				this.residentialPickMode = false
 				this.flowStep = 'street_merchant'
 			},
 			initUserPoints(keepFlow) {
@@ -1995,10 +1983,15 @@
 			async saveSetup() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				const rows = this.setupRows.filter(r => r.point_name && String(r.point_name).trim())
-				if (!rows.length) return this.$u.toast('请至少添一个扔垃圾的地方')
+				if (!rows.length) {
+					return this.$u.toast(this.isStreetHub ? '请填写投放点名称' : '请至少添一个扔垃圾的地方')
+				}
 				try {
 					for (const row of rows) {
-						const cate = this.cateList[row.cate_index]
+						let cate = this.cateList[row.cate_index]
+						if (this.isStreetHub && this.streetMerchant) {
+							cate = (this.cateList || []).find(c => Number(c.id) === Number(this.streetMerchant.cate_id))
+						}
 						if (!cate) return this.$u.toast('请选择垃圾种类')
 						const img = String(row.point_image || '').trim()
 						if (!img) return this.$u.toast('请为每个点位上传照片')
@@ -2018,6 +2011,10 @@
 					this.$u.toast('已保存')
 					if (this.isResidentialHub) {
 						await this.initUserPoints('pick')
+						return
+					}
+					if (this.isStreetHub) {
+						await this.initStreetMerchantFlow('pick')
 						return
 					}
 					this.setupRows = [{ point_name: '', cate_index: 0, point_image: '', point_image_url: '' }]
@@ -2064,7 +2061,10 @@
 				if (!p) return
 				const name = String(p._edit_name || '').trim()
 				if (!name) return this.$u.toast('请填写点位名称')
-				const cate = this.cateList[p._edit_cate_index]
+				let cate = this.cateList[p._edit_cate_index]
+				if (this.isStreetHub && this.streetMerchant) {
+					cate = (this.cateList || []).find(c => Number(c.id) === Number(this.streetMerchant.cate_id))
+				}
 				if (!cate) return this.$u.toast('请选择种类')
 				const img = String(p._edit_image || p.point_image || '').trim()
 				if (!img) return this.$u.toast('请上传点位照片')
@@ -2079,29 +2079,47 @@
 				}
 				await this.$u.api.save_clock_scene_point(payload)
 				this.$u.toast('已保存')
-				if (this.isResidentialHub && this.residentialPickMode) {
-					this.initUserPoints('pick').then(() => {
+				if (this.isOwnPointHub && this.residentialPickMode) {
+					const reload = this.isStreetHub
+						? () => this.initStreetMerchantFlow('pick')
+						: () => this.initUserPoints('pick')
+					reload().then(() => {
 						this.residentialBinSettingsOpen = true
 						this.points = (this.points || []).map(item => this.decoratePointForEdit(item))
 					})
+					return
+				}
+				if (this.isStreetHub) {
+					this.initStreetMerchantFlow('manage')
 					return
 				}
 				this.initUserPoints('manage')
 			},
 			deletePointById(id) {
 				this.confirmDeleteScenePoint(id, () => {
-					if (this.isResidentialHub && this.residentialPickMode) {
-						this.initUserPoints('pick').then(() => {
+					if (this.isOwnPointHub && this.residentialPickMode) {
+						const reload = this.isStreetHub
+							? () => this.initStreetMerchantFlow('pick')
+							: () => this.initUserPoints('pick')
+						reload().then(() => {
 							if (!this.points.length) {
 								this.residentialPickMode = false
 								this.residentialBinSettingsOpen = false
-								this.enterResidentialSetupFlow()
+								if (this.isStreetHub) {
+									this.enterStreetSetupFlow()
+								} else {
+									this.enterResidentialSetupFlow()
+								}
 								return
 							}
 							if (this.residentialBinSettingsOpen) {
 								this.points = (this.points || []).map(p => this.decoratePointForEdit(p))
 							}
 						})
+						return
+					}
+					if (this.isStreetHub) {
+						this.initStreetMerchantFlow('manage')
 						return
 					}
 					this.initUserPoints('manage')
@@ -2113,7 +2131,7 @@
 				this.flowStep = 'setup'
 			},
 			backFromManage() {
-				if (this.isResidentialHub) {
+				if (this.isOwnPointHub) {
 					this.flowStep = 'setup'
 					this.residentialPickMode = this.points.length > 0
 					this.residentialBinSettingsOpen = false
@@ -2126,7 +2144,7 @@
 				const group = groups[gIdx]
 				const p = group && group.items && group.items[pIdx]
 				if (!p || p.id == null) return
-				if (this.isResidentialHub) {
+				if (this.isOwnPointHub) {
 					this.pickResidentialPoint(p)
 					return
 				}
@@ -2162,7 +2180,8 @@
 			},
 			backFromGuide() {
 				if (this.isStreetHub) {
-					this.flowStep = 'street_hub'
+					this.flowStep = 'setup'
+					this.residentialPickMode = (this.points || []).length > 0
 					return
 				}
 				this.flowStep = 'points'
@@ -2364,7 +2383,7 @@
 					return
 				}
 				if (this.isStreetHub) {
-					this.flowStep = 'street_hub'
+					this.initStreetMerchantFlow('pick')
 					return
 				}
 				this.flowStep = 'points'
@@ -2516,6 +2535,34 @@
 	font-size: 28rpx;
 	color: #8a9590;
 	padding: 16rpx 0;
+}
+.scf-street-shop-bar {
+	margin-bottom: 20rpx;
+	padding: 20rpx 22rpx;
+	background: #fff;
+	border-radius: 16rpx;
+	box-shadow: 0 6rpx 20rpx rgba(20, 40, 28, 0.06);
+}
+.scf-street-shop-bar-name {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #142018;
+}
+.scf-street-shop-bar-meta {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 26rpx;
+	color: #6a756c;
+}
+.scf-street-shop-bar-edit {
+	display: inline-block;
+	margin-top: 12rpx;
+	font-size: 26rpx;
+	color: #18af38;
+}
+.scf-bin-tile-cate--locked {
+	opacity: 0.95;
 }
 .scf-street-shop-k {
 	font-size: 26rpx;

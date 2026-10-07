@@ -8,9 +8,6 @@ use app\admin\model\basic\SelectModel;
 use app\admin\model\forum\ForumCateModel;
 use app\admin\model\forum\ClockSceneGuideModel;
 use app\admin\model\forum\ClockScenePointModel;
-use app\admin\model\forum\StreetShopConfig;
-use app\admin\model\forum\StreetShopDropPointModel;
-use app\admin\model\forum\StreetShopMerchantModel;
 use app\admin\model\forum\ClockTutorialModel;
 use app\admin\model\forum\ForumDeleteLogModel;
 use app\admin\model\forum\ForumHandleModel;
@@ -600,121 +597,16 @@ class ForumController extends ToolController
         $this->success('已删除');
     }
 
-    /** 沿街：统一投放点（按商铺类型共享） */
-    public function street_shop_drop_point_index()
-    {
-        $shopType = trim((string)$this->request->param('shop_type', ''));
-        $keyword = trim((string)$this->request->param('keyword', ''));
-        $query = StreetShopDropPointModel::order('list_order asc,id desc');
-        if ($shopType !== '' && StreetShopConfig::normalizeShopType($shopType) !== '') {
-            $query->where('shop_type', $shopType);
-        }
-        if ($keyword !== '') {
-            $query->where('name|address', 'like', '%' . $keyword . '%');
-        }
-        $list = $query->paginate(20);
-        $typeLabels = StreetShopConfig::shopTypes();
-        return $this->fetch('street_shop_drop_point_index', [
-            'list'       => $list,
-            'page'       => $list->render(),
-            'shop_type'  => $shopType,
-            'keyword'    => $keyword,
-            'typeLabels' => $typeLabels,
-        ]);
-    }
-
-    public function street_shop_drop_point_add()
-    {
-        $id = $this->request->param('id', 0, 'intval');
-        $item = null;
-        if ($id > 0) {
-            $item = StreetShopDropPointModel::where('id', $id)->find();
-            if (empty($item)) {
-                $this->error('记录不存在');
-            }
-        }
-        return $this->fetch('street_shop_drop_point_add', [
-            'data'       => $item,
-            'typeLabels' => StreetShopConfig::shopTypes(),
-        ]);
-    }
-
-    public function street_shop_drop_point_add_post()
-    {
-        if (!$this->request->isPost()) {
-            $this->error('非法请求');
-        }
-        $id = $this->request->param('id', 0, 'intval');
-        $shopType = StreetShopConfig::normalizeShopType(trim((string)$this->request->param('shop_type', '')));
-        if ($shopType === '') {
-            $this->error('请选择商铺类型');
-        }
-        $name = trim((string)$this->request->param('name', ''));
-        $address = trim((string)$this->request->param('address', ''));
-        if ($name === '') {
-            $this->error('请填写投放点显示名称');
-        }
-        if ($address === '') {
-            $this->error('请填写地址说明');
-        }
-        $lng = (float)$this->request->param('lng', 0);
-        $lat = (float)$this->request->param('lat', 0);
-        if ($lng < -180 || $lng > 180 || $lat < -90 || $lat > 90 || ($lng == 0.0 && $lat == 0.0)) {
-            $this->error('请填写有效经纬度');
-        }
-        $cate = StreetShopConfig::resolveCateByShopType($shopType);
-        if (!$cate) {
-            $this->error('该商铺类型未匹配到垃圾种类，请检查基础选项');
-        }
-        $now = time();
-        $save = [
-            'shop_type'      => $shopType,
-            'shop_type_name' => StreetShopConfig::shopTypeLabel($shopType),
-            'name'           => mb_substr($name, 0, 64),
-            'address'        => mb_substr($address, 0, 255),
-            'lng'            => round($lng, 6),
-            'lat'            => round($lat, 6),
-            'cate_id'        => (int)$cate['id'],
-            'cate_name'      => (string)$cate['name'],
-            'list_order'     => (int)$this->request->param('list_order', 0),
-            'status'         => (int)$this->request->param('status', 1) ? 1 : 0,
-            'update_time'    => $now,
-        ];
-        if ($id > 0) {
-            StreetShopDropPointModel::where('id', $id)->update($save);
-            $this->success('保存成功', url('street_shop_drop_point_index'));
-            return;
-        }
-        $save['create_time'] = $now;
-        StreetShopDropPointModel::insert($save);
-        $this->success('添加成功', url('street_shop_drop_point_index'));
-    }
-
-    public function street_shop_drop_point_delete()
-    {
-        $id = $this->request->param('id', 0, 'intval');
-        if ($id <= 0) {
-            $this->error('参数错误');
-        }
-        $used = (int)Db::name('street_shop_merchant')->where('drop_point_id', $id)->count();
-        if ($used > 0) {
-            $this->error('已有商户绑定该投放点，无法删除');
-        }
-        StreetShopDropPointModel::where('id', $id)->delete();
-        $this->success('已删除');
-    }
-
-    /** 沿街：用户认领商户 */
+    /** 沿街：用户登记商户（点位由用户在小程序上传） */
     public function street_shop_merchant_index()
     {
         $keyword = trim((string)$this->request->param('keyword', ''));
         $query = Db::name('street_shop_merchant')->alias('m')
             ->join('member mem', 'mem.id = m.user_id', 'LEFT')
-            ->join('street_shop_drop_point dp', 'dp.id = m.drop_point_id', 'LEFT')
-            ->field('m.*, mem.nickname, mem.mobile, dp.name as drop_name, dp.address as drop_address')
+            ->field('m.*, mem.nickname, mem.mobile')
             ->order('m.id desc');
         if ($keyword !== '') {
-            $query->where('m.shop_name|mem.nickname|mem.mobile|dp.name', 'like', '%' . $keyword . '%');
+            $query->where('m.shop_name|mem.nickname|mem.mobile', 'like', '%' . $keyword . '%');
         }
         $list = $query->paginate(20);
         return $this->fetch('street_shop_merchant_index', [

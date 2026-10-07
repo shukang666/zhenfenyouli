@@ -20,6 +20,7 @@ class StreetShopConfig
             'clothing'    => ['name' => '服装店', 'cate_keyword' => '可回收'],
             'barber'      => ['name' => '美容美发', 'cate_keyword' => '其他'],
             'print'       => ['name' => '图文印刷', 'cate_keyword' => '可回收'],
+            'express'     => ['name' => '快递驿站', 'cate_keyword' => '可回收'],
             'other'       => ['name' => '其他商铺', 'cate_keyword' => '其他'],
         ];
     }

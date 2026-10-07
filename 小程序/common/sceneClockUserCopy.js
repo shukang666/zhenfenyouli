@@ -269,13 +269,13 @@ export function getSceneHubCards() {
 	]
 }
 
-/** 沿街：登记商铺 + 选投放点 */
+/** 沿街：登记商铺 + 自传投放点照片（同家庭摆桶逻辑） */
 export function getStreetClaimTitle() {
 	return '登记沿街商铺'
 }
 
 export function getStreetClaimLead() {
-	return '有门面的先在这里登记店名和类型，选好投放点就能打卡。家里分类仍走家庭场景，两边分开算。'
+	return '有门面的填店名、选类型，再拍一张店里投放点的照片，以后在这边打卡。'
 }
 
 export function getStreetClaimShopNamePh() {
@@ -283,39 +283,55 @@ export function getStreetClaimShopNamePh() {
 }
 
 export function getStreetClaimTypeHint() {
-	return '按经营种类选，会对应您店主要要分的那一类垃圾。'
-}
-
-export function getStreetClaimDropHint() {
-	return '选社区给这类店用的集中投放点，打卡前可以导航过去。'
+	return '选经营种类，系统会定好您店主要分哪一类。'
 }
 
 export function getStreetClaimSubmit() {
-	return '保存登记'
+	return '下一步，拍投放点'
 }
 
-export function getStreetClaimNoDrop() {
-	return '这类店还没配投放点，请联系社区或物业。'
+export function getStreetSetupKicker() {
+	return '拍您店的投放点'
 }
 
-export function getStreetHubDropTitle() {
-	return '统一投放点'
+export function getStreetSetupSub() {
+	return '和家里一样：起个名字、拍清楚桶或投放位置，保存后点选即可打卡。'
 }
 
-export function getStreetHubCateLabel() {
-	return '本店主要打卡种类'
+export function getStreetSetupNamePh() {
+	return '如：店后垃圾桶、门口分类桶'
 }
 
-export function getStreetHubNav() {
-	return '导航去投放点'
+export function getStreetSetupFootnote() {
+	return '种类已按商铺类型定好，不用另选。'
 }
 
-export function getStreetHubStartClock() {
-	return '开始分类打卡'
+export function getStreetSetupNextCta() {
+	return '保存，去选点打卡'
 }
 
-export function getStreetHubEdit() {
-	return '修改商铺信息'
+export function getStreetPickLead() {
+	return '点选下面这个投放点，上传分类照片'
+}
+
+export function getStreetPickSub() {
+	return '需要改照片或名字，点下方「展开」'
+}
+
+export function getStreetPickMaskHint() {
+	return '轻触空白处返回'
+}
+
+export function getStreetBinSettingsFoldTitle() {
+	return '改投放点照片或名称'
+}
+
+export function getStreetBinSettingsFoldHint() {
+	return '展开后可修改，保存即生效'
+}
+
+export function getStreetEditShop() {
+	return '改店名或类型'
 }
 
 /** 任务说明（原型 Screen 5） */

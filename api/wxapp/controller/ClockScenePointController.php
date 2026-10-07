@@ -7,12 +7,12 @@ use app\admin\model\forum\ClockScenePointModel;
 use think\facade\Db;
 
 /**
- * 场景真分点：家庭/亲子用户自建；沿街/办公由后台统一配置
+ * 场景真分点：家庭/沿街用户自建；办公由后台统一配置
  */
 class ClockScenePointController extends AuthController
 {
     /** @var string[] */
-    private $userHubs = ['home'];
+    private $userHubs = ['home', 'street'];
 
     /** @var string[] */
     private $listHubs = ['home', 'qinzi', 'street', 'office'];
@@ -51,6 +51,10 @@ class ClockScenePointController extends AuthController
         if ($hub === '') {
             $this->error('该场景回收点由社区统一配置，请联系工作人员');
         }
+        $streetMerchant = null;
+        if ($hub === 'street') {
+            $streetMerchant = $this->requireStreetMerchant();
+        }
         $pointName = trim((string)$this->request->param('point_name', ''));
         $cateId = intval($this->request->param('cate_id', 0));
         if ($pointName === '') {
@@ -58,6 +62,9 @@ class ClockScenePointController extends AuthController
         }
         if (mb_strlen($pointName) > 32) {
             $this->error('真分点名称过长');
+        }
+        if ($streetMerchant) {
+            $cateId = (int)$streetMerchant['cate_id'];
         }
         $cate = $this->resolveClockCate($cateId);
         if (!$cate) {
@@ -168,7 +175,30 @@ class ClockScenePointController extends AuthController
         if ($hub === 'qinzi') {
             $hub = 'home';
         }
+        if ($hub === 'street') {
+            $merchant = Db::name('street_shop_merchant')
+                ->where('user_id', $this->user_id)
+                ->where('status', 1)
+                ->find();
+            if (empty($merchant)) {
+                return '';
+            }
+        }
         return in_array($hub, $this->userHubs, true) ? $hub : '';
+    }
+
+    /** @return array<string,mixed> */
+    private function requireStreetMerchant(): array
+    {
+        $this->checkUser();
+        $merchant = Db::name('street_shop_merchant')
+            ->where('user_id', $this->user_id)
+            ->where('status', 1)
+            ->find();
+        if (empty($merchant)) {
+            $this->error('请先登记沿街商铺');
+        }
+        return $merchant;
     }
 
     /**

@@ -235,14 +235,13 @@ class ForumController extends AuthController
                     ->where('status', 1)
                     ->find();
                 if (empty($merchant)) {
-                    $this->error('请先认领沿街商铺');
+                    $this->error('请先登记沿街商铺');
                 }
                 if ($merchantId > 0 && (int)$merchant['id'] !== $merchantId) {
                     $this->error('商户信息无效');
                 }
                 $params['clock_scene'] = 'street';
                 $params['clock_sub_scene'] = 'merchant_' . (int)$merchant['id'];
-                $params['clock_point_id'] = (int)$merchant['drop_point_id'];
                 if (empty($params['cate_id'])) {
                     $params['cate_id'] = (int)$merchant['cate_id'];
                 }

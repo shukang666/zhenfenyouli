@@ -3,11 +3,10 @@
 <body>
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
-        <li><a href="{:url('street_shop_drop_point_index')}">沿街统一投放点</a></li>
-        <li class="active"><a href="{:url('street_shop_merchant_index')}">沿街认领商户</a></li>
+        <li class="active"><a href="{:url('street_shop_merchant_index')}">沿街登记商户</a></li>
     </ul>
     <form class="well form-inline margin-top-15" method="get" action="{:url('street_shop_merchant_index')}">
-        <input type="text" name="keyword" class="form-control" placeholder="商铺名/用户/投放点" value="{$keyword}">
+        <input type="text" name="keyword" class="form-control" placeholder="商铺名/用户" value="{$keyword}">
         <button type="submit" class="btn btn-primary">搜索</button>
     </form>
     <table class="table table-hover table-bordered margin-top-10">
@@ -18,8 +17,7 @@
             <th>商铺名称</th>
             <th>类型</th>
             <th>打卡种类</th>
-            <th>绑定投放点</th>
-            <th>认领时间</th>
+            <th>登记时间</th>
         </tr>
         </thead>
         <tbody>
@@ -30,7 +28,6 @@
                 <td>{$vo.shop_name}</td>
                 <td>{$vo.shop_type_name}</td>
                 <td>{$vo.cate_name}</td>
-                <td>{$vo.drop_name|default=''}<br><small>{$vo.drop_address|default=''}</small></td>
                 <td>{:date('Y-m-d H:i',$vo.create_time)}</td>
             </tr>
         </foreach>
