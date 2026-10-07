@@ -73,9 +73,11 @@
 					</view>
 
 					<view v-else-if="block.type === 'quiz'" class="cle-quiz">
-						<text class="cle-quiz-tag">{{ block.tag || '练一练' }}</text>
 						<text class="cle-quiz-q">{{ block.question }}</text>
-						<view class="cle-opt-grid">
+						<view
+							class="cle-opt-grid"
+							:class="{ 'cle-opt-grid--row4': block.id === 'q1' || block.id === 'q2' }"
+						>
 							<view
 								v-for="(opt, oi) in block.options"
 								:key="oi"
@@ -205,7 +207,7 @@
 			},
 			submitExam() {
 				if (!this.canSubmit || this.submitting) {
-					if (!this.canSubmit) this.$u.toast('请答完所有练一练题目')
+					if (!this.canSubmit) this.$u.toast('请答完所有题目')
 					return
 				}
 				this.submitting = true
@@ -467,46 +469,54 @@
 	border-radius: 20rpx;
 	box-shadow: 0 6rpx 20rpx rgba(36, 48, 40, 0.05);
 }
-.cle-quiz-tag {
-	display: inline-block;
-	padding: 6rpx 16rpx;
-	border-radius: 999rpx;
-	background: rgba(24, 175, 56, 0.12);
-	color: #18af38;
-	font-size: 24rpx;
-	font-weight: 700;
-	margin-bottom: 16rpx;
-}
 .cle-quiz-q {
 	display: block;
 	font-size: 32rpx;
 	font-weight: 700;
 	color: #142018;
 	line-height: 1.5;
-	margin-bottom: 20rpx;
+	margin-bottom: 16rpx;
 }
 .cle-opt-grid {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: space-between;
-	row-gap: 16rpx;
+	row-gap: 12rpx;
+}
+.cle-opt-grid--row4 {
+	flex-wrap: nowrap;
+	justify-content: flex-start;
+	column-gap: 8rpx;
+	row-gap: 0;
 }
 .cle-opt {
-	width: calc(50% - 10rpx);
+	width: calc(50% - 8rpx);
 	box-sizing: border-box;
-	min-height: 88rpx;
-	padding: 18rpx 14rpx;
-	border-radius: 20rpx;
+	min-height: 72rpx;
+	padding: 10rpx 8rpx;
+	border-radius: 16rpx;
 	border: 2rpx solid #c8d4cc;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 }
+.cle-opt-grid--row4 .cle-opt {
+	flex: 1;
+	width: 0;
+	min-width: 0;
+	min-height: 64rpx;
+	padding: 8rpx 4rpx;
+	border-radius: 12rpx;
+}
 .cle-opt-text {
 	font-size: 26rpx;
-	line-height: 1.4;
+	line-height: 1.35;
 	color: #3a4540;
 	text-align: center;
+}
+.cle-opt-grid--row4 .cle-opt-text {
+	font-size: 22rpx;
+	line-height: 1.25;
 }
 .cle-opt--on .cle-opt-text {
 	color: #18af38;

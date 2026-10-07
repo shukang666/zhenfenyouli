@@ -106,7 +106,7 @@ class ClockLearnExamService
             'type'        => 1,
             'status'      => 3,
             'score'       => 100,
-            'total_num'   => 5,
+            'total_num'   => 4,
             'create_time' => $now,
         ]);
     }
@@ -196,19 +196,6 @@ class ClockLearnExamService
                     ['key' => 'D', 'text' => '垃圾堆一起'],
                 ],
                 'answer'   => 'B',
-            ],
-            [
-                'type'     => 'quiz',
-                'id'       => 'q4',
-                'tag'      => '练一练',
-                'question' => '坚持真分打卡，对您有什么好处？',
-                'options'  => [
-                    ['key' => 'A', 'text' => '养成习惯攒积分'],
-                    ['key' => 'B', 'text' => '随便混装'],
-                    ['key' => 'C', 'text' => '不管桶颜色'],
-                    ['key' => 'D', 'text' => '与环保无关'],
-                ],
-                'answer'   => 'A',
             ],
             [
                 'type'     => 'quiz',
