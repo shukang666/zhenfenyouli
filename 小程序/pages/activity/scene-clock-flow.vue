@@ -137,7 +137,15 @@
 				<text class="scf-info-text scf-street-claim-lead">{{ streetClaimLead }}</text>
 				<view class="scf-street-field">
 					<text class="scf-street-label">商铺名称</text>
-					<input class="scf-street-input" v-model="streetFormShopName" :placeholder="streetClaimShopNamePh" maxlength="64" />
+					<input
+						class="scf-street-input"
+						type="text"
+						v-model="streetFormShopName"
+						:placeholder="streetClaimShopNamePh"
+						placeholder-class="scf-street-input-ph"
+						maxlength="64"
+						:adjust-position="true"
+					/>
 				</view>
 				<view class="scf-street-field">
 					<text class="scf-street-label">商铺类型</text>
@@ -2413,7 +2421,12 @@
 	margin-bottom: 12rpx;
 }
 .scf-street-claim-lead {
+	display: block;
 	margin-bottom: 24rpx;
+	font-weight: 400;
+	font-size: 28rpx;
+	line-height: 1.6;
+	color: #5a6b62;
 }
 .scf-street-field {
 	margin-bottom: 28rpx;
@@ -2432,11 +2445,30 @@
 	line-height: 1.5;
 	margin-bottom: 12rpx;
 }
-.scf-street-input,
+.scf-street-input {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	min-height: 96rpx;
+	height: 96rpx;
+	padding: 0 24rpx;
+	line-height: 96rpx;
+	background: #f5f8f6;
+	border-radius: 16rpx;
+	font-size: 30rpx;
+	color: #142018;
+}
+.scf-street-input-ph {
+	font-size: 28rpx;
+	line-height: 96rpx;
+	color: #9aa5a0;
+}
 .scf-street-picker {
 	width: 100%;
 	box-sizing: border-box;
-	padding: 22rpx 24rpx;
+	min-height: 96rpx;
+	padding: 28rpx 24rpx;
+	line-height: 1.45;
 	background: #f5f8f6;
 	border-radius: 16rpx;
 	font-size: 30rpx;

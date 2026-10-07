@@ -269,33 +269,33 @@ export function getSceneHubCards() {
 	]
 }
 
-/** 沿街：认领商户 + 统一投放点 */
+/** 沿街：登记商铺 + 选投放点 */
 export function getStreetClaimTitle() {
-	return '认领您的商铺'
+	return '登记沿街商铺'
 }
 
 export function getStreetClaimLead() {
-	return '家庭场景人人可用；沿街需额外绑定一个商户身份，与家庭互不影响。'
+	return '有门面的先在这里登记店名和类型，选好投放点就能打卡。家里分类仍走家庭场景，两边分开算。'
 }
 
 export function getStreetClaimShopNamePh() {
-	return '请填写招牌上的商铺名称'
+	return '写店名，与招牌一致即可'
 }
 
 export function getStreetClaimTypeHint() {
-	return '商铺类型决定主要打卡的垃圾种类（如餐馆→厨余，药房→有害）'
+	return '按经营种类选，会对应您店主要要分的那一类垃圾。'
 }
 
 export function getStreetClaimDropHint() {
-	return '请选择社区为您这类商铺配置的统一投放点，邻近同类型店铺可共用'
+	return '选社区给这类店用的集中投放点，打卡前可以导航过去。'
 }
 
 export function getStreetClaimSubmit() {
-	return '确认认领'
+	return '保存登记'
 }
 
 export function getStreetClaimNoDrop() {
-	return '该类型暂无可用投放点，请联系社区工作人员配置'
+	return '这类店还没配投放点，请联系社区或物业。'
 }
 
 export function getStreetHubDropTitle() {
