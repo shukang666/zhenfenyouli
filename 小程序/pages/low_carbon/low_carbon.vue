@@ -505,7 +505,6 @@
             :src="item.thumb"
             mode="aspectFill"
           ></u-image>
-          <view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
           <view class="fb-act-badge" v-if="item.active_count > 0">
             <view
               class="fb-act-avatars"
@@ -2179,7 +2178,7 @@ export default {
   @include glass-surface(0.8, 20px);
   margin-bottom: 20rpx;
   overflow: hidden;
-  clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%);
+  border-radius: $glass-radius-lg;
 }
 .fb-act-card:active {
   opacity: 0.92;
@@ -2189,11 +2188,11 @@ export default {
   width: 100%;
   height: 320rpx;
   background: #dce8de;
-  clip-path: polygon(0 0, 100% 0, 100% 86%, 0 100%);
 }
 .fb-act-body {
   padding: 20rpx 24rpx 22rpx 32rpx;
   position: relative;
+  background: transparent;
 }
 .fb-act-body::before {
   content: "";
