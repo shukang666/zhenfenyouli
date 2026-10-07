@@ -236,6 +236,27 @@ export function getScenePickHint() {
 	return '您今天主要在哪儿扔垃圾？点选一个就行'
 }
 
+/** 选场景前：是否愿意参加真分（仅下方卡片区，上方「为什么要分」不动） */
+export function getThemeOptInEyebrow() {
+	return '真分打卡'
+}
+
+export function getThemeOptInTitle() {
+	return '今天愿意认真真分吗？'
+}
+
+export function getThemeOptInDesc() {
+	return '真分就是分对类别、投进对的桶，并拍照留记录。点「愿意」后再选您今天主要在哪个场景投放。'
+}
+
+export function getThemeOptInYes() {
+	return '愿意，去选场景'
+}
+
+export function getThemeOptInLater() {
+	return '今天先不打了'
+}
+
 export function getSceneHubCards() {
 	return [
 		{ hub: 'home', emoji: '🏠', title: '家庭场景', desc: '厨房、客厅、卫生间，全家日常投放', theme: 'home' },

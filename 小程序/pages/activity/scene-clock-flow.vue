@@ -56,24 +56,33 @@
 			</view>
 		</view>
 		<view class="zf-scenes-pick">
-			<text class="zf-scenes-kicker">选场景</text>
-			<text class="zf-scenes-hint">{{ scenePickHint }}</text>
-			<view class="zf-scene-row">
-				<view
-					class="zf-scene-card zf-scene-card--pick"
-					v-for="(item, sIdx) in sceneHubCards"
-					:key="item.hub"
-					:class="'zf-scene-card--' + item.theme"
-					hover-class="zf-scene-card--press"
-					:hover-stay-time="80"
-					@tap="pickThemeHubByIndex(sIdx)"
-				>
-					<view class="zf-scene-icon-wrap">
-						<text class="zf-scene-icon">{{ item.emoji }}</text>
-					</view>
-					<view class="zf-scene-copy">
-						<text class="zf-scene-title">{{ item.title }}</text>
-						<text class="zf-scene-desc">{{ item.desc }}</text>
+			<view class="zf-opt-in" :class="{ 'zf-opt-in--hide': themeOptInReveal }">
+				<text class="zf-opt-in-eyebrow">{{ themeOptInEyebrow }}</text>
+				<text class="zf-opt-in-title">{{ themeOptInTitle }}</text>
+				<text class="zf-opt-in-desc">{{ themeOptInDesc }}</text>
+				<view class="zf-opt-in-yes zf-btn zf-btn--primary" hover-class="zf-btn--press" @tap="confirmThemeOptIn">{{ themeOptInYes }}</view>
+				<view class="zf-opt-in-later" hover-class="zf-opt-in-later--press" @tap="declineThemeOptIn">{{ themeOptInLater }}</view>
+			</view>
+			<view class="zf-scenes-reveal" :class="{ 'zf-scenes-reveal--show': themeOptInReveal }">
+				<text class="zf-scenes-kicker">选场景</text>
+				<text class="zf-scenes-hint">{{ scenePickHint }}</text>
+				<view class="zf-scene-row">
+					<view
+						class="zf-scene-card zf-scene-card--pick"
+						v-for="(item, sIdx) in sceneHubCards"
+						:key="item.hub"
+						:class="'zf-scene-card--' + item.theme"
+						hover-class="zf-scene-card--press"
+						:hover-stay-time="80"
+						@tap="pickThemeHubByIndex(sIdx)"
+					>
+						<view class="zf-scene-icon-wrap">
+							<text class="zf-scene-icon">{{ item.emoji }}</text>
+						</view>
+						<view class="zf-scene-copy">
+							<text class="zf-scene-title">{{ item.title }}</text>
+							<text class="zf-scene-desc">{{ item.desc }}</text>
+						</view>
 					</view>
 				</view>
 			</view>
@@ -730,6 +739,11 @@
 		getThemeIntroCta,
 		getScenePickNavTitle,
 		getScenePickHint,
+		getThemeOptInEyebrow,
+		getThemeOptInTitle,
+		getThemeOptInDesc,
+		getThemeOptInYes,
+		getThemeOptInLater,
 		getSceneHubCards,
 		getThemePromoPillars,
 		getThemeIntroHeroSlogan,
@@ -803,6 +817,12 @@
 				themeSteps: getThemeIntroSteps(),
 				themeCta: getThemeIntroCta(),
 				scenePickHint: getScenePickHint(),
+				themeOptInReveal: false,
+				themeOptInEyebrow: getThemeOptInEyebrow(),
+				themeOptInTitle: getThemeOptInTitle(),
+				themeOptInDesc: getThemeOptInDesc(),
+				themeOptInYes: getThemeOptInYes(),
+				themeOptInLater: getThemeOptInLater(),
 				sceneHubCards: getSceneHubCards(),
 				themePillars: getThemePromoPillars(),
 				themeHeroSlogan: getThemeIntroHeroSlogan(),
@@ -1089,6 +1109,7 @@
 				flowStepBefore: this.flowStep,
 			})
 			if (mode === 'theme' || mode === 'intro') {
+				this.resetThemeOptIn()
 				this.flowStep = 'theme_scenes'
 				console.log('[SCF-DEBUG] scene-clock-flow → theme_scenes')
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
@@ -1097,6 +1118,7 @@
 			const hubRaw = opt.hub != null ? String(opt.hub).trim() : ''
 			// 未带 hub：与 Banner 配置 scene-clock-flow 无参一致，先进选场景（勿默认家庭）
 			if (!hubRaw) {
+				this.resetThemeOptIn()
 				this.flowStep = 'theme_scenes'
 				console.log('[SCF-DEBUG] scene-clock-flow → theme_scenes (no hub param)')
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
@@ -1230,8 +1252,23 @@
 					})
 					return
 				}
+				this.resetThemeOptIn()
 				this.flowStep = 'theme_scenes'
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
+			},
+			resetThemeOptIn() {
+				this.themeOptInReveal = false
+			},
+			confirmThemeOptIn() {
+				if (this.themeOptInReveal) return
+				this.themeOptInReveal = true
+			},
+			declineThemeOptIn() {
+				uni.navigateBack({
+					fail: () => {
+						this.$u.toast('下次再来一起真分')
+					},
+				})
 			},
 			pickThemeHub(hub) {
 				this.scfDbg('pickThemeHub', { hub, isLogin: this.isLogin })
@@ -4018,6 +4055,75 @@
 	background: #fff;
 	border-radius: 24rpx;
 	box-shadow: 0 10rpx 32rpx rgba(20, 40, 28, 0.08);
+	overflow: hidden;
+}
+.zf-opt-in {
+	transition: opacity 0.32s ease, transform 0.32s ease, max-height 0.38s ease;
+	max-height: 520rpx;
+	opacity: 1;
+	transform: translateY(0);
+}
+.zf-opt-in--hide {
+	opacity: 0;
+	transform: translateY(-12rpx) scale(0.98);
+	max-height: 0;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+.zf-opt-in-eyebrow {
+	display: block;
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #18af38;
+	letter-spacing: 2rpx;
+	margin-bottom: 10rpx;
+}
+.zf-opt-in-title {
+	display: block;
+	font-size: 38rpx;
+	font-weight: 700;
+	color: #142018;
+	line-height: 1.4;
+	margin-bottom: 16rpx;
+}
+.zf-opt-in-desc {
+	display: block;
+	font-size: 30rpx;
+	color: #5a6b62;
+	line-height: 1.55;
+	margin-bottom: 28rpx;
+}
+.zf-opt-in-yes {
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+	margin-bottom: 16rpx;
+}
+.zf-opt-in-later {
+	display: block;
+	text-align: center;
+	font-size: 28rpx;
+	color: #8a9590;
+	padding: 12rpx 0 4rpx;
+}
+.zf-opt-in-later--press {
+	opacity: 0.65;
+}
+.zf-scenes-reveal {
+	max-height: 0;
+	opacity: 0;
+	transform: translateY(16rpx);
+	overflow: hidden;
+	transition: opacity 0.4s ease 0.06s, transform 0.4s ease 0.06s, max-height 0.45s ease;
+	pointer-events: none;
+}
+.zf-scenes-reveal--show {
+	max-height: 1200rpx;
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
 }
 .zf-scenes-kicker {
 	display: block;
