@@ -190,7 +190,7 @@
 				<text class="scf-street-shop-bar-meta">{{ streetMerchant.shop_type_name }} · {{ streetMerchant.cate_name }}</text>
 				<text class="scf-street-shop-bar-edit" @tap="editStreetMerchant">{{ streetEditShop }}</text>
 			</view>
-			<block v-if="isOwnPointHub && residentialPickMode">
+			<block v-if="isOwnPointHub && residentialPickMode && !isResidentialHub">
 				<view class="scf-pick-lead">
 					<text class="scf-pick-lead-t">{{ ownPointPickLead }}</text>
 					<text class="scf-pick-lead-s">{{ ownPointPickSub }}</text>
@@ -568,7 +568,7 @@
 		</view>
 
 		<view
-			v-if="isOwnPointHub && residentialPickMode && flowStep === 'setup'"
+			v-if="isOwnPointHub && residentialPickMode && !isResidentialHub && flowStep === 'setup'"
 			class="scf-pick-mask"
 			@tap="exitResidentialPickMode"
 		></view>
@@ -740,8 +740,134 @@
 			</view>
 		</view>
 
+		<!-- 家庭：今日真分（自选种类，无选桶蒙层） -->
+		<view class="scf-body scf-body--home-clock" v-if="flowStep === 'learn' && isResidentialHub">
+			<view class="scf-hc-banner">
+				<view class="scf-hc-banner-ph">
+					<text class="scf-hc-banner-slogan">{{ homeClockBannerSlogan }}</text>
+				</view>
+			</view>
+
+			<view class="scf-hc-step">
+				<text class="scf-hc-step-no">①</text>
+				<view class="scf-hc-step-body">
+					<text class="scf-hc-step-title">{{ homeClockStep1Title }}</text>
+					<text class="scf-hc-step-sub">{{ homeClockStep1Sub }}</text>
+					<view class="scf-hc-cate-row">
+						<view
+							v-for="card in homeClockCateCards"
+							:key="card.key"
+							class="scf-hc-cate-card"
+							:class="[
+								'scf-hc-cate-card--' + card.tone,
+								{ 'scf-hc-cate-card--on': homeClockCateKey === card.key },
+							]"
+							hover-class="scf-card--press"
+							@tap="selectHomeClockCate(card)"
+						>
+							<view class="scf-hc-cate-illus">
+								<text class="scf-hc-cate-illus-ph">{{ card.illusPh }}</text>
+							</view>
+							<text class="scf-hc-cate-label">{{ card.label }}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="scf-hc-step">
+				<text class="scf-hc-step-no">②</text>
+				<view class="scf-hc-step-body">
+					<text class="scf-hc-step-title">{{ homeClockStep2Title }}</text>
+					<view class="scf-hc-amount-row">
+						<view
+							v-for="opt in homeClockAmountOptions"
+							:key="opt"
+							class="scf-hc-amount-chip"
+							:class="{ 'scf-hc-amount-chip--on': homeClockAmount === opt }"
+							hover-class="scf-card--press"
+							@tap="homeClockAmount = opt"
+						>{{ opt }}</view>
+					</view>
+					<text class="scf-hc-amount-note">● {{ homeClockAmountNote }}</text>
+				</view>
+			</view>
+
+			<view class="scf-hc-step">
+				<text class="scf-hc-step-no">③</text>
+				<view class="scf-hc-step-body">
+					<text class="scf-hc-step-title">{{ homeClockStep3Title }}</text>
+					<view class="scf-hc-tip-box">
+						<textarea
+							class="scf-hc-tip-input"
+							v-model="homeClockTip"
+							:placeholder="homeClockStep3Placeholder"
+							maxlength="200"
+							:auto-height="false"
+						/>
+					</view>
+				</view>
+			</view>
+
+			<view class="scf-hc-step scf-hc-step--photo">
+				<text class="scf-hc-step-no">④</text>
+				<view class="scf-hc-step-body">
+					<view class="scf-hc-photo-head">
+						<view class="scf-hc-photo-head-l">
+							<text class="scf-hc-step-title">{{ homeClockStep4Title }}</text>
+							<text class="scf-hc-step-sub scf-hc-step-sub--tight">{{ homeClockStep4Sub }}</text>
+						</view>
+						<view class="scf-hc-photo-example">
+							<view class="scf-hc-photo-example-ph">
+								<text class="scf-hc-photo-example-ph-t">示例</text>
+							</view>
+							<text class="scf-hc-photo-example-cap">{{ homeClockPhotoExampleCap }} →</text>
+						</view>
+					</view>
+					<view
+						class="scf-hc-upload"
+						:class="{ 'scf-hc-upload--done': !!clockSlotUrls[0] }"
+						hover-class="scf-card--press"
+						@tap="onClockSlotTap(0)"
+					>
+						<image
+							v-if="clockSlotUrls[0]"
+							class="scf-hc-upload-img"
+							:src="clockSlotUrls[0]"
+							mode="aspectFill"
+						/>
+						<block v-else>
+							<text class="scf-hc-upload-ico">📷</text>
+							<text class="scf-hc-upload-t">{{ homeClockPhotoUploadCta }}</text>
+						</block>
+					</view>
+					<view class="scf-hc-rules">
+						<view
+							class="scf-hc-rule"
+							v-for="(rule, ri) in homeClockPhotoRules"
+							:key="'r' + ri"
+						>
+							<text class="scf-hc-rule-ico">{{ rule.ok ? '✓' : '✕' }}</text>
+							<text class="scf-hc-rule-t" :class="{ 'scf-hc-rule-t--ok': rule.ok }">{{ rule.text }}</text>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="scf-hc-foot">
+				<view
+					class="scf-hc-submit"
+					:class="{ 'scf-hc-submit--disabled': clockSubmitting }"
+					hover-class="scf-card--press"
+					@tap="submitClock"
+				>{{ clockSubmitting ? '提交中…' : homeClockSubmitCta }}</view>
+				<text class="scf-hc-foot-note">{{ homeClockFootNote }}</text>
+				<text class="scf-hc-foot-points">{{ homeClockFootPoints }}</text>
+				<text class="scf-hc-foot-link" hover-class="scf-card--press" @tap="enterResidentialSetupFlow">修改家庭点位布置图</text>
+			</view>
+		</view>
+
 		<!-- 拍照打卡（原跳转 add 页，现页内完成） -->
-		<view class="scf-body" v-if="flowStep === 'learn'">
+		<view class="scf-body" v-else-if="flowStep === 'learn'">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
 				<text class="scf-promo-line">上传 {{ activeCateName || '分类' }} 成果</text>
 				<text class="scf-promo-line scf-promo-line--sub">{{ clockPhotoIntro }}</text>
@@ -991,6 +1117,23 @@
 		getHomeFixedSetupRewardHint,
 		getHomeFixedSetupFinishCta,
 		getHomeFixedSetupRequiredHint,
+		getHomeClockNavTitle,
+		getHomeClockBannerSlogan,
+		getHomeClockStep1Title,
+		getHomeClockStep1Sub,
+		getHomeClockStep2Title,
+		getHomeClockAmountNote,
+		getHomeClockStep3Title,
+		getHomeClockStep3Placeholder,
+		getHomeClockStep4Title,
+		getHomeClockStep4Sub,
+		getHomeClockPhotoExampleCap,
+		getHomeClockPhotoUploadCta,
+		getHomeClockPhotoRules,
+		getHomeClockSubmitCta,
+		getHomeClockFootNote,
+		getHomeClockFootPoints,
+		getHomeClockAmountOptions,
 	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
@@ -1101,6 +1244,25 @@
 					recycle: true,
 					hazard: true,
 				},
+				homeClockCateKey: '',
+				homeClockAmount: '',
+				homeClockTip: '',
+				homeClockBannerSlogan: getHomeClockBannerSlogan(),
+				homeClockStep1Title: getHomeClockStep1Title(),
+				homeClockStep1Sub: getHomeClockStep1Sub(),
+				homeClockStep2Title: getHomeClockStep2Title(),
+				homeClockAmountNote: getHomeClockAmountNote(),
+				homeClockStep3Title: getHomeClockStep3Title(),
+				homeClockStep3Placeholder: getHomeClockStep3Placeholder(),
+				homeClockStep4Title: getHomeClockStep4Title(),
+				homeClockStep4Sub: getHomeClockStep4Sub(),
+				homeClockPhotoExampleCap: getHomeClockPhotoExampleCap(),
+				homeClockPhotoUploadCta: getHomeClockPhotoUploadCta(),
+				homeClockPhotoRules: getHomeClockPhotoRules(),
+				homeClockSubmitCta: getHomeClockSubmitCta(),
+				homeClockFootNote: getHomeClockFootNote(),
+				homeClockFootPoints: getHomeClockFootPoints(),
+				homeClockAmountOptions: getHomeClockAmountOptions(),
 			}
 		},
 		computed: {
@@ -1113,6 +1275,31 @@
 			homeFixedCanFinishSetup() {
 				if (this.homeFixedSavingKey) return false
 				return this.isHomeFixedSetupComplete()
+			},
+			homeClockCateCards() {
+				const defs = [
+					{ key: 'food', label: '厨余垃圾', tone: 'food', match: '厨余', illusPh: '🥕' },
+					{ key: 'recycle', label: '可回收物', tone: 'recycle', match: '可回收', exclude: '不可', illusPh: '♻️' },
+					{ key: 'harm', label: '有害垃圾', tone: 'harm', match: '有害', illusPh: '☣️' },
+					{ key: 'other', label: '其他垃圾', tone: 'other', match: '其他', illusPh: '🗑️' },
+				]
+				const list = this.cateList || []
+				return defs.map(d => {
+					let cate = null
+					for (let i = 0; i < list.length; i++) {
+						const name = list[i].name || ''
+						if (d.exclude && name.indexOf(d.exclude) >= 0) continue
+						if (name.indexOf(d.match) >= 0) {
+							cate = list[i]
+							break
+						}
+					}
+					return {
+						...d,
+						cateId: cate ? cate.id : 0,
+						cateName: cate ? cate.name : d.label,
+					}
+				})
 			},
 			/** 无任何家庭点位数据：必须先完成本页布置 */
 			homeFixedSetupMandatory() {
@@ -1321,30 +1508,14 @@
 				return getResidentialPickMaskHint()
 			},
 			clockSuccessOtherPickTitle() {
-				return this.isResidentialHub ? getClockSuccessOtherBinTitle() : getClockSuccessOtherCateTitle()
+				return getClockSuccessOtherCateTitle()
 			},
 			clockOtherPickHint() {
-				if (this.isResidentialHub) {
-					const cur = this.pointName || this.activeCateName || ''
-					const all = (this.points || []).map(p => p.point_name).filter(Boolean)
-					return getClockSuccessOtherBinBody(cur, all)
-				}
 				const cur = this.activeCateName || ''
 				const all = (this.cateList || []).map(c => c.name).filter(Boolean)
 				return getClockSuccessOtherCateBody(cur, all)
 			},
 			clockSuccessOtherPickList() {
-				if (this.isResidentialHub) {
-					const curId = Number(this.pointId)
-					return (this.points || [])
-						.filter(p => p && p.id && Number(p.id) !== curId)
-						.map(p => ({
-							key: 'bin-' + p.id,
-							kind: 'bin',
-							label: p.point_name || p.cate_name || '桶',
-							raw: p,
-						}))
-				}
 				const curId = Number(this.cateId)
 				return (this.cateList || [])
 					.filter(c => c && c.id && Number(c.id) !== curId)
@@ -1425,7 +1596,7 @@
 					return ['设投放点', '选点打卡', '拍照提交']
 				}
 				if (this.isResidentialHub) {
-					return ['摆好桶', '选桶打卡', '上传成果']
+					return []
 				}
 				if (['setup'].indexOf(this.flowStep) >= 0) return []
 				return ['怎么扔', '小窍门', '拍照']
@@ -1749,6 +1920,9 @@
 				this.residentialBinSettingsOpen = false
 				this.syncHomeFixedSlots()
 				this.flowStep = 'setup'
+				if (this.hub && this.hub.title) {
+					uni.setNavigationBarTitle({ title: this.hub.title })
+				}
 			},
 			syncHomeFixedSlots() {
 				const defs = getHomeFixedSetupSlots()
@@ -1825,9 +1999,51 @@
 					}
 					return
 				}
-				this.residentialPickMode = true
+				this.enterResidentialClockFlow()
+			},
+			enterResidentialClockFlow() {
+				if (!this.isHomeFixedSetupComplete()) {
+					this.enterResidentialSetupFlow()
+					return
+				}
+				this.residentialPickMode = false
 				this.residentialBinSettingsOpen = false
-				this.flowStep = 'setup'
+				this.resetHomeClockForm()
+				this.flowStep = 'learn'
+				uni.setNavigationBarTitle({ title: getHomeClockNavTitle() })
+			},
+			resetHomeClockForm() {
+				this.homeClockCateKey = ''
+				this.homeClockAmount = ''
+				this.homeClockTip = ''
+				this.cateId = 0
+				this.activeCateName = ''
+				this.pointId = 0
+				this.pointName = ''
+				this.clockContent = ''
+				this.accumDuration = ''
+				this.sortDuration = ''
+				this.resetClockSlots()
+			},
+			selectHomeClockCate(card) {
+				if (!card || !card.cateId) {
+					this.$u.toast('分类种类加载中，请稍后再试')
+					return
+				}
+				this.homeClockCateKey = card.key
+				this.cateId = card.cateId
+				this.activeCateName = card.cateName
+				this.cateLabel = guideCateLabelFromName(card.cateName)
+				this.subKey = this.guideSubKeyForHub()
+				const defs = getHomeFixedSetupSlots()
+				let def = null
+				if (card.key === 'food') def = defs.find(s => s.slotKey === 'kitchen')
+				else if (card.key === 'recycle') def = defs.find(s => s.slotKey === 'recycle')
+				else if (card.key === 'harm') def = defs.find(s => s.slotKey === 'hazard')
+				const p = def ? this.findPointForHomeSlot(def, true) : null
+				this.pointId = p && p.id ? p.id : 0
+				this.pointName = (p && p.point_name) || ''
+				this.loadGuide()
 			},
 			chooseHomeFixedPhoto(slotKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -1948,12 +2164,10 @@
 			},
 			enterResidentialPickMode() {
 				if (this.isResidentialHub) {
-					if (!this.isHomeFixedSetupComplete()) {
-						this.$u.toast('请先完成三处点位布置')
-						this.enterResidentialSetupFlow()
-						return
-					}
-				} else if (!this.points.length) {
+					this.enterResidentialClockFlow()
+					return
+				}
+				if (!this.points.length) {
 					this.$u.toast('请先设置分类桶')
 					return
 				}
@@ -2001,8 +2215,10 @@
 			},
 			backFromLearn() {
 				if (this.isResidentialHub) {
-					this.flowStep = 'setup'
-					this.enterResidentialPickMode()
+					this.enterResidentialSetupFlow()
+					if (this.hub && this.hub.title) {
+						uni.setNavigationBarTitle({ title: this.hub.title })
+					}
 					return
 				}
 				if (this.isStreetHub) {
@@ -2204,11 +2420,11 @@
 					}
 					if (keepFlow === 'cate' || keepFlow === 'points') {
 						if (this.isResidentialHub) {
-							this.flowStep = 'setup'
-							this.residentialPickMode =
-								this.isHomeFixedSetupComplete() &&
-								this.points.length > 0 &&
-								(keepFlow === 'points' || keepFlow === 'cate')
+							if (this.isHomeFixedSetupComplete()) {
+								this.enterResidentialClockFlow()
+							} else {
+								this.enterResidentialSetupFlow()
+							}
 						}
 						return
 					}
@@ -2225,33 +2441,32 @@
 							return
 						}
 						if (keepFlow === 'pick') {
-							this.flowStep = 'setup'
-							this.residentialPickMode = this.isHomeFixedSetupComplete()
-							this.residentialBinSettingsOpen = false
-							if (!this.isHomeFixedSetupComplete()) {
+							if (this.isHomeFixedSetupComplete()) {
+								this.enterResidentialClockFlow()
+							} else {
 								this.enterResidentialSetupFlow()
 							}
 							return
 						}
 						if (keepFlow === 'points') {
-							this.flowStep = 'setup'
-							this.residentialPickMode = this.isHomeFixedSetupComplete() && this.points.length > 0
-							if (!this.isHomeFixedSetupComplete()) {
+							if (this.isHomeFixedSetupComplete()) {
+								this.enterResidentialClockFlow()
+							} else {
 								this.enterResidentialSetupFlow()
 							}
 							return
 						}
 						if (this.flowStep === 'learn') return
 						if (this.flowStep === 'manage') return
-						if (this.flowStep === 'setup' && this.residentialPickMode && this.isHomeFixedSetupComplete()) {
-							return
+						if (this.flowStep === 'setup' && !this.homeFixedEditSetup) {
+							/* 布置页上传中 */
 						}
-						// 无点位或布置未完成：强制停留布置页
 						if (this.isHomeFixedSetupComplete()) {
-							this.flowStep = 'setup'
-							this.residentialPickMode = true
-							this.residentialBinSettingsOpen = false
-							this.syncHomeFixedSlots()
+							if (this.homeFixedEditSetup) {
+								this.enterResidentialSetupFlow()
+							} else {
+								this.enterResidentialClockFlow()
+							}
 						} else {
 							this.enterResidentialSetupFlow()
 						}
@@ -2615,6 +2830,10 @@
 				return 'home'
 			},
 			resetClockSlots() {
+				if (this.isResidentialHub) {
+					this.clockSlotUrls = ['']
+					return
+				}
 				const n = this.isCommunityHub ? 3 : 2
 				this.clockSlotUrls = Array(n).fill('')
 			},
@@ -2682,13 +2901,19 @@
 				if (this.clockSubmitting) return
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
-				if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类')
 				if (this.isResidentialHub) {
-					if (!this.accumDuration) return this.$u.toast('请选择积累了多久')
-					if (!this.sortDuration) return this.$u.toast('请选择分拣用了多久')
+					if (!this.homeClockCateKey || !this.cateId) {
+						return this.$u.toast('请选择今天打卡的垃圾种类')
+					}
+					if (!this.homeClockAmount) return this.$u.toast('请选择今天大约有多少')
+					if (!String(this.clockSlotUrls[0] || '').trim()) {
+						return this.$u.toast('请上传今日真分照片')
+					}
+				} else {
+					if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类')
+					const missing = this.missingClockSlotLabel()
+					if (missing) return this.$u.toast('请拍摄「' + missing + '」照片')
 				}
-				const missing = this.missingClockSlotLabel()
-				if (missing) return this.$u.toast('请拍摄「' + missing + '」照片')
 				const that = this
 				uni.showModal({
 					title: '提示',
@@ -2704,6 +2929,10 @@
 				const note = String(this.clockContent || '').trim()
 				if (note) parts.push(note)
 				if (this.isResidentialHub) {
+					if (this.homeClockAmount) parts.push('今日数量：' + this.homeClockAmount)
+					const tip = String(this.homeClockTip || '').trim()
+					if (tip) parts.push('真分小妙招：' + tip)
+				} else if (this.accumDuration || this.sortDuration) {
 					if (this.accumDuration) parts.push('积累时长：' + this.accumDuration)
 					if (this.sortDuration) parts.push('分拣用时：' + this.sortDuration)
 				}
@@ -2780,9 +3009,7 @@
 				this.accumDuration = ''
 				this.sortDuration = ''
 				if (this.isResidentialHub) {
-					this.initUserPoints('points').then(() => {
-						this.enterResidentialPickMode()
-					})
+					this.enterResidentialClockFlow()
 					return
 				}
 				if (this.isStreetHub) {
@@ -2794,17 +3021,20 @@
 			clockSuccessJumpOtherPick(item) {
 				if (!item) return
 				this.clockSuccessShow = false
-				this.resetClockSlots()
-				this.clockContent = ''
-				this.accumDuration = ''
-				this.sortDuration = ''
-				if (item.kind === 'bin' && item.raw) {
-					this.pickResidentialPoint(item.raw)
+				this.resetHomeClockForm()
+				this.flowStep = 'learn'
+				if (item.kind === 'cate' && item.raw) {
+					const card = (this.homeClockCateCards || []).find(
+						c => Number(c.cateId) === Number(item.raw.id)
+					)
+					if (card) this.selectHomeClockCate(card)
 					return
 				}
-				if (item.kind === 'cate' && item.raw) {
-					this.pickResidentialCate(item.raw)
-					this.flowStep = 'points'
+				if (item.kind === 'bin' && item.raw && item.raw.cate_id) {
+					const card = (this.homeClockCateCards || []).find(
+						c => Number(c.cateId) === Number(item.raw.cate_id)
+					)
+					if (card) this.selectHomeClockCate(card)
 				}
 			},
 			goActivityTab() {
@@ -3319,6 +3549,292 @@
 	text-align: center;
 	background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
 	line-height: 1.35;
+}
+
+.scf-body--home-clock {
+	padding: 0 0 calc(40rpx + env(safe-area-inset-bottom));
+	background: #f3faf5;
+	min-height: 100vh;
+	box-sizing: border-box;
+}
+.scf-hc-banner {
+	padding: 16rpx 24rpx 8rpx;
+}
+.scf-hc-banner-ph {
+	min-height: 160rpx;
+	border-radius: 20rpx;
+	background: linear-gradient(135deg, #dff5e8 0%, #c8ecd6 55%, #b8e6c8 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 32rpx 28rpx;
+	box-shadow: inset 0 0 0 1rpx rgba(255, 255, 255, 0.65);
+}
+.scf-hc-banner-slogan {
+	font-size: 36rpx;
+	font-weight: 800;
+	color: #1a6b3a;
+	line-height: 1.45;
+	text-align: center;
+}
+.scf-hc-step {
+	display: flex;
+	align-items: flex-start;
+	gap: 12rpx;
+	padding: 20rpx 24rpx 0;
+}
+.scf-hc-step--photo {
+	padding-bottom: 8rpx;
+}
+.scf-hc-step-no {
+	flex-shrink: 0;
+	width: 44rpx;
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #18af38;
+	line-height: 1.3;
+}
+.scf-hc-step-body {
+	flex: 1;
+	min-width: 0;
+}
+.scf-hc-step-title {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #142018;
+	line-height: 1.35;
+	margin-bottom: 10rpx;
+}
+.scf-hc-step-sub {
+	display: block;
+	font-size: 24rpx;
+	color: #6a756c;
+	line-height: 1.5;
+	margin-bottom: 16rpx;
+}
+.scf-hc-step-sub--tight {
+	margin-bottom: 8rpx;
+}
+.scf-hc-cate-row {
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 12rpx;
+	overflow-x: auto;
+	padding-bottom: 4rpx;
+}
+.scf-hc-cate-card {
+	flex: 1;
+	min-width: 148rpx;
+	border-radius: 16rpx;
+	padding: 16rpx 10rpx 14rpx;
+	box-sizing: border-box;
+	text-align: center;
+	border: 2rpx solid transparent;
+	background: #fff;
+	box-shadow: 0 6rpx 20rpx rgba(20, 50, 30, 0.06);
+}
+.scf-hc-cate-card--on {
+	border-color: #18af38;
+	box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.18);
+}
+.scf-hc-cate-card--food.scf-hc-cate-card--on {
+	background: linear-gradient(180deg, #e8f8ec 0%, #fff 100%);
+}
+.scf-hc-cate-card--recycle.scf-hc-cate-card--on {
+	background: linear-gradient(180deg, #fff8e6 0%, #fff 100%);
+}
+.scf-hc-cate-illus {
+	height: 72rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 8rpx;
+}
+.scf-hc-cate-illus-ph {
+	font-size: 40rpx;
+	line-height: 1;
+}
+.scf-hc-cate-label {
+	font-size: 22rpx;
+	font-weight: 700;
+	color: #333;
+	line-height: 1.35;
+}
+.scf-hc-amount-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16rpx;
+	margin-bottom: 12rpx;
+}
+.scf-hc-amount-chip {
+	padding: 16rpx 28rpx;
+	border-radius: 999rpx;
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #2d6b45;
+	background: #fff;
+	border: 2rpx solid #c5e6cf;
+}
+.scf-hc-amount-chip--on {
+	background: #e8f8ec;
+	border-color: #18af38;
+	color: #18af38;
+}
+.scf-hc-amount-note {
+	display: block;
+	font-size: 22rpx;
+	color: #e07a2a;
+	text-align: right;
+	line-height: 1.4;
+}
+.scf-hc-tip-box {
+	border: 2rpx dashed #d0ddd4;
+	border-radius: 16rpx;
+	background: #fff;
+	padding: 8rpx 16rpx;
+	min-height: 120rpx;
+}
+.scf-hc-tip-input {
+	width: 100%;
+	min-height: 100rpx;
+	font-size: 26rpx;
+	color: #333;
+	line-height: 1.5;
+}
+.scf-hc-photo-head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16rpx;
+	margin-bottom: 16rpx;
+}
+.scf-hc-photo-head-l {
+	flex: 1;
+	min-width: 0;
+}
+.scf-hc-photo-example {
+	flex-shrink: 0;
+	width: 168rpx;
+	text-align: center;
+}
+.scf-hc-photo-example-ph {
+	height: 100rpx;
+	border-radius: 12rpx;
+	background: #eef2ef;
+	border: 1rpx solid #dde5df;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.scf-hc-photo-example-ph-t {
+	font-size: 22rpx;
+	color: #9aa89e;
+}
+.scf-hc-photo-example-cap {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 20rpx;
+	color: #888;
+	line-height: 1.35;
+}
+.scf-hc-upload {
+	min-height: 240rpx;
+	border: 2rpx dashed #b8dfc4;
+	border-radius: 16rpx;
+	background: #fafcfb;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 28rpx;
+	position: relative;
+	overflow: hidden;
+}
+.scf-hc-upload--done {
+	padding: 0;
+	border-style: solid;
+}
+.scf-hc-upload-ico {
+	font-size: 48rpx;
+	margin-bottom: 12rpx;
+}
+.scf-hc-upload-t {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #18af38;
+	text-align: center;
+}
+.scf-hc-upload-img {
+	width: 100%;
+	height: 280rpx;
+	display: block;
+}
+.scf-hc-rules {
+	margin-top: 16rpx;
+	padding: 16rpx 8rpx 0;
+}
+.scf-hc-rule {
+	display: flex;
+	align-items: flex-start;
+	gap: 10rpx;
+	margin-bottom: 10rpx;
+}
+.scf-hc-rule-ico {
+	flex-shrink: 0;
+	font-size: 24rpx;
+	color: #e85555;
+	line-height: 1.4;
+}
+.scf-hc-rule-t {
+	flex: 1;
+	font-size: 24rpx;
+	color: #666;
+	line-height: 1.45;
+}
+.scf-hc-rule-t--ok {
+	color: #18af38;
+	font-weight: 600;
+}
+.scf-hc-foot {
+	padding: 28rpx 32rpx 16rpx;
+}
+.scf-hc-submit {
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+	padding: 28rpx 24rpx;
+	border-radius: 999rpx;
+	font-size: 34rpx;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(180deg, #5cb878 0%, #52a16d 100%);
+	box-shadow: 0 10rpx 28rpx rgba(82, 161, 109, 0.35);
+}
+.scf-hc-submit--disabled {
+	opacity: 0.5;
+	box-shadow: none;
+}
+.scf-hc-foot-note,
+.scf-hc-foot-points {
+	display: block;
+	text-align: center;
+	font-size: 24rpx;
+	color: #888;
+	line-height: 1.5;
+	margin-top: 12rpx;
+}
+.scf-hc-foot-points {
+	color: #6a8572;
+	margin-top: 4rpx;
+}
+.scf-hc-foot-link {
+	display: block;
+	text-align: center;
+	font-size: 26rpx;
+	color: #18af38;
+	margin-top: 20rpx;
+	padding: 8rpx;
 }
 
 /* 与 theme_scenes 的 zf-promo 同系视觉，用于流程内各步 */

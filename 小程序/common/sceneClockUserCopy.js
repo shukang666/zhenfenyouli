@@ -529,3 +529,76 @@ export function getHomeFixedSetupFinishCta() {
 export function getHomeFixedSetupRequiredHint() {
 	return '三处布置照片均需上传，缺一不可'
 }
+
+export function getHomeClockNavTitle() {
+	return '开始今天的真分吧'
+}
+
+export function getHomeClockBannerSlogan() {
+	return '把分类融入每一天的生活'
+}
+
+export function getHomeClockStep1Title() {
+	return '今天打卡哪类垃圾？'
+}
+
+export function getHomeClockStep1Sub() {
+	return '选择今天真实产生的一类垃圾。'
+}
+
+export function getHomeClockStep2Title() {
+	return '今天大约有多少？'
+}
+
+export function getHomeClockAmountNote() {
+	return '仅作参考，不要求称重'
+}
+
+export function getHomeClockStep3Title() {
+	return '你的真分小妙招'
+}
+
+export function getHomeClockStep3Placeholder() {
+	return '分享一个真分小技巧'
+}
+
+export function getHomeClockStep4Title() {
+	return '上传真分照片'
+}
+
+export function getHomeClockStep4Sub() {
+	return '需要拍下「垃圾+分类容器」的完整画面'
+}
+
+export function getHomeClockPhotoExampleCap() {
+	return '真分照片示例图'
+}
+
+export function getHomeClockPhotoUploadCta() {
+	return '点击上传今日真分照片'
+}
+
+export function getHomeClockPhotoRules() {
+	return [
+		{ ok: false, text: '单独拍一个矿泉水瓶' },
+		{ ok: false, text: '拍一张已经扔完的垃圾桶' },
+		{ ok: false, text: '审核不通过会扣除本日积分' },
+		{ ok: true, text: '真实产生的垃圾 → 正确分类 → 准备投递' },
+	]
+}
+
+export function getHomeClockSubmitCta() {
+	return '提交真分'
+}
+
+export function getHomeClockFootNote() {
+	return '完成后提交，记录今天的真分行动'
+}
+
+export function getHomeClockFootPoints() {
+	return '审核成功可获得30积分'
+}
+
+export function getHomeClockAmountOptions() {
+	return ['少量', '一小袋', '一桶', '较多']
+}
