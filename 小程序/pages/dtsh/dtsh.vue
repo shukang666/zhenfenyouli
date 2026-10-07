@@ -39,7 +39,7 @@
 			</view>
 			<view class="wb-tip" v-if="volunteerSupervision.last_date">
 				<text class="wb-tip-icon">✓</text>
-				<text class="wb-tip-t">最近桶边督导：{{ volunteerSupervision.last_date }}</text>
+				<text class="wb-tip-t">最近点位督导：{{ volunteerSupervision.last_date }}</text>
 			</view>
 		</view>
 
@@ -50,7 +50,7 @@
 					<u-icon name="clock" size="44" color="#fff"></u-icon>
 				</view>
 				<view class="wb-job-main">
-					<text class="wb-job-name">桶边督导</text>
+					<text class="wb-job-name">点位督导</text>
 					<text class="wb-job-desc">随时到岗 · 桶边留证与登记</text>
 				</view>
 				<view class="wb-job-btn">去执行</view>
@@ -60,7 +60,7 @@
 					<u-icon name="file-text" size="44" color="#fff"></u-icon>
 				</view>
 				<view class="wb-job-main">
-					<text class="wb-job-name">小区分类检查</text>
+					<text class="wb-job-name">小区巡查</text>
 					<text class="wb-job-desc">点位巡查 · 现场记录与留证</text>
 				</view>
 				<view class="wb-job-btn">去检查</view>
