@@ -26,11 +26,11 @@ export function getIntroLead() {
 }
 
 export function getWhyIntroLead() {
-	return '为什么要分？混装一袋，后面很难再利用；分开后厨余能堆肥、可回收能再生，有害也能单独处理'
+	return '为什么要分？分开扔才好回收；混装一袋，后面很难再利用。'
 }
 
 export function getWhyIntroSummary() {
-	return '先看下面要点，再选您今天的场景，跟着提示摆桶、打卡即可'
+	return '看下面要点，选今天场景，按提示打卡即可'
 }
 
 /** 建议家里各房间放什么桶（户型示意用 planId 定位格子） */
@@ -79,7 +79,7 @@ export function getBinSetupLead() {
 }
 
 export function getBinSetupLeadNote() {
-	return '这是「设置」不是每次打卡都要做；保存后下次进来直接选桶即可'
+	return '首次设置即可；保存后下次直接选桶打卡'
 }
 
 export function getAccumDurationOptions() {
@@ -92,39 +92,38 @@ export function getSortDurationOptions() {
 
 /** 设置页：一句话说清要做什么 */
 export function getSetupIntroLine() {
-	return '厨房放厨余桶、客厅放可回收桶…添好名字和种类，给桶拍张照，方便以后打卡对照。'
+	return '按房间添桶、选种类，拍张照，以后打卡好对照。'
 }
 
 /** 选择页：还没有位置时 */
 export function getIntroSummary() {
-	return '在家固定好「扔哪儿」，扔的时候按提示拍几张照片就可以。'
+	return '在家定好扔哪儿，按提示拍照提交即可。'
 }
 
 /** 展开「了解更多」 */
 export function getIntroBlocks() {
-	const local =
-		'在七贤岭：手机上学怎么分，扔对了拍照还能攒积分；全家一起动手，记得更牢。'
+	const local = '在七贤岭：手机学分类，扔对拍照可攒积分。'
 
 	return [
 		{
 			id: 'what',
 			title: '混装会带来什么',
-			body: '一袋混装，后面很难分拣再利用；厨余混进其他垃圾还容易发臭、招虫，处理成本更高。',
+			body: '混装难再利用，厨余混进其他垃圾还容易发臭、招虫。',
 		},
 		{
 			id: 'benefit',
 			title: '分开之后的好处',
-			body: '厨余专门处理，纸箱瓶罐能回收再造，电池药品单独收更安全，小区更干净、少浪费。',
+			body: '厨余、可回收、有害分开收，小区更干净，资源少浪费。',
 		},
 		{
 			id: 'policy',
 			title: '社区一起参与',
-			body: '现在都要做垃圾分类。' + local,
+			body: '垃圾分类人人有责。' + local,
 		},
 		{
 			id: 'vision',
 			title: '打卡在记录什么',
-			body: '不是考你会不会分，而是记录您认真分类的成果；用得勤有积分，邻里一起把习惯留住。',
+			body: '记录您认真分类的成果，不是考试；常用有积分。',
 		},
 	]
 }
@@ -192,7 +191,7 @@ export function getThemeIntroHeadline() {
 }
 
 export function getThemeIntroSubline() {
-	return '不用一次做完，跟着下面四步，慢慢就养成习惯'
+	return '四步走，不用一次做完，慢慢养成习惯'
 }
 
 export function getThemeIntroSteps() {
@@ -200,25 +199,25 @@ export function getThemeIntroSteps() {
 		{
 			num: '1',
 			title: '选对场景',
-			desc: '在家、上班或店里——选您今天主要在哪儿扔垃圾。',
+			desc: '在家、上班或店里，选您今天主要在哪儿扔。',
 			icon: '🏠',
 		},
 		{
 			num: '2',
 			title: '分清种类',
-			desc: '厨余、可回收、有害、其他要分开。拿不准可回看分类说明。',
+			desc: '四类分开；拿不准可看分类说明。',
 			icon: '♻️',
 		},
 		{
 			num: '3',
 			title: '动手投放',
-			desc: '按提示投进对应颜色的桶，别混装、别投错桶。',
+			desc: '投进对应颜色桶，别混装。',
 			icon: '🗑️',
 		},
 		{
 			num: '4',
 			title: '拍照留记录',
-			desc: '拍清楚本次投放，提交后可得积分。',
+			desc: '拍清本次投放，提交记积分。',
 			icon: '📷',
 		},
 	]
@@ -247,7 +246,7 @@ export function getSceneHubCards() {
 
 /** 任务说明（原型 Screen 5） */
 export function getThemeBriefTagline() {
-	return '分对了、扔对了，就是在为绿色生活出一份力'
+	return '分对、扔对，就是在为绿色生活出力'
 }
 
 export function getThemeBriefTaskTitle() {
@@ -267,7 +266,7 @@ export function getThemeBriefCta() {
 }
 
 export function getThemeIntroHeroSlogan() {
-	return { line1: '垃圾分类', line2: '从我做起 让绿色成为习惯' }
+	return { line1: '垃圾分类', line2: '从身边做起' }
 }
 
 export function getThemePromoHeadline() {
