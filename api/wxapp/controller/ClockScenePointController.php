@@ -24,13 +24,28 @@ class ClockScenePointController extends AuthController
         if ($hub === '') {
             $this->error('场景参数无效');
         }
-        $query = Db::name('clock_scene_point')->where('user_id', $this->user_id);
-        if ($hub === 'home') {
-            $query->whereIn('hub_key', ['home', 'qinzi']);
+        if ($hub === 'office') {
+            $communityId = (int)Db::name('member')->where('id', $this->user_id)->value('community_id');
+            if ($communityId <= 0) {
+                $this->success('请求成功', []);
+                return;
+            }
+            $query = Db::name('clock_scene_point')
+                ->where('hub_key', 'office')
+                ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+                ->where(function ($q) use ($communityId) {
+                    $q->where('community_id', $communityId)->whereOr('community_id', 0);
+                });
+            $list = $query->order('list_order asc,id asc')->select()->toArray();
         } else {
-            $query->where('hub_key', $hub);
+            $query = Db::name('clock_scene_point')->where('user_id', $this->user_id);
+            if ($hub === 'home') {
+                $query->whereIn('hub_key', ['home', 'qinzi']);
+            } else {
+                $query->where('hub_key', $hub);
+            }
+            $list = $query->order('list_order asc,id asc')->select()->toArray();
         }
-        $list = $query->order('list_order asc,id asc')->select()->toArray();
         foreach ($list as &$item) {
             $stored = trim((string)($item['point_image'] ?? ''));
             $img = $this->normalizePointImageStored($stored);
@@ -39,6 +54,8 @@ class ClockScenePointController extends AuthController
             }
             $item['point_image_raw'] = $img;
             $item['point_image'] = $img === '' ? '' : cmf_get_asset_url($img);
+            $item['building_name'] = trim((string)($item['point_name'] ?? ''));
+            $item['corner_location'] = trim((string)($item['remark'] ?? ''));
         }
         unset($item);
         $this->success('请求成功', $list);

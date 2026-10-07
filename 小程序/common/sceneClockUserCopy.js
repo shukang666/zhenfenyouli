@@ -602,3 +602,75 @@ export function getHomeClockFootPoints() {
 export function getHomeClockAmountOptions() {
 	return ['少量', '一小袋', '一桶', '较多']
 }
+
+export function getOfficeClockNavTitle() {
+	return '开始今天的真分吧'
+}
+
+export function getOfficeClockBannerTitle() {
+	return '在办公室也能真分'
+}
+
+export function getOfficeClockBannerSub() {
+	return '纸箱、瓶子、废纸，攒着投真分角 / 拍摄投递过程，别只拍一个瓶子'
+}
+
+export function getOfficeClockBannerBadge() {
+	return '每天一次，+30分，攒着好物'
+}
+
+export function getOfficeClockRecycleAlertTitle() {
+	return '本次只记录可回收物'
+}
+
+export function getOfficeClockRecycleAlertBody() {
+	return '请投递纸箱、瓶子、纸张等可回收物，并上传投递过程照片。'
+}
+
+export function getOfficeClockBuildingTitle() {
+	return '你在哪栋楼办公？'
+}
+
+export function getOfficeClockBuildingPlaceholder() {
+	return '点击选择或搜索办公楼宇'
+}
+
+export function getOfficeClockCornerTitle() {
+	return '真分角位置'
+}
+
+export function getOfficeClockConfirmTitle() {
+	return '真分前先确认'
+}
+
+export function getOfficeClockItemTitle() {
+	return '今天投了什么？'
+}
+
+export function getOfficeClockItemTags() {
+	return ['纸箱', '瓶子', '其他']
+}
+
+export function getOfficeClockVolumeTags() {
+	return ['少', '多']
+}
+
+export function getOfficeClockSaveTitle() {
+	return '攒了多久？'
+}
+
+export function getOfficeClockSaveOptions() {
+	return ['今天', '1-3天', '三天以上']
+}
+
+export function getOfficeClockPhotoTitle() {
+	return '上传真分照片'
+}
+
+export function getOfficeClockPhotoUploadCta() {
+	return '点击上传可回收物真分投递照片'
+}
+
+export function getOfficeClockSubmitCta() {
+	return '完成提交，记录今日真分行为'
+}

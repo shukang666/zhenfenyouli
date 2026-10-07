@@ -271,10 +271,19 @@ class ForumController extends AuthController
             $pointId = intval($params['clock_point_id']);
             $params['clock_point_id'] = 0;
             if ($pointId > 0) {
-                $point = \think\facade\Db::name('clock_scene_point')
-                    ->where('id', $pointId)
-                    ->where('user_id', $this->user_id)
-                    ->find();
+                $sceneForPoint = trim((string)($params['clock_scene'] ?? ''));
+                if (in_array($sceneForPoint, ['office', 'zhenfenjiao'], true)) {
+                    $point = Db::name('clock_scene_point')
+                        ->where('id', $pointId)
+                        ->where('hub_key', 'office')
+                        ->where('source', 1)
+                        ->find();
+                } else {
+                    $point = Db::name('clock_scene_point')
+                        ->where('id', $pointId)
+                        ->where('user_id', $this->user_id)
+                        ->find();
+                }
                 if (!empty($point)) {
                     $params['clock_point_id'] = $pointId;
                     if (empty($params['cate_id'])) {
@@ -288,6 +297,34 @@ class ForumController extends AuthController
             if (in_array($scene, ['home', 'qinzi'], true)) {
                 if (!ClockScenePointController::isHomeFixedSetupComplete((int)$this->user_id)) {
                     $this->error('请先完成厨房、可回收物、有害垃圾三处点位的布置照片');
+                }
+            }
+            if (in_array($scene, ['office', 'zhenfenjiao'], true)) {
+                $cateIdCheck = (int)($params['cate_id'] ?? 0);
+                if ($cateIdCheck <= 0) {
+                    $this->error('请选择可回收物种类');
+                }
+                $cateRow = Db::name('basic_select')->where('id', $cateIdCheck)->where('type', 2)->find();
+                $cateName = $cateRow ? (string)$cateRow['name'] : '';
+                if ($cateName === '' || strpos($cateName, '可回收') === false || strpos($cateName, '不可') !== false) {
+                    $this->error('办公场景本次仅记录可回收物');
+                }
+                $officePointId = (int)($params['clock_point_id'] ?? 0);
+                if ($officePointId <= 0) {
+                    $this->error('请选择办公楼宇真分角');
+                }
+                $officePoint = Db::name('clock_scene_point')
+                    ->where('id', $officePointId)
+                    ->where('hub_key', 'office')
+                    ->where('source', 1)
+                    ->find();
+                if (empty($officePoint)) {
+                    $this->error('真分角无效，请联系社区工作人员');
+                }
+                $communityId = (int)Db::name('member')->where('id', $this->user_id)->value('community_id');
+                $pCid = (int)($officePoint['community_id'] ?? 0);
+                if ($communityId > 0 && $pCid > 0 && $pCid !== $communityId) {
+                    $this->error('真分角与您的社区不匹配');
                 }
             }
             $merchantId = (int)$this->request->param('street_merchant_id', 0);

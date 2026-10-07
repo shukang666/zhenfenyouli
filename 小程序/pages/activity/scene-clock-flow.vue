@@ -574,7 +574,7 @@
 		></view>
 
 		<!-- 打卡点列表（打卡入口，家庭场景在摆桶页蒙层选桶，不单独进此页） -->
-		<view class="scf-body" v-if="flowStep === 'points' && !isResidentialHub && !isStreetHub">
+		<view class="scf-body" v-if="flowStep === 'points' && !isResidentialHub && !isStreetHub && !isOfficeHub">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
 				<text class="scf-promo-line">{{ isResidentialHub ? residentialPickLead : introDisplayLead }}</text>
 				<text class="scf-promo-line scf-promo-line--sub">{{ isResidentialHub ? residentialPickSub : introDisplaySummary }}</text>
@@ -866,6 +866,139 @@
 			</view>
 		</view>
 
+		<!-- 办公：真分角打卡（自选楼宇，本次仅可回收物） -->
+		<view class="scf-body scf-body--office-clock" v-else-if="flowStep === 'learn' && isOfficeHub">
+			<view class="scf-oc-banner">
+				<view class="scf-oc-banner-ph">
+					<image
+						v-if="officeClockHeroImgUrl"
+						class="scf-oc-banner-bg"
+						:src="officeClockHeroImgUrl"
+						mode="aspectFill"
+						@error="onOfficeClockHeroImgError"
+					/>
+					<view class="scf-oc-banner-overlay">
+						<text class="scf-oc-banner-title">{{ officeClockBannerTitle }}</text>
+						<text class="scf-oc-banner-sub">{{ officeClockBannerSub }}</text>
+						<text class="scf-oc-banner-badge">{{ officeClockBannerBadge }}</text>
+					</view>
+				</view>
+			</view>
+
+			<view class="scf-oc-alert">
+				<view class="scf-oc-alert-ico">♻️</view>
+				<view class="scf-oc-alert-body">
+					<text class="scf-oc-alert-title">{{ officeClockRecycleAlertTitle }}</text>
+					<text class="scf-oc-alert-desc">{{ officeClockRecycleAlertBody }}</text>
+				</view>
+				<view class="scf-oc-alert-deco">📷</view>
+			</view>
+
+			<view class="scf-oc-card">
+				<text class="scf-oc-card-title">{{ officeClockBuildingTitle }}</text>
+				<picker
+					mode="selector"
+					:range="officeBuildingLabels"
+					:value="officeBuildingIndex"
+					@change="onOfficeBuildingPick"
+				>
+					<view class="scf-oc-picker">
+						<text class="scf-oc-picker-t" :class="{ 'scf-oc-picker-t--ph': !officeBuildingKey }">
+							{{ officeBuildingKey || officeClockBuildingPlaceholder }}
+						</text>
+						<text class="scf-oc-picker-arrow">▾</text>
+					</view>
+				</picker>
+			</view>
+
+			<view class="scf-oc-card" v-if="officeBuildingKey && officeCornerPoint">
+				<text class="scf-oc-card-title">{{ officeClockCornerTitle }}</text>
+				<text class="scf-oc-corner-loc">{{ officeCornerDisplayLocation }}</text>
+				<image
+					v-if="officeCornerPoint.point_image"
+					class="scf-oc-corner-img"
+					:src="officeCornerPoint.point_image"
+					mode="aspectFill"
+				/>
+				<view v-else class="scf-oc-corner-img scf-oc-corner-img--ph">
+					<text class="scf-oc-corner-ph-t">真分角参考图占位</text>
+				</view>
+			</view>
+
+			<view class="scf-oc-card scf-oc-card--form">
+				<text class="scf-oc-form-head">{{ officeClockConfirmTitle }}</text>
+
+				<view class="scf-oc-form-row">
+					<text class="scf-oc-form-no">1</text>
+					<view class="scf-oc-form-body">
+						<text class="scf-oc-form-label">{{ officeClockItemTitle }}</text>
+						<view class="scf-oc-chip-row">
+							<view
+								v-for="tag in officeClockItemTags"
+								:key="'it-' + tag"
+								class="scf-oc-chip"
+								:class="{ 'scf-oc-chip--on': officeItemTags.indexOf(tag) >= 0 }"
+								@tap="toggleOfficeItemTag(tag)"
+							>{{ tag }}</view>
+						</view>
+						<view class="scf-oc-chip-row scf-oc-chip-row--sub">
+							<view
+								v-for="tag in officeClockVolumeTags"
+								:key="'vol-' + tag"
+								class="scf-oc-chip scf-oc-chip--sm"
+								:class="{ 'scf-oc-chip--on': officeVolumeTag === tag }"
+								@tap="officeVolumeTag = tag"
+							>{{ tag }}</view>
+						</view>
+					</view>
+				</view>
+
+				<view class="scf-oc-form-row">
+					<text class="scf-oc-form-no">2</text>
+					<view class="scf-oc-form-body">
+						<text class="scf-oc-form-label">{{ officeClockSaveTitle }}</text>
+						<view class="scf-oc-chip-row">
+							<view
+								v-for="opt in officeClockSaveOptions"
+								:key="'sv-' + opt"
+								class="scf-oc-chip"
+								:class="{ 'scf-oc-chip--on': officeSaveDuration === opt }"
+								@tap="officeSaveDuration = opt"
+							>{{ opt }}</view>
+						</view>
+					</view>
+				</view>
+
+				<view class="scf-oc-form-row">
+					<text class="scf-oc-form-no">3</text>
+					<view class="scf-oc-form-body">
+						<text class="scf-oc-form-label">{{ officeClockPhotoTitle }}</text>
+						<view
+							class="scf-oc-upload"
+							:class="{ 'scf-oc-upload--done': !!clockSlotUrls[0] }"
+							hover-class="scf-card--press"
+							@tap="onClockSlotTap(0)"
+						>
+							<image v-if="clockSlotUrls[0]" class="scf-oc-upload-img" :src="clockSlotUrls[0]" mode="aspectFill" />
+							<block v-else>
+								<text class="scf-oc-upload-ico">📷</text>
+								<text class="scf-oc-upload-t">{{ officeClockPhotoUploadCta }}</text>
+							</block>
+						</view>
+					</view>
+				</view>
+			</view>
+
+			<view class="scf-oc-foot">
+				<view
+					class="scf-oc-submit"
+					:class="{ 'scf-oc-submit--disabled': clockSubmitting }"
+					hover-class="scf-card--press"
+					@tap="submitClock"
+				>{{ clockSubmitting ? '提交中…' : officeClockSubmitCta }}</view>
+			</view>
+		</view>
+
 		<!-- 拍照打卡（原跳转 add 页，现页内完成） -->
 		<view class="scf-body" v-else-if="flowStep === 'learn'">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
@@ -1134,6 +1267,24 @@
 		getHomeClockFootNote,
 		getHomeClockFootPoints,
 		getHomeClockAmountOptions,
+		getOfficeClockNavTitle,
+		getOfficeClockBannerTitle,
+		getOfficeClockBannerSub,
+		getOfficeClockBannerBadge,
+		getOfficeClockRecycleAlertTitle,
+		getOfficeClockRecycleAlertBody,
+		getOfficeClockBuildingTitle,
+		getOfficeClockBuildingPlaceholder,
+		getOfficeClockCornerTitle,
+		getOfficeClockConfirmTitle,
+		getOfficeClockItemTitle,
+		getOfficeClockItemTags,
+		getOfficeClockVolumeTags,
+		getOfficeClockSaveTitle,
+		getOfficeClockSaveOptions,
+		getOfficeClockPhotoTitle,
+		getOfficeClockPhotoUploadCta,
+		getOfficeClockSubmitCta,
 	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
@@ -1263,6 +1414,29 @@
 				homeClockFootNote: getHomeClockFootNote(),
 				homeClockFootPoints: getHomeClockFootPoints(),
 				homeClockAmountOptions: getHomeClockAmountOptions(),
+				officeBuildingKey: '',
+				officeBuildingIndex: 0,
+				officeItemTags: [],
+				officeVolumeTag: '',
+				officeSaveDuration: '',
+				officeClockBannerTitle: getOfficeClockBannerTitle(),
+				officeClockBannerSub: getOfficeClockBannerSub(),
+				officeClockBannerBadge: getOfficeClockBannerBadge(),
+				officeClockRecycleAlertTitle: getOfficeClockRecycleAlertTitle(),
+				officeClockRecycleAlertBody: getOfficeClockRecycleAlertBody(),
+				officeClockBuildingTitle: getOfficeClockBuildingTitle(),
+				officeClockBuildingPlaceholder: getOfficeClockBuildingPlaceholder(),
+				officeClockCornerTitle: getOfficeClockCornerTitle(),
+				officeClockConfirmTitle: getOfficeClockConfirmTitle(),
+				officeClockItemTitle: getOfficeClockItemTitle(),
+				officeClockItemTags: getOfficeClockItemTags(),
+				officeClockVolumeTags: getOfficeClockVolumeTags(),
+				officeClockSaveTitle: getOfficeClockSaveTitle(),
+				officeClockSaveOptions: getOfficeClockSaveOptions(),
+				officeClockPhotoTitle: getOfficeClockPhotoTitle(),
+				officeClockPhotoUploadCta: getOfficeClockPhotoUploadCta(),
+				officeClockSubmitCta: getOfficeClockSubmitCta(),
+				officeClockHeroImgOk: true,
 			}
 		},
 		computed: {
@@ -1271,10 +1445,44 @@
 				const base = this.scenePickCosBase
 				return base + 'home-setup-hero.png'
 			},
+			officeClockHeroImgUrl() {
+				if (!this.officeClockHeroImgOk) return ''
+				const base = this.scenePickCosBase
+				return base + 'office-clock-hero.jpg'
+			},
 			/** 三处布置照片均已保存到服务端 */
 			homeFixedCanFinishSetup() {
 				if (this.homeFixedSavingKey) return false
 				return this.isHomeFixedSetupComplete()
+			},
+			officeRecyclePoints() {
+				return (this.points || []).filter(p => this.isRecycleCateName(p.cate_name))
+			},
+			officeBuildingLabels() {
+				const labels = []
+				const seen = {}
+				;(this.officeRecyclePoints || []).forEach(p => {
+					const n = String(p.building_name || p.point_name || '').trim()
+					if (n && !seen[n]) {
+						seen[n] = true
+						labels.push(n)
+					}
+				})
+				return labels
+			},
+			officeCornerPoint() {
+				if (!this.officeBuildingKey) return null
+				const key = this.officeBuildingKey
+				return (this.officeRecyclePoints || []).find(
+					p => String(p.building_name || p.point_name || '').trim() === key
+				) || null
+			},
+			officeCornerDisplayLocation() {
+				const p = this.officeCornerPoint
+				if (!p) return ''
+				const loc = String(p.corner_location || p.remark || '').trim()
+				if (loc) return loc
+				return this.officeBuildingKey
 			},
 			homeClockCateCards() {
 				const defs = [
@@ -1789,6 +1997,9 @@
 			onHomeFixedHeroImgError() {
 				this.homeFixedHeroImgOk = false
 			},
+			onOfficeClockHeroImgError() {
+				this.officeClockHeroImgOk = false
+			},
 			onHomeFixedExampleImgError(slotKey) {
 				if (!slotKey) return
 				this.$set(this.homeFixedExampleImgOk, slotKey, false)
@@ -2011,6 +2222,70 @@
 				this.resetHomeClockForm()
 				this.flowStep = 'learn'
 				uni.setNavigationBarTitle({ title: getHomeClockNavTitle() })
+			},
+			enterOfficeClockFlow() {
+				if (!(this.officeBuildingLabels || []).length) {
+					this.flowStep = 'hub_empty'
+					return
+				}
+				this.residentialPickMode = false
+				this.resetOfficeClockForm()
+				this.flowStep = 'learn'
+				this.subKey = 'zhenfenjiao'
+				if (this.officeBuildingLabels.length === 1) {
+					this.applyOfficeBuildingByName(this.officeBuildingLabels[0])
+				}
+				uni.setNavigationBarTitle({ title: getOfficeClockNavTitle() })
+			},
+			resetOfficeClockForm() {
+				this.officeBuildingKey = ''
+				this.officeBuildingIndex = 0
+				this.officeItemTags = []
+				this.officeVolumeTag = ''
+				this.officeSaveDuration = ''
+				this.pointId = 0
+				this.cateId = 0
+				this.activeCateName = ''
+				this.clockContent = ''
+				this.resetClockSlots()
+			},
+			isRecycleCateName(name) {
+				const n = String(name || '')
+				return n.indexOf('可回收') >= 0 && n.indexOf('不可') < 0
+			},
+			applyOfficeBuildingByName(name) {
+				const key = String(name || '').trim()
+				if (!key) return
+				this.officeBuildingKey = key
+				const labels = this.officeBuildingLabels || []
+				const idx = labels.indexOf(key)
+				this.officeBuildingIndex = idx >= 0 ? idx : 0
+				const p = (this.officeRecyclePoints || []).find(
+					item => String(item.building_name || item.point_name || '').trim() === key
+				)
+				if (p) {
+					this.pointId = p.id
+					this.cateId = p.cate_id
+					this.activeCateName = p.cate_name || ''
+					this.cateLabel = guideCateLabelFromName(p.cate_name)
+					this.subKey = 'zhenfenjiao'
+					this.loadGuide()
+				}
+			},
+			onOfficeBuildingPick(e) {
+				const idx = parseInt(e.detail.value, 10)
+				const labels = this.officeBuildingLabels || []
+				if (isNaN(idx) || idx < 0 || idx >= labels.length) return
+				this.applyOfficeBuildingByName(labels[idx])
+			},
+			toggleOfficeItemTag(tag) {
+				const t = String(tag || '')
+				if (!t) return
+				const list = [...(this.officeItemTags || [])]
+				const pos = list.indexOf(t)
+				if (pos >= 0) list.splice(pos, 1)
+				else list.push(t)
+				this.officeItemTags = list
 			},
 			resetHomeClockForm() {
 				this.homeClockCateKey = ''
@@ -2429,7 +2704,12 @@
 						return
 					}
 					if (this.isCommunityHub) {
-						this.flowStep = this.points.length ? 'points' : 'hub_empty'
+						if (keepFlow === 'learn') return
+						if (this.points.length > 0) {
+							this.enterOfficeClockFlow()
+						} else {
+							this.flowStep = 'hub_empty'
+						}
 						return
 					}
 					if (this.isResidentialHub) {
@@ -2830,7 +3110,7 @@
 				return 'home'
 			},
 			resetClockSlots() {
-				if (this.isResidentialHub) {
+				if (this.isResidentialHub || this.isOfficeHub) {
 					this.clockSlotUrls = ['']
 					return
 				}
@@ -2909,6 +3189,18 @@
 					if (!String(this.clockSlotUrls[0] || '').trim()) {
 						return this.$u.toast('请上传今日真分照片')
 					}
+				} else if (this.isOfficeHub) {
+					if (!this.officeBuildingKey || !this.pointId) {
+						return this.$u.toast('请选择办公楼宇')
+					}
+					if (!(this.officeItemTags || []).length) {
+						return this.$u.toast('请选择今天投了什么')
+					}
+					if (!this.officeVolumeTag) return this.$u.toast('请选择投放数量（少/多）')
+					if (!this.officeSaveDuration) return this.$u.toast('请选择攒了多久')
+					if (!String(this.clockSlotUrls[0] || '').trim()) {
+						return this.$u.toast('请上传真分投递照片')
+					}
 				} else {
 					if (!this.cateId) return this.$u.toast('暂未匹配到垃圾种类')
 					const missing = this.missingClockSlotLabel()
@@ -2932,6 +3224,13 @@
 					if (this.homeClockAmount) parts.push('今日数量：' + this.homeClockAmount)
 					const tip = String(this.homeClockTip || '').trim()
 					if (tip) parts.push('真分小妙招：' + tip)
+				} else if (this.isOfficeHub) {
+					if (this.officeBuildingKey) parts.push('办公楼宇：' + this.officeBuildingKey)
+					if ((this.officeItemTags || []).length) {
+						parts.push('投放物：' + this.officeItemTags.join('、'))
+					}
+					if (this.officeVolumeTag) parts.push('数量：' + this.officeVolumeTag)
+					if (this.officeSaveDuration) parts.push('积攒：' + this.officeSaveDuration)
 				} else if (this.accumDuration || this.sortDuration) {
 					if (this.accumDuration) parts.push('积累时长：' + this.accumDuration)
 					if (this.sortDuration) parts.push('分拣用时：' + this.sortDuration)
@@ -2981,7 +3280,9 @@
 					content: this.buildClockContentText(),
 					image: this.clockImages,
 					clock_scene: this.resolveClockScene(),
-					clock_sub_scene: '',
+					clock_sub_scene: this.isOfficeHub
+						? String(this.officeBuildingKey || 'zhenfenjiao').slice(0, 50)
+						: '',
 					clock_point_id: this.pointId || 0,
 				}
 				if (this.isStreetHub && this.streetMerchant && this.streetMerchant.id) {
@@ -3010,6 +3311,10 @@
 				this.sortDuration = ''
 				if (this.isResidentialHub) {
 					this.enterResidentialClockFlow()
+					return
+				}
+				if (this.isOfficeHub) {
+					this.enterOfficeClockFlow()
 					return
 				}
 				if (this.isStreetHub) {
@@ -3835,6 +4140,273 @@
 	color: #18af38;
 	margin-top: 20rpx;
 	padding: 8rpx;
+}
+
+.scf-body--office-clock {
+	padding: 0 0 calc(32rpx + env(safe-area-inset-bottom));
+	background: #f6f3ed;
+	min-height: 100vh;
+	box-sizing: border-box;
+}
+.scf-oc-banner {
+	padding: 12rpx 24rpx 0;
+}
+.scf-oc-banner-ph {
+	position: relative;
+	min-height: 200rpx;
+	border-radius: 20rpx;
+	overflow: hidden;
+	background: linear-gradient(135deg, #4a5568 0%, #6b7b6a 100%);
+	box-sizing: border-box;
+}
+.scf-oc-banner-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 0;
+}
+.scf-oc-banner-overlay {
+	position: relative;
+	z-index: 1;
+	padding: 28rpx 24rpx;
+	background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.15) 100%);
+}
+.scf-oc-banner-title {
+	display: block;
+	font-size: 36rpx;
+	font-weight: 800;
+	color: #fff;
+	line-height: 1.35;
+	margin-bottom: 12rpx;
+}
+.scf-oc-banner-sub {
+	display: block;
+	font-size: 24rpx;
+	color: rgba(255, 255, 255, 0.92);
+	line-height: 1.5;
+	margin-bottom: 16rpx;
+}
+.scf-oc-banner-badge {
+	display: inline-block;
+	padding: 8rpx 20rpx;
+	border-radius: 999rpx;
+	font-size: 22rpx;
+	font-weight: 600;
+	color: #fff;
+	background: rgba(24, 175, 56, 0.85);
+}
+.scf-oc-alert {
+	margin: 20rpx 24rpx;
+	padding: 22rpx 20rpx;
+	border-radius: 20rpx;
+	background: #e8f5ec;
+	display: flex;
+	align-items: flex-start;
+	gap: 14rpx;
+}
+.scf-oc-alert-ico {
+	font-size: 36rpx;
+	line-height: 1;
+}
+.scf-oc-alert-body {
+	flex: 1;
+	min-width: 0;
+}
+.scf-oc-alert-title {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 800;
+	color: #142018;
+	margin-bottom: 8rpx;
+}
+.scf-oc-alert-desc {
+	display: block;
+	font-size: 24rpx;
+	color: #4a5a50;
+	line-height: 1.5;
+}
+.scf-oc-alert-deco {
+	font-size: 40rpx;
+	opacity: 0.35;
+	line-height: 1;
+}
+.scf-oc-card {
+	margin: 0 24rpx 20rpx;
+	padding: 24rpx 22rpx;
+	background: #fff;
+	border-radius: 20rpx;
+	box-shadow: 0 8rpx 28rpx rgba(40, 36, 28, 0.06);
+}
+.scf-oc-card--form {
+	padding-bottom: 12rpx;
+}
+.scf-oc-card-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #142018;
+	margin-bottom: 16rpx;
+}
+.scf-oc-picker {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 22rpx 24rpx;
+	border-radius: 999rpx;
+	background: #fff;
+	border: 2rpx solid #e8e4dc;
+}
+.scf-oc-picker-t {
+	flex: 1;
+	font-size: 28rpx;
+	color: #333;
+}
+.scf-oc-picker-t--ph {
+	color: #aaa;
+}
+.scf-oc-picker-arrow {
+	font-size: 28rpx;
+	color: #999;
+	margin-left: 12rpx;
+}
+.scf-oc-corner-loc {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #333;
+	margin-bottom: 16rpx;
+	line-height: 1.45;
+}
+.scf-oc-corner-img {
+	width: 100%;
+	height: 200rpx;
+	border-radius: 12rpx;
+	display: block;
+	background: #eef2ef;
+}
+.scf-oc-corner-img--ph {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.scf-oc-corner-ph-t {
+	font-size: 24rpx;
+	color: #9aa89e;
+}
+.scf-oc-form-head {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #142018;
+	margin-bottom: 20rpx;
+}
+.scf-oc-form-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 12rpx;
+	margin-bottom: 24rpx;
+}
+.scf-oc-form-no {
+	width: 40rpx;
+	height: 40rpx;
+	border-radius: 50%;
+	background: #18af38;
+	color: #fff;
+	font-size: 24rpx;
+	font-weight: 700;
+	text-align: center;
+	line-height: 40rpx;
+	flex-shrink: 0;
+}
+.scf-oc-form-body {
+	flex: 1;
+	min-width: 0;
+}
+.scf-oc-form-label {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #333;
+	margin-bottom: 14rpx;
+}
+.scf-oc-chip-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16rpx;
+	margin-bottom: 12rpx;
+}
+.scf-oc-chip-row--sub {
+	margin-top: 4rpx;
+}
+.scf-oc-chip {
+	padding: 14rpx 28rpx;
+	border-radius: 999rpx;
+	font-size: 26rpx;
+	color: #555;
+	background: #fff;
+	border: 2rpx solid #e0ddd6;
+}
+.scf-oc-chip--sm {
+	padding: 10rpx 32rpx;
+}
+.scf-oc-chip--on {
+	border-color: #18af38;
+	color: #18af38;
+	background: #eefaf2;
+	font-weight: 600;
+}
+.scf-oc-upload {
+	min-height: 220rpx;
+	border: 2rpx dashed #b8dfc4;
+	border-radius: 16rpx;
+	background: #fafcfb;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 24rpx;
+	overflow: hidden;
+}
+.scf-oc-upload--done {
+	padding: 0;
+	border-style: solid;
+}
+.scf-oc-upload-ico {
+	font-size: 44rpx;
+	margin-bottom: 12rpx;
+}
+.scf-oc-upload-t {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #18af38;
+	text-align: center;
+	padding: 0 16rpx;
+}
+.scf-oc-upload-img {
+	width: 100%;
+	height: 260rpx;
+	display: block;
+}
+.scf-oc-foot {
+	padding: 8rpx 32rpx 24rpx;
+}
+.scf-oc-submit {
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+	padding: 28rpx 24rpx;
+	border-radius: 999rpx;
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(180deg, #5cb878 0%, #52a16d 100%);
+	box-shadow: 0 10rpx 28rpx rgba(82, 161, 109, 0.35);
+}
+.scf-oc-submit--disabled {
+	opacity: 0.5;
+	box-shadow: none;
 }
 
 /* 与 theme_scenes 的 zf-promo 同系视觉，用于流程内各步 */

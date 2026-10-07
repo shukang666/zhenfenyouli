@@ -520,10 +520,12 @@ class ForumController extends ToolController
             }
         }
         $cateList = SelectModel::where('type', 2)->where('pid', 0)->order('list_order asc,id asc')->select();
+        $communityList = CommunityModel::where('delete_time', 0)->order('id desc')->limit(500)->select();
         return $this->fetch('clock_scene_point_add', [
-            'data'       => $item,
-            'cateList'   => $cateList,
-            'hubLabels'  => ClockScenePointModel::adminHubLabels(),
+            'data'          => $item,
+            'cateList'      => $cateList,
+            'hubLabels'     => ClockScenePointModel::adminHubLabels(),
+            'communityList' => $communityList,
         ]);
     }
 
@@ -556,16 +558,26 @@ class ForumController extends ToolController
             $this->error('请选择垃圾种类');
         }
         $now = time();
+        $communityId = intval($this->request->param('community_id', 0));
+        if ($hub === 'office' && $communityId <= 0) {
+            $this->error('办公场景请填写所属社区');
+        }
+        $pointImage = trim((string)$this->request->param('point_image', ''));
+        if ($pointImage !== '' && mb_strlen($pointImage) > 255) {
+            $this->error('点位照片路径过长');
+        }
         $save = [
-            'user_id'     => $userId,
-            'hub_key'     => $hub,
-            'point_name'  => mb_substr($pointName, 0, 32),
-            'cate_id'     => $cateId,
-            'cate_name'   => $cate['name'],
-            'source'      => ClockScenePointModel::SOURCE_ADMIN,
-            'remark'      => mb_substr(trim((string)$this->request->param('remark', '')), 0, 255),
-            'admin_id'    => (int)session('ADMIN_ID'),
-            'update_time' => $now,
+            'user_id'      => $userId,
+            'community_id' => $hub === 'office' ? $communityId : 0,
+            'hub_key'      => $hub,
+            'point_name'   => mb_substr($pointName, 0, 32),
+            'cate_id'      => $cateId,
+            'cate_name'    => $cate['name'],
+            'point_image'  => $pointImage,
+            'source'       => ClockScenePointModel::SOURCE_ADMIN,
+            'remark'       => mb_substr(trim((string)$this->request->param('remark', '')), 0, 255),
+            'admin_id'     => (int)session('ADMIN_ID'),
+            'update_time'  => $now,
         ];
         if ($id > 0) {
             $row = ClockScenePointModel::where('id', $id)
