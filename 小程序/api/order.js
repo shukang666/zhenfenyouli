@@ -13,6 +13,8 @@ const order = {
     get_clock_tutorial: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_tutorial', params),
     get_clock_scene_guide: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_scene_guide', params),
     get_clock_pre_learn: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_pre_learn', params),
+    get_clock_learn_exam: (params = {}) => uni.$u.post('/wxapp/forum/get_clock_learn_exam', params),
+    submit_clock_learn_exam: (params = {}) => uni.$u.post('/wxapp/forum/submit_clock_learn_exam', params),
     complete_clock_pre_learn: (params = {}) => uni.$u.post('/wxapp/forum/complete_clock_pre_learn', params),
     submit_clock_scene_survey: (params = {}) => uni.$u.post('/wxapp/forum/submit_clock_scene_survey', params),
     list_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/list', params),

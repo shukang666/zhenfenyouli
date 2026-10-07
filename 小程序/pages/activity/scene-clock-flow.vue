@@ -1307,28 +1307,15 @@
 				this.$u.api.getUserInfo().then(res => {
 					const info = res.data || {}
 					this.$u.vuex('userInfo', info)
-					if (!info.is_learn) {
+					if (!info.is_learn || !info.is_answer) {
 						uni.showModal({
 							title: '还差一步',
-							content: '第一次打卡前，需要先看一遍打卡说明（大约几分钟）。看完并通过小测验即可继续。',
+							content: '第一次打卡前，请先完成「学考一体」（学一点、考一点，大约几分钟）。',
 							showCancel: false,
-							confirmText: '去学习',
+							confirmText: '去学考',
 							confirmColor: '#38B061',
 							success: (r) => {
 								if (r.confirm) uni.navigateTo({ url: '/pages/flhd/pre_learn' })
-							},
-						})
-						return
-					}
-					if (!info.is_answer) {
-						uni.showModal({
-							title: '再答几道题',
-							content: '说明已经看完了，做一套简单选择题通过后即可打卡攒积分。',
-							showCancel: false,
-							confirmText: '去答题',
-							confirmColor: '#38B061',
-							success: (r) => {
-								if (r.confirm) this.$u.route('/pages/answer/examine?id=1')
 							},
 						})
 					}
@@ -1344,28 +1331,15 @@
 					info = res.data || {}
 					this.$u.vuex('userInfo', info)
 				} catch (e) {}
-				if (!info.is_learn) {
+				if (!info.is_learn || !info.is_answer) {
 					uni.showModal({
 						title: '还差一步',
-						content: '第一次打卡前，需要先看一遍打卡说明（大约几分钟）。看完并通过小测验即可继续。',
+						content: '第一次打卡前，请先完成「学考一体」（学一点、考一点，大约几分钟）。',
 						showCancel: false,
-						confirmText: '去学习',
+						confirmText: '去学考',
 						confirmColor: '#38B061',
 						success: (res) => {
 							if (res.confirm) uni.navigateTo({ url: '/pages/flhd/pre_learn' })
-						},
-					})
-					return
-				}
-				if (!info.is_answer) {
-					uni.showModal({
-						title: '再答几道题',
-						content: '说明已经看完了，做一套简单选择题通过后即可打卡攒积分。',
-						showCancel: false,
-						confirmText: '去答题',
-						confirmColor: '#38B061',
-						success: (res) => {
-							if (res.confirm) this.$u.route('/pages/answer/examine?id=1')
 						},
 					})
 					return
@@ -1421,16 +1395,10 @@
 						is_answer: info.is_answer,
 						community_id: info.community_id,
 					})
-					if (Number(info.is_learn) !== 1) {
+					if (Number(info.is_learn) !== 1 || Number(info.is_answer) !== 1) {
 						this.scfDbg('ensureExamGate BLOCK → pre_learn')
-						this.$u.toast('请先完成打卡前学习')
+						this.$u.toast('请先完成学考一体')
 						setTimeout(() => uni.navigateTo({ url: '/pages/flhd/pre_learn' }), 500)
-						return false
-					}
-					if (Number(info.is_answer) !== 1) {
-						this.scfDbg('ensureExamGate BLOCK → examine')
-						this.$u.toast('请先通过分类小测验')
-						setTimeout(() => uni.navigateTo({ url: '/pages/answer/examine?id=1' }), 500)
 						return false
 					}
 					this.scfDbg('ensureExamGate pass')

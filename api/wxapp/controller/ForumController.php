@@ -3,6 +3,7 @@
 namespace api\wxapp\controller;
 
 use api\wxapp\service\ClockPreLearnService;
+use api\wxapp\service\ClockLearnExamService;
 use api\wxapp\model\AccountLogModel;
 use api\wxapp\model\CommonModel;
 use app\admin\model\active\ActiveUserModel;
@@ -128,16 +129,55 @@ class ForumController extends AuthController
     {
         $done = 0;
         if (!empty($this->user_id)) {
-            $done = (int)MemberModel::where('id', $this->user_id)->value('clock_pre_learn');
+            $done = ClockLearnExamService::isCompleted((int)$this->user_id) ? 1 : 0;
         }
         $this->success('请求成功', [
             'sections' => ClockPreLearnService::getSections(),
             'done'     => $done ? 1 : 0,
+            'blocks'   => ClockLearnExamService::getBlocksForClient(),
+            'completed'=> $done ? 1 : 0,
         ]);
     }
 
     /**
-     * 标记已完成打卡前学习
+     * 学考一体：拉取页面块（不含答案）
+     */
+    public function get_clock_learn_exam()
+    {
+        $done = 0;
+        if (!empty($this->user_id)) {
+            $done = ClockLearnExamService::isCompleted((int)$this->user_id) ? 1 : 0;
+        }
+        $this->success('请求成功', [
+            'blocks'    => ClockLearnExamService::getBlocksForClient(),
+            'completed' => $done ? 1 : 0,
+        ]);
+    }
+
+    /**
+     * 学考一体：提交全部练一练答案，通过后写 clock_pre_learn + 答题及格记录
+     */
+    public function submit_clock_learn_exam()
+    {
+        $this->checkUser();
+        if (ClockLearnExamService::isCompleted((int)$this->user_id)) {
+            $this->success('您已完成学考', ['completed' => 1]);
+            return;
+        }
+        $answers = $this->request->param('answers/a', []);
+        if (empty($answers) || !is_array($answers)) {
+            $this->error('请先答完练一练题目');
+        }
+        $grade = ClockLearnExamService::gradeAnswers($answers);
+        if (empty($grade['pass'])) {
+            $this->error('有题目答错了，请对照上面知识修改后再提交', $grade);
+        }
+        ClockLearnExamService::markCompleted((int)$this->user_id);
+        $this->success('学考完成，可以开始真分打卡了', ['completed' => 1]);
+    }
+
+    /**
+     * 标记已完成打卡前学习（兼容旧版单独「已阅读」；学考一体请用 submit_clock_learn_exam）
      */
     public function complete_clock_pre_learn()
     {

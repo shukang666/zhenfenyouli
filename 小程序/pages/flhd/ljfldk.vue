@@ -16,41 +16,20 @@
 			</view>
 		</view>
 
-		<!-- 新用户：真分介绍 + 考试一体；通过后下方打卡 -->
+		<!-- 新用户：学考一体（完整页 pre_learn） -->
 		<view class="dk-block dk-block--intro" v-if="showLearnHub">
-			<text class="dk-block-t">打卡前学习</text>
-			<text class="dk-block-hint">请阅读以下三部分说明，确认后再参加分类小测验</text>
-			<scroll-view scroll-y class="dk-intro-scroll" :show-scrollbar="false">
-				<view class="dk-intro-card" v-for="(sec, si) in introSections" :key="'intro-' + si">
-					<text class="dk-intro-name">{{ sec.name }}</text>
-					<text class="dk-intro-desc" v-if="sec.desc">{{ sec.desc }}</text>
-					<view class="dk-intro-rich" v-if="sec.contentHtml">
-						<u-parse :html="sec.contentHtml"></u-parse>
-					</view>
-				</view>
-				<view class="dk-intro-empty" v-if="introLoaded && !introSections.length">学习内容加载失败，请稍后重试</view>
-			</scroll-view>
-			<view
-				class="dk-intro-ack"
-				:class="{ 'dk-intro-ack--done': introAcknowledged }"
-				@tap="ackIntro"
-			>
-				<text>{{ introAcknowledged ? '已完成学习' : '我已阅读以上内容' }}</text>
-			</view>
-			<view class="dk-exam-block dk-exam-block--inline">
-				<text class="dk-block-t dk-exam-block-t">分类小测验</text>
-				<view class="dk-exam-card" :class="{ 'dk-exam-card--locked': !introAcknowledged, 'dk-exam-card--ready': introAcknowledged }">
-					<text class="dk-exam-desc" v-if="!introAcknowledged">阅读并确认上方内容后，即可开始答题。</text>
-					<text class="dk-exam-desc" v-else>通过测验后即可选择场景打卡；也可稍后再答。</text>
-					<view
-						class="dk-scene-btn"
-						:class="!introAcknowledged ? 'dk-scene-btn--disabled' : 'dk-scene-btn--primary'"
-						:hover-class="introAcknowledged ? 'dk-scene-btn--press' : ''"
-						:hover-stay-time="80"
-						@tap="onExamTap"
-					>
-						<text class="dk-scene-btn-t">{{ introAcknowledged ? '开始答题' : '请先完成学习' }}</text>
-					</view>
+			<text class="dk-block-t">学考一体</text>
+			<text class="dk-block-hint">学一点、考一点，通过后即可选择场景真分打卡</text>
+			<view class="dk-learn-exam-card">
+				<text class="dk-learn-exam-ico">📖</text>
+				<text class="dk-learn-exam-desc">分类常识 + 5 道练一练，大约几分钟</text>
+				<view
+					class="dk-scene-btn dk-scene-btn--primary"
+					hover-class="dk-scene-btn--press"
+					:hover-stay-time="80"
+					@tap="goPreLearn"
+				>
+					<text class="dk-scene-btn-t">开始学考 ›</text>
 				</view>
 			</view>
 		</view>
@@ -176,9 +155,6 @@
 			this.refreshUser().then(() => {
 				if (!this.isLogin) return
 				this.syncIntroAckFromUser()
-				if (this.showLearnHub) {
-					this.loadIntroSections()
-				}
 			})
 		},
 		methods: {
@@ -226,8 +202,11 @@
 				}
 				this.goExam()
 			},
+			goPreLearn() {
+				uni.navigateTo({ url: '/pages/flhd/pre_learn' })
+			},
 			goExam() {
-				uni.navigateTo({ url: '/pages/answer/examine?id=1' })
+				this.goPreLearn()
 			},
 			refreshUser() {
 				if (!this.isLogin) return Promise.resolve()
@@ -476,6 +455,25 @@
 	display: flex;
 	flex-direction: column;
 	margin-top: 12rpx;
+}
+.dk-learn-exam-card {
+	margin-top: 16rpx;
+	padding: 32rpx 24rpx;
+	border-radius: 18rpx;
+	background: #fff;
+	box-shadow: 0 6rpx 20rpx rgba(36, 48, 40, 0.06);
+	text-align: center;
+}
+.dk-learn-exam-ico {
+	font-size: 72rpx;
+	line-height: 1;
+}
+.dk-learn-exam-desc {
+	display: block;
+	margin: 16rpx 0 28rpx;
+	font-size: 28rpx;
+	line-height: 1.55;
+	color: #5a665e;
 }
 .dk-intro-scroll {
 	flex: 1;
