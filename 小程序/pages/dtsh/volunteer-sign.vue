@@ -1,11 +1,15 @@
 <template>
 	<view class="page-wrap u-p-30">
-		<u-navbar title-color="#fff" title="桶边督导" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false" :custom-back="customBack">
+		<u-navbar title-color="#fff" title="点位督导" :is-back="true" back-icon-color="#fff" background="transparent" :borderBottom="false" :custom-back="customBack">
 		</u-navbar>
 		<view class="page-bg u-abso"></view>
 
+		<view class="vs-hero">
+			<text class="vs-hero-sub">督导是到点位现场引导分类；选小区与点位后登记并拍照留证</text>
+		</view>
+
 		<!-- 顶栏：随时督导 + 先小区后点位 -->
-		<view class="header-card u-m-t-20">
+		<view class="header-card u-m-t-16">
 			<view class="header-top u-flex u-row-between u-col-center u-m-b-8">
 				<view class="time-badge">随时督导</view>
 				<view class="supervisor-name u-line-1">{{ supervisorLabel }}</view>
@@ -32,7 +36,7 @@
 		<!-- 今日已完成 -->
 		<view class="card u-m-t-24" v-if="todaySigned">
 			<view class="u-text-center u-font-32 u-font-bold">今日督导已完成</view>
-			<view class="u-font-28 u-m-t-20 u-text-center" style="color:#18AF38;">感谢你的桶边督导 ✓</view>
+			<view class="u-font-28 u-m-t-20 u-text-center" style="color:#18AF38;">感谢你的点位督导 ✓</view>
 			<view class="u-font-24 u-type-info u-m-t-10 u-text-center" v-if="todayRecord && todayRecord.point > 0">审核通过后可获 {{ todayRecord.point }} 积分</view>
 		</view>
 
@@ -495,6 +499,17 @@
 	right: 0;
 	height: 552rpx;
 	background: linear-gradient(to bottom, #2fb74c, #eff9f1);
+}
+.vs-hero {
+	position: relative;
+	z-index: 1;
+	padding: 8rpx 30rpx 20rpx;
+}
+.vs-hero-sub {
+	display: block;
+	font-size: 26rpx;
+	color: rgba(255, 255, 255, 0.92);
+	line-height: 1.5;
 }
 .header-card,
 .card {
