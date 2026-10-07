@@ -192,7 +192,10 @@
 		<!-- 首次：设置分类打卡点（仅家庭/办公等摆桶，不含「为什么要分」） -->
 		<view
 			class="scf-body scf-body--setup"
-			:class="{ 'scf-body--pick-active': isOwnPointHub && residentialPickMode }"
+			:class="{
+				'scf-body--pick-active': isOwnPointHub && residentialPickMode,
+				'scf-body--home-fix': isResidentialHub && !residentialPickMode,
+			}"
 			v-if="flowStep === 'setup'"
 		>
 			<view class="scf-street-shop-bar" v-if="isStreetHub && streetMerchant && !residentialPickMode">
@@ -231,7 +234,7 @@
 					</view>
 				</view>
 				<text class="scf-pick-mask-hint">{{ ownPointPickMaskHint }}</text>
-				<view class="scf-settings-fold" v-if="points.length">
+				<view class="scf-settings-fold" v-if="points.length && !isResidentialHub">
 					<view
 						class="scf-settings-fold-head"
 						hover-class="scf-card--press"
@@ -292,6 +295,124 @@
 							<view class="scf-settings-fold-done" hover-class="scf-card--press" @tap="closeResidentialBinSettings">完成，返回选桶</view>
 						</view>
 					</view>
+				</view>
+			</block>
+			<block v-else-if="isResidentialHub">
+				<view class="scf-home-fix">
+					<view class="scf-home-fix-hero">
+						<image
+							v-if="homeFixedHeroImgUrl"
+							class="scf-home-fix-hero-banner-img"
+							:src="homeFixedHeroImgUrl"
+							mode="widthFix"
+							@error="onHomeFixedHeroImgError"
+						/>
+						<view v-else class="scf-home-fix-hero-banner-ph">
+							<text class="scf-home-fix-hero-banner-ph-t">{{ homeFixedHeroTitle }}</text>
+							<text class="scf-home-fix-hero-banner-ph-s">{{ homeFixedHeroSub }}</text>
+						</view>
+					</view>
+
+					<view class="scf-home-fix-sect">
+						<view class="scf-home-fix-sect-head">
+							<view class="scf-home-fix-sect-line"></view>
+							<text class="scf-home-fix-sect-leaf">🍃</text>
+							<text class="scf-home-fix-sect-t">{{ homeFixedSectionStartTitle }}</text>
+							<text class="scf-home-fix-sect-leaf">🍃</text>
+							<view class="scf-home-fix-sect-line"></view>
+						</view>
+						<text class="scf-home-fix-reward">{{ homeFixedRewardHint }}</text>
+						<view
+							class="scf-home-fix-card"
+							v-for="slot in homeFixedSlotsStart"
+							:key="slot.slotKey"
+						>
+							<text class="scf-home-fix-card-title">{{ slot.title }}</text>
+							<view class="scf-home-fix-card-mid">
+								<text class="scf-home-fix-card-desc">{{ slot.desc }}</text>
+								<view class="scf-home-fix-card-example">
+									<view class="scf-home-fix-card-example-ph">
+										<text class="scf-home-fix-card-example-ph-t">示例图</text>
+									</view>
+									<text class="scf-home-fix-card-example-cap">{{ slot.exampleCaption }}</text>
+								</view>
+							</view>
+							<view
+								class="scf-home-fix-upload"
+								:class="{ 'scf-home-fix-upload--done': slot.point_image_url }"
+								hover-class="scf-card--press"
+								@tap="chooseHomeFixedPhoto(slot.slotKey)"
+							>
+								<image
+									v-if="slot.point_image_url"
+									class="scf-home-fix-upload-img"
+									:src="slot.point_image_url"
+									mode="aspectFill"
+								></image>
+								<block v-else>
+									<view class="scf-home-fix-upload-ico-wrap">
+										<text class="scf-home-fix-upload-ico">📷</text>
+									</view>
+									<text class="scf-home-fix-upload-t">{{ slot.uploadCta }}</text>
+								</block>
+								<text v-if="slot.point_image_url" class="scf-home-fix-upload-badge">{{ slot.uploadDone }}</text>
+							</view>
+						</view>
+					</view>
+
+					<view class="scf-home-fix-sect">
+						<view class="scf-home-fix-sect-head">
+							<view class="scf-home-fix-sect-line"></view>
+							<text class="scf-home-fix-sect-leaf">🍃</text>
+							<text class="scf-home-fix-sect-t">{{ homeFixedSectionRecycleTitle }}</text>
+							<text class="scf-home-fix-sect-leaf">🍃</text>
+							<view class="scf-home-fix-sect-line"></view>
+						</view>
+						<view
+							class="scf-home-fix-card"
+							v-for="slot in homeFixedSlotsRecycleHarm"
+							:key="slot.slotKey"
+						>
+							<text class="scf-home-fix-card-title">{{ slot.title }}</text>
+							<view class="scf-home-fix-card-mid">
+								<text class="scf-home-fix-card-desc">{{ slot.desc }}</text>
+								<view class="scf-home-fix-card-example">
+									<view class="scf-home-fix-card-example-ph">
+										<text class="scf-home-fix-card-example-ph-t">示例图</text>
+									</view>
+									<text class="scf-home-fix-card-example-cap">{{ slot.exampleCaption }}</text>
+								</view>
+							</view>
+							<view
+								class="scf-home-fix-upload"
+								:class="{ 'scf-home-fix-upload--done': slot.point_image_url }"
+								hover-class="scf-card--press"
+								@tap="chooseHomeFixedPhoto(slot.slotKey)"
+							>
+								<image
+									v-if="slot.point_image_url"
+									class="scf-home-fix-upload-img"
+									:src="slot.point_image_url"
+									mode="aspectFill"
+								></image>
+								<block v-else>
+									<view class="scf-home-fix-upload-ico-wrap">
+										<text class="scf-home-fix-upload-ico">📷</text>
+									</view>
+									<text class="scf-home-fix-upload-t">{{ slot.uploadCta }}</text>
+								</block>
+								<text v-if="slot.point_image_url" class="scf-home-fix-upload-badge">{{ slot.uploadDone }}</text>
+							</view>
+						</view>
+					</view>
+				</view>
+				<view class="scf-home-fix-foot">
+					<view
+						class="scf-home-fix-finish"
+						:class="{ 'scf-home-fix-finish--disabled': !homeFixedAllSlotsReady }"
+						hover-class="scf-home-fix-finish--press"
+						@tap="onHomeFixedFinishAll"
+					>{{ homeFixedFinishCta }}</view>
 				</view>
 			</block>
 			<block v-else>
@@ -858,6 +979,13 @@
 		getClockSuccessPromoBody,
 		getClockSuccessPromoEmptyBody,
 		getClockSuccessPromoMoreLabel,
+		getHomeFixedSetupSlots,
+		getHomeFixedSetupHeroTitle,
+		getHomeFixedSetupHeroSub,
+		getHomeFixedSectionStartTitle,
+		getHomeFixedSectionRecycleTitle,
+		getHomeFixedSetupRewardHint,
+		getHomeFixedSetupFinishCta,
 	} from '@/common/sceneClockUserCopy.js'
 
 	export default {
@@ -951,9 +1079,36 @@
 				sortDurationOptions: getSortDurationOptions(),
 				clockPromoActivity: null,
 				clockPromoList: [],
+				homeFixedSlots: [],
+				homeFixedHeroTitle: getHomeFixedSetupHeroTitle(),
+				homeFixedHeroSub: getHomeFixedSetupHeroSub(),
+				homeFixedSectionStartTitle: getHomeFixedSectionStartTitle(),
+				homeFixedSectionRecycleTitle: getHomeFixedSectionRecycleTitle(),
+				homeFixedRewardHint: getHomeFixedSetupRewardHint(),
+				homeFixedFinishCta: getHomeFixedSetupFinishCta(),
+				homeFixedSavingKey: '',
+				homeFixedHeroImgOk: true,
+				/** URL 参数 home_setup=1 时强制进入布置页（后续改图入口用） */
+				homeFixedEditSetup: false,
 			}
 		},
 		computed: {
+			homeFixedHeroImgUrl() {
+				if (!this.homeFixedHeroImgOk) return ''
+				const base = this.scenePickCosBase
+				return base + 'home-setup-hero.png'
+			},
+			/** 三处布置照片是否都已上传（含本地刚选未落库时以 slots 为准） */
+			homeFixedAllSlotsReady() {
+				const slots = this.homeFixedSlots || []
+				if (slots.length < 3) return false
+				return slots.every(s => String(s.point_image || s.point_image_url || '').trim())
+			},
+			/** 无任何家庭点位数据：必须先完成本页布置 */
+			homeFixedSetupMandatory() {
+				if (!this.isResidentialHub) return false
+				return !(this.points || []).some(p => p && p.id && !p._isDraft)
+			},
 			scenePickCosBase() {
 				const base = settings.staticAssetBase || ''
 				return base + (base.endsWith('/') ? '' : '/') + 'scene-pick/'
@@ -1010,9 +1165,30 @@
 			ownPointSettingsFoldHint() {
 				return this.isStreetHub ? getStreetBinSettingsFoldHint() : this.residentialBinSettingsFoldHint
 			},
-			/** 选桶高亮区：不含折叠里未保存的草稿 */
+			/** 选桶高亮区：家庭固定三点位；商铺不含草稿 */
 			residentialPickPoints() {
+				if (this.isResidentialHub) {
+					return this.homeFixedPickPoints
+				}
 				return (this.points || []).filter(p => p && p.id && !p._isDraft)
+			},
+			homeFixedSlotsStart() {
+				return (this.homeFixedSlots || []).filter(s => s.section === 'start')
+			},
+			homeFixedSlotsRecycleHarm() {
+				return (this.homeFixedSlots || []).filter(s => s.section === 'recycle_harm')
+			},
+			homeFixedPickPoints() {
+				const defs = getHomeFixedSetupSlots()
+				const out = []
+				for (let i = 0; i < defs.length; i++) {
+					const def = defs[i]
+					const p = this.findPointForHomeSlot(def)
+					if (p && p.id && !p._isDraft && (p.point_image || p.point_image_raw)) {
+						out.push(p)
+					}
+				}
+				return out
 			},
 			binLayoutExamplesTop() {
 				const list = this.binLayoutExamples || []
@@ -1300,6 +1476,7 @@
 				return
 			}
 			const hubKey = normalizeClockHubKey(hubRaw)
+			this.homeFixedEditSetup = String(opt.home_setup || '') === '1'
 			console.log('[SCF-DEBUG] scene-clock-flow onLoad bootstrapHub', hubKey)
 			this.bootstrapHub(hubKey)
 		},
@@ -1425,6 +1602,9 @@
 					this.$set(this.scenePickImgOk, key, false)
 				}
 			},
+			onHomeFixedHeroImgError() {
+				this.homeFixedHeroImgOk = false
+			},
 			onScenePickCardImgErrorEvt(e) {
 				const ds = (e && e.currentTarget && e.currentTarget.dataset) || {}
 				const key = ds.illusKey || ds['illus-key'] || ''
@@ -1503,6 +1683,10 @@
 				return this.cateHintByName(this.setupCateName(row))
 			},
 			goSetupStep() {
+				if (this.isResidentialHub) {
+					this.enterResidentialSetupFlow()
+					return
+				}
 				this.residentialPickMode = false
 				if (this.hydrateSetupRowsFromPoints()) {
 					this.flowStep = 'setup'
@@ -1546,10 +1730,106 @@
 			enterResidentialSetupFlow() {
 				this.residentialPickMode = false
 				this.residentialBinSettingsOpen = false
-				if (!this.hydrateSetupRowsFromPoints()) {
-					this.prefillSetupRowsFromExamples()
-				}
+				this.syncHomeFixedSlots()
 				this.flowStep = 'setup'
+			},
+			syncHomeFixedSlots() {
+				const defs = getHomeFixedSetupSlots()
+				this.homeFixedSlots = defs.map(def => {
+					const np = this.findPointForHomeSlot(def)
+					const raw = np ? (np.point_image_raw || '') : ''
+					const show = np
+						? (np.point_image || resolveAssetShowUrl(np.point_image_raw))
+						: ''
+					return Object.assign({}, def, {
+						id: np && np.id ? np.id : 0,
+						point_image: raw,
+						point_image_url: show,
+					})
+				})
+			},
+			findPointForHomeSlot(def) {
+				if (!def) return null
+				const list = (this.points || []).filter(p => p && !p._isDraft)
+				const name = String(def.point_name || '').trim()
+				if (name) {
+					const exact = list.find(p => String(p.point_name || '').trim() === name)
+					if (exact) return this.normalizeScenePoint(exact)
+				}
+				const kw = def.cateKw || ''
+				if (kw) {
+					const byCate = list.find(p => String(p.cate_name || '').indexOf(kw) >= 0)
+					if (byCate) return this.normalizeScenePoint(byCate)
+				}
+				return null
+			},
+			isHomeFixedSetupComplete() {
+				const defs = getHomeFixedSetupSlots()
+				for (let i = 0; i < defs.length; i++) {
+					const p = this.findPointForHomeSlot(defs[i])
+					const img = p ? String(p.point_image_raw || p.point_image || '').trim() : ''
+					if (!img) return false
+				}
+				return true
+			},
+			onHomeFixedFinishAll() {
+				if (!this.homeFixedAllSlotsReady) {
+					this.$u.toast('请先完成三处点位照片上传')
+					return
+				}
+				if (!this.isHomeFixedSetupComplete()) {
+					this.$u.toast('照片保存中，请稍后再试')
+					return
+				}
+				this.residentialPickMode = true
+				this.residentialBinSettingsOpen = false
+				this.flowStep = 'setup'
+			},
+			chooseHomeFixedPhoto(slotKey) {
+				if (!this.isLogin) return this.$u.route('/pages/public/login')
+				if (this.homeFixedSavingKey) return
+				const idx = (this.homeFixedSlots || []).findIndex(s => s.slotKey === slotKey)
+				if (idx < 0) return
+				this.pickAndUploadPointPhoto((savePath, showUrl) => {
+					this.$set(this.homeFixedSlots[idx], 'point_image', savePath)
+					this.$set(this.homeFixedSlots[idx], 'point_image_url', showUrl)
+					this.persistHomeFixedSlot(idx)
+				})
+			},
+			async persistHomeFixedSlot(idx) {
+				const slot = (this.homeFixedSlots || [])[idx]
+				if (!slot) return
+				const img = String(slot.point_image || '').trim()
+				if (!img) return
+				let cate = (this.cateList || []).find(c => String(c.name || '').indexOf(slot.cateKw) >= 0)
+				if (!cate && this.cateList.length) {
+					cate = this.cateList[this.cateIndexByKeyword(slot.cateKw)]
+				}
+				if (!cate) {
+					this.$u.toast('分类种类加载中，请稍后再试')
+					return
+				}
+				this.homeFixedSavingKey = slot.slotKey
+				try {
+					const payload = {
+						hub_key: this.hubKey,
+						point_name: String(slot.point_name || '').trim(),
+						cate_id: cate.id,
+						point_image: img,
+					}
+					if (slot.id) payload.id = slot.id
+					const res = await this.$u.api.save_clock_scene_point(payload)
+					const saved = (res && res.data) || {}
+					if (saved.id) {
+						this.$set(this.homeFixedSlots[idx], 'id', saved.id)
+					}
+					await this.initUserPoints('setup')
+					this.$u.toast('已保存')
+				} catch (e) {
+					this.$u.toast((e && e.msg) || '保存失败，请重试')
+				} finally {
+					this.homeFixedSavingKey = ''
+				}
 			},
 			stopTapBubble() {},
 			toggleResidentialBinSettings() {
@@ -1623,7 +1903,13 @@
 				}))
 			},
 			enterResidentialPickMode() {
-				if (!this.points.length) {
+				if (this.isResidentialHub) {
+					if (!this.isHomeFixedSetupComplete()) {
+						this.$u.toast('请先完成三处点位布置')
+						this.enterResidentialSetupFlow()
+						return
+					}
+				} else if (!this.points.length) {
 					this.$u.toast('请先设置分类桶')
 					return
 				}
@@ -1828,7 +2114,7 @@
 				})
 				if (!this.isLogin) {
 					if (this.isResidentialHub) {
-						this.prefillSetupRowsFromExamples()
+						this.syncHomeFixedSlots()
 						this.flowStep = 'setup'
 					} else if (this.isStreetHub) {
 						this.flowStep = 'street_merchant'
@@ -1860,13 +2146,20 @@
 						return
 					}
 					if (keepFlow === 'setup') {
-						this.hydrateSetupRowsFromPoints()
+						if (this.isResidentialHub) {
+							this.syncHomeFixedSlots()
+						} else {
+							this.hydrateSetupRowsFromPoints()
+						}
 						return
 					}
 					if (keepFlow === 'cate' || keepFlow === 'points') {
 						if (this.isResidentialHub) {
 							this.flowStep = 'setup'
-							this.residentialPickMode = this.points.length > 0 && (keepFlow === 'points' || keepFlow === 'cate')
+							this.residentialPickMode =
+								this.isHomeFixedSetupComplete() &&
+								this.points.length > 0 &&
+								(keepFlow === 'points' || keepFlow === 'cate')
 						}
 						return
 					}
@@ -1875,28 +2168,41 @@
 						return
 					}
 					if (this.isResidentialHub) {
+						if (this.homeFixedEditSetup && keepFlow !== 'setup' && keepFlow !== 'learn') {
+							this.enterResidentialSetupFlow()
+							return
+						}
 						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'learn') {
 							return
 						}
 						if (keepFlow === 'pick') {
 							this.flowStep = 'setup'
-							this.residentialPickMode = true
+							this.residentialPickMode = this.isHomeFixedSetupComplete()
 							this.residentialBinSettingsOpen = false
+							if (!this.isHomeFixedSetupComplete()) {
+								this.enterResidentialSetupFlow()
+							}
 							return
 						}
 						if (keepFlow === 'points') {
 							this.flowStep = 'setup'
-							this.residentialPickMode = this.points.length > 0
+							this.residentialPickMode = this.isHomeFixedSetupComplete() && this.points.length > 0
+							if (!this.isHomeFixedSetupComplete()) {
+								this.enterResidentialSetupFlow()
+							}
 							return
 						}
 						if (this.flowStep === 'learn') return
 						if (this.flowStep === 'manage') return
-						if (this.flowStep === 'setup' && this.residentialPickMode) return
-						// data 默认 flowStep=points，家庭场景不展示 points 页，此处勿因 points 提前 return
-						if (this.points.length > 0) {
+						if (this.flowStep === 'setup' && this.residentialPickMode && this.isHomeFixedSetupComplete()) {
+							return
+						}
+						// 无点位或布置未完成：强制停留布置页
+						if (this.isHomeFixedSetupComplete()) {
 							this.flowStep = 'setup'
 							this.residentialPickMode = true
 							this.residentialBinSettingsOpen = false
+							this.syncHomeFixedSlots()
 						} else {
 							this.enterResidentialSetupFlow()
 						}
@@ -2715,6 +3021,230 @@
 }
 .scf-body {
 	padding: 8rpx 24rpx 24rpx;
+}
+.scf-body--home-fix {
+	padding: 0;
+	background: #f0f7f0;
+	min-height: calc(100vh - 88rpx);
+	box-sizing: border-box;
+}
+.scf-home-fix {
+	padding: 0 24rpx calc(180rpx + env(safe-area-inset-bottom));
+}
+.scf-home-fix-hero {
+	padding: 0 0 8rpx;
+}
+.scf-home-fix-hero-banner-img {
+	width: 100%;
+	display: block;
+	vertical-align: top;
+}
+.scf-home-fix-hero-banner-ph {
+	margin: 16rpx 0;
+	padding: 32rpx 24rpx;
+	border-radius: 16rpx;
+	background: linear-gradient(180deg, #d4f0dc 0%, #b8e6c8 100%);
+	text-align: center;
+}
+.scf-home-fix-hero-banner-ph-t {
+	display: block;
+	font-size: 34rpx;
+	font-weight: 800;
+	color: #1a4d2e;
+	line-height: 1.35;
+}
+.scf-home-fix-hero-banner-ph-s {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #2d6b45;
+}
+.scf-home-fix-reward {
+	display: block;
+	text-align: center;
+	font-size: 24rpx;
+	color: #6a8572;
+	margin: -8rpx 0 20rpx;
+	line-height: 1.4;
+}
+.scf-home-fix-sect {
+	margin-bottom: 24rpx;
+}
+.scf-home-fix-sect-head {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12rpx;
+	margin-bottom: 20rpx;
+	padding: 0 8rpx;
+}
+.scf-home-fix-sect-line {
+	flex: 1;
+	height: 2rpx;
+	background: linear-gradient(90deg, transparent, #9fd4ad 50%, transparent);
+	max-width: 80rpx;
+}
+.scf-home-fix-sect-leaf {
+	font-size: 22rpx;
+	line-height: 1;
+	opacity: 0.85;
+}
+.scf-home-fix-sect-t {
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #2d6b45;
+	text-align: center;
+	line-height: 1.4;
+	flex-shrink: 0;
+	max-width: 420rpx;
+}
+.scf-home-fix-card {
+	background: #fff;
+	border-radius: 24rpx;
+	border: 1rpx solid rgba(0, 0, 0, 0.05);
+	padding: 28rpx 24rpx 24rpx;
+	margin-bottom: 24rpx;
+	box-shadow: 0 8rpx 28rpx rgba(20, 60, 40, 0.07);
+}
+.scf-home-fix-card-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #1a1a1a;
+	margin-bottom: 20rpx;
+	line-height: 1.4;
+}
+.scf-home-fix-card-mid {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 16rpx;
+	margin-bottom: 20rpx;
+}
+.scf-home-fix-card-desc {
+	flex: 1;
+	min-width: 0;
+	font-size: 26rpx;
+	color: #333;
+	line-height: 1.55;
+}
+.scf-home-fix-card-example {
+	flex-shrink: 0;
+	width: 200rpx;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.scf-home-fix-card-example-ph {
+	width: 200rpx;
+	height: 160rpx;
+	border-radius: 12rpx;
+	background: #eef2ef;
+	border: 1rpx solid #dde5df;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.scf-home-fix-card-example-ph-t {
+	font-size: 22rpx;
+	color: #9aa89e;
+}
+.scf-home-fix-card-example-cap {
+	margin-top: 8rpx;
+	font-size: 20rpx;
+	color: #888;
+	text-align: center;
+	line-height: 1.35;
+}
+.scf-home-fix-upload {
+	min-height: 140rpx;
+	border: 2rpx dashed #d8e0da;
+	border-radius: 16rpx;
+	background: #fafcfb;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 32rpx 24rpx;
+	position: relative;
+	overflow: hidden;
+	box-sizing: border-box;
+}
+.scf-home-fix-upload--done {
+	border-style: dashed;
+	border-color: #b8dfc4;
+	padding: 0;
+	min-height: 260rpx;
+}
+.scf-home-fix-upload-ico-wrap {
+	width: 72rpx;
+	height: 72rpx;
+	border-radius: 50%;
+	background: rgba(24, 175, 56, 0.12);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 16rpx;
+}
+.scf-home-fix-upload-ico {
+	font-size: 40rpx;
+	line-height: 1;
+}
+.scf-home-fix-upload-t {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #18af38;
+	text-align: center;
+	line-height: 1.45;
+	padding: 0 12rpx;
+}
+.scf-home-fix-upload-img {
+	width: 100%;
+	height: 260rpx;
+	display: block;
+}
+.scf-home-fix-foot {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 16rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
+	background: linear-gradient(180deg, rgba(240, 247, 240, 0) 0%, #f0f7f0 28%, #f0f7f0 100%);
+	z-index: 8;
+	box-sizing: border-box;
+}
+.scf-home-fix-finish {
+	width: 100%;
+	box-sizing: border-box;
+	text-align: center;
+	padding: 28rpx 24rpx;
+	border-radius: 999rpx;
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(180deg, #5cb878 0%, #52a16d 100%);
+	box-shadow: 0 10rpx 28rpx rgba(82, 161, 109, 0.35);
+}
+.scf-home-fix-finish--disabled {
+	opacity: 0.45;
+	box-shadow: none;
+}
+.scf-home-fix-finish--press {
+	opacity: 0.88;
+	transform: scale(0.99);
+}
+.scf-home-fix-upload-badge {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 14rpx 16rpx;
+	font-size: 22rpx;
+	color: #fff;
+	text-align: center;
+	background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
+	line-height: 1.35;
 }
 
 /* 与 theme_scenes 的 zf-promo 同系视觉，用于流程内各步 */

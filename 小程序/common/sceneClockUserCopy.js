@@ -459,3 +459,66 @@ export function getClockSuccessPromoMoreLabel(count) {
 	if (count <= 0) return ''
 	return `还有 ${count} 个活动可以看看`
 }
+
+/** 家庭场景：固定三类布置点位（不可增删改名称/种类） */
+export function getHomeFixedSetupSlots() {
+	return [
+		{
+			slotKey: 'kitchen',
+			section: 'start',
+			title: '建议上传厨房点位布置',
+			desc: '厨房里要放两个桶：一个厨余，一个其他。做饭时顺手分，不用来回跑。',
+			exampleCaption: '厨房布置点位示例图',
+			uploadCta: '点击开始布置厨房点位',
+			uploadDone: '厨房点位已布置，点击可更换照片',
+			point_name: '厨房分类点位',
+			cateKw: '厨余',
+		},
+		{
+			slotKey: 'recycle',
+			section: 'recycle_harm',
+			title: '布置可回收物点位',
+			desc: '家里找个角落放可回收物，纸箱、瓶子攒着卖。以后打卡可回收物，记得拍售卖照片。',
+			exampleCaption: '可回收物点位布置示例图',
+			uploadCta: '点击开始布置可回收物点位',
+			uploadDone: '可回收物点位已布置，点击可更换照片',
+			point_name: '可回收物点位',
+			cateKw: '可回收',
+		},
+		{
+			slotKey: 'hazard',
+			section: 'recycle_harm',
+			title: '布置有害垃圾点位',
+			desc: '有害垃圾别乱扔，找个盒子专门放。',
+			exampleCaption: '有害垃圾点位布置示例图',
+			uploadCta: '点击开始布置有害垃圾点位',
+			uploadDone: '有害垃圾点位已布置，点击可更换照片',
+			point_name: '有害垃圾点位',
+			cateKw: '有害',
+		},
+	]
+}
+
+export function getHomeFixedSetupHeroTitle() {
+	return '布置家庭垃圾分类的点位'
+}
+
+export function getHomeFixedSetupHeroSub() {
+	return '家里摆好桶，真分不费劲'
+}
+
+export function getHomeFixedSectionStartTitle() {
+	return '开始布置家庭分类点位吧'
+}
+
+export function getHomeFixedSectionRecycleTitle() {
+	return '开始布置可回收物和有害垃圾点位'
+}
+
+export function getHomeFixedSetupRewardHint() {
+	return '完成布置可获得100积分'
+}
+
+export function getHomeFixedSetupFinishCta() {
+	return '完成全部上传开始今日真分'
+}
