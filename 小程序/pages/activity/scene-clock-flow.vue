@@ -1094,7 +1094,15 @@
 				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
 				return
 			}
-			const hubKey = normalizeClockHubKey(opt.hub ? String(opt.hub) : 'home')
+			const hubRaw = opt.hub != null ? String(opt.hub).trim() : ''
+			// 未带 hub：与 Banner 配置 scene-clock-flow 无参一致，先进选场景（勿默认家庭）
+			if (!hubRaw) {
+				this.flowStep = 'theme_scenes'
+				console.log('[SCF-DEBUG] scene-clock-flow → theme_scenes (no hub param)')
+				uni.setNavigationBarTitle({ title: getScenePickNavTitle() })
+				return
+			}
+			const hubKey = normalizeClockHubKey(hubRaw)
 			console.log('[SCF-DEBUG] scene-clock-flow onLoad bootstrapHub', hubKey)
 			this.bootstrapHub(hubKey)
 		},
