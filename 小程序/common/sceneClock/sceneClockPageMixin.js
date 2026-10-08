@@ -1279,9 +1279,9 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.subKey = this.guideSubKeyForHub()
 				this.loadGuide()
 				const locs = this.homeClockLocationOptions
-				if (locs.length === 1) {
+				if (locs.length) {
 					this.pickHomeClockLocation(locs[0])
-				} else if (!locs.length) {
+				} else {
 					this.$u.toast('请先完成对应点位的布置照片')
 				}
 			},
@@ -2190,7 +2190,7 @@ import settings, { uploadUrl } from '@/common/settings'
 					if (!this.homeClockCateKey || !this.cateId) {
 						return this.$u.toast('请选择今天打卡的垃圾种类')
 					}
-					if (!this.pointId) return this.$u.toast('请选择打卡位置')
+					if (!this.pointId) return this.$u.toast('请先完成对应点位的布置照片')
 					if (!this.homeClockAmount) return this.$u.toast('请选择今天大约有多少')
 					if (!String(this.clockSlotUrls[0] || '').trim()) {
 						return this.$u.toast('请上传今日真分照片')

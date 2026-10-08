@@ -93,46 +93,9 @@
 
 
 
-				<view class="scf-hc-step" :class="{ 'scf-hc-step--muted': !homeClockCateKey }">
-
-					<text class="scf-hc-step-no">②</text>
-
-					<view class="scf-hc-step-body">
-
-						<text class="scf-hc-step-title">{{ homeClockLocationStepTitle }}</text>
-
-						<text class="scf-hc-step-sub">{{ homeClockLocationStepHint }}</text>
-
-						<view class="scf-hc-location-row" v-if="homeClockCateKey && homeClockLocationOptions.length">
-							<view
-								v-for="loc in homeClockLocationOptions"
-								:key="loc.key"
-								class="scf-hc-location-chip"
-								:class="{ 'scf-hc-location-chip--on': homeClockLocationKey === loc.key }"
-								hover-class="scf-card--press"
-								@tap="pickHomeClockLocation(loc)"
-							>
-								<image
-									v-if="loc.imageUrl"
-									class="scf-hc-location-thumb"
-									:src="loc.imageUrl"
-									mode="aspectFill"
-								/>
-								<text class="scf-hc-location-label">{{ loc.label }}</text>
-							</view>
-						</view>
-						<text v-else-if="!homeClockCateKey" class="scf-hc-step-hint">请先选择垃圾种类</text>
-						<text v-else class="scf-hc-step-hint scf-hc-step-hint--warn">暂无可用点位，请先完成布置</text>
-
-					</view>
-
-				</view>
-
-
-
 				<view class="scf-hc-step">
 
-					<text class="scf-hc-step-no">③</text>
+					<text class="scf-hc-step-no">②</text>
 
 					<view class="scf-hc-step-body">
 
@@ -168,7 +131,7 @@
 
 				<view class="scf-hc-step scf-hc-step--photo">
 
-					<text class="scf-hc-step-no">④</text>
+					<text class="scf-hc-step-no">③</text>
 
 					<view class="scf-hc-step-body">
 
