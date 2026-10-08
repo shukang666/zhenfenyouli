@@ -61,8 +61,8 @@
                 <td>{$vo.cate_name|default='—'}</td>
                 <td>
                     <if condition="!empty($vo.point_image)">
-                        <a href="{:cmf_get_image_url($vo.point_image)}" target="_blank" rel="noopener">
-                            <img src="{:cmf_get_image_url($vo.point_image)}" style="max-height:56px;max-width:88px;border-radius:4px;" alt="">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.point_image)}');">
+                            <img src="{:cmf_get_image_preview_url($vo.point_image)}" style="max-height:56px;max-width:88px;border-radius:4px;" alt="">
                         </a>
                     <else/>
                         <span class="text-muted">未上传</span>

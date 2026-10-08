@@ -35,7 +35,9 @@
                 <td>{$vo.remark|default='—'}</td>
                 <td>
                     <if condition="!empty($vo.point_image)">
-                        <img src="{:cmf_get_image_url($vo.point_image)}" style="max-height:48px;max-width:80px;" alt="">
+                        <a href="javascript:imagePreviewDialog('{:cmf_get_image_preview_url($vo.point_image)}');">
+                            <img src="{:cmf_get_image_preview_url($vo.point_image)}" style="max-height:48px;max-width:80px;" alt="">
+                        </a>
                     <else/>
                         —
                     </if>

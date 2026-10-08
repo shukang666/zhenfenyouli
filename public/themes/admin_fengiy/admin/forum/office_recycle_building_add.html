@@ -30,7 +30,7 @@
                 <input type="hidden" name="point_image" id="office-building-image" value="{$data.point_image|default=''}">
                 <div style="margin-bottom:8px;">
                     <if condition="!empty($data.point_image)">
-                        <img id="office-building-image-preview" src="{:cmf_get_image_url($data.point_image)}" style="max-height:160px;max-width:100%;" alt="">
+                        <img id="office-building-image-preview" src="{:cmf_get_image_preview_url($data.point_image)}" style="max-height:160px;max-width:100%;cursor:pointer;" alt="" onclick="imagePreviewDialog(this.src);">
                     <else/>
                         <img id="office-building-image-preview" src="" style="max-height:160px;max-width:100%;display:none;" alt="">
                     </if>
