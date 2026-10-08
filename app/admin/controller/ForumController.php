@@ -622,7 +622,7 @@ class ForumController extends ToolController
         $keyword = trim((string)$this->request->param('keyword', ''));
         $communityId = intval($this->request->param('community_id', 0));
         $query = Db::name('clock_scene_point')->alias('p')
-            ->join('community c', 'c.id = p.community_id', 'LEFT')
+            ->leftJoin('member_community c', 'c.id = p.community_id AND c.delete_time = 0')
             ->where('p.hub_key', ClockScenePointModel::officeBuildingHubKey())
             ->where('p.source', ClockScenePointModel::SOURCE_ADMIN)
             ->field('p.*, c.name as community_name')
