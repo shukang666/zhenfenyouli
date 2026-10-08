@@ -36,7 +36,7 @@ const wxapp = {
 	checkTodayQuiz: (params = {}) => uni.$u.get('/wxapp/quiz/check_today', params),
 
 	// 活动风采 - 列表
-	getActivityShowcaseList: (params = {}) => uni.$u.get('/wxapp/activity_showcase/get_list', params),
+	getActivityShowcaseList: (params = {}) => uni.$u.post('/wxapp/activity_showcase/get_list', params),
 	// 活动风采 - 详情
 	getActivityShowcaseDetail: (params = {}) => uni.$u.get('/wxapp/activity_showcase/get_detail', params),
 

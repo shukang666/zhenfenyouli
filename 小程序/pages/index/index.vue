@@ -636,7 +636,7 @@ export default {
 			if (this.todayTask.daysToGoal === 7) this.todayTask.daysToGoal = 0
 		},
 			goShowcaseList() {
-				this.$u.route('/pages/activity/showcase-list');
+				this.$u.route('/pages/activity/showcase-list?tab=manual');
 			},
 			goShowcaseDetail(id) {
 				this.$u.route('/pages/activity/showcase-detail?id=' + id);
