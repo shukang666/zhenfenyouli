@@ -247,7 +247,7 @@
 
 
 
-			<view class="scf-success-mask" v-if="clockSuccessShow" @tap="goActivityTab">
+			<view class="scf-success-mask" v-if="isClockSuccessVisible" @tap="goActivityTab">
 
 				<view class="scf-success-dialog" @tap.stop="">
 
@@ -361,20 +361,14 @@
 
 import sceneClockPageMixin from '@/common/sceneClock/sceneClockPageMixin.js'
 
-
-
 export default {
 
 	mixins: [sceneClockPageMixin],
 
-	data() {
-		return {
-			clockSuccessShow: false,
-			clockSuccessMsg: '',
-			clockHabitTip: '',
-			clockPromoActivity: null,
-			clockPromoList: [],
-		}
+	computed: {
+		isClockSuccessVisible() {
+			return this.clockSuccessShow === true
+		},
 	},
 
 	onLoad(option) {
