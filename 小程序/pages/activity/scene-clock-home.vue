@@ -68,15 +68,33 @@
 
 								]"
 
-								hover-class="scf-card--press"
+								hover-class="scf-hc-cate-card--press"
 
 								@tap="selectHomeClockCate(card)"
 
 							>
 
-								<view class="scf-hc-cate-illus">
+								<view class="scf-hc-cate-img-wrap">
 
-									<text class="scf-hc-cate-illus-ph">{{ card.illusPh }}</text>
+									<image
+
+										v-if="card.imgUrl"
+
+										class="scf-hc-cate-img"
+
+										:src="card.imgUrl"
+
+										mode="aspectFill"
+
+										@error="onHomeClockCateImgError(card.key)"
+
+									/>
+
+									<view v-else class="scf-hc-cate-illus">
+
+										<text class="scf-hc-cate-illus-ph">{{ card.illusPh }}</text>
+
+									</view>
 
 								</view>
 

@@ -241,6 +241,12 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeFixedSavingKey: '',
 				homeFixedHeroImgOk: true,
 				homeClockBannerImgOk: true,
+				homeClockCateImgOk: {
+					food: true,
+					other: true,
+					recycle: true,
+					harm: true,
+				},
 				/** 家庭拆分页：clock=今日真分 setup=点位布置 */
 				homeHubPage: '',
 				homeFixedExampleImgOk: {
@@ -345,12 +351,14 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			homeClockCateCards() {
 				const defs = [
-					{ key: 'food', label: '厨余垃圾', tone: 'food', match: '厨余', illusPh: '🥕' },
-					{ key: 'other', label: '其他垃圾', tone: 'other', match: '其他', illusPh: '🗑️' },
-					{ key: 'recycle', label: '可回收垃圾', tone: 'recycle', match: '可回收', exclude: '不可', illusPh: '♻️' },
-					{ key: 'harm', label: '有害垃圾', tone: 'harm', match: '有害', illusPh: '☣️' },
+					{ key: 'food', label: '厨余垃圾', tone: 'food', match: '厨余', imgFile: 'home-cate-food.jpg', illusPh: '🥕' },
+					{ key: 'other', label: '其他垃圾', tone: 'other', match: '其他', imgFile: 'home-cate-other.jpg', illusPh: '🗑️' },
+					{ key: 'recycle', label: '可回收垃圾', tone: 'recycle', match: '可回收', exclude: '不可', imgFile: 'home-cate-recycle.jpg', illusPh: '♻️' },
+					{ key: 'harm', label: '有害垃圾', tone: 'harm', match: '有害', imgFile: 'home-cate-harm.jpg', illusPh: '☣️' },
 				]
 				const list = this.cateList || []
+				const base = this.scenePickCosBase
+				const okMap = this.homeClockCateImgOk || {}
 				return defs.map(d => {
 					let cate = null
 					for (let i = 0; i < list.length; i++) {
@@ -361,8 +369,11 @@ import settings, { uploadUrl } from '@/common/settings'
 							break
 						}
 					}
+					const imgOk = okMap[d.key] !== false
+					const imgUrl = imgOk && d.imgFile ? base + d.imgFile : ''
 					return {
 						...d,
+						imgUrl,
 						cateId: cate ? cate.id : 0,
 						cateName: cate ? cate.name : d.label,
 					}
@@ -871,6 +882,10 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			onHomeClockBannerImgError() {
 				this.homeClockBannerImgOk = false
+			},
+			onHomeClockCateImgError(cateKey) {
+				if (!cateKey || !this.homeClockCateImgOk) return
+				this.$set(this.homeClockCateImgOk, cateKey, false)
 			},
 			onOfficeClockHeroImgError() {
 				this.officeClockHeroImgOk = false

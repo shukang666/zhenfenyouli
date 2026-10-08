@@ -608,30 +608,58 @@
 .scf-hc-cate-card {
 	flex: 1;
 	min-width: 148rpx;
-	border-radius: 16rpx;
-	padding: 16rpx 10rpx 14rpx;
+	border-radius: 20rpx;
+	padding: 8rpx;
 	box-sizing: border-box;
 	text-align: center;
-	border: 2rpx solid transparent;
+	border: 3rpx solid transparent;
 	background: #fff;
 	box-shadow: 0 6rpx 20rpx rgba(20, 50, 30, 0.06);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+}
+.scf-hc-cate-card--press {
+	opacity: 0.92;
+	transform: scale(0.98);
 }
 .scf-hc-cate-card--on {
 	border-color: #18af38;
-	box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.18);
+	box-shadow: 0 10rpx 28rpx rgba(24, 175, 56, 0.28);
+	transform: scale(1.02);
 }
 .scf-hc-cate-card--food.scf-hc-cate-card--on {
 	background: linear-gradient(180deg, #e8f8ec 0%, #fff 100%);
 }
+.scf-hc-cate-card--other.scf-hc-cate-card--on {
+	background: linear-gradient(180deg, #f3f4f5 0%, #fff 100%);
+}
 .scf-hc-cate-card--recycle.scf-hc-cate-card--on {
-	background: linear-gradient(180deg, #fff8e6 0%, #fff 100%);
+	background: linear-gradient(180deg, #e8f4ff 0%, #fff 100%);
+}
+.scf-hc-cate-card--harm.scf-hc-cate-card--on {
+	background: linear-gradient(180deg, #fceef4 0%, #fff 100%);
+}
+.scf-hc-cate-img-wrap {
+	width: 100%;
+	height: 128rpx;
+	border-radius: 16rpx;
+	overflow: hidden;
+	margin-bottom: 10rpx;
+	background: #eef2ee;
+}
+.scf-hc-cate-card--on .scf-hc-cate-img-wrap {
+	box-shadow: inset 0 0 0 3rpx rgba(24, 175, 56, 0.55);
+}
+.scf-hc-cate-img {
+	width: 100%;
+	height: 100%;
+	border-radius: 16rpx;
+	display: block;
 }
 .scf-hc-cate-illus {
-	height: 72rpx;
+	height: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	margin-bottom: 8rpx;
 }
 .scf-hc-cate-illus-ph {
 	font-size: 40rpx;
