@@ -319,7 +319,7 @@ import settings, { uploadUrl } from '@/common/settings'
 			officeClockHeroImgUrl() {
 				if (!this.officeClockHeroImgOk) return ''
 				const base = this.scenePickCosBase
-				return base + 'office-clock-hero.jpg'
+				return base + 'office-clock-banner.jpg'
 			},
 			/** 三处布置照片均已保存到服务端 */
 			homeFixedCanFinishSetup() {

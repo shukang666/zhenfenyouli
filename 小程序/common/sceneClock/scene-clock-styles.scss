@@ -917,6 +917,16 @@
 	background: linear-gradient(135deg, #4a5568 0%, #6b7b6a 100%);
 	box-sizing: border-box;
 }
+.scf-oc-banner-ph--img {
+	min-height: 0;
+	background: transparent;
+}
+.scf-oc-banner-img {
+	display: block;
+	width: 100%;
+	border-radius: 20rpx;
+	vertical-align: top;
+}
 .scf-oc-banner-bg {
 	position: absolute;
 	left: 0;

@@ -13,27 +13,29 @@
 
 				<view class="scf-body scf-body--office-clock" v-if="flowStep === 'learn'">
 			<view class="scf-oc-banner">
-				<view class="scf-oc-banner-ph">
+				<view class="scf-oc-banner-ph" :class="{ 'scf-oc-banner-ph--img': !!officeClockHeroImgUrl }">
 					<image
 						v-if="officeClockHeroImgUrl"
-						class="scf-oc-banner-bg"
+						class="scf-oc-banner-img"
 						:src="officeClockHeroImgUrl"
-						mode="aspectFill"
+						mode="widthFix"
 						@error="onOfficeClockHeroImgError"
 					/>
-					<view v-else class="scf-oc-banner-css" aria-hidden="true">
-						<view class="scf-oc-banner-css-wall"></view>
-						<view class="scf-oc-banner-css-bins">
-							<view class="scf-oc-css-bin scf-oc-css-bin--y"></view>
-							<view class="scf-oc-css-bin scf-oc-css-bin--g"></view>
-							<view class="scf-oc-css-bin scf-oc-css-bin--b"></view>
+					<block v-else>
+						<view class="scf-oc-banner-css" aria-hidden="true">
+							<view class="scf-oc-banner-css-wall"></view>
+							<view class="scf-oc-banner-css-bins">
+								<view class="scf-oc-css-bin scf-oc-css-bin--y"></view>
+								<view class="scf-oc-css-bin scf-oc-css-bin--g"></view>
+								<view class="scf-oc-css-bin scf-oc-css-bin--b"></view>
+							</view>
 						</view>
-					</view>
-					<view class="scf-oc-banner-overlay">
-						<text class="scf-oc-banner-title">{{ officeClockBannerTitle }}</text>
-						<text class="scf-oc-banner-sub">{{ officeClockBannerSub }}</text>
-						<text class="scf-oc-banner-badge">{{ officeClockBannerBadge }}</text>
-					</view>
+						<view class="scf-oc-banner-overlay">
+							<text class="scf-oc-banner-title">{{ officeClockBannerTitle }}</text>
+							<text class="scf-oc-banner-sub">{{ officeClockBannerSub }}</text>
+							<text class="scf-oc-banner-badge">{{ officeClockBannerBadge }}</text>
+						</view>
+					</block>
 				</view>
 			</view>
 
