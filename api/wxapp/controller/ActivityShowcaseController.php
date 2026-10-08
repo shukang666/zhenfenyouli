@@ -14,6 +14,7 @@ class ActivityShowcaseController extends AuthController
      * 风采列表
      * GET /wxapp/activity_showcase/get_list
      * 参数：page, limit（首页预览传 limit=6）
+     * source=manual 仅手工上传随拍（active_id=0）；source=archive 仅往期活动归档（active_id>0）；不传则两类混合（兼容旧调用）
      */
     public function get_list()
     {
@@ -22,23 +23,44 @@ class ActivityShowcaseController extends AuthController
         $page  = $this->request->param('page', 1, 'intval');
         $limit = $this->request->param('limit', 15, 'intval');
         $limit = max(1, min($limit, 50));
+        $source = trim((string)$this->request->param('source', ''));
 
         $where = [['status', '=', 1]];
+        if ($source === 'manual') {
+            $where[] = ['active_id', '=', 0];
+        } elseif ($source === 'archive') {
+            $where[] = ['active_id', '>', 0];
+        }
 
         $total = Db::name('activity_showcase')->where($where)->count();
         $list = Db::name('activity_showcase')
             ->where($where)
-            ->field('id, title, cover, description, content, event_date, photos, view_count, create_time')
+            ->field('id, active_id, title, cover, description, content, event_date, photos, view_count, create_time')
             ->order('list_order asc, event_date desc, id desc')
             ->page($page, $limit)
             ->select()
             ->toArray();
 
+        $list = $this->formatShowcaseListRows($list);
+
+        $this->success('success', [
+            'list'     => $list,
+            'total'    => $total,
+            'page'     => $page,
+            'has_more' => $page * $limit < $total,
+            'source'   => $source,
+        ]);
+    }
+
+    protected function formatShowcaseListRows(array $list): array
+    {
         foreach ($list as &$item) {
             $photos = $this->parsePhotos($item['photos'] ?? '');
             $item['cover'] = $this->formatImage($item['cover'] ?: ($photos[0] ?? ''));
             $item['photo_count'] = count($photos);
             $item['event_date_text'] = $item['event_date'] ? date('Y-m-d', $item['event_date']) : '';
+            $item['active_id'] = (int)($item['active_id'] ?? 0);
+            $item['is_archive'] = $item['active_id'] > 0 ? 1 : 0;
             if (empty($item['description'])) {
                 $plain = trim(strip_tags($this->formatContent($item['content'] ?? '')));
                 if ($plain !== '') {
@@ -50,13 +72,7 @@ class ActivityShowcaseController extends AuthController
             unset($item['content'], $item['photos']);
         }
         unset($item);
-
-        $this->success('success', [
-            'list'     => $list,
-            'total'    => $total,
-            'page'     => $page,
-            'has_more' => $page * $limit < $total,
-        ]);
+        return $list;
     }
 
     /**

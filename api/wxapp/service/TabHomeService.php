@@ -219,6 +219,7 @@ class TabHomeService
 
         $list = Db::name('activity_showcase')
             ->where('status', 1)
+            ->where('active_id', 0)
             ->field('id, title, cover, description, content, event_date, photos, view_count, create_time')
             ->order('list_order asc, event_date desc, id desc')
             ->limit($limit)

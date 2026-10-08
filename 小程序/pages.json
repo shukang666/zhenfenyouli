@@ -262,7 +262,8 @@
 				{
 					"path": "showcase-list",
 					"style": {
-						"navigationBarTitleText": "活动风采"
+						"navigationBarTitleText": "活动风采",
+						"enablePullDownRefresh": true
 					}
 				},
 				{
