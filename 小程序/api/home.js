@@ -20,6 +20,7 @@ const home = {
 	get_new_active_ranking: (params = {}) => uni.$u.post('/wxapp/active/get_new_active_ranking', params),
 	// 活动报名 
 	post_new_active_sign: (params = {}) => uni.$u.post('/wxapp/active/post_new_active_sign', params),
+	post_toggle_active_interest: (params = {}) => uni.$u.post('/wxapp/active/post_toggle_active_interest', params),
 	// 报名打卡 
 	post_new_sign_clock: (params = {}) => uni.$u.post('/wxapp/active/post_new_sign_clock', params),
 	// 线下活动现场签到

@@ -2,7 +2,7 @@
 	<view class="container">
 		<!-- 沉浸式封面区域 -->
 		<view class="hero-section">
-			<u-image width="750" height="420" :src="info.thumb" mode="aspectFill"></u-image>
+			<u-image width="750" height="480" :src="info.thumb" mode="aspectFill"></u-image>
 			<view class="hero-overlay"></view>
 			
 			<!-- 返回按钮 -->
@@ -35,8 +35,8 @@
 					</view>
 					<view class="stat-divider"></view>
 					<view class="stat-item">
-						<text class="stat-value">{{participantsCount}}</text>
-						<text class="stat-label">人已参与</text>
+						<text class="stat-value">{{ heroEngagementValue }}</text>
+						<text class="stat-label">{{ heroEngagementLabel }}</text>
 					</view>
 				</view>
 			</view>
@@ -206,66 +206,73 @@
 			</view>
 		</view>
 		
-		<!-- 底部固定按钮 -->
+		<!-- 底部固定按钮（原生 view，避免 u-button 默认边框/圆角叠层） -->
 		<view class="bottom-bar glass-footer">
 			<view class="share-btn" @click="handleShare">
-				<u-icon name="share" size="36" color="#18AF38"></u-icon>
+				<u-icon name="share" size="34" color="#8a9690"></u-icon>
 				<text class="share-icon">分享</text>
 			</view>
+			<!-- 时间待定：感兴趣（上映前「想看」） -->
+			<view class="action-area" v-if="isDatePending">
+				<view
+					class="bar-native-btn bar-native-btn--full"
+					:class="info.is_interested == 1 ? 'bar-native-btn--interest-on' : 'bar-native-btn--interest'"
+					@click="toggleActiveInterest"
+				>
+					<text class="interest-heart">{{ info.is_interested == 1 ? '♥' : '♡' }}</text>
+					<text>{{ info.is_interested == 1 ? '已感兴趣' : '感兴趣' }}</text>
+				</view>
+			</view>
 			<!-- 线下活动：报名 + 限时定位签到 -->
-			<view class="action-area" v-if="isOfflineEvent">
-				<u-button
+			<view class="action-area" v-else-if="isOfflineEvent">
+				<view
 					v-if="info.is_sign == 0"
-					class="action-btn primary-btn"
-					:disabled="info.is_end == 1"
-					@click="handleSign"
+					class="bar-native-btn bar-native-btn--primary"
+					:class="{ 'is-disabled': info.is_end == 1 }"
+					@click="tapOfflineSignUp"
 				>
 					{{ info.is_end == 1 ? '活动已结束' : '我要报名' }}
-				</u-button>
-				<u-button v-else-if="info.is_sign_clock == 1" class="action-btn success-btn" disabled>
+				</view>
+				<view v-else-if="info.is_sign_clock == 1" class="bar-native-btn bar-native-btn--done">
 					已签到 ✓
-				</u-button>
-				<u-button v-else-if="info.offline_sign_ended == 1" class="action-btn" disabled>
+				</view>
+				<view v-else-if="info.offline_sign_ended == 1" class="bar-native-btn is-disabled">
 					签到已结束
-				</u-button>
-				<u-button v-else-if="info.offline_sign_wait == 1" class="action-btn" disabled>
+				</view>
+				<view v-else-if="info.offline_sign_wait == 1" class="bar-native-btn is-disabled">
 					签到未开始
-				</u-button>
-				<u-button v-else class="action-btn primary-btn" @click="openOfflineSignPopup">
+				</view>
+				<view v-else class="bar-native-btn bar-native-btn--primary" @click="openOfflineSignPopup">
 					签到
-				</u-button>
+				</view>
 			</view>
 			<!-- 非打卡活动：报名按钮（扫码参加活动统一叫"签到"） -->
 			<view class="action-area" v-else-if="info.is_clock == 0">
-				<u-button 
+				<view
 					v-if="info.is_sign == 0"
-					class="action-btn primary-btn"
-					:disabled="info.is_end == 1"
-					@click="handleSign"
+					class="bar-native-btn bar-native-btn--primary"
+					:class="{ 'is-disabled': info.is_end == 1 }"
+					@click="tapActiveSignUp"
 				>
 					{{info.is_end == 1 ? '活动已结束' : (isScanJoin ? '立即签到' : '我要报名')}}
-				</u-button>
-				<u-button 
-					v-else
-					class="action-btn success-btn"
-					disabled
-				>
+				</view>
+				<view v-else class="bar-native-btn bar-native-btn--done">
 					{{isScanJoin ? '已签到 ✓' : '已报名 ✓'}}
-				</u-button>
+				</view>
 			</view>
 			<!-- 打卡活动：排行榜 + 打卡 -->
 			<view class="action-area clock-actions" v-else-if="info.is_clock == 1 || info.is_clock_challenge == 1">
-				<u-button class="action-btn rank-btn" @click="goToRank">
+				<view class="bar-native-btn bar-native-btn--rank" @click="goToRank">
 					<text class="btn-icon">🏆</text>
 					<text>排行榜</text>
-				</u-button>
-				<u-button 
-					class="action-btn primary-btn"
-					:disabled="info.is_end == 1 || (info.is_sign == 1 && info.is_sign_clock == 1)"
-					@click="handleClock"
+				</view>
+				<view
+					class="bar-native-btn bar-native-btn--primary bar-native-btn--main"
+					:class="{ 'is-disabled': isClockBarDisabled }"
+					@click="tapClockBar"
 				>
 					{{clockBtnText}}
-				</u-button>
+				</view>
 			</view>
 		</view>
 		
@@ -557,7 +564,22 @@
 				return '满足天数后，在礼品列表或积分商城兑换（商品需绑定本活动）';
 			}
 			return '获得积分，解锁徽章';
-		}
+		},
+		isClockBarDisabled() {
+			return this.info.is_end == 1 || (this.info.is_sign == 1 && this.info.is_sign_clock == 1);
+		},
+		isDatePending() {
+			return Number(this.info.is_date_pending) === 1;
+		},
+		heroEngagementValue() {
+			if (this.isDatePending) {
+				return this.info.interest_count || 0;
+			}
+			return this.participantsCount;
+		},
+		heroEngagementLabel() {
+			return this.isDatePending ? '人感兴趣' : '人已参与';
+		},
 	},
 		onLoad(option) {
 			// 避免 onLoad 与紧随其后的 onShow 各请求一次详情（打卡活动会触发重复自动报名）
@@ -638,6 +660,34 @@
 			goRedeemGoods(goodsId) {
 				if (!goodsId) return;
 				this.$u.route('/pages/shop/details', { id: goodsId });
+			},
+			tapOfflineSignUp() {
+				if (this.info.is_end == 1) return;
+				this.handleSign();
+			},
+			tapActiveSignUp() {
+				if (this.info.is_end == 1) return;
+				this.handleSign();
+			},
+			tapClockBar() {
+				if (this.isClockBarDisabled) return;
+				this.handleClock();
+			},
+			async toggleActiveInterest() {
+				if (!this.isLogin) return this.$u.route('/pages/public/login');
+				try {
+					const res = await this.$u.api.post_toggle_active_interest({ active_id: this.info.id });
+					const data = res.data || {};
+					if (data.interest_count !== undefined) {
+						this.$set(this.info, 'interest_count', data.interest_count);
+					}
+					if (data.is_interested !== undefined) {
+						this.$set(this.info, 'is_interested', data.is_interested);
+					}
+					this.$u.toast(res.msg || '操作成功');
+				} catch (e) {
+					this.$u.toast(e.msg || '操作失败');
+				}
 			},
 			// 分享
 			handleShare() {
@@ -991,164 +1041,208 @@
 </script>
 
 <style lang="scss" scoped>
+	// 页面视觉基线（仅样式，不改业务）
+	$page-bg: #e8ece8;
+	$surface: #ffffff;
+	$text-primary: #2a322e;
+	$text-body: #454f49;
+	$text-muted: #8a9690;
+	$text-faint: #b4bdb7;
+	$brand: #18af38;
+	$brand-deep: #147a2e;
+	$radius-card: 20rpx;
+	$pad-page: 28rpx;
+	$border-hairline: 1rpx solid rgba(42, 50, 46, 0.06);
+	$shadow-card: 0 2rpx 16rpx rgba(42, 50, 46, 0.04);
+
 	.container {
 		min-height: 100vh;
-		background: #eef4f0;
-		padding-bottom: 200rpx;
+		background: $page-bg;
+		padding-bottom: calc(180rpx + constant(safe-area-inset-bottom));
+		padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
 	}
-	
-	// 沉浸式封�?
+
 	.hero-section {
 		position: relative;
 		width: 750rpx;
-		height: 520rpx;
-		overflow: hidden;
-		
+		height: 480rpx;
+		overflow: visible;
+		margin-bottom: 56rpx;
+
 		.hero-overlay {
 			position: absolute;
 			top: 0;
 			left: 0;
 			right: 0;
 			bottom: 0;
-			background: linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(14,127,38,0.28) 42%, rgba(12,70,28,0.82) 100%);
+			background: linear-gradient(
+				180deg,
+				rgba(20, 24, 22, 0.08) 0%,
+				rgba(20, 24, 22, 0.22) 45%,
+				rgba(20, 24, 22, 0.62) 100%
+			);
+			pointer-events: none;
 		}
-		
+
 		.back-btn {
 			position: absolute;
 			top: 80rpx;
-			left: 30rpx;
-			width: 64rpx;
-			height: 64rpx;
+			left: $pad-page;
+			width: 60rpx;
+			height: 60rpx;
 			border-radius: 50%;
-			background: rgba(0,0,0,0.32);
+			background: rgba(0, 0, 0, 0.28);
+			backdrop-filter: blur(8px);
 			display: flex;
 			align-items: center;
-		justify-content: center;
+			justify-content: center;
 			z-index: 10;
-			
+
 			.back-icon {
-				font-size: 48rpx;
+				font-size: 44rpx;
 				color: #fff;
 				line-height: 1;
+				margin-left: -4rpx;
 			}
 		}
-		
+
 		.hero-content {
 			position: absolute;
-			left: 30rpx;
-			right: 30rpx;
-			bottom: 30rpx;
+			left: $pad-page;
+			right: $pad-page;
+			bottom: 0;
 			z-index: 5;
-			
+			transform: translateY(48rpx);
+
 			.hero-badge {
 				display: inline-flex;
 				align-items: center;
-				background: rgba(255,213,106,0.92);
-				padding: 8rpx 16rpx;
-				border-radius: 20rpx;
-				margin-bottom: 16rpx;
-				
+				background: rgba(255, 255, 255, 0.88);
+				padding: 6rpx 14rpx;
+				border-radius: 999rpx;
+				margin-bottom: 12rpx;
+				border: 1rpx solid rgba(255, 255, 255, 0.5);
+				box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+
 				.badge-icon {
-					font-size: 24rpx;
-					margin-right: 6rpx;
-				}
-				
-				.badge-text {
 					font-size: 22rpx;
-					color: #7a5a00;
-					font-weight: 700;
+					margin-right: 4rpx;
+					line-height: 1;
+				}
+
+				.badge-text {
+					font-size: 20rpx;
+					color: $brand-deep;
+					font-weight: 600;
+					letter-spacing: 0.5rpx;
 				}
 			}
-			
+
 			.hero-title {
-				font-size: 40rpx;
+				display: block;
+				font-size: 38rpx;
 				font-weight: 700;
 				color: #fff;
-				line-height: 1.3;
-				margin-bottom: 8rpx;
-				text-shadow: none;
+				line-height: 1.35;
+				margin-bottom: 6rpx;
+				text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.35);
 			}
-			
+
 			.hero-subtitle {
-				font-size: 26rpx;
-				color: rgba(255,255,255,0.85);
-				line-height: 1.4;
-				margin-bottom: 20rpx;
+				display: block;
+				font-size: 24rpx;
+				color: rgba(255, 255, 255, 0.88);
+				line-height: 1.45;
+				margin-bottom: 16rpx;
+				text-shadow: 0 1rpx 6rpx rgba(0, 0, 0, 0.25);
 			}
-			
+
 			.hero-stats {
 				display: flex;
-				align-items: center;
-				background: #fff;
-				border-radius: 24rpx;
-				padding: 22rpx 0;
-				box-shadow: 0 12rpx 28rpx rgba(0,0,0,0.12);
-				
+				align-items: stretch;
+				background: $surface;
+				border-radius: $radius-card;
+				padding: 16rpx 0;
+				box-shadow: $shadow-card;
+				border: $border-hairline;
+
 				.stat-item {
 					flex: 1;
 					display: flex;
 					flex-direction: column;
 					align-items: center;
-					
+					justify-content: center;
+					padding: 4rpx 8rpx;
+
 					.stat-value {
-						font-size: 36rpx;
+						font-size: 34rpx;
 						font-weight: 700;
-						color: #18AF38;
-						line-height: 1.2;
+						color: $text-primary;
+						line-height: 1.15;
+						font-variant-numeric: tabular-nums;
 					}
-					
+
 					.stat-label {
-						font-size: 22rpx;
-						color: #6a7b6e;
-						margin-top: 4rpx;
+						font-size: 20rpx;
+						color: $text-muted;
+						margin-top: 6rpx;
+						font-weight: 400;
 					}
 				}
-				
+
+				.stat-item:first-child .stat-value {
+					color: $brand-deep;
+				}
+
 				.stat-divider {
-					width: 2rpx;
-					height: 44rpx;
-					background: #e8f0ea;
+					width: 1rpx;
+					align-self: center;
+					height: 36rpx;
+					background: rgba(42, 50, 46, 0.08);
 				}
 			}
 		}
 	}
-	
-	// 内容�?
+
 	.content-section {
-		padding: 24rpx 24rpx 8rpx;
+		padding: 8rpx $pad-page 12rpx;
 	}
 
 	.section-header {
 		display: flex;
 		align-items: center;
-		margin-bottom: 20rpx;
+		margin-bottom: 16rpx;
 	}
 	.section-bar {
-		width: 8rpx;
-		height: 28rpx;
-		border-radius: 8rpx;
-		background: linear-gradient(180deg, #2bc24e 0%, #18af38 100%);
-		margin-right: 12rpx;
+		width: 6rpx;
+		height: 26rpx;
+		border-radius: 3rpx;
+		background: $brand;
+		margin-right: 10rpx;
 		flex-shrink: 0;
+		opacity: 0.85;
 	}
 	.section-bar--gold {
-		background: linear-gradient(180deg, #f6d365 0%, #dda017 100%);
+		background: #c9a227;
+		opacity: 1;
 	}
 	.section-title {
-		font-size: 30rpx;
-		font-weight: 700;
-		color: #1c2b1e;
+		font-size: 28rpx;
+		font-weight: 600;
+		color: $text-primary;
+		letter-spacing: 0.5rpx;
 	}
 
 	.glass-card {
-		background: #fff;
-		border-radius: 28rpx;
-		margin-bottom: 20rpx;
-		box-shadow: 0 10rpx 28rpx rgba(16, 48, 24, 0.06);
+		background: $surface;
+		border-radius: $radius-card;
+		margin-bottom: 16rpx;
+		box-shadow: none;
+		border: $border-hairline;
 	}
 
 	.challenge-progress {
-		padding: 24rpx 28rpx 28rpx;
+		padding: 22rpx 24rpx 24rpx;
 	}
 	.challenge-progress-row {
 		display: flex;
@@ -1175,7 +1269,7 @@
 	.challenge-bar-fill {
 		height: 100%;
 		border-radius: 999rpx;
-		background: linear-gradient(90deg, #A4DB88 0%, #18AF38 100%);
+		background: $brand;
 		transition: width 0.3s ease;
 	}
 	.challenge-done-tip {
@@ -1186,7 +1280,7 @@
 	}
 
 	.redeem-goods {
-		padding: 24rpx 28rpx 28rpx;
+		padding: 22rpx 24rpx 24rpx;
 	}
 	.redeem-goods-tip {
 		display: block;
@@ -1198,8 +1292,8 @@
 	.redeem-goods-item {
 		display: flex;
 		align-items: center;
-		padding: 20rpx 0;
-		border-top: 1rpx solid #eef3ef;
+		padding: 18rpx 0;
+		border-top: $border-hairline;
 	}
 	.redeem-goods-item:first-of-type {
 		border-top: none;
@@ -1229,121 +1323,141 @@
 	}
 
 	.doc-links {
-		padding: 8rpx 28rpx;
-		margin-top: 24rpx;
+		padding: 4rpx 24rpx;
+		margin-top: 0;
 
 		.doc-link-item {
 			display: flex;
 			align-items: center;
-			padding: 26rpx 0;
-			border-bottom: 1rpx solid #eef3ef;
+			padding: 20rpx 0;
+			border-bottom: $border-hairline;
 
 			&:last-child {
 				border-bottom: none;
 			}
+
+			&:active {
+				opacity: 0.72;
+			}
 		}
 
 		.doc-link-icon {
-			font-size: 34rpx;
-			margin-right: 16rpx;
+			font-size: 30rpx;
+			margin-right: 14rpx;
+			width: 40rpx;
+			text-align: center;
+			flex-shrink: 0;
 		}
 
 		.doc-link-text {
 			flex: 1;
-			font-size: 30rpx;
-			color: #1b4332;
+			font-size: 28rpx;
+			color: $text-primary;
 			font-weight: 500;
+		}
+
+		.info-arrow {
+			font-size: 28rpx;
+			color: $text-faint;
 		}
 	}
 
 	.info-card {
-		padding: 8rpx 28rpx 8rpx;
+		padding: 4rpx 24rpx;
 
 		.info-item {
 			display: flex;
 			align-items: center;
-			padding: 22rpx 0;
-			border-bottom: 1rpx solid #eef3ef;
+			padding: 18rpx 0;
+			border-bottom: $border-hairline;
 
 			&:last-child {
 				border-bottom: none;
 			}
 
 			.info-icon-wrap {
-				width: 72rpx;
-				height: 72rpx;
-				border-radius: 22rpx;
-				background: #e8f8ec;
+				width: 64rpx;
+				height: 64rpx;
+				border-radius: 16rpx;
+				background: #f3f6f4;
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				margin-right: 20rpx;
+				margin-right: 16rpx;
+				flex-shrink: 0;
 
 				.info-icon {
-					font-size: 32rpx;
+					font-size: 28rpx;
 				}
 			}
 
 			&:nth-child(2) .info-icon-wrap {
-				background: #e8f2ff;
+				background: #f2f5fa;
 			}
 			&:nth-child(3) .info-icon-wrap {
-				background: #fff1e6;
+				background: #faf6f2;
 			}
 
 			.info-content {
 				flex: 1;
 				min-width: 0;
-				margin-right: 12rpx;
+				margin-right: 8rpx;
 				display: flex;
 				flex-direction: column;
 
 				.info-label {
-					font-size: 22rpx;
-					color: #8a9b8d;
+					font-size: 20rpx;
+					color: $text-muted;
+					line-height: 1.3;
 				}
 
 				.info-value {
-					margin-top: 6rpx;
-					font-size: 28rpx;
-					color: #1c2b1e;
-					font-weight: 600;
+					margin-top: 4rpx;
+					font-size: 26rpx;
+					color: $text-primary;
+					font-weight: 500;
+					line-height: 1.45;
 				}
 			}
 
 			.info-arrow {
-				font-size: 36rpx;
-				color: #c5d0c7;
+				font-size: 28rpx;
+				color: $text-faint;
+				flex-shrink: 0;
 			}
 		}
 	}
 
 .overview-card {
-	padding: 28rpx 28rpx 12rpx;
+	padding: 22rpx 24rpx 8rpx;
 
 	.overview-list {
 		.overview-item {
 			display: flex;
-			align-items: center;
-			padding: 18rpx 0;
-			border-bottom: 1rpx solid #eef3ef;
+			align-items: flex-start;
+			padding: 14rpx 0 16rpx;
+			border-bottom: $border-hairline;
 
 			&:last-child {
 				border-bottom: none;
+				padding-bottom: 8rpx;
 			}
 
 			.overview-label {
-				font-size: 24rpx;
-				color: #8a9b8d;
+				font-size: 22rpx;
+				color: $text-muted;
 				flex-shrink: 0;
-				width: 160rpx;
+				width: 140rpx;
+				line-height: 1.5;
+				padding-top: 2rpx;
 			}
 
 			.overview-value {
 				font-size: 28rpx;
-				color: #1c2b1e;
-				font-weight: 600;
+				color: $text-primary;
+				font-weight: 500;
 				flex: 1;
+				line-height: 1.5;
 			}
 		}
 	}
@@ -1351,53 +1465,73 @@
 
 .gain-card {
 	.section-title {
-		color: #b88912;
+		color: #9a7b18;
 	}
 }
 
 .flow-card {
-	padding: 28rpx;
+	padding: 22rpx 24rpx 24rpx;
 
 		.flow-list {
+			padding-left: 4rpx;
+
 			.flow-item {
 				display: flex;
 				align-items: flex-start;
-				margin-bottom: 24rpx;
-				
+				margin-bottom: 20rpx;
+				position: relative;
+
 				&:last-child {
 					margin-bottom: 0;
 				}
-				
+
+				&:not(:last-child)::before {
+					content: '';
+					position: absolute;
+					left: 22rpx;
+					top: 52rpx;
+					bottom: -12rpx;
+					width: 2rpx;
+					background: rgba(42, 50, 46, 0.08);
+				}
+
 				.flow-number {
-					width: 48rpx;
-					height: 48rpx;
+					width: 44rpx;
+					height: 44rpx;
 					border-radius: 50%;
-					background: linear-gradient(135deg, #2bc24e 0%, #18af38 100%);
+					background: $brand;
 					color: #fff;
-					font-size: 24rpx;
-					font-weight: 700;
+					font-size: 22rpx;
+					font-weight: 600;
 					display: flex;
 					align-items: center;
 					justify-content: center;
-					margin-right: 20rpx;
+					margin-right: 16rpx;
 					flex-shrink: 0;
-					box-shadow: 0 6rpx 14rpx rgba(24, 175, 56, 0.22);
+					box-shadow: none;
+					position: relative;
+					z-index: 1;
 				}
-				
+
 				.flow-content {
 					flex: 1;
-					padding-top: 4rpx;
-					
+					padding-top: 2rpx;
+					min-width: 0;
+
 					.flow-title {
+						display: block;
 						font-size: 28rpx;
-						font-weight: 700;
-						color: #1c2b1e;
-						margin-bottom: 4rpx;
+						font-weight: 600;
+						color: $text-primary;
+						margin-bottom: 6rpx;
+						line-height: 1.35;
 					}
-					
+
 					.flow-desc {
+						display: block;
 						font-size: 24rpx;
-						color: #6a7b6e;
+						color: $text-muted;
+						line-height: 1.55;
 					}
 				}
 			}
@@ -1405,98 +1539,180 @@
 	}
 
 	.desc-card {
-		padding: 28rpx;
-		
+		padding: 22rpx 24rpx 26rpx;
+
 		.desc-content {
-			font-size: 26rpx;
-			color: #3d4a40;
-			line-height: 1.7;
+			font-size: 28rpx;
+			color: $text-body;
+			line-height: 1.75;
+			word-break: break-word;
+
+			::v-deep p {
+				margin: 0 0 20rpx;
+				line-height: 1.75;
+			}
+			::v-deep p:last-child {
+				margin-bottom: 0;
+			}
+			::v-deep h1,
+			::v-deep h2,
+			::v-deep h3,
+			::v-deep h4,
+			::v-deep h5,
+			::v-deep h6 {
+				margin: 28rpx 0 12rpx;
+				font-weight: 600;
+				color: $text-primary;
+				line-height: 1.4;
+			}
+			::v-deep h1:first-child,
+			::v-deep h2:first-child,
+			::v-deep h3:first-child,
+			::v-deep h4:first-child {
+				margin-top: 0;
+			}
+			::v-deep h1 { font-size: 32rpx; }
+			::v-deep h2 { font-size: 30rpx; }
+			::v-deep h3,
+			::v-deep h4 { font-size: 28rpx; }
+			::v-deep strong,
+			::v-deep b {
+				font-weight: 600;
+				color: $text-primary;
+			}
+			::v-deep ul,
+			::v-deep ol {
+				margin: 0 0 20rpx;
+				padding-left: 1.2em;
+			}
+			::v-deep li {
+				margin-bottom: 8rpx;
+				line-height: 1.7;
+			}
+			::v-deep img {
+				max-width: 100%;
+				border-radius: 12rpx;
+				margin: 12rpx 0;
+			}
 		}
 	}
-	
-	// 底部操作�?
+
 	.bottom-bar {
 		position: fixed;
 		bottom: 0;
 		left: 0;
 		right: 0;
-		padding: 16rpx 24rpx;
-		padding-bottom: calc(16rpx + constant(safe-area-inset-bottom));
-		padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+		padding: 12rpx $pad-page;
+		padding-bottom: calc(12rpx + constant(safe-area-inset-bottom));
+		padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
 		display: flex;
 		align-items: center;
-		background: rgba(255,255,255,0.96);
-		box-shadow: 0 -8rpx 24rpx rgba(16, 48, 24, 0.08);
+		gap: 12rpx;
+		background: #ffffff;
+		border-top: $border-hairline;
+		box-shadow: 0 -4rpx 24rpx rgba(42, 50, 46, 0.06);
 		z-index: 20;
-		
+
 		.share-btn {
-			width: 96rpx;
-			height: 88rpx;
-			margin-right: 16rpx;
-			border-radius: 24rpx;
-			background: #e8f8ec;
+			width: 72rpx;
+			height: 80rpx;
+			margin-right: 0;
+			border-radius: 12rpx;
+			background: transparent;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
 			flex-shrink: 0;
-			
+
 			.share-icon {
-				margin-top: 2rpx;
-				font-size: 18rpx;
-				color: #18AF38;
-				font-weight: 600;
+				margin-top: 4rpx;
+				font-size: 20rpx;
+				color: $text-muted;
+				font-weight: 500;
 			}
 		}
-		
+
 		.action-area {
 			flex: 1;
 			display: flex;
+			align-items: stretch;
+			gap: 12rpx;
 			min-width: 0;
-			
-			.action-btn {
+		}
+
+		.bar-native-btn {
+			flex: 1;
+			min-width: 0;
+			height: 80rpx;
+			border-radius: 16rpx;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 28rpx;
+			font-weight: 600;
+			box-sizing: border-box;
+			border: none;
+			line-height: 1.2;
+			text-align: center;
+			padding: 0 20rpx;
+
+			&--primary {
+				background: $brand;
+				color: #fff;
+			}
+
+			&--rank {
+				flex: 0 0 188rpx;
+				width: 188rpx;
+				background: #faf8f3;
+				color: #8a7340;
+			}
+
+			&--main {
 				flex: 1;
-				height: 88rpx;
-				margin-left: 12rpx;
-				border-radius: 44rpx !important;
-				font-size: 28rpx;
-				font-weight: 700;
-			}
-			.action-btn:first-child {
-				margin-left: 0;
-			}
-			
-			.primary-btn {
-				background: linear-gradient(135deg, #2bc24e 0%, #18af38 100%) !important;
-				color: #fff !important;
-				border: none !important;
 			}
 
-			.success-btn {
-				background: #e8f8ec !important;
-				color: #18AF38 !important;
-				border: none !important;
+			&--done {
+				background: #eef2ef;
+				color: $brand-deep;
 			}
 
-			.rank-btn {
-				background: #fff4d8 !important;
-				color: #b88912 !important;
-				border: none !important;
-				display: flex;
-				align-items: center;
-				justify-content: center;
+			&--full {
+				flex: 1;
+				width: 100%;
+			}
 
-				.btn-icon {
-					font-size: 28rpx;
-					margin-right: 6rpx;
-				}
+			&--interest {
+				background: $brand;
+				color: #fff;
+			}
+
+			&--interest-on {
+				background: #fff;
+				color: $brand-deep;
+				border: 2rpx solid rgba(24, 175, 56, 0.45);
+			}
+
+			.interest-heart {
+				margin-right: 8rpx;
+				font-size: 30rpx;
+				line-height: 1;
+			}
+
+			&.is-disabled {
+				background: #eef2ef;
+				color: #9aa89f;
+			}
+
+			&:active:not(.is-disabled):not(.bar-native-btn--done) {
+				opacity: 0.88;
 			}
 		}
-		
-		.clock-actions {
-			.action-btn:first-child {
-				flex: 0.62;
-			}
+
+		.btn-icon {
+			font-size: 26rpx;
+			margin-right: 4rpx;
 		}
 	}
 	
@@ -1563,11 +1779,11 @@
 			justify-content: center;
 			width: 100%;
 			height: 80rpx;
-			border-radius: 40rpx;
-			background: linear-gradient(135deg, #2bc24e 0%, #18af38 100%);
+			border-radius: 16rpx;
+			background: $brand;
 			color: #fff;
 			font-size: 28rpx;
-			font-weight: 700;
+			font-weight: 600;
 		}
 	}
 

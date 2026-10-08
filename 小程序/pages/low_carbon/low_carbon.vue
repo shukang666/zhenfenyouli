@@ -350,9 +350,9 @@
             <view class="fb-weekly-tag">
               <text class="fb-weekly-tag-text">{{ item.isWeeklyPin ? '真分打卡' : '本周精选' }}</text>
             </view>
-            <view class="fb-weekly-badge" v-if="!item.isWeeklyPin && item.active_count > 0">
+            <view class="fb-weekly-badge" v-if="!item.isWeeklyPin && actEngagementCount(item) > 0">
               <text class="fb-weekly-badge-text"
-                >{{ item.active_count }}人参与</text
+                >{{ actEngagementCount(item) }}{{ actEngagementSuffix(item) }}</text
               >
             </view>
             <view class="fb-weekly-foot">
@@ -505,7 +505,7 @@
             :src="item.thumb"
             mode="aspectFill"
           ></u-image>
-          <view class="fb-act-badge" v-if="item.active_count > 0">
+          <view class="fb-act-badge" v-if="actEngagementCount(item) > 0">
             <view
               class="fb-act-avatars"
               v-if="item.avatar_array && item.avatar_array.length"
@@ -518,7 +518,7 @@
                 :key="i"
               ></image>
             </view>
-            <text class="fb-act-badge-text">{{ item.active_count }}人参与</text>
+            <text class="fb-act-badge-text">{{ actEngagementCount(item) }}{{ actEngagementSuffix(item) }}</text>
           </view>
         </view>
         <view class="fb-act-body">
@@ -664,6 +664,16 @@ export default {
       }
       if (!item.id) return;
       this.$u.route("/pages/activity/lsxf/details-new?id=" + item.id);
+    },
+    actEngagementCount(item) {
+      if (!item) return 0;
+      if (Number(item.is_date_pending) === 1) {
+        return Number(item.interest_count) || 0;
+      }
+      return Number(item.active_count) || 0;
+    },
+    actEngagementSuffix(item) {
+      return Number(item && item.is_date_pending) === 1 ? "人感兴趣" : "人参与";
     },
     weeklyCardDateLine(item) {
       const base = this.formatActiveDate(item);

@@ -329,6 +329,17 @@ SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEM
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `safety_url` varchar(500) NOT NULL DEFAULT '''' COMMENT ''安全注意事项独立页URL'' AFTER `rules_url`');
 PREPARE stmt FROM @__sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+-- 活动时间待定：用户「感兴趣」（类似上映前「想看」）
+CREATE TABLE IF NOT EXISTS `cmf_active_interest` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '活动ID',
+  `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
+  `create_time` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_active_user` (`active_id`,`user_id`),
+  KEY `idx_active_id` (`active_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='活动感兴趣（时间待定）';
+
 -- 沿街商铺：统一投放点 + 用户认领商户身份
 CREATE TABLE IF NOT EXISTS `cmf_street_shop_drop_point` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,

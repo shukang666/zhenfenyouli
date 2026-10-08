@@ -9,6 +9,7 @@ use app\admin\model\active\ActiveCateModel;
 use app\admin\model\active\ActiveClockModel;
 use app\admin\model\active\ActiveCommunityCateModel;
 use app\admin\model\active\ActiveModel;
+use app\admin\model\active\ActiveInterestModel;
 use app\admin\model\active\ActiveSIgnModel;
 use app\admin\model\active\ActiveTabModel;
 use app\admin\model\active\ActiveUserModel;
@@ -514,7 +515,7 @@ class ActiveController extends AuthController
         $sign_info = ActiveSIgnModel::where($where)->find();
         // 只有打卡活动（is_clock=1）才自动报名，非打卡活动需用户手动报名
         $autoClockJoin = intval($item['is_clock']) === 1 || intval($item['is_clock_challenge'] ?? 0) === 1;
-        if (empty($sign_info) && $this->user_id && $autoClockJoin && !ActiveModel::isOfflineEvent($item)) {
+        if (empty($sign_info) && $this->user_id && $autoClockJoin && !ActiveModel::isOfflineEvent($item) && !ActiveModel::isDatePending($item)) {
             // 自动创建报名记录，跳过角色条件校验和积分扣除（详情 onLoad/onShow 并发时需防重）
             ActiveSIgnModel::ensureClockAutoSign((int) $this->user_id, (int) $item['id'], [
                 'type'        => 2,
@@ -567,6 +568,7 @@ class ActiveController extends AuthController
 //        $item['sign_id'] = $sign_info['id'];
 
         $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
+        $this->attachInterestFields($item);
         $item['is_end'] = ActiveModel::resolveIsEnd($item);
         $this->attachWebLaunchFields($item);
         $pwdConfigured = 0;
@@ -624,6 +626,9 @@ class ActiveController extends AuthController
         $active_info = ActiveModel::where('id', $active_id)->find();
         if (empty($active_info) || !ActiveModel::isOfflineEvent($active_info)) {
             $this->error('活动不存在或不是线下活动');
+        }
+        if (ActiveModel::isDatePending($active_info)) {
+            $this->error('活动时间待定，确定时间后再签到');
         }
         if (!ActiveModel::isDatePending($active_info) && $active_info['date'] < time()) {
             $this->error('活动已结束');
@@ -762,6 +767,9 @@ class ActiveController extends AuthController
         $active_id = $this->request->param('active_id');
         $item = ActiveModel::where('id',$active_id)->find();
         if(empty($item)) $this->error('活动不存在');
+        if (ActiveModel::isDatePending($item)) {
+            $this->error('活动时间待定，请先点击「感兴趣」，确定时间后再报名参与');
+        }
         if (!ActiveModel::isDatePending($item) && $item['date'] < time()) {
             $this->error('活动已结束');
         }
@@ -812,6 +820,45 @@ class ActiveController extends AuthController
         }
 
         $this->success('报名成功');
+    }
+
+    /**
+     * 活动时间待定：标记/取消「感兴趣」
+     * @OA\Post (
+     *tags={"新版活动"},
+     *path="/wxapp/active/post_toggle_active_interest",
+     *@OA\Parameter(name="active_id",description="活动id",in="query",required=true, @OA\Schema(type="string",)),
+     *@OA\Response(response="200", description="An example resource")
+     * )
+     */
+    public function post_toggle_active_interest()
+    {
+        $this->checkUser();
+        $activeId = (int) $this->request->param('active_id');
+        if ($activeId <= 0) {
+            $this->error('参数错误');
+        }
+        $item = ActiveModel::where('id', $activeId)->find();
+        if (empty($item)) {
+            $this->error('活动不存在');
+        }
+        if (!ActiveModel::isDatePending($item)) {
+            $this->error('活动已公布时间，请直接报名或打卡参与');
+        }
+        $result = ActiveInterestModel::toggle($activeId, (int) $this->user_id);
+        $msg = $result['action'] === 'add' ? '已标记感兴趣' : '已取消感兴趣';
+        $this->success($msg, $result);
+    }
+
+    /** 详情/列表：感兴趣人数与当前用户状态 */
+    protected function attachInterestFields(&$item): void
+    {
+        $activeId = (int) ($item['id'] ?? 0);
+        $item['interest_count'] = ActiveInterestModel::countByActive($activeId);
+        $item['is_interested'] = 0;
+        if ($this->user_id && ActiveInterestModel::isInterested($activeId, (int) $this->user_id)) {
+            $item['is_interested'] = 1;
+        }
     }
 
     /**
@@ -896,6 +943,9 @@ class ActiveController extends AuthController
         $active_id = $item['active_id'];
         $active_info = ActiveModel::where('id',$active_id)->find();
         if(empty($active_info)) $this->error('活动不存在');
+        if (ActiveModel::isDatePending($active_info)) {
+            $this->error('活动时间待定，确定时间后再打卡');
+        }
         // 照片校验：扫码参加(join_type=2)活动免上传照片，点击按钮直接签到；其余活动照片必填
         if(empty($image_url) && intval($active_info['join_type']) !== 2) $this->error('照片不能为空');
         $date_time = strtotime(date('Y-m-d 00:00:00'));

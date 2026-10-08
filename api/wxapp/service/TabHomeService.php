@@ -6,6 +6,7 @@ use api\wxapp\controller\AuthController;
 use api\wxapp\model\CommonModel;
 use app\admin\model\active\ActiveClockModel;
 use app\admin\model\active\ActiveModel;
+use app\admin\model\active\ActiveInterestModel;
 use app\admin\model\active\ActiveSIgnModel;
 use app\admin\model\active\MemberBadgeModel;
 use api\wxapp\model\AnswerModel;
@@ -495,6 +496,11 @@ class TabHomeService
         $item['is_sign_clock'] = empty($clock_info) ? 0 : 1;
 
         $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
+        $item['interest_count'] = ActiveInterestModel::countByActive((int) $item['id']);
+        $item['is_interested'] = 0;
+        if ($this->userId && ActiveInterestModel::isInterested((int) $item['id'], (int) $this->userId)) {
+            $item['is_interested'] = 1;
+        }
         $item['is_end'] = ActiveModel::resolveIsEnd($item);
         $this->attachWebLaunchFields($item);
         return $item;
