@@ -233,6 +233,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeFixedRequiredHint: getHomeFixedSetupRequiredHint(),
 				homeFixedSavingKey: '',
 				homeFixedHeroImgOk: true,
+				homeClockBannerImgOk: true,
 				/** URL 参数 home_setup=1 时强制进入布置页（后续改图入口用） */
 				homeFixedEditSetup: false,
 				homeFixedExampleImgOk: {
@@ -289,6 +290,11 @@ import settings, { uploadUrl } from '@/common/settings'
 				if (!this.homeFixedHeroImgOk) return ''
 				const base = this.scenePickCosBase
 				return base + 'home-setup-hero.png'
+			},
+			homeClockBannerImgUrl() {
+				if (!this.homeClockBannerImgOk) return ''
+				const base = this.scenePickCosBase
+				return base + 'home-clock-banner.png'
 			},
 			officeClockHeroImgUrl() {
 				if (!this.officeClockHeroImgOk) return ''
@@ -633,7 +639,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				return getCommunityEmptyTitle(this.isStreetHub, this.isOfficeHub)
 			},
 			communityEmptyDesc() {
-				return getCommunityEmptyDesc()
+				return getCommunityEmptyDesc(this.isStreetHub, this.isOfficeHub)
 			},
 			presetTips() {
 				const tips = this.guide && this.guide.preset_tips
@@ -816,6 +822,9 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			onHomeFixedHeroImgError() {
 				this.homeFixedHeroImgOk = false
+			},
+			onHomeClockBannerImgError() {
+				this.homeClockBannerImgOk = false
 			},
 			onOfficeClockHeroImgError() {
 				this.officeClockHeroImgOk = false
@@ -1046,7 +1055,11 @@ import settings, { uploadUrl } from '@/common/settings'
 				uni.setNavigationBarTitle({ title: getHomeClockNavTitle() })
 			},
 			enterOfficeClockFlow() {
-				if (!(this.officeBuildingLabels || []).length) {
+				const labels = this.officeBuildingLabels || []
+				if (!labels.length) {
+					if ((this.points || []).length) {
+						this.$u.toast('办公点位种类需为可回收物，请联系社区调整配置')
+					}
 					this.flowStep = 'hub_empty'
 					return
 				}

@@ -138,8 +138,15 @@
 		</view>
 				<view class="scf-body scf-body--home-clock" v-if="flowStep === 'learn'">
 			<view class="scf-hc-banner">
-				<view class="scf-hc-banner-ph">
-					<text class="scf-hc-banner-slogan">{{ homeClockBannerSlogan }}</text>
+				<view class="scf-hc-banner-ph" :class="{ 'scf-hc-banner-ph--img': !!homeClockBannerImgUrl }">
+					<image
+						v-if="homeClockBannerImgUrl"
+						class="scf-hc-banner-img"
+						:src="homeClockBannerImgUrl"
+						mode="widthFix"
+						@error="onHomeClockBannerImgError"
+					/>
+					<text v-else class="scf-hc-banner-slogan">{{ homeClockBannerSlogan }}</text>
 				</view>
 			</view>
 

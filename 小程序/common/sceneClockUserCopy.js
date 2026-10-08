@@ -130,11 +130,17 @@ export function getIntroBlocks() {
 
 export function getCommunityEmptyTitle(isStreetHub, isOfficeHub) {
 	if (isStreetHub) return '店里还没安排投放点'
-	if (isOfficeHub) return '楼里还没安排投放点'
+	if (isOfficeHub) return '办公真分角尚未配置'
 	return '还没安排投放点'
 }
 
-export function getCommunityEmptyDesc() {
+export function getCommunityEmptyDesc(isStreetHub, isOfficeHub) {
+	if (isOfficeHub) {
+		return '请社区工作人员在后台「场景回收点配置」中添加办公场景、所属社区、楼宇名与可回收物真分角。配置完成后重新进入本页即可打卡。'
+	}
+	if (isStreetHub) {
+		return '社区会根据商铺情况安排投放点，弄好后会出现在这里。不清楚可以问社区或物业。'
+	}
 	return '社区会根据商铺或单位情况安排扔垃圾的地方，弄好后会出现在这里。不清楚可以问社区或物业。'
 }
 
@@ -551,7 +557,7 @@ export function getHomeClockBannerSlogan() {
 }
 
 export function getHomeClockStep1Title() {
-	return '今天打卡哪类垃圾？'
+	return '今天真分哪类垃圾？'
 }
 
 export function getHomeClockStep1Sub() {
