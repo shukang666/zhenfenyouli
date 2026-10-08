@@ -73,33 +73,16 @@
 								@tap="selectHomeClockCate(card)"
 
 							>
-
-								<view class="scf-hc-cate-img-wrap">
-
-									<image
-
-										v-if="card.imgUrl"
-
-										class="scf-hc-cate-img"
-
-										:src="card.imgUrl"
-
-										mode="aspectFill"
-
-										@error="onHomeClockCateImgError(card.key)"
-
-									/>
-
-									<view v-else class="scf-hc-cate-illus">
-
-										<text class="scf-hc-cate-illus-ph">{{ card.illusPh }}</text>
-
-									</view>
-
+								<image
+									v-if="card.imgUrl"
+									class="scf-hc-cate-img"
+									:src="card.imgUrl"
+									mode="aspectFill"
+									@error="onHomeClockCateImgError(card.key)"
+								/>
+								<view v-else class="scf-hc-cate-illus">
+									<text class="scf-hc-cate-illus-ph">{{ card.illusPh }}</text>
 								</view>
-
-								<text class="scf-hc-cate-label">{{ card.label }}</text>
-
 							</view>
 
 						</view>
