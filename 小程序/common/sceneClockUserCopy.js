@@ -671,6 +671,10 @@ export function getOfficeClockCornerTitle() {
 	return '真分角位置'
 }
 
+export function getOfficeClockCornerPendingText() {
+	return '正在推进中'
+}
+
 export function getOfficeClockConfirmTitle() {
 	return '真分前先确认'
 }

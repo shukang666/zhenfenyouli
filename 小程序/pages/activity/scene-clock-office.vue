@@ -117,7 +117,10 @@
 
 			<view class="scf-oc-card" v-if="officeBuildingKey && officeCornerPoint">
 				<text class="scf-oc-card-title">{{ officeClockCornerTitle }}</text>
-				<text class="scf-oc-corner-loc">{{ officeCornerDisplayLocation }}</text>
+				<text
+					class="scf-oc-corner-loc"
+					:class="{ 'scf-oc-corner-loc--pending': officeCornerDisplayLocation === officeClockCornerPendingText }"
+				>{{ officeCornerDisplayLocation }}</text>
 				<image
 					v-if="officeCornerPoint.point_image"
 					class="scf-oc-corner-img"
@@ -125,7 +128,7 @@
 					mode="aspectFill"
 				/>
 				<view v-else class="scf-oc-corner-img scf-oc-corner-img--ph">
-					<text class="scf-oc-corner-ph-t">真分角参考图占位</text>
+					<text class="scf-oc-corner-ph-t">{{ officeClockCornerPendingText }}</text>
 				</view>
 			</view>
 

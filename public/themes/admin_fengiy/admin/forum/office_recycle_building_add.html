@@ -18,10 +18,10 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-2 control-label"><span class="form-required">*</span>回收点地址</label>
+            <label class="col-sm-2 control-label">回收点地址</label>
             <div class="col-sm-6">
-                <input type="text" name="recycle_address" class="form-control" required maxlength="255"
-                       value="{$data.remark|default=''}" placeholder="如：3楼东侧楼道口（可与楼名组合展示）">
+                <input type="text" name="recycle_address" class="form-control" maxlength="255"
+                       value="{$data.remark|default=''}" placeholder="可留空；小程序未填时显示「正在推进中」">
             </div>
         </div>
         <div class="form-group">

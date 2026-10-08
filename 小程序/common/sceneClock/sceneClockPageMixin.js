@@ -121,6 +121,7 @@ import settings, { uploadUrl } from '@/common/settings'
 		getOfficeClockBuildingTitle,
 		getOfficeClockBuildingPlaceholder,
 		getOfficeClockCornerTitle,
+		getOfficeClockCornerPendingText,
 		getOfficeClockConfirmTitle,
 		getOfficeClockItemTitle,
 		getOfficeClockItemTags,
@@ -290,6 +291,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				officeClockBuildingTitle: getOfficeClockBuildingTitle(),
 				officeClockBuildingPlaceholder: getOfficeClockBuildingPlaceholder(),
 				officeClockCornerTitle: getOfficeClockCornerTitle(),
+				officeClockCornerPendingText: getOfficeClockCornerPendingText(),
 				officeClockConfirmTitle: getOfficeClockConfirmTitle(),
 				officeClockItemTitle: getOfficeClockItemTitle(),
 				officeClockItemTags: getOfficeClockItemTags(),
@@ -374,13 +376,14 @@ import settings, { uploadUrl } from '@/common/settings'
 			officeCornerDisplayLocation() {
 				const p = this.officeCornerPoint
 				if (!p) return ''
+				const pending = this.officeClockCornerPendingText || '正在推进中'
 				const b = String(this.officeBuildingKey || '').trim()
 				const loc = String(p.corner_location || p.remark || p.address || '').trim()
+				if (!loc) return pending
 				if (loc && b && loc.indexOf(b) < 0) {
 					return b + ' ' + loc
 				}
-				if (loc) return loc
-				return b
+				return loc
 			},
 			homeClockCateCards() {
 				const defs = [

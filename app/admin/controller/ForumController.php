@@ -667,9 +667,6 @@ class ForumController extends ToolController
             $this->error('大楼名称过长（最多32字）');
         }
         $address = trim((string)$this->request->param('recycle_address', ''));
-        if ($address === '') {
-            $this->error('请填写回收点地址说明');
-        }
         if (mb_strlen($address) > 255) {
             $this->error('地址说明过长');
         }
