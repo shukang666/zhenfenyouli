@@ -8,6 +8,7 @@ use app\admin\model\active\ActiveClockModel;
 use app\admin\model\active\ActiveModel;
 use app\admin\model\active\ActiveInterestModel;
 use app\admin\model\active\ActiveSIgnModel;
+use app\admin\service\ActivityShowcaseSyncService;
 use app\admin\model\active\MemberBadgeModel;
 use api\wxapp\model\AnswerModel;
 use app\admin\model\forum\ForumCommentModel;
@@ -214,6 +215,8 @@ class TabHomeService
 
     protected function fetchShowcasePreview(int $limit): array
     {
+        ActivityShowcaseSyncService::syncEligibleEndedActives(15);
+
         $list = Db::name('activity_showcase')
             ->where('status', 1)
             ->field('id, title, cover, description, content, event_date, photos, view_count, create_time')

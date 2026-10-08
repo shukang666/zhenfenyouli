@@ -329,6 +329,16 @@ SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEM
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `safety_url` varchar(500) NOT NULL DEFAULT '''' COMMENT ''安全注意事项独立页URL'' AFTER `rules_url`');
 PREPARE stmt FROM @__sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+-- 活动：是否周期性（结束后不进风采，详情提示等待下期）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'is_recurring');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `is_recurring` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT ''1周期性活动'' AFTER `is_date_pending`');
+PREPARE stmt FROM @__sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- 活动风采：关联来源活动（自动归档）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_activity_showcase' AND COLUMN_NAME = 'active_id');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_activity_showcase` ADD COLUMN `active_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT ''来源活动ID，0为手工'' AFTER `id`');
+PREPARE stmt FROM @__sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 -- 活动时间待定：用户「感兴趣」（类似上映前「想看」）
 CREATE TABLE IF NOT EXISTS `cmf_active_interest` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,

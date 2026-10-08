@@ -249,6 +249,15 @@
                 </div>
             </div>
 
+            <div class="form-group active-web-list-field">
+                <label class="col-sm-2 control-label">周期性活动:</label>
+                <div class="col-md-8 col-sm-10" style="margin-top:7px;">
+                    <input type="checkbox" lay-skin="primary" name="is_recurring" value="1" title="周期性活动（多期举办）"
+                           <if condition="!empty($item.is_recurring) && $item.is_recurring==1">checked</if>>
+                    <p class="help-block">勾选后：活动结束<strong>不会</strong>自动进入小程序「活动风采」；详情页提示「等待下期开放」。未勾选的非周期性活动，结束后会自动归档到活动风采（封面/打卡图/活动说明）。与「时间待定」互斥。</p>
+                </div>
+            </div>
+
             <div class="active-config-only">
             <div class="form-group">
                 <label class="col-sm-2 control-label"><span class="form-required">*</span>报名所需积分:</label>

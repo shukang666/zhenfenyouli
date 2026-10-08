@@ -7,6 +7,7 @@ use app\admin\model\active\ActiveCateModel;
 use app\admin\model\active\ActiveCommunityCateModel;
 use app\admin\model\active\ActiveClockModel;
 use app\admin\model\active\ActiveModel;
+use app\admin\service\ActivityShowcaseSyncService;
 use app\admin\model\member\CommunityCateModel;
 use think\App;
 use think\db\exception\DbException;
@@ -190,7 +191,7 @@ class ActiveController extends ToolController
             'is_clock', 'is_clock_challenge', 'clock_challenge_days', 'clock_challenge_point',
             'clock_start_time', 'clock_end_time', 'send_point', 'role', 'sign_day', 'is_badge',
             'badge_name', 'badge_image', 'point', 'share_point', 'phone', 'address', 'lat', 'lng',
-            'flow', 'gain', 'suit_people', 'duration', 'day_type', 'area_range', 'content', 'date', 'is_date_pending',
+            'flow', 'gain', 'suit_people', 'duration', 'day_type', 'area_range', 'content', 'date', 'is_date_pending', 'is_recurring',
             'is_month_recommend',
         ];
         foreach ($copyKeys as $key) {
@@ -333,6 +334,10 @@ class ActiveController extends ToolController
             $params['is_badge'] = empty($params['is_badge']) ? 0 : 1;
             $params['is_month_recommend'] = empty($params['is_month_recommend']) ? 0 : 1;
             $params['is_date_pending'] = empty($params['is_date_pending']) ? 0 : 1;
+            $params['is_recurring'] = empty($params['is_recurring']) ? 0 : 1;
+            if ($params['is_recurring'] && $params['is_date_pending']) {
+                $this->error('「周期性活动」与「时间待定」请勿同时勾选');
+            }
             if ($params['is_date_pending']) {
                 if (empty($params['date'])) {
                     $params['date'] = 0;
@@ -381,6 +386,22 @@ class ActiveController extends ToolController
                 $result = $this->setEditPost($params);
             }
 
+            if (!empty($result)) {
+                $savedId = (int)($params['id'] ?? 0);
+                if ($savedId <= 0) {
+                    if (is_object($result) && isset($result->id)) {
+                        $savedId = (int)$result->id;
+                    } elseif (is_array($result) && !empty($result['id'])) {
+                        $savedId = (int)$result['id'];
+                    }
+                }
+                if ($savedId > 0) {
+                    $savedRow = ActiveModel::where('id', $savedId)->find();
+                    if ($savedRow) {
+                        ActivityShowcaseSyncService::syncOneActive($savedRow->toArray());
+                    }
+                }
+            }
 
             $this->getMsg(!empty($result));
         } else {

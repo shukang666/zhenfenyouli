@@ -11,6 +11,7 @@ use app\admin\model\active\ActiveCommunityCateModel;
 use app\admin\model\active\ActiveModel;
 use app\admin\model\active\ActiveInterestModel;
 use app\admin\model\active\ActiveSIgnModel;
+use app\admin\service\ActivityShowcaseSyncService;
 use app\admin\model\active\ActiveTabModel;
 use app\admin\model\active\ActiveUserModel;
 use app\admin\model\active\MemberBadgeModel;
@@ -568,8 +569,21 @@ class ActiveController extends AuthController
 //        $item['sign_id'] = $sign_info['id'];
 
         $item['is_date_pending'] = (int)($item['is_date_pending'] ?? 0);
+        $item['is_recurring'] = (int)($item['is_recurring'] ?? 0);
         $this->attachInterestFields($item);
         $item['is_end'] = ActiveModel::resolveIsEnd($item);
+        if ((int)$item['is_clock'] === 1 || (int)($item['is_clock_challenge'] ?? 0) === 1) {
+            $clockEnd = (int)($item['clock_end_time'] ?? 0);
+            if ($clockEnd > 0 && $clockEnd < time()) {
+                $item['is_end'] = 1;
+            }
+        }
+        $item['showcase_id'] = 0;
+        if ($item['is_end'] == 1 && !ActiveModel::isRecurring($item)) {
+            $activeRow = is_object($item) && method_exists($item, 'toArray') ? $item->toArray() : (array)$item;
+            ActivityShowcaseSyncService::syncOneActive($activeRow);
+            $item['showcase_id'] = ActivityShowcaseSyncService::findShowcaseIdByActive((int)$item['id']);
+        }
         $this->attachWebLaunchFields($item);
         $pwdConfigured = 0;
         if (ActiveModel::isOfflineEvent($item)) {

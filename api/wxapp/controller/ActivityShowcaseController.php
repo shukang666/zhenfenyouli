@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use app\admin\service\ActivityShowcaseSyncService;
 use think\facade\Db;
 
 /**
@@ -16,6 +17,8 @@ class ActivityShowcaseController extends AuthController
      */
     public function get_list()
     {
+        ActivityShowcaseSyncService::syncEligibleEndedActives(20);
+
         $page  = $this->request->param('page', 1, 'intval');
         $limit = $this->request->param('limit', 15, 'intval');
         $limit = max(1, min($limit, 50));

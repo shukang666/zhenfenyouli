@@ -82,6 +82,12 @@ class ActiveModel extends \think\Model
         return (int)($active['is_date_pending'] ?? 0) === 1;
     }
 
+    /** 周期性活动：结束后不进活动风采，详情页提示等待下期 */
+    public static function isRecurring($active): bool
+    {
+        return (int)($active['is_recurring'] ?? 0) === 1;
+    }
+
     /**
      * 小程序列表/推荐可见：开放浏览 join_type=1，或有效 Web 式（已填 web_url，不受 join_type 误配影响）
      */

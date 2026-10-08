@@ -44,6 +44,21 @@
 		
 		<!-- 内容区域 -->
 		<view class="content-section">
+			<!-- 周期性活动本期已结束 -->
+			<view class="status-hint glass-card status-hint--recurring" v-if="isRecurringEnded">
+				<text class="status-hint__title">本期活动已结束</text>
+				<text class="status-hint__desc">本活动为多期举办，下一期开放时间确定后将在此更新，欢迎持续关注。</text>
+			</view>
+			<!-- 已结束：进入活动风采 -->
+			<view class="status-hint glass-card status-hint--showcase" v-else-if="showShowcaseEntry" @click="goActivityShowcase">
+				<view class="status-hint__row">
+					<view>
+						<text class="status-hint__title">活动已结束</text>
+						<text class="status-hint__desc">精彩瞬间已收录至活动风采，点击查看回顾</text>
+					</view>
+					<text class="status-hint__arrow">›</text>
+				</view>
+			</view>
 			<!-- 活动时间地点卡片 -->
 			<view class="info-card glass-card">
 				<view class="info-item">
@@ -221,6 +236,18 @@
 				>
 					<text class="interest-heart">{{ info.is_interested == 1 ? '♥' : '♡' }}</text>
 					<text>{{ info.is_interested == 1 ? '已感兴趣' : '感兴趣' }}</text>
+				</view>
+			</view>
+			<!-- 周期性活动本期结束 -->
+			<view class="action-area" v-else-if="isRecurringEnded">
+				<view class="bar-native-btn bar-native-btn--full bar-native-btn--recurring-wait">
+					等待下期开放
+				</view>
+			</view>
+			<!-- 已结束且有风采归档 -->
+			<view class="action-area" v-else-if="showShowcaseEntry">
+				<view class="bar-native-btn bar-native-btn--full bar-native-btn--primary" @click="goActivityShowcase">
+					查看活动风采
 				</view>
 			</view>
 			<!-- 线下活动：报名 + 限时定位签到 -->
@@ -571,6 +598,14 @@
 		isDatePending() {
 			return Number(this.info.is_date_pending) === 1;
 		},
+		isRecurringEnded() {
+			return Number(this.info.is_recurring) === 1 && Number(this.info.is_end) === 1;
+		},
+		showShowcaseEntry() {
+			return Number(this.info.is_end) === 1
+				&& Number(this.info.is_recurring) !== 1
+				&& Number(this.info.showcase_id) > 0;
+		},
 		heroEngagementValue() {
 			if (this.isDatePending) {
 				return this.info.interest_count || 0;
@@ -699,6 +734,11 @@
 			// 跳转排行�?
 			goToRank() {
 				this.$u.route(`/pages/activity/rank?id=${this.info.id}`);
+			},
+			goActivityShowcase() {
+				const sid = Number(this.info.showcase_id);
+				if (!sid) return;
+				this.$u.route('/pages/activity/showcase-detail', { id: sid });
 			},
 		// 上传组件状态变化回�?
 		handleUploadChange() {},
@@ -1208,6 +1248,49 @@
 		padding: 8rpx $pad-page 12rpx;
 	}
 
+	.status-hint {
+		padding: 22rpx 24rpx;
+		margin-bottom: 16rpx;
+
+		&__title {
+			display: block;
+			font-size: 28rpx;
+			font-weight: 600;
+			color: $text-primary;
+			line-height: 1.4;
+		}
+
+		&__desc {
+			display: block;
+			margin-top: 8rpx;
+			font-size: 24rpx;
+			color: $text-muted;
+			line-height: 1.55;
+		}
+
+		&__row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+
+		&__arrow {
+			font-size: 36rpx;
+			color: $text-faint;
+			margin-left: 12rpx;
+			flex-shrink: 0;
+		}
+
+		&--recurring {
+			background: #faf9f5;
+			border-color: rgba(180, 150, 80, 0.15);
+		}
+
+		&--showcase:active {
+			opacity: 0.92;
+		}
+	}
+
 	.section-header {
 		display: flex;
 		align-items: center;
@@ -1692,6 +1775,12 @@
 				background: #fff;
 				color: $brand-deep;
 				border: 2rpx solid rgba(24, 175, 56, 0.45);
+			}
+
+			&--recurring-wait {
+				background: #faf9f5;
+				color: #8a7340;
+				border: $border-hairline;
 			}
 
 			.interest-heart {
