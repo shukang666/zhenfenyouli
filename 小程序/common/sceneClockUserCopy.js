@@ -136,7 +136,7 @@ export function getCommunityEmptyTitle(isStreetHub, isOfficeHub) {
 
 export function getCommunityEmptyDesc(isStreetHub, isOfficeHub) {
 	if (isOfficeHub) {
-		return '请社区工作人员在后台「办公大楼回收点」中维护大楼名称、回收点地址与示意图。配置完成后重新进入本页即可打卡。'
+		return '请社区工作人员在后台「场景回收点配置」中添加办公场景、所属社区、楼宇名与可回收物真分角。配置完成后重新进入本页即可打卡。'
 	}
 	if (isStreetHub) {
 		return '社区会根据商铺情况安排投放点，弄好后会出现在这里。不清楚可以问社区或物业。'
@@ -769,10 +769,6 @@ export function getOfficeClockBuildingPlaceholder() {
 
 export function getOfficeClockCornerTitle() {
 	return '真分角位置'
-}
-
-export function getOfficeClockCornerPendingText() {
-	return '正在推进中'
 }
 
 export function getOfficeClockConfirmTitle() {
