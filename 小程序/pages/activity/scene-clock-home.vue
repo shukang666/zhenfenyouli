@@ -134,6 +134,12 @@
 						hover-class="scf-home-fix-finish--press"
 						@tap="onHomeFixedFinishAll"
 					>{{ homeFixedFinishCta }}</view>
+					<text
+						v-if="homeSetupBackToLearn"
+						class="scf-home-fix-back-link"
+						hover-class="scf-card--press"
+						@tap="handleResidentialSetupBack"
+					>返回今日真分</text>
 				</view>
 		</view>
 				<view class="scf-body scf-body--home-clock" v-if="flowStep === 'learn'">
@@ -335,6 +341,9 @@ export default {
 	},
 	onShow() {
 		this.hubPageOnShow()
+	},
+	onBackPress() {
+		return this.handleResidentialSetupBack()
 	},
 }
 </script>

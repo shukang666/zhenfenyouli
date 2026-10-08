@@ -236,6 +236,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeClockBannerImgOk: true,
 				/** URL 参数 home_setup=1 时强制进入布置页（后续改图入口用） */
 				homeFixedEditSetup: false,
+				/** 从今日真分进入改布置时，返回应回到 learn 而非退出页面 */
+				homeSetupBackToLearn: false,
 				homeFixedExampleImgOk: {
 					kitchen: true,
 					recycle: true,
@@ -958,6 +960,9 @@ import settings, { uploadUrl } from '@/common/settings'
 				return true
 			},
 			enterResidentialSetupFlow() {
+				if (this.isResidentialHub && this.flowStep === 'learn') {
+					this.homeSetupBackToLearn = true
+				}
 				this.residentialPickMode = false
 				this.residentialBinSettingsOpen = false
 				this.syncHomeFixedSlots()
@@ -965,6 +970,17 @@ import settings, { uploadUrl } from '@/common/settings'
 				if (this.hub && this.hub.title) {
 					uni.setNavigationBarTitle({ title: this.hub.title })
 				}
+			},
+			handleResidentialSetupBack() {
+				if (!this.isResidentialHub || this.flowStep !== 'setup' || !this.homeSetupBackToLearn) {
+					return false
+				}
+				this.homeSetupBackToLearn = false
+				this.residentialPickMode = false
+				this.residentialBinSettingsOpen = false
+				this.flowStep = 'learn'
+				uni.setNavigationBarTitle({ title: getHomeClockNavTitle() })
+				return true
 			},
 			syncHomeFixedSlots() {
 				const defs = getHomeFixedSetupSlots()
@@ -1048,6 +1064,7 @@ import settings, { uploadUrl } from '@/common/settings'
 					this.enterResidentialSetupFlow()
 					return
 				}
+				this.homeSetupBackToLearn = false
 				this.residentialPickMode = false
 				this.residentialBinSettingsOpen = false
 				this.resetHomeClockForm()
