@@ -407,3 +407,9 @@ SELECT
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='office_recycle_building_index' LIMIT 1);
+
+UPDATE `cmf_clock_scene_point` SET `community_id` = 0
+WHERE `hub_key` = 'office' AND `source` = 1 AND `community_id` <> 0;
+
+UPDATE `cmf_admin_menu` SET `remark` = '办公大楼、回收点地址与示意图（全站共用）'
+WHERE `app` = 'admin' AND `controller` = 'Forum' AND `action` = 'office_recycle_building_index' LIMIT 1;

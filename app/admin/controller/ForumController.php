@@ -616,31 +616,22 @@ class ForumController extends ToolController
         $this->success('已删除');
     }
 
-    /** 办公：按社区维护大楼名、回收点地址与示意图（小程序选楼后展示） */
+    /** 办公：维护大楼名、回收点地址与示意图（小程序选楼后展示） */
     public function office_recycle_building_index()
     {
         $keyword = trim((string)$this->request->param('keyword', ''));
-        $communityId = intval($this->request->param('community_id', 0));
-        $query = Db::name('clock_scene_point')->alias('p')
-            ->leftJoin('member_community c', 'c.id = p.community_id AND c.delete_time = 0')
-            ->where('p.hub_key', ClockScenePointModel::officeBuildingHubKey())
-            ->where('p.source', ClockScenePointModel::SOURCE_ADMIN)
-            ->field('p.*, c.name as community_name')
-            ->order('p.list_order asc,p.id asc');
-        if ($communityId > 0) {
-            $query->where('p.community_id', $communityId);
-        }
+        $query = Db::name('clock_scene_point')
+            ->where('hub_key', ClockScenePointModel::officeBuildingHubKey())
+            ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+            ->order('list_order asc,id asc');
         if ($keyword !== '') {
-            $query->where('p.point_name|p.remark', 'like', '%' . $keyword . '%');
+            $query->where('point_name|remark', 'like', '%' . $keyword . '%');
         }
         $list = $query->paginate(20);
-        $communityList = CommunityModel::where('delete_time', 0)->order('id desc')->limit(500)->select();
         return $this->fetch('office_recycle_building_index', [
-            'list'          => $list,
-            'page'          => $list->render(),
-            'keyword'       => $keyword,
-            'community_id'  => $communityId,
-            'communityList' => $communityList,
+            'list'    => $list,
+            'page'    => $list->render(),
+            'keyword' => $keyword,
         ]);
     }
 
@@ -657,10 +648,8 @@ class ForumController extends ToolController
                 $this->error('记录不存在');
             }
         }
-        $communityList = CommunityModel::where('delete_time', 0)->order('id desc')->limit(500)->select();
         return $this->fetch('office_recycle_building_add', [
-            'data'          => $item,
-            'communityList' => $communityList,
+            'data' => $item,
         ]);
     }
 
@@ -670,10 +659,6 @@ class ForumController extends ToolController
             $this->error('非法请求');
         }
         $id = $this->request->param('id', 0, 'intval');
-        $communityId = intval($this->request->param('community_id', 0));
-        if ($communityId <= 0) {
-            $this->error('请选择所属社区');
-        }
         $buildingName = trim((string)$this->request->param('building_name', ''));
         if ($buildingName === '') {
             $this->error('请填写办公大楼名称');
@@ -701,17 +686,16 @@ class ForumController extends ToolController
         $dupQuery = Db::name('clock_scene_point')
             ->where('hub_key', ClockScenePointModel::officeBuildingHubKey())
             ->where('source', ClockScenePointModel::SOURCE_ADMIN)
-            ->where('community_id', $communityId)
             ->where('point_name', $buildingName);
         if ($id > 0) {
             $dupQuery->where('id', '<>', $id);
         }
         if ($dupQuery->find()) {
-            $this->error('该社区下已存在同名办公大楼，请直接编辑原记录');
+            $this->error('已存在同名办公大楼，请直接编辑原记录');
         }
         $save = [
             'user_id'      => 0,
-            'community_id' => $communityId,
+            'community_id' => 0,
             'hub_key'      => ClockScenePointModel::officeBuildingHubKey(),
             'point_name'   => mb_substr($buildingName, 0, 32),
             'cate_id'      => $cate['id'],

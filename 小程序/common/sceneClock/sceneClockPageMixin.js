@@ -277,6 +277,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeClockAmountOptions: getHomeClockAmountOptions(),
 				officeBuildingKey: '',
 				officeBuildingIndex: 0,
+				officeBuildingPickerShow: false,
+				officeBuildingSearchQuery: '',
 				officeItemTags: [],
 				officeVolumeTag: '',
 				officeSaveDuration: '',
@@ -330,18 +332,39 @@ import settings, { uploadUrl } from '@/common/settings'
 				return (this.points || []).filter(p => this.isRecycleCateName(p.cate_name))
 			},
 			officeBuildingLabels() {
-				const labels = []
-				const seen = {}
-				;(this.officeRecyclePoints || []).forEach(p => {
-					const n = String(p.building_name || p.point_name || '').trim()
-					if (n && !seen[n]) {
-						seen[n] = true
-						labels.push(n)
-					}
+				return (this.officeBuildingOptions || []).map(o => o.label)
+			},
+			officeBuildingOptions() {
+				return (this.officeRecyclePoints || [])
+					.map(p => {
+						const label = String(p.building_name || p.point_name || '').trim()
+						const address = String(p.corner_location || p.remark || p.address || '').trim()
+						const id = parseInt(p.id, 10)
+						if (!label || !id) return null
+						return {
+							id,
+							label,
+							address,
+							searchText: (label + ' ' + address).toLowerCase(),
+						}
+					})
+					.filter(Boolean)
+			},
+			officeBuildingFilteredOptions() {
+				const list = this.officeBuildingOptions || []
+				const q = String(this.officeBuildingSearchQuery || '').trim().toLowerCase()
+				if (!q) return list
+				const parts = q.split(/\s+/).filter(Boolean)
+				return list.filter(o => {
+					const text = o.searchText || ''
+					return parts.every(part => text.indexOf(part) >= 0)
 				})
-				return labels
 			},
 			officeCornerPoint() {
+				const pid = parseInt(this.pointId, 10)
+				if (pid > 0) {
+					return (this.officeRecyclePoints || []).find(p => parseInt(p.id, 10) === pid) || null
+				}
 				if (!this.officeBuildingKey) return null
 				const key = this.officeBuildingKey
 				return (this.officeRecyclePoints || []).find(
@@ -1170,7 +1193,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				}
 			},
 			enterOfficeClockFlow() {
-				const labels = this.officeBuildingLabels || []
+				const labels = this.officeBuildingOptions || []
 				if (!labels.length) {
 					if ((this.points || []).length) {
 						this.$u.toast('办公点位种类需为可回收物，请联系社区调整配置')
@@ -1182,14 +1205,16 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.resetOfficeClockForm()
 				this.flowStep = 'learn'
 				this.subKey = 'zhenfenjiao'
-				if (this.officeBuildingLabels.length === 1) {
-					this.applyOfficeBuildingByName(this.officeBuildingLabels[0])
+				if (this.officeBuildingOptions.length === 1) {
+					this.applyOfficeBuildingById(this.officeBuildingOptions[0].id)
 				}
 				uni.setNavigationBarTitle({ title: getOfficeClockNavTitle() })
 			},
 			resetOfficeClockForm() {
 				this.officeBuildingKey = ''
 				this.officeBuildingIndex = 0
+				this.officeBuildingPickerShow = false
+				this.officeBuildingSearchQuery = ''
 				this.officeItemTags = []
 				this.officeVolumeTag = ''
 				this.officeSaveDuration = ''
@@ -1203,30 +1228,55 @@ import settings, { uploadUrl } from '@/common/settings'
 				const n = String(name || '')
 				return n.indexOf('可回收') >= 0 && n.indexOf('不可') < 0
 			},
-			applyOfficeBuildingByName(name) {
-				const key = String(name || '').trim()
-				if (!key) return
+			applyOfficeBuildingById(id) {
+				const pid = parseInt(id, 10)
+				if (!pid) return
+				const p = (this.officeRecyclePoints || []).find(item => parseInt(item.id, 10) === pid)
+				if (!p) return
+				const key = String(p.building_name || p.point_name || '').trim()
 				this.officeBuildingKey = key
 				const labels = this.officeBuildingLabels || []
 				const idx = labels.indexOf(key)
 				this.officeBuildingIndex = idx >= 0 ? idx : 0
+				this.pointId = pid
+				this.cateId = p.cate_id
+				this.activeCateName = p.cate_name || ''
+				this.cateLabel = guideCateLabelFromName(p.cate_name)
+				this.subKey = 'zhenfenjiao'
+				this.loadGuide()
+			},
+			applyOfficeBuildingByName(name) {
+				const key = String(name || '').trim()
+				if (!key) return
 				const p = (this.officeRecyclePoints || []).find(
 					item => String(item.building_name || item.point_name || '').trim() === key
 				)
 				if (p) {
-					this.pointId = p.id
-					this.cateId = p.cate_id
-					this.activeCateName = p.cate_name || ''
-					this.cateLabel = guideCateLabelFromName(p.cate_name)
-					this.subKey = 'zhenfenjiao'
-					this.loadGuide()
+					this.applyOfficeBuildingById(p.id)
 				}
 			},
-			onOfficeBuildingPick(e) {
-				const idx = parseInt(e.detail.value, 10)
-				const labels = this.officeBuildingLabels || []
-				if (isNaN(idx) || idx < 0 || idx >= labels.length) return
-				this.applyOfficeBuildingByName(labels[idx])
+			openOfficeBuildingPicker() {
+				this.officeBuildingSearchQuery = ''
+				this.officeBuildingPickerShow = true
+			},
+			closeOfficeBuildingPicker() {
+				this.officeBuildingPickerShow = false
+				this.officeBuildingSearchQuery = ''
+			},
+			onOfficeBuildingSearchInput(e) {
+				this.officeBuildingSearchQuery = (e && e.detail && e.detail.value) != null
+					? String(e.detail.value)
+					: ''
+			},
+			clearOfficeBuildingSearch() {
+				this.officeBuildingSearchQuery = ''
+			},
+			pickOfficeBuildingOptionByIndex(idx) {
+				const list = this.officeBuildingFilteredOptions || []
+				const opt = list[idx]
+				if (!opt || !opt.id) return
+				this.applyOfficeBuildingById(opt.id)
+				this.closeOfficeBuildingPicker()
 			},
 			toggleOfficeItemTag(tag) {
 				const t = String(tag || '')
@@ -1768,7 +1818,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				}).finally(() => {
 					this.pointsLoading = false
 					if (this.isOfficeHub && ['learn', 'hub_empty'].indexOf(this.flowStep) < 0) {
-						if ((this.officeBuildingLabels || []).length) {
+						if ((this.officeBuildingOptions || []).length) {
 							this.enterOfficeClockFlow()
 						} else {
 							this.flowStep = 'hub_empty'

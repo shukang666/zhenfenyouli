@@ -9,16 +9,9 @@
         <li><a href="{:url('clock_scene_point_index')}">沿街回收点配置</a></li>
         <li class="active"><a href="{:url('office_recycle_building_index')}">办公大楼回收点</a></li>
     </ul>
-    <p class="margin-top-20 text-muted">维护办公大楼列表：小程序下拉展示<strong>全部</strong>大楼（与用户社区无关），选楼后展示<strong>回收点地址</strong>与<strong>示意图</strong>。所属社区仅便于后台筛选管理。</p>
+    <p class="margin-top-20 text-muted">维护办公大楼名称、回收点地址与示意图。小程序展示全部已配置大楼，选楼后自动加载地址与参考图。</p>
     <form class="well form-inline margin-top-15" method="get" action="{:url('office_recycle_building_index')}">
-        <label>社区：</label>
-        <select name="community_id" class="form-control">
-            <option value="0">全部</option>
-            <foreach name="communityList" item="com">
-                <option value="{$com.id}" <if condition="$community_id eq $com.id">selected</if>>{$com.name}</option>
-            </foreach>
-        </select>
-        <input type="text" name="keyword" class="form-control" placeholder="大楼名 / 地址" value="{$keyword|default=''}" style="width:220px;">
+        <input type="text" name="keyword" class="form-control" placeholder="大楼名 / 地址" value="{$keyword|default=''}" style="width:260px;">
         <button type="submit" class="btn btn-primary">搜索</button>
         <a class="btn btn-success" href="{:url('office_recycle_building_add')}">新增大楼</a>
     </form>
@@ -26,7 +19,6 @@
         <thead>
         <tr>
             <th>ID</th>
-            <th>所属社区</th>
             <th>办公大楼</th>
             <th>回收点地址</th>
             <th>示意图</th>
@@ -39,7 +31,6 @@
         <foreach name="list" item="vo">
             <tr>
                 <td>{$vo.id}</td>
-                <td>{$vo.community_name|default='—'}</td>
                 <td>{$vo.point_name}</td>
                 <td>{$vo.remark|default='—'}</td>
                 <td>

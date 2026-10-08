@@ -61,19 +61,58 @@
 
 			<view class="scf-oc-card">
 				<text class="scf-oc-card-title">{{ officeClockBuildingTitle }}</text>
-				<picker
-					mode="selector"
-					:range="officeBuildingLabels"
-					:value="officeBuildingIndex"
-					@change="onOfficeBuildingPick"
-				>
-					<view class="scf-oc-picker">
-						<text class="scf-oc-picker-t" :class="{ 'scf-oc-picker-t--ph': !officeBuildingKey }">
-							{{ officeBuildingKey || officeClockBuildingPlaceholder }}
-						</text>
-						<text class="scf-oc-picker-arrow">▾</text>
+				<view class="scf-oc-picker" hover-class="scf-card--press" @tap="openOfficeBuildingPicker">
+					<text class="scf-oc-picker-t" :class="{ 'scf-oc-picker-t--ph': !officeBuildingKey }">
+						{{ officeBuildingKey || officeClockBuildingPlaceholder }}
+					</text>
+					<text class="scf-oc-picker-arrow">▾</text>
+				</view>
+			</view>
+
+			<view class="scf-oc-building-mask" v-if="officeBuildingPickerShow" @tap="closeOfficeBuildingPicker">
+				<view class="scf-oc-building-sheet" @tap.stop="">
+					<view class="scf-oc-building-sheet-head">
+						<text class="scf-oc-building-sheet-title">选择办公大楼</text>
+						<view class="scf-oc-building-sheet-close" hover-class="scf-card--press" @tap="closeOfficeBuildingPicker">
+							<text>×</text>
+						</view>
 					</view>
-				</picker>
+					<view class="scf-oc-building-search">
+						<text class="scf-oc-building-search-ico">🔍</text>
+						<input
+							class="scf-oc-building-search-input"
+							type="text"
+							:value="officeBuildingSearchQuery"
+							placeholder="输入大楼名或地址筛选"
+							confirm-type="search"
+							@input="onOfficeBuildingSearchInput"
+						/>
+						<view
+							v-if="officeBuildingSearchQuery"
+							class="scf-oc-building-search-clear"
+							hover-class="scf-card--press"
+							@tap="clearOfficeBuildingSearch"
+						>
+							<text>清除</text>
+						</view>
+					</view>
+					<scroll-view scroll-y class="scf-oc-building-list">
+						<view
+							v-for="(opt, officeBIdx) in officeBuildingFilteredOptions"
+							:key="opt.id"
+							class="scf-oc-building-item"
+							:class="{ 'scf-oc-building-item--on': pointId === opt.id }"
+							hover-class="scf-card--press"
+							@tap="pickOfficeBuildingOptionByIndex(officeBIdx)"
+						>
+							<text class="scf-oc-building-item-name">{{ opt.label }}</text>
+							<text v-if="opt.address" class="scf-oc-building-item-addr">{{ opt.address }}</text>
+						</view>
+						<view v-if="!officeBuildingFilteredOptions.length" class="scf-oc-building-empty">
+							<text>没有匹配的大楼，换个关键词试试</text>
+						</view>
+					</scroll-view>
+				</view>
 			</view>
 
 			<view class="scf-oc-card" v-if="officeBuildingKey && officeCornerPoint">

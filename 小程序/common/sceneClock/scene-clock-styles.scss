@@ -1133,6 +1133,110 @@
 	color: #999;
 	margin-left: 12rpx;
 }
+.scf-oc-building-mask {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 1200;
+	background: rgba(12, 18, 14, 0.48);
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+}
+.scf-oc-building-sheet {
+	width: 100%;
+	max-height: 78vh;
+	background: #f7faf8;
+	border-radius: 28rpx 28rpx 0 0;
+	padding: 24rpx 28rpx calc(24rpx + env(safe-area-inset-bottom));
+	box-shadow: 0 -12rpx 40rpx rgba(0, 0, 0, 0.12);
+}
+.scf-oc-building-sheet-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 20rpx;
+}
+.scf-oc-building-sheet-title {
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #142018;
+}
+.scf-oc-building-sheet-close {
+	width: 56rpx;
+	height: 56rpx;
+	border-radius: 50%;
+	background: #fff;
+	border: 2rpx solid #e8e4dc;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 36rpx;
+	color: #666;
+	line-height: 1;
+}
+.scf-oc-building-search {
+	display: flex;
+	align-items: center;
+	gap: 12rpx;
+	padding: 16rpx 20rpx;
+	background: #fff;
+	border: 2rpx solid #e8e4dc;
+	border-radius: 999rpx;
+	margin-bottom: 16rpx;
+}
+.scf-oc-building-search-ico {
+	font-size: 28rpx;
+	opacity: 0.85;
+}
+.scf-oc-building-search-input {
+	flex: 1;
+	font-size: 28rpx;
+	color: #333;
+	min-height: 44rpx;
+}
+.scf-oc-building-search-clear {
+	flex-shrink: 0;
+	font-size: 24rpx;
+	color: #18af38;
+	padding: 4rpx 8rpx;
+}
+.scf-oc-building-list {
+	max-height: 56vh;
+}
+.scf-oc-building-item {
+	padding: 22rpx 20rpx;
+	margin-bottom: 12rpx;
+	background: #fff;
+	border-radius: 16rpx;
+	border: 2rpx solid #eef2ef;
+}
+.scf-oc-building-item--on {
+	border-color: #7bc89a;
+	background: linear-gradient(180deg, #f3fbf6 0%, #fff 100%);
+}
+.scf-oc-building-item-name {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #142018;
+	line-height: 1.35;
+}
+.scf-oc-building-item-addr {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	color: #6b756e;
+	line-height: 1.4;
+}
+.scf-oc-building-empty {
+	padding: 48rpx 24rpx;
+	text-align: center;
+	font-size: 26rpx;
+	color: #999;
+}
 .scf-oc-corner-loc {
 	display: block;
 	font-size: 28rpx;
