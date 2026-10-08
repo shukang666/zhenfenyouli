@@ -601,8 +601,8 @@
 .scf-hc-cate-row {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: center;
-	align-items: stretch;
+	justify-content: flex-start;
+	align-content: flex-start;
 	column-gap: 20rpx;
 	row-gap: 16rpx;
 	padding-bottom: 4rpx;
@@ -610,8 +610,8 @@
 	box-sizing: border-box;
 }
 .scf-hc-cate-card {
-	flex: 0 0 268rpx;
-	width: 268rpx;
+	flex: 0 0 248rpx;
+	width: 248rpx;
 	aspect-ratio: 148 / 104;
 	height: auto;
 	border-radius: 20rpx;
