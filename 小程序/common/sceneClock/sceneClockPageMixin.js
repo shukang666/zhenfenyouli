@@ -97,10 +97,12 @@ import settings, { uploadUrl } from '@/common/settings'
 		getHomeClockBannerSlogan,
 		getHomeClockStep1Title,
 		getHomeClockStep1Sub,
+		getHomeClockSortRhythmNote,
+		getHomeClockLocationStepTitle,
+		getHomeClockLocationStepHint,
+		getHomeClockLocationLabel,
 		getHomeClockStep2Title,
 		getHomeClockAmountNote,
-		getHomeClockStep3Title,
-		getHomeClockStep3Placeholder,
 		getHomeClockStep4Title,
 		getHomeClockStep4Sub,
 		getHomeClockPhotoExampleCap,
@@ -247,15 +249,16 @@ import settings, { uploadUrl } from '@/common/settings'
 					hazard: true,
 				},
 				homeClockCateKey: '',
+				homeClockLocationKey: '',
 				homeClockAmount: '',
-				homeClockTip: '',
 				homeClockBannerSlogan: getHomeClockBannerSlogan(),
 				homeClockStep1Title: getHomeClockStep1Title(),
 				homeClockStep1Sub: getHomeClockStep1Sub(),
+				homeClockSortRhythmNote: getHomeClockSortRhythmNote(),
+				homeClockLocationStepTitle: getHomeClockLocationStepTitle(),
+				homeClockLocationStepHint: getHomeClockLocationStepHint(),
 				homeClockStep2Title: getHomeClockStep2Title(),
 				homeClockAmountNote: getHomeClockAmountNote(),
-				homeClockStep3Title: getHomeClockStep3Title(),
-				homeClockStep3Placeholder: getHomeClockStep3Placeholder(),
 				homeClockStep4Title: getHomeClockStep4Title(),
 				homeClockStep4Sub: getHomeClockStep4Sub(),
 				homeClockPhotoExampleCap: getHomeClockPhotoExampleCap(),
@@ -343,9 +346,9 @@ import settings, { uploadUrl } from '@/common/settings'
 			homeClockCateCards() {
 				const defs = [
 					{ key: 'food', label: '厨余垃圾', tone: 'food', match: '厨余', illusPh: '🥕' },
-					{ key: 'recycle', label: '可回收物', tone: 'recycle', match: '可回收', exclude: '不可', illusPh: '♻️' },
-					{ key: 'harm', label: '有害垃圾', tone: 'harm', match: '有害', illusPh: '☣️' },
 					{ key: 'other', label: '其他垃圾', tone: 'other', match: '其他', illusPh: '🗑️' },
+					{ key: 'recycle', label: '可回收垃圾', tone: 'recycle', match: '可回收', exclude: '不可', illusPh: '♻️' },
+					{ key: 'harm', label: '有害垃圾', tone: 'harm', match: '有害', illusPh: '☣️' },
 				]
 				const list = this.cateList || []
 				return defs.map(d => {
@@ -364,6 +367,35 @@ import settings, { uploadUrl } from '@/common/settings'
 						cateName: cate ? cate.name : d.label,
 					}
 				})
+			},
+			homeClockLocationOptions() {
+				const cateKey = this.homeClockCateKey
+				if (!cateKey) return []
+				const defs = getHomeFixedSetupSlots()
+				let slotKeys = []
+				if (cateKey === 'food' || cateKey === 'other') {
+					slotKeys = ['kitchen']
+				} else if (cateKey === 'recycle') {
+					slotKeys = ['recycle']
+				} else if (cateKey === 'harm') {
+					slotKeys = ['hazard']
+				}
+				const out = []
+				for (let i = 0; i < slotKeys.length; i++) {
+					const sk = slotKeys[i]
+					const def = defs.find(s => s.slotKey === sk)
+					if (!def) continue
+					const p = this.findPointForHomeSlot(def, true)
+					if (!p || !p.id) continue
+					out.push({
+						key: sk,
+						label: getHomeClockLocationLabel(sk),
+						pointId: p.id,
+						pointName: String(p.point_name || def.point_name || '').trim(),
+						imageUrl: p.point_image || '',
+					})
+				}
+				return out
 			},
 			/** 无任何家庭点位数据：必须先完成本页布置 */
 			homeFixedSetupMandatory() {
@@ -1197,8 +1229,8 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			resetHomeClockForm() {
 				this.homeClockCateKey = ''
+				this.homeClockLocationKey = ''
 				this.homeClockAmount = ''
-				this.homeClockTip = ''
 				this.cateId = 0
 				this.activeCateName = ''
 				this.pointId = 0
@@ -1214,19 +1246,26 @@ import settings, { uploadUrl } from '@/common/settings'
 					return
 				}
 				this.homeClockCateKey = card.key
+				this.homeClockLocationKey = ''
+				this.pointId = 0
+				this.pointName = ''
 				this.cateId = card.cateId
 				this.activeCateName = card.cateName
 				this.cateLabel = guideCateLabelFromName(card.cateName)
 				this.subKey = this.guideSubKeyForHub()
-				const defs = getHomeFixedSetupSlots()
-				let def = null
-				if (card.key === 'food') def = defs.find(s => s.slotKey === 'kitchen')
-				else if (card.key === 'recycle') def = defs.find(s => s.slotKey === 'recycle')
-				else if (card.key === 'harm') def = defs.find(s => s.slotKey === 'hazard')
-				const p = def ? this.findPointForHomeSlot(def, true) : null
-				this.pointId = p && p.id ? p.id : 0
-				this.pointName = (p && p.point_name) || ''
 				this.loadGuide()
+				const locs = this.homeClockLocationOptions
+				if (locs.length === 1) {
+					this.pickHomeClockLocation(locs[0])
+				} else if (!locs.length) {
+					this.$u.toast('请先完成对应点位的布置照片')
+				}
+			},
+			pickHomeClockLocation(loc) {
+				if (!loc || !loc.pointId) return
+				this.homeClockLocationKey = loc.key
+				this.pointId = loc.pointId
+				this.pointName = loc.pointName || ''
 			},
 			chooseHomeFixedPhoto(slotKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -2127,6 +2166,7 @@ import settings, { uploadUrl } from '@/common/settings'
 					if (!this.homeClockCateKey || !this.cateId) {
 						return this.$u.toast('请选择今天打卡的垃圾种类')
 					}
+					if (!this.pointId) return this.$u.toast('请选择打卡位置')
 					if (!this.homeClockAmount) return this.$u.toast('请选择今天大约有多少')
 					if (!String(this.clockSlotUrls[0] || '').trim()) {
 						return this.$u.toast('请上传今日真分照片')
@@ -2163,9 +2203,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				const note = String(this.clockContent || '').trim()
 				if (note) parts.push(note)
 				if (this.isResidentialHub) {
+					if (this.pointName) parts.push('打卡位置：' + this.pointName)
 					if (this.homeClockAmount) parts.push('今日数量：' + this.homeClockAmount)
-					const tip = String(this.homeClockTip || '').trim()
-					if (tip) parts.push('真分小妙招：' + tip)
 				} else if (this.isOfficeHub) {
 					if (this.officeBuildingKey) parts.push('办公楼宇：' + this.officeBuildingKey)
 					if ((this.officeItemTags || []).length) {

@@ -561,7 +561,29 @@ export function getHomeClockStep1Title() {
 }
 
 export function getHomeClockStep1Sub() {
-	return '选择今天真实产生的一类垃圾。'
+	return '先选今天真实产生、并已分好的一类。'
+}
+
+/** 日常 2 分类 vs 四类按周，避免形式化打卡 */
+export function getHomeClockSortRhythmNote() {
+	return '在家做饭吃饭，日常按「厨余 + 其他」两类投就好；可回收、有害不必每天打卡，一般按周集中清理时再记一次即可。'
+}
+
+export function getHomeClockLocationStepTitle() {
+	return '选择打卡位置'
+}
+
+export function getHomeClockLocationStepHint() {
+	return '选您实际投放的一处家庭布置点位。'
+}
+
+export function getHomeClockLocationLabel(slotKey) {
+	const map = {
+		kitchen: '厨房点位（厨余/其他）',
+		recycle: '可回收物点位',
+		hazard: '有害垃圾点位',
+	}
+	return map[slotKey] || '布置点位'
 }
 
 export function getHomeClockStep2Title() {
@@ -570,14 +592,6 @@ export function getHomeClockStep2Title() {
 
 export function getHomeClockAmountNote() {
 	return '仅作参考，不要求称重'
-}
-
-export function getHomeClockStep3Title() {
-	return '你的真分小妙招'
-}
-
-export function getHomeClockStep3Placeholder() {
-	return '分享一个真分小技巧'
 }
 
 export function getHomeClockStep4Title() {

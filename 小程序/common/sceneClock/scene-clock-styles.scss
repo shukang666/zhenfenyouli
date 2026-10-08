@@ -539,6 +539,19 @@
 	width: 100%;
 	border-radius: 20rpx;
 }
+.scf-hc-rhythm-note {
+	margin: 0 32rpx 8rpx;
+	padding: 20rpx 24rpx;
+	border-radius: 16rpx;
+	background: #fff8e8;
+	border: 1rpx solid rgba(245, 166, 35, 0.25);
+	box-sizing: border-box;
+}
+.scf-hc-rhythm-note-t {
+	font-size: 26rpx;
+	line-height: 1.55;
+	color: #6b5a2e;
+}
 .scf-hc-banner-slogan {
 	font-size: 36rpx;
 	font-weight: 800;
@@ -629,6 +642,53 @@
 	font-weight: 700;
 	color: #333;
 	line-height: 1.35;
+}
+.scf-hc-step--muted {
+	opacity: 0.72;
+}
+.scf-hc-step-hint {
+	display: block;
+	font-size: 26rpx;
+	color: #8a9a8e;
+	margin-top: 12rpx;
+}
+.scf-hc-step-hint--warn {
+	color: #c45c26;
+}
+.scf-hc-location-row {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+	margin-top: 16rpx;
+}
+.scf-hc-location-chip {
+	display: flex;
+	align-items: center;
+	gap: 20rpx;
+	padding: 20rpx 24rpx;
+	border-radius: 16rpx;
+	background: #fff;
+	border: 2rpx solid #e0ebe3;
+	box-sizing: border-box;
+}
+.scf-hc-location-chip--on {
+	border-color: #38b061;
+	background: #f0faf3;
+	box-shadow: 0 4rpx 16rpx rgba(56, 176, 97, 0.12);
+}
+.scf-hc-location-thumb {
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 12rpx;
+	flex-shrink: 0;
+	background: #eef2ee;
+}
+.scf-hc-location-label {
+	flex: 1;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #2d3a32;
+	line-height: 1.4;
 }
 .scf-hc-amount-row {
 	display: flex;
