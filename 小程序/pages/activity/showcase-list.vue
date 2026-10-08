@@ -17,8 +17,8 @@
 				<view
 					class="showcase-card"
 					v-for="item in manualList"
-					:key="'m-' + item.id"
-					@click="goDetail(item.id)"
+					:key="item.id"
+					@click="onTapShowcase(item.id)"
 				>
 					<view class="card-cover">
 						<u-image width="100%" height="360" :src="item.cover" mode="aspectFill" border-radius="20rpx 20rpx 0 0"></u-image>
@@ -62,8 +62,8 @@
 				<view
 					class="showcase-card showcase-card--archive"
 					v-for="item in archiveList"
-					:key="'a-' + item.id"
-					@click="goDetail(item.id)"
+					:key="item.id"
+					@click="onTapShowcase(item.id)"
 				>
 					<view class="card-cover">
 						<u-image width="100%" height="280" :src="item.cover" mode="aspectFill" border-radius="20rpx 20rpx 0 0"></u-image>
@@ -175,8 +175,10 @@ export default {
 				this.archiveLoading = false;
 			});
 		},
-		goDetail(id) {
-			this.$u.route('/pages/activity/showcase-detail?id=' + id);
+		onTapShowcase(id) {
+			const sid = Number(id);
+			if (!sid) return;
+			this.$u.route('/pages/activity/showcase-detail?id=' + sid);
 		},
 	},
 };
