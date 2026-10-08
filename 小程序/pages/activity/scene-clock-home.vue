@@ -367,6 +367,16 @@ export default {
 
 	mixins: [sceneClockPageMixin],
 
+	data() {
+		return {
+			clockSuccessShow: false,
+			clockSuccessMsg: '',
+			clockHabitTip: '',
+			clockPromoActivity: null,
+			clockPromoList: [],
+		}
+	},
+
 	onLoad(option) {
 
 		this.hubPageOnLoad('home', option || {}, { homePage: 'clock' })
