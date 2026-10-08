@@ -40,12 +40,23 @@
 			</view>
 
 			<view class="scf-oc-alert">
-				<view class="scf-oc-alert-ico">♻️</view>
+				<view class="scf-oc-alert-accent" aria-hidden="true"></view>
+				<view class="scf-oc-alert-ico-wrap">
+					<view class="scf-oc-alert-ico-ring" aria-hidden="true"></view>
+					<text class="scf-oc-alert-ico">♻️</text>
+				</view>
 				<view class="scf-oc-alert-body">
+					<text class="scf-oc-alert-kicker">办公真分 · 可回收</text>
 					<text class="scf-oc-alert-title">{{ officeClockRecycleAlertTitle }}</text>
 					<text class="scf-oc-alert-desc">{{ officeClockRecycleAlertBody }}</text>
 				</view>
-				<view class="scf-oc-alert-deco">📷</view>
+				<view class="scf-oc-alert-deco" aria-hidden="true">
+					<view class="scf-oc-alert-cam">
+						<view class="scf-oc-alert-cam-top"></view>
+						<view class="scf-oc-alert-cam-lens"></view>
+						<view class="scf-oc-alert-cam-flash"></view>
+					</view>
+				</view>
 			</view>
 
 			<view class="scf-oc-card">
