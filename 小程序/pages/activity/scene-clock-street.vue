@@ -335,7 +335,61 @@
 					>{{ homeFixedFinishCta }}</view>
 				</view>
 			</block>
-			<block v-else>
+			<block v-else-if="isStreetHub">
+				<view class="scf-st-setup">
+					<view class="scf-st-setup-head">
+						<text class="scf-st-setup-title">{{ streetSetupPageTitle }}</text>
+						<text class="scf-st-setup-sub">{{ streetSetupPageSub }}</text>
+						<view class="scf-st-setup-shop" v-if="streetMerchant">
+							<text class="scf-st-setup-shop-name">{{ streetMerchant.shop_name }}</text>
+							<text class="scf-st-setup-shop-type">{{ streetMerchant.shop_type_name }}</text>
+						</view>
+					</view>
+					<view
+						class="scf-st-slot"
+						v-for="slot in streetFixedSlots"
+						:key="slot.slotKey"
+					>
+						<view class="scf-st-slot-accent" :class="'scf-st-slot-accent--' + slot.tone"></view>
+						<view class="scf-st-slot-main">
+							<view class="scf-st-slot-head">
+								<text class="scf-st-slot-tag">{{ slot.tag }}</text>
+								<text class="scf-st-slot-cate">{{ slot.cateKw }}</text>
+							</view>
+							<text class="scf-st-slot-title">{{ slot.title }}</text>
+							<text class="scf-st-slot-desc">{{ slot.desc }}</text>
+							<view
+								class="scf-st-upload"
+								:class="{ 'scf-st-upload--done': slot.point_image_url }"
+								hover-class="scf-card--press"
+								@tap="chooseStreetFixedPhoto(slot.slotKey)"
+							>
+								<image
+									v-if="slot.point_image_url"
+									class="scf-st-upload-img"
+									:src="slot.point_image_url"
+									mode="aspectFill"
+								/>
+								<block v-else>
+									<text class="scf-st-upload-ico">📷</text>
+									<text class="scf-st-upload-t">{{ slot.uploadCta }}</text>
+								</block>
+								<text v-if="slot.point_image_url" class="scf-st-upload-badge">{{ slot.uploadDone }}</text>
+							</view>
+						</view>
+					</view>
+					<view class="scf-st-setup-foot">
+						<view
+							class="scf-st-finish"
+							:class="{ 'scf-st-finish--disabled': !streetFixedCanFinishSetup }"
+							hover-class="scf-card--press"
+							@tap="onStreetFixedFinishAll"
+						>{{ streetSetupFinishCta }}</view>
+						<text class="scf-st-edit-link" @tap="editStreetMerchant">{{ streetEditShop }}</text>
+					</view>
+				</view>
+			</block>
+			<block v-else-if="!isStreetHub">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
 				<text class="scf-promo-line">{{ binSetupLead }}</text>
 				<text class="scf-promo-line scf-promo-line--sub">{{ binSetupLeadNote }}</text>
@@ -656,8 +710,90 @@
 			</view>
 		</view>
 
-		<!-- 拍照打卡（原跳转 add 页，现页内完成） -->
-		<view class="scf-body" v-if="flowStep === 'learn'">
+		<!-- 沿街：今日真分（与家庭同逻辑，界面独立） -->
+		<view class="scf-body scf-body--shop-clock" v-if="flowStep === 'learn' && isStreetHub">
+			<view class="scf-sk-shop-bar" v-if="streetMerchant">
+				<view class="scf-sk-shop-bar-l">
+					<text class="scf-sk-shop-name">{{ streetMerchant.shop_name }}</text>
+					<text class="scf-sk-shop-hint">{{ streetClockShopBarHint }}</text>
+				</view>
+				<text class="scf-sk-shop-edit" @tap="editStreetMerchant">{{ streetEditShop }}</text>
+			</view>
+
+			<view class="scf-sk-panel">
+				<text class="scf-sk-panel-k">STEP 1</text>
+				<text class="scf-sk-panel-title">{{ streetClockStep1Title }}</text>
+				<text class="scf-sk-panel-sub">{{ streetClockStep1Sub }}</text>
+				<scroll-view scroll-x class="scf-sk-cate-scroll" :show-scrollbar="false">
+					<view class="scf-sk-cate-row">
+						<view
+							v-for="card in streetClockCateCards"
+							:key="card.key"
+							class="scf-sk-cate-card"
+							:class="[
+								'scf-sk-cate-card--' + card.tone,
+								{ 'scf-sk-cate-card--on': homeClockCateKey === card.key },
+								{ 'scf-sk-cate-card--lock': !card.ready },
+							]"
+							hover-class="scf-card--press"
+							@tap="selectHomeClockCate(card)"
+						>
+							<text class="scf-sk-cate-tag">{{ card.tag }}</text>
+							<text class="scf-sk-cate-name">{{ card.shortLabel }}</text>
+							<text class="scf-sk-cate-label">{{ card.label }}</text>
+							<text v-if="!card.ready" class="scf-sk-cate-lock">未布置</text>
+						</view>
+					</view>
+				</scroll-view>
+			</view>
+
+			<view class="scf-sk-panel" v-if="homeClockCateKey">
+				<text class="scf-sk-panel-k">STEP 2</text>
+				<text class="scf-sk-panel-title">{{ streetClockStep2Title }}</text>
+				<view class="scf-sk-amount-row">
+					<view
+						v-for="opt in homeClockAmountOptions"
+						:key="opt"
+						class="scf-sk-amount-pill"
+						:class="{ 'scf-sk-amount-pill--on': homeClockAmount === opt }"
+						hover-class="scf-card--press"
+						@tap="pickHomeClockAmount(opt)"
+					>{{ opt }}</view>
+				</view>
+			</view>
+
+			<view class="scf-sk-panel scf-sk-panel--photo" v-if="homeClockCateKey">
+				<text class="scf-sk-panel-k">STEP 3</text>
+				<text class="scf-sk-panel-title">{{ streetClockPhotoTitle }}</text>
+				<text class="scf-sk-panel-sub">{{ streetClockPhotoSub }}</text>
+				<view
+					class="scf-sk-photo-box"
+					:class="{ 'scf-sk-photo-box--done': !!clockSlotUrls[0] }"
+					hover-class="scf-card--press"
+					@tap="onClockSlotTap(0)"
+				>
+					<image v-if="clockSlotUrls[0]" class="scf-sk-photo-img" :src="clockSlotUrls[0]" mode="aspectFill" />
+					<block v-else>
+						<text class="scf-sk-photo-ico">📷</text>
+						<text class="scf-sk-photo-t">{{ homeClockPhotoUploadCta }}</text>
+					</block>
+				</view>
+				<text class="scf-sk-point-hint" v-if="pointName">对应点位：{{ pointName }}</text>
+			</view>
+
+			<view class="scf-sk-foot">
+				<view
+					class="scf-sk-submit"
+					:class="{ 'scf-sk-submit--disabled': clockSubmitting }"
+					hover-class="scf-card--press"
+					@tap="submitClock"
+				>{{ clockSubmitting ? '提交中…' : streetClockSubmitCta }}</view>
+				<text class="scf-sk-back-setup" @tap="enterStreetSetupFlow">调整店内点位布置</text>
+			</view>
+		</view>
+
+		<!-- 其他场景：拍照打卡 -->
+		<view class="scf-body" v-else-if="flowStep === 'learn'">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
 				<text class="scf-promo-line">上传 {{ activeCateName || '分类' }} 成果</text>
 				<text class="scf-promo-line scf-promo-line--sub">{{ clockPhotoIntro }}</text>

@@ -335,7 +335,132 @@ export function getStreetClaimTypeHint() {
 }
 
 export function getStreetClaimSubmit() {
-	return '点击开始布置店内投放点位'
+	return '下一步，布置店内投放点位'
+}
+
+/** 沿街：按商铺大类固定需布置的垃圾分类点位（不可增删种类） */
+export function getStreetShopSetupSlotDefs(shopCategory) {
+	const cat = String(shopCategory || 'retail')
+	if (cat === 'catering') {
+		return [
+			{
+				slotKey: 'shop_food',
+				cateKw: '厨余',
+				point_name: '店内厨余投放点',
+				title: '厨余垃圾投放点',
+				desc: '后厨、操作台旁设厨余桶，员工随手分，顾客区可不放。',
+				uploadCta: '拍摄厨余桶/投放区',
+				uploadDone: '已布置，点击可更换',
+				tone: 'food',
+				tag: '餐饮',
+			},
+			{
+				slotKey: 'shop_other_c',
+				cateKw: '其他',
+				point_name: '店内其他垃圾点',
+				title: '其他垃圾投放点',
+				desc: '餐巾纸、一次性用具等进其他桶，与厨余分开。',
+				uploadCta: '拍摄其他垃圾桶位',
+				uploadDone: '已布置，点击可更换',
+				tone: 'other',
+				tag: '餐饮',
+			},
+		]
+	}
+	if (cat === 'life') {
+		return [
+			{
+				slotKey: 'shop_other_l',
+				cateKw: '其他',
+				point_name: '店内其他垃圾点',
+				title: '其他垃圾投放点',
+				desc: '客用纸巾、清洁耗材等，固定在员工易达的位置。',
+				uploadCta: '拍摄其他垃圾投放区',
+				uploadDone: '已布置，点击可更换',
+				tone: 'other',
+				tag: '服务',
+			},
+			{
+				slotKey: 'shop_recycle_l',
+				cateKw: '可回收',
+				point_name: '店内可回收物点',
+				title: '可回收物收集点',
+				desc: '纸箱、瓶罐等集中存放，定期清运或售卖。',
+				uploadCta: '拍摄可回收收集区',
+				uploadDone: '已布置，点击可更换',
+				tone: 'recycle',
+				tag: '服务',
+			},
+		]
+	}
+	return [
+		{
+			slotKey: 'shop_recycle_r',
+			cateKw: '可回收',
+			point_name: '店内可回收物点',
+			title: '可回收物收集点',
+			desc: '纸箱、包装膜等可回收物集中堆放位置。',
+			uploadCta: '拍摄可回收收集区',
+			uploadDone: '已布置，点击可更换',
+			tone: 'recycle',
+			tag: '零售',
+		},
+		{
+			slotKey: 'shop_other_r',
+			cateKw: '其他',
+			point_name: '店内其他垃圾点',
+			title: '其他垃圾投放点',
+			desc: '不可回收的包装、杂物等，与可回收分开。',
+			uploadCta: '拍摄其他垃圾投放区',
+			uploadDone: '已布置，点击可更换',
+			tone: 'other',
+			tag: '零售',
+		},
+	]
+}
+
+export function getStreetSetupPageTitle() {
+	return '布置店内分类投放点'
+}
+
+export function getStreetSetupPageSub() {
+	return '按您店经营类型拍清对应点位，完成后即可按种类打卡'
+}
+
+export function getStreetSetupFinishCta() {
+	return '完成布置，开始今日打卡'
+}
+
+export function getStreetClockNavTitle() {
+	return '沿街商铺 · 今日真分'
+}
+
+export function getStreetClockShopBarHint() {
+	return '今日真分'
+}
+
+export function getStreetClockStep1Title() {
+	return '今天记哪一类？'
+}
+
+export function getStreetClockStep1Sub() {
+	return '选一类，上传该点位的分类成果'
+}
+
+export function getStreetClockStep2Title() {
+	return '大概有多少？'
+}
+
+export function getStreetClockPhotoTitle() {
+	return '上传分类成果'
+}
+
+export function getStreetClockPhotoSub() {
+	return '对准刚分好的垃圾或桶内成果，拍清楚即可'
+}
+
+export function getStreetClockSubmitCta() {
+	return '提交今日真分'
 }
 
 export function getStreetSetupKicker() {

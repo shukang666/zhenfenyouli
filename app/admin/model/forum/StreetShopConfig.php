@@ -35,11 +35,6 @@ class StreetShopConfig
             'stationery'  => ['name' => '文具店', 'category' => 'retail', 'cate_keyword' => '可回收'],
             'hardware'    => ['name' => '五金店', 'category' => 'retail', 'cate_keyword' => '其他'],
             'print'       => ['name' => '图文印刷', 'category' => 'retail', 'cate_keyword' => '可回收'],
-            // 医药类
-            'pharmacy'    => ['name' => '药店', 'category' => 'medical', 'cate_keyword' => '有害'],
-            'clinic'      => ['name' => '诊所', 'category' => 'medical', 'cate_keyword' => '有害'],
-            'community_clinic' => ['name' => '社区卫生服务站', 'category' => 'medical', 'cate_keyword' => '有害'],
-            'medical_store'  => ['name' => '医疗器械店', 'category' => 'medical', 'cate_keyword' => '有害'],
             // 兜底
             'other'       => ['name' => '其他商铺', 'category' => 'retail', 'cate_keyword' => '其他'],
         ];
@@ -52,7 +47,6 @@ class StreetShopConfig
             'catering' => '餐饮类',
             'life'     => '生活服务类',
             'retail'   => '零售类',
-            'medical'  => '医药类',
         ];
     }
 
@@ -127,6 +121,7 @@ class StreetShopConfig
             $bucket[$cid][] = [
                 'key'       => $key,
                 'name'      => $def['name'],
+                'category'  => (string)($def['category'] ?? ''),
                 'cate_id'   => $cate ? (int)$cate['id'] : 0,
                 'cate_name' => $cate ? (string)$cate['name'] : '',
             ];

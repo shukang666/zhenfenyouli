@@ -4085,3 +4085,338 @@
 .scf-oc-css-bin--y { height: 72rpx; background: #f9a825; }
 .scf-oc-css-bin--g { height: 88rpx; background: #43a047; }
 .scf-oc-css-bin--b { height: 72rpx; background: #1e88e5; }
+
+/* 沿街：店内点位布置（区别于家庭 scf-home-fix） */
+.scf-body--street-merchant,
+.scf-body--shop-clock {
+	background: #f4f7f5;
+}
+.scf-st-setup {
+	padding: 8rpx 24rpx 32rpx;
+}
+.scf-st-setup-head {
+	margin-bottom: 24rpx;
+}
+.scf-st-setup-title {
+	display: block;
+	font-size: 36rpx;
+	font-weight: 800;
+	color: #1a2e24;
+}
+.scf-st-setup-sub {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 26rpx;
+	color: #5c6b62;
+	line-height: 1.45;
+}
+.scf-st-setup-shop {
+	margin-top: 16rpx;
+	padding: 16rpx 20rpx;
+	border-radius: 12rpx;
+	background: #fff;
+	border-left: 6rpx solid #ff8f3d;
+}
+.scf-st-setup-shop-name {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #222;
+}
+.scf-st-setup-shop-type {
+	display: block;
+	margin-top: 4rpx;
+	font-size: 24rpx;
+	color: #888;
+}
+.scf-st-slot {
+	display: flex;
+	margin-bottom: 20rpx;
+	border-radius: 16rpx;
+	overflow: hidden;
+	background: #fff;
+	box-shadow: 0 8rpx 24rpx rgba(26, 46, 36, 0.06);
+}
+.scf-st-slot-accent {
+	width: 8rpx;
+	flex-shrink: 0;
+}
+.scf-st-slot-accent--food { background: linear-gradient(180deg, #7cb342, #558b2f); }
+.scf-st-slot-accent--other { background: linear-gradient(180deg, #78909c, #546e7a); }
+.scf-st-slot-accent--recycle { background: linear-gradient(180deg, #29b6f6, #0288d1); }
+.scf-st-slot-main {
+	flex: 1;
+	padding: 22rpx 20rpx 20rpx;
+}
+.scf-st-slot-head {
+	display: flex;
+	align-items: center;
+	gap: 12rpx;
+	margin-bottom: 8rpx;
+}
+.scf-st-slot-tag {
+	font-size: 22rpx;
+	color: #ff8f3d;
+	background: rgba(255, 143, 61, 0.12);
+	padding: 4rpx 12rpx;
+	border-radius: 999rpx;
+}
+.scf-st-slot-cate {
+	font-size: 22rpx;
+	color: #666;
+}
+.scf-st-slot-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #1a2e24;
+}
+.scf-st-slot-desc {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	color: #6b7a72;
+	line-height: 1.45;
+	margin-bottom: 16rpx;
+}
+.scf-st-upload {
+	position: relative;
+	min-height: 160rpx;
+	border-radius: 12rpx;
+	border: 2rpx dashed #c5d0ca;
+	background: #f8fbf9;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+.scf-st-upload--done {
+	border-style: solid;
+	border-color: #7bc89a;
+}
+.scf-st-upload-img {
+	width: 100%;
+	height: 200rpx;
+}
+.scf-st-upload-ico {
+	font-size: 40rpx;
+}
+.scf-st-upload-t {
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	color: #5c6b62;
+}
+.scf-st-upload-badge {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 8rpx;
+	text-align: center;
+	font-size: 22rpx;
+	color: #fff;
+	background: rgba(26, 46, 36, 0.55);
+}
+.scf-st-setup-foot {
+	margin-top: 12rpx;
+}
+.scf-st-finish {
+	text-align: center;
+	padding: 26rpx;
+	border-radius: 999rpx;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(90deg, #ff8f3d 0%, #ffb347 100%);
+}
+.scf-st-finish--disabled {
+	opacity: 0.45;
+}
+.scf-st-edit-link {
+	display: block;
+	text-align: center;
+	margin-top: 20rpx;
+	font-size: 26rpx;
+	color: #5c8f6e;
+}
+/* 沿街：今日真分（横向卡片 + 步骤面板，区别于家庭 scf-hc-*） */
+.scf-sk-shop-bar {
+	margin: 16rpx 24rpx;
+	padding: 20rpx 22rpx;
+	border-radius: 16rpx;
+	background: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+.scf-sk-shop-name {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #1a2e24;
+}
+.scf-sk-shop-hint {
+	display: block;
+	margin-top: 4rpx;
+	font-size: 22rpx;
+	color: #ff8f3d;
+}
+.scf-sk-shop-edit {
+	font-size: 24rpx;
+	color: #5c8f6e;
+}
+.scf-sk-panel {
+	margin: 0 24rpx 20rpx;
+	padding: 24rpx 22rpx;
+	border-radius: 16rpx;
+	background: #fff;
+}
+.scf-sk-panel-k {
+	display: block;
+	font-size: 22rpx;
+	font-weight: 700;
+	color: #ff8f3d;
+	letter-spacing: 2rpx;
+	margin-bottom: 8rpx;
+}
+.scf-sk-panel-title {
+	display: block;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #1a2e24;
+}
+.scf-sk-panel-sub {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 24rpx;
+	color: #6b7a72;
+	line-height: 1.4;
+	margin-bottom: 16rpx;
+}
+.scf-sk-cate-scroll {
+	width: 100%;
+	white-space: nowrap;
+}
+.scf-sk-cate-row {
+	display: inline-flex;
+	gap: 16rpx;
+	padding: 4rpx 0 8rpx;
+}
+.scf-sk-cate-card {
+	width: 200rpx;
+	padding: 20rpx 16rpx;
+	border-radius: 14rpx;
+	border: 2rpx solid #e0e8e3;
+	background: #fafcfb;
+	flex-shrink: 0;
+}
+.scf-sk-cate-card--on {
+	border-color: #ff8f3d;
+	box-shadow: 0 6rpx 16rpx rgba(255, 143, 61, 0.2);
+}
+.scf-sk-cate-card--lock {
+	opacity: 0.55;
+}
+.scf-sk-cate-tag {
+	display: block;
+	font-size: 20rpx;
+	color: #999;
+}
+.scf-sk-cate-name {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 34rpx;
+	font-weight: 800;
+}
+.scf-sk-cate-card--food .scf-sk-cate-name { color: #558b2f; }
+.scf-sk-cate-card--other .scf-sk-cate-name { color: #546e7a; }
+.scf-sk-cate-card--recycle .scf-sk-cate-name { color: #0288d1; }
+.scf-sk-cate-label {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 22rpx;
+	color: #666;
+}
+.scf-sk-cate-lock {
+	display: block;
+	margin-top: 8rpx;
+	font-size: 20rpx;
+	color: #e65100;
+}
+.scf-sk-amount-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12rpx;
+	margin-top: 12rpx;
+}
+.scf-sk-amount-pill {
+	padding: 14rpx 28rpx;
+	border-radius: 999rpx;
+	font-size: 26rpx;
+	color: #444;
+	background: #f0f4f2;
+	border: 2rpx solid transparent;
+}
+.scf-sk-amount-pill--on {
+	border-color: #ff8f3d;
+	color: #c25e00;
+	background: #fff8f0;
+}
+.scf-sk-photo-box {
+	margin-top: 16rpx;
+	min-height: 240rpx;
+	border-radius: 14rpx;
+	border: 2rpx dashed #c5d0ca;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	background: #f8fbf9;
+}
+.scf-sk-photo-box--done {
+	border-style: solid;
+	border-color: #7bc89a;
+}
+.scf-sk-photo-img {
+	width: 100%;
+	height: 280rpx;
+}
+.scf-sk-photo-ico {
+	font-size: 44rpx;
+}
+.scf-sk-photo-t {
+	margin-top: 10rpx;
+	font-size: 26rpx;
+	color: #5c6b62;
+}
+.scf-sk-point-hint {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 24rpx;
+	color: #888;
+}
+.scf-sk-foot {
+	padding: 8rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+}
+.scf-sk-submit {
+	text-align: center;
+	padding: 26rpx;
+	border-radius: 999rpx;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(90deg, #2e7d52 0%, #43a047 100%);
+}
+.scf-sk-submit--disabled {
+	opacity: 0.5;
+}
+.scf-sk-back-setup {
+	display: block;
+	text-align: center;
+	margin-top: 18rpx;
+	font-size: 26rpx;
+	color: #5c8f6e;
+}
