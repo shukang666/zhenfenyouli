@@ -6,9 +6,10 @@
         <li><a href="{:url('index',['type'=>2])}">垃圾打卡列表</a></li>
         <li><a href="{:url('clock_tutorial_index')}">打卡教程</a></li>
         <li><a href="{:url('clock_scene_guide_index')}">场景分类引导</a></li>
-        <li class="active"><a href="{:url('clock_scene_point_index')}">场景回收点配置</a></li>
+        <li class="active"><a href="{:url('clock_scene_point_index')}">沿街回收点配置</a></li>
+        <li><a href="{:url('office_recycle_building_index')}">办公大楼回收点</a></li>
     </ul>
-    <p class="margin-top-20 text-muted">沿街商铺、办公真分角使用<strong>社区统一回收点</strong>，按用户人工配置（可结合商铺性质在备注中说明）。小程序端用户不可自行增删，仅选择点位打卡。</p>
+    <p class="margin-top-20 text-muted">沿街商铺<strong>社区统一回收点</strong>，按用户绑定配置（备注可写商铺性质）。办公场景请使用「办公大楼回收点」菜单。</p>
     <form class="well form-inline margin-top-15" method="get" action="{:url('clock_scene_point_index')}">
         <label>场景：</label>
         <select name="hub_key" class="form-control">

@@ -56,6 +56,7 @@ class ClockScenePointController extends AuthController
             $item['point_image'] = $img === '' ? '' : cmf_get_asset_url($img);
             $item['building_name'] = trim((string)($item['point_name'] ?? ''));
             $item['corner_location'] = trim((string)($item['remark'] ?? ''));
+            $item['address'] = $item['corner_location'];
         }
         unset($item);
         $this->success('请求成功', $list);

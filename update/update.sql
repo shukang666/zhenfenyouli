@@ -392,3 +392,18 @@ WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_clock_scene_point' AND COLUMN_NAME = 'community_id');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_clock_scene_point` ADD COLUMN `community_id` int(10) unsigned NOT NULL DEFAULT ''0'' COMMENT ''所属社区(办公统一回收点)'' AFTER `user_id`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+UPDATE `cmf_admin_menu` SET `name` = '沿街回收点配置', `remark` = '沿街商铺统一回收点（按用户人工配置）'
+WHERE `app` = 'admin' AND `controller` = 'Forum' AND `action` = 'clock_scene_point_index' LIMIT 1;
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
+        SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1
+    )), 0) + 1,
+    'admin','Forum','office_recycle_building_index','','办公大楼回收点','','社区办公大楼、回收点地址与示意图'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_scene_guide_index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='office_recycle_building_index' LIMIT 1);

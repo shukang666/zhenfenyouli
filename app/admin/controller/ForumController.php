@@ -542,7 +542,10 @@ class ForumController extends ToolController
             $this->error('请填写用户ID');
         }
         if (!in_array($hub, $adminHubs, true)) {
-            $this->error('请选择沿街或办公场景');
+            $this->error('请选择沿街商铺场景');
+        }
+        if ($hub === 'office') {
+            $this->error('办公大楼请使用「办公大楼回收点」菜单配置');
         }
         $member = Db::name('member')->where('id', $userId)->find();
         if (empty($member)) {
@@ -559,9 +562,6 @@ class ForumController extends ToolController
         }
         $now = time();
         $communityId = intval($this->request->param('community_id', 0));
-        if ($hub === 'office' && $communityId <= 0) {
-            $this->error('办公场景请填写所属社区');
-        }
         $pointImage = trim((string)$this->request->param('point_image', ''));
         if ($pointImage !== '' && mb_strlen($pointImage) > 255) {
             $this->error('点位照片路径过长');
@@ -603,7 +603,151 @@ class ForumController extends ToolController
         if ($id <= 0) {
             $this->error('参数错误');
         }
+        $row = ClockScenePointModel::where('id', $id)
+            ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+            ->find();
+        if (empty($row)) {
+            $this->error('记录不存在');
+        }
+        if (($row['hub_key'] ?? '') === ClockScenePointModel::officeBuildingHubKey()) {
+            $this->error('办公大楼请使用「办公大楼回收点」菜单删除');
+        }
+        ClockScenePointModel::where('id', $id)->delete();
+        $this->success('已删除');
+    }
+
+    /** 办公：按社区维护大楼名、回收点地址与示意图（小程序选楼后展示） */
+    public function office_recycle_building_index()
+    {
+        $keyword = trim((string)$this->request->param('keyword', ''));
+        $communityId = intval($this->request->param('community_id', 0));
+        $query = Db::name('clock_scene_point')->alias('p')
+            ->join('community c', 'c.id = p.community_id', 'LEFT')
+            ->where('p.hub_key', ClockScenePointModel::officeBuildingHubKey())
+            ->where('p.source', ClockScenePointModel::SOURCE_ADMIN)
+            ->field('p.*, c.name as community_name')
+            ->order('p.list_order asc,p.id asc');
+        if ($communityId > 0) {
+            $query->where('p.community_id', $communityId);
+        }
+        if ($keyword !== '') {
+            $query->where('p.point_name|p.remark', 'like', '%' . $keyword . '%');
+        }
+        $list = $query->paginate(20);
+        $communityList = CommunityModel::where('delete_time', 0)->order('id desc')->limit(500)->select();
+        return $this->fetch('office_recycle_building_index', [
+            'list'          => $list,
+            'page'          => $list->render(),
+            'keyword'       => $keyword,
+            'community_id'  => $communityId,
+            'communityList' => $communityList,
+        ]);
+    }
+
+    public function office_recycle_building_add()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        $item = null;
+        if ($id > 0) {
+            $item = ClockScenePointModel::where('id', $id)
+                ->where('hub_key', ClockScenePointModel::officeBuildingHubKey())
+                ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+                ->find();
+            if (empty($item)) {
+                $this->error('记录不存在');
+            }
+        }
+        $communityList = CommunityModel::where('delete_time', 0)->order('id desc')->limit(500)->select();
+        return $this->fetch('office_recycle_building_add', [
+            'data'          => $item,
+            'communityList' => $communityList,
+        ]);
+    }
+
+    public function office_recycle_building_add_post()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('非法请求');
+        }
+        $id = $this->request->param('id', 0, 'intval');
+        $communityId = intval($this->request->param('community_id', 0));
+        if ($communityId <= 0) {
+            $this->error('请选择所属社区');
+        }
+        $buildingName = trim((string)$this->request->param('building_name', ''));
+        if ($buildingName === '') {
+            $this->error('请填写办公大楼名称');
+        }
+        if (mb_strlen($buildingName) > 32) {
+            $this->error('大楼名称过长（最多32字）');
+        }
+        $address = trim((string)$this->request->param('recycle_address', ''));
+        if ($address === '') {
+            $this->error('请填写回收点地址说明');
+        }
+        if (mb_strlen($address) > 255) {
+            $this->error('地址说明过长');
+        }
+        $cate = ClockScenePointModel::resolveRecycleCate();
+        if (empty($cate)) {
+            $this->error('未找到「可回收物」种类，请先在基础数据里配置垃圾分类');
+        }
+        $pointImage = trim((string)$this->request->param('point_image', ''));
+        if ($pointImage !== '' && mb_strlen($pointImage) > 255) {
+            $this->error('示意图路径过长');
+        }
+        $listOrder = intval($this->request->param('list_order', 0));
+        $now = time();
+        $dupQuery = Db::name('clock_scene_point')
+            ->where('hub_key', ClockScenePointModel::officeBuildingHubKey())
+            ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+            ->where('community_id', $communityId)
+            ->where('point_name', $buildingName);
+        if ($id > 0) {
+            $dupQuery->where('id', '<>', $id);
+        }
+        if ($dupQuery->find()) {
+            $this->error('该社区下已存在同名办公大楼，请直接编辑原记录');
+        }
+        $save = [
+            'user_id'      => 0,
+            'community_id' => $communityId,
+            'hub_key'      => ClockScenePointModel::officeBuildingHubKey(),
+            'point_name'   => mb_substr($buildingName, 0, 32),
+            'cate_id'      => $cate['id'],
+            'cate_name'    => $cate['name'],
+            'point_image'  => $pointImage,
+            'source'       => ClockScenePointModel::SOURCE_ADMIN,
+            'remark'       => mb_substr($address, 0, 255),
+            'list_order'   => $listOrder,
+            'admin_id'     => (int)session('ADMIN_ID'),
+            'update_time'  => $now,
+        ];
+        if ($id > 0) {
+            $row = ClockScenePointModel::where('id', $id)
+                ->where('hub_key', ClockScenePointModel::officeBuildingHubKey())
+                ->where('source', ClockScenePointModel::SOURCE_ADMIN)
+                ->find();
+            if (empty($row)) {
+                $this->error('记录不存在');
+            }
+            ClockScenePointModel::where('id', $id)->update($save);
+            $this->success('保存成功', url('office_recycle_building_index'));
+            return;
+        }
+        $save['create_time'] = $now;
+        ClockScenePointModel::insert($save);
+        $this->success('添加成功', url('office_recycle_building_index'));
+    }
+
+    public function office_recycle_building_delete()
+    {
+        $id = $this->request->param('id', 0, 'intval');
+        if ($id <= 0) {
+            $this->error('参数错误');
+        }
         ClockScenePointModel::where('id', $id)
+            ->where('hub_key', ClockScenePointModel::officeBuildingHubKey())
             ->where('source', ClockScenePointModel::SOURCE_ADMIN)
             ->delete();
         $this->success('已删除');

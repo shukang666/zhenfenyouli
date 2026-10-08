@@ -351,9 +351,13 @@ import settings, { uploadUrl } from '@/common/settings'
 			officeCornerDisplayLocation() {
 				const p = this.officeCornerPoint
 				if (!p) return ''
-				const loc = String(p.corner_location || p.remark || '').trim()
+				const b = String(this.officeBuildingKey || '').trim()
+				const loc = String(p.corner_location || p.remark || p.address || '').trim()
+				if (loc && b && loc.indexOf(b) < 0) {
+					return b + ' ' + loc
+				}
 				if (loc) return loc
-				return this.officeBuildingKey
+				return b
 			},
 			homeClockCateCards() {
 				const defs = [

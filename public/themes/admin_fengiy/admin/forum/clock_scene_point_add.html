@@ -3,7 +3,8 @@
 <body>
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
-        <li><a href="{:url('clock_scene_point_index')}">场景回收点配置</a></li>
+        <li><a href="{:url('clock_scene_point_index')}">沿街回收点配置</a></li>
+        <li><a href="{:url('office_recycle_building_index')}">办公大楼回收点</a></li>
         <li class="active"><a href="javascript:;"><if condition="empty($data)">新增<else/>编辑</if></a></li>
     </ul>
     <form class="form-horizontal margin-top-20 js-ajax-form" action="{:url('clock_scene_point_add_post')}" method="post">
@@ -37,13 +38,13 @@
                         <option value="{$com.id}" <if condition="isset($data.community_id) && $data.community_id eq $com.id">selected</if>>{$com.name}</option>
                     </foreach>
                 </select>
-                <p class="help-block">办公场景：填社区后，该社区居民小程序可见；回收点名称填<strong>楼宇名</strong>，备注填<strong>真分角位置</strong>（如 3楼东侧楼道口）。</p>
+                <p class="help-block">沿街场景一般留空；办公大楼请到「办公大楼回收点」菜单配置。</p>
             </div>
         </div>
         <div class="form-group">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>回收点名称</label>
             <div class="col-sm-6">
-                <input type="text" name="point_name" class="form-control" required maxlength="32" value="{$data.point_name|default=''}" placeholder="办公：楼宇名；沿街：店后集中回收点">
+                <input type="text" name="point_name" class="form-control" required maxlength="32" value="{$data.point_name|default=''}" placeholder="沿街：店后集中回收点">
             </div>
         </div>
         <div class="form-group">

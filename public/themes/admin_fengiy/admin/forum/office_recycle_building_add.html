@@ -1,0 +1,83 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('office_recycle_building_index')}">办公大楼回收点</a></li>
+        <li class="active"><a href="javascript:;"><if condition="empty($data)">新增<else/>编辑</if></a></li>
+    </ul>
+    <form class="form-horizontal margin-top-20 js-ajax-form" action="{:url('office_recycle_building_add_post')}" method="post">
+        <if condition="!empty($data.id)">
+            <input type="hidden" name="id" value="{$data.id}">
+        </if>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>所属社区</label>
+            <div class="col-sm-6">
+                <select name="community_id" class="form-control" required>
+                    <option value="">请选择</option>
+                    <foreach name="communityList" item="com">
+                        <option value="{$com.id}" <if condition="isset($data.community_id) && $data.community_id eq $com.id">selected</if>>{$com.name}</option>
+                    </foreach>
+                </select>
+                <p class="help-block">该社区居民在小程序「办公真分」页可见本大楼。</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>办公大楼名称</label>
+            <div class="col-sm-6">
+                <input type="text" name="building_name" class="form-control" required maxlength="32"
+                       value="{$data.point_name|default=''}" placeholder="如：科创中心A座">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"><span class="form-required">*</span>回收点地址</label>
+            <div class="col-sm-6">
+                <input type="text" name="recycle_address" class="form-control" required maxlength="255"
+                       value="{$data.remark|default=''}" placeholder="如：3楼东侧楼道口（可与楼名组合展示）">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">回收点示意图</label>
+            <div class="col-sm-6">
+                <input type="hidden" name="point_image" id="office-building-image" value="{$data.point_image|default=''}">
+                <div style="margin-bottom:8px;">
+                    <if condition="!empty($data.point_image)">
+                        <img id="office-building-image-preview" src="{:cmf_get_image_url($data.point_image)}" style="max-height:160px;max-width:100%;" alt="">
+                    <else/>
+                        <img id="office-building-image-preview" src="" style="max-height:160px;max-width:100%;display:none;" alt="">
+                    </if>
+                </div>
+                <button type="button" class="btn btn-default" onclick="doOfficeBuildingUpload()"><i class="fa fa-upload"></i> 上传图片</button>
+                <p class="help-block">小程序选楼后下方展示的真分角参考图。</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">排序</label>
+            <div class="col-sm-6">
+                <input type="number" name="list_order" class="form-control" value="{$data.list_order|default='0'}" placeholder="越小越靠前">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-6">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <a class="btn btn-default" href="{:url('office_recycle_building_index')}">返回</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+<script>
+function doOfficeBuildingUpload(){
+    openUploadDialog('回收点示意图', function (dialog, files) {
+        var filepath = files[0].filepath || '';
+        $('#office-building-image').val(filepath);
+        var previewUrl = files[0].preview_url || files[0].filepath || '';
+        if(previewUrl && !/^https?:\/\//.test(previewUrl)){
+            previewUrl = GV.WEB_ROOT + previewUrl;
+        }
+        $('#office-building-image-preview').attr('src', previewUrl).show();
+    }, {}, 0, 'image', 'admin');
+}
+</script>
+</body>
+</html>
