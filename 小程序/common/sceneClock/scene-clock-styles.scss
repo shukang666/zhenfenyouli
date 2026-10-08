@@ -601,13 +601,16 @@
 .scf-hc-cate-row {
 	display: flex;
 	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: center;
 	gap: 12rpx;
-	overflow-x: auto;
 	padding-bottom: 4rpx;
+	width: 100%;
+	box-sizing: border-box;
 }
 .scf-hc-cate-card {
-	flex: 1;
-	min-width: 0;
+	flex: 0 0 148rpx;
+	width: 148rpx;
 	height: 104rpx;
 	border-radius: 20rpx;
 	padding: 0;
@@ -774,6 +777,20 @@
 	font-size: 20rpx;
 	color: #888;
 	line-height: 1.35;
+}
+.scf-hc-step--photo .scf-hc-upload {
+	width: 100%;
+	max-width: 520rpx;
+	margin-left: auto;
+	margin-right: auto;
+	box-sizing: border-box;
+}
+.scf-hc-step--photo .scf-hc-rules {
+	width: 100%;
+	max-width: 520rpx;
+	margin-left: auto;
+	margin-right: auto;
+	box-sizing: border-box;
 }
 .scf-hc-upload {
 	min-height: 240rpx;
