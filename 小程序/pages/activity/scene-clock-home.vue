@@ -183,15 +183,17 @@
 							</view>
 
 							<view class="scf-hc-photo-example">
-
-								<view class="scf-hc-photo-example-ph">
-
+								<image
+									v-if="homeClockPhotoExampleImgUrl"
+									class="scf-hc-photo-example-img"
+									:src="homeClockPhotoExampleImgUrl"
+									mode="aspectFill"
+									@error="onHomeClockPhotoExampleImgError"
+								/>
+								<view v-else class="scf-hc-photo-example-ph">
 									<text class="scf-hc-photo-example-ph-t">示例</text>
-
 								</view>
-
 								<text class="scf-hc-photo-example-cap">{{ homeClockPhotoExampleCap }} →</text>
-
 							</view>
 
 						</view>

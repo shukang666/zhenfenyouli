@@ -241,6 +241,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeFixedSavingKey: '',
 				homeFixedHeroImgOk: true,
 				homeClockBannerImgOk: true,
+				homeClockPhotoExampleImgOk: true,
 				homeClockCateImgOk: {
 					food: true,
 					other: true,
@@ -309,6 +310,11 @@ import settings, { uploadUrl } from '@/common/settings'
 				if (!this.homeClockBannerImgOk) return ''
 				const base = this.scenePickCosBase
 				return base + 'home-clock-banner.png'
+			},
+			homeClockPhotoExampleImgUrl() {
+				if (!this.homeClockPhotoExampleImgOk) return ''
+				const base = this.scenePickCosBase
+				return base + 'home-clock-photo-example.png'
 			},
 			officeClockHeroImgUrl() {
 				if (!this.officeClockHeroImgOk) return ''
@@ -886,6 +892,9 @@ import settings, { uploadUrl } from '@/common/settings'
 			onHomeClockCateImgError(cateKey) {
 				if (!cateKey || !this.homeClockCateImgOk) return
 				this.$set(this.homeClockCateImgOk, cateKey, false)
+			},
+			onHomeClockPhotoExampleImgError() {
+				this.homeClockPhotoExampleImgOk = false
 			},
 			onOfficeClockHeroImgError() {
 				this.officeClockHeroImgOk = false
