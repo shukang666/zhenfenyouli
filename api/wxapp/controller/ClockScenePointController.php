@@ -25,18 +25,12 @@ class ClockScenePointController extends AuthController
             $this->error('场景参数无效');
         }
         if ($hub === 'office') {
-            $communityId = (int)Db::name('member')->where('id', $this->user_id)->value('community_id');
-            if ($communityId <= 0) {
-                $this->success('请求成功', []);
-                return;
-            }
-            $query = Db::name('clock_scene_point')
+            $list = Db::name('clock_scene_point')
                 ->where('hub_key', 'office')
                 ->where('source', ClockScenePointModel::SOURCE_ADMIN)
-                ->where(function ($q) use ($communityId) {
-                    $q->where('community_id', $communityId)->whereOr('community_id', 0);
-                });
-            $list = $query->order('list_order asc,id asc')->select()->toArray();
+                ->order('list_order asc,id asc')
+                ->select()
+                ->toArray();
         } else {
             $query = Db::name('clock_scene_point')->where('user_id', $this->user_id);
             if ($hub === 'home') {

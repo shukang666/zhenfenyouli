@@ -136,7 +136,7 @@ export function getCommunityEmptyTitle(isStreetHub, isOfficeHub) {
 
 export function getCommunityEmptyDesc(isStreetHub, isOfficeHub) {
 	if (isOfficeHub) {
-		return '请社区工作人员在后台「办公大楼回收点」中维护所属社区、大楼名称、回收点地址与示意图。配置完成后重新进入本页即可打卡。'
+		return '请社区工作人员在后台「办公大楼回收点」中维护大楼名称、回收点地址与示意图。配置完成后重新进入本页即可打卡。'
 	}
 	if (isStreetHub) {
 		return '社区会根据商铺情况安排投放点，弄好后会出现在这里。不清楚可以问社区或物业。'

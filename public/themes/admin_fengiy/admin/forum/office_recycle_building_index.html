@@ -9,7 +9,7 @@
         <li><a href="{:url('clock_scene_point_index')}">沿街回收点配置</a></li>
         <li class="active"><a href="{:url('office_recycle_building_index')}">办公大楼回收点</a></li>
     </ul>
-    <p class="margin-top-20 text-muted">按<strong>社区</strong>维护办公大楼：用户小程序选楼后，自动展示<strong>回收点地址</strong>与<strong>示意图</strong>。种类固定为可回收物，无需绑定用户。</p>
+    <p class="margin-top-20 text-muted">维护办公大楼列表：小程序下拉展示<strong>全部</strong>大楼（与用户社区无关），选楼后展示<strong>回收点地址</strong>与<strong>示意图</strong>。所属社区仅便于后台筛选管理。</p>
     <form class="well form-inline margin-top-15" method="get" action="{:url('office_recycle_building_index')}">
         <label>社区：</label>
         <select name="community_id" class="form-control">

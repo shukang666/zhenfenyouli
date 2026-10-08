@@ -231,7 +231,12 @@ class ForumController extends AuthController
         $cate_id = $this->request->param('cate_id');
 //        if (empty($params['content'])) $this->error('内容不能为空');
         if (empty($type)) $this->error('类型不能为空');
-        if ($type == 2 && empty($this->user_info['community_id'])) $this->error('请完善小区');
+        if ($type == 2 && empty($this->user_info['community_id'])) {
+            $clockSceneEarly = trim((string)($params['clock_scene'] ?? ''));
+            if (!in_array($clockSceneEarly, ['office', 'zhenfenjiao'], true)) {
+                $this->error('请完善小区');
+            }
+        }
         //腾讯校验
 //        $res = CommonModel::checkContent($this->user_info['openid'], $params['content']);
 //        if (!$res) {
@@ -320,11 +325,6 @@ class ForumController extends AuthController
                     ->find();
                 if (empty($officePoint)) {
                     $this->error('真分角无效，请联系社区工作人员');
-                }
-                $communityId = (int)Db::name('member')->where('id', $this->user_id)->value('community_id');
-                $pCid = (int)($officePoint['community_id'] ?? 0);
-                if ($communityId > 0 && $pCid > 0 && $pCid !== $communityId) {
-                    $this->error('真分角与您的社区不匹配');
                 }
             }
             $merchantId = (int)$this->request->param('street_merchant_id', 0);
