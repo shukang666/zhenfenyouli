@@ -8,6 +8,8 @@ import {
 	buildSceneClockHubUrl,
 	SCENE_CLOCK_PICK_PAGE,
 	SCENE_CLOCK_LEGACY_PAGE,
+	SCENE_CLOCK_HOME_CLOCK_PAGE,
+	SCENE_CLOCK_HOME_SETUP_PAGE,
 } from '@/common/sceneClock/sceneClockRoutes.js'
 
 const DBG = '[SCF-DEBUG] sceneClockEntry'
@@ -99,4 +101,9 @@ export function openSceneClockFromBannerEntry(vm, entry) {
 	return false
 }
 
-export { SCENE_CLOCK_PICK_PAGE, SCENE_CLOCK_LEGACY_PAGE }
+export {
+	SCENE_CLOCK_PICK_PAGE,
+	SCENE_CLOCK_LEGACY_PAGE,
+	SCENE_CLOCK_HOME_CLOCK_PAGE,
+	SCENE_CLOCK_HOME_SETUP_PAGE,
+}

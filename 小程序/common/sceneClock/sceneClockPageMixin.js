@@ -3,6 +3,11 @@ import settings, { uploadUrl } from '@/common/settings'
 	import { pickRandomHabitTip } from '@/common/clockHabitTips.js'
 	import { getHub, mergeGuide, normalizeClockHubKey } from '@/common/sceneClockHub.js'
 	import { openSceneClockHub } from '@/common/sceneClockEntry.js'
+	import {
+		openSceneClockHomeSetup,
+		openSceneClockHomeClock,
+		finishSceneClockHomeSetupNavigation,
+	} from '@/common/sceneClock/sceneClockRoutes.js'
 	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind, SECTION_HINTS } from '@/common/clockScene.js'
 	import {
 		getStepTitles,
@@ -234,10 +239,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeFixedSavingKey: '',
 				homeFixedHeroImgOk: true,
 				homeClockBannerImgOk: true,
-				/** URL 参数 home_setup=1 时强制进入布置页（后续改图入口用） */
-				homeFixedEditSetup: false,
-				/** 从今日真分进入改布置时，返回应回到 learn 而非退出页面 */
-				homeSetupBackToLearn: false,
+				/** 家庭拆分页：clock=今日真分 setup=点位布置 */
+				homeHubPage: '',
 				homeFixedExampleImgOk: {
 					kitchen: true,
 					recycle: true,
@@ -718,10 +721,19 @@ import settings, { uploadUrl } from '@/common/settings'
 					if (ok) this.initUserPoints()
 				})
 			},
-			hubPageOnLoad(hubKey, option) {
-				const opt = option || {}
-				this.homeFixedEditSetup = String(opt.home_setup || '') === '1'
+			hubPageOnLoad(hubKey, option, pageOpts) {
+				const po = pageOpts || {}
+				this.homeHubPage = String(po.homePage || '').trim()
+				if (this.homeHubPage === 'clock') {
+					this.flowStep = 'learn'
+				} else if (this.homeHubPage === 'setup') {
+					this.flowStep = 'setup'
+				}
 				this.bootstrapHub(normalizeClockHubKey(hubKey))
+			},
+			goResidentialHomeSetup() {
+				if (!this.isResidentialHub) return
+				openSceneClockHomeSetup()
 			},
 			goFlowStepSurvey() {
 				this.flowStep = 'survey'
@@ -959,9 +971,21 @@ import settings, { uploadUrl } from '@/common/settings'
 				})
 				return true
 			},
-			enterResidentialSetupFlow() {
-				if (this.isResidentialHub && this.flowStep === 'learn') {
-					this.homeSetupBackToLearn = true
+			enterResidentialSetupFlow(opts) {
+				const replace = !!(opts && opts.replace)
+				if (this.isResidentialHub) {
+					if (this.homeHubPage === 'setup') {
+						this.residentialPickMode = false
+						this.residentialBinSettingsOpen = false
+						this.syncHomeFixedSlots()
+						this.flowStep = 'setup'
+						if (this.hub && this.hub.title) {
+							uni.setNavigationBarTitle({ title: this.hub.title })
+						}
+						return
+					}
+					openSceneClockHomeSetup({ replace })
+					return
 				}
 				this.residentialPickMode = false
 				this.residentialBinSettingsOpen = false
@@ -970,17 +994,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				if (this.hub && this.hub.title) {
 					uni.setNavigationBarTitle({ title: this.hub.title })
 				}
-			},
-			handleResidentialSetupBack() {
-				if (!this.isResidentialHub || this.flowStep !== 'setup' || !this.homeSetupBackToLearn) {
-					return false
-				}
-				this.homeSetupBackToLearn = false
-				this.residentialPickMode = false
-				this.residentialBinSettingsOpen = false
-				this.flowStep = 'learn'
-				uni.setNavigationBarTitle({ title: getHomeClockNavTitle() })
-				return true
 			},
 			syncHomeFixedSlots() {
 				const defs = getHomeFixedSetupSlots()
@@ -1059,17 +1072,42 @@ import settings, { uploadUrl } from '@/common/settings'
 				}
 				this.enterResidentialClockFlow()
 			},
-			enterResidentialClockFlow() {
+			enterResidentialClockFlow(opts) {
+				const replace = !!(opts && opts.replace)
 				if (!this.isHomeFixedSetupComplete()) {
-					this.enterResidentialSetupFlow()
+					this.enterResidentialSetupFlow({ replace: true })
 					return
 				}
-				this.homeSetupBackToLearn = false
+				if (this.homeHubPage === 'setup') {
+					finishSceneClockHomeSetupNavigation()
+					return
+				}
+				if (this.homeHubPage === 'clock') {
+					this.residentialPickMode = false
+					this.residentialBinSettingsOpen = false
+					this.resetHomeClockForm()
+					this.flowStep = 'learn'
+					uni.setNavigationBarTitle({ title: getHomeClockNavTitle() })
+					return
+				}
+				openSceneClockHomeClock({ replace })
+			},
+			applyResidentialHomeClockPageAfterLoad() {
+				if (!this.isHomeFixedSetupComplete()) {
+					openSceneClockHomeSetup({ replace: true })
+					return
+				}
 				this.residentialPickMode = false
 				this.residentialBinSettingsOpen = false
-				this.resetHomeClockForm()
 				this.flowStep = 'learn'
 				uni.setNavigationBarTitle({ title: getHomeClockNavTitle() })
+			},
+			applyResidentialHomeSetupPageAfterLoad() {
+				this.syncHomeFixedSlots()
+				this.flowStep = 'setup'
+				if (this.hub && this.hub.title) {
+					uni.setNavigationBarTitle({ title: this.hub.title })
+				}
 			},
 			enterOfficeClockFlow() {
 				const labels = this.officeBuildingLabels || []
@@ -1555,8 +1593,11 @@ import settings, { uploadUrl } from '@/common/settings'
 				})
 				if (!this.isLogin) {
 					if (this.isResidentialHub) {
-						this.syncHomeFixedSlots()
-						this.flowStep = 'setup'
+						if (this.homeHubPage === 'clock') {
+							openSceneClockHomeSetup({ replace: true })
+						} else {
+							this.applyResidentialHomeSetupPageAfterLoad()
+						}
 					} else if (this.isStreetHub) {
 						this.flowStep = 'street_merchant'
 					} else {
@@ -1614,42 +1655,35 @@ import settings, { uploadUrl } from '@/common/settings'
 						return
 					}
 					if (this.isResidentialHub) {
-						if (this.homeFixedEditSetup && keepFlow !== 'setup' && keepFlow !== 'learn') {
-							this.enterResidentialSetupFlow()
+						if (this.homeHubPage === 'setup') {
+							if (keepFlow === 'setup' || keepFlow === 'manage') {
+								this.applyResidentialHomeSetupPageAfterLoad()
+								return
+							}
+							if (keepFlow === 'learn') {
+								finishSceneClockHomeSetupNavigation()
+								return
+							}
+							this.applyResidentialHomeSetupPageAfterLoad()
+							return
+						}
+						if (this.homeHubPage === 'clock') {
+							if (keepFlow === 'learn' || keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate') {
+								if (keepFlow === 'learn') {
+									this.applyResidentialHomeClockPageAfterLoad()
+								}
+								return
+							}
+							this.applyResidentialHomeClockPageAfterLoad()
 							return
 						}
 						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'learn') {
 							return
 						}
-						if (keepFlow === 'pick') {
-							if (this.isHomeFixedSetupComplete()) {
-								this.enterResidentialClockFlow()
-							} else {
-								this.enterResidentialSetupFlow()
-							}
-							return
-						}
-						if (keepFlow === 'points') {
-							if (this.isHomeFixedSetupComplete()) {
-								this.enterResidentialClockFlow()
-							} else {
-								this.enterResidentialSetupFlow()
-							}
-							return
-						}
-						if (this.flowStep === 'learn') return
-						if (this.flowStep === 'manage') return
-						if (this.flowStep === 'setup' && !this.homeFixedEditSetup) {
-							/* 布置页上传中 */
-						}
 						if (this.isHomeFixedSetupComplete()) {
-							if (this.homeFixedEditSetup) {
-								this.enterResidentialSetupFlow()
-							} else {
-								this.enterResidentialClockFlow()
-							}
+							this.enterResidentialClockFlow()
 						} else {
-							this.enterResidentialSetupFlow()
+							this.enterResidentialSetupFlow({ replace: true })
 						}
 						return
 					}

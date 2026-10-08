@@ -4,10 +4,57 @@ import { normalizeClockHubKey } from '@/common/sceneClockHub.js'
 export const SCENE_CLOCK_PICK_PAGE = '/pages/activity/scene-clock-pick'
 export const SCENE_CLOCK_LEGACY_PAGE = '/pages/activity/scene-clock-flow'
 
+/** 家庭场景：今日真分 / 点位布置 分两个页面 */
+export const SCENE_CLOCK_HOME_CLOCK_PAGE = '/pages/activity/scene-clock-home'
+export const SCENE_CLOCK_HOME_SETUP_PAGE = '/pages/activity/scene-clock-home-setup'
+
 const HUB_PAGE = {
-	home: '/pages/activity/scene-clock-home',
+	home: SCENE_CLOCK_HOME_CLOCK_PAGE,
 	office: '/pages/activity/scene-clock-office',
 	street: '/pages/activity/scene-clock-street',
+}
+
+const HOME_CLOCK_ROUTE = 'pages/activity/scene-clock-home'
+
+export function openSceneClockHomeSetup({ replace = false } = {}) {
+	const url = SCENE_CLOCK_HOME_SETUP_PAGE
+	if (replace) {
+		uni.redirectTo({ url })
+		return
+	}
+	uni.navigateTo({
+		url,
+		fail: () => {
+			uni.redirectTo({ url })
+		},
+	})
+}
+
+export function openSceneClockHomeClock({ replace = false } = {}) {
+	const url = SCENE_CLOCK_HOME_CLOCK_PAGE
+	if (replace) {
+		uni.redirectTo({ url })
+		return
+	}
+	uni.navigateTo({
+		url,
+		fail: () => {
+			uni.redirectTo({ url })
+		},
+	})
+}
+
+/** 布置完成：从今日真分进入则返回上一页，否则进入今日真分页 */
+export function finishSceneClockHomeSetupNavigation() {
+	const pages = getCurrentPages()
+	if (pages.length >= 2) {
+		const prev = pages[pages.length - 2]
+		if (prev && prev.route === HOME_CLOCK_ROUTE) {
+			uni.navigateBack()
+			return
+		}
+	}
+	uni.redirectTo({ url: SCENE_CLOCK_HOME_CLOCK_PAGE })
 }
 
 export function sceneClockHubPagePath(hub) {
@@ -26,13 +73,11 @@ export function buildSceneClockPickUrl(query) {
 
 export function buildSceneClockHubUrl(hub, extraQuery) {
 	const key = normalizeClockHubKey(hub)
-	const base = sceneClockHubPagePath(key)
-	const parts = []
 	if (key === 'home' && extraQuery && String(extraQuery.home_setup || '') === '1') {
-		parts.push('home_setup=1')
+		return SCENE_CLOCK_HOME_SETUP_PAGE
 	}
-	const qs = parts.length ? '?' + parts.join('&') : ''
-	return base + qs
+	const base = sceneClockHubPagePath(key)
+	return base
 }
 
 /** 旧链接 scene-clock-flow?hub= → 新页面 */
