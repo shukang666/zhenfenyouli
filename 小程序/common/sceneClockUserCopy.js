@@ -338,85 +338,60 @@ export function getStreetClaimSubmit() {
 	return '下一步，布置店内投放点位'
 }
 
-/** 沿街：按商铺大类固定需布置的垃圾分类点位（不可增删种类） */
-export function getStreetShopSetupSlotDefs(shopCategory) {
-	const cat = String(shopCategory || 'retail')
-	if (cat === 'catering') {
-		return [
-			{
-				slotKey: 'shop_food',
-				cateKw: '厨余',
-				point_name: '店内厨余投放点',
-				title: '厨余垃圾投放点',
-				desc: '后厨、操作台旁设厨余桶，员工随手分，顾客区可不放。',
-				uploadCta: '拍摄厨余桶/投放区',
-				uploadDone: '已布置，点击可更换',
-				tone: 'food',
-				tag: '餐饮',
-			},
-			{
-				slotKey: 'shop_other_c',
-				cateKw: '其他',
-				point_name: '店内其他垃圾点',
-				title: '其他垃圾投放点',
-				desc: '餐巾纸、一次性用具等进其他桶，与厨余分开。',
-				uploadCta: '拍摄其他垃圾桶位',
-				uploadDone: '已布置，点击可更换',
-				tone: 'other',
-				tag: '餐饮',
-			},
-		]
-	}
-	if (cat === 'life') {
-		return [
-			{
-				slotKey: 'shop_other_l',
-				cateKw: '其他',
-				point_name: '店内其他垃圾点',
-				title: '其他垃圾投放点',
-				desc: '客用纸巾、清洁耗材等，固定在员工易达的位置。',
-				uploadCta: '拍摄其他垃圾投放区',
-				uploadDone: '已布置，点击可更换',
-				tone: 'other',
-				tag: '服务',
-			},
-			{
-				slotKey: 'shop_recycle_l',
-				cateKw: '可回收',
-				point_name: '店内可回收物点',
-				title: '可回收物收集点',
-				desc: '纸箱、瓶罐等集中存放，定期清运或售卖。',
-				uploadCta: '拍摄可回收收集区',
-				uploadDone: '已布置，点击可更换',
-				tone: 'recycle',
-				tag: '服务',
-			},
-		]
-	}
-	return [
-		{
-			slotKey: 'shop_recycle_r',
+/** 沿街：本店主营垃圾种类对应 1 个布置点位（与认领时店铺类型一致） */
+export function getStreetShopSetupSlotDefs(primaryCateKw) {
+	const kw = String(primaryCateKw || '其他').trim()
+	const presets = {
+		厨余: {
+			slotKey: 'shop_primary_food',
+			cateKw: '厨余',
+			point_name: '店内投放点',
+			title: '厨余垃圾投放点',
+			desc: '在后厨或操作台旁固定厨余桶，拍清楚桶或投放区域即可。',
+			uploadCta: '拍摄厨余投放点',
+			uploadDone: '已布置，点击可更换',
+			tone: 'food',
+			tag: '本店主营',
+		},
+		可回收: {
+			slotKey: 'shop_primary_recycle',
 			cateKw: '可回收',
-			point_name: '店内可回收物点',
+			point_name: '店内投放点',
 			title: '可回收物收集点',
-			desc: '纸箱、包装膜等可回收物集中堆放位置。',
-			uploadCta: '拍摄可回收收集区',
+			desc: '纸箱、瓶罐等集中存放处，拍清楚即可。',
+			uploadCta: '拍摄可回收收集点',
 			uploadDone: '已布置，点击可更换',
 			tone: 'recycle',
-			tag: '零售',
+			tag: '本店主营',
 		},
-		{
-			slotKey: 'shop_other_r',
+		有害: {
+			slotKey: 'shop_primary_harm',
+			cateKw: '有害',
+			point_name: '店内投放点',
+			title: '有害垃圾收集点',
+			desc: '专用收集盒或桶，拍清楚位置即可。',
+			uploadCta: '拍摄有害垃圾收集点',
+			uploadDone: '已布置，点击可更换',
+			tone: 'harm',
+			tag: '本店主营',
+		},
+		其他: {
+			slotKey: 'shop_primary_other',
 			cateKw: '其他',
-			point_name: '店内其他垃圾点',
+			point_name: '店内投放点',
 			title: '其他垃圾投放点',
-			desc: '不可回收的包装、杂物等，与可回收分开。',
-			uploadCta: '拍摄其他垃圾投放区',
+			desc: '店内其他垃圾桶或投放区，拍清楚即可。',
+			uploadCta: '拍摄其他垃圾投放点',
 			uploadDone: '已布置，点击可更换',
 			tone: 'other',
-			tag: '零售',
+			tag: '本店主营',
 		},
-	]
+	}
+	if (presets[kw]) return [presets[kw]]
+	for (const key of Object.keys(presets)) {
+		if (kw.indexOf(key) >= 0) return [presets[key]]
+	}
+	return [presets.其他]
 }
 
 export function getStreetSetupPageTitle() {
@@ -424,7 +399,7 @@ export function getStreetSetupPageTitle() {
 }
 
 export function getStreetSetupPageSub() {
-	return '按您店经营类型拍清对应点位，完成后即可按种类打卡'
+	return '按认领时选定的店铺类型，只需布置本店主营那一类垃圾的投放点'
 }
 
 export function getStreetSetupFinishCta() {
@@ -440,11 +415,11 @@ export function getStreetClockShopBarHint() {
 }
 
 export function getStreetClockStep1Title() {
-	return '今天记哪一类？'
+	return '今日打卡种类'
 }
 
 export function getStreetClockStep1Sub() {
-	return '选一类，上传该点位的分类成果'
+	return '已按店铺类型为您匹配主营垃圾种类'
 }
 
 export function getStreetClockStep2Title() {

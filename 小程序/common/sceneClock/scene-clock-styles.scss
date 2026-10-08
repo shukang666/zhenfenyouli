@@ -4144,6 +4144,7 @@
 .scf-st-slot-accent--food { background: linear-gradient(180deg, #7cb342, #558b2f); }
 .scf-st-slot-accent--other { background: linear-gradient(180deg, #78909c, #546e7a); }
 .scf-st-slot-accent--recycle { background: linear-gradient(180deg, #29b6f6, #0288d1); }
+.scf-st-slot-accent--harm { background: linear-gradient(180deg, #ab47bc, #7b1fa2); }
 .scf-st-slot-main {
 	flex: 1;
 	padding: 22rpx 20rpx 20rpx;
@@ -4344,6 +4345,28 @@
 	margin-top: 8rpx;
 	font-size: 20rpx;
 	color: #e65100;
+}
+.scf-sk-single-cate {
+	margin-top: 12rpx;
+	padding: 22rpx 20rpx;
+	border-radius: 12rpx;
+	background: #f4f7f5;
+	border: 2rpx solid #dfe8e3;
+}
+.scf-sk-single-cate-name {
+	display: block;
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #1a2e24;
+}
+.scf-sk-single-cate--food .scf-sk-single-cate-name { color: #558b2f; }
+.scf-sk-single-cate--recycle .scf-sk-single-cate-name { color: #0288d1; }
+.scf-sk-single-cate--other .scf-sk-single-cate-name { color: #546e7a; }
+.scf-sk-single-cate-shop {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 24rpx;
+	color: #888;
 }
 .scf-sk-amount-row {
 	display: flex;

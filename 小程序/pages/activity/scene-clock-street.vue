@@ -720,35 +720,22 @@
 				<text class="scf-sk-shop-edit" @tap="editStreetMerchant">{{ streetEditShop }}</text>
 			</view>
 
-			<view class="scf-sk-panel">
-				<text class="scf-sk-panel-k">STEP 1</text>
+			<view class="scf-sk-panel" v-if="streetClockCateCards.length">
+				<text class="scf-sk-panel-k">种类</text>
 				<text class="scf-sk-panel-title">{{ streetClockStep1Title }}</text>
 				<text class="scf-sk-panel-sub">{{ streetClockStep1Sub }}</text>
-				<scroll-view scroll-x class="scf-sk-cate-scroll" :show-scrollbar="false">
-					<view class="scf-sk-cate-row">
-						<view
-							v-for="card in streetClockCateCards"
-							:key="card.key"
-							class="scf-sk-cate-card"
-							:class="[
-								'scf-sk-cate-card--' + card.tone,
-								{ 'scf-sk-cate-card--on': homeClockCateKey === card.key },
-								{ 'scf-sk-cate-card--lock': !card.ready },
-							]"
-							hover-class="scf-card--press"
-							@tap="selectHomeClockCate(card)"
-						>
-							<text class="scf-sk-cate-tag">{{ card.tag }}</text>
-							<text class="scf-sk-cate-name">{{ card.shortLabel }}</text>
-							<text class="scf-sk-cate-label">{{ card.label }}</text>
-							<text v-if="!card.ready" class="scf-sk-cate-lock">未布置</text>
-						</view>
-					</view>
-				</scroll-view>
+				<view
+					v-if="streetClockCateCards.length === 1"
+					class="scf-sk-single-cate"
+					:class="'scf-sk-single-cate--' + streetClockCateCards[0].tone"
+				>
+					<text class="scf-sk-single-cate-name">{{ streetClockCateCards[0].cateName }}</text>
+					<text class="scf-sk-single-cate-shop" v-if="streetMerchant">{{ streetMerchant.shop_type_name }}</text>
+				</view>
 			</view>
 
 			<view class="scf-sk-panel" v-if="homeClockCateKey">
-				<text class="scf-sk-panel-k">STEP 2</text>
+				<text class="scf-sk-panel-k">STEP 1</text>
 				<text class="scf-sk-panel-title">{{ streetClockStep2Title }}</text>
 				<view class="scf-sk-amount-row">
 					<view
@@ -763,7 +750,7 @@
 			</view>
 
 			<view class="scf-sk-panel scf-sk-panel--photo" v-if="homeClockCateKey">
-				<text class="scf-sk-panel-k">STEP 3</text>
+				<text class="scf-sk-panel-k">STEP 2</text>
 				<text class="scf-sk-panel-title">{{ streetClockPhotoTitle }}</text>
 				<text class="scf-sk-panel-sub">{{ streetClockPhotoSub }}</text>
 				<view

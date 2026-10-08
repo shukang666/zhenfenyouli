@@ -440,7 +440,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				})
 			},
 			streetClockCateCards() {
-				const defs = getStreetShopSetupSlotDefs(this.streetMerchantShopCategory())
+				const defs = getStreetShopSetupSlotDefs(this.streetMerchantPrimaryCateKw())
 				const list = this.cateList || []
 				return defs.map(d => {
 					let cate = null
@@ -473,7 +473,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				const cateKey = this.homeClockCateKey
 				if (!cateKey) return []
 				if (this.isStreetHub) {
-					const defs = getStreetShopSetupSlotDefs(this.streetMerchantShopCategory())
+					const defs = getStreetShopSetupSlotDefs(this.streetMerchantPrimaryCateKw())
 					const def = defs.find(s => s.slotKey === cateKey)
 					if (!def) return []
 					const p = this.findPointForStreetSlot(def, true)
@@ -1693,8 +1693,23 @@ import settings, { uploadUrl } from '@/common/settings'
 				if (t && t.category) return t.category
 				return 'retail'
 			},
+			streetMerchantPrimaryCateKw() {
+				const fromMerchant = String((this.streetMerchant && this.streetMerchant.cate_name) || '').trim()
+				if (fromMerchant) {
+					if (fromMerchant.indexOf('厨余') >= 0) return '厨余'
+					if (fromMerchant.indexOf('有害') >= 0) return '有害'
+					if (fromMerchant.indexOf('可回收') >= 0 && fromMerchant.indexOf('不可') < 0) return '可回收'
+					if (fromMerchant.indexOf('其他') >= 0) return '其他'
+				}
+				const t = this.streetSelectedTypeRow
+				const cn = (t && t.cate_name) || ''
+				if (cn.indexOf('厨余') >= 0) return '厨余'
+				if (cn.indexOf('有害') >= 0) return '有害'
+				if (cn.indexOf('可回收') >= 0 && cn.indexOf('不可') < 0) return '可回收'
+				return '其他'
+			},
 			syncStreetFixedSlots() {
-				const defs = getStreetShopSetupSlotDefs(this.streetMerchantShopCategory())
+				const defs = getStreetShopSetupSlotDefs(this.streetMerchantPrimaryCateKw())
 				this.streetFixedSlots = defs.map(def => {
 					const np = this.findPointForStreetSlot(def)
 					const raw = np ? (np.point_image_raw || '') : ''
@@ -1730,7 +1745,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				return null
 			},
 			isStreetFixedSetupComplete() {
-				const defs = getStreetShopSetupSlotDefs(this.streetMerchantShopCategory())
+				const defs = getStreetShopSetupSlotDefs(this.streetMerchantPrimaryCateKw())
 				for (let i = 0; i < defs.length; i++) {
 					if (!this.findPointForStreetSlot(defs[i], true)) {
 						return false
@@ -1755,6 +1770,10 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.resetHomeClockForm()
 				this.flowStep = 'learn'
 				uni.setNavigationBarTitle({ title: getStreetClockNavTitle() })
+				const cards = this.streetClockCateCards || []
+				if (cards.length === 1 && cards[0].ready) {
+					this.selectHomeClockCate(cards[0])
+				}
 			},
 			chooseStreetFixedPhoto(slotKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
