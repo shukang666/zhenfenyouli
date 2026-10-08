@@ -734,6 +734,49 @@ class ForumController extends ToolController
         $this->success('已删除');
     }
 
+    /** 家庭/沿街：用户在小程序布置的真分点位（只读查看） */
+    public function user_clock_scene_point_index()
+    {
+        $hub = trim((string)$this->request->param('hub_key', ''));
+        $keyword = trim((string)$this->request->param('keyword', ''));
+        $userHubs = array_keys(ClockScenePointModel::userHubLabels());
+        $userHubs[] = 'street';
+        $hubLabels = array_merge(ClockScenePointModel::userHubLabels(), [
+            'street' => '沿街商铺',
+        ]);
+        $query = Db::name('clock_scene_point')->alias('p')
+            ->join('member m', 'm.id = p.user_id', 'LEFT')
+            ->leftJoin('street_shop_merchant sm', 'sm.user_id = p.user_id')
+            ->where('p.source', ClockScenePointModel::SOURCE_USER)
+            ->where('p.user_id', '>', 0)
+            ->field('p.*, m.nickname, m.mobile, sm.shop_name, sm.shop_type_name')
+            ->order('p.update_time desc,p.id desc');
+        if ($hub !== '' && in_array($hub, $userHubs, true)) {
+            if ($hub === 'home') {
+                $query->whereIn('p.hub_key', ['home', 'qinzi']);
+            } else {
+                $query->where('p.hub_key', $hub);
+            }
+        } else {
+            $query->whereIn('p.hub_key', array_merge(['home', 'qinzi', 'street']));
+        }
+        if ($keyword !== '') {
+            $query->where(
+                'm.nickname|m.mobile|p.point_name|p.cate_name|sm.shop_name',
+                'like',
+                '%' . $keyword . '%'
+            );
+        }
+        $list = $query->paginate(20);
+        return $this->fetch('user_clock_scene_point_index', [
+            'list'      => $list,
+            'page'      => $list->render(),
+            'hub_key'   => $hub,
+            'keyword'   => $keyword,
+            'hubLabels' => $hubLabels,
+        ]);
+    }
+
     /** 沿街：用户登记商户（点位由用户在小程序上传） */
     public function street_shop_merchant_index()
     {

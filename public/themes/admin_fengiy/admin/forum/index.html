@@ -36,6 +36,7 @@
     <ul class="nav nav-tabs">
         <li class="active"><a href="{:url('index',['type'=>$params.type])}">列表</a></li>
         <if condition="$params.type==2">
+            <li><a href="{:url('user_clock_scene_point_index')}">用户点位布置</a></li>
             <li><a href="{:url('clock_tutorial_index')}">打卡教程</a></li>
             <li><a href="{:url('clock_scene_guide_index')}">场景分类引导</a></li>
         </if>

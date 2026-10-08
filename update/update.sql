@@ -413,3 +413,13 @@ WHERE `hub_key` = 'office' AND `source` = 1 AND `community_id` <> 0;
 
 UPDATE `cmf_admin_menu` SET `remark` = '办公大楼、回收点地址与示意图（全站共用）'
 WHERE `app` = 'admin' AND `controller` = 'Forum' AND `action` = 'office_recycle_building_index' LIMIT 1;
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT `list_order` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1), 0) - 1,
+    'admin','Forum','user_clock_scene_point_index','','用户点位布置','','家庭/沿街用户小程序上传的布置点位'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='user_clock_scene_point_index' LIMIT 1);
