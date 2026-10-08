@@ -3,23 +3,27 @@
 		<view :class="['scf-page', hubTheme]" v-if="hub">
 		<view class="scf-body scf-body--street-merchant" v-if="isStreetHub && flowStep === 'street_merchant'">
 			<view class="scf-sm-hero">
-				<image
-					v-if="streetMerchantHeroImgUrl"
-					class="scf-sm-hero-img"
-					:src="streetMerchantHeroImgUrl"
-					mode="aspectFill"
-					@error="onStreetMerchantHeroImgError"
-				/>
-				<view class="scf-sm-hero-css" v-else>
-					<view class="scf-sm-hero-kitchen">
-						<view class="scf-sm-bin scf-sm-bin--food"></view>
-						<view class="scf-sm-bin scf-sm-bin--recycle"></view>
-						<view class="scf-sm-bin scf-sm-bin--other"></view>
-					</view>
-				</view>
-				<view class="scf-sm-hero-copy">
-					<text class="scf-sm-hero-title">{{ streetMerchantHeroTitle }}</text>
-					<text class="scf-sm-hero-sub">{{ streetMerchantHeroSub }}</text>
+				<view class="scf-sm-hero-ph" :class="{ 'scf-sm-hero-ph--img': !!streetMerchantHeroImgUrl }">
+					<image
+						v-if="streetMerchantHeroImgUrl"
+						class="scf-sm-hero-img"
+						:src="streetMerchantHeroImgUrl"
+						mode="widthFix"
+						@error="onStreetMerchantHeroImgError"
+					/>
+					<block v-else>
+						<view class="scf-sm-hero-css">
+							<view class="scf-sm-hero-kitchen">
+								<view class="scf-sm-bin scf-sm-bin--food"></view>
+								<view class="scf-sm-bin scf-sm-bin--recycle"></view>
+								<view class="scf-sm-bin scf-sm-bin--other"></view>
+							</view>
+						</view>
+						<view class="scf-sm-hero-copy">
+							<text class="scf-sm-hero-title">{{ streetMerchantHeroTitle }}</text>
+							<text class="scf-sm-hero-sub">{{ streetMerchantHeroSub }}</text>
+						</view>
+					</block>
 				</view>
 			</view>
 

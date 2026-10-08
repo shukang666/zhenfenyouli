@@ -3876,13 +3876,22 @@
 	box-sizing: border-box;
 }
 .scf-sm-hero {
+	padding: 0;
+}
+.scf-sm-hero-ph {
 	position: relative;
-	height: 320rpx;
+	min-height: 320rpx;
 	overflow: hidden;
+	background: linear-gradient(145deg, #dfe8e0 0%, #c8d4cc 40%, #b8c4bc 100%);
+}
+.scf-sm-hero-ph--img {
+	min-height: 0;
+	background: transparent;
 }
 .scf-sm-hero-img {
+	display: block;
 	width: 100%;
-	height: 100%;
+	vertical-align: top;
 }
 .scf-sm-hero-css {
 	position: absolute;

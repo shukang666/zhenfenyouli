@@ -712,7 +712,7 @@ import settings, { uploadUrl } from '@/common/settings'
 			streetMerchantHeroImgUrl() {
 				if (!this.streetMerchantHeroImgOk) return ''
 				const base = this.scenePickCosBase
-				return base + 'street-merchant-hero.jpg'
+				return base + 'street-merchant-hero.png'
 			},
 			streetMerchantTypeChips() {
 				const gid = this.streetActiveCategoryId
