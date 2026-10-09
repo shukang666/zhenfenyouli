@@ -174,13 +174,13 @@ class QxlQuizController extends AuthController
         $draw = QxlLearnModuleService::MODULE_QUIZ_DRAW;
         $questions = QxlLearnModuleService::drawModuleQuestions($category, $draw);
         if ($questions === null) {
-            $this->error('该模块题库不足 ' . $draw . ' 道题，请联系管理员补充');
+            $this->error('该模块暂无题目，请联系管理员补充');
         }
         $this->success('success', [
             'category'   => $category,
             'passed'     => 0,
             'questions'  => $questions,
-            'draw_count' => $draw,
+            'draw_count' => count($questions),
         ]);
     }
 
@@ -218,9 +218,17 @@ class QxlQuizController extends AuthController
         }
 
         $answers = $this->parseAnswers($rawParams);
-        $draw = QxlLearnModuleService::MODULE_QUIZ_DRAW;
-        if (count($answers) !== $draw) {
-            $this->error('请答完本模块 ' . $draw . ' 道题');
+        $draw = count($answers);
+        if ($draw < 1) {
+            $this->error('请答完本模块测验');
+        }
+        $poolSize = count(QxlLearnModuleService::questionIdsForCategory($category));
+        $maxDraw = min(QxlLearnModuleService::MODULE_QUIZ_DRAW, $poolSize);
+        if ($poolSize < 1) {
+            $this->error('该模块暂无题目');
+        }
+        if ($draw > $maxDraw) {
+            $this->error('题目数量不对，请刷新后重试');
         }
 
         $qids = [];

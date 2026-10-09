@@ -99,11 +99,12 @@ class QxlLearnModuleService
     {
         $ids = self::questionIdsForCategory($category);
         $limit = max(1, intval($limit));
-        if (count($ids) < $limit) {
+        if (empty($ids)) {
             return null;
         }
         shuffle($ids);
-        $picked = array_slice($ids, 0, $limit);
+        // 题库少于默认抽题数时，全部题目参与测验
+        $picked = count($ids) <= $limit ? $ids : array_slice($ids, 0, $limit);
         $rows = Db::name('qxl_quiz_question')
             ->where('id', 'in', $picked)
             ->where('status', 1)
@@ -234,12 +235,13 @@ class QxlLearnModuleService
                 ];
             }
 
+            $poolN = intval($poolMap[$cat] ?? 0);
             $units[] = [
                 'category'    => $cat,
                 'subtitle'    => $def['subtitle'],
                 'passed'      => $passed ? 1 : 0,
-                'pool_count'  => $poolMap[$cat] ?? 0,
-                'draw_count'  => self::MODULE_QUIZ_DRAW,
+                'pool_count'  => $poolN,
+                'draw_count'  => $poolN > 0 ? min(self::MODULE_QUIZ_DRAW, $poolN) : 0,
                 'articles'    => $learnArticles,
             ];
         }

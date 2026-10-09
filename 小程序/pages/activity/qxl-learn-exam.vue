@@ -22,14 +22,23 @@
 
 		<view class="feed-stream" v-else>
 			<view class="feed-unit" v-for="(unit, uIdx) in units" :key="unit.category">
-				<view class="feed-unit-head">
-					<view class="feed-mod-tag" :style="modTagStyle(unit.category)">
-						<text class="feed-mod-emoji">{{ modEmoji(unit.category) }}</text>
-						<text class="feed-mod-name">{{ unit.category }}</text>
+				<view class="feed-unit-head" hover-class="feed-unit-head--press" @tap="toggleUnitExpand(unit.category)">
+					<view class="feed-unit-head-main">
+						<view class="feed-mod-tag" :style="modTagStyle(unit.category)">
+							<text class="feed-mod-emoji">{{ modEmoji(unit.category) }}</text>
+							<text class="feed-mod-name">{{ unit.category }}</text>
+						</view>
+						<text class="feed-unit-idx">{{ unit.subtitle }}</text>
+						<text class="feed-unit-status" v-if="unit.passed">已过关</text>
+						<text class="feed-unit-status feed-unit-status--todo" v-else-if="isUnitExpanded(unit.category)">进行中</text>
 					</view>
-					<text class="feed-unit-idx">{{ unit.subtitle }}</text>
+					<view class="feed-unit-toggle">
+						<text class="feed-unit-toggle-t">{{ isUnitExpanded(unit.category) ? '收起' : '展开' }}</text>
+						<text class="feed-unit-toggle-arrow" :class="{ 'is-open': isUnitExpanded(unit.category) }">›</text>
+					</view>
 				</view>
 
+				<block v-if="isUnitExpanded(unit.category)">
 				<view class="feed-learn" :style="learnBorderStyle(unit.category)">
 					<view class="feed-phase-row">
 						<text class="feed-phase feed-phase--learn">学习</text>
@@ -66,7 +75,7 @@
 					<view class="feed-phase-row">
 						<text class="feed-phase feed-phase--exam">考试</text>
 						<text class="feed-phase-sub" v-if="unit.passed">本模块已过关</text>
-						<text class="feed-phase-sub" v-else>随机 {{ drawCount }} 题 · 未全对将重新抽题</text>
+						<text class="feed-phase-sub" v-else>{{ unitExamSub(unit) }}</text>
 					</view>
 
 					<view class="feed-exam-done" v-if="unit.passed">
@@ -100,8 +109,13 @@
 					</block>
 
 					<view class="feed-exam-empty" v-else>
-						<text>题库不足 {{ drawCount }} 题（当前 {{ unit.pool_count }} 题），请联系管理员</text>
+						<text v-if="(unit.pool_count || 0) < 1">该模块暂无题目，请联系管理员</text>
+						<text v-else>题目加载失败，请下拉刷新或稍后再试</text>
 					</view>
+				</view>
+				</block>
+				<view class="feed-unit-folded" v-else @tap="toggleUnitExpand(unit.category)">
+					<text class="feed-unit-folded-t">{{ unit.passed ? '本模块已过关，点击展开回看' : '点击展开学习与测验' }}</text>
 				</view>
 			</view>
 			<view class="feed-footer-space"></view>
@@ -129,6 +143,7 @@ export default {
 			answersMap: {},
 			failMap: {},
 			submittingCat: '',
+			expandedMap: {},
 		}
 	},
 	computed: {
@@ -156,6 +171,27 @@ export default {
 		},
 		moduleQuestions(category) {
 			return this.quizMap[category] || []
+		},
+		isUnitExpanded(category) {
+			return !!this.expandedMap[category]
+		},
+		unitExamSub(unit) {
+			const n = this.unitQuizDrawCount(unit)
+			if (n < 1) return '暂无测验题'
+			const pool = unit.pool_count || 0
+			if (pool > 0 && pool < (this.drawCount || 3)) {
+				return '共 ' + n + ' 题（题库 ' + pool + ' 题全出）· 未全对将重新抽题'
+			}
+			return '随机 ' + n + ' 题 · 未全对将重新抽题'
+		},
+		unitQuizDrawCount(unit) {
+			const qs = this.moduleQuestions(unit.category)
+			if (qs.length) return qs.length
+			const planned = unit.draw_count || 0
+			if (planned > 0) return planned
+			const pool = unit.pool_count || 0
+			const cap = this.drawCount || 3
+			return pool > 0 ? Math.min(cap, pool) : cap
 		},
 		modEmoji(category) {
 			return getModuleUi(category).emoji || '📖'
@@ -186,8 +222,9 @@ export default {
 					this.quizMap = {}
 					this.answersMap = {}
 					this.failMap = {}
+					this.applyDefaultExpanded()
 					this.units.forEach(u => {
-						if (!u.passed) {
+						if (!u.passed && this.isUnitExpanded(u.category)) {
 							this.fetchModuleQuiz(u.category)
 						}
 					})
@@ -208,6 +245,12 @@ export default {
 						this.refreshUnitPassed(category)
 					} else {
 						this.$set(this.quizMap, category, res.data.questions || [])
+						if (res.data.draw_count) {
+							const idx = this.units.findIndex(u => u.category === category)
+							if (idx >= 0) {
+								this.$set(this.units[idx], 'draw_count', res.data.draw_count)
+							}
+						}
 					}
 				}
 			}).catch(err => {
@@ -220,6 +263,37 @@ export default {
 			const idx = this.units.findIndex(u => u.category === category)
 			if (idx >= 0) {
 				this.$set(this.units[idx], 'passed', 1)
+			}
+		},
+		applyDefaultExpanded() {
+			const map = {}
+			let firstTodo = -1
+			for (let i = 0; i < (this.units || []).length; i++) {
+				if (!this.units[i].passed) {
+					firstTodo = i
+					break
+				}
+			}
+			for (let j = 0; j < (this.units || []).length; j++) {
+				const cat = this.units[j].category
+				map[cat] = j === firstTodo
+			}
+			this.expandedMap = map
+		},
+		toggleUnitExpand(category) {
+			if (!category) return
+			const next = !this.isUnitExpanded(category)
+			this.$set(this.expandedMap, category, next)
+			if (next) {
+				const unit = (this.units || []).find(u => u.category === category)
+				if (
+					unit &&
+					!unit.passed &&
+					!this.moduleQuestions(category).length &&
+					!this.quizLoadingMap[category]
+				) {
+					this.fetchModuleQuiz(category)
+				}
 			}
 		},
 		questionOptions(q) {
@@ -399,11 +473,68 @@ export default {
 }
 .feed-unit-head {
 	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16rpx;
+	margin-bottom: 16rpx;
+	padding: 16rpx 12rpx;
+	background: #fff;
+	border-radius: 20rpx;
+	border: 1rpx solid #dceee4;
+	box-shadow: 0 8rpx 20rpx rgba(15, 110, 86, 0.06);
+}
+.feed-unit-head--press {
+	opacity: 0.92;
+}
+.feed-unit-head-main {
+	flex: 1;
+	min-width: 0;
+	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	gap: 10rpx;
-	margin-bottom: 16rpx;
-	padding: 0 4rpx;
+}
+.feed-unit-status {
+	font-size: 22rpx;
+	font-weight: 700;
+	color: #0f6e56;
+}
+.feed-unit-status--todo {
+	color: #9a6700;
+}
+.feed-unit-toggle {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 4rpx;
+}
+.feed-unit-toggle-t {
+	font-size: 24rpx;
+	color: #6b7c75;
+	font-weight: 600;
+}
+.feed-unit-toggle-arrow {
+	font-size: 36rpx;
+	color: #0f6e56;
+	line-height: 1;
+	transform: rotate(90deg);
+	transition: transform 0.2s ease;
+}
+.feed-unit-toggle-arrow.is-open {
+	transform: rotate(-90deg);
+}
+.feed-unit-folded {
+	margin-bottom: 8rpx;
+	padding: 20rpx 24rpx;
+	border-radius: 16rpx;
+	background: #f3f8f5;
+	border: 1rpx dashed #c5e8d8;
+}
+.feed-unit-folded-t {
+	font-size: 24rpx;
+	color: #6b7c75;
 }
 .feed-mod-tag {
 	display: flex;
