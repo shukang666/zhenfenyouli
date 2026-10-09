@@ -1404,12 +1404,9 @@ class ActiveController extends AuthController
 
         $weeklyQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
         $lightQuery = ActiveModel::miniProgramVisible()->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
-        $recentQuery = ActiveModel::miniProgramVisible();
-
         return [
             'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
             'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
-            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'create_time desc, id desc'),
         ];
     }
 

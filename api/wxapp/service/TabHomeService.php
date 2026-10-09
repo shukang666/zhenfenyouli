@@ -67,11 +67,11 @@ class TabHomeService
             $sections = $this->buildActivityPageSections();
             $data['weekly_list'] = $sections['weekly_list'];
             $data['light_list'] = $sections['light_list'];
-            $data['recent_list'] = $sections['recent_list'];
+            // 近期活动区暂时下线，不返回 recent_list
         }
-        $pager = $this->paginateActiveListForTab($page, $pageSize, $tag);
-        $data['active_list'] = $pager['list'];
-        $data['active_total'] = $pager['total'];
+        // 底部「全部活动」列表暂时下线，不查分页列表
+        $data['active_list'] = [];
+        $data['active_total'] = 0;
         $data['active_page_size'] = $pageSize;
         return $data;
     }
@@ -446,12 +446,9 @@ class TabHomeService
         $lightTag = '轻活动';
         $weeklyQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
         $lightQuery = ActiveModel::miniProgramVisible()->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
-        // 近期活动：含 Web 式；按创建时间取最新 2 条
-        $recentQuery = ActiveModel::miniProgramVisible();
         return [
             'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
             'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
-            'recent_list' => $this->fetchActiveListSlice($recentQuery, 2, 'create_time desc, id desc'),
         ];
     }
 

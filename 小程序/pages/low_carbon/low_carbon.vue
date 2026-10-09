@@ -396,7 +396,7 @@
       </view>
     </view>
 
-    <!-- 近期活动：日期台历 + 信息流，不像海报也不像宫格 -->
+    <!-- 近期活动（暂时隐藏，恢复时同步 TabHomeService recent_list）
     <view class="fb-section fb-recent-act" v-if="recent_list.length > 0">
       <view class="fb-section-header">
         <view class="fb-hd">
@@ -439,6 +439,7 @@
         </view>
       </view>
     </view>
+    -->
 
     <!-- 标签栏：热门活动 + 动态标签（已隐藏，保留代码备用） -->
     <view class="fb-tab-bar" v-if="false">
@@ -472,7 +473,7 @@
       </scroll-view>
     </view>
 
-    <!-- 活动列表 -->
+    <!-- 全部活动列表（暂时隐藏，恢复时同步 TabHomeService active_list 分页）
     <view class="fb-act-list">
       <view class="fb-section-header fb-act-list-hd">
         <view class="fb-hd">
@@ -539,6 +540,7 @@
         </view>
       </view>
     </view>
+    -->
     <page-guide page="low_carbon"></page-guide>
   </view>
 </template>
@@ -777,7 +779,7 @@ export default {
      * 活动 Tab 唯一数据口：首屏带 banner/标签/推荐区；分页或筛标签只增量列表字段
      */
     fetchActivityTabHome({ page = 1, tag = "" } = {}) {
-      const params = { page, page_size: ACTIVE_LIST_PREVIEW_SIZE };
+      const params = { page };
       if (tag) params.tag = tag;
       return this.$u.api.get_activity_tab_home(params).then((res) => {
         const data = res.data || {};
@@ -793,16 +795,16 @@ export default {
         if (Object.prototype.hasOwnProperty.call(data, "light_list")) {
           this.light_list = data.light_list || [];
         }
+        /* 近期活动 / 全部活动暂时下线，接口不再返回列表数据
         if (Object.prototype.hasOwnProperty.call(data, "recent_list")) {
           this.recent_list = data.recent_list || [];
         }
         const list = data.active_list || [];
-        if (page === 1) {
-          this.active_list = list;
-        } else {
-          this.active_list.push(...list);
-        }
-        this.active_total = data.active_total != null ? data.active_total : list.length;
+        ...
+        */
+        this.recent_list = [];
+        this.active_list = [];
+        this.active_total = 0;
         this.active_page = page;
       });
     },
