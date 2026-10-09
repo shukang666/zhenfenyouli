@@ -14,26 +14,48 @@
 					<text class="qxl-journey-intro-text">先读懂七贤岭，再用镜头记录与分享</text>
 				</view>
 
-				<view class="qxl-journey-step" @tap="goLearnExam">
+				<view class="qxl-journey-step qxl-journey-step--learn" @tap="goLearnExam">
 					<view class="qxl-step-rail">
 						<view class="qxl-step-badge">
 							<text class="qxl-step-badge-text">认识</text>
 						</view>
 						<view class="qxl-step-line" v-if="momentActive || momentLoading"></view>
 					</view>
-					<view class="qxl-step-card qxl-step-card--learn">
-						<view class="qxl-step-main">
-							<text class="qxl-step-title">七贤岭学考</text>
-							<text class="qxl-step-desc">边读边测，过关解锁下一篇</text>
-							<view class="qxl-step-progress">
-								<view class="qxl-step-progress-track">
-									<view class="qxl-step-progress-fill" :style="{ width: learnProgressWidth }"></view>
-								</view>
-								<text class="qxl-step-progress-text">{{ learnProgressText }}</text>
+					<view class="qxl-step-card qxl-step-card--learn qxl-step-card--learn-feature">
+						<view class="qxl-learn-cover">
+							<image
+								v-if="learnCardCoverResolved"
+								class="qxl-learn-cover-img"
+								:src="learnCardCoverResolved"
+								mode="aspectFill"
+								lazy-load
+							></image>
+							<view v-else class="qxl-learn-cover-ph">
+								<text class="qxl-learn-cover-ph-icon">📖</text>
+								<text class="qxl-learn-cover-ph-text">七贤岭 · 读与测</text>
 							</view>
 						</view>
-						<view class="qxl-step-go">
-							<text>开始</text>
+						<view class="qxl-learn-content">
+							<text class="qxl-learn-kicker">七贤岭学考</text>
+							<text class="qxl-learn-lead">用短文认识七贤岭的人文与生态，读完立刻做本篇小测验。</text>
+							<text class="qxl-learn-detail">题目都来自刚读的内容，全部答对才能解锁下一篇，循序渐进把七贤岭「读懂」。</text>
+							<view class="qxl-learn-tags">
+								<text class="qxl-learn-tag">读短文</text>
+								<text class="qxl-learn-tag">答本篇</text>
+								<text class="qxl-learn-tag">过关解锁</text>
+							</view>
+							<view class="qxl-learn-foot">
+								<view class="qxl-learn-progress">
+									<view class="qxl-step-progress-track qxl-step-progress-track--lg">
+										<view class="qxl-step-progress-fill" :style="{ width: learnProgressWidth }"></view>
+									</view>
+									<text class="qxl-step-progress-text">{{ learnProgressText }}</text>
+								</view>
+								<view class="qxl-learn-cta">
+									<text>{{ learnCtaText }}</text>
+									<text class="qxl-learn-cta-arrow">›</text>
+								</view>
+							</view>
 						</view>
 					</view>
 				</view>
@@ -77,10 +99,14 @@
 <script>
 import { openActiveDetailWithContext, isWebDisplayActive } from '@/common/activeOpen.js'
 
+// 学考卡片顶图：换成你的图片 URL（本地 static 或 COS 均可），留空则显示占位
+const QXL_LEARN_CARD_COVER = ''
+
 export default {
 	data() {
 		return {
 			heroBgImage: '',
+			learnCardCover: QXL_LEARN_CARD_COVER,
 			learnPassed: 0,
 			learnTotal: 0,
 			momentActive: null,
@@ -88,6 +114,19 @@ export default {
 		}
 	},
 	computed: {
+		learnCardCoverResolved() {
+			const raw = (this.learnCardCover || '').trim()
+			if (!raw) return ''
+			if (typeof this.$u !== 'undefined' && this.$u.func && typeof this.$u.func.resolveAssetUrl === 'function') {
+				return this.$u.func.resolveAssetUrl(raw)
+			}
+			return raw
+		},
+		learnCtaText() {
+			if (this.learnTotal && this.learnPassed >= this.learnTotal) return '回顾学考'
+			if (this.learnPassed > 0) return '继续学考'
+			return '进入学考'
+		},
 		heroBgStyle() {
 			if (this.heroBgImage) {
 				return `background-image: linear-gradient(180deg, rgba(15,110,86,0.55) 0%, rgba(15,110,86,0.2) 100%), url(${this.heroBgImage}); background-size: cover; background-position: center;`
@@ -233,6 +272,12 @@ $qxl-green-border: #c5e8d8;
 	gap: 16rpx;
 	padding: 20rpx 0 8rpx;
 }
+.qxl-journey-step--learn {
+	align-items: flex-start;
+}
+.qxl-journey-step--learn .qxl-step-line {
+	min-height: 80rpx;
+}
 .qxl-journey-step:active .qxl-step-card {
 	opacity: 0.92;
 }
@@ -290,6 +335,120 @@ $qxl-green-border: #c5e8d8;
 	background: $qxl-green-soft;
 	border: 1rpx solid $qxl-green-border;
 }
+.qxl-step-card--learn-feature {
+	flex-direction: column;
+	align-items: stretch;
+	padding: 0;
+	overflow: hidden;
+	gap: 0;
+}
+
+.qxl-learn-cover {
+	width: 100%;
+	height: 280rpx;
+	background: linear-gradient(135deg, #0d5c48 0%, $qxl-green-mid 55%, #7fd4b0 100%);
+	position: relative;
+}
+.qxl-learn-cover-img {
+	width: 100%;
+	height: 280rpx;
+	display: block;
+}
+.qxl-learn-cover-ph {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12rpx;
+	background: linear-gradient(135deg, rgba(13, 92, 72, 0.92) 0%, rgba(31, 169, 113, 0.85) 100%);
+}
+.qxl-learn-cover-ph-icon {
+	font-size: 56rpx;
+	line-height: 1;
+	opacity: 0.95;
+}
+.qxl-learn-cover-ph-text {
+	font-size: 26rpx;
+	color: rgba(255, 255, 255, 0.92);
+	letter-spacing: 4rpx;
+	font-weight: 600;
+}
+
+.qxl-learn-content {
+	padding: 28rpx 24rpx 24rpx;
+	display: flex;
+	flex-direction: column;
+	gap: 12rpx;
+}
+.qxl-learn-kicker {
+	font-size: 34rpx;
+	font-weight: 800;
+	color: #1a2e28;
+	line-height: 1.35;
+}
+.qxl-learn-lead {
+	font-size: 26rpx;
+	color: #3d524a;
+	line-height: 1.55;
+	font-weight: 600;
+}
+.qxl-learn-detail {
+	font-size: 24rpx;
+	color: #5a6b63;
+	line-height: 1.55;
+}
+.qxl-learn-tags {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 12rpx;
+	margin-top: 4rpx;
+}
+.qxl-learn-tag {
+	font-size: 22rpx;
+	color: $qxl-green;
+	background: #fff;
+	border: 1rpx solid $qxl-green-border;
+	padding: 8rpx 18rpx;
+	border-radius: 999rpx;
+	font-weight: 600;
+}
+.qxl-learn-foot {
+	margin-top: 12rpx;
+	padding-top: 20rpx;
+	border-top: 1rpx solid rgba(15, 110, 86, 0.12);
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+}
+.qxl-learn-progress {
+	width: 100%;
+}
+.qxl-step-progress-track--lg {
+	height: 12rpx;
+}
+.qxl-learn-cta {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	gap: 8rpx;
+	height: 80rpx;
+	border-radius: 40rpx;
+	background: linear-gradient(90deg, $qxl-green 0%, $qxl-green-mid 100%);
+	color: #fff;
+	font-size: 28rpx;
+	font-weight: 700;
+	box-shadow: 0 8rpx 20rpx rgba(15, 110, 86, 0.22);
+}
+.qxl-learn-cta-arrow {
+	font-size: 36rpx;
+	font-weight: 400;
+	line-height: 1;
+	margin-top: -2rpx;
+}
 .qxl-step-card--moment {
 	background: #f8fbf9;
 	border: 1rpx solid $qxl-green-border;
@@ -345,21 +504,6 @@ $qxl-green-border: #c5e8d8;
 	margin-top: 6rpx;
 	font-size: 20rpx;
 	color: #5a7a6e;
-}
-
-.qxl-step-go {
-	flex-shrink: 0;
-	width: 88rpx;
-	height: 88rpx;
-	border-radius: 50%;
-	background: #fff;
-	border: 2rpx solid rgba(15, 110, 86, 0.2);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: $qxl-green;
-	font-size: 26rpx;
-	font-weight: 700;
 }
 
 .qxl-moment-thumb {
