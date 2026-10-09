@@ -292,6 +292,12 @@
 					}
 				},
 				{
+					"path": "activity-spot-hub",
+					"style": {
+						"navigationBarTitleText": "专题活动"
+					}
+				},
+				{
 					"path": "xsdld",
 					"style": {
 						"navigationBarTitleText": "小手拉大手"

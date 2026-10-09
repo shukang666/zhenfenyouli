@@ -38,8 +38,8 @@ export const PAGE_GUIDES = {
 			{
 				selector: '#guide-fb-qxl',
 				prefer: 'below',
-				title: '我和七贤岭',
-				desc: '专题主推位：认识、探索、记录、守护七贤岭，点「进入专题」打开。'
+				title: '社区专题',
+				desc: '我和七贤岭、徒步拾遗、绿色二手集市、垃圾真分小课堂四个专题，点卡片进入；后三个可再选分会场。'
 			},
 			{
 				selector: '#guide-fb-light-task',

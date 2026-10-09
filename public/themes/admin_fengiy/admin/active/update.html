@@ -68,6 +68,20 @@
             </div>
         </div>
 
+        <php>$spot_key_val = isset($item['spot_key']) ? trim($item['spot_key']) : '';</php>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动专题分会场:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="spot_key" class="form-control">
+                    <option value="" <if condition="$spot_key_val === ''">selected</if>>— 不属于专题分会场 —</option>
+                    <option value="hiking" <if condition="$spot_key_val === 'hiking'">selected</if>>徒步拾遗</option>
+                    <option value="flea_market" <if condition="$spot_key_val === 'flea_market'">selected</if>>七贤岭绿色二手集市</option>
+                    <option value="zhenfen_class" <if condition="$spot_key_val === 'zhenfen_class'">selected</if>>垃圾真分小课堂</option>
+                </select>
+                <p class="help-block" style="font-size:12px;color:#888;margin-top:4px;">与「我和七贤岭」平级的三个专题：此处标记的活动作为<strong>分会场</strong>展示在对应专题页；二手集市另可在后台维护场次表。与七贤岭分类可同时为空，避免重复展示。</p>
+            </div>
+        </div>
+
         <div class="form-group">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>名称:</label>
             <div class="col-md-6 col-sm-10">

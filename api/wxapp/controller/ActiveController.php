@@ -22,6 +22,7 @@ use app\admin\model\active\ActiveClockActionModel;
 use app\admin\model\active\ActiveClockActionFormModel;
 use app\admin\model\active\ActiveClockActionUserModel;
 use app\admin\model\active\ActiveClockPushUserModel;
+use api\wxapp\service\ActivitySpotService;
 use app\admin\model\forum\ForumCommentModel;
 use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\goods\GoodsModel;
@@ -373,6 +374,51 @@ class ActiveController extends AuthController
             $this->success('请求成功', $item);
         }
         $this->success('请求成功', $list);
+    }
+
+    /** 活动 Tab 四大专题入口（我和七贤岭 + 三个分会场专题） */
+    public function get_activity_spot_modules()
+    {
+        $this->success('请求成功', ActivitySpotService::moduleList());
+    }
+
+    /** 专题分会场列表（徒步拾遗 / 二手集市 / 真分小课堂） */
+    public function get_activity_spot_venues()
+    {
+        $spotKey = trim((string)$this->request->param('spot_key', ''));
+        if (!ActivitySpotService::isValidSpotKey($spotKey)) {
+            $this->error('专题不存在');
+        }
+        $module = null;
+        foreach (ActivitySpotService::moduleList() as $m) {
+            if ($m['key'] === $spotKey) {
+                $module = $m;
+                break;
+            }
+        }
+        $venues = ActivitySpotService::venueList($spotKey);
+        foreach ($venues as &$row) {
+            if (($row['kind'] ?? '') !== 'active') {
+                continue;
+            }
+            $active = ActiveModel::miniProgramVisible()->where('id', (int)$row['active_id'])->find();
+            if (empty($active)) {
+                continue;
+            }
+            $active = $this->applyActiveListItemFields($active);
+            $row['thumb'] = $active['thumb'];
+            $row['active_count'] = (int)$active['active_count'];
+            $row['date_text'] = !empty($active['date']) ? date('Y-m-d', (int)$active['date']) : $row['date_text'];
+            $row['display_mode'] = (int)$active['display_mode'];
+            $row['web_url'] = (string)($active['web_url'] ?? '');
+            $row['web_launch_url'] = (string)($active['web_launch_url'] ?? '');
+            $row['web_page_url'] = (string)($active['web_page_url'] ?? '');
+        }
+        unset($row);
+        $this->success('请求成功', [
+            'module' => $module,
+            'venues' => $venues,
+        ]);
     }
 
     /**

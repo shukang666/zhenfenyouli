@@ -165,38 +165,27 @@
       </view>
     </view>
 
-    <!-- 我和七贤岭：独立主推位（非快捷入口，后续可扩展专题能力） -->
-    <view class="fb-qxl-spotlight" id="guide-fb-qxl">
-      <view
-        class="fb-qxl-spotlight-card"
-        hover-class="fb-qxl-spotlight-press"
-        :hover-stay-time="80"
-        @click="gotoQxl"
-      >
-        <view class="fb-qxl-spotlight-glow fb-qxl-spotlight-glow--a"></view>
-        <view class="fb-qxl-spotlight-glow fb-qxl-spotlight-glow--b"></view>
-        <view class="fb-qxl-spotlight-inner">
-          <view class="fb-qxl-spotlight-copy">
-            <view class="fb-qxl-spotlight-badge-row">
-              <text class="fb-qxl-spotlight-badge">专题</text>
-              <text class="fb-qxl-spotlight-kicker">山野社区</text>
-            </view>
-            <view class="fb-qxl-spotlight-title-row">
-              <text class="fb-qxl-spotlight-emoji">⛰️</text>
-              <text class="fb-qxl-spotlight-title">我和七贤岭</text>
-            </view>
-            <text class="fb-qxl-spotlight-desc">一起守护这片绿水青山</text>
-            <view class="fb-qxl-spotlight-tags">
-              <text class="fb-qxl-spotlight-tag">认识</text>
-              <text class="fb-qxl-spotlight-tag">探索</text>
-              <text class="fb-qxl-spotlight-tag">记录</text>
-              <text class="fb-qxl-spotlight-tag">守护</text>
-            </view>
-          </view>
-          <view class="fb-qxl-spotlight-cta">
-            <text class="fb-qxl-spotlight-cta-label">进入专题</text>
-            <!-- <text class="fb-qxl-spotlight-cta-arrow">›</text> -->
-          </view>
+    <!-- 四大专题：我和七贤岭 + 徒步拾遗 / 绿色二手集市 / 垃圾真分小课堂 -->
+    <view class="fb-section fb-spot-modules" id="guide-fb-qxl">
+      <view class="fb-section-header">
+        <view class="fb-hd">
+          <view class="fb-entry-kicker-dot"></view>
+          <text class="fb-section-title">社区专题</text>
+        </view>
+      </view>
+      <view class="fb-spot-grid">
+        <view
+          class="fb-spot-card"
+          :class="'fb-spot-card--' + mod.key"
+          v-for="mod in spot_modules"
+          :key="mod.key"
+          hover-class="fb-press"
+          :hover-stay-time="80"
+          @click="gotoSpotModule(mod)"
+        >
+          <text class="fb-spot-emoji">{{ mod.emoji }}</text>
+          <text class="fb-spot-name">{{ mod.name }}</text>
+          <text class="fb-spot-sub u-line-1">{{ mod.subtitle }}</text>
         </view>
       </view>
     </view>
@@ -593,6 +582,36 @@ export default {
       recent_list: [],
       // 5 大活动分类（硬编码，后台新增不显示）
       // community_cate_id 对应数据库 cmf_active_community_cate.id
+      spot_modules: [
+        {
+          key: "qxl",
+          name: "我和七贤岭",
+          subtitle: "发现 · 玩 · 记录 · 守护",
+          emoji: "⛰️",
+          entry_type: "qxl_page",
+        },
+        {
+          key: "hiking",
+          name: "徒步拾遗",
+          subtitle: "边走边捡 · 洁净山野",
+          emoji: "🥾",
+          entry_type: "spot_hub",
+        },
+        {
+          key: "flea_market",
+          name: "七贤岭绿色二手集市",
+          subtitle: "闲置循环 · 绿色生活",
+          emoji: "♻️",
+          entry_type: "spot_hub",
+        },
+        {
+          key: "zhenfen_class",
+          name: "垃圾真分小课堂",
+          subtitle: "学分类 · 真投放",
+          emoji: "📗",
+          entry_type: "spot_hub",
+        },
+      ],
       main_categories: [
         {
           id: 1,
@@ -714,7 +733,10 @@ export default {
       this.active_page = 1;
       this.active_total = 0;
       try {
-        await this.fetchActivityTabHome({ page: 1 });
+        await Promise.all([
+          this.fetchActivityTabHome({ page: 1 }),
+          this.loadSpotModules(),
+        ]);
       } catch (e) {
         console.log("数据加载失败:", e);
       } finally {
@@ -896,6 +918,29 @@ export default {
     gotoStreetShop() {
       console.log("[SCF-DEBUG] low_carbon gotoStreetShop", { isLogin: this.isLogin });
       openSceneClockHub(this, "street");
+    },
+
+    async loadSpotModules() {
+      try {
+        const res = await this.$u.api.get_activity_spot_modules();
+        const list = res.data || [];
+        if (Array.isArray(list) && list.length >= 4) {
+          this.spot_modules = list;
+        }
+      } catch (e) {
+        /* 保留本地默认四项 */
+      }
+    },
+
+    gotoSpotModule(mod) {
+      if (!mod || !mod.key) return;
+      if (mod.entry_type === "qxl_page" || mod.key === "qxl") {
+        this.gotoQxl();
+        return;
+      }
+      this.$u.route(
+        `/pages/activity/activity-spot-hub?spot=${mod.key}&name=${encodeURIComponent(mod.name || "")}`,
+      );
     },
 
     // 我和七贤岭入口
@@ -1559,7 +1604,61 @@ export default {
   margin-top: -4rpx;
 }
 
-/* ===== 我和七贤岭 · 活动页独立主推位 ===== */
+/* ===== 社区专题 · 四大平级入口 ===== */
+.fb-spot-modules {
+  padding-top: 8rpx;
+}
+.fb-spot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  padding: 0 4rpx 8rpx;
+}
+.fb-spot-card {
+  border-radius: 20rpx;
+  padding: 24rpx 20rpx 20rpx;
+  min-height: 168rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+.fb-spot-card--qxl {
+  background: linear-gradient(145deg, #e8f5e9 0%, #b7e4c7 100%);
+}
+.fb-spot-card--hiking {
+  background: linear-gradient(145deg, #d8f3dc 0%, #95d5b2 100%);
+}
+.fb-spot-card--flea_market {
+  background: linear-gradient(145deg, #ecfdf3 0%, #74c69d 100%);
+}
+.fb-spot-card--zhenfen_class {
+  background: linear-gradient(145deg, #e7f0fe 0%, #a8dadc 100%);
+}
+.fb-spot-emoji {
+  font-size: 40rpx;
+  line-height: 1;
+}
+.fb-spot-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1b4332;
+  line-height: 1.3;
+}
+.fb-spot-card--zhenfen_class .fb-spot-name {
+  color: #0d3b66;
+}
+.fb-spot-sub {
+  font-size: 20rpx;
+  color: rgba(27, 67, 50, 0.75);
+  line-height: 1.35;
+}
+.fb-spot-card--zhenfen_class .fb-spot-sub {
+  color: rgba(13, 59, 102, 0.72);
+}
+
+/* ===== 我和七贤岭 · 活动页独立主推位（已并入专题网格，样式保留供其它页引用） ===== */
 .fb-qxl-spotlight {
   padding: 8rpx 20rpx 16rpx;
 }

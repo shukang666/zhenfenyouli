@@ -55,6 +55,11 @@ ALTER TABLE `cmf_forum` ADD COLUMN `clock_scene` varchar(50) NOT NULL DEFAULT ''
 ALTER TABLE `cmf_active` ADD COLUMN `xsdld_cate_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '小手拉大手分类' AFTER `community_cate_id`;
 ALTER TABLE `cmf_active_community_cate` ADD COLUMN `cate_group` varchar(20) NOT NULL DEFAULT '' COMMENT 'qxl=七贤岭 xsdld=小手拉大手' AFTER `name`;
 
+-- 活动 Tab 专题分会场：hiking / flea_market / zhenfen_class（空=非专题分会场）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'spot_key');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `spot_key` varchar(32) NOT NULL DEFAULT '''' COMMENT ''活动专题分会场 hiking/flea_market/zhenfen_class'' AFTER `xsdld_cate_id`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
 CREATE TABLE IF NOT EXISTS `cmf_clock_tutorial` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `cate_key` varchar(20) NOT NULL DEFAULT '' COMMENT 'recycle/other/harm/food',
