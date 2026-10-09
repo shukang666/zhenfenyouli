@@ -14,12 +14,85 @@
 					<text class="qxl-journey-intro-text">先读懂七贤岭，再用镜头记录与分享</text>
 				</view>
 
-				<view class="qxl-journey-step qxl-journey-step--learn" @tap="goLearnExam">
+				<!-- 有「发现」步：网格对齐，左侧竖线随学考卡片增高 -->
+				<view class="qxl-journey-grid" v-if="momentActive || momentLoading">
+					<view class="qxl-grid-rail qxl-grid-rail--learn">
+						<view class="qxl-step-badge">
+							<text class="qxl-step-badge-text">认识</text>
+						</view>
+						<view class="qxl-step-line qxl-step-line--grow"></view>
+					</view>
+					<view class="qxl-grid-card-hit" @tap="goLearnExam">
+						<view class="qxl-step-card qxl-step-card--learn qxl-step-card--learn-feature">
+							<view class="qxl-learn-cover">
+								<image
+									v-if="learnCardCoverResolved"
+									class="qxl-learn-cover-img"
+									:src="learnCardCoverResolved"
+									mode="aspectFill"
+									lazy-load
+								></image>
+								<view v-else class="qxl-learn-cover-ph">
+									<text class="qxl-learn-cover-ph-icon">📖</text>
+									<text class="qxl-learn-cover-ph-text">七贤岭 · 读与测</text>
+								</view>
+							</view>
+							<view class="qxl-learn-content">
+								<text class="qxl-learn-kicker">七贤岭学考</text>
+								<text class="qxl-learn-lead">用短文认识七贤岭的人文与生态，读完立刻做本篇小测验。</text>
+								<text class="qxl-learn-detail">题目都来自刚读的内容，全部答对才能解锁下一篇，循序渐进把七贤岭「读懂」。</text>
+								<view class="qxl-learn-tags">
+									<text class="qxl-learn-tag">读短文</text>
+									<text class="qxl-learn-tag">答本篇</text>
+									<text class="qxl-learn-tag">过关解锁</text>
+								</view>
+								<view class="qxl-learn-foot">
+									<view class="qxl-learn-progress">
+										<view class="qxl-step-progress-track qxl-step-progress-track--lg">
+											<view class="qxl-step-progress-fill" :style="{ width: learnProgressWidth }"></view>
+										</view>
+										<text class="qxl-step-progress-text">{{ learnProgressText }}</text>
+									</view>
+									<view class="qxl-learn-cta">
+										<text>{{ learnCtaText }}</text>
+										<text class="qxl-learn-cta-arrow">›</text>
+									</view>
+								</view>
+							</view>
+						</view>
+					</view>
+
+					<view class="qxl-grid-rail qxl-grid-rail--discover">
+						<view class="qxl-step-line qxl-step-line--join"></view>
+						<view class="qxl-step-badge qxl-step-badge--soft">
+							<text class="qxl-step-badge-text">发现</text>
+						</view>
+					</view>
+					<view class="qxl-grid-card-hit" @tap="gotoMomentActive">
+						<view class="qxl-step-card qxl-step-card--moment" v-if="momentActive">
+							<view class="qxl-moment-thumb" v-if="momentActive.thumb">
+								<image class="qxl-moment-thumb-img" :src="momentActive.thumb" mode="aspectFill" lazy-load></image>
+							</view>
+							<view class="qxl-step-main">
+								<text class="qxl-step-title">{{ momentActive.name }}</text>
+								<text class="qxl-step-desc">参与征集，定格七贤岭的每一个瞬间</text>
+								<text class="qxl-step-link">进入活动 ›</text>
+							</view>
+						</view>
+						<view class="qxl-step-card qxl-step-card--placeholder" v-else-if="!momentLoading">
+							<text class="qxl-empty-text">100个瞬间活动筹备中</text>
+						</view>
+						<view class="qxl-step-card qxl-step-card--placeholder" v-else>
+							<text class="qxl-empty-text">加载中...</text>
+						</view>
+					</view>
+				</view>
+
+				<view class="qxl-journey-step qxl-journey-step--solo" v-else @tap="goLearnExam">
 					<view class="qxl-step-rail">
 						<view class="qxl-step-badge">
 							<text class="qxl-step-badge-text">认识</text>
 						</view>
-						<view class="qxl-step-line" v-if="momentActive || momentLoading"></view>
 					</view>
 					<view class="qxl-step-card qxl-step-card--learn qxl-step-card--learn-feature">
 						<view class="qxl-learn-cover">
@@ -57,30 +130,6 @@
 								</view>
 							</view>
 						</view>
-					</view>
-				</view>
-
-				<view class="qxl-journey-step" v-if="momentActive || momentLoading" @tap="gotoMomentActive">
-					<view class="qxl-step-rail">
-						<view class="qxl-step-badge qxl-step-badge--soft">
-							<text class="qxl-step-badge-text">发现</text>
-						</view>
-					</view>
-					<view class="qxl-step-card qxl-step-card--moment" v-if="momentActive">
-						<view class="qxl-moment-thumb" v-if="momentActive.thumb">
-							<image class="qxl-moment-thumb-img" :src="momentActive.thumb" mode="aspectFill" lazy-load></image>
-						</view>
-						<view class="qxl-step-main">
-							<text class="qxl-step-title">{{ momentActive.name }}</text>
-							<text class="qxl-step-desc">参与征集，定格七贤岭的每一个瞬间</text>
-							<text class="qxl-step-link">进入活动 ›</text>
-						</view>
-					</view>
-					<view class="qxl-step-card qxl-step-card--placeholder" v-else-if="!momentLoading">
-						<text class="qxl-empty-text">100个瞬间活动筹备中</text>
-					</view>
-					<view class="qxl-step-card qxl-step-card--placeholder" v-else>
-						<text class="qxl-empty-text">加载中...</text>
 					</view>
 				</view>
 			</view>
@@ -266,6 +315,26 @@ $qxl-green-border: #c5e8d8;
 	line-height: 1.5;
 }
 
+.qxl-journey-grid {
+	display: grid;
+	grid-template-columns: 56rpx 1fr;
+	column-gap: 16rpx;
+	row-gap: 16rpx;
+	padding: 20rpx 0 8rpx;
+}
+.qxl-grid-rail {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-height: 0;
+}
+.qxl-grid-rail--learn {
+	align-self: stretch;
+}
+.qxl-grid-card-hit:active .qxl-step-card {
+	opacity: 0.92;
+}
+
 .qxl-journey-step {
 	display: flex;
 	flex-direction: row;
@@ -273,13 +342,7 @@ $qxl-green-border: #c5e8d8;
 	gap: 16rpx;
 	padding: 20rpx 0 8rpx;
 }
-.qxl-journey-step--learn {
-	align-items: flex-start;
-}
-.qxl-journey-step--learn .qxl-step-line {
-	min-height: 80rpx;
-}
-.qxl-journey-step:active .qxl-step-card {
+.qxl-journey-step--solo:active .qxl-step-card {
 	opacity: 0.92;
 }
 
@@ -314,12 +377,23 @@ $qxl-green-border: #c5e8d8;
 	color: $qxl-green;
 }
 .qxl-step-line {
-	flex: 1;
+	flex-shrink: 0;
 	width: 4rpx;
-	min-height: 40rpx;
-	margin: 8rpx 0;
 	border-radius: 4rpx;
-	background: linear-gradient(180deg, $qxl-green-mid 0%, $qxl-green-border 100%);
+	background: $qxl-green-mid;
+}
+.qxl-step-line--grow {
+	flex: 1;
+	min-height: 24rpx;
+	margin-top: 8rpx;
+	margin-bottom: -16rpx;
+	padding-bottom: 16rpx;
+	box-sizing: content-box;
+}
+.qxl-step-line--join {
+	height: 16rpx;
+	min-height: 16rpx;
+	margin: 0;
 }
 
 .qxl-step-card {
