@@ -294,7 +294,10 @@
 				{
 					"path": "activity-spot-hub",
 					"style": {
-						"navigationBarTitleText": "专题活动"
+						"navigationBarTitleText": "专题活动",
+						"componentPlaceholder": {
+							"u-icon": "view"
+						}
 					}
 				},
 				{

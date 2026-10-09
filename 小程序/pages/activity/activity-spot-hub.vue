@@ -1,6 +1,6 @@
 <template>
 	<view class="container">
-		<view class="spot-hero" :class="'spot-hero--' + spotKey">
+		<view :class="heroClass">
 			<text class="spot-hero-emoji">{{ moduleEmoji }}</text>
 			<text class="spot-hero-title">{{ moduleName }}</text>
 			<text class="spot-hero-sub">{{ moduleSubtitle }}</text>
@@ -15,9 +15,9 @@
 			<view class="spot-list" v-if="venues.length">
 				<view
 					class="spot-card"
-					v-for="item in venues"
-					:key="item.kind + '-' + item.id"
-					@click="onTapVenue(item)"
+					v-for="(item, vIdx) in venues"
+					:key="vIdx"
+					@tap="onTapVenue(vIdx)"
 				>
 					<view class="spot-card-cover" v-if="item.thumb">
 						<image class="spot-card-img" :src="item.thumb" mode="aspectFill" lazy-load></image>
@@ -29,7 +29,7 @@
 								<u-icon name="clock" size="20" color="#65676B"></u-icon>
 								<text>{{ item.date_text }}</text>
 							</view>
-							<view class="spot-meta-row" v-if="item.address && item.address.trim()">
+							<view class="spot-meta-row" v-if="item.address">
 								<u-icon name="map" size="20" color="#65676B"></u-icon>
 								<text class="u-line-1">{{ item.address }}</text>
 							</view>
@@ -72,6 +72,12 @@ export default {
 			loading: true,
 		}
 	},
+	computed: {
+		heroClass() {
+			const k = this.spotKey || 'default'
+			return 'spot-hero spot-hero--' + k
+		},
+	},
 	onLoad(options) {
 		this.spotKey = String(options.spot || options.spot_key || '').trim()
 		const nameFromQuery = options.name ? decodeURIComponent(options.name) : ''
@@ -109,7 +115,8 @@ export default {
 				this.loading = false
 			})
 		},
-		onTapVenue(item) {
+		onTapVenue(vIdx) {
+			const item = this.venues[vIdx]
 			if (!item || !item.active_id) return
 			const payload = {
 				id: item.active_id,
