@@ -94,29 +94,34 @@
 				</view>
 			</view>
 
-			<!-- 热门活动横向滚动卡片 -->
+			<!-- 热门活动：固定五项（垃圾真分 + 社区专题） -->
 			<scroll-view scroll-x class="active-scroll" :show-scrollbar="false" v-if="currentTab === 0">
 				<view class="u-flex">
-					<view class="active-card" v-for="item in active_list" :key="item.id"
+					<view class="active-card" v-for="item in home_hot_spot_list" :key="item.key"
 						hover-class="press-scale" :hover-stay-time="80"
-						@click="$u.func.openActiveDetail(item)">
-						<view class="active-card-cover">
-							<u-image width="500" height="260" :src="item.thumb" :lazy-load="true" border-radius="20rpx 20rpx 0 0"></u-image>
+						@click="onHomeHotSpotTap(item)">
+						<view class="active-card-cover" v-if="homeHotThumb(item)">
+							<u-image width="500" height="260" :src="homeHotThumb(item)" :lazy-load="true" mode="aspectFill" border-radius="20rpx 20rpx 0 0"></u-image>
+							<view class="active-card-cover-tag">{{ item.meta }}</view>
+						</view>
+						<view class="active-card-cover active-card-cover--spot" v-else>
+							<text class="active-card-emoji">{{ item.emoji }}</text>
+							<text class="active-card-spot-kicker">{{ item.meta }}</text>
 						</view>
 						<view class="active-card-body">
-							<view class="active-card-title u-line-2">{{item.name}}</view>
+							<view class="active-card-title u-line-2">{{ item.name }}</view>
 							<view class="active-card-info">
 								<view class="active-chip">
 									<u-icon name="clock" size="20" color="#18AF38"></u-icon>
-									<text class="active-card-text">{{item.date | date('mm月dd日')}}</text>
+									<text class="active-card-text">{{ item.meta }}</text>
 								</view>
 								<view class="active-chip active-chip--addr">
 									<u-icon name="map" size="20" color="#18AF38"></u-icon>
-									<text class="active-card-text u-line-1">{{item.address}}</text>
+									<text class="active-card-text u-line-1">{{ item.hint }}</text>
 								</view>
 							</view>
 							<view class="active-card-foot">
-								<text>了解详情</text>
+								<text>{{ item.entry_type === 'scene_clock' ? '去打卡' : '进入专题' }}</text>
 								<u-icon name="arrow-right" size="20" color="#18AF38"></u-icon>
 							</view>
 						</view>
@@ -250,6 +255,11 @@ import SkeletonScreen from '@/components/skeleton-screen/index.vue'
 import NewUserGuide from '@/components/new-user-guide/new-user-guide.vue'
 import careGesture from '@/common/care-gesture.mixin.js'
 import { shouldTabRefresh, markTabRefreshed } from '@/common/tab-refresh.js'
+import {
+	HOME_HOT_SPOT_ENTRIES,
+	navigateHomeHotSpotEntry,
+	resolveHomeHotThumb,
+} from '@/common/homeHotSpotEntries.js'
 export default {
 	components: {
 		SkeletonScreen,
@@ -261,7 +271,6 @@ export default {
 				isLoading: true,
 				bannerList: [],
 				dataList: [],
-				active_list: [],
 				showcaseList: [],
 				homeNotice: '',
 				// 问候模块数据
@@ -334,6 +343,9 @@ export default {
 			}
 		},
 		computed: {
+			home_hot_spot_list() {
+				return HOME_HOT_SPOT_ENTRIES
+			},
 			// 问候文本计算属性
 			greetingText() {
 				const hour = this.greetingHour
@@ -591,7 +603,6 @@ export default {
 			const req = this.$u.api.get_index_tab_home(params).then(res => {
 				const d = res.data || {}
 				this.bannerList = d.banner_list || []
-				this.active_list = d.active_list || []
 				this.showcaseList = d.showcase_list || []
 				this.homeNotice = (d.home_notice || '').toString()
 				this.mergeHomeEntries(d.home_entries || [])
@@ -609,6 +620,12 @@ export default {
 			})
 			this._indexTabHomeInflight = req
 			return req
+		},
+		homeHotThumb(item) {
+			return resolveHomeHotThumb(item && item.thumb)
+		},
+		onHomeHotSpotTap(item) {
+			navigateHomeHotSpotEntry(this, item)
 		},
 		mergeHomeEntries(list) {
 			if (!list || list.length === 0) return
@@ -1324,6 +1341,37 @@ export default {
 		width: 500rpx;
 		height: 260rpx;
 		overflow: hidden;
+		position: relative;
+	}
+	.active-card-cover-tag {
+		position: absolute;
+		left: 16rpx;
+		top: 16rpx;
+		padding: 6rpx 16rpx;
+		border-radius: 999rpx;
+		background: rgba(255, 255, 255, 0.92);
+		font-size: 20rpx;
+		font-weight: 600;
+		color: #2d6a4f;
+		z-index: 2;
+	}
+	.active-card-cover--spot {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 12rpx;
+		background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 45%, #a5d6a7 100%);
+	}
+	.active-card-emoji {
+		font-size: 72rpx;
+		line-height: 1;
+	}
+	.active-card-spot-kicker {
+		font-size: 22rpx;
+		color: #2d6a4f;
+		font-weight: 600;
+		letter-spacing: 2rpx;
 	}
 	.active-card-body {
 		padding: 20rpx 22rpx 22rpx;

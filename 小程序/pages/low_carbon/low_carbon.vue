@@ -322,21 +322,16 @@
             :hover-stay-time="80"
             @tap="onWeeklyCardTap(wIdx)"
           >
-            <view v-if="item.isWeeklyPin" class="fb-weekly-pin-bg">
-              <text class="fb-weekly-pin-emoji">♻️</text>
-              <text class="fb-weekly-pin-bg-t">垃圾分类真分打卡</text>
-            </view>
             <u-image
-              v-else
               width="520"
               height="320"
-              :src="item.thumb"
+              :src="weeklyCardCover(item)"
               mode="aspectFill"
             ></u-image>
             <view class="fb-weekly-hatch"></view>
             <view class="fb-weekly-mask"></view>
             <view class="fb-weekly-tag">
-              <text class="fb-weekly-tag-text">{{ item.isWeeklyPin ? '真分打卡' : '本周精选' }}</text>
+              <text class="fb-weekly-tag-text">{{ item.isWeeklyPin ? '垃圾真分' : '本周精选' }}</text>
             </view>
             <view class="fb-weekly-badge" v-if="!item.isWeeklyPin && actEngagementCount(item) > 0">
               <text class="fb-weekly-badge-text"
@@ -552,15 +547,9 @@ import {
   parseBannerSceneClockEntry,
   openSceneClockFromBannerEntry,
 } from "@/common/sceneClockEntry.js";
+import { WEEKLY_ZHENFEN_PIN, resolveHomeHotThumb } from "@/common/homeHotSpotEntries.js";
 import careGesture from "@/common/care-gesture.mixin.js";
 import SkeletonScreen from "@/components/skeleton-screen/index.vue";
-
-/** 本周推荐横滑第一项：固定真分打卡（不走后台 is_month_recommend） */
-const WEEKLY_ZHENFEN_PIN = {
-  isWeeklyPin: true,
-  name: "真分打卡",
-  active_count: 0,
-};
 
 /** 活动 Tab 底部「全部活动」仅预览条数，完整列表见 active-list */
 const ACTIVE_LIST_PREVIEW_SIZE = 2;
@@ -696,6 +685,13 @@ export default {
     if (!this.isLogin) return;
   },
   methods: {
+    weeklyCardCover(item) {
+      if (!item) return "";
+      if (item.isWeeklyPin) {
+        return resolveHomeHotThumb(item.thumb) || "";
+      }
+      return item.thumb || "";
+    },
     onWeeklyCardTap(wIdx) {
       const list = this.weekly_display_list || [];
       const item = list[wIdx];
