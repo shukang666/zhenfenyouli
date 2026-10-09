@@ -98,9 +98,10 @@
 
 <script>
 import { openActiveDetailWithContext, isWebDisplayActive } from '@/common/activeOpen.js'
+import settings from '@/common/settings.js'
 
-// 学考卡片顶图：换成你的图片 URL（本地 static 或 COS 均可），留空则显示占位
-const QXL_LEARN_CARD_COVER = ''
+// 学考卡片顶图（COS static/img/，换图后重跑 data/cos_upload_one_qxl_learn_cover.php 或覆盖桶内同名对象）
+const QXL_LEARN_CARD_COVER = settings.staticAssetBase + 'img/qxl-learn-cover.png'
 
 export default {
 	data() {
