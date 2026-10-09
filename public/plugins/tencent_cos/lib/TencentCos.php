@@ -154,17 +154,44 @@ class TencentCos
                         'secretKey' => $cosCfg['secret_key'],
                     ],
                 ]);
-                $client->deleteObject([
-                    'Bucket' => $cosCfg['bucket'],
-                    'Key'    => $key,
-                ]);
+                try {
+                    $client->deleteObject([
+                        'Bucket' => $cosCfg['bucket'],
+                        'Key'    => $key,
+                    ]);
+                } catch (\Throwable $e) {
+                    if (self::isCosDeleteBenignError($e)) {
+                        return;
+                    }
+                    throw $e;
+                }
 
                 return;
             }
         }
 
         $this->loadCosUploadLib();
+        if (!function_exists('cos_delete_object')) {
+            throw new \RuntimeException('COS 删除组件未安装，请同步 cos_upload_lib.php');
+        }
         cos_delete_object($cosCfg, $key);
+    }
+
+    /** 对象不存在时视为已删除 */
+    private static function isCosDeleteBenignError(\Throwable $e)
+    {
+        if ($e instanceof \Qcloud\Cos\Exception\ServiceResponseException) {
+            $code = (int)$e->getStatusCode();
+            if ($code === 404) {
+                return true;
+            }
+        }
+        $msg = $e->getMessage();
+
+        return stripos($msg, 'NoSuchKey') !== false
+            || stripos($msg, 'HTTP 404') !== false
+            || stripos($msg, '404 Not Found') !== false
+            || stripos($msg, '不存在') !== false;
     }
 
     private function putObject(array $cosCfg, $key, $localPath)

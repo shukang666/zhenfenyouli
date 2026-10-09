@@ -583,39 +583,131 @@ class PublicController extends AuthController
         }
         $this->checkUser();
 
+        $rawBody = file_get_contents('php://input');
+        $rawParams = $rawBody ? json_decode($rawBody, true) : [];
+        if (!is_array($rawParams)) {
+            $rawParams = [];
+        }
+
         $filepath = trim((string)$this->request->param('filepath', ''));
         $url = trim((string)$this->request->param('url', ''));
-        if ($filepath === '' && $url !== '') {
-            $storage = cmf_storage_for_assets();
-            $filepath = (string)$storage->getFilePath($url);
+        if ($filepath === '' && !empty($rawParams['filepath'])) {
+            $filepath = trim((string)$rawParams['filepath']);
         }
-        $filepath = \plugins\tencent_cos\lib\TencentCos::normalizeObjectKey($filepath);
-        if ($filepath === '') {
+        if ($url === '' && !empty($rawParams['url'])) {
+            $url = trim((string)$rawParams['url']);
+        }
+
+        $objectKey = $this->resolveDeleteUploadObjectKey($filepath, $url);
+        if ($objectKey === '') {
             $this->error('文件无效');
         }
-        if (strpos($filepath, 'xcxkf052/') !== 0) {
+        if (!preg_match('#^(xcxkf052|dz\d+|kf\d+)/#', $objectKey)) {
             $this->error('不允许删除该文件');
         }
 
-        $setting = cmf_resolve_storage_setting();
-        $type = $setting['type'] ?? 'Local';
         try {
-            if ($type === 'TencentCos') {
-                $driverConfig = $setting['storages'][$type] ?? [];
-                $cos = new \plugins\tencent_cos\lib\TencentCos($driverConfig);
-                $cos->delete($filepath);
-            } else {
-                $local = WEB_ROOT . 'upload/' . ltrim(str_replace('\\', '/', $filepath), '/');
-                if (is_file($local)) {
-                    @unlink($local);
-                }
-            }
+            $this->deleteUploadObjectFromStorage($objectKey);
         } catch (\Throwable $e) {
-            Log::error('delete_asset: ' . $e->getMessage());
+            Log::error('delete_asset key=' . $objectKey . ' err=' . $e->getMessage());
+            if ($this->isBenignCosDeleteError($e)) {
+                $this->success('已删除');
+            }
             $this->error('删除失败');
         }
 
         $this->success('已删除');
+    }
+
+    /** @return string 相对对象键，如 xcxkf052/admin/... */
+    private function resolveDeleteUploadObjectKey($filepath, $url)
+    {
+        $filepath = trim((string)$filepath);
+        $url = trim((string)$url);
+
+        if ($filepath !== '' && preg_match('#^https?://#i', $filepath)) {
+            $url = cmf_finalize_public_asset_url($filepath);
+            $filepath = '';
+        }
+
+        if ($filepath !== '') {
+            return \plugins\tencent_cos\lib\TencentCos::normalizeObjectKey(
+                cmf_strip_upload_object_key_prefix($filepath)
+            );
+        }
+
+        if ($url === '') {
+            return '';
+        }
+
+        $url = cmf_finalize_public_asset_url($url);
+        $storage = cmf_storage_for_assets();
+        $key = (string)$storage->getFilePath($url);
+        if ($key === '' && preg_match('#^https?://#i', $url)) {
+            $path = parse_url($url, PHP_URL_PATH);
+            $key = ltrim((string)$path, '/');
+        }
+
+        return \plugins\tencent_cos\lib\TencentCos::normalizeObjectKey(
+            cmf_strip_upload_object_key_prefix($key)
+        );
+    }
+
+    private function deleteUploadObjectFromStorage($objectKey)
+    {
+        $setting = cmf_resolve_storage_setting();
+        $type = $setting['type'] ?? 'Local';
+
+        if ($type === 'TencentCos') {
+            $driverConfig = $setting['storages']['TencentCos'] ?? [];
+            $cos = new \plugins\tencent_cos\lib\TencentCos($driverConfig);
+            try {
+                $cos->delete($objectKey);
+
+                return;
+            } catch (\Throwable $e) {
+                if ($this->isBenignCosDeleteError($e)) {
+                    return;
+                }
+                $this->deleteUploadObjectViaMigrateConfig($objectKey);
+
+                return;
+            }
+        }
+
+        $local = WEB_ROOT . 'upload/' . ltrim(str_replace('\\', '/', $objectKey), '/');
+        if (is_file($local)) {
+            @unlink($local);
+        }
+    }
+
+    /** 插件 Storage 删除失败时，用迁移配置直连 COS 再删一次 */
+    private function deleteUploadObjectViaMigrateConfig($objectKey)
+    {
+        $configFile = CMF_ROOT . 'data/cos_migrate.config.php';
+        if (!is_file($configFile)) {
+            throw new \RuntimeException('COS 配置缺失');
+        }
+        require_once CMF_ROOT . 'data/cos_upload_lib.php';
+        if (!function_exists('cos_delete_object')) {
+            throw new \RuntimeException('COS 删除组件未安装');
+        }
+        $cfg = require $configFile;
+        cos_delete_object($cfg, $objectKey);
+    }
+
+    private function isBenignCosDeleteError(\Throwable $e)
+    {
+        if ($e instanceof \Qcloud\Cos\Exception\ServiceResponseException) {
+            if ((int)$e->getStatusCode() === 404) {
+                return true;
+            }
+        }
+        $msg = $e->getMessage();
+
+        return stripos($msg, 'NoSuchKey') !== false
+            || stripos($msg, 'HTTP 404') !== false
+            || stripos($msg, '404 Not Found') !== false;
     }
 
 
