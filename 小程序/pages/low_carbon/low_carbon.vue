@@ -586,7 +586,7 @@ export default {
         {
           key: "qxl",
           name: "我和七贤岭",
-          subtitle: "发现 · 玩 · 记录 · 守护",
+          subtitle: "认识 · 发现",
           emoji: "⛰️",
           entry_type: "qxl_page",
         },
