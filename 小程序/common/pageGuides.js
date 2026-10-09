@@ -15,7 +15,7 @@ export const PAGE_GUIDES = {
 			{
 				selector: '',
 				title: '活动页能做什么',
-				desc: '这里报名小区活动、去垃圾分类打卡，也能进「我和七贤岭」。点下一步认一认。'
+				desc: '报名社区活动、垃圾真分打卡、进七贤岭专题和工作台。下面按从上到下认一认。'
 			},
 			{
 				selector: '#guide-fb-search',
@@ -24,34 +24,34 @@ export const PAGE_GUIDES = {
 				desc: '按活动名称或地点查找，不用在列表里慢慢翻。'
 			},
 			{
-				selector: '#guide-fb-entry',
+				selector: '#guide-fb-zhenfen-hub',
 				prefer: 'below',
-				title: '场景快捷入口',
-				desc: '家庭、办公、沿街等真分打卡场景，点卡片直接进入对应场景打卡。'
+				title: '垃圾真分',
+				desc: '顶部海报和下面家庭、办公、沿街三个入口是一整套：看说明、选场景、拍照打卡。'
 			},
 			{
 				selector: '#guide-fb-dtsh-hub',
 				prefer: 'below',
 				title: '垃圾分类工作台',
-				desc: '打卡、督导、积分等核心能力集中在这里，点「进入工作台」。'
+				desc: '学习、打卡、督导监测、积分排行等集中在这里，点「进入工作台」。'
 			},
 			{
 				selector: '#guide-fb-qxl',
 				prefer: 'below',
 				title: '社区专题',
-				desc: '我和七贤岭、步行山海净美家园专题、绿色二手集市、垃圾真分小课堂，点卡片进入；后三个再选活动地点。'
-			},
-			{
-				selector: '#guide-fb-light-task',
-				prefer: 'below',
-				title: '分类小任务',
-				desc: '随手拍问题、答题挑战、看分类知识，不用先进工作台也能用。'
+				desc: '我和七贤岭、步行山海净美家园、绿色二手集市、垃圾真分小课堂，点卡片进入；后三个再选具体地点。'
 			},
 			{
 				selector: '#guide-fb-theme',
-				prefer: 'above',
+				prefer: 'below',
 				title: '主题活动',
-				desc: '健康、学习、兴趣等分类，点进去看对应活动。'
+				desc: '健康运动、学习成长等五大类，点圆钮进入对应分类活动列表。'
+			},
+			{
+				selector: '#guide-fb-weekly',
+				prefer: 'above',
+				title: '本周推荐',
+				desc: '横滑海报与首页热门一致：垃圾真分 + 四个社区专题，点卡片直达。'
 			},
 			{
 				selector: '#pg-tabbar',
@@ -67,19 +67,13 @@ export const PAGE_GUIDES = {
 			{
 				selector: '',
 				title: '健康页能做什么',
-				desc: '身心健康测评、健康档案都在这里。点下一步认一认入口。'
-			},
-			{
-				selector: '#guide-health-diag',
-				prefer: 'below',
-				title: '健康诊断',
-				desc: '上面两块是测评入口，下面可以建健康档案、看直播。'
+				desc: '浏览邻居发的健康帖，可以点赞、评论、分享。点右上角「更多」进完整社区列表。'
 			},
 			{
 				selector: '#guide-health-life',
 				prefer: 'above',
 				title: '健康生活社区',
-				desc: '邻居分享的健康帖，可以看、赞、评论。没有这块时跳过即可。'
+				desc: '最新帖子会出现在这里，点一条看详情；列表为空时稍后再来或点「更多」逛逛。'
 			},
 			{
 				selector: '#pg-tabbar',
@@ -95,7 +89,7 @@ export const PAGE_GUIDES = {
 			{
 				selector: '',
 				title: '积分商城',
-				desc: '用打卡和活动攒的积分，在这里兑商品、领优惠券。'
+				desc: '用打卡和活动攒的积分兑商品；顶部有券时可领取，再选产区或搜商品。'
 			},
 			{
 				selector: '#guide-mall-search',
@@ -107,7 +101,7 @@ export const PAGE_GUIDES = {
 				selector: '#guide-mall-cate',
 				prefer: 'below',
 				title: '地理产区',
-				desc: '点选产区格子，下面会显示当地特色好物。'
+				desc: '展开后点地图大区，再选具体产区，下方会筛当地好物。'
 			},
 			{
 				selector: '#guide-mall-goods',
@@ -129,25 +123,25 @@ export const PAGE_GUIDES = {
 			{
 				selector: '',
 				title: '这是「我的」',
-				desc: '看积分、改资料、查打卡和订单，都从这里进。'
+				desc: '看积分、改资料、查活动与订单，打卡和徽章也在这里进。'
 			},
 			{
 				selector: '#guide-me-hero',
 				prefer: 'below',
 				title: '头像和积分',
-				desc: '登录后这里是昵称。绿色卡片是账户积分，点进去看明细。'
+				desc: '登录后显示昵称；绿色卡片是账户积分，点「明细」查流水。'
 			},
 			{
 				selector: '#guide-me-common',
 				prefer: 'above',
 				title: '常用功能',
-				desc: '积分明细、我的活动、兑换订单、消息通知。'
+				desc: '积分明细、我的活动、兑换订单、消息通知，日常最常用。'
 			},
 			{
 				selector: '#guide-me-service',
 				prefer: 'above',
 				title: '我的服务',
-				desc: '打卡记录、答题、徽章等，按名字点进去就行。'
+				desc: '打卡记录、测评与问卷、健康生活社区、答题考试、徽章等，按名称点进去。'
 			},
 			{
 				selector: '#pg-tabbar',

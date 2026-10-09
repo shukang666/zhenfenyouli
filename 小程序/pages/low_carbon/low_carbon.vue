@@ -38,7 +38,7 @@
     <skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
     <!-- 垃圾真分：Banner + 三场景入口统一外框 -->
-    <view class="fb-zhenfen-hub">
+    <view class="fb-zhenfen-hub" id="guide-fb-zhenfen-hub">
       <view class="fb-zhenfen-hub-head">
         <view class="fb-zhenfen-hub-brand">
           <text class="fb-zhenfen-hub-badge">垃圾真分</text>
@@ -311,7 +311,7 @@
     </view>
 
     <!-- 本周推荐：大图海报横滑，和下面两块刻意做成不同版式 -->
-    <view class="fb-section fb-weekly-rec" v-if="weekly_display_list.length > 0">
+    <view class="fb-section fb-weekly-rec" id="guide-fb-weekly" v-if="weekly_display_list.length > 0">
       <view class="fb-section-header">
         <view class="fb-hd">
           <view class="fb-hd-bar fb-hd-bar--gold"></view>
