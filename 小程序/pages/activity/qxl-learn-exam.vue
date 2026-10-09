@@ -4,7 +4,7 @@
 			<view class="hub-hero-deco"></view>
 			<text class="hub-kicker">认识七贤岭</text>
 			<text class="hub-title">分模块 · 边读边测</text>
-			<text class="hub-desc">按主题自由选学，读完本篇立刻做测验，不用按顺序解锁</text>
+			<text class="hub-desc">六大主题分模块，读完短文即在文末测本篇</text>
 			<view class="hub-progress">
 				<view class="hub-progress-row">
 					<text class="hub-progress-label">累计通关</text>

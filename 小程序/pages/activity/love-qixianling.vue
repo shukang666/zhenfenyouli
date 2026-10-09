@@ -39,12 +39,12 @@
 							</view>
 							<view class="qxl-learn-content">
 								<text class="qxl-learn-kicker">七贤岭学考</text>
-							<text class="qxl-learn-lead">人口、人文、地理等六大主题，各走各的入口，不用按顺序解锁。</text>
-							<text class="qxl-learn-detail">进入模块后选一篇：先读短文，文末立刻做本篇测验，边学边考。</text>
+							<text class="qxl-learn-lead">人口、人文、地理等六大主题，按模块选你关心的内容。</text>
+							<text class="qxl-learn-detail">每篇先读短文，读完在文末做本篇测验。</text>
 							<view class="qxl-learn-tags">
-								<text class="qxl-learn-tag">分模块</text>
+								<text class="qxl-learn-tag">六大主题</text>
 								<text class="qxl-learn-tag">边读边测</text>
-								<text class="qxl-learn-tag">自由选学</text>
+								<text class="qxl-learn-tag">随选随学</text>
 							</view>
 								<view class="qxl-learn-foot">
 									<view class="qxl-learn-progress">
@@ -110,12 +110,12 @@
 						</view>
 						<view class="qxl-learn-content">
 							<text class="qxl-learn-kicker">七贤岭学考</text>
-							<text class="qxl-learn-lead">人口、人文、地理等六大主题，各走各的入口，不用按顺序解锁。</text>
-							<text class="qxl-learn-detail">进入模块后选一篇：先读短文，文末立刻做本篇测验，边学边考。</text>
+							<text class="qxl-learn-lead">人口、人文、地理等六大主题，按模块选你关心的内容。</text>
+							<text class="qxl-learn-detail">每篇先读短文，读完在文末做本篇测验。</text>
 							<view class="qxl-learn-tags">
-								<text class="qxl-learn-tag">分模块</text>
+								<text class="qxl-learn-tag">六大主题</text>
 								<text class="qxl-learn-tag">边读边测</text>
-								<text class="qxl-learn-tag">自由选学</text>
+								<text class="qxl-learn-tag">随选随学</text>
 							</view>
 							<view class="qxl-learn-foot">
 								<view class="qxl-learn-progress">
@@ -175,7 +175,7 @@ export default {
 		learnCtaText() {
 			if (this.learnTotal && this.learnPassed >= this.learnTotal) return '回顾模块'
 			if (this.learnPassed > 0) return '继续选学'
-			return '选模块开刷'
+			return '进入学考'
 		},
 		heroBgStyle() {
 			if (this.heroBgImage) {
@@ -188,7 +188,7 @@ export default {
 			return Math.max(12, Math.round((this.learnPassed / this.learnTotal) * 100)) + '%'
 		},
 		learnProgressText() {
-			if (!this.learnTotal) return '六大主题 · 边学边考'
+			if (!this.learnTotal) return '选模块开始学考'
 			if (this.learnPassed >= this.learnTotal) return '各模块篇章已全部通关'
 			return '累计通关 ' + this.learnPassed + '/' + this.learnTotal + ' 篇'
 		},
