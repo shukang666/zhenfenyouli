@@ -81,6 +81,24 @@ class QxlKnowledgeController extends AuthController
     }
 
     /**
+     * 学考长页数据：Banner 下交替的学习/考试单元
+     * GET /wxapp/qxl_knowledge/get_learn_feed
+     */
+    public function get_learn_feed()
+    {
+        $data = QxlLearnModuleService::buildLearnFeed(
+            intval($this->user_id),
+            function ($raw) {
+                return $this->formatContent($raw);
+            },
+            function ($raw) {
+                return $this->formatImage($raw);
+            }
+        );
+        $this->success('success', $data);
+    }
+
+    /**
      * 某模块下的篇章摘要（不含正文）
      * GET /wxapp/qxl_knowledge/get_module_articles?category=
      */

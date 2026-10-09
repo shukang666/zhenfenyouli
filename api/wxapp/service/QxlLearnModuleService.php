@@ -156,4 +156,73 @@ class QxlLearnModuleService
         }
         return $map;
     }
+
+    /**
+     * 学考长页：按板块顺序排列的「学习+考试」单元（含正文与题目）
+     *
+     * @param callable $formatContent fn(string $raw): string
+     * @param callable $formatImage fn(string $raw): string
+     * @return array<string, mixed>
+     */
+    public static function buildLearnFeed($userId, callable $formatContent, callable $formatImage)
+    {
+        $passedMap = self::passedKnowledgeMap($userId);
+        $questionRows = Db::name('qxl_quiz_question')
+            ->where('status', 1)
+            ->where('knowledge_id', '>', 0)
+            ->field('id, knowledge_id, title, option_a, option_b, option_c, option_d')
+            ->order('list_order asc, id asc')
+            ->select()
+            ->toArray();
+        $questionsByKid = [];
+        foreach ($questionRows as $q) {
+            $kid = intval($q['knowledge_id']);
+            unset($q['knowledge_id']);
+            $questionsByKid[$kid][] = $q;
+        }
+
+        $units = [];
+        $passedCount = 0;
+        foreach (self::moduleDefinitions() as $def) {
+            $cat = $def['category'];
+            $articles = Db::name('qxl_knowledge')
+                ->where('status', 1)
+                ->where('category', $cat)
+                ->order('list_order asc, id asc')
+                ->select()
+                ->toArray();
+            foreach ($articles as $item) {
+                $kid = intval($item['id']);
+                $passed = isset($passedMap[$kid]);
+                if ($passed) {
+                    $passedCount++;
+                }
+                $questions = $passed ? [] : ($questionsByKid[$kid] ?? []);
+                $units[] = [
+                    'id'             => $kid,
+                    'category'       => $cat,
+                    'title'          => $item['title'],
+                    'image'          => $formatImage($item['image'] ?? ''),
+                    'content'        => $formatContent($item['content'] ?? ''),
+                    'passed'         => $passed ? 1 : 0,
+                    'question_count' => count($questionsByKid[$kid] ?? []),
+                    'questions'      => $questions,
+                ];
+            }
+        }
+
+        $moduleLabels = [];
+        foreach (self::moduleDefinitions() as $def) {
+            $moduleLabels[] = $def['category'];
+        }
+
+        $total = count($units);
+        return [
+            'units'          => $units,
+            'passed_count'   => $passedCount,
+            'article_count'  => $total,
+            'all_passed'     => $total > 0 && $passedCount >= $total,
+            'module_labels'  => $moduleLabels,
+        ];
+    }
 }
