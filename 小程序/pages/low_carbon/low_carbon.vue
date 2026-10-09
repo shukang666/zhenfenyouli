@@ -564,6 +564,57 @@ const WEEKLY_ZHENFEN_PIN = {
 /** 活动 Tab 底部「全部活动」仅预览条数，完整列表见 active-list */
 const ACTIVE_LIST_PREVIEW_SIZE = 2;
 
+/** 社区专题卡片展示文案（以前端为准，避免线上 API 未发版时副标题被旧数据覆盖） */
+const SPOT_MODULES_DEFAULT = [
+  {
+    key: "qxl",
+    name: "我和七贤岭",
+    subtitle: "认识 · 发现",
+    emoji: "⛰️",
+    entry_type: "qxl_page",
+  },
+  {
+    key: "hiking",
+    name: "徒步拾遗",
+    subtitle: "边走边捡 · 洁净山野",
+    emoji: "🥾",
+    entry_type: "spot_hub",
+  },
+  {
+    key: "flea_market",
+    name: "七贤岭绿色二手集市",
+    subtitle: "闲置循环 · 绿色生活",
+    emoji: "♻️",
+    entry_type: "spot_hub",
+  },
+  {
+    key: "zhenfen_class",
+    name: "垃圾真分小课堂",
+    subtitle: "学分类 · 真投放",
+    emoji: "📗",
+    entry_type: "spot_hub",
+  },
+];
+
+function mergeSpotModulesFromApi(fromApi) {
+  if (!Array.isArray(fromApi) || fromApi.length < 4) {
+    return SPOT_MODULES_DEFAULT.map((m) => ({ ...m }));
+  }
+  const remoteByKey = {};
+  fromApi.forEach((item) => {
+    if (item && item.key) remoteByKey[item.key] = item;
+  });
+  return SPOT_MODULES_DEFAULT.map((local) => {
+    const remote = remoteByKey[local.key];
+    if (!remote) return { ...local };
+    return {
+      ...local,
+      name: remote.name || local.name,
+      entry_type: remote.entry_type || local.entry_type,
+    };
+  });
+}
+
 export default {
   components: { SkeletonScreen },
   mixins: [careGesture],
@@ -582,36 +633,7 @@ export default {
       recent_list: [],
       // 5 大活动分类（硬编码，后台新增不显示）
       // community_cate_id 对应数据库 cmf_active_community_cate.id
-      spot_modules: [
-        {
-          key: "qxl",
-          name: "我和七贤岭",
-          subtitle: "认识 · 发现",
-          emoji: "⛰️",
-          entry_type: "qxl_page",
-        },
-        {
-          key: "hiking",
-          name: "徒步拾遗",
-          subtitle: "边走边捡 · 洁净山野",
-          emoji: "🥾",
-          entry_type: "spot_hub",
-        },
-        {
-          key: "flea_market",
-          name: "七贤岭绿色二手集市",
-          subtitle: "闲置循环 · 绿色生活",
-          emoji: "♻️",
-          entry_type: "spot_hub",
-        },
-        {
-          key: "zhenfen_class",
-          name: "垃圾真分小课堂",
-          subtitle: "学分类 · 真投放",
-          emoji: "📗",
-          entry_type: "spot_hub",
-        },
-      ],
+      spot_modules: SPOT_MODULES_DEFAULT.map((m) => ({ ...m })),
       main_categories: [
         {
           id: 1,
@@ -925,7 +947,7 @@ export default {
         const res = await this.$u.api.get_activity_spot_modules();
         const list = res.data || [];
         if (Array.isArray(list) && list.length >= 4) {
-          this.spot_modules = list;
+          this.spot_modules = mergeSpotModulesFromApi(list);
         }
       } catch (e) {
         /* 保留本地默认四项 */
