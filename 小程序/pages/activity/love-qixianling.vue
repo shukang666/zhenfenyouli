@@ -188,9 +188,9 @@ export default {
 			return Math.max(12, Math.round((this.learnPassed / this.learnTotal) * 100)) + '%'
 		},
 		learnProgressText() {
-			if (!this.learnTotal) return '选模块开始学考'
-			if (this.learnPassed >= this.learnTotal) return '各模块篇章已全部通关'
-			return '累计通关 ' + this.learnPassed + '/' + this.learnTotal + ' 篇'
+			if (!this.learnTotal) return '六大板块 · 每模块抽 3 题'
+			if (this.learnPassed >= this.learnTotal) return '六大板块已全部通关'
+			return '板块通关 ' + this.learnPassed + '/' + this.learnTotal
 		},
 	},
 	onLoad() {
@@ -242,7 +242,7 @@ export default {
 			this.$u.api.getQxlLearnModules().then(res => {
 				if (res.code == 1) {
 					this.learnPassed = res.data.passed_count || 0
-					this.learnTotal = res.data.article_count || 0
+					this.learnTotal = res.data.module_count || res.data.article_count || 0
 				}
 			}).catch(() => {})
 		},

@@ -3,6 +3,7 @@
 namespace api\wxapp\controller;
 
 use api\wxapp\model\AccountLogModel;
+use api\wxapp\service\QxlLearnModuleService;
 use think\facade\Db;
 
 /**
@@ -146,6 +147,167 @@ class QxlQuizController extends AuthController
             'total_count'    => $totalCount,
             'point'          => $point,
             'answers_detail' => $detail,
+        ]);
+    }
+
+    /**
+     * 模块随机抽题（未过关时每次调用重新抽 3 道）
+     * GET /wxapp/qxl_quiz/get_module_quiz?category=
+     */
+    public function get_module_quiz()
+    {
+        $category = trim((string)$this->request->param('category', ''));
+        if (!QxlLearnModuleService::isValidModuleCategory($category)) {
+            $this->error('模块无效');
+        }
+        if (!empty($this->user_id)) {
+            $passed = QxlLearnModuleService::passedModuleMap($this->user_id);
+            if (isset($passed[$category])) {
+                $this->success('success', [
+                    'category'   => $category,
+                    'passed'     => 1,
+                    'questions'  => [],
+                    'draw_count' => QxlLearnModuleService::MODULE_QUIZ_DRAW,
+                ]);
+            }
+        }
+        $draw = QxlLearnModuleService::MODULE_QUIZ_DRAW;
+        $questions = QxlLearnModuleService::drawModuleQuestions($category, $draw);
+        if ($questions === null) {
+            $this->error('该模块题库不足 ' . $draw . ' 道题，请联系管理员补充');
+        }
+        $this->success('success', [
+            'category'   => $category,
+            'passed'     => 0,
+            'questions'  => $questions,
+            'draw_count' => $draw,
+        ]);
+    }
+
+    /**
+     * 提交模块测验（3 题全对即板块过关；未过关不记历史，前端重新抽题）
+     * POST /wxapp/qxl_quiz/submit_module_quiz
+     */
+    public function submit_module_quiz()
+    {
+        $this->checkUser();
+
+        $rawBody = file_get_contents('php://input');
+        $rawParams = $rawBody ? json_decode($rawBody, true) : [];
+        if (!is_array($rawParams)) {
+            $rawParams = [];
+        }
+
+        $category = trim((string)$this->request->param('category', ''));
+        if ($category === '' && !empty($rawParams['category'])) {
+            $category = trim((string)$rawParams['category']);
+        }
+        if (!QxlLearnModuleService::isValidModuleCategory($category)) {
+            $this->error('请指定有效模块');
+        }
+
+        $passedMap = QxlLearnModuleService::passedModuleMap($this->user_id);
+        if (isset($passedMap[$category])) {
+            $this->success('本模块已过关', [
+                'passed'         => true,
+                'already_passed' => true,
+                'correct_count'  => QxlLearnModuleService::MODULE_QUIZ_DRAW,
+                'total_count'    => QxlLearnModuleService::MODULE_QUIZ_DRAW,
+                'point'          => 0,
+            ]);
+        }
+
+        $answers = $this->parseAnswers($rawParams);
+        $draw = QxlLearnModuleService::MODULE_QUIZ_DRAW;
+        if (count($answers) !== $draw) {
+            $this->error('请答完本模块 ' . $draw . ' 道题');
+        }
+
+        $qids = [];
+        foreach ($answers as $ans) {
+            $qid = intval($ans['qid'] ?? 0);
+            if ($qid <= 0) {
+                $this->error('题目无效');
+            }
+            $qids[] = $qid;
+        }
+        if (count(array_unique($qids)) !== $draw) {
+            $this->error('题目重复或数量不对');
+        }
+
+        $bank = QxlLearnModuleService::filterQuestionBankForCategory($category, $qids);
+        if (count($bank) !== $draw) {
+            $this->error('题目不属于本模块题库');
+        }
+
+        $correctCount = 0;
+        foreach ($answers as $ans) {
+            $qid = intval($ans['qid']);
+            $answer = strtoupper(trim($ans['answer'] ?? ''));
+            if ($answer !== '' && isset($bank[$qid]) && $answer === $bank[$qid]) {
+                $correctCount++;
+            }
+        }
+
+        $passed = ($correctCount === $draw);
+        if (!$passed) {
+            $this->success('尚未全部答对，已为你重新抽题', [
+                'passed'         => false,
+                'already_passed' => false,
+                'correct_count'  => $correctCount,
+                'total_count'    => $draw,
+                'point'          => 0,
+                'redraw'         => 1,
+            ]);
+        }
+
+        $existLog = Db::name('qxl_module_log')
+            ->where('user_id', $this->user_id)
+            ->where('category', $category)
+            ->find();
+        $point = 0;
+        if (empty($existLog) || intval($existLog['point']) === 0) {
+            $point = $draw * self::POINT_PER_Q;
+        }
+
+        $now = time();
+        $save = [
+            'user_id'       => $this->user_id,
+            'category'      => $category,
+            'total_count'   => $draw,
+            'correct_count' => $correctCount,
+            'passed'        => 1,
+            'detail'        => '',
+            'update_time'   => $now,
+        ];
+        if ($existLog) {
+            if ($point > 0) {
+                $save['point'] = $point;
+            }
+            Db::name('qxl_module_log')->where('id', $existLog['id'])->update($save);
+        } else {
+            $save['point'] = $point;
+            $save['create_time'] = $now;
+            Db::name('qxl_module_log')->insertGetId($save);
+        }
+
+        if ($point > 0) {
+            AccountLogModel::add_account_log(
+                $this->user_id,
+                2,
+                201,
+                $point,
+                ['remark' => '七贤岭学考过关：' . $category]
+            );
+        }
+
+        $this->success('本模块已过关', [
+            'passed'         => true,
+            'already_passed' => false,
+            'correct_count'  => $correctCount,
+            'total_count'    => $draw,
+            'point'          => $point,
+            'redraw'         => 0,
         ]);
     }
 

@@ -10,9 +10,9 @@
 				<text class="feed-banner-ph">Banner 占位 · 后续可替换为生成图</text>
 				<text class="feed-banner-title">七贤岭学考</text>
 				<text class="feed-banner-lead">人文 · 地理 · 景点 · 七贤由来 · 人口 · 小区信息</text>
-				<text class="feed-banner-tip">先读再考，板块标签标在每段学考前</text>
+				<text class="feed-banner-tip">学习内容由后台配置；每模块随机 3 题，全对过关</text>
 				<view class="feed-banner-progress">
-					<text class="feed-banner-progress-txt">通关 {{ passedCount }}/{{ articleCount }}</text>
+					<text class="feed-banner-progress-txt">板块通关 {{ passedCount }}/{{ moduleCount }}</text>
 					<view class="feed-banner-track">
 						<view class="feed-banner-fill" :style="{ width: progressWidth }"></view>
 					</view>
@@ -30,29 +30,38 @@
 		</view>
 
 		<view class="feed-stream" v-else>
-			<view class="feed-unit" v-for="(unit, uIdx) in units" :key="unit.id">
+			<view class="feed-unit" v-for="(unit, uIdx) in units" :key="unit.category">
 				<view class="feed-unit-head">
 					<view class="feed-mod-tag" :style="modTagStyle(unit.category)">
 						<text class="feed-mod-emoji">{{ modEmoji(unit.category) }}</text>
 						<text class="feed-mod-name">{{ unit.category }}</text>
 					</view>
-					<text class="feed-unit-idx">第 {{ uIdx + 1 }} 组</text>
+					<text class="feed-unit-idx">{{ unit.subtitle }}</text>
 				</view>
 
 				<view class="feed-learn" :style="learnBorderStyle(unit.category)">
 					<view class="feed-phase-row">
 						<text class="feed-phase feed-phase--learn">学习</text>
-						<text class="feed-phase-title">{{ unit.title }}</text>
+						<text class="feed-phase-sub">后台配置 · {{ unit.articles.length }} 篇</text>
 					</view>
-					<image
-						v-if="unit.image"
-						class="feed-learn-cover"
-						:src="unit.image"
-						mode="widthFix"
-						lazy-load
-					></image>
-					<view class="feed-learn-body">
-						<rich-text :nodes="unit.content || ''"></rich-text>
+					<block v-if="unit.articles && unit.articles.length">
+						<view class="feed-art-block" v-for="(art, aIdx) in unit.articles" :key="art.id">
+							<text class="feed-art-title">{{ art.title }}</text>
+							<image
+								v-if="art.image"
+								class="feed-learn-cover"
+								:src="art.image"
+								mode="widthFix"
+								lazy-load
+							></image>
+							<view class="feed-learn-body">
+								<rich-text :nodes="art.content || ''"></rich-text>
+							</view>
+							<view class="feed-art-divider" v-if="aIdx < unit.articles.length - 1"></view>
+						</view>
+					</block>
+					<view class="feed-learn-empty" v-else>
+						<text>该模块学习正文尚未配置</text>
 					</view>
 				</view>
 
@@ -65,38 +74,42 @@
 				<view class="feed-exam">
 					<view class="feed-phase-row">
 						<text class="feed-phase feed-phase--exam">考试</text>
-						<text class="feed-phase-sub" v-if="unit.passed">本篇已通过</text>
-						<text class="feed-phase-sub" v-else>{{ unit.question_count }} 题 · 对照上文作答</text>
+						<text class="feed-phase-sub" v-if="unit.passed">本模块已过关</text>
+						<text class="feed-phase-sub" v-else>随机 {{ drawCount }} 题 · 未全对将重新抽题</text>
 					</view>
 
 					<view class="feed-exam-done" v-if="unit.passed">
-						<text class="feed-exam-done-txt">测验已过关，内容可随时回看</text>
+						<text class="feed-exam-done-txt">本模块测验已通过，可随时回看学习内容</text>
 					</view>
 
-					<block v-else-if="unit.questions && unit.questions.length">
-						<view class="feed-q" v-for="(q, qIdx) in unit.questions" :key="q.id">
+					<view class="feed-exam-loading" v-else-if="quizLoadingMap[unit.category]">
+						<text>正在抽题...</text>
+					</view>
+
+					<block v-else-if="moduleQuestions(unit.category).length">
+						<view class="feed-q" v-for="(q, qIdx) in moduleQuestions(unit.category)" :key="q.id">
 							<text class="feed-q-title">{{ qIdx + 1 }}. {{ q.title }}</text>
 							<view
 								class="feed-opt"
 								v-for="(opt, optIdx) in questionOptions(q)"
 								:key="optIdx"
-								:class="optionClass(uIdx, qIdx, optIdx)"
+								:class="optionClass(unit.category, qIdx, optIdx)"
 								@tap="onSelectOpt(uIdx, qIdx, optIdx)"
 							>
 								<text class="feed-opt-key">{{ opt.key }}</text>
 								<text class="feed-opt-text">{{ opt.text }}</text>
 							</view>
 						</view>
-						<view class="feed-fail" v-if="failHint(unit.id)">
-							<text>{{ failHint(unit.id) }}</text>
+						<view class="feed-fail" v-if="failHint(unit.category)">
+							<text>{{ failHint(unit.category) }}</text>
 						</view>
-						<view class="feed-submit" @tap="onSubmitUnit(uIdx)">
-							<text>{{ submittingId === unit.id ? '提交中...' : '提交本篇测验' }}</text>
+						<view class="feed-submit" @tap="onSubmitModule(uIdx)">
+							<text>{{ submittingCat === unit.category ? '提交中...' : '提交本模块测验' }}</text>
 						</view>
 					</block>
 
 					<view class="feed-exam-empty" v-else>
-						<text>本篇暂未配置题目</text>
+						<text>题库不足 {{ drawCount }} 题（当前 {{ unit.pool_count }} 题），请联系管理员</text>
 					</view>
 				</view>
 			</view>
@@ -114,16 +127,19 @@ export default {
 			loading: true,
 			units: [],
 			passedCount: 0,
-			articleCount: 0,
+			moduleCount: 6,
+			drawCount: 3,
+			quizMap: {},
+			quizLoadingMap: {},
 			answersMap: {},
 			failMap: {},
-			submittingId: 0,
+			submittingCat: '',
 		}
 	},
 	computed: {
 		progressWidth() {
-			if (!this.articleCount) return '0%'
-			return Math.min(100, Math.round((this.passedCount / this.articleCount) * 100)) + '%'
+			if (!this.moduleCount) return '0%'
+			return Math.min(100, Math.round((this.passedCount / this.moduleCount) * 100)) + '%'
 		},
 	},
 	onShow() {
@@ -143,6 +159,9 @@ export default {
 			}
 			return s
 		},
+		moduleQuestions(category) {
+			return this.quizMap[category] || []
+		},
 		modEmoji(category) {
 			return getModuleUi(category).emoji || '📖'
 		},
@@ -159,16 +178,54 @@ export default {
 			this.$u.api.getQxlLearnFeed().then(res => {
 				if (res.code == 1) {
 					const data = res.data || {}
-					this.units = (data.units || []).map(u => ({
+					this.units = (data.units || data.modules || []).map(u => ({
 						...u,
-						content: this.formatArticleContent(u.content),
+						articles: (u.articles || []).map(a => ({
+							...a,
+							content: this.formatArticleContent(a.content),
+						})),
 					}))
 					this.passedCount = data.passed_count || 0
-					this.articleCount = data.article_count || 0
+					this.moduleCount = data.module_count || this.units.length || 6
+					this.drawCount = (this.units[0] && this.units[0].draw_count) || 3
+					this.quizMap = {}
+					this.answersMap = {}
+					this.failMap = {}
+					this.units.forEach(u => {
+						if (!u.passed) {
+							this.fetchModuleQuiz(u.category)
+						}
+					})
 				}
 			}).finally(() => {
 				this.loading = false
 			})
+		},
+		fetchModuleQuiz(category) {
+			if (!category) return
+			this.$set(this.quizLoadingMap, category, true)
+			this.$set(this.quizMap, category, [])
+			this.$set(this.answersMap, category, {})
+			this.$set(this.failMap, category, '')
+			this.$u.api.getQxlModuleQuiz({ category }).then(res => {
+				if (res.code == 1 && res.data) {
+					if (res.data.passed) {
+						this.refreshUnitPassed(category)
+					} else {
+						this.$set(this.quizMap, category, res.data.questions || [])
+					}
+				}
+			}).catch(err => {
+				uni.showToast({ title: (err && err.msg) || '抽题失败', icon: 'none' })
+			}).finally(() => {
+				this.$set(this.quizLoadingMap, category, false)
+			})
+		},
+		refreshUnitPassed(category) {
+			const idx = this.units.findIndex(u => u.category === category)
+			if (idx >= 0) {
+				this.$set(this.units[idx], 'passed', 1)
+			}
 		},
 		questionOptions(q) {
 			const list = []
@@ -178,41 +235,42 @@ export default {
 			if (q.option_d) list.push({ key: 'D', text: q.option_d })
 			return list
 		},
-		unitAnswers(unitId) {
-			return this.answersMap[unitId] || {}
+		unitAnswers(category) {
+			return this.answersMap[category] || {}
 		},
-		optionClass(uIdx, qIdx, optIdx) {
-			const unit = (this.units || [])[uIdx]
-			if (!unit) return ''
-			const q = (unit.questions || [])[qIdx]
+		optionClass(category, qIdx, optIdx) {
+			const questions = this.moduleQuestions(category)
+			const q = questions[qIdx]
 			if (!q) return ''
 			const opts = this.questionOptions(q)
 			const opt = opts[optIdx]
 			if (!opt) return ''
-			const picked = this.unitAnswers(unit.id)[q.id]
+			const picked = this.unitAnswers(category)[q.id]
 			return picked === opt.key ? 'is-on' : ''
 		},
 		onSelectOpt(uIdx, qIdx, optIdx) {
 			const unit = (this.units || [])[uIdx]
-			if (!unit) return
-			const q = (unit.questions || [])[qIdx]
+			if (!unit || unit.passed) return
+			const questions = this.moduleQuestions(unit.category)
+			const q = questions[qIdx]
 			if (!q) return
 			const opts = this.questionOptions(q)
 			const opt = opts[optIdx]
 			if (!opt) return
-			if (!this.answersMap[unit.id]) {
-				this.$set(this.answersMap, unit.id, {})
+			if (!this.answersMap[unit.category]) {
+				this.$set(this.answersMap, unit.category, {})
 			}
-			this.$set(this.answersMap[unit.id], q.id, opt.key)
+			this.$set(this.answersMap[unit.category], q.id, opt.key)
 		},
-		failHint(unitId) {
-			return this.failMap[unitId] || ''
+		failHint(category) {
+			return this.failMap[category] || ''
 		},
-		onSubmitUnit(uIdx) {
+		onSubmitModule(uIdx) {
 			const unit = (this.units || [])[uIdx]
-			if (!unit || this.submittingId) return
-			const questions = unit.questions || []
-			const picked = this.unitAnswers(unit.id)
+			if (!unit || unit.passed || this.submittingCat) return
+			const category = unit.category
+			const questions = this.moduleQuestions(category)
+			const picked = this.unitAnswers(category)
 			for (let i = 0; i < questions.length; i++) {
 				if (!picked[questions[i].id]) {
 					uni.showToast({ title: '请答完第' + (i + 1) + '题', icon: 'none' })
@@ -225,20 +283,20 @@ export default {
 				qid: q.id,
 				answer: picked[q.id],
 			}))
-			this.submittingId = unit.id
-			this.$u.api.submitQxlChapter({
-				knowledge_id: unit.id,
+			this.submittingCat = category
+			this.$u.api.submitQxlModuleQuiz({
+				category,
 				answers,
 			}).then(res => {
-				this.submittingId = 0
+				this.submittingCat = ''
 				if (res.code != 1) {
 					uni.showToast({ title: res.msg || '提交失败', icon: 'none' })
 					return
 				}
 				const data = res.data || {}
 				if (data.passed) {
-					this.$set(this.failMap, unit.id, '')
-					let msg = '本篇已过关'
+					this.$set(this.failMap, category, '')
+					let msg = '本模块已过关'
 					if (data.point > 0) msg = '过关 +' + data.point + '积分'
 					uni.showToast({ title: msg, icon: 'success' })
 					this.loadFeed()
@@ -246,13 +304,14 @@ export default {
 					const wrong = (data.total_count || 0) - (data.correct_count || 0)
 					this.$set(
 						this.failMap,
-						unit.id,
-						'答对 ' + data.correct_count + '/' + data.total_count + '，还有 ' + wrong + ' 题可对照上文再选'
+						category,
+						'答对 ' + data.correct_count + '/' + data.total_count + (wrong > 0 ? '，已为你换一批新题' : '')
 					)
 					uni.showToast({ title: '尚未全部答对', icon: 'none' })
+					this.fetchModuleQuiz(category)
 				}
 			}).catch(err => {
-				this.submittingId = 0
+				this.submittingCat = ''
 				const msg = err && err.msg
 				if (msg === '用户不存在') {
 					this.$u.func.checkLogin()
@@ -270,7 +329,6 @@ export default {
 	min-height: 100vh;
 	background: #e8efeb;
 }
-
 .feed-banner {
 	position: relative;
 	min-height: 360rpx;
@@ -330,14 +388,12 @@ export default {
 	font-size: 48rpx;
 	font-weight: 800;
 	letter-spacing: 4rpx;
-	text-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.18);
 }
 .feed-banner-lead {
 	display: block;
 	margin-top: 16rpx;
 	font-size: 26rpx;
 	line-height: 1.55;
-	opacity: 0.95;
 	font-weight: 600;
 }
 .feed-banner-tip {
@@ -391,8 +447,9 @@ export default {
 }
 .feed-unit-head {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10rpx;
 	margin-bottom: 16rpx;
 	padding: 0 4rpx;
 }
@@ -407,13 +464,11 @@ export default {
 }
 .feed-mod-emoji {
 	font-size: 28rpx;
-	line-height: 1;
 }
 .feed-mod-name {
 	font-size: 26rpx;
 	font-weight: 800;
 	color: #fff;
-	letter-spacing: 2rpx;
 }
 .feed-unit-idx {
 	font-size: 22rpx;
@@ -440,7 +495,6 @@ export default {
 	font-weight: 800;
 	padding: 6rpx 16rpx;
 	border-radius: 8rpx;
-	letter-spacing: 2rpx;
 }
 .feed-phase--learn {
 	color: #9a6700;
@@ -451,17 +505,19 @@ export default {
 	color: #fff;
 	background: linear-gradient(90deg, #0f6e56, #1fa971);
 }
-.feed-phase-title {
-	flex: 1;
-	min-width: 0;
-	font-size: 30rpx;
-	font-weight: 700;
-	color: #16332b;
-	line-height: 1.4;
-}
 .feed-phase-sub {
 	font-size: 22rpx;
 	color: #6b7c75;
+}
+.feed-art-block {
+	padding-bottom: 8rpx;
+}
+.feed-art-title {
+	display: block;
+	padding: 0 28rpx 12rpx;
+	font-size: 30rpx;
+	font-weight: 700;
+	color: #16332b;
 }
 .feed-learn-cover {
 	width: 100%;
@@ -469,10 +525,20 @@ export default {
 	background: #eef3f0;
 }
 .feed-learn-body {
-	padding: 8rpx 28rpx 28rpx;
+	padding: 8rpx 28rpx 20rpx;
 	font-size: 28rpx;
 	color: #2c3d37;
 	line-height: 1.85;
+}
+.feed-art-divider {
+	height: 1rpx;
+	margin: 8rpx 28rpx 16rpx;
+	background: linear-gradient(90deg, transparent, #dceee4, transparent);
+}
+.feed-learn-empty {
+	padding: 24rpx 28rpx 32rpx;
+	color: #8a9691;
+	font-size: 24rpx;
 }
 
 .feed-connector {
@@ -501,7 +567,8 @@ export default {
 	box-shadow: 0 12rpx 32rpx rgba(15, 110, 86, 0.06);
 	padding-bottom: 24rpx;
 }
-.feed-exam-done {
+.feed-exam-done,
+.feed-exam-loading {
 	margin: 0 24rpx 24rpx;
 	padding: 24rpx;
 	text-align: center;
@@ -584,7 +651,6 @@ export default {
 	color: #fff;
 	font-size: 30rpx;
 	font-weight: 700;
-	box-shadow: 0 10rpx 24rpx rgba(15, 110, 86, 0.22);
 }
 .feed-footer-space {
 	height: 48rpx;

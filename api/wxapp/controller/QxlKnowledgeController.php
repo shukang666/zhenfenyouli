@@ -65,19 +65,8 @@ class QxlKnowledgeController extends AuthController
      */
     public function get_learn_modules()
     {
-        $modules = QxlLearnModuleService::buildModulesSummary(intval($this->user_id));
-        $passedTotal = 0;
-        $articleTotal = 0;
-        foreach ($modules as $m) {
-            $passedTotal += intval($m['passed_count']);
-            $articleTotal += intval($m['article_count']);
-        }
-        $this->success('success', [
-            'modules'       => $modules,
-            'passed_count'  => $passedTotal,
-            'article_count' => $articleTotal,
-            'all_passed'    => $articleTotal > 0 && $passedTotal >= $articleTotal,
-        ]);
+        $data = QxlLearnModuleService::buildModulesSummary(intval($this->user_id));
+        $this->success('success', $data);
     }
 
     /**

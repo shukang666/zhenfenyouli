@@ -57,6 +57,8 @@ const wxapp = {
 	getQxlChapterLearn: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_chapter_learn', params),
 	// 七贤岭学考 - 提交本篇测验
 	submitQxlChapter: (params = {}) => uni.$u.post('/wxapp/qxl_quiz/submit_chapter', params),
+	getQxlModuleQuiz: (params = {}) => uni.$u.get('/wxapp/qxl_quiz/get_module_quiz', params),
+	submitQxlModuleQuiz: (params = {}) => uni.$u.post('/wxapp/qxl_quiz/submit_module_quiz', params),
 
 	// 七贤岭考试 - 获取题目
 	getQxlQuiz: (params = {}) => uni.$u.get('/wxapp/qxl_quiz/get_quiz', params),

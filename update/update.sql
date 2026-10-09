@@ -454,3 +454,22 @@ SELECT
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='user_clock_scene_point_index' LIMIT 1);
+
+-- 七贤岭学考：按板块通关（每模块随机抽 3 题）
+SET @__col := (SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_qxl_module_log');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'CREATE TABLE `cmf_qxl_module_log` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `category` varchar(50) NOT NULL DEFAULT '''' COMMENT ''模块名：人文/地理等'',
+  `total_count` int(11) unsigned NOT NULL DEFAULT 0,
+  `correct_count` int(11) unsigned NOT NULL DEFAULT 0,
+  `passed` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `point` int(11) unsigned NOT NULL DEFAULT 0,
+  `detail` text COMMENT ''最近一次提交详情JSON，过关后不再写入'',
+  `create_time` int(11) unsigned NOT NULL DEFAULT 0,
+  `update_time` int(11) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_category` (`user_id`,`category`),
+  KEY `passed` (`passed`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT=''七贤岭学考模块通关记录''');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
