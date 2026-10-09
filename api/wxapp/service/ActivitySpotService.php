@@ -78,7 +78,7 @@ class ActivitySpotService
 
         $list = [];
         foreach ($rows as $row) {
-            $list[] = self::formatActiveVenue($row);
+            $list[] = self::formatActiveVenue($row, $spotKey);
         }
         return $list;
     }
@@ -113,7 +113,7 @@ class ActivitySpotService
                 'id' => (int)$s['id'],
                 'session_id' => (int)$s['id'],
                 'active_id' => $aid,
-                'title' => (string)($s['title'] ?: ($active['name'] ?? '分会场')),
+                'title' => self::resolveFleaSessionTitle($s, $active),
                 'address' => (string)$s['address'],
                 'date_text' => (string)$s['date_text'],
                 'thumb' => !empty($active['thumb']) ? cmf_get_asset_url($active['thumb']) : '',
@@ -126,27 +126,121 @@ class ActivitySpotService
         // 无场次时仍展示绑定了专题的主活动（便于运营先上架活动再补场次）
         if (empty($list)) {
             foreach ($activeMap as $row) {
-                $list[] = self::formatActiveVenue($row);
+                $list[] = self::formatActiveVenue($row, self::SPOT_FLEA);
             }
         }
 
         return $list;
     }
 
+    /** @param array<string,mixed> $session @param array<string,mixed> $active */
+    protected static function resolveFleaSessionTitle(array $session, array $active): string
+    {
+        $title = trim((string)($session['title'] ?? ''));
+        if ($title !== '') {
+            return $title;
+        }
+        $address = trim((string)($session['address'] ?? ''));
+        if ($address !== '') {
+            return self::shortPlaceLabel($address);
+        }
+        return self::resolveActiveVenueTitle($active, self::SPOT_FLEA);
+    }
+
+    /** 专题内列表项：以地点命名，不重复专题活动名 */
     /** @param array<string,mixed> $row */
-    protected static function formatActiveVenue(array $row): array
+    protected static function resolveActiveVenueTitle(array $row, string $spotKey): string
+    {
+        $name = trim((string)($row['name'] ?? ''));
+        $address = trim((string)($row['address'] ?? ''));
+        $moduleName = self::moduleNameByKey($spotKey);
+
+        $stripped = self::stripTopicPrefixFromName($name, $spotKey);
+        if ($stripped !== '' && ($moduleName === '' || $stripped !== $moduleName)) {
+            return $stripped;
+        }
+        if ($address !== '') {
+            return self::shortPlaceLabel($address);
+        }
+        if ($name !== '') {
+            return $name;
+        }
+        return '地点待定';
+    }
+
+    protected static function moduleNameByKey(string $spotKey): string
+    {
+        foreach (self::moduleList() as $m) {
+            if (($m['key'] ?? '') === $spotKey) {
+                return trim((string)($m['name'] ?? ''));
+            }
+        }
+        return '';
+    }
+
+    protected static function stripTopicPrefixFromName(string $name, string $spotKey): string
+    {
+        $name = trim($name);
+        if ($name === '') {
+            return '';
+        }
+        $prefixes = array_filter([
+            self::moduleNameByKey($spotKey),
+            '徒步拾遗',
+            '七贤岭绿色二手集市',
+            '绿色二手集市',
+            '垃圾真分小课堂',
+        ]);
+        foreach ($prefixes as $prefix) {
+            if ($prefix === '') {
+                continue;
+            }
+            if ($name === $prefix) {
+                return '';
+            }
+            $pattern = '/^' . preg_quote($prefix, '/') . '[\s·\-—|｜:：]*+/u';
+            $next = preg_replace($pattern, '', $name);
+            if (is_string($next) && $next !== $name) {
+                $name = trim($next);
+            }
+        }
+        return $name;
+    }
+
+    /** 地址过长时取更易读的地点称呼（列表主标题用） */
+    protected static function shortPlaceLabel(string $address): string
+    {
+        $address = trim($address);
+        if ($address === '') {
+            return '';
+        }
+        $parts = preg_split('/[\s,，、]+/u', $address);
+        if (is_array($parts) && count($parts) > 0) {
+            $last = trim((string)end($parts));
+            if ($last !== '' && mb_strlen($last) <= 32) {
+                return $last;
+            }
+        }
+        return mb_strlen($address) > 32 ? (mb_substr($address, 0, 32) . '…') : $address;
+    }
+
+    /** @param array<string,mixed> $row */
+    protected static function formatActiveVenue(array $row, string $spotKey = ''): array
     {
         $thumb = $row['thumb'] ?? '';
         if ($thumb !== '') {
             $thumb = cmf_get_asset_url($thumb);
         }
+        $spotKey = $spotKey !== '' ? $spotKey : trim((string)($row['spot_key'] ?? ''));
+        $address = (string)($row['address'] ?? '');
+        $title = $spotKey !== '' ? self::resolveActiveVenueTitle($row, $spotKey) : (string)($row['name'] ?? '');
         return [
             'kind' => 'active',
             'id' => (int)$row['id'],
             'session_id' => 0,
             'active_id' => (int)$row['id'],
-            'title' => (string)($row['name'] ?? ''),
-            'address' => (string)($row['address'] ?? ''),
+            'title' => $title,
+            'address' => $address,
             'date_text' => !empty($row['date']) ? date('Y-m-d', (int)$row['date']) : '',
             'thumb' => $thumb,
             'display_mode' => (int)($row['display_mode'] ?? 1),

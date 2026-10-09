@@ -8,8 +8,8 @@
 
 		<view class="spot-body">
 			<view class="spot-section-head">
-				<text class="spot-section-label">分会场</text>
-				<text class="spot-section-hint">选择场次进入活动</text>
+				<text class="spot-section-label">活动地点</text>
+				<text class="spot-section-hint">选择地点进入活动</text>
 			</view>
 
 			<view class="spot-list" v-if="venues.length">
@@ -29,7 +29,7 @@
 								<u-icon name="clock" size="20" color="#65676B"></u-icon>
 								<text>{{ item.date_text }}</text>
 							</view>
-							<view class="spot-meta-row" v-if="item.address">
+							<view class="spot-meta-row" v-if="showVenueAddress(item)">
 								<u-icon name="map" size="20" color="#65676B"></u-icon>
 								<text class="u-line-1">{{ item.address }}</text>
 							</view>
@@ -43,7 +43,7 @@
 			</view>
 
 			<view class="spot-empty" v-else-if="!loading">
-				<text class="spot-empty-text">暂无分会场，敬请期待</text>
+				<text class="spot-empty-text">暂无活动地点，敬请期待</text>
 			</view>
 			<view class="spot-empty" v-else>
 				<text class="spot-empty-text">加载中...</text>
@@ -92,6 +92,16 @@ export default {
 		this.loadHub()
 	},
 	methods: {
+		showVenueAddress(item) {
+			if (!item || !item.address) return false
+			const addr = String(item.address).trim()
+			const title = String(item.title || '').trim()
+			if (!addr) return false
+			if (!title) return true
+			if (addr === title) return false
+			if (addr.indexOf(title) >= 0 || title.indexOf(addr) >= 0) return false
+			return true
+		},
 		loadHub() {
 			if (!this.spotKey) {
 				this.loading = false
