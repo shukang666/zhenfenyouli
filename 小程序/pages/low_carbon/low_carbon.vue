@@ -347,7 +347,7 @@
       </scroll-view>
     </view>
 
-    <!-- 现在就能参加：绿色行动块，强调立刻点 -->
+    <!-- 现在就能参加（暂时隐藏，恢复时同步 TabHomeService light_list / goMoreLight）
     <view class="fb-section fb-light-act" v-if="light_list.length > 0">
       <view class="fb-section-header">
         <view class="fb-hd">
@@ -389,6 +389,7 @@
         </view>
       </view>
     </view>
+    -->
 
     <!-- 近期活动（暂时隐藏，恢复时同步 TabHomeService recent_list）
     <view class="fb-section fb-recent-act" v-if="recent_list.length > 0">
