@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use api\wxapp\service\QxlLearnModuleService;
 use think\facade\Db;
 
 /**
@@ -58,23 +59,103 @@ class QxlKnowledgeController extends AuthController
      * 学考融合路径：按篇章顺序返回学习内容 + 本篇题目 + 通关/解锁状态
      * GET /wxapp/qxl_knowledge/get_learn_path
      */
-    public function get_learn_path()
+    /**
+     * 学考模块总览（枢纽页 Bento 入口）
+     * GET /wxapp/qxl_knowledge/get_learn_modules
+     */
+    public function get_learn_modules()
     {
-        $articles = Db::name('qxl_knowledge')
-            ->where('status', 1)
-            ->order('list_order asc, id asc')
-            ->select()
-            ->toArray();
+        $modules = QxlLearnModuleService::buildModulesSummary(intval($this->user_id));
+        $passedTotal = 0;
+        $articleTotal = 0;
+        foreach ($modules as $m) {
+            $passedTotal += intval($m['passed_count']);
+            $articleTotal += intval($m['article_count']);
+        }
+        $this->success('success', [
+            'modules'       => $modules,
+            'passed_count'  => $passedTotal,
+            'article_count' => $articleTotal,
+            'all_passed'    => $articleTotal > 0 && $passedTotal >= $articleTotal,
+        ]);
+    }
 
-        $passedMap = [];
-        if (!empty($this->user_id)) {
-            $logs = Db::name('qxl_chapter_log')
-                ->where('user_id', $this->user_id)
-                ->where('passed', 1)
-                ->column('id', 'knowledge_id');
-            $passedMap = $logs ?: [];
+    /**
+     * 某模块下的篇章摘要（不含正文）
+     * GET /wxapp/qxl_knowledge/get_module_articles?category=
+     */
+    public function get_module_articles()
+    {
+        $category = trim((string)$this->request->param('category', ''));
+        if ($category === '') {
+            $this->error('请指定模块');
+        }
+        $data = QxlLearnModuleService::buildModuleArticles(intval($this->user_id), $category);
+        foreach ($data['articles'] as &$item) {
+            $item['image'] = $this->formatImage($item['image'] ?? '');
+        }
+        unset($item);
+        $this->success('success', $data);
+    }
+
+    /**
+     * 单篇学考：正文 + 未过关时的题目
+     * GET /wxapp/qxl_knowledge/get_chapter_learn?id=
+     */
+    public function get_chapter_learn()
+    {
+        $id = intval($this->request->param('id', 0));
+        if ($id <= 0) {
+            $this->error('参数错误');
+        }
+        $item = Db::name('qxl_knowledge')->where('id', $id)->where('status', 1)->find();
+        if (empty($item)) {
+            $this->error('内容不存在');
         }
 
+        $passed = false;
+        if (!empty($this->user_id)) {
+            $log = Db::name('qxl_chapter_log')
+                ->where('user_id', $this->user_id)
+                ->where('knowledge_id', $id)
+                ->where('passed', 1)
+                ->find();
+            $passed = !empty($log);
+        }
+
+        $questions = [];
+        if (!$passed) {
+            $questions = Db::name('qxl_quiz_question')
+                ->where('knowledge_id', $id)
+                ->where('status', 1)
+                ->field('id, title, option_a, option_b, option_c, option_d')
+                ->order('list_order asc, id asc')
+                ->select()
+                ->toArray();
+        }
+
+        $this->success('success', [
+            'id'             => $id,
+            'title'          => $item['title'],
+            'category'       => $item['category'],
+            'image'          => $this->formatImage($item['image']),
+            'content'        => $this->formatContent($item['content'] ?? ''),
+            'passed'         => $passed ? 1 : 0,
+            'question_count' => count($questions),
+            'questions'      => $questions,
+        ]);
+    }
+
+    public function get_learn_path()
+    {
+        $category = trim((string)$this->request->param('category', ''));
+        $query = Db::name('qxl_knowledge')->where('status', 1);
+        if ($category !== '') {
+            $query->where('category', $category);
+        }
+        $articles = $query->order('list_order asc, id asc')->select()->toArray();
+
+        $passedMap = QxlLearnModuleService::passedKnowledgeMap(intval($this->user_id));
         $questionsByKid = [];
         $questionRows = Db::name('qxl_quiz_question')
             ->where('status', 1)
@@ -90,51 +171,32 @@ class QxlKnowledgeController extends AuthController
         }
 
         $chapters = [];
-        $prevPassed = true;
         $passedCount = 0;
         $currentId = 0;
 
         foreach ($articles as $item) {
             $kid = intval($item['id']);
             $passed = isset($passedMap[$kid]);
-            $unlocked = $prevPassed;
             if ($passed) {
                 $passedCount++;
             }
-            if ($unlocked && !$passed && $currentId === 0) {
+            if (!$passed && $currentId === 0) {
                 $currentId = $kid;
             }
 
             $chapter = [
-                'id'            => $kid,
-                'title'         => $item['title'],
-                'image'         => $this->formatImage($item['image']),
-                'category'      => $item['category'],
-                'unlocked'      => $unlocked ? 1 : 0,
-                'passed'        => $passed ? 1 : 0,
-                'question_count'=> isset($questionsByKid[$kid]) ? count($questionsByKid[$kid]) : 0,
-                'content'       => '',
-                'questions'     => [],
+                'id'             => $kid,
+                'title'          => $item['title'],
+                'image'          => $this->formatImage($item['image']),
+                'category'       => $item['category'],
+                'unlocked'       => 1,
+                'passed'         => $passed ? 1 : 0,
+                'question_count' => isset($questionsByKid[$kid]) ? count($questionsByKid[$kid]) : 0,
+                'content'        => '',
+                'questions'      => [],
             ];
 
-            if ($unlocked) {
-                $chapter['content'] = $this->formatContent($item['content'] ?? '');
-            }
-            if ($unlocked && !$passed) {
-                $chapter['questions'] = $questionsByKid[$kid] ?? [];
-            }
-
             $chapters[] = $chapter;
-            $prevPassed = $passed;
-        }
-
-        if ($currentId === 0 && !empty($chapters)) {
-            foreach ($chapters as $ch) {
-                if (intval($ch['unlocked']) === 1 && intval($ch['passed']) === 0) {
-                    $currentId = intval($ch['id']);
-                    break;
-                }
-            }
         }
 
         $total = count($chapters);

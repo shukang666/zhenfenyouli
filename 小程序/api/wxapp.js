@@ -51,6 +51,9 @@ const wxapp = {
 	getQxlKnowledgeDetail: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_detail', params),
 	// 七贤岭学考融合路径
 	getQxlLearnPath: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_learn_path', params),
+	getQxlLearnModules: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_learn_modules', params),
+	getQxlModuleArticles: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_module_articles', params),
+	getQxlChapterLearn: (params = {}) => uni.$u.get('/wxapp/qxl_knowledge/get_chapter_learn', params),
 	// 七贤岭学考 - 提交本篇测验
 	submitQxlChapter: (params = {}) => uni.$u.post('/wxapp/qxl_quiz/submit_chapter', params),
 

@@ -59,10 +59,6 @@ class QxlQuizController extends AuthController
             ]);
         }
 
-        if (!$this->isChapterUnlocked($knowledgeId)) {
-            $this->error('请先通过上一篇学考');
-        }
-
         $answers = $this->parseAnswers($rawParams);
         if (empty($answers)) {
             $this->error('请完成本篇测验');
@@ -151,34 +147,6 @@ class QxlQuizController extends AuthController
             'point'          => $point,
             'answers_detail' => $detail,
         ]);
-    }
-
-    /**
-     * 上一篇已过关（或本篇就是第一篇）才可考本篇
-     */
-    private function isChapterUnlocked($knowledgeId)
-    {
-        $ids = Db::name('qxl_knowledge')
-            ->where('status', 1)
-            ->order('list_order asc, id asc')
-            ->column('id');
-        $prevId = 0;
-        foreach ($ids as $id) {
-            $id = intval($id);
-            if ($id === intval($knowledgeId)) {
-                break;
-            }
-            $prevId = $id;
-        }
-        if ($prevId <= 0) {
-            return true;
-        }
-        $prev = Db::name('qxl_chapter_log')
-            ->where('user_id', $this->user_id)
-            ->where('knowledge_id', $prevId)
-            ->where('passed', 1)
-            ->find();
-        return !empty($prev);
     }
 
     private function parseAnswers($rawParams = [])

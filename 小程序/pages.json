@@ -382,6 +382,22 @@
 					}
 				},
 				{
+					"path": "qxl-learn-module",
+					"style": {
+						"navigationBarTitleText": "模块学考",
+						"navigationBarBackgroundColor": "#0F6E56",
+						"navigationBarTextStyle": "white"
+					}
+				},
+				{
+					"path": "qxl-learn-chapter",
+					"style": {
+						"navigationBarTitleText": "边读边测",
+						"navigationBarBackgroundColor": "#FFFFFF",
+						"navigationBarTextStyle": "black"
+					}
+				},
+				{
 					"path": "qxl-knowledge",
 					"style": {
 						"navigationBarTitleText": "七贤岭学习"

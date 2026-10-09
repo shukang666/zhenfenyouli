@@ -39,13 +39,13 @@
 							</view>
 							<view class="qxl-learn-content">
 								<text class="qxl-learn-kicker">七贤岭学考</text>
-								<text class="qxl-learn-lead">用短文认识七贤岭的人文与生态，读完立刻做本篇小测验。</text>
-								<text class="qxl-learn-detail">题目都来自刚读的内容，全部答对才能解锁下一篇，循序渐进把七贤岭「读懂」。</text>
-								<view class="qxl-learn-tags">
-									<text class="qxl-learn-tag">读短文</text>
-									<text class="qxl-learn-tag">答本篇</text>
-									<text class="qxl-learn-tag">过关解锁</text>
-								</view>
+							<text class="qxl-learn-lead">人口、人文、地理等六大主题，各走各的入口，不用按顺序解锁。</text>
+							<text class="qxl-learn-detail">进入模块后选一篇：先读短文，文末立刻做本篇测验，边学边考。</text>
+							<view class="qxl-learn-tags">
+								<text class="qxl-learn-tag">分模块</text>
+								<text class="qxl-learn-tag">边读边测</text>
+								<text class="qxl-learn-tag">自由选学</text>
+							</view>
 								<view class="qxl-learn-foot">
 									<view class="qxl-learn-progress">
 										<view class="qxl-step-progress-track qxl-step-progress-track--lg">
@@ -110,12 +110,12 @@
 						</view>
 						<view class="qxl-learn-content">
 							<text class="qxl-learn-kicker">七贤岭学考</text>
-							<text class="qxl-learn-lead">用短文认识七贤岭的人文与生态，读完立刻做本篇小测验。</text>
-							<text class="qxl-learn-detail">题目都来自刚读的内容，全部答对才能解锁下一篇，循序渐进把七贤岭「读懂」。</text>
+							<text class="qxl-learn-lead">人口、人文、地理等六大主题，各走各的入口，不用按顺序解锁。</text>
+							<text class="qxl-learn-detail">进入模块后选一篇：先读短文，文末立刻做本篇测验，边学边考。</text>
 							<view class="qxl-learn-tags">
-								<text class="qxl-learn-tag">读短文</text>
-								<text class="qxl-learn-tag">答本篇</text>
-								<text class="qxl-learn-tag">过关解锁</text>
+								<text class="qxl-learn-tag">分模块</text>
+								<text class="qxl-learn-tag">边读边测</text>
+								<text class="qxl-learn-tag">自由选学</text>
 							</view>
 							<view class="qxl-learn-foot">
 								<view class="qxl-learn-progress">
@@ -173,9 +173,9 @@ export default {
 			return raw
 		},
 		learnCtaText() {
-			if (this.learnTotal && this.learnPassed >= this.learnTotal) return '回顾学考'
-			if (this.learnPassed > 0) return '继续学考'
-			return '进入学考'
+			if (this.learnTotal && this.learnPassed >= this.learnTotal) return '回顾模块'
+			if (this.learnPassed > 0) return '继续选学'
+			return '选模块开刷'
 		},
 		heroBgStyle() {
 			if (this.heroBgImage) {
@@ -188,9 +188,9 @@ export default {
 			return Math.max(12, Math.round((this.learnPassed / this.learnTotal) * 100)) + '%'
 		},
 		learnProgressText() {
-			if (!this.learnTotal) return '边学边考 · 过关解锁'
-			if (this.learnPassed >= this.learnTotal) return '已全部通关'
-			return '已通关 ' + this.learnPassed + '/' + this.learnTotal + ' 篇'
+			if (!this.learnTotal) return '六大主题 · 边学边考'
+			if (this.learnPassed >= this.learnTotal) return '各模块篇章已全部通关'
+			return '累计通关 ' + this.learnPassed + '/' + this.learnTotal + ' 篇'
 		},
 	},
 	onLoad() {
@@ -239,10 +239,10 @@ export default {
 			this.$u.route('/pages/activity/showcase-list')
 		},
 		loadLearnProgress() {
-			this.$u.api.getQxlLearnPath().then(res => {
+			this.$u.api.getQxlLearnModules().then(res => {
 				if (res.code == 1) {
 					this.learnPassed = res.data.passed_count || 0
-					this.learnTotal = res.data.total_count || 0
+					this.learnTotal = res.data.article_count || 0
 				}
 			}).catch(() => {})
 		},
