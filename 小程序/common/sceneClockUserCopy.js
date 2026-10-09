@@ -804,16 +804,12 @@ export function getOfficeClockItemTags() {
 	return ['纸箱', '瓶子', '其他']
 }
 
-export function getOfficeClockVolumeTags() {
-	return ['少', '多']
-}
-
 export function getOfficeClockSaveTitle() {
 	return '攒了多久？'
 }
 
 export function getOfficeClockSaveOptions() {
-	return ['今天', '1-3天', '三天以上']
+	return ['今天', '1-3天', '3天以上']
 }
 
 export function getOfficeClockPhotoTitle() {

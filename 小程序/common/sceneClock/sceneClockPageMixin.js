@@ -137,7 +137,6 @@ import settings, { uploadUrl } from '@/common/settings'
 		getOfficeClockConfirmTitle,
 		getOfficeClockItemTitle,
 		getOfficeClockItemTags,
-		getOfficeClockVolumeTags,
 		getOfficeClockSaveTitle,
 		getOfficeClockSaveOptions,
 		getOfficeClockPhotoTitle,
@@ -306,7 +305,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				officeBuildingPickerShow: false,
 				officeBuildingSearchQuery: '',
 				officeItemTags: [],
-				officeVolumeTag: '',
 				officeSaveDuration: '',
 				officeClockBannerTitle: getOfficeClockBannerTitle(),
 				officeClockBannerSub: getOfficeClockBannerSub(),
@@ -320,7 +318,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				officeClockConfirmTitle: getOfficeClockConfirmTitle(),
 				officeClockItemTitle: getOfficeClockItemTitle(),
 				officeClockItemTags: getOfficeClockItemTags(),
-				officeClockVolumeTags: getOfficeClockVolumeTags(),
 				officeClockSaveTitle: getOfficeClockSaveTitle(),
 				officeClockSaveOptions: getOfficeClockSaveOptions(),
 				officeClockPhotoTitle: getOfficeClockPhotoTitle(),
@@ -1326,7 +1323,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.officeBuildingPickerShow = false
 				this.officeBuildingSearchQuery = ''
 				this.officeItemTags = []
-				this.officeVolumeTag = ''
 				this.officeSaveDuration = ''
 				this.pointId = 0
 				this.cateId = 0
@@ -1402,12 +1398,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				const tag = tags[idx]
 				if (tag == null) return
 				this.toggleOfficeItemTag(tag)
-			},
-			pickOfficeVolumeTagByIndex(idx) {
-				const tags = this.officeClockVolumeTags || []
-				const tag = tags[idx]
-				if (tag == null) return
-				this.officeVolumeTag = tag
 			},
 			pickOfficeSaveDurationByIndex(idx) {
 				const opts = this.officeClockSaveOptions || []
@@ -2494,7 +2484,6 @@ import settings, { uploadUrl } from '@/common/settings'
 					if (!(this.officeItemTags || []).length) {
 						return this.$u.toast('请选择今天投了什么')
 					}
-					if (!this.officeVolumeTag) return this.$u.toast('请选择投放数量（少/多）')
 					if (!this.officeSaveDuration) return this.$u.toast('请选择攒了多久')
 					if (!String(this.clockSlotUrls[0] || '').trim()) {
 						return this.$u.toast('请上传真分投递照片')
@@ -2526,7 +2515,6 @@ import settings, { uploadUrl } from '@/common/settings'
 					if ((this.officeItemTags || []).length) {
 						parts.push('投放物：' + this.officeItemTags.join('、'))
 					}
-					if (this.officeVolumeTag) parts.push('数量：' + this.officeVolumeTag)
 					if (this.officeSaveDuration) parts.push('积攒：' + this.officeSaveDuration)
 				} else if (this.accumDuration || this.sortDuration) {
 					if (this.accumDuration) parts.push('积累时长：' + this.accumDuration)

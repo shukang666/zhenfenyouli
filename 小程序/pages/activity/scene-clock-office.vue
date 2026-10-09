@@ -148,15 +148,6 @@
 								@tap="toggleOfficeItemTagByIndex(itemTagIdx)"
 							>{{ tag }}</view>
 						</view>
-						<view class="scf-oc-chip-row scf-oc-chip-row--sub">
-							<view
-								v-for="(tag, volTagIdx) in officeClockVolumeTags"
-								:key="volTagIdx"
-								class="scf-oc-chip scf-oc-chip--sm"
-								:class="{ 'scf-oc-chip--on': officeVolumeTag === tag }"
-								@tap="pickOfficeVolumeTagByIndex(volTagIdx)"
-							>{{ tag }}</view>
-						</view>
 					</view>
 				</view>
 
