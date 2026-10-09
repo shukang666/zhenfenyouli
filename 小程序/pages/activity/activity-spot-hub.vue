@@ -56,9 +56,9 @@
 import { openActiveDetailWithContext, appendActiveIdToWebUrl, buildH5WrapperPath, isWebDisplayActive } from '@/common/activeOpen.js'
 
 const SPOT_DECOR = {
-	hiking: { emoji: '🥾', subtitle: '边走边捡 · 洁净山野' },
-	flea_market: { emoji: '♻️', subtitle: '闲置循环 · 绿色生活' },
-	zhenfen_class: { emoji: '📗', subtitle: '学分类 · 真投放' },
+	hiking: { emoji: '🥾', name: '步行山海，净美家园', subtitle: '边走边捡 · 洁净山野' },
+	flea_market: { emoji: '♻️', name: '七贤岭绿色二手集市', subtitle: '闲置循环 · 绿色生活' },
+	zhenfen_class: { emoji: '📗', name: '垃圾真分小课堂', subtitle: '学分类 · 真投放' },
 }
 
 export default {
@@ -86,8 +86,11 @@ export default {
 		}
 		const decor = SPOT_DECOR[this.spotKey] || {}
 		this.moduleEmoji = decor.emoji || '📌'
-		if (!this.moduleSubtitle) {
-			this.moduleSubtitle = decor.subtitle || ''
+		if (decor.name) {
+			this.moduleName = decor.name
+		}
+		if (decor.subtitle) {
+			this.moduleSubtitle = decor.subtitle
 		}
 		this.loadHub()
 	},
@@ -112,9 +115,18 @@ export default {
 			this.$u.api.get_activity_spot_venues({ spot_key: this.spotKey }).then(res => {
 				const data = res.data || {}
 				const mod = data.module || {}
-				if (mod.name) this.moduleName = mod.name
-				if (mod.subtitle) this.moduleSubtitle = mod.subtitle
-				if (mod.emoji) this.moduleEmoji = mod.emoji
+				const decor = SPOT_DECOR[this.spotKey] || {}
+				if (!decor.name && mod.name && !this.moduleName) {
+					this.moduleName = mod.name
+				} else if (decor.name) {
+					this.moduleName = decor.name
+				}
+				if (!decor.subtitle && mod.subtitle) {
+					this.moduleSubtitle = mod.subtitle
+				} else if (decor.subtitle) {
+					this.moduleSubtitle = decor.subtitle
+				}
+				if (mod.emoji && !decor.emoji) this.moduleEmoji = mod.emoji
 				this.venues = data.venues || []
 				if (this.moduleName) {
 					uni.setNavigationBarTitle({ title: this.moduleName })

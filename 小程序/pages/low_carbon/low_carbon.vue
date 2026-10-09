@@ -164,7 +164,7 @@
       </view>
     </view>
 
-    <!-- 四大专题：我和七贤岭 + 徒步拾遗 / 绿色二手集市 / 垃圾真分小课堂 -->
+    <!-- 四大专题：我和七贤岭 + 步行山海净美家园 / 绿色二手集市 / 垃圾真分小课堂 -->
     <view class="fb-section fb-spot-modules" id="guide-fb-qxl">
       <view class="fb-section-header">
         <view class="fb-hd">
@@ -597,9 +597,9 @@ function mergeSpotModulesFromApi(fromApi) {
   return SPOT_MODULES_DEFAULT.map((local) => {
     const remote = remoteByKey[local.key];
     if (!remote) return { ...local };
+    // 名称、副标题以前端 SPOT_MODULES_DEFAULT 为准（避免线上 API 未发版时仍显示旧文案）
     return {
       ...local,
-      name: remote.name || local.name,
       entry_type: remote.entry_type || local.entry_type,
     };
   });
