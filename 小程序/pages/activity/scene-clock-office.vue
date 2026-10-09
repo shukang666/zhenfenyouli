@@ -227,7 +227,7 @@
 								hover-class="scf-card--press"
 								@tap="clockSuccessJumpOtherPick(item)"
 							>
-								<text>去打卡 {{ item.label }}</text>
+								<text>去真分 {{ item.label }}</text>
 							</view>
 						</view>
 					</view>

@@ -779,7 +779,7 @@
 			</view>
 		</view>
 
-		<!-- 其他场景：拍照打卡 -->
+		<!-- 其他场景：拍照真分 -->
 		<view class="scf-body" v-else-if="flowStep === 'learn'">
 			<view class="scf-promo scf-promo--compact" :class="'scf-promo--' + hubPromoSkin">
 				<text class="scf-promo-line">上传 {{ activeCateName || '分类' }} 成果</text>
@@ -890,7 +890,7 @@
 		<view class="scf-success-mask" v-if="clockSuccessShow" @tap="goActivityTab">
 			<view class="scf-success-dialog" @tap.stop="">
 				<text class="scf-success-emoji">✓</text>
-				<text class="scf-success-title">{{ clockSuccessMsg || '打卡成功' }}</text>
+				<text class="scf-success-title">{{ clockSuccessMsg || '真分成功' }}</text>
 				<text class="scf-success-sub">记得投进对的桶；积分到账可能稍有延迟，请稍后在「我的积分」查看。</text>
 
 				<view class="scf-success-next">
@@ -907,7 +907,7 @@
 								hover-class="scf-card--press"
 								@tap="clockSuccessJumpOtherPick(item)"
 							>
-								<text>去打卡 {{ item.label }}</text>
+								<text>去真分 {{ item.label }}</text>
 							</view>
 						</view>
 					</view>

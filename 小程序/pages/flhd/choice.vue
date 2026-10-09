@@ -72,7 +72,7 @@
                 total: 0,
                 forum: {},
                 list: [{
-                    name: '精选打卡',
+                    name: '精选真分',
                     type: 0
                 }],
                 current: 0
@@ -102,7 +102,7 @@
                 this.page = 1
                 this.get_choice_list()
             },
-            // 精选打卡列表
+            // 精选真分列表
             get_choice_list() {
                 this.$u.api.get_choice_list({
                     keyword: this.keyword,

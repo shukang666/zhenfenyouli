@@ -109,12 +109,12 @@
                                 src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250516/26e0df0c97fcd40c195728a3e6a7560c.png"></u-image>
                         </view>
                         <view class="u-font-32 u-font-bold u-p-30">
-                            恭喜已经激活垃圾分类打卡等功能，可以开启垃圾打卡环保之旅
+                            恭喜已经激活垃圾分类真分等功能，可以开启垃圾真分环保之旅
                         </view>
                         <view class="u-m-t-30">
                             <u-button type="success" hover-class="none"
                                 :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
-                                shape="circle" size="medium" @click="redirectTo">立即打卡</u-button>
+                                shape="circle" size="medium" @click="redirectTo">立即真分</u-button>
                         </view>
                         <u-gap height="30"></u-gap>
                     </view>
@@ -146,7 +146,7 @@
             this.get_question_one()
         },
         methods: {
-            // 打卡
+            // 真分
             redirectTo(){
                 uni.redirectTo({
                     url:'/pages/flhd/ljfldk'

@@ -253,7 +253,7 @@
 
 					<text class="scf-success-emoji">✓</text>
 
-					<text class="scf-success-title">{{ clockSuccessMsg || '打卡成功' }}</text>
+					<text class="scf-success-title">{{ clockSuccessMsg || '真分成功' }}</text>
 
 					<text class="scf-success-sub">记得投进对的桶；积分到账可能稍有延迟，请稍后在「我的积分」查看。</text>
 
@@ -287,7 +287,7 @@
 
 								>
 
-									<text>去打卡 {{ item.label }}</text>
+									<text>去真分 {{ item.label }}</text>
 
 								</view>
 

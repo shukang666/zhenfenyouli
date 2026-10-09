@@ -46,7 +46,7 @@
 				</view>
 			</view>
 
-			<!-- 问候 + 快捷打卡（浅色卡片，入口指向垃圾分类打卡页） -->
+			<!-- 问候 + 快捷真分（浅色卡片，入口指向垃圾分类真分页） -->
 			<view id="guide-hello" class="hello-card" v-if="isLogin && todayTask.show">
 				<view class="hello-card__orb hello-card__orb--a"></view>
 				<view class="hello-card__orb hello-card__orb--b"></view>
@@ -67,13 +67,13 @@
 						<view class="hello-card__meta">
 							<text class="hello-card__level">{{ userInfo.nickname || '环保新人' }}</text>
 							<text class="hello-card__dot">·</text>
-							<text>连续打卡 {{ todayTask.streak }} 天</text>
+							<text>连续真分 {{ todayTask.streak }} 天</text>
 							<text v-if="todayTask.daysToGoal > 0">，再坚持 {{ todayTask.daysToGoal }} 天</text>
 						</view>
 					</view>
 				</view>
 				<view class="hello-card__btn" hover-class="hello-card__btn--on" @click.stop="goToClock">
-					<text class="hello-card__btn-title">快捷打卡</text>
+					<text class="hello-card__btn-title">快捷真分</text>
 					<text class="hello-card__btn-sub">垃圾分类</text>
 				</view>
 			</view>
@@ -121,7 +121,7 @@
 								</view>
 							</view>
 							<view class="active-card-foot">
-								<text>{{ item.entry_type === 'scene_clock' ? '去打卡' : '进入专题' }}</text>
+								<text>{{ item.entry_type === 'scene_clock' ? '去真分' : '进入专题' }}</text>
 								<u-icon name="arrow-right" size="20" color="#18AF38"></u-icon>
 							</view>
 						</view>
@@ -197,7 +197,7 @@
 					<view class="sk-about-body">
 						<text class="sk-about-kicker">SHUKANG · 数康科技</text>
 						<text class="sk-about-title">把低碳做成社区日常</text>
-						<text class="sk-about-desc">分类打卡、社区活动、积分兑换，一站式低碳服务。</text>
+						<text class="sk-about-desc">分类真分、社区活动、积分兑换，一站式低碳服务。</text>
 					</view>
 				</view>
 				<view class="sk-guide-cta" hover-class="sk-guide-cta--on" :hover-stay-time="80" @click="openUsageGuide">
@@ -275,10 +275,10 @@ export default {
 				homeNotice: '',
 				// 问候模块数据
 				greetingHour: new Date().getHours(),
-				// 今日打卡任务数据
+				// 今日真分任务数据
 				todayTask: {
 					show: false,
-					title: '今日垃圾分类打卡',
+					title: '今日垃圾分类真分',
 					subtitle: '完成家庭分类，共建绿色社区',
 					points: 20,
 					streak: 0,
@@ -313,7 +313,7 @@ export default {
 					{
 						selector: '',
 						title: '欢迎来到绿色社区',
-						desc: '签到攒积分、快捷垃圾分类打卡、看热门活动与社区专题。下面几步带您认一认。'
+						desc: '签到攒积分、快捷垃圾分类真分、看热门活动与社区专题。下面几步带您认一认。'
 					},
 					{
 						selector: '#guide-search',
@@ -324,8 +324,8 @@ export default {
 					{
 						selector: '#guide-hello',
 						prefer: 'below',
-						title: '签到和快捷打卡',
-						desc: '登录后这里会显示：先点「签到」，再点「快捷打卡」进垃圾分类打卡（未显示可跳过本步）。'
+						title: '签到和快捷真分',
+						desc: '登录后这里会显示：先点「签到」，再点「快捷真分」进垃圾分类真分（未显示可跳过本步）。'
 					},
 					{
 						selector: '#guide-tabs',
@@ -790,7 +790,7 @@ export default {
 					tabBar.setSelected(index)
 				}
 			},
-			// 获取用户成长信息（问候模块+打卡卡片用）
+			// 获取用户成长信息（问候模块+真分卡片用）
 			async getUserInfoForGrowth() {
 				try {
 					let res = await this.$u.api.getUserInfo()
@@ -806,12 +806,12 @@ export default {
 					console.log('获取用户信息失败:', e)
 				}
 			},
-			// 快捷打卡：跳转垃圾分类打卡页（与活动页入口同一套学习/考试校验）
+			// 快捷真分：跳转垃圾分类真分页（与活动页入口同一套学习/考试校验）
 			goToClock() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.goClockCheck()
 			},
-			// 快捷打卡前置校验：学习→考试→打卡（学完垃圾分类指导才可考试，考过才可打卡）
+			// 快捷真分前置校验：学习→考试→真分（学完垃圾分类指导才可考试，考过才可真分）
 			async goClockCheck() {
 				// 先拉取最新用户信息，避免在 flhd/list 学完后返回首页时 is_learn/is_answer 状态过期
 				let info = this.userInfo
@@ -822,11 +822,11 @@ export default {
 				} catch (e) {
 					console.log('刷新用户状态失败:', e)
 				}
-				// 1. 尚未完成打卡前学习 → 引导学习
+				// 1. 尚未完成真分前学习 → 引导学习
 				if (!info.is_learn) {
 					uni.showModal({
 						title: '提示',
-						content: '请先完成打卡前学习，通过答题考试后可参与垃圾分类打卡',
+						content: '请先完成真分前学习，通过答题考试后可参与垃圾分类真分',
 						showCancel: false,
 						confirmText: '去学习',
 						confirmColor: '#39BF3E',
@@ -840,7 +840,7 @@ export default {
 				if (!info.is_answer) {
 					uni.showModal({
 						title: '提示',
-						content: '学习已完成，请通过垃圾分类答题考试后即可打卡',
+						content: '学习已完成，请通过垃圾分类答题考试后即可真分',
 						showCancel: false,
 						confirmText: '去考试',
 						confirmColor: '#39BF3E',
@@ -850,7 +850,7 @@ export default {
 					})
 					return
 				}
-				// 3. 已通过考试 → 直接打卡
+				// 3. 已通过考试 → 直接真分
 				this.$u.route('/pages/flhd/ljfldk')
 			},
 			// 获取签到状态

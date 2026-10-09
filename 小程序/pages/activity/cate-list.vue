@@ -4,7 +4,7 @@
 		<view class="fb-special-entries" v-if="cate_id === 5">
 			<view class="fb-special-entry fb-s-lgfl" @click="gotoFlhd">
 				<text class="fb-s-entry-title">垃圾分类</text>
-				<text class="fb-s-entry-sub">学习分类 · 拍照打卡</text>
+				<text class="fb-s-entry-sub">学习分类 · 拍照真分</text>
 				<text class="fb-s-entry-arrow">›</text>
 			</view>
 			<view class="fb-special-entry fb-s-qxl" @click="gotoQxl">

@@ -495,7 +495,7 @@
 			if (this.isScanJoin) {
 				return done ? '已签到 ✓' : '立即签到';
 			}
-			return done ? '已打卡 ✓' : '立即打卡';
+			return done ? '已真分 ✓' : '立即真分';
 		},
 		// 活动时间文本 - 根据活动类型显示不同格式
 		activityTimeText() {
@@ -583,7 +583,7 @@
 			if (Number(this.info.is_clock_challenge) === 1) {
 				return `在活动期内打卡，累计满 ${this.info.clock_challenge_days || 0} 天即可兑换礼品`;
 			}
-			if (this.info.is_clock == 1) return '完成垃圾分类打卡任务';
+			if (this.info.is_clock == 1) return '完成垃圾分类真分任务';
 			return '点击下方按钮，加入活动';
 		},
 		flowStep2Desc() {
@@ -617,7 +617,7 @@
 		},
 	},
 		onLoad(option) {
-			// 避免 onLoad 与紧随其后的 onShow 各请求一次详情（打卡活动会触发重复自动报名）
+			// 避免 onLoad 与紧随其后的 onShow 各请求一次详情（真分活动会触发重复自动报名）
 			this._skipDetailShowRefresh = true
 			const scene = option.scene ? String(option.scene) : ''
 			let sceneVal = scene
@@ -661,7 +661,7 @@
 			}
 		},
 		methods: {
-			// 关闭打卡/签到成功弹窗
+			// 关闭真分/签到成功弹窗
 			closeTip() {
 				this.tipShow = false;
 			},
@@ -742,7 +742,7 @@
 			},
 		// 上传组件状态变化回�?
 		handleUploadChange() {},
-		// 打卡/签到按钮（打卡活动不需要先报名，直接打卡）
+		// 真分/签到按钮（真分活动不需要先报名，直接真分）
 		openOfflineSignPopup() {
 			if (!this.isLogin) return this.$u.route('/pages/public/login')
 			this.offlinePwdShow = false
@@ -827,7 +827,7 @@
 		handleClock() {
 			if (!this.isLogin) return this.$u.route('/pages/public/login')
 			if (this.isScanJoin) {
-				// 扫码参加活动：免上传照片，点击直接签到（走同一个打卡接口，数据逻辑不变）
+				// 扫码参加活动：免上传照片，点击直接签到（走同一个真分接口，数据逻辑不变）
 				this.post_new_sign_clock()
 				return
 			}
@@ -854,7 +854,7 @@
 					this.form[key].push(e.data.filepath)
 				}
 			},
-			// 打卡
+			// 真分
 			async post_new_sign_clock() {
 				if (!this.$u.func.checkLogin()) return
 				try {
@@ -868,7 +868,7 @@
 					this.showType = 2
 					this.tipShow = true
 
-					// 检查是否有打卡动作触发
+					// 检查是否有真分动作触发
 					if (res.data && res.data.action_trigger) {
 						this.actionTrigger = res.data.action_trigger;
 						// 即时表单通知：弹出表单弹�?
@@ -924,7 +924,7 @@
 				}
 				this.$set(this.actionFormData, fieldLabel, arr);
 			},
-			// 提交打卡动作表单
+			// 提交真分动作表单
 			async submitClockActionForm() {
 				if (!this.actionTrigger) return;
 				// 校验必填�?
@@ -1805,7 +1805,7 @@
 		}
 	}
 	
-	// 打卡成功弹窗
+	// 真分成功弹窗
 	.success-wrap {
 		display: flex;
 		align-items: center;

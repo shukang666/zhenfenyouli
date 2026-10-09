@@ -68,7 +68,7 @@
 		<view class="submit-btn u-p-b ">
 			<u-button type="success" hover-class="none" @click="add_handle_shop" shape="square">确认提交</u-button>
 			<view class="u-text-center u-type-success u-p-30" @click="$u.route('/pages/zzhd/shop-sign-history')">
-				打卡记录
+				真分记录
 			</view>
 		</view>
 	</view>
@@ -97,7 +97,7 @@
 			};
 		},
 		methods: {
-			// 商家打卡
+			// 商家真分
 			async add_handle_shop() {
 				try {
 					let params = {

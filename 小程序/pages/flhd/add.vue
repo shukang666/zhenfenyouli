@@ -16,7 +16,7 @@
 			</view>
 		</view>
 
-		<!-- Step 1：四种垃圾类型（点位打卡时种类已固定则跳过） -->
+		<!-- Step 1：四种垃圾类型（点位真分时种类已固定则跳过） -->
 		<view class="clock-wiz-body" v-show="wizardStep === 1 && !lockCate">
 			<text class="clock-wiz-hint">请选择本次投放的垃圾类型</text>
 			<view class="clock-cate-grid">
@@ -88,15 +88,15 @@
 			<view class="clock-success-wrap">
 				<view class="clock-success-card">
 					<u-icon name="checkmark-circle-fill" size="88" color="#18AF38"></u-icon>
-					<text class="clock-success-title">{{ msg || '打卡成功' }}</text>
+					<text class="clock-success-title">{{ msg || '真分成功' }}</text>
 					<text class="clock-success-sub">请不要忘记正确投递哦~</text>
 					<view class="clock-habit-box" v-if="habitTip">
-						<text class="clock-habit-kicker">本次打卡结束，养成好习惯</text>
+						<text class="clock-habit-kicker">本次真分结束，养成好习惯</text>
 						<text class="clock-habit-text">{{ habitTip }}</text>
 					</view>
 					<view class="clock-supervisor-box" v-if="showSupervisorInvite">
 						<text class="clock-supervisor-kicker">邀请您成为督导员</text>
-						<text class="clock-supervisor-text">您已累计垃圾打卡 {{ supervisorInvite.clock_days }} 天，欢迎申请加入社区督导员，参与点位巡检与桶边督导。</text>
+						<text class="clock-supervisor-text">您已累计垃圾真分 {{ supervisorInvite.clock_days }} 天，欢迎申请加入社区督导员，参与点位巡检与桶边督导。</text>
 						<view class="clock-supervisor-actions">
 							<view class="clock-supervisor-btn clock-supervisor-btn--primary" @tap="goSupervisorApply">去申请</view>
 							<view class="clock-supervisor-btn clock-supervisor-btn--ghost" @tap="dismissSupervisorInvite">稍后再说</view>
@@ -104,7 +104,7 @@
 					</view>
 					<view class="clock-success-btns">
 						<u-button type="success" hover-class="none" shape="circle" :custom-style="btnPrimary" @click="closeMask">
-							继续打卡
+							继续真分
 						</u-button>
 						<u-button type="default" hover-class="none" shape="circle" @click="goActivityTab">返回活动</u-button>
 					</view>
@@ -216,7 +216,7 @@
 			this.form.clock_scene = this.resolveClockScene(this.sceneKey)
 			this.form.clock_sub_scene = this.lockCate ? '' : this.subSceneKey
 			this.get_select_list()
-			uni.setNavigationBarTitle({ title: (this.sceneLabel || '垃圾分类') + '打卡' })
+			uni.setNavigationBarTitle({ title: (this.sceneLabel || '垃圾分类') + '真分' })
 		},
 		methods: {
 			resolveClockScene(sceneKey) {

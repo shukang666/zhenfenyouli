@@ -85,7 +85,7 @@
 							<u-image width="80" height="80" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20260611/1b473a1a2a5fde71f6d0aa98459bab92.png"></u-image>
 						</view>
 						<view class="u-m-t-30 u-font-bold">
-							商家打卡
+							商家真分
 						</view>
 					</view>
 				</view>

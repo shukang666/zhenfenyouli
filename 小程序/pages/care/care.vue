@@ -50,9 +50,9 @@
 						<u-icon name="photo-fill" size="40" color="#18AF38"></u-icon>
 					</view>
 					<text class="care-tile__name">垃圾分类</text>
-					<text class="care-tile__hint">拍照打卡赚积分</text>
+					<text class="care-tile__hint">拍照真分赚积分</text>
 					<view class="care-tile__btn">
-						<text class="care-tile__btn-text">去打卡</text>
+						<text class="care-tile__btn-text">去真分</text>
 					</view>
 				</view>
 				<view class="care-tile">

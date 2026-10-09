@@ -11,7 +11,7 @@
         </view>
         <!-- 学完全部指导且尚未通过考试时，提供考试入口（考过后自动隐藏） -->
         <view class="u-m-t-30" v-if="learnAll && !is_answer">
-            <view class="u-font-24 u-m-b-20" style="color: #18AF38;">已学完全部垃圾分类指导，参加答题考试通过后即可打卡</view>
+            <view class="u-font-24 u-m-b-20" style="color: #18AF38;">已学完全部垃圾分类指导，参加答题考试通过后即可真分</view>
             <u-button type="primary" hover-class="none"
                 :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
                 @click="$u.route('/pages/answer/examine?id=1')">去答题考试</u-button>
@@ -80,7 +80,7 @@
                 this.$u.api.getUserInfo().then(res => {
                     const info = res.data || {}
                     this.is_answer = Number(info.is_answer) === 1
-                    // 顺带刷新全局用户状态，保证首页快捷打卡等入口判断最新状态
+                    // 顺带刷新全局用户状态，保证首页快捷真分等入口判断最新状态
                     this.$u.vuex('userInfo', info)
                 }).catch(e => {
                     console.log('获取考试状态失败:', e)

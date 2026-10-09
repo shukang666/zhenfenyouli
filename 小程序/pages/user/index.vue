@@ -25,7 +25,7 @@
 						<view class="user-login-btn" @click="$u.route('/pages/public/login')">
 							<text class="user-login-btn__text">立即登录</text>
 						</view>
-						<text class="user-login-sub">登录后解锁积分、活动与打卡</text>
+						<text class="user-login-sub">登录后解锁积分、活动与真分</text>
 					</view>
 					<view class="me-user__info" v-else>
 						<view class="me-name-row">
@@ -64,7 +64,7 @@
 						</view>
 					</view>
 					<u-line-progress :striped="true" :percent="(userInfo.clock_count / userInfo.continuous_check) * 100" height="18" active-color="#18AF38" :show-percent="false"></u-line-progress>
-					<text class="me-grow__desc">已连续打卡 <text class="me-grow__em">{{userInfo.clock_count}}</text> 天，还差 <text class="me-grow__warn">{{userInfo.remaining_count}}</text> 天</text>
+					<text class="me-grow__desc">已连续真分 <text class="me-grow__em">{{userInfo.clock_count}}</text> 天，还差 <text class="me-grow__warn">{{userInfo.remaining_count}}</text> 天</text>
 				</view>
 			</view>
 
@@ -148,7 +148,7 @@
 						<view class="me-grid__icon">
 							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-10.png" :size="50"></u-icon>
 						</view>
-						<text class="me-grid__name">垃圾分类打卡</text>
+						<text class="me-grid__name">垃圾分类真分</text>
 					</view>
 					<view class="me-grid__item" @click="navigator('/pages/flhd/list')">
 						<view class="me-grid__icon">

@@ -31,7 +31,7 @@
 
 		<!-- 学完全部但没考试 -->
 		<block v-if="allLearned && !isAnswer">
-			<view class="next-tip">恭喜学完全部垃圾分类指导，参加考试通过后即可打卡</view>
+			<view class="next-tip">恭喜学完全部垃圾分类指导，参加考试通过后即可真分</view>
 			<u-button type="primary" hover-class="none"
 				:customStyle="{background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)', height: '90rpx', fontSize: '30rpx'}"
 				@click="$u.route('/pages/answer/examine?id=1')">去答题考试</u-button>

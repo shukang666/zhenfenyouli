@@ -42,9 +42,9 @@
       <view class="fb-zhenfen-hub-head">
         <view class="fb-zhenfen-hub-brand">
           <text class="fb-zhenfen-hub-badge">垃圾真分</text>
-          <text class="fb-zhenfen-hub-sub">选场景 · 摆桶 · 拍照打卡</text>
+          <text class="fb-zhenfen-hub-sub">选场景 · 摆桶 · 拍照真分</text>
         </view>
-        <text class="fb-zhenfen-hub-hint">看海报 · 选场景 · 马上打卡</text>
+        <text class="fb-zhenfen-hub-hint">看海报 · 选场景 · 马上真分</text>
       </view>
       <view class="fb-zhenfen-hub-frame">
         <view class="fb-banner-wrap fb-banner-wrap--inset" v-if="banner_list && banner_list.length">
@@ -160,9 +160,9 @@
               <text class="fb-dtsh-spotlight-emoji">♻️</text>
               <text class="fb-dtsh-spotlight-title">垃圾分类工作台</text>
             </view>
-            <text class="fb-dtsh-spotlight-desc">学习分类、拍照打卡、督导监测一站搞定</text>
+            <text class="fb-dtsh-spotlight-desc">学习分类、拍照真分、督导监测一站搞定</text>
             <view class="fb-dtsh-spotlight-tags">
-              <text class="fb-dtsh-spotlight-tag">学习打卡</text>
+              <text class="fb-dtsh-spotlight-tag">学习真分</text>
               <text class="fb-dtsh-spotlight-tag">督导巡检</text>
               <text class="fb-dtsh-spotlight-tag">积分排行</text>
             </view>
@@ -925,7 +925,7 @@ export default {
       );
     },
 
-    // 垃圾分类工作台 → 低碳生活二级页（督导、打卡等）
+    // 垃圾分类工作台 → 低碳生活二级页（督导、真分等）
     gotoFlhd() {
       this.$u.route("/pages/dtsh/dtsh");
     },

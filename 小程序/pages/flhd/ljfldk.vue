@@ -1,13 +1,13 @@
 <template>
 	<view class="dk-hub dk-hub--page" v-if="!setting.app_test">
 		<view class="dk-banner">
-			<text class="dk-banner-title">已经打卡 {{ clockTotalDays }} 天</text>
-			<text class="dk-banner-sub" v-if="!isLogin">登录后同步您的打卡天数</text>
+			<text class="dk-banner-title">已经真分 {{ clockTotalDays }} 天</text>
+			<text class="dk-banner-sub" v-if="!isLogin">登录后同步您的真分天数</text>
 		</view>
 
 		<view class="dk-supervisor-banner" v-if="showSupervisorBanner">
 			<view class="dk-supervisor-banner-inner">
-				<text class="dk-supervisor-banner-t">累计打卡 {{ supervisorInvite.clock_days }} 天，欢迎申请督导员</text>
+				<text class="dk-supervisor-banner-t">累计真分 {{ supervisorInvite.clock_days }} 天，欢迎申请督导员</text>
 				<text class="dk-supervisor-banner-d">参与点位巡检、桶边督导，共建分类社区</text>
 				<view class="dk-supervisor-banner-row">
 					<view class="dk-supervisor-banner-btn dk-supervisor-banner-btn--go" @tap="goSupervisorApply">去申请</view>
@@ -19,7 +19,7 @@
 		<!-- 新用户：学考一体（完整页 pre_learn） -->
 		<view class="dk-block dk-block--intro" v-if="showLearnHub">
 			<text class="dk-block-t">学考一体</text>
-			<text class="dk-block-hint">学一点、考一点，通过后即可选择场景真分打卡</text>
+			<text class="dk-block-hint">学一点、考一点，通过后即可选择场景真分真分</text>
 			<view class="dk-learn-exam-card">
 				<text class="dk-learn-exam-ico">📖</text>
 				<text class="dk-learn-exam-desc">分类常识 + 5 道练一练，大约几分钟</text>
@@ -35,8 +35,8 @@
 		</view>
 
 		<view class="dk-block dk-block--scenes" v-if="showSceneHub">
-			<text class="dk-block-t">去打卡</text>
-			<text class="dk-block-hint">选择场景，设置或选择真分点后拍照打卡</text>
+			<text class="dk-block-t">去真分</text>
+			<text class="dk-block-hint">选择场景，设置或选择真分点后拍照真分</text>
 			<view class="dk-scene-list">
 			<view
 				class="dk-scene-card"
@@ -57,7 +57,7 @@
 					<text class="dk-scene-desc">{{ item.desc }}</text>
 					<view class="dk-scene-actions">
 						<view class="dk-scene-btn dk-scene-btn--primary">
-							<text class="dk-scene-btn-t">进入打卡 ›</text>
+							<text class="dk-scene-btn-t">进入真分 ›</text>
 						</view>
 					</view>
 				</view>
@@ -69,11 +69,11 @@
 			<text class="dk-block-t">看看别人怎么分</text>
 			<view class="dk-hist-row">
 				<view class="dk-hist-btn dk-hist-btn--pick" hover-class="dk-hist-btn--press" :hover-stay-time="80" @click="goChoice">
-					<text class="dk-hist-name">精选打卡</text>
+					<text class="dk-hist-name">精选真分</text>
 					<text class="dk-hist-go">查看 ›</text>
 				</view>
 				<view class="dk-hist-btn dk-hist-btn--mine" hover-class="dk-hist-btn--press" :hover-stay-time="80" @click="goMy">
-					<text class="dk-hist-name">我的打卡</text>
+					<text class="dk-hist-name">我的真分</text>
 					<text class="dk-hist-go">查看 ›</text>
 				</view>
 			</view>
@@ -129,7 +129,7 @@
 				const n = Number(u.clock_total_days ?? u.junk_clock_days ?? 0)
 				return n >= 0 ? n : 0
 			},
-			/** 学完且考过，展示打卡入口 */
+			/** 学完且考过，展示真分入口 */
 			showSceneHub() {
 				if (!this.isLogin) return false
 				const u = this.userInfo || {}
@@ -217,7 +217,7 @@
 			navigateScene(sceneKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.showSceneHub) {
-					return this.$u.toast('请先完成打卡前学习并通过分类测验')
+					return this.$u.toast('请先完成真分前学习并通过分类测验')
 				}
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				const scene = this.scenes.find(s => s.key === sceneKey)

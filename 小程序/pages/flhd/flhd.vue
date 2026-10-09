@@ -5,7 +5,7 @@
 			<view class="u-p-20 u-flex u-row-between">
 				<view class="">
 					<view class="u-font-bold u-font-32">
-						垃圾分类打卡
+						垃圾分类真分
 					</view>
 					<view class="u-m-t-10 u-font-24 u-type-info">
 						参与垃圾分类学习通过考核后即可解锁
@@ -84,8 +84,8 @@
 					uni.showModal({
 						title: '提示',
 						content: needLearn
-							? '请先完成打卡前学习，通过答题考试后可参与垃圾分类打卡'
-							: '请通过垃圾分类答题考试后即可打卡',
+							? '请先完成真分前学习，通过答题考试后可参与垃圾分类真分'
+							: '请通过垃圾分类答题考试后即可真分',
 						showCancel: false,
 						confirmText: needLearn ? '去学习' : '去考试',
 						confirmColor: '#39BF3E',
