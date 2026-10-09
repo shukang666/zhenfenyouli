@@ -172,9 +172,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				},
 				userChoice: '',
 				customTip: '',
+				/** 真分照片：选图后为本地临时路径，确认提交时才上传 COS */
 				clockSlotUrls: ['', '', ''],
-				/** 与 clockSlotUrls 同下标，用于删除 COS 对象 */
-				clockSlotFilepaths: ['', '', ''],
 				clockContent: '',
 				clockSubmitting: false,
 				clockSuccessShow: false,
@@ -2401,12 +2400,20 @@ import settings, { uploadUrl } from '@/common/settings'
 			resetClockSlots() {
 				if (this.isResidentialHub || this.isOfficeHub) {
 					this.clockSlotUrls = ['']
-					this.clockSlotFilepaths = ['']
 					return
 				}
 				const n = this.isCommunityHub ? 3 : 2
 				this.clockSlotUrls = Array(n).fill('')
-				this.clockSlotFilepaths = Array(n).fill('')
+			},
+			isRemoteClockAssetUrl(src) {
+				const s = String(src || '').trim()
+				if (!s) return false
+				if (/^wxfile:\/\//i.test(s)) return false
+				if (/^https:\/\//i.test(s)) return true
+				if (/^http:\/\//i.test(s)) {
+					return /\.cos\.|circular-economy|\/upload\/|xcxkf052\//i.test(s)
+				}
+				return false
 			},
 			onClockSlotTap(slotIdx) {
 				const url = this.clockSlotUrls[slotIdx]
@@ -2422,65 +2429,62 @@ import settings, { uploadUrl } from '@/common/settings'
 					sourceType: ['camera', 'album'],
 					success: (res) => {
 						const path = (res.tempFilePaths || [])[0]
-						if (path) this.uploadClockSlotImage(slotIdx, path)
+						if (path) {
+							this.$set(this.clockSlotUrls, slotIdx, path)
+						}
 					},
 				})
 			},
-			uploadClockSlotImage(slotIdx, filePath) {
-				uni.showLoading({ title: '上传中…' })
-				uni.uploadFile({
-					url: this.uploadUrl,
-					filePath,
-					name: 'file',
-					formData: { filetype: 'image' },
-					success: (res) => {
-						try {
-							const data = JSON.parse(res.data)
-							if (data.code == 1 && data.data && data.data.url) {
-								this.$set(this.clockSlotUrls, slotIdx, data.data.url)
-								const fp = data.data.filepath || data.data.file_path || ''
-								this.$set(this.clockSlotFilepaths, slotIdx, fp ? String(fp) : '')
-							} else {
-								this.$u.toast(data.msg || '上传失败')
+			uploadClockFileToServer(filePath) {
+				return new Promise((resolve, reject) => {
+					uni.uploadFile({
+						url: this.uploadUrl,
+						filePath,
+						name: 'file',
+						formData: { filetype: 'image' },
+						success: (res) => {
+							try {
+								const data = JSON.parse(res.data)
+								if (data.code == 1 && data.data && data.data.url) {
+									resolve(String(data.data.url))
+								} else {
+									reject(new Error(data.msg || '上传失败'))
+								}
+							} catch (e) {
+								reject(new Error('上传失败'))
 							}
-						} catch (e) {
-							this.$u.toast('上传失败')
-						}
-					},
-					fail: () => this.$u.toast('上传失败'),
-					complete: () => uni.hideLoading(),
+						},
+						fail: () => reject(new Error('上传失败')),
+					})
+				})
+			},
+			ensureClockImagesUploaded() {
+				const slots = this.clockSlotUrls || []
+				const jobs = []
+				for (let i = 0; i < slots.length; i++) {
+					const raw = String(slots[i] || '').trim()
+					if (!raw) continue
+					if (this.isRemoteClockAssetUrl(raw)) {
+						jobs.push(Promise.resolve({ idx: i, url: raw }))
+					} else {
+						jobs.push(
+							this.uploadClockFileToServer(raw)
+								.then(url => ({ idx: i, url }))
+						)
+					}
+				}
+				if (!jobs.length) {
+					return Promise.reject(new Error('请先拍摄真分照片'))
+				}
+				return Promise.all(jobs).then(results => {
+					results.forEach(({ idx, url }) => {
+						this.$set(this.clockSlotUrls, idx, url)
+					})
+					return results.map(r => r.url)
 				})
 			},
 			clearClockSlot(slotIdx) {
-				const url = String((this.clockSlotUrls || [])[slotIdx] || '').trim()
-				const filepath = String((this.clockSlotFilepaths || [])[slotIdx] || '').trim()
-				if (!url && !filepath) {
-					this.$set(this.clockSlotUrls, slotIdx, '')
-					this.$set(this.clockSlotFilepaths, slotIdx, '')
-					return
-				}
-				if (!this.isLogin) {
-					this.$set(this.clockSlotUrls, slotIdx, '')
-					this.$set(this.clockSlotFilepaths, slotIdx, '')
-					return
-				}
-				uni.showLoading({ title: '删除中…', mask: true })
-				this.$u
-					.post('/wxapp/public/delete_asset', { url, filepath })
-					.then(res => {
-						if (res.code == 1) {
-							this.$set(this.clockSlotUrls, slotIdx, '')
-							this.$set(this.clockSlotFilepaths, slotIdx, '')
-						} else {
-							this.$u.toast(res.msg || '删除失败')
-						}
-					})
-					.catch(err => {
-						this.$u.toast((err && err.msg) || '删除失败')
-					})
-					.finally(() => {
-						uni.hideLoading()
-					})
+				this.$set(this.clockSlotUrls, slotIdx, '')
 			},
 			previewClockImages(index) {
 				const urls = this.clockImages
@@ -2592,35 +2596,45 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.$u.route('/pages/activity/active-list')
 			},
 			doSubmitClock() {
+				if (this.clockSubmitting) return
 				this.clockSubmitting = true
-				const payload = {
-					type: 2,
-					cate_id: this.cateId,
-					content: this.buildClockContentText(),
-					image: this.clockImages,
-					clock_scene: this.resolveClockScene(),
-					clock_sub_scene: this.isOfficeHub
-						? String(this.officeBuildingKey || 'zhenfenjiao').slice(0, 50)
-						: '',
-					clock_point_id: this.pointId || 0,
-				}
-				if (this.isStreetHub && this.streetMerchant && this.streetMerchant.id) {
-					payload.street_merchant_id = this.streetMerchant.id
-				}
-				this.$u.api.add_forum(payload).then(res => {
-					this.clockSuccessMsg = res.msg || '打卡成功'
-					this.scenePickHasClock = true
-					this.clockHabitTip = pickRandomHabitTip()
-					this.loadClockPromoActivities()
-					this.clockSuccessShow = true
-					this.$u.api.getUserInfo().then(r => {
-						this.$u.vuex('userInfo', r.data || {})
-					}).catch(() => {})
-				}).catch(e => {
-					this.$u.toast((e && e.msg) || '提交失败')
-				}).finally(() => {
-					this.clockSubmitting = false
-				})
+				uni.showLoading({ title: '上传并提交…', mask: true })
+				this.ensureClockImagesUploaded()
+					.then(imageUrls => {
+						const payload = {
+							type: 2,
+							cate_id: this.cateId,
+							content: this.buildClockContentText(),
+							image: imageUrls,
+							clock_scene: this.resolveClockScene(),
+							clock_sub_scene: this.isOfficeHub
+								? String(this.officeBuildingKey || 'zhenfenjiao').slice(0, 50)
+								: '',
+							clock_point_id: this.pointId || 0,
+						}
+						if (this.isStreetHub && this.streetMerchant && this.streetMerchant.id) {
+							payload.street_merchant_id = this.streetMerchant.id
+						}
+						return this.$u.api.add_forum(payload)
+					})
+					.then(res => {
+						this.clockSuccessMsg = res.msg || '打卡成功'
+						this.scenePickHasClock = true
+						this.clockHabitTip = pickRandomHabitTip()
+						this.loadClockPromoActivities()
+						this.clockSuccessShow = true
+						this.$u.api.getUserInfo().then(r => {
+							this.$u.vuex('userInfo', r.data || {})
+						}).catch(() => {})
+					})
+					.catch(e => {
+						const msg = (e && e.msg) || (e && e.message) || '提交失败'
+						this.$u.toast(msg)
+					})
+					.finally(() => {
+						this.clockSubmitting = false
+						uni.hideLoading()
+					})
 			},
 			clockSuccessContinue() {
 				this.clockSuccessShow = false
