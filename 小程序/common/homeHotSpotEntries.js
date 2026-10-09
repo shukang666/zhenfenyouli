@@ -50,7 +50,7 @@ export const HOME_HOT_SPOT_ENTRIES = [
 	},
 	{
 		key: 'hiking',
-		name: '徒步拾遗',
+		name: '步行山海，净美家园',
 		emoji: '🥾',
 		thumb: THUMB_HIKING,
 		entry_type: 'spot_hub',

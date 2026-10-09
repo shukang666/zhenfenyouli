@@ -565,7 +565,7 @@ const SPOT_MODULES_DEFAULT = [
   },
   {
     key: "hiking",
-    name: "徒步拾遗",
+    name: "步行山海，净美家园",
     subtitle: "边走边捡 · 洁净山野",
     emoji: "🥾",
     entry_type: "spot_hub",

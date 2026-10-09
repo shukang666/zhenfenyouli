@@ -39,7 +39,7 @@ export const PAGE_GUIDES = {
 				selector: '#guide-fb-qxl',
 				prefer: 'below',
 				title: '社区专题',
-				desc: '我和七贤岭、徒步拾遗、绿色二手集市、垃圾真分小课堂四个专题，点卡片进入；后三个再选活动地点。'
+				desc: '我和七贤岭、步行山海净美家园专题、绿色二手集市、垃圾真分小课堂，点卡片进入；后三个再选活动地点。'
 			},
 			{
 				selector: '#guide-fb-light-task',
