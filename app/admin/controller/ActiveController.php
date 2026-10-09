@@ -365,6 +365,19 @@ class ActiveController extends ToolController
                 $params['web_url'] = '';
             }
 
+            $params['qxl_hub_slot'] = trim((string)($params['qxl_hub_slot'] ?? ''));
+            if (!in_array($params['qxl_hub_slot'], ['', 'moment_100'], true)) {
+                $params['qxl_hub_slot'] = '';
+            }
+            if ($params['qxl_hub_slot'] === 'moment_100') {
+                $clearQuery = ActiveModel::where('qxl_hub_slot', 'moment_100');
+                if (!empty($params['id'])) {
+                    $clearQuery->where('id', '<>', (int)$params['id']);
+                }
+                $clearQuery->update(['qxl_hub_slot' => '']);
+                $params['community_cate_id'] = 0;
+            }
+
             $params = $this->setParamData($params);
             $share_url = 'pages/activity/lsxf/details-new';
             if (empty($params['id'])) {

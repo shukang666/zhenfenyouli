@@ -60,6 +60,11 @@ SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEM
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `spot_key` varchar(32) NOT NULL DEFAULT '''' COMMENT ''活动专题分会场 hiking/flea_market/zhenfen_class'' AFTER `xsdld_cate_id`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
 
+-- 我和七贤岭页主推位：moment_100=「100个瞬间」（全站仅一项；学考为固定入口不占此字段）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'qxl_hub_slot');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `qxl_hub_slot` varchar(32) NOT NULL DEFAULT '''' COMMENT ''我和七贤岭页位 moment_100'' AFTER `spot_key`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
 CREATE TABLE IF NOT EXISTS `cmf_clock_tutorial` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `cate_key` varchar(20) NOT NULL DEFAULT '' COMMENT 'recycle/other/harm/food',

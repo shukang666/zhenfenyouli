@@ -146,6 +146,80 @@ class ActivityShowcaseSyncService
         return (int)$id;
     }
 
+    /**
+     * 运营迁移：将活动写入风采（可强制，不要求已结束；Web 式仅有封面也可入库）
+     */
+    public static function archiveActiveToShowcase(array $active, bool $force = false): bool
+    {
+        $activeId = (int)($active['id'] ?? 0);
+        if ($activeId <= 0) {
+            return false;
+        }
+        if (!$force && !self::isEndedForShowcase($active)) {
+            return false;
+        }
+        if ((int)($active['status'] ?? 0) !== 1 || (int)($active['delete_time'] ?? 0) !== 0) {
+            return false;
+        }
+
+        $exists = Db::name('activity_showcase')
+            ->where('active_id', $activeId)
+            ->where('status', '<>', -1)
+            ->find();
+        if (!empty($exists)) {
+            return false;
+        }
+
+        $thumb = trim((string)($active['thumb'] ?? ''));
+        $photos = self::collectPhotos($activeId, $thumb);
+        if (empty($photos) && $thumb !== '') {
+            $photos = [$thumb];
+        }
+        if (empty($photos)) {
+            return false;
+        }
+
+        $title = trim((string)($active['name'] ?? ''));
+        if ($title === '') {
+            $title = '社区活动回顾';
+        }
+
+        $content = htmlspecialchars_decode((string)($active['content'] ?? ''), ENT_QUOTES);
+        if (trim(strip_tags($content)) === '') {
+            $content = '<p>活动回顾已收录至活动风采。</p>';
+        }
+
+        $plain = trim(strip_tags($content));
+        $description = mb_strlen($plain, 'UTF-8') > 120
+            ? mb_substr($plain, 0, 120, 'UTF-8') . '…'
+            : $plain;
+
+        $eventDate = (int)($active['date'] ?? 0);
+        if ($eventDate <= 0) {
+            $eventDate = (int)($active['clock_end_time'] ?? 0);
+        }
+        if ($eventDate <= 0) {
+            $eventDate = time();
+        }
+
+        $now = time();
+        Db::name('activity_showcase')->insert([
+            'active_id'   => $activeId,
+            'title'       => $title,
+            'cover'       => $photos[0],
+            'description' => $description,
+            'content'     => $content,
+            'event_date'  => $eventDate,
+            'photos'      => implode(',', $photos),
+            'list_order'  => 0,
+            'status'      => 1,
+            'view_count'  => 0,
+            'create_time' => $now,
+            'update_time' => $now,
+        ]);
+        return true;
+    }
+
     protected static function collectPhotos(int $activeId, string $thumb): array
     {
         $list = [];

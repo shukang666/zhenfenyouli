@@ -376,6 +376,23 @@ class ActiveController extends AuthController
         $this->success('请求成功', $list);
     }
 
+    /** 我和七贤岭页：学考进度 + 「100个瞬间」主推活动 */
+    public function get_love_qixianling_hub()
+    {
+        $moment = ActiveModel::miniProgramVisible()
+            ->where('qxl_hub_slot', 'moment_100')
+            ->order('list_order asc, id desc')
+            ->find();
+        $momentOut = null;
+        if ($moment) {
+            $momentOut = $this->applyActiveListItemFields($moment);
+        }
+        $this->success('请求成功', [
+            'moment_active' => $momentOut,
+            'showcase_path' => '/pages/activity/showcase-list',
+        ]);
+    }
+
     /** 活动 Tab 四大专题入口（我和七贤岭 + 三个分会场专题） */
     public function get_activity_spot_modules()
     {

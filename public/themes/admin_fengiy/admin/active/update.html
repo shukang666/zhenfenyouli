@@ -51,7 +51,19 @@
                         <option value="{$vo.id}" <if condition="!empty($item.community_cate_id) && $item.community_cate_id == $vo.id">selected</if>>{$vo.name}</option>
                     </foreach>
                 </select>
-                <p class="help-block" style="font-size:12px;color:#888;margin-top:4px;">勾选后该活动将在小程序"我和七贤岭"页面对应分类下展示</p>
+                <p class="help-block" style="font-size:12px;color:#888;margin-top:4px;">已改版：<strong>我和七贤岭</strong>页仅保留「学考」与「100个瞬间」；其它七贤岭活动请收进<strong>活动风采</strong>，此处请选「不显示在七贤岭」。</p>
+            </div>
+        </div>
+
+        <php>$qxl_hub_slot_val = isset($item['qxl_hub_slot']) ? trim($item['qxl_hub_slot']) : '';</php>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">我和七贤岭页主推:</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="qxl_hub_slot" class="form-control">
+                    <option value="" <if condition="$qxl_hub_slot_val === ''">selected</if>>— 不在该页单独展示 —</option>
+                    <option value="moment_100" <if condition="$qxl_hub_slot_val === 'moment_100'">selected</if>>「100个瞬间」主推位（全站仅一项）</option>
+                </select>
+                <p class="help-block" style="font-size:12px;color:#888;margin-top:4px;">与固定「七贤岭学考」并列；选此项后活动会在「我和七贤岭」以大卡片展示，并自动取消旧版七贤岭分类绑定。</p>
             </div>
         </div>
 
