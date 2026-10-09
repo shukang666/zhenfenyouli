@@ -178,7 +178,7 @@ class ClockScenePointController extends AuthController
         $this->success('已删除');
     }
 
-    /** 家庭场景三处固定点位是否均已上传布置照片 */
+    /** 家庭场景固定布置点位（厨余+其他+可回收+有害）是否均已上传布置照片 */
     public static function isHomeFixedSetupComplete(int $userId): bool
     {
         if ($userId <= 0) {
@@ -203,7 +203,8 @@ class ClockScenePointController extends AuthController
     private static function homeFixedSlotDefs(): array
     {
         return [
-            ['point_name' => '厨房分类点位', 'cate_kw' => '厨余'],
+            ['point_name' => '厨房厨余桶', 'cate_kw' => '厨余', 'legacy_point_names' => ['厨房分类点位']],
+            ['point_name' => '厨房其他桶', 'cate_kw' => '其他'],
             ['point_name' => '可回收物点位', 'cate_kw' => '可回收'],
             ['point_name' => '有害垃圾点位', 'cate_kw' => '有害'],
         ];
@@ -213,14 +214,28 @@ class ClockScenePointController extends AuthController
     private static function matchHomeFixedSlotWithImage(array $list, array $def): bool
     {
         $wantName = trim((string)($def['point_name'] ?? ''));
+        $legacyNames = $def['legacy_point_names'] ?? [];
+        if (!is_array($legacyNames)) {
+            $legacyNames = [];
+        }
         $kw = trim((string)($def['cate_kw'] ?? ''));
         foreach ($list as $p) {
             $img = trim((string)($p['point_image'] ?? ''));
             if ($img === '') {
                 continue;
             }
-            if ($wantName !== '' && trim((string)($p['point_name'] ?? '')) === $wantName) {
+            $pName = trim((string)($p['point_name'] ?? ''));
+            if ($wantName !== '' && $pName === $wantName) {
                 return true;
+            }
+            foreach ($legacyNames as $legacy) {
+                $legacy = trim((string)$legacy);
+                if ($legacy === '' || $pName !== $legacy) {
+                    continue;
+                }
+                if ($kw === '' || strpos((string)($p['cate_name'] ?? ''), $kw) !== false) {
+                    return true;
+                }
             }
         }
         if ($kw === '') {

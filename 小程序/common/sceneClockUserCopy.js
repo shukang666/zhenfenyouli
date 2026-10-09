@@ -578,20 +578,35 @@ export function getClockSuccessPromoMoreLabel(count) {
 	return `还有 ${count} 个活动可以看看`
 }
 
-/** 家庭场景：固定三类布置点位（不可增删改名称/种类） */
+/** 家庭场景：固定布置点位（厨房厨余+其他两桶，加可回收、有害；不可增删改名称/种类） */
 export function getHomeFixedSetupSlots() {
 	return [
 		{
-			slotKey: 'kitchen',
+			slotKey: 'kitchen_food',
 			section: 'start',
+			groupKey: 'kitchen',
+			groupRole: 'lead',
 			title: '建议上传厨房点位布置',
 			desc: '厨房里要放两个桶：一个厨余，一个其他。做饭时顺手分，不用来回跑。',
 			exampleCaption: '厨房布置点位示例图',
 			exampleImgKey: 'home-setup-example-kitchen',
-			uploadCta: '点击开始布置厨房点位',
-			uploadDone: '厨房点位已布置，点击可更换照片',
-			point_name: '厨房分类点位',
+			uploadLabel: '厨余桶',
+			uploadCta: '点击上传厨余垃圾桶',
+			uploadDone: '厨余桶已布置，点击可更换',
+			point_name: '厨房厨余桶',
 			cateKw: '厨余',
+			legacyPointNames: ['厨房分类点位'],
+		},
+		{
+			slotKey: 'kitchen_other',
+			section: 'start',
+			groupKey: 'kitchen',
+			groupRole: 'member',
+			uploadLabel: '其他桶',
+			uploadCta: '点击上传其他垃圾桶',
+			uploadDone: '其他桶已布置，点击可更换',
+			point_name: '厨房其他桶',
+			cateKw: '其他',
 		},
 		{
 			slotKey: 'recycle',
@@ -645,7 +660,7 @@ export function getHomeFixedSetupFinishCta() {
 }
 
 export function getHomeFixedSetupRequiredHint() {
-	return '三处布置照片均需上传，缺一不可'
+	return '厨余桶、其他桶、可回收与有害四处布置照片均需上传，缺一不可'
 }
 
 export function getHomeClockNavTitle() {
@@ -679,6 +694,8 @@ export function getHomeClockLocationStepHint() {
 
 export function getHomeClockLocationLabel(slotKey) {
 	const map = {
+		kitchen_food: '厨房厨余桶',
+		kitchen_other: '厨房其他桶',
 		kitchen: '厨房点位（厨余/其他）',
 		recycle: '可回收物点位',
 		hazard: '有害垃圾点位',

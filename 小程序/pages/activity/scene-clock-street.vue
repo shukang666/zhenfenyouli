@@ -226,9 +226,58 @@
 						</view>
 						<text class="scf-home-fix-reward">{{ homeFixedRewardHint }}</text>
 						<text class="scf-home-fix-required">{{ homeFixedRequiredHint }}</text>
+						<view class="scf-home-fix-card" v-if="homeFixedKitchenLeadSlot">
+							<text class="scf-home-fix-card-title">{{ homeFixedKitchenLeadSlot.title }}</text>
+							<view class="scf-home-fix-card-mid">
+								<text class="scf-home-fix-card-desc">{{ homeFixedKitchenLeadSlot.desc }}</text>
+								<view class="scf-home-fix-card-example">
+									<image
+										v-if="homeFixedKitchenLeadSlot.exampleImgUrl && homeFixedExampleImgOk[homeFixedKitchenLeadSlot.slotKey]"
+										class="scf-home-fix-card-example-img"
+										:src="homeFixedKitchenLeadSlot.exampleImgUrl"
+										mode="aspectFit"
+										@error="onHomeFixedExampleImgError(homeFixedKitchenLeadSlot.slotKey)"
+									/>
+									<view v-else class="scf-home-fix-card-example-ph">
+										<text class="scf-home-fix-card-example-ph-t">示例图</text>
+									</view>
+									<text class="scf-home-fix-card-example-cap">{{ homeFixedKitchenLeadSlot.exampleCaption }}</text>
+								</view>
+							</view>
+							<view class="scf-home-fix-upload-row">
+								<view
+									class="scf-home-fix-upload-col"
+									v-for="slot in homeFixedKitchenUploadSlots"
+									:key="slot.slotKey"
+								>
+									<text v-if="slot.uploadLabel" class="scf-home-fix-upload-lbl">{{ slot.uploadLabel }}</text>
+									<view
+										class="scf-home-fix-upload scf-home-fix-upload--half"
+										:class="{ 'scf-home-fix-upload--done': slot.point_image_url }"
+										hover-class="scf-card--press"
+										@tap="chooseHomeFixedPhoto(slot.slotKey)"
+									>
+										<image
+											v-if="slot.point_image_url"
+											class="scf-home-fix-upload-img"
+											:src="slot.point_image_url"
+											mode="aspectFill"
+										></image>
+										<block v-else>
+											<text class="scf-home-fix-upload-required">必填</text>
+											<view class="scf-home-fix-upload-ico-wrap">
+												<text class="scf-home-fix-upload-ico">📷</text>
+											</view>
+											<text class="scf-home-fix-upload-t">{{ slot.uploadCta }}</text>
+										</block>
+										<text v-if="slot.point_image_url" class="scf-home-fix-upload-badge">{{ slot.uploadDone }}</text>
+									</view>
+								</view>
+							</view>
+						</view>
 						<view
 							class="scf-home-fix-card"
-							v-for="slot in homeFixedSlotsStart"
+							v-for="slot in homeFixedSlotsStartStandalone"
 							:key="slot.slotKey"
 						>
 							<text class="scf-home-fix-card-title">{{ slot.title }}</text>

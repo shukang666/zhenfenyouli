@@ -301,7 +301,7 @@ class ForumController extends AuthController
             $scene = trim((string)($params['clock_scene'] ?? ''));
             if (in_array($scene, ['home', 'qinzi'], true)) {
                 if (!ClockScenePointController::isHomeFixedSetupComplete((int)$this->user_id)) {
-                    $this->error('请先完成厨房、可回收物、有害垃圾三处点位的布置照片');
+                    $this->error('请先完成厨房厨余桶、其他桶、可回收物、有害垃圾四处点位的布置照片');
                 }
             }
             if (in_array($scene, ['office', 'zhenfenjiao'], true)) {

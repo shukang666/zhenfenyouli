@@ -276,7 +276,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				/** 家庭拆分页：clock=今日真分 setup=点位布置 */
 				homeHubPage: '',
 				homeFixedExampleImgOk: {
-					kitchen: true,
+					kitchen_food: true,
+					kitchen_other: true,
 					recycle: true,
 					hazard: true,
 				},
@@ -349,7 +350,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				const base = this.scenePickCosBase
 				return base + 'office-clock-banner.jpg'
 			},
-			/** 三处布置照片均已保存到服务端 */
+			/** 固定四处布置照片均已保存到服务端 */
 			homeFixedCanFinishSetup() {
 				if (this.homeFixedSavingKey) return false
 				return this.isHomeFixedSetupComplete()
@@ -488,8 +489,10 @@ import settings, { uploadUrl } from '@/common/settings'
 				}
 				const defs = getHomeFixedSetupSlots()
 				let slotKeys = []
-				if (cateKey === 'food' || cateKey === 'other') {
-					slotKeys = ['kitchen']
+				if (cateKey === 'food') {
+					slotKeys = ['kitchen_food']
+				} else if (cateKey === 'other') {
+					slotKeys = ['kitchen_other']
 				} else if (cateKey === 'recycle') {
 					slotKeys = ['recycle']
 				} else if (cateKey === 'harm') {
@@ -582,6 +585,17 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			homeFixedSlotsStart() {
 				return (this.homeFixedSlots || []).filter(s => s.section === 'start')
+			},
+			homeFixedKitchenUploadSlots() {
+				return (this.homeFixedSlots || []).filter(s => s.groupKey === 'kitchen')
+			},
+			homeFixedKitchenLeadSlot() {
+				const list = this.homeFixedKitchenUploadSlots
+				if (!list.length) return null
+				return list.find(s => s.groupRole === 'lead') || list[0]
+			},
+			homeFixedSlotsStartStandalone() {
+				return (this.homeFixedSlotsStart || []).filter(s => !s.groupKey)
 			},
 			homeFixedSlotsRecycleHarm() {
 				return (this.homeFixedSlots || []).filter(s => s.section === 'recycle_harm')
@@ -1188,9 +1202,23 @@ import settings, { uploadUrl } from '@/common/settings'
 				const list = (this.points || []).filter(p => p && !p._isDraft)
 				const name = String(def.point_name || '').trim()
 				const accept = p => !requireImage || this.pointHasHomeFixedImage(p)
+				const matchName = (want, p) =>
+					!!want && accept(p) && String(p.point_name || '').trim() === want
 				if (name) {
-					const exact = list.find(p => accept(p) && String(p.point_name || '').trim() === name)
+					const exact = list.find(p => matchName(name, p))
 					if (exact) return this.normalizeScenePoint(exact)
+				}
+				const legacy = def.legacyPointNames || []
+				for (let li = 0; li < legacy.length; li++) {
+					const ln = String(legacy[li] || '').trim()
+					if (!ln) continue
+					const kwLegacy = def.cateKw || ''
+					const leg = list.find(p => {
+						if (!matchName(ln, p)) return false
+						if (!kwLegacy) return true
+						return String(p.cate_name || '').indexOf(kwLegacy) >= 0
+					})
+					if (leg) return this.normalizeScenePoint(leg)
 				}
 				const kw = def.cateKw || ''
 				if (kw) {
@@ -1215,7 +1243,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				const missing = []
 				for (let i = 0; i < defs.length; i++) {
 					if (!this.findPointForHomeSlot(defs[i], true)) {
-						missing.push(defs[i].title || defs[i].slotKey)
+						const d = defs[i]
+						missing.push(d.uploadLabel || d.title || d.slotKey)
 					}
 				}
 				return missing
@@ -1230,7 +1259,7 @@ import settings, { uploadUrl } from '@/common/settings'
 					if (missing.length) {
 						this.$u.toast('请先上传：' + missing.join('、'))
 					} else {
-						this.$u.toast('请先完成三处点位照片上传')
+						this.$u.toast('请先完成四处点位照片上传')
 					}
 					return
 				}
@@ -1567,7 +1596,7 @@ import settings, { uploadUrl } from '@/common/settings'
 			pickResidentialPoint(p) {
 				if (!p || p.id == null) return
 				if (this.isResidentialHub && !this.isHomeFixedSetupComplete()) {
-					this.$u.toast('请先完成三处点位布置照片')
+					this.$u.toast('请先完成四处点位布置照片')
 					this.enterResidentialSetupFlow()
 					return
 				}

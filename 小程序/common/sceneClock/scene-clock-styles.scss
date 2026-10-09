@@ -410,6 +410,39 @@
 	text-align: center;
 	line-height: 1.35;
 }
+.scf-home-fix-upload-row {
+	display: flex;
+	flex-direction: row;
+	gap: 20rpx;
+	margin-top: 4rpx;
+}
+.scf-home-fix-upload-col {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 10rpx;
+}
+.scf-home-fix-upload-lbl {
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #2d4a35;
+	text-align: center;
+	line-height: 1.35;
+}
+.scf-home-fix-upload--half {
+	width: 100%;
+	box-sizing: border-box;
+}
+.scf-home-fix-upload--half .scf-home-fix-upload-t {
+	font-size: 22rpx;
+}
+.scf-home-fix-upload--half.scf-home-fix-upload--done {
+	min-height: 220rpx;
+}
+.scf-home-fix-upload--half .scf-home-fix-upload-img {
+	height: 220rpx;
+}
 .scf-home-fix-upload {
 	min-height: 140rpx;
 	border: 2rpx dashed #d8e0da;
