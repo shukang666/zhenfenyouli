@@ -22,8 +22,12 @@
 					class="mod-piece"
 					v-for="(art, idx) in articles"
 					:key="art.id"
-					:class="pieceClass(idx, art)"
-					@tap="openChapter(art)"
+					:class="[
+						idx % 5 === 0 ? 'mod-piece--wide' : '',
+						idx % 3 === 1 ? 'mod-piece--tall' : '',
+						art.passed ? 'is-done' : ''
+					]"
+					@tap="onTapArticle(idx)"
 				>
 					<image
 						v-if="art.image"
@@ -76,13 +80,6 @@ export default {
 		this.loadArticles()
 	},
 	methods: {
-		pieceClass(idx, art) {
-			const classes = []
-			if (idx % 5 === 0) classes.push('mod-piece--wide')
-			else if (idx % 3 === 1) classes.push('mod-piece--tall')
-			if (art.passed) classes.push('is-done')
-			return classes.join(' ')
-		},
 		loadArticles() {
 			if (!this.category) {
 				this.loading = false
@@ -100,7 +97,8 @@ export default {
 				this.loading = false
 			})
 		},
-		openChapter(art) {
+		onTapArticle(idx) {
+			const art = (this.articles || [])[idx]
 			if (!art || !art.id) return
 			this.$u.route('/pages/activity/qxl-learn-chapter?id=' + art.id)
 		},
@@ -198,7 +196,10 @@ export default {
 }
 .mod-piece-mask {
 	position: absolute;
-	inset: 0;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
 	background: linear-gradient(180deg, rgba(8, 50, 40, 0.15) 0%, rgba(8, 50, 40, 0.75) 100%);
 }
 .mod-piece-inner {

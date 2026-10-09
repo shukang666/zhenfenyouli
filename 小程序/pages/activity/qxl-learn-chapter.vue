@@ -35,10 +35,10 @@
 					<text class="ch-q-title">{{ qIdx + 1 }}. {{ q.title }}</text>
 					<view
 						class="ch-opt"
-						v-for="opt in questionOptions(q)"
-						:key="q.id + '-' + opt.key"
-						:class="optionClass(q.id, opt.key)"
-						@tap="selectAnswer(q.id, opt.key)"
+						v-for="(opt, optIdx) in questionOptions(q)"
+						:key="optIdx"
+						:class="optionClassByIndex(qIdx, optIdx)"
+						@tap="onSelectOpt(qIdx, optIdx)"
 					>
 						<text class="ch-opt-key">{{ opt.key }}</text>
 						<text class="ch-opt-text">{{ opt.text }}</text>
@@ -124,11 +124,21 @@ export default {
 			if (q.option_d) list.push({ key: 'D', text: q.option_d })
 			return list
 		},
-		optionClass(qid, key) {
-			return this.answersMap[qid] === key ? 'is-on' : ''
+		optionClassByIndex(qIdx, optIdx) {
+			const q = (this.chapter.questions || [])[qIdx]
+			if (!q) return ''
+			const opts = this.questionOptions(q)
+			const opt = opts[optIdx]
+			if (!opt) return ''
+			return this.answersMap[q.id] === opt.key ? 'is-on' : ''
 		},
-		selectAnswer(qid, key) {
-			this.$set(this.answersMap, qid, key)
+		onSelectOpt(qIdx, optIdx) {
+			const q = (this.chapter.questions || [])[qIdx]
+			if (!q) return
+			const opts = this.questionOptions(q)
+			const opt = opts[optIdx]
+			if (!opt) return
+			this.$set(this.answersMap, q.id, opt.key)
 		},
 		submitChapter() {
 			if (this.submitting) return
