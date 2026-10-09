@@ -12,12 +12,22 @@ const THUMB_HIKING = 'xcxkf052/admin/20261002/9969252bfe5296f70fa911d6f4990fe6.p
 const THUMB_FLEA = 'xcxkf052/admin/20261002/99254fa35d6f5cd3ded6e611f9985eef.png'
 const THUMB_ZHENFEN_CLASS = 'xcxkf052/admin/20261002/eda5f775876ba16251dfb02145f4934b.png'
 
-/** 活动 Tab 本周推荐横滑第一项（不走后台 is_month_recommend） */
+/** @deprecated 请用 getWeeklyRecommendDisplayList；保留兼容 */
 export const WEEKLY_ZHENFEN_PIN = {
 	isWeeklyPin: true,
 	name: '垃圾真分',
 	active_count: 0,
 	thumb: THUMB_ZHENFEN_CLOCK,
+	key: 'zhenfen_clock',
+	entry_type: 'scene_clock',
+}
+
+/** 活动 Tab「本周推荐」固定五项（与首页热门活动一致，不走 is_month_recommend） */
+export function getWeeklyRecommendDisplayList() {
+	return HOME_HOT_SPOT_ENTRIES.map((entry) => ({
+		...entry,
+		isWeeklyPin: entry.key === 'zhenfen_clock',
+	}))
 }
 
 /** 相对路径或完整 URL → 小程序可展示地址 */

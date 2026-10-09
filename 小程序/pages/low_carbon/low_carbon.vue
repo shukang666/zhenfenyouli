@@ -331,7 +331,7 @@
             <view class="fb-weekly-hatch"></view>
             <view class="fb-weekly-mask"></view>
             <view class="fb-weekly-tag">
-              <text class="fb-weekly-tag-text">{{ item.isWeeklyPin ? '垃圾真分' : '本周精选' }}</text>
+              <text class="fb-weekly-tag-text">{{ item.isWeeklyPin ? '垃圾真分' : (item.meta || '社区专题') }}</text>
             </view>
             <view class="fb-weekly-badge" v-if="!item.isWeeklyPin && actEngagementCount(item) > 0">
               <text class="fb-weekly-badge-text"
@@ -543,12 +543,15 @@
 <script>
 import { checkCommunity } from "@/common/communityCheck.mixin.js";
 import {
-  openSceneClockTheme,
   openSceneClockHub,
   parseBannerSceneClockEntry,
   openSceneClockFromBannerEntry,
 } from "@/common/sceneClockEntry.js";
-import { WEEKLY_ZHENFEN_PIN, resolveHomeHotThumb } from "@/common/homeHotSpotEntries.js";
+import {
+  getWeeklyRecommendDisplayList,
+  navigateHomeHotSpotEntry,
+  resolveHomeHotThumb,
+} from "@/common/homeHotSpotEntries.js";
 import careGesture from "@/common/care-gesture.mixin.js";
 import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 
@@ -666,7 +669,7 @@ export default {
   },
   computed: {
     weekly_display_list() {
-      return [WEEKLY_ZHENFEN_PIN].concat(this.weekly_list || []);
+      return getWeeklyRecommendDisplayList();
     },
     active_list_preview() {
       return (this.active_list || []).slice(0, ACTIVE_LIST_PREVIEW_SIZE);
@@ -688,17 +691,14 @@ export default {
   methods: {
     weeklyCardCover(item) {
       if (!item) return "";
-      if (item.isWeeklyPin) {
-        return resolveHomeHotThumb(item.thumb) || "";
-      }
-      return item.thumb || "";
+      return resolveHomeHotThumb(item.thumb) || item.thumb || "";
     },
     onWeeklyCardTap(wIdx) {
       const list = this.weekly_display_list || [];
       const item = list[wIdx];
       if (!item) return;
-      if (item.isWeeklyPin) {
-        openSceneClockTheme(this);
+      if (item.entry_type) {
+        navigateHomeHotSpotEntry(this, item);
         return;
       }
       if (!item.id) return;
@@ -716,11 +716,14 @@ export default {
     },
     weeklyCardDateLine(item) {
       const base = this.formatActiveDate(item);
-      if (item && item.isWeeklyPin) return base;
+      if (item && (item.isWeeklyPin || item.entry_type)) return base;
       if (Number(item.is_date_pending) === 1) return base;
       return base + " 结束";
     },
     formatActiveDate(item) {
+      if (item && item.hint) {
+        return item.hint;
+      }
       if (item && item.isWeeklyPin) {
         return "选场景 · 摆桶 · 拍照";
       }
