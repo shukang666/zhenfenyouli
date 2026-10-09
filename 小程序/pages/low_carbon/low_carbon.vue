@@ -66,42 +66,7 @@
       </swiper>
     </view>
 
-    <!-- 垃圾分类工作台：独立主推位（与场景快捷入口分离） -->
-    <view class="fb-dtsh-spotlight" id="guide-fb-dtsh-hub">
-      <view
-        class="fb-dtsh-spotlight-card"
-        hover-class="fb-dtsh-spotlight-press"
-        :hover-stay-time="80"
-        @click="gotoFlhd"
-      >
-        <view class="fb-dtsh-spotlight-glow fb-dtsh-spotlight-glow--a"></view>
-        <view class="fb-dtsh-spotlight-glow fb-dtsh-spotlight-glow--b"></view>
-        <view class="fb-dtsh-spotlight-inner">
-          <view class="fb-dtsh-spotlight-copy">
-            <view class="fb-dtsh-spotlight-badge-row">
-              <text class="fb-dtsh-spotlight-badge">核心</text>
-              <text class="fb-dtsh-spotlight-kicker">分类治理</text>
-            </view>
-            <view class="fb-dtsh-spotlight-title-row">
-              <text class="fb-dtsh-spotlight-emoji">♻️</text>
-              <text class="fb-dtsh-spotlight-title">垃圾分类工作台</text>
-            </view>
-            <text class="fb-dtsh-spotlight-desc">学习分类、拍照打卡、督导监测一站搞定</text>
-            <view class="fb-dtsh-spotlight-tags">
-              <text class="fb-dtsh-spotlight-tag">学习打卡</text>
-              <text class="fb-dtsh-spotlight-tag">督导巡检</text>
-              <text class="fb-dtsh-spotlight-tag">积分排行</text>
-            </view>
-          </view>
-          <view class="fb-dtsh-spotlight-cta">
-            <text class="fb-dtsh-spotlight-cta-label">进入工作台</text>
-            <!-- <text class="fb-dtsh-spotlight-cta-arrow">›</text> -->
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 场景快捷入口：家庭 · 办公 · 沿街商铺 -->
+    <!-- 场景快捷入口：紧挨真分打卡（Banner/本周推荐入口），先于工作台 -->
     <view class="fb-entry-stage" id="guide-fb-entry">
       <view class="fb-entry-kicker">
         <view class="fb-entry-kicker-dot"></view>
@@ -160,6 +125,40 @@
             <view class="fb-entry-go">
               <text class="fb-entry-arrow">›</text>
             </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 垃圾分类工作台（治理督导，放在场景快捷入口之后） -->
+    <view class="fb-dtsh-spotlight" id="guide-fb-dtsh-hub">
+      <view
+        class="fb-dtsh-spotlight-card"
+        hover-class="fb-dtsh-spotlight-press"
+        :hover-stay-time="80"
+        @click="gotoFlhd"
+      >
+        <view class="fb-dtsh-spotlight-glow fb-dtsh-spotlight-glow--a"></view>
+        <view class="fb-dtsh-spotlight-glow fb-dtsh-spotlight-glow--b"></view>
+        <view class="fb-dtsh-spotlight-inner">
+          <view class="fb-dtsh-spotlight-copy">
+            <view class="fb-dtsh-spotlight-badge-row">
+              <text class="fb-dtsh-spotlight-badge">核心</text>
+              <text class="fb-dtsh-spotlight-kicker">分类治理</text>
+            </view>
+            <view class="fb-dtsh-spotlight-title-row">
+              <text class="fb-dtsh-spotlight-emoji">♻️</text>
+              <text class="fb-dtsh-spotlight-title">垃圾分类工作台</text>
+            </view>
+            <text class="fb-dtsh-spotlight-desc">学习分类、拍照打卡、督导监测一站搞定</text>
+            <view class="fb-dtsh-spotlight-tags">
+              <text class="fb-dtsh-spotlight-tag">学习打卡</text>
+              <text class="fb-dtsh-spotlight-tag">督导巡检</text>
+              <text class="fb-dtsh-spotlight-tag">积分排行</text>
+            </view>
+          </view>
+          <view class="fb-dtsh-spotlight-cta">
+            <text class="fb-dtsh-spotlight-cta-label">进入工作台</text>
           </view>
         </view>
       </view>

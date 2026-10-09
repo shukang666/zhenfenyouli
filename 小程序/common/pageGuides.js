@@ -24,16 +24,16 @@ export const PAGE_GUIDES = {
 				desc: '按活动名称或地点查找，不用在列表里慢慢翻。'
 			},
 			{
+				selector: '#guide-fb-entry',
+				prefer: 'below',
+				title: '场景快捷入口',
+				desc: '家庭、办公、沿街等真分打卡场景，点卡片直接进入对应场景打卡。'
+			},
+			{
 				selector: '#guide-fb-dtsh-hub',
 				prefer: 'below',
 				title: '垃圾分类工作台',
 				desc: '打卡、督导、积分等核心能力集中在这里，点「进入工作台」。'
-			},
-			{
-				selector: '#guide-fb-entry',
-				prefer: 'below',
-				title: '场景快捷入口',
-				desc: '家庭、亲子、办公、沿街商铺四种场景，点卡片进入对应专题（内容陆续完善）。'
 			},
 			{
 				selector: '#guide-fb-qxl',
