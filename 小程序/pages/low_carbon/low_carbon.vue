@@ -37,42 +37,50 @@
     <care-pull-hint :visible="!showCareHint"></care-pull-hint>
     <skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
-    <!-- 顶部 Banner 轮播 -->
-    <view class="fb-banner-wrap" v-if="banner_list && banner_list.length">
-      <swiper
-        class="fb-banner-swiper"
-        :indicator-dots="banner_list.length > 1"
-        indicator-color="rgba(255,255,255,0.5)"
-        indicator-active-color="#fff"
-        autoplay
-        circular
-        :interval="4000"
-        @change="onBannerChange"
-      >
-        <swiper-item
-          v-for="(banner, idx) in banner_list"
-          :key="idx"
-          @click="handleBannerTap(banner)"
-        >
-          <view class="fb-banner-item">
-            <u-image
-              width="100%"
-              height="100%"
-              :src="banner.image"
-              mode="aspectFill"
-            ></u-image>
-          </view>
-        </swiper-item>
-      </swiper>
-    </view>
-
-    <!-- 场景快捷入口：紧挨真分打卡（Banner/本周推荐入口），先于工作台 -->
-    <view class="fb-entry-stage" id="guide-fb-entry">
-      <view class="fb-entry-kicker">
-        <view class="fb-entry-kicker-dot"></view>
-        <text class="fb-entry-kicker-text">场景快捷入口</text>
+    <!-- 垃圾真分：Banner + 三场景入口统一外框 -->
+    <view class="fb-zhenfen-hub">
+      <view class="fb-zhenfen-hub-head">
+        <view class="fb-zhenfen-hub-brand">
+          <text class="fb-zhenfen-hub-badge">垃圾真分</text>
+          <text class="fb-zhenfen-hub-sub">选场景 · 摆桶 · 拍照打卡</text>
+        </view>
+        <text class="fb-zhenfen-hub-hint">看海报 · 选场景 · 马上打卡</text>
       </view>
-      <view class="fb-entry-row fb-entry-row--triple">
+      <view class="fb-zhenfen-hub-frame">
+        <view class="fb-banner-wrap fb-banner-wrap--inset" v-if="banner_list && banner_list.length">
+          <swiper
+            class="fb-banner-swiper fb-banner-swiper--inset"
+            :indicator-dots="banner_list.length > 1"
+            indicator-color="rgba(255,255,255,0.5)"
+            indicator-active-color="#fff"
+            autoplay
+            circular
+            :interval="4000"
+            @change="onBannerChange"
+          >
+            <swiper-item
+              v-for="(banner, idx) in banner_list"
+              :key="idx"
+              @click="handleBannerTap(banner)"
+            >
+              <view class="fb-banner-item">
+                <u-image
+                  width="100%"
+                  height="100%"
+                  :src="banner.image"
+                  mode="aspectFill"
+                ></u-image>
+              </view>
+            </swiper-item>
+          </swiper>
+        </view>
+        <view class="fb-zhenfen-hub-divider" v-if="banner_list && banner_list.length"></view>
+        <view class="fb-entry-stage fb-entry-stage--inset" id="guide-fb-entry">
+          <view class="fb-entry-kicker fb-entry-kicker--inset">
+            <view class="fb-entry-kicker-dot"></view>
+            <text class="fb-entry-kicker-text">三大场景快捷入口</text>
+          </view>
+          <view class="fb-entry-row fb-entry-row--triple">
         <view
           class="fb-entry-card fb-entry-home"
           hover-class="fb-press"
@@ -125,6 +133,8 @@
             <view class="fb-entry-go">
               <text class="fb-entry-arrow">›</text>
             </view>
+          </view>
+        </view>
           </view>
         </view>
       </view>
@@ -1050,7 +1060,104 @@ export default {
   color: #9aa39c;
 }
 
-/* ===== Banner 轮播 ===== */
+/* ===== 垃圾真分：Banner + 场景入口统一外框 ===== */
+.fb-zhenfen-hub {
+  padding: 8rpx 24rpx 16rpx;
+  box-sizing: border-box;
+}
+.fb-zhenfen-hub-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 0 8rpx 14rpx;
+}
+.fb-zhenfen-hub-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 0;
+}
+.fb-zhenfen-hub-badge {
+  align-self: flex-start;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #1b7a4a 0%, #18af38 100%);
+  box-shadow: 0 4rpx 12rpx rgba(24, 175, 56, 0.28);
+}
+.fb-zhenfen-hub-sub {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: $glass-text;
+  letter-spacing: 0.5rpx;
+}
+.fb-zhenfen-hub-hint {
+  flex-shrink: 0;
+  font-size: 20rpx;
+  color: #8a958c;
+  text-align: right;
+  max-width: 42%;
+  line-height: 1.35;
+}
+.fb-zhenfen-hub-frame {
+  @include glass-surface(0.72, 40px);
+  border-radius: $glass-radius-xl;
+  border: 2rpx solid rgba(24, 175, 56, 0.22);
+  box-shadow:
+    0 10rpx 32rpx rgba(16, 48, 24, 0.08),
+    inset 0 0 0 1rpx rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+  background: linear-gradient(
+    165deg,
+    rgba(232, 248, 236, 0.55) 0%,
+    rgba(255, 255, 255, 0.72) 42%,
+    rgba(255, 255, 255, 0.58) 100%
+  );
+}
+.fb-zhenfen-hub-divider {
+  height: 1rpx;
+  margin: 0 20rpx;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(24, 175, 56, 0.35) 20%,
+    rgba(24, 175, 56, 0.35) 80%,
+    transparent 100%
+  );
+}
+.fb-banner-wrap--inset {
+  width: 100%;
+  padding: 12rpx 12rpx 0;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+.fb-banner-swiper--inset {
+  width: 100%;
+  height: 300rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  padding: 0;
+  box-shadow: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.fb-entry-stage--inset {
+  padding: 8rpx 12rpx 12rpx;
+}
+.fb-entry-kicker--inset {
+  padding: 4rpx 8rpx 10rpx;
+}
+.fb-entry-kicker--inset .fb-entry-kicker-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #3d5245;
+}
+
+/* ===== Banner 轮播（独立使用时保留） ===== */
 .fb-banner-wrap {
   width: 100%;
   padding: 16rpx 24rpx 0;
@@ -1367,7 +1474,16 @@ export default {
 }
 .fb-entry-row--triple {
   grid-template-columns: repeat(3, 1fr);
-  padding-bottom: 12rpx;
+  padding-bottom: 4rpx;
+}
+.fb-zhenfen-hub-frame .fb-entry-row--triple {
+  padding: 0 0 4rpx;
+  gap: 10rpx;
+}
+.fb-zhenfen-hub-frame .fb-entry-card {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1rpx solid rgba(24, 175, 56, 0.12);
+  box-shadow: 0 4rpx 14rpx rgba(16, 48, 24, 0.06);
 }
 .fb-entry-row--triple .fb-entry-card {
   padding: 14rpx 10rpx 12rpx;
