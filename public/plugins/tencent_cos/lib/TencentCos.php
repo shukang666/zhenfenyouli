@@ -118,6 +118,55 @@ class TencentCos
         return cos_object_url($cosCfg, $key);
     }
 
+    /**
+     * 删除 COS 对象（支持相对键或公网 URL）
+     */
+    public function delete($file)
+    {
+        $key = self::normalizeObjectKey($file);
+        if ($key === '') {
+            return false;
+        }
+        $cosCfg = $this->toCosLibConfig();
+        if (empty($cosCfg['bucket']) || empty($cosCfg['secret_id'])) {
+            throw new \RuntimeException('COS 未配置');
+        }
+        $this->deleteObject($cosCfg, $key);
+        $localPath = WEB_ROOT . 'upload/' . ltrim(str_replace('\\', '/', (string)$file), '/');
+        if (is_file($localPath)) {
+            @unlink($localPath);
+        }
+
+        return true;
+    }
+
+    private function deleteObject(array $cosCfg, $key)
+    {
+        $autoload = CMF_ROOT . 'vendor/autoload.php';
+        if (is_file($autoload)) {
+            require_once $autoload;
+            if (class_exists('Qcloud\\Cos\\Client')) {
+                $client = new \Qcloud\Cos\Client([
+                    'region'      => $cosCfg['region'],
+                    'schema'      => 'https',
+                    'credentials' => [
+                        'secretId'  => $cosCfg['secret_id'],
+                        'secretKey' => $cosCfg['secret_key'],
+                    ],
+                ]);
+                $client->deleteObject([
+                    'Bucket' => $cosCfg['bucket'],
+                    'Key'    => $key,
+                ]);
+
+                return;
+            }
+        }
+
+        $this->loadCosUploadLib();
+        cos_delete_object($cosCfg, $key);
+    }
+
     private function putObject(array $cosCfg, $key, $localPath)
     {
         $autoload = CMF_ROOT . 'vendor/autoload.php';

@@ -182,6 +182,11 @@
 								<text class="scf-oc-upload-ico">📷</text>
 								<text class="scf-oc-upload-t">{{ officeClockPhotoUploadCta }}</text>
 							</block>
+							<view
+								v-if="clockSlotUrls[0]"
+								class="scf-photo-del scf-photo-del--round"
+								@tap.stop="clearClockSlot(0)"
+							>×</view>
 						</view>
 					</view>
 				</view>

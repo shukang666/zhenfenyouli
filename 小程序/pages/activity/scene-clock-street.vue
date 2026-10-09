@@ -813,6 +813,11 @@
 						<text class="scf-sk-photo-ico">📷</text>
 						<text class="scf-sk-photo-t">{{ homeClockPhotoUploadCta }}</text>
 					</block>
+					<view
+						v-if="clockSlotUrls[0]"
+						class="scf-photo-del scf-photo-del--round"
+						@tap.stop="clearClockSlot(0)"
+					>×</view>
 				</view>
 				<text class="scf-sk-point-hint" v-if="pointName">对应点位：{{ pointName }}</text>
 			</view>

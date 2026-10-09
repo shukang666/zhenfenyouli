@@ -1374,6 +1374,7 @@
 	align-items: center;
 	justify-content: center;
 	padding: 24rpx;
+	position: relative;
 	overflow: hidden;
 }
 .scf-oc-upload--done {
@@ -2930,6 +2931,12 @@
 	font-size: 32rpx;
 	z-index: 2;
 }
+.scf-photo-del--round {
+	top: 12rpx;
+	right: 12rpx;
+	border-radius: 50%;
+	line-height: 44rpx;
+}
 .scf-slot-del {
 	border-radius: 0 0 0 12rpx;
 }
@@ -4429,6 +4436,7 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	position: relative;
 	overflow: hidden;
 	background: #f8fbf9;
 }

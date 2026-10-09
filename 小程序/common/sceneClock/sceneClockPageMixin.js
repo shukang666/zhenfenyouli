@@ -173,6 +173,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				userChoice: '',
 				customTip: '',
 				clockSlotUrls: ['', '', ''],
+				/** 与 clockSlotUrls 同下标，用于删除 COS 对象 */
+				clockSlotFilepaths: ['', '', ''],
 				clockContent: '',
 				clockSubmitting: false,
 				clockSuccessShow: false,
@@ -2399,10 +2401,12 @@ import settings, { uploadUrl } from '@/common/settings'
 			resetClockSlots() {
 				if (this.isResidentialHub || this.isOfficeHub) {
 					this.clockSlotUrls = ['']
+					this.clockSlotFilepaths = ['']
 					return
 				}
 				const n = this.isCommunityHub ? 3 : 2
 				this.clockSlotUrls = Array(n).fill('')
+				this.clockSlotFilepaths = Array(n).fill('')
 			},
 			onClockSlotTap(slotIdx) {
 				const url = this.clockSlotUrls[slotIdx]
@@ -2434,6 +2438,8 @@ import settings, { uploadUrl } from '@/common/settings'
 							const data = JSON.parse(res.data)
 							if (data.code == 1 && data.data && data.data.url) {
 								this.$set(this.clockSlotUrls, slotIdx, data.data.url)
+								const fp = data.data.filepath || data.data.file_path || ''
+								this.$set(this.clockSlotFilepaths, slotIdx, fp ? String(fp) : '')
 							} else {
 								this.$u.toast(data.msg || '上传失败')
 							}
@@ -2446,7 +2452,35 @@ import settings, { uploadUrl } from '@/common/settings'
 				})
 			},
 			clearClockSlot(slotIdx) {
-				this.$set(this.clockSlotUrls, slotIdx, '')
+				const url = String((this.clockSlotUrls || [])[slotIdx] || '').trim()
+				const filepath = String((this.clockSlotFilepaths || [])[slotIdx] || '').trim()
+				if (!url && !filepath) {
+					this.$set(this.clockSlotUrls, slotIdx, '')
+					this.$set(this.clockSlotFilepaths, slotIdx, '')
+					return
+				}
+				if (!this.isLogin) {
+					this.$set(this.clockSlotUrls, slotIdx, '')
+					this.$set(this.clockSlotFilepaths, slotIdx, '')
+					return
+				}
+				uni.showLoading({ title: '删除中…', mask: true })
+				this.$u
+					.post('/wxapp/public/delete_asset', { url, filepath })
+					.then(res => {
+						if (res.code == 1) {
+							this.$set(this.clockSlotUrls, slotIdx, '')
+							this.$set(this.clockSlotFilepaths, slotIdx, '')
+						} else {
+							this.$u.toast(res.msg || '删除失败')
+						}
+					})
+					.catch(err => {
+						this.$u.toast((err && err.msg) || '删除失败')
+					})
+					.finally(() => {
+						uni.hideLoading()
+					})
 			},
 			previewClockImages(index) {
 				const urls = this.clockImages

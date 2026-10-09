@@ -572,6 +572,52 @@ class PublicController extends AuthController
         }
     }
 
+    /**
+     * 删除用户刚上传但未提交的资源（COS / 本地），防止反复上传刷存储
+     * POST filepath=相对键 或 url=公网地址
+     */
+    public function delete_asset()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('非法传参');
+        }
+        $this->checkUser();
+
+        $filepath = trim((string)$this->request->param('filepath', ''));
+        $url = trim((string)$this->request->param('url', ''));
+        if ($filepath === '' && $url !== '') {
+            $storage = cmf_storage_for_assets();
+            $filepath = (string)$storage->getFilePath($url);
+        }
+        $filepath = \plugins\tencent_cos\lib\TencentCos::normalizeObjectKey($filepath);
+        if ($filepath === '') {
+            $this->error('文件无效');
+        }
+        if (strpos($filepath, 'xcxkf052/') !== 0) {
+            $this->error('不允许删除该文件');
+        }
+
+        $setting = cmf_resolve_storage_setting();
+        $type = $setting['type'] ?? 'Local';
+        try {
+            if ($type === 'TencentCos') {
+                $driverConfig = $setting['storages'][$type] ?? [];
+                $cos = new \plugins\tencent_cos\lib\TencentCos($driverConfig);
+                $cos->delete($filepath);
+            } else {
+                $local = WEB_ROOT . 'upload/' . ltrim(str_replace('\\', '/', $filepath), '/');
+                if (is_file($local)) {
+                    @unlink($local);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error('delete_asset: ' . $e->getMessage());
+            $this->error('删除失败');
+        }
+
+        $this->success('已删除');
+    }
+
 
     /**
      * 获取手机号验证码
