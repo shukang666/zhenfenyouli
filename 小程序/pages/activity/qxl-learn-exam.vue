@@ -2,13 +2,12 @@
 	<view class="feed-page">
 		<view class="feed-banner">
 			<image class="feed-banner-img" :src="bannerUrl" mode="widthFix" lazy-load></image>
-			<view class="feed-banner-progress-wrap">
-				<view class="feed-banner-progress">
-					<text class="feed-banner-progress-txt">板块通关 {{ passedCount }}/{{ moduleCount }}</text>
-					<view class="feed-banner-track">
-						<view class="feed-banner-fill" :style="{ width: progressWidth }"></view>
-					</view>
-				</view>
+		</view>
+		<view class="feed-progress-card">
+			<text class="feed-progress-label">板块通关</text>
+			<text class="feed-progress-num">{{ passedCount }}/{{ moduleCount }}</text>
+			<view class="feed-progress-track">
+				<view class="feed-progress-fill" :style="{ width: progressWidth }"></view>
 			</view>
 		</view>
 
@@ -336,35 +335,43 @@ export default {
 	display: block;
 	vertical-align: top;
 }
-.feed-banner-progress-wrap {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	padding: 0 28rpx 24rpx;
-	background: linear-gradient(180deg, rgba(6, 42, 34, 0) 0%, rgba(6, 42, 34, 0.55) 100%);
+.feed-progress-card {
+	margin: -16rpx 20rpx 0;
+	padding: 22rpx 24rpx 20rpx;
+	position: relative;
+	z-index: 4;
+	background: #fff;
+	border-radius: 20rpx;
+	box-shadow: 0 10rpx 28rpx rgba(15, 110, 86, 0.1);
+	border: 1rpx solid #dceee4;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12rpx 16rpx;
 }
-.feed-banner-progress {
-	padding: 16rpx 20rpx;
-	border-radius: 16rpx;
-	background: rgba(255, 255, 255, 0.14);
-	backdrop-filter: blur(6px);
+.feed-progress-label {
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #16332b;
 }
-.feed-banner-progress-txt {
-	font-size: 22rpx;
-	color: rgba(255, 255, 255, 0.92);
+.feed-progress-num {
+	font-size: 28rpx;
+	font-weight: 800;
+	color: #0f6e56;
+	margin-left: auto;
 }
-.feed-banner-track {
-	height: 10rpx;
-	margin-top: 10rpx;
-	border-radius: 10rpx;
-	background: rgba(255, 255, 255, 0.22);
+.feed-progress-track {
+	width: 100%;
+	height: 12rpx;
+	border-radius: 12rpx;
+	background: #e8f0ec;
 	overflow: hidden;
 }
-.feed-banner-fill {
+.feed-progress-fill {
 	height: 100%;
-	border-radius: 10rpx;
-	background: linear-gradient(90deg, #fff5cc, #ffffff);
+	border-radius: 12rpx;
+	background: linear-gradient(90deg, #0f6e56, #1fa971);
 }
 
 .feed-loading,
@@ -382,7 +389,7 @@ export default {
 }
 
 .feed-stream {
-	margin-top: -24rpx;
+	margin-top: 20rpx;
 	padding: 0 20rpx;
 	position: relative;
 	z-index: 3;
