@@ -1,16 +1,8 @@
 <template>
 	<view class="feed-page">
 		<view class="feed-banner">
-			<view class="feed-banner-bg">
-				<view class="feed-banner-orb feed-banner-orb--1"></view>
-				<view class="feed-banner-orb feed-banner-orb--2"></view>
-				<view class="feed-banner-grid"></view>
-			</view>
-			<view class="feed-banner-inner">
-				<text class="feed-banner-ph">Banner 占位 · 后续可替换为生成图</text>
-				<text class="feed-banner-title">七贤岭学考</text>
-				<text class="feed-banner-lead">人文 · 地理 · 景点 · 七贤由来 · 人口 · 小区信息</text>
-				<text class="feed-banner-tip">学习内容由后台配置；每模块随机 3 题，全对过关</text>
+			<image class="feed-banner-img" :src="bannerUrl" mode="widthFix" lazy-load></image>
+			<view class="feed-banner-progress-wrap">
 				<view class="feed-banner-progress">
 					<text class="feed-banner-progress-txt">板块通关 {{ passedCount }}/{{ moduleCount }}</text>
 					<view class="feed-banner-track">
@@ -120,10 +112,14 @@
 
 <script>
 import { getModuleUi } from '@/common/qxlLearnModules.js'
+import settings from '@/common/settings.js'
+
+const QXL_LEARN_BANNER = settings.staticAssetBase + 'img/qxl-learn-banner.png'
 
 export default {
 	data() {
 		return {
+			bannerUrl: QXL_LEARN_BANNER,
 			loading: true,
 			units: [],
 			passedCount: 0,
@@ -331,83 +327,32 @@ export default {
 }
 .feed-banner {
 	position: relative;
-	min-height: 360rpx;
+	width: 100%;
 	overflow: hidden;
+	background: #0f6e56;
 }
-.feed-banner-bg {
+.feed-banner-img {
+	width: 100%;
+	display: block;
+	vertical-align: top;
+}
+.feed-banner-progress-wrap {
 	position: absolute;
 	left: 0;
-	top: 0;
 	right: 0;
 	bottom: 0;
-	background: linear-gradient(155deg, #062a22 0%, #0f6e56 42%, #1fa971 78%, #52b788 100%);
-}
-.feed-banner-orb {
-	position: absolute;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.08);
-}
-.feed-banner-orb--1 {
-	width: 320rpx;
-	height: 320rpx;
-	right: -80rpx;
-	top: -100rpx;
-}
-.feed-banner-orb--2 {
-	width: 200rpx;
-	height: 200rpx;
-	left: -40rpx;
-	bottom: -60rpx;
-}
-.feed-banner-grid {
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	opacity: 0.12;
-	background-image: linear-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(255, 255, 255, 0.35) 1px, transparent 1px);
-	background-size: 32rpx 32rpx;
-}
-.feed-banner-inner {
-	position: relative;
-	z-index: 2;
-	padding: 36rpx 32rpx 40rpx;
-	color: #fff;
-}
-.feed-banner-ph {
-	display: block;
-	font-size: 20rpx;
-	opacity: 0.72;
-	letter-spacing: 2rpx;
-	margin-bottom: 16rpx;
-}
-.feed-banner-title {
-	display: block;
-	font-size: 48rpx;
-	font-weight: 800;
-	letter-spacing: 4rpx;
-}
-.feed-banner-lead {
-	display: block;
-	margin-top: 16rpx;
-	font-size: 26rpx;
-	line-height: 1.55;
-	font-weight: 600;
-}
-.feed-banner-tip {
-	display: block;
-	margin-top: 10rpx;
-	font-size: 22rpx;
-	opacity: 0.78;
+	padding: 0 28rpx 24rpx;
+	background: linear-gradient(180deg, rgba(6, 42, 34, 0) 0%, rgba(6, 42, 34, 0.55) 100%);
 }
 .feed-banner-progress {
-	margin-top: 28rpx;
+	padding: 16rpx 20rpx;
+	border-radius: 16rpx;
+	background: rgba(255, 255, 255, 0.14);
+	backdrop-filter: blur(6px);
 }
 .feed-banner-progress-txt {
 	font-size: 22rpx;
-	opacity: 0.88;
+	color: rgba(255, 255, 255, 0.92);
 }
 .feed-banner-track {
 	height: 10rpx;
