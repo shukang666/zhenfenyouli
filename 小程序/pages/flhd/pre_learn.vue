@@ -1,6 +1,6 @@
 <template>
 	<view class="cle-page" v-if="!setting.app_test">
-		<scroll-view scroll-y class="cle-scroll" :show-scrollbar="false">
+		<scroll-view scroll-y class="cle-scroll" :style="scrollViewStyle" :show-scrollbar="false">
 			<block v-if="!completed">
 				<view v-for="(block, bi) in blocks" :key="bi">
 					<!-- 头图 -->
@@ -115,9 +115,16 @@
 				completed: false,
 				submitting: false,
 				loaded: false,
+				scrollHeightPx: 0,
 			}
 		},
 		computed: {
+			scrollViewStyle() {
+				if (this.scrollHeightPx > 0) {
+					return { height: this.scrollHeightPx + 'px' }
+				}
+				return {}
+			},
 			preLearnImg() {
 				return {
 					welcome: PRE_LEARN_COS + 'pre_learn_welcome.png',
@@ -138,6 +145,9 @@
 				return ids.every(id => !!String(this.answers[id] || '').trim())
 			},
 		},
+		onReady() {
+			this.measureScrollArea()
+		},
 		onShow() {
 			if (!this.isLogin) {
 				return this.$u.route('/pages/public/login')
@@ -152,6 +162,24 @@
 			})
 		},
 		methods: {
+			measureScrollArea() {
+				this.$nextTick(() => {
+					const query = uni.createSelectorQuery().in(this)
+					query.select('.cle-page').boundingClientRect()
+					query.select('.cle-foot').boundingClientRect()
+					query.exec(res => {
+						const pageH = res[0] && res[0].height
+						const footH = (res[1] && res[1].height) || 0
+						if (pageH > 0) {
+							this.scrollHeightPx = Math.floor(Math.max(200, pageH - footH))
+							return
+						}
+						const sys = uni.getSystemInfoSync()
+						const win = sys.windowHeight || 600
+						this.scrollHeightPx = Math.floor(Math.max(200, win - footH))
+					})
+				})
+			},
 			loadBlocks() {
 				return this.$u.api.get_clock_learn_exam().then(res => {
 					const data = res.data || {}
@@ -162,8 +190,10 @@
 					}
 					this.completed = false
 					this.loaded = true
+					this.measureScrollArea()
 				}).catch(() => {
 					this.loaded = true
+					this.measureScrollArea()
 				})
 			},
 			pickAnswerByIndex(bi, oi) {
@@ -252,14 +282,18 @@
 
 <style lang="scss" scoped>
 .cle-page {
-	min-height: 100vh;
+	height: 100%;
+	min-height: 100%;
+	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
+	overflow: hidden;
 	background: linear-gradient(180deg, #dff5e8 0%, #eef5f0 320rpx, #f4f7f5 100%);
 }
 .cle-scroll {
 	flex: 1;
-	height: 0;
+	min-height: 0;
+	width: 100%;
 	padding: 0 28rpx;
 	box-sizing: border-box;
 }

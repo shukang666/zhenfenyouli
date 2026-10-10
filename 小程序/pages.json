@@ -584,7 +584,8 @@
 				{
 					"path": "pre_learn",
 					"style": {
-						"navigationBarTitleText": "欢迎来真分"
+						"navigationBarTitleText": "欢迎来真分",
+						"disableScroll": true
 					}
 				},
 			{
