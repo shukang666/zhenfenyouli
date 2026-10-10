@@ -46,7 +46,7 @@
 				</view>
 			</view>
 
-			<!-- 问候 + 快捷真分（浅色卡片，入口指向垃圾分类真分页） -->
+			<!-- 问候 + 快捷真分（浅色卡片，入口指向三场景选场景页） -->
 			<view id="guide-hello" class="hello-card" v-if="isLogin && todayTask.show">
 				<view class="hello-card__orb hello-card__orb--a"></view>
 				<view class="hello-card__orb hello-card__orb--b"></view>
@@ -260,6 +260,7 @@ import {
 	navigateHomeHotSpotEntry,
 	resolveHomeHotThumb,
 } from '@/common/homeHotSpotEntries.js'
+import { openSceneClockTheme } from '@/common/sceneClockEntry.js'
 export default {
 	components: {
 		SkeletonScreen,
@@ -806,12 +807,12 @@ export default {
 					console.log('获取用户信息失败:', e)
 				}
 			},
-			// 快捷真分：跳转垃圾分类真分页（与活动页入口同一套学习/考试校验）
+			// 快捷真分：学考通过后进三场景选场景页（与 Banner / 热门活动垃圾真分一致）
 			goToClock() {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.goClockCheck()
 			},
-			// 快捷真分前置校验：学习→考试→真分（学完垃圾分类指导才可考试，考过才可真分）
+			// 快捷真分前置校验：学习→考试→选场景真分
 			async goClockCheck() {
 				// 先拉取最新用户信息，避免在 flhd/list 学完后返回首页时 is_learn/is_answer 状态过期
 				let info = this.userInfo
@@ -850,8 +851,8 @@ export default {
 					})
 					return
 				}
-				// 3. 已通过考试 → 直接真分
-				this.$u.route('/pages/flhd/ljfldk')
+				// 3. 已通过考试 → 三场景选场景页
+				openSceneClockTheme(this)
 			},
 			// 获取签到状态
 			async getSignStatus() {
