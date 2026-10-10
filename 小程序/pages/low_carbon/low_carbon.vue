@@ -184,24 +184,18 @@
       </view>
       <view class="fb-spot-grid">
         <view
-          class="fb-spot-card"
-          :class="'fb-spot-card--' + mod.key"
+          class="fb-spot-card fb-spot-card--poster"
           v-for="mod in spot_modules"
           :key="mod.key"
           hover-class="fb-press"
           :hover-stay-time="80"
           @click="gotoSpotModule(mod)"
         >
-          <u-image
-            class="fb-spot-cover"
-            width="80"
-            height="80"
+          <image
+            class="fb-spot-poster-img"
             :src="spotModuleCover(mod)"
-            mode="aspectFill"
-            border-radius="16"
-          ></u-image>
-          <text class="fb-spot-name">{{ mod.name }}</text>
-          <text class="fb-spot-sub u-line-1">{{ mod.subtitle }}</text>
+            mode="widthFix"
+          />
         </view>
       </view>
     </view>
@@ -1779,49 +1773,17 @@ export default {
   gap: 16rpx;
   padding: 0 4rpx 8rpx;
 }
-.fb-spot-card {
+.fb-spot-card--poster {
   border-radius: 20rpx;
-  padding: 24rpx 20rpx 20rpx;
-  min-height: 168rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-}
-.fb-spot-card--qxl {
-  background: linear-gradient(145deg, #e8f5e9 0%, #b7e4c7 100%);
-}
-.fb-spot-card--hiking {
-  background: linear-gradient(145deg, #d8f3dc 0%, #95d5b2 100%);
-}
-.fb-spot-card--flea_market {
-  background: linear-gradient(145deg, #ecfdf3 0%, #74c69d 100%);
-}
-.fb-spot-card--zhenfen_class {
-  background: linear-gradient(145deg, #e7f0fe 0%, #a8dadc 100%);
-}
-.fb-spot-cover {
-  flex-shrink: 0;
+  padding: 0;
   overflow: hidden;
-  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  background: transparent;
 }
-.fb-spot-name {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #1b4332;
-  line-height: 1.3;
-}
-.fb-spot-card--zhenfen_class .fb-spot-name {
-  color: #0d3b66;
-}
-.fb-spot-sub {
-  font-size: 20rpx;
-  color: rgba(27, 67, 50, 0.75);
-  line-height: 1.35;
-}
-.fb-spot-card--zhenfen_class .fb-spot-sub {
-  color: rgba(13, 59, 102, 0.72);
+.fb-spot-poster-img {
+  width: 100%;
+  display: block;
+  border-radius: 20rpx;
 }
 
 /* ===== 我和七贤岭 · 活动页独立主推位（已并入专题网格，样式保留供其它页引用） ===== */
