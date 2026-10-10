@@ -125,6 +125,8 @@
 </template>
 
 <script>
+    import { redirectSceneClockTheme } from '@/common/sceneClockEntry.js'
+
     export default {
         data() {
             return {
@@ -148,9 +150,7 @@
         methods: {
             // 真分
             redirectTo(){
-                uni.redirectTo({
-                    url:'/pages/flhd/ljfldk'
-                })
+                redirectSceneClockTheme()
             },
             // 
             navigateBack() {

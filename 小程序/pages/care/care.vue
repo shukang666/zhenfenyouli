@@ -106,6 +106,8 @@
 </template>
 
 <script>
+	import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
+
 	export default {
 	data() {
 		return {
@@ -180,11 +182,7 @@
 		},
 
 		goClock() {
-			if (!this.isLogin) {
-				this.$u.route('/pages/public/login')
-				return
-			}
-			this.$u.route('/pages/flhd/ljfldk')
+			runSceneClockLearnExamGate(this)
 		},
 
 		goPointDetail() {

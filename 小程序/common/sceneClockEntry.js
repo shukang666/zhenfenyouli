@@ -71,6 +71,60 @@ export function openSceneClockTheme(vm) {
 	return vm.$u.route(url)
 }
 
+/** 考试通过等场景：replace 到选场景页，避免回到旧 hub */
+export function redirectSceneClockTheme() {
+	const url = buildSceneClockThemeUrl()
+	uni.redirectTo({ url })
+}
+
+/**
+ * 学考门禁后进入三场景选场景页（首页快捷真分、关怀版去真分等共用）
+ * @returns {Promise<boolean>} 是否已进入选场景页
+ */
+export async function runSceneClockLearnExamGate(vm) {
+	if (!vm) return false
+	if (!vm.isLogin) {
+		vm.$u.route('/pages/public/login')
+		return false
+	}
+	let info = vm.userInfo || {}
+	try {
+		const res = await vm.$u.api.getUserInfo()
+		info = res.data || {}
+		vm.$u.vuex('userInfo', info)
+	} catch (e) {
+		console.log('[sceneClockEntry] 刷新用户状态失败:', e)
+	}
+	if (!info.is_learn) {
+		uni.showModal({
+			title: '提示',
+			content: '请先完成真分前学习，通过答题考试后可参与垃圾分类真分',
+			showCancel: false,
+			confirmText: '去学习',
+			confirmColor: '#39BF3E',
+			success: (res) => {
+				if (res.confirm) uni.navigateTo({ url: '/pages/flhd/pre_learn' })
+			},
+		})
+		return false
+	}
+	if (!info.is_answer) {
+		uni.showModal({
+			title: '提示',
+			content: '学习已完成，请通过垃圾分类答题考试后即可真分',
+			showCancel: false,
+			confirmText: '去考试',
+			confirmColor: '#39BF3E',
+			success: (res) => {
+				if (res.confirm) vm.$u.route('/pages/answer/examine?id=1')
+			},
+		})
+		return false
+	}
+	openSceneClockTheme(vm)
+	return true
+}
+
 /** 场景深链：家庭 / 办公 / 沿街独立页 */
 export function openSceneClockHub(vm, hub) {
 	const url = buildSceneClockHubUrl(hub)

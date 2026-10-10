@@ -588,13 +588,6 @@
 					}
 				},
 			{
-				"path": "ljfldk",
-				"style": {
-					"navigationBarTitleText": "践行真分",
-					"disableScroll": true
-				}
-			},
-			{
 				"path": "choice",
 				"style": {
 					"navigationBarTitleText": "精选打卡"
@@ -1115,7 +1108,7 @@
 			"network": "all",
 			"packages": ["pages/activity"]
 		},
-		"pages/flhd/ljfldk": {
+		"pages/activity/scene-clock-pick": {
 			"network": "all",
 			"packages": ["pages/activity"]
 		},

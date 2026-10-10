@@ -1,6 +1,6 @@
 <template>
 	<view class="u-p-30">
-		<view class="u-type-white-bg u-radius-10" @click="navigator('/pages/flhd/ljfldk',1)">
+		<view class="u-type-white-bg u-radius-10" @click="navigator('/pages/activity/scene-clock-pick?mode=theme',1)">
 			<u-image width="100%" height="326" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250512/25a5d7f724a31ba6eccbe9d660e605ef.png"></u-image>
 			<view class="u-p-20 u-flex u-row-between">
 				<view class="">
@@ -13,7 +13,7 @@
 				</view>
 				<view class="">
 					<u-button type="primary" size="mini" hover-class="none" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}"
-						@click.stop="navigator('/pages/flhd/ljfldk',1)">立即参与</u-button>
+						@click.stop="navigator('/pages/activity/scene-clock-pick?mode=theme',1)">立即参与</u-button>
 				</view>
 			</view>
 		</view>
@@ -101,7 +101,7 @@
 				} else if (type == 3) {
 					if (this.userInfo.is_answer == 1) {
 						// this.$u.toast('已完成答题考试')
-						this.$u.route('/pages/flhd/ljfldk')
+						this.$u.route('/pages/activity/scene-clock-pick?mode=theme')
 					} else {
 						this.$u.route(url)
 					}

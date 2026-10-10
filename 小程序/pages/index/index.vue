@@ -260,7 +260,7 @@ import {
 	navigateHomeHotSpotEntry,
 	resolveHomeHotThumb,
 } from '@/common/homeHotSpotEntries.js'
-import { openSceneClockTheme } from '@/common/sceneClockEntry.js'
+import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
 export default {
 	components: {
 		SkeletonScreen,
@@ -809,50 +809,7 @@ export default {
 			},
 			// 快捷真分：学考通过后进三场景选场景页（与 Banner / 热门活动垃圾真分一致）
 			goToClock() {
-				if (!this.isLogin) return this.$u.route('/pages/public/login')
-				this.goClockCheck()
-			},
-			// 快捷真分前置校验：学习→考试→选场景真分
-			async goClockCheck() {
-				// 先拉取最新用户信息，避免在 flhd/list 学完后返回首页时 is_learn/is_answer 状态过期
-				let info = this.userInfo
-				try {
-					let res = await this.$u.api.getUserInfo()
-					info = res.data || {}
-					this.$u.vuex('userInfo', info)
-				} catch (e) {
-					console.log('刷新用户状态失败:', e)
-				}
-				// 1. 尚未完成真分前学习 → 引导学习
-				if (!info.is_learn) {
-					uni.showModal({
-						title: '提示',
-						content: '请先完成真分前学习，通过答题考试后可参与垃圾分类真分',
-						showCancel: false,
-						confirmText: '去学习',
-						confirmColor: '#39BF3E',
-						success: (res) => {
-							if (res.confirm) uni.navigateTo({ url: '/pages/flhd/pre_learn' })
-						}
-					})
-					return
-				}
-				// 2. 已学完但未通过考试 → 引导考试
-				if (!info.is_answer) {
-					uni.showModal({
-						title: '提示',
-						content: '学习已完成，请通过垃圾分类答题考试后即可真分',
-						showCancel: false,
-						confirmText: '去考试',
-						confirmColor: '#39BF3E',
-						success: (res) => {
-							if (res.confirm) this.$u.route('/pages/answer/examine?id=1')
-						}
-					})
-					return
-				}
-				// 3. 已通过考试 → 三场景选场景页
-				openSceneClockTheme(this)
+				runSceneClockLearnExamGate(this)
 			},
 			// 获取签到状态
 			async getSignStatus() {

@@ -150,7 +150,7 @@
 				this.$u.route(`/pages/activity/lsxf/details-new?id=${id}`)
 			},
 			gotoFlhd() {
-				this.$u.route('/pages/flhd/ljfldk')
+				this.$u.route('/pages/activity/scene-clock-pick?mode=theme')
 			},
 			gotoQxl() {
 				this.$u.route('/pages/activity/love-qixianling')
