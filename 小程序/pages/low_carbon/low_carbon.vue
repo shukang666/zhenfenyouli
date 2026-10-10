@@ -192,7 +192,14 @@
           :hover-stay-time="80"
           @click="gotoSpotModule(mod)"
         >
-          <text class="fb-spot-emoji">{{ mod.emoji }}</text>
+          <u-image
+            class="fb-spot-cover"
+            width="80"
+            height="80"
+            :src="spotModuleCover(mod)"
+            mode="aspectFill"
+            border-radius="16"
+          ></u-image>
           <text class="fb-spot-name">{{ mod.name }}</text>
           <text class="fb-spot-sub u-line-1">{{ mod.subtitle }}</text>
         </view>
@@ -557,6 +564,7 @@ import {
   parseBannerSceneClockEntry,
   openSceneClockFromBannerEntry,
 } from "@/common/sceneClockEntry.js";
+import settings from "@/common/settings.js";
 import {
   getWeeklyRecommendDisplayList,
   navigateHomeHotSpotEntry,
@@ -568,6 +576,14 @@ import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 /** 活动 Tab 底部「全部活动」仅预览条数，完整列表见 active-list */
 const ACTIVE_LIST_PREVIEW_SIZE = 2;
 
+/** 社区专题卡片封面（COS static/，与 staticAssetBase 拼接） */
+const SPOT_MODULE_COVERS = {
+  qxl: settings.staticAssetBase + "spot-modules/qxl-cover.png",
+  hiking: settings.staticAssetBase + "spot-modules/hiking-cover.png",
+  flea_market: settings.staticAssetBase + "spot-modules/flea-market-cover.png",
+  zhenfen_class: settings.staticAssetBase + "spot-modules/zhenfen-class-cover.png",
+};
+
 /** 社区专题卡片展示文案（以前端为准，避免线上 API 未发版时副标题被旧数据覆盖） */
 const SPOT_MODULES_DEFAULT = [
   {
@@ -575,6 +591,7 @@ const SPOT_MODULES_DEFAULT = [
     name: "我和七贤岭",
     subtitle: "认识 · 发现",
     emoji: "⛰️",
+    cover: SPOT_MODULE_COVERS.qxl,
     entry_type: "qxl_page",
   },
   {
@@ -582,6 +599,7 @@ const SPOT_MODULES_DEFAULT = [
     name: "步行山海，净美家园",
     subtitle: "边走边捡 · 洁净山野",
     emoji: "🥾",
+    cover: SPOT_MODULE_COVERS.hiking,
     entry_type: "spot_hub",
   },
   {
@@ -589,6 +607,7 @@ const SPOT_MODULES_DEFAULT = [
     name: "七贤岭绿色二手集市",
     subtitle: "闲置循环 · 绿色生活",
     emoji: "♻️",
+    cover: SPOT_MODULE_COVERS.flea_market,
     entry_type: "spot_hub",
   },
   {
@@ -596,6 +615,7 @@ const SPOT_MODULES_DEFAULT = [
     name: "垃圾真分小课堂",
     subtitle: "学分类 · 真投放",
     emoji: "📗",
+    cover: SPOT_MODULE_COVERS.zhenfen_class,
     entry_type: "spot_hub",
   },
 ];
@@ -702,6 +722,12 @@ export default {
     weeklyCardCover(item) {
       if (!item) return "";
       return resolveHomeHotThumb(item.thumb) || item.thumb || "";
+    },
+    spotModuleCover(mod) {
+      if (!mod) return "";
+      const c = mod.cover || "";
+      if (/^https?:\/\//i.test(c)) return c;
+      return resolveHomeHotThumb(c) || c;
     },
     onWeeklyCardTap(wIdx) {
       const list = this.weekly_display_list || [];
@@ -1775,9 +1801,10 @@ export default {
 .fb-spot-card--zhenfen_class {
   background: linear-gradient(145deg, #e7f0fe 0%, #a8dadc 100%);
 }
-.fb-spot-emoji {
-  font-size: 40rpx;
-  line-height: 1;
+.fb-spot-cover {
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 16rpx;
 }
 .fb-spot-name {
   font-size: 28rpx;
