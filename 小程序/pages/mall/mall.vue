@@ -61,57 +61,46 @@
 				</view>
 			</view>
 
-			<!-- 地理产区：可折叠，选完自动收起 -->
+			<!-- 地理产区：可折叠，选完自动收起（canvas 地图须 v-if 卸载，真机无法用 overflow 裁剪） -->
 			<view class="zone-panel glass-card" id="guide-mall-cate">
-				<u-collapse
-					ref="zoneCollapse"
-					:accordion="true"
-					:arrow="false"
-					:head-style="zoneCollapseHeadStyle"
-					:body-style="zoneCollapseBodyStyle"
-					:item-style="zoneCollapseItemStyle"
-				>
-					<u-collapse-item :open="zonePanelOpen" name="geo" @change="onZonePanelToggle">
-						<view slot="title-all" class="zone-panel__head">
-							<view class="zone-panel__head-main">
-								<view class="zone-panel__title-wrap">
-									<view class="zone-panel__dot"></view>
-									<text class="zone-panel__title">地理产区</text>
-								</view>
-								<text class="zone-panel__summary">{{ zonePanelSummary }}</text>
-							</view>
-							<u-icon
-								class="zone-panel__chevron"
-								:class="{ 'zone-panel__chevron--up': zonePanelOpen }"
-								name="arrow-down"
-								size="28"
-								color="#999"
-							></u-icon>
+				<view class="zone-panel__head" hover-class="u-hover-class" @tap="toggleZonePanel">
+					<view class="zone-panel__head-main">
+						<view class="zone-panel__title-wrap">
+							<view class="zone-panel__dot"></view>
+							<text class="zone-panel__title">地理产区</text>
 						</view>
-						<view class="zone-panel__body">
-							<text class="zone-panel__hint">点地图大区，再选具体产区</text>
-							<mall-china-map :value="mapRegion" @change="onMapRegionChange" />
-							<scroll-view
-								v-if="regionZoneList.length"
-								scroll-x
-								class="zone-strip"
-								:show-scrollbar="false"
+						<text class="zone-panel__summary">{{ zonePanelSummary }}</text>
+					</view>
+					<u-icon
+						class="zone-panel__chevron"
+						:class="{ 'zone-panel__chevron--up': zonePanelOpen }"
+						name="arrow-down"
+						size="28"
+						color="#999"
+					></u-icon>
+				</view>
+				<view class="zone-panel__body" v-if="zonePanelOpen">
+					<text class="zone-panel__hint">点地图大区，再选具体产区</text>
+					<mall-china-map :value="mapRegion" @change="onMapRegionChange" />
+					<scroll-view
+						v-if="regionZoneList.length"
+						scroll-x
+						class="zone-strip"
+						:show-scrollbar="false"
+					>
+						<view class="zone-strip__inner">
+							<view
+								class="zone-chip"
+								:class="{ 'zone-chip--on': cate_type === item.index }"
+								v-for="item in regionZoneList"
+								:key="item.id"
+								@click="cate_btn(item.index)"
 							>
-								<view class="zone-strip__inner">
-									<view
-										class="zone-chip"
-										:class="{ 'zone-chip--on': cate_type === item.index }"
-										v-for="item in regionZoneList"
-										:key="item.id"
-										@click="cate_btn(item.index)"
-									>
-										<text>{{ zoneShortName(item.cate_name) }}</text>
-									</view>
-								</view>
-							</scroll-view>
+								<text>{{ zoneShortName(item.cate_name) }}</text>
+							</view>
 						</view>
-					</u-collapse-item>
-				</u-collapse>
+					</scroll-view>
+				</view>
 			</view>
 
 			<!-- 商品列表 -->
@@ -177,9 +166,6 @@
 				total: 0,
 				loadingGoods: false,
 				zonePanelOpen: true,
-				zoneCollapseHeadStyle: { padding: 0 },
-				zoneCollapseBodyStyle: { padding: 0 },
-				zoneCollapseItemStyle: { border: 'none' },
 			};
 		},
 		computed: {
@@ -262,7 +248,6 @@
 					} else {
 						this.isLoading = false
 					}
-					this.$nextTick(() => this.refreshZoneCollapseHeight())
 				}
 			},
 			fetchMallTabHome({ page = 1, secondCate = 0 } = {}) {
@@ -299,19 +284,8 @@
 				this.goods_list = []
 				return this.fetchMallTabHome({ page: 1 })
 			},
-			onZonePanelToggle(e) {
-				this.zonePanelOpen = !!e.show
-				if (e.show) {
-					this.refreshZoneCollapseHeight()
-				}
-			},
-			refreshZoneCollapseHeight() {
-				this.$nextTick(() => {
-					const collapse = this.$refs.zoneCollapse
-					if (collapse && collapse.init) {
-						collapse.init()
-					}
-				})
+			toggleZonePanel() {
+				this.zonePanelOpen = !this.zonePanelOpen
 			},
 			collapseZonePanel() {
 				this.zonePanelOpen = false
@@ -461,14 +435,6 @@
 		font-size: 24rpx;
 		color: #999;
 		padding-left: 20rpx;
-	}
-
-	.zone-panel .u-collapse-head {
-		padding: 0 !important;
-	}
-
-	.zone-panel .u-collapse-body {
-		transition: height 0.32s ease;
 	}
 
 	.zone-strip {
