@@ -1489,7 +1489,12 @@ import settings, { uploadUrl } from '@/common/settings'
 						this.$set(this.homeFixedSlots[idx], 'id', saved.id)
 					}
 					await this.initUserPoints('setup')
-					this.$u.toast('已保存')
+					const granted = parseFloat(saved.reward_granted || 0)
+					if (granted > 0) {
+						this.$u.toast('布置完成，已获得' + granted + '积分')
+					} else {
+						this.$u.toast('已保存')
+					}
 				} catch (e) {
 					this.$u.toast((e && e.msg) || '保存失败，请重试')
 				} finally {

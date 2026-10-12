@@ -117,12 +117,14 @@ class ClockScenePointController extends AuthController
             if (empty($exists)) {
                 $this->error('点位不存在');
             }
-            if ((int)($exists['source'] ?? 0) === ClockScenePointModel::SOURCE_ADMIN) {
+            $existsArr = self::normalizePointRow($exists);
+            if ((int)($existsArr['source'] ?? 0) === ClockScenePointModel::SOURCE_ADMIN) {
                 $this->error('该点位由社区配置，无法自行修改');
             }
             Db::name('clock_scene_point')->where('id', $id)->update($row);
-            $afterRow = Db::name('clock_scene_point')->where('id', $id)->find();
-            $reward = ClockScenePointRewardService::tryGrantAfterSave($id, (int)$this->user_id, $exists, $afterRow ?: []);
+            $afterRow = self::normalizePointRow(Db::name('clock_scene_point')->where('id', $id)->find());
+            $reward = ClockScenePointRewardService::tryGrantAfterSave($id, (int)$this->user_id, $existsArr, $afterRow);
+            $afterRow = self::normalizePointRow(Db::name('clock_scene_point')->where('id', $id)->find());
             $savedImg = (string)($afterRow['point_image'] ?? '');
             $this->success('已保存', [
                 'id' => $id,
@@ -145,8 +147,9 @@ class ClockScenePointController extends AuthController
         $row['list_order'] = $maxOrder + 1;
         $row['create_time'] = $now;
         $newId = Db::name('clock_scene_point')->insertGetId($row);
-        $afterRow = Db::name('clock_scene_point')->where('id', $newId)->find();
-        $reward = ClockScenePointRewardService::tryGrantAfterSave($newId, (int)$this->user_id, null, $afterRow ?: []);
+        $afterRow = self::normalizePointRow(Db::name('clock_scene_point')->where('id', $newId)->find());
+        $reward = ClockScenePointRewardService::tryGrantAfterSave($newId, (int)$this->user_id, null, $afterRow);
+        $afterRow = self::normalizePointRow(Db::name('clock_scene_point')->where('id', $newId)->find());
         $savedImg = (string)($afterRow['point_image'] ?? '');
         $this->success('已添加', [
             'id' => $newId,
@@ -196,16 +199,43 @@ class ClockScenePointController extends AuthController
         $list = Db::name('clock_scene_point')
             ->where('user_id', $userId)
             ->whereIn('hub_key', ['home', 'qinzi'])
-            ->field('point_name,cate_name,point_image')
+            ->field('id,point_name,cate_name,point_image')
             ->select()
             ->toArray();
         foreach (self::homeFixedSlotDefs() as $def) {
-            if (!self::matchHomeFixedSlotWithImage($list, $def)) {
+            if (self::matchHomeFixedSlotPointId($list, $def) <= 0) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /** 四处固定布置均已上传时，返回对应 4 条点位 id（否则空数组） */
+    /** @return list<int> */
+    public static function homeFixedSetupPointIds(int $userId): array
+    {
+        if (!self::isHomeFixedSetupComplete($userId)) {
+            return [];
+        }
+        $list = Db::name('clock_scene_point')
+            ->where('user_id', $userId)
+            ->whereIn('hub_key', ['home', 'qinzi'])
+            ->field('id,point_name,cate_name,point_image')
+            ->select()
+            ->toArray();
+        $ids = [];
+        foreach (self::homeFixedSlotDefs() as $def) {
+            $pid = self::matchHomeFixedSlotPointId($list, $def);
+            if ($pid <= 0) {
+                return [];
+            }
+            $ids[] = $pid;
+        }
+        if (count(array_unique($ids)) < 4) {
+            return [];
+        }
+        return $ids;
     }
 
     /** @return list<array{point_name:string,cate_kw:string}> */
@@ -220,7 +250,7 @@ class ClockScenePointController extends AuthController
     }
 
     /** @param list<array<string,mixed>> $list */
-    private static function matchHomeFixedSlotWithImage(array $list, array $def): bool
+    private static function matchHomeFixedSlotPointId(array $list, array $def): int
     {
         $wantName = trim((string)($def['point_name'] ?? ''));
         $legacyNames = $def['legacy_point_names'] ?? [];
@@ -235,7 +265,7 @@ class ClockScenePointController extends AuthController
             }
             $pName = trim((string)($p['point_name'] ?? ''));
             if ($wantName !== '' && $pName === $wantName) {
-                return true;
+                return (int)($p['id'] ?? 0);
             }
             foreach ($legacyNames as $legacy) {
                 $legacy = trim((string)$legacy);
@@ -243,12 +273,12 @@ class ClockScenePointController extends AuthController
                     continue;
                 }
                 if ($kw === '' || strpos((string)($p['cate_name'] ?? ''), $kw) !== false) {
-                    return true;
+                    return (int)($p['id'] ?? 0);
                 }
             }
         }
         if ($kw === '') {
-            return false;
+            return 0;
         }
         foreach ($list as $p) {
             $img = trim((string)($p['point_image'] ?? ''));
@@ -256,11 +286,31 @@ class ClockScenePointController extends AuthController
                 continue;
             }
             if (strpos((string)($p['cate_name'] ?? ''), $kw) !== false) {
-                return true;
+                return (int)($p['id'] ?? 0);
             }
         }
+        return 0;
+    }
 
-        return false;
+    /** @param list<array<string,mixed>> $list */
+    private static function matchHomeFixedSlotWithImage(array $list, array $def): bool
+    {
+        return self::matchHomeFixedSlotPointId($list, $def) > 0;
+    }
+
+    /** @param array<string,mixed>|object|null $row */
+    private static function normalizePointRow($row): array
+    {
+        if (empty($row)) {
+            return [];
+        }
+        if (is_array($row)) {
+            return $row;
+        }
+        if (is_object($row) && method_exists($row, 'toArray')) {
+            return $row->toArray();
+        }
+        return (array)$row;
     }
 
     private function normalizeListHub($hub): string
