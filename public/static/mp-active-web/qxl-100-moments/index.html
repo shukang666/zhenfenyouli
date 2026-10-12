@@ -29,7 +29,27 @@
     .panel{padding:12px}
     .btn{width:100%;padding:14px;border:none;border-radius:12px;background:var(--g);color:#fff;font-size:15px;margin-top:10px}
     .btn.sec{background:#95d5b2;color:#1b4332}
-    textarea,input,select{width:100%;padding:10px;border:1px solid #b7e4c7;border-radius:10px;font-size:14px;margin-top:8px}
+    textarea,input,select{width:100%;padding:10px;border:1px solid #b7e4c7;border-radius:10px;font-size:14px}
+    .field{margin-top:14px}
+    .field-label{display:block;font-size:13px;font-weight:600;color:var(--g);margin-bottom:8px}
+    .field-hint{font-size:12px;color:#74c69d;margin-top:6px;line-height:1.45}
+    .file-input-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+    .photo-picker{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;padding:16px;border:2px dashed #95d5b2;border-radius:14px;background:#fff;cursor:pointer;transition:border-color .2s,background .2s;-webkit-tap-highlight-color:transparent}
+    .photo-picker:active{background:#e8f5e9;border-color:var(--gl)}
+    .photo-picker.has-preview{padding:0;border-style:solid;border-color:#b7e4c7;cursor:default;min-height:0;overflow:hidden}
+    .photo-picker.has-preview .picker-empty{display:none}
+    .picker-empty{text-align:center;padding:8px 12px}
+    .picker-icon{width:48px;height:48px;margin:0 auto 10px;border-radius:50%;background:linear-gradient(135deg,#d8f3dc,#b7e4c7);display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1}
+    .picker-title{font-size:15px;font-weight:600;color:var(--g)}
+    .picker-sub{font-size:12px;color:#74c69d;margin-top:6px;line-height:1.5}
+    .picker-preview{width:100%;display:block;max-height:320px;object-fit:contain;background:#f1faee;vertical-align:middle}
+    .picker-actions{display:flex;gap:8px;padding:10px 12px;background:#fff;border-top:1px solid #d8f3dc}
+    .picker-actions button{flex:1;padding:10px;border-radius:10px;border:1px solid #b7e4c7;background:#fff;color:var(--g);font-size:14px}
+    .picker-actions button.primary{background:var(--g);color:#fff;border-color:var(--g)}
+    .btn:disabled{opacity:.55;pointer-events:none}
+    .btn.loading{position:relative;color:transparent}
+    .btn.loading::after{content:'';position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
     .detail-img{width:100%;border-radius:12px;margin:12px 0;background:#eee;min-height:120px}
     .like-row{display:flex;align-items:center;gap:12px;margin:12px 0}
     .like-btn{padding:10px 20px;border-radius:999px;border:2px solid var(--g);background:#fff;color:var(--g);font-size:15px}
@@ -81,16 +101,39 @@
   </div>
 
   <div id="view-upload" class="hidden panel">
-    <p style="font-size:14px;line-height:1.6">上传你在七贤岭的人文、景观、美食等照片，并附简短介绍。上传后即可公开展示、分享获赞；每日上传与积分均有上限。</p>
-    <select id="up-category">
-      <option value="humanity">人文（大集、民俗等）</option>
-      <option value="scenery">美景（栈道、观海等）</option>
-      <option value="food">美食</option>
-      <option value="other">其他</option>
-    </select>
-    <input type="file" id="up-file" accept="image/*" />
-    <textarea id="up-intro" rows="4" placeholder="简单介绍拍摄地点与故事（500字内）"></textarea>
-    <button class="btn" id="btn-upload">发布作品</button>
+    <p style="font-size:14px;line-height:1.6;margin-bottom:4px">上传你在七贤岭的人文、景观、美食等照片，并附简短介绍。审核通过后可公开展示、分享获赞。</p>
+    <div class="field">
+      <label class="field-label" for="up-category">作品分类</label>
+      <select id="up-category">
+        <option value="humanity">人文（大集、民俗等）</option>
+        <option value="scenery">美景（栈道、观海等）</option>
+        <option value="food">美食</option>
+        <option value="other">其他</option>
+      </select>
+    </div>
+    <div class="field">
+      <span class="field-label">选择照片</span>
+      <input type="file" id="up-file" class="file-input-hidden" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/*" />
+      <div class="photo-picker" id="photo-picker" role="button" tabindex="0" aria-label="选择照片">
+        <div class="picker-empty">
+          <div class="picker-icon" aria-hidden="true">📷</div>
+          <p class="picker-title">点击添加照片</p>
+          <p class="picker-sub">支持 JPG、PNG 等常见格式<br/>单张建议不超过 10MB，须为本人原创实拍</p>
+        </div>
+        <img class="picker-preview hidden" id="up-preview" alt="已选照片预览" />
+        <div class="picker-actions hidden" id="picker-actions">
+          <button type="button" id="btn-change-photo">重新选择</button>
+          <button type="button" class="primary" id="btn-clear-photo">移除</button>
+        </div>
+      </div>
+      <p class="field-hint hidden" id="up-file-meta"></p>
+    </div>
+    <div class="field">
+      <label class="field-label" for="up-intro">作品介绍</label>
+      <textarea id="up-intro" rows="4" maxlength="500" placeholder="简单介绍拍摄地点与故事（500字内）"></textarea>
+      <p class="field-hint"><span id="up-intro-count">0</span>/500 字</p>
+    </div>
+    <button class="btn" type="button" id="btn-upload">发布作品</button>
     <p class="err hidden" id="up-err"></p>
   </div>
 
@@ -129,7 +172,8 @@
   <script>
     var app = {
       activeId: 0, openid: '', apiBase: '', bannerReportId: 0, guest: false,
-      currentPhoto: null, currentReport: null,
+      currentPhoto: null, currentReport: null, uploadPreviewUrl: '', uploadFile: null,
+      maxUploadBytes: 10 * 1024 * 1024,
       needLoginTip: function() {
         alert('请通过微信小程序打开「七贤岭100个瞬间」后再上传或点赞');
       },
@@ -201,6 +245,7 @@
         });
         document.getElementById('fab-upload').onclick = function() { app.switchTab('upload'); };
         document.getElementById('btn-upload').onclick = app.doUpload;
+        app.bindUploadPicker();
         document.getElementById('btn-like').onclick = app.doLike;
         document.getElementById('btn-copy-share').onclick = app.copyPhotoShare;
         document.getElementById('btn-copy-report').onclick = app.copyReportShare;
@@ -227,6 +272,92 @@
         if (h.address) meta.push('范围：' + h.address);
         if (h.contact_phone) meta.push('咨询：' + h.contact_phone);
         document.getElementById('about-meta').textContent = meta.join(' · ');
+      },
+      bindUploadPicker: function() {
+        var input = document.getElementById('up-file');
+        var picker = document.getElementById('photo-picker');
+        var intro = document.getElementById('up-intro');
+        function openFile() {
+          if (app.guest) { app.needLoginTip(); return; }
+          input.click();
+        }
+        picker.addEventListener('click', function(e) {
+          if (picker.classList.contains('has-preview') && e.target.closest('.picker-actions')) return;
+          if (!picker.classList.contains('has-preview')) openFile();
+        });
+        picker.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (!picker.classList.contains('has-preview')) openFile();
+          }
+        });
+        document.getElementById('btn-change-photo').onclick = function(e) {
+          e.stopPropagation();
+          openFile();
+        };
+        document.getElementById('btn-clear-photo').onclick = function(e) {
+          e.stopPropagation();
+          app.clearUploadFile();
+        };
+        input.onchange = function() {
+          var file = input.files && input.files[0];
+          if (file) app.setUploadFile(file);
+        };
+        intro.oninput = function() {
+          document.getElementById('up-intro-count').textContent = String(intro.value.length);
+        };
+      },
+      formatFileSize: function(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+      },
+      clearUploadFile: function() {
+        if (app.uploadPreviewUrl) {
+          try { URL.revokeObjectURL(app.uploadPreviewUrl); } catch (e) {}
+          app.uploadPreviewUrl = '';
+        }
+        app.uploadFile = null;
+        document.getElementById('up-file').value = '';
+        document.getElementById('up-preview').src = '';
+        document.getElementById('up-preview').classList.add('hidden');
+        document.getElementById('picker-actions').classList.add('hidden');
+        document.getElementById('photo-picker').classList.remove('has-preview');
+        document.getElementById('up-file-meta').classList.add('hidden');
+        document.getElementById('up-file-meta').textContent = '';
+      },
+      setUploadFile: function(file) {
+        var err = document.getElementById('up-err');
+        err.classList.add('hidden');
+        if (!file.type || file.type.indexOf('image/') !== 0) {
+          err.textContent = '请选择图片文件（JPG、PNG 等）';
+          err.classList.remove('hidden');
+          app.clearUploadFile();
+          return;
+        }
+        if (file.size > app.maxUploadBytes) {
+          err.textContent = '图片过大（最大 10MB），请压缩后重试';
+          err.classList.remove('hidden');
+          app.clearUploadFile();
+          return;
+        }
+        app.clearUploadFile();
+        app.uploadFile = file;
+        app.uploadPreviewUrl = URL.createObjectURL(file);
+        var preview = document.getElementById('up-preview');
+        preview.src = app.uploadPreviewUrl;
+        preview.classList.remove('hidden');
+        document.getElementById('picker-actions').classList.remove('hidden');
+        document.getElementById('photo-picker').classList.add('has-preview');
+        var meta = document.getElementById('up-file-meta');
+        meta.textContent = (file.name || '已选图片') + ' · ' + app.formatFileSize(file.size);
+        meta.classList.remove('hidden');
+      },
+      setUploadLoading: function(on) {
+        var btn = document.getElementById('btn-upload');
+        btn.disabled = on;
+        btn.classList.toggle('loading', on);
+        btn.textContent = on ? '发布中…' : '发布作品';
       },
       renderLimits: function(l) {
         if (!l) return;
@@ -344,13 +475,16 @@
       },
       doUpload: function() {
         if (app.guest) { app.needLoginTip(); return; }
-        var file = document.getElementById('up-file').files[0];
+        var file = app.uploadFile || (document.getElementById('up-file').files && document.getElementById('up-file').files[0]);
         var intro = document.getElementById('up-intro').value.trim();
         var cat = document.getElementById('up-category').value;
         var err = document.getElementById('up-err');
         err.classList.add('hidden');
-        if (!file) { err.textContent = '请选择照片'; err.classList.remove('hidden'); return; }
-        if (!intro) { err.textContent = '请填写介绍'; err.classList.remove('hidden'); return; }
+        if (!file) { err.textContent = '请先添加一张照片'; err.classList.remove('hidden'); return; }
+        if (!intro) { err.textContent = '请填写作品介绍'; err.classList.remove('hidden'); return; }
+        if (app.uploadLoading) return;
+        app.uploadLoading = true;
+        app.setUploadLoading(true);
         var fd = new FormData();
         fd.append('file', file);
         fetch(app.apiBase + '/wxapp/public/upload_asset?filetype=image', {
@@ -364,7 +498,8 @@
         }).then(function(res) {
           alert(res.message || '发布成功');
           document.getElementById('up-intro').value = '';
-          document.getElementById('up-file').value = '';
+          document.getElementById('up-intro-count').textContent = '0';
+          app.clearUploadFile();
           app.api('/wxapp/active_web_photo/home', { active_id: app.activeId }).then(function(h) {
             app.renderLimits(h.limits);
           });
@@ -372,6 +507,9 @@
         }).catch(function(e) {
           err.textContent = e.message || e;
           err.classList.remove('hidden');
+        }).finally(function() {
+          app.uploadLoading = false;
+          app.setUploadLoading(false);
         });
       },
       doLike: function() {
