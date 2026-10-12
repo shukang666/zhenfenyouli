@@ -2,7 +2,7 @@
 	<view class="container">
 		<view class="qxl-hero" :style="heroBgStyle">
 			<view class="qxl-hero-content">
-				<text class="qxl-hero-title">我和七贤岭</text>
+				<text class="qxl-hero-title">我的七贤岭</text>
 				<text class="qxl-hero-subtitle">认识 · 发现</text>
 			</view>
 		</view>

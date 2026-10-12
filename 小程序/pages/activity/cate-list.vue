@@ -8,8 +8,8 @@
 				<text class="fb-s-entry-arrow">›</text>
 			</view>
 			<view class="fb-special-entry fb-s-qxl" @click="gotoQxl">
-				<text class="fb-s-entry-title">我和七贤岭</text>
-				<text class="fb-s-entry-sub">发现 · 玩 · 记录 · 守护</text>
+				<text class="fb-s-entry-title">我的七贤岭</text>
+				<text class="fb-s-entry-sub">认识 · 发现</text>
 				<text class="fb-s-entry-arrow">›</text>
 			</view>
 		</view>

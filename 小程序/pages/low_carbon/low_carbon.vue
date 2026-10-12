@@ -571,7 +571,7 @@ import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 const ACTIVE_LIST_PREVIEW_SIZE = 2;
 
 /** 换 COS 图后递增，避免小程序/WebView 缓存旧图 */
-const SPOT_MODULE_COVER_VER = "2026101016";
+const SPOT_MODULE_COVER_VER = "2026101211";
 
 function spotModuleCoverUrl(fileName) {
   return (
@@ -595,7 +595,7 @@ const SPOT_MODULE_COVERS = {
 const SPOT_MODULES_DEFAULT = [
   {
     key: "qxl",
-    name: "我和七贤岭",
+    name: "我的七贤岭",
     subtitle: "认识 · 发现",
     emoji: "⛰️",
     cover: SPOT_MODULE_COVERS.qxl,
