@@ -22,7 +22,7 @@
 					:poster="posterUrl"
 				></video>
 				<view class="intro-video-ph" v-else>
-					<text>视频加载中，请稍后下拉刷新</text>
+					<text>{{ videoHint }}</text>
 				</view>
 			</view>
 
@@ -66,8 +66,13 @@
 
 <script>
 import settings from '@/common/settings.js'
+import {
+	QXL_INTRO_CATEGORY,
+	QXL_INTRO_VIDEO_URL,
+	QXL_INTRO_QUESTIONS,
+	isLegacyLearnFeed,
+} from '@/common/qxlIntroExperience.js'
 
-const INTRO_CATEGORY = '认识七贤岭'
 const POSTER = settings.staticAssetBase + 'img/qxl-learn-banner.png'
 
 export default {
@@ -77,7 +82,9 @@ export default {
 			pageTitle: '认识七贤岭',
 			pageSubtitle: '看视频，用几道小互动快速了解本地人文与地理',
 			videoUrl: '',
+			videoHint: '视频准备中…',
 			posterUrl: POSTER,
+			feedNeedDeploy: false,
 			passed: false,
 			moduleCount: 1,
 			passedCount: 0,
@@ -96,7 +103,26 @@ export default {
 	onShow() {
 		this.loadFeed()
 	},
+	onPullDownRefresh() {
+		this.loadFeed().finally(() => {
+			uni.stopPullDownRefresh()
+		})
+	},
 	methods: {
+		applyIntroFallback(options = {}) {
+			const { legacyApi = false } = options
+			this.feedNeedDeploy = legacyApi
+			this.pageTitle = '认识七贤岭'
+			this.pageSubtitle = '看视频，用几道小互动快速了解本地人文与地理'
+			this.videoUrl = this.resolveUrl(QXL_INTRO_VIDEO_URL)
+			this.videoHint = this.videoUrl
+				? ''
+				: '视频地址未配置，请确认 COS 已上传 static/video/qxl-intro-v3.mp4'
+			this.moduleCount = 1
+			if (!this.passed) {
+				this.questions = QXL_INTRO_QUESTIONS.map(q => ({ ...q }))
+			}
+		},
 		resolveUrl(raw) {
 			const s = (raw || '').trim()
 			if (!s) return ''
@@ -127,18 +153,37 @@ export default {
 		},
 		loadFeed() {
 			this.loading = true
-			this.$u.api.getQxlLearnFeed().then(res => {
-				if (res.code != 1) return
+			return this.$u.api.getQxlLearnFeed().then(res => {
+				if (res.code != 1) {
+					this.applyIntroFallback()
+					return
+				}
 				const data = res.data || {}
+				if (isLegacyLearnFeed(data)) {
+					this.passed = false
+					this.passedCount = 0
+					this.applyIntroFallback({ legacyApi: true })
+					return
+				}
+				this.feedNeedDeploy = false
 				this.pageTitle = data.title || this.pageTitle
 				this.pageSubtitle = data.subtitle || this.pageSubtitle
-				this.videoUrl = this.resolveUrl(data.video_url || '')
 				this.passed = !!(data.passed || data.all_passed)
 				this.passedCount = data.passed_count || (this.passed ? 1 : 0)
 				this.moduleCount = data.module_count || 1
 				this.questions = data.questions || []
+				this.videoUrl = this.resolveUrl(data.video_url || '')
+				if (!this.videoUrl) {
+					this.videoUrl = this.resolveUrl(QXL_INTRO_VIDEO_URL)
+				}
+				if (!this.passed && !this.questions.length) {
+					this.questions = QXL_INTRO_QUESTIONS.map(q => ({ ...q }))
+				}
+				this.videoHint = this.videoUrl ? '' : '视频暂不可用，请稍后下拉刷新'
 				this.answers = {}
 				this.failHint = ''
+			}).catch(() => {
+				this.applyIntroFallback()
 			}).finally(() => {
 				this.loading = false
 			})
@@ -167,7 +212,7 @@ export default {
 			this.submitting = true
 			this.failHint = ''
 			this.$u.api.submitQxlModuleQuiz({
-				category: INTRO_CATEGORY,
+				category: QXL_INTRO_CATEGORY,
 				answers,
 			}).then(res => {
 				if (res.code != 1) {
