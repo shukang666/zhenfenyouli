@@ -23,7 +23,7 @@
             <input type="submit" class="btn btn-primary" value="搜索" />
             <a class="btn btn-danger" href="{:url('answer',['exam_id'=>$exam_id])}">清空</a>
             <notempty name="exam_id">
-                <a class="btn btn-success" href="{:url('outAnswer',['keyword'=>$keyword,'shop_id'=>$shop_id,'exam_id'=>$exam_id])}">导出</a>
+                <a class="btn btn-success" target="_blank" rel="noopener" href="{:url('outAnswer',['keyword'=>$keyword,'shop_id'=>$shop_id,'exam_id'=>$exam_id])}">导出</a>
             </notempty>
         </div>
     </form>

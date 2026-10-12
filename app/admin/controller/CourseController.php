@@ -18,6 +18,7 @@ use api\wxapp\model\ChapterPlayModel;
 use api\wxapp\model\CourseOrderModel;
 use api\wxapp\model\CoursePlayModel;
 use api\wxapp\model\MemberModel;
+use api\wxapp\model\ProblemModel;
 use api\wxapp\model\QuestionModel;
 use cmf\controller\AdminBaseController;
 use api\wxapp\model\CourseModel;
@@ -284,60 +285,111 @@ class CourseController extends AdminBaseController
         return $this->fetch();
     }
 
-    public function outAnswer(){
-        $Model = new AnswerModel();
-        $keyword = $this->request->param('keyword','','trim');
-        $exam_id = $this->request->param('exam_id');
-        $shop_id = trim($this->request->param('shop_id'));
-        $map = [];
-        if($shop_id)  $map[] = ['shop_id','=',$shop_id];
-        if($exam_id)  $map[] = ['exam_id','=',$exam_id];
-        if (!empty($keyword)) {
-            $map[] = ['b.true_name|b.nickname|b.mobile', 'like', "%{$keyword}%"];
+    public function outAnswer()
+    {
+        // 弹窗 iframe 与导出并发时 PHP 默认 session 锁会导致导出一直 pending
+        if (function_exists('session_write_close')) {
+            session_write_close();
         }
-        //题目
+        @set_time_limit(0);
+
+        $keyword = $this->request->param('keyword', '', 'trim');
+        $exam_id = (int)$this->request->param('exam_id', 0);
+        $shop_id = trim($this->request->param('shop_id', ''));
+        if ($exam_id <= 0) {
+            $this->error('缺少考试 ID');
+        }
+
+        $map = [['a.exam_id', '=', $exam_id]];
+        if ($shop_id !== '') {
+            $map[] = ['a.shop_id', '=', $shop_id];
+        }
+        if ($keyword !== '') {
+            $map[] = ['b.true_name|b.nickname|b.mobile', 'like', '%' . $keyword . '%'];
+        }
+
         $QuestionModel = new QuestionModel();
-        $where = [];
-        $where[] = ['pid', '=', $exam_id];
-        $where[] = ['status', '=', 1];
-        $q_list = $QuestionModel->where($where)->order('id asc')->select();
-        $answer_arr = [];
+        $q_list = $QuestionModel->where([
+            ['pid', '=', $exam_id],
+            ['status', '=', 1],
+        ])->order('id asc')->select()->toArray();
+
         $q_head = [];
+        $q_ids = [];
         foreach ($q_list as $v) {
-            $answer_arr[] = 'answer' . $v['id'] . '_status_name';
+            $q_ids[] = (int)$v['id'];
             $q_head[] = strip_tags(htmlspecialchars_decode((string)$v['title']));
         }
-        $AnswerLogModel = new AnswerLogModel();
-        $answer_status_name = [1 => '正确', 2 => '错误', 3 => '未回答'];
-        $list = $Model->getInfo($map, -1);
-        if ($list->isEmpty()) {
+
+        $AnswerModel = new AnswerModel();
+        $list = $AnswerModel->alias('a')
+            ->field('a.*,b.true_name,b.mobile,b.nickname')
+            ->join('member b', 'a.user_id = b.id')
+            ->where($map)
+            ->order('a.id desc')
+            ->select()
+            ->toArray();
+
+        if (empty($list)) {
             $this->error('暂无数据可导出');
         }
-        foreach ($list as &$item) {
-            $item['create_time'] = date('Y-m-d H:i:s', $item['create_time']);
 
-            foreach ($q_list as $value) {
-                $logMap = [];
-                $logMap[] = ['answer_id', '=', $item['id']];
-                $logMap[] = ['q_id', '=', $value['id']];
-                $is = $AnswerLogModel->where($logMap)->find();
-                if (!empty($is)) {
-                    $item['answer' . $value['id'] . '_status_name'] = $answer_status_name[$is['answer_status']] ?? '错误';
-                } else {
-                    $item['answer' . $value['id'] . '_status_name'] = '错误';
-                }
+        $problemName = (string)ProblemModel::where('id', $exam_id)->value('name');
+        $answerIds = array_column($list, 'id');
+        $logByAnswer = [];
+        if (!empty($answerIds) && !empty($q_ids)) {
+            $logs = AnswerLogModel::where('answer_id', 'in', $answerIds)
+                ->where('q_id', 'in', $q_ids)
+                ->field('answer_id,q_id,answer_status')
+                ->select()
+                ->toArray();
+            foreach ($logs as $log) {
+                $logByAnswer[(int)$log['answer_id']][(int)$log['q_id']] = (int)$log['answer_status'];
             }
         }
-        unset($item);
-        $problemName = $list[0]['problem_name'] ?? '';
-        $filename = '答题记录' . ($problemName ? '_' . $problemName : '') . '_' . date('Y-m-d');
 
-        $head = ['ID', '昵称', '姓名', '手机号', '考试名称', '答题数', '得分', '答题时间'];
-        $head = array_merge($head, $q_head);
+        $answer_status_name = [1 => '正确', 2 => '错误', 3 => '未回答'];
+        $head = array_merge(
+            ['ID', '昵称', '姓名', '手机号', '考试名称', '答题数', '得分', '答题时间'],
+            $q_head
+        );
 
-        $keys = ['id', 'nickname', 'true_name', 'mobile', 'problem_name', 'total_num', 'score', 'create_time'];
-        $keys = array_merge($keys, $answer_arr);
-        CommonModel::outData($filename, $list, $head, $keys);
+        $filename = '答题记录' . ($problemName !== '' ? '_' . $problemName : '') . '_' . date('Y-m-d');
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+        header('Content-Type: text/csv; charset=UTF-8');
+        $encodedName = rawurlencode($filename . '.csv');
+        header('Content-Disposition: attachment; filename="answer_export.csv"; filename*=UTF-8\'\'' . $encodedName);
+        header('Cache-Control: max-age=0');
+        header('X-Accel-Buffering: no');
+
+        $fp = fopen('php://output', 'w');
+        fwrite($fp, "\xEF\xBB\xBF");
+        fputcsv($fp, $head);
+
+        foreach ($list as $row) {
+            $row = CommonModel::changeTrueNameFromNickname($row);
+            $line = [
+                $row['id'],
+                $row['nickname'] ?? '',
+                $row['true_name'] ?? '',
+                $row['mobile'] ?? '',
+                $problemName,
+                $row['total_num'] ?? '',
+                $row['score'] ?? '',
+                !empty($row['create_time']) ? date('Y-m-d H:i:s', (int)$row['create_time']) : '',
+            ];
+            foreach ($q_list as $q) {
+                $qid = (int)$q['id'];
+                $status = $logByAnswer[(int)$row['id']][$qid] ?? null;
+                $line[] = $status !== null ? ($answer_status_name[$status] ?? '错误') : '错误';
+            }
+            fputcsv($fp, $line);
+        }
+
+        fclose($fp);
+        exit;
     }
 
     public function answerLog(){
