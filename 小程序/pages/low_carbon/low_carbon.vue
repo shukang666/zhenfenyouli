@@ -140,37 +140,19 @@
       </view>
     </view>
 
-    <!-- 垃圾分类工作台（治理督导，放在场景快捷入口之后） -->
+    <!-- 垃圾分类工作台（运营切图，点击进入 /pages/dtsh/dtsh） -->
     <view class="fb-dtsh-spotlight" id="guide-fb-dtsh-hub">
       <view
-        class="fb-dtsh-spotlight-card"
+        class="fb-dtsh-spotlight-poster"
         hover-class="fb-dtsh-spotlight-press"
         :hover-stay-time="80"
         @click="gotoFlhd"
       >
-        <view class="fb-dtsh-spotlight-glow fb-dtsh-spotlight-glow--a"></view>
-        <view class="fb-dtsh-spotlight-glow fb-dtsh-spotlight-glow--b"></view>
-        <view class="fb-dtsh-spotlight-inner">
-          <view class="fb-dtsh-spotlight-copy">
-            <view class="fb-dtsh-spotlight-badge-row">
-              <text class="fb-dtsh-spotlight-badge">核心</text>
-              <text class="fb-dtsh-spotlight-kicker">分类治理</text>
-            </view>
-            <view class="fb-dtsh-spotlight-title-row">
-              <text class="fb-dtsh-spotlight-emoji">♻️</text>
-              <text class="fb-dtsh-spotlight-title">垃圾分类工作台</text>
-            </view>
-            <text class="fb-dtsh-spotlight-desc">学习分类、拍照真分、督导监测一站搞定</text>
-            <view class="fb-dtsh-spotlight-tags">
-              <text class="fb-dtsh-spotlight-tag">学习真分</text>
-              <text class="fb-dtsh-spotlight-tag">督导巡检</text>
-              <text class="fb-dtsh-spotlight-tag">积分排行</text>
-            </view>
-          </view>
-          <view class="fb-dtsh-spotlight-cta">
-            <text class="fb-dtsh-spotlight-cta-label">进入工作台</text>
-          </view>
-        </view>
+        <image
+          class="fb-dtsh-spotlight-img"
+          :src="dtshSpotlightPoster"
+          mode="widthFix"
+        />
       </view>
     </view>
 
@@ -572,6 +554,11 @@ const ACTIVE_LIST_PREVIEW_SIZE = 2;
 
 /** 换 COS 图后递增，避免小程序/WebView 缓存旧图 */
 const SPOT_MODULE_COVER_VER = "2026101211";
+const DTSH_SPOTLIGHT_POSTER_VER = "2026101216";
+const DTSH_SPOTLIGHT_POSTER =
+  settings.staticAssetBase +
+  "planning/activity-tab-screenshot.png?v=" +
+  DTSH_SPOTLIGHT_POSTER_VER;
 
 function spotModuleCoverUrl(fileName) {
   return (
@@ -665,6 +652,7 @@ export default {
       // 5 大活动分类（硬编码，后台新增不显示）
       // community_cate_id 对应数据库 cmf_active_community_cate.id
       spot_modules: SPOT_MODULES_DEFAULT.map((m) => ({ ...m })),
+      dtshSpotlightPoster: DTSH_SPOTLIGHT_POSTER,
       main_categories: [
         {
           id: 1,
@@ -1657,123 +1645,22 @@ export default {
   background: rgba(0, 0, 0, 0.06);
 }
 
-/* ===== 垃圾分类工作台 · 活动页独立主推位 ===== */
+/* ===== 垃圾分类工作台 · 活动页主推（COS 切图） ===== */
 .fb-dtsh-spotlight {
   padding: 12rpx 20rpx 8rpx;
 }
-.fb-dtsh-spotlight-card {
-  @include glass-accent-card(rgba(24, 175, 56, 0.06));
-  position: relative;
+.fb-dtsh-spotlight-poster {
+  border-radius: 20rpx;
   overflow: hidden;
-  padding: 32rpx 28rpx 28rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
 }
 .fb-dtsh-spotlight-press {
   opacity: 0.92;
-  transform: scale(0.992);
 }
-.fb-dtsh-spotlight-glow {
-  display: none;
-}
-.fb-dtsh-spotlight-inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20rpx;
-}
-.fb-dtsh-spotlight-copy {
-  flex: 1;
-  min-width: 0;
-}
-.fb-dtsh-spotlight-badge-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10rpx;
-  margin-bottom: 10rpx;
-}
-.fb-dtsh-spotlight-badge {
-  font-size: 18rpx;
-  font-weight: 600;
-  color: #12962e;
-  background: $glass-brand-soft;
-  padding: 4rpx 12rpx;
-  border-radius: 999rpx;
-  letter-spacing: 1rpx;
-}
-.fb-dtsh-spotlight-kicker {
-  font-size: 22rpx;
-  color: $glass-text-tertiary;
-  letter-spacing: 0.5rpx;
-}
-.fb-dtsh-spotlight-title-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10rpx;
-  margin-bottom: 6rpx;
-}
-.fb-dtsh-spotlight-emoji {
-  font-size: 40rpx;
-  line-height: 1;
-}
-.fb-dtsh-spotlight-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: $glass-text;
-  letter-spacing: 0.2rpx;
-}
-.fb-dtsh-spotlight-desc {
+.fb-dtsh-spotlight-img {
+  width: 100%;
   display: block;
-  font-size: 24rpx;
-  color: $glass-text-secondary;
-  line-height: 1.5;
-  margin-bottom: 14rpx;
-}
-.fb-dtsh-spotlight-tags {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8rpx;
-}
-.fb-dtsh-spotlight-tag {
-  font-size: 20rpx;
-  color: $glass-brand-dark;
-  padding: 4rpx 14rpx;
-  border-radius: 999rpx;
-  border: 1rpx solid rgba(24, 175, 56, 0.12);
-  background: $glass-brand-soft;
-}
-.fb-dtsh-spotlight-cta {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4rpx;
-  width: 104rpx;
-  height: 104rpx;
-  border-radius: 50%;
-  background: #18af38;
-  border: none;
-  box-shadow: 0 8rpx 24rpx rgba(24, 175, 56, 0.28);
-}
-.fb-dtsh-spotlight-cta-label {
-  font-size: 20rpx;
-  font-weight: 600;
-  color: #fff;
-  line-height: 1.25;
-  text-align: center;
-  padding: 0 6rpx;
-}
-.fb-dtsh-spotlight-cta-arrow {
-  font-size: 32rpx;
-  font-weight: 300;
-  color: #fff;
-  line-height: 1;
-  margin-top: -4rpx;
+  border-radius: 20rpx;
 }
 
 /* ===== 社区专题 · 四大平级入口 ===== */

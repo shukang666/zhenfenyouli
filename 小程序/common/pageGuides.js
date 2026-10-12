@@ -33,7 +33,7 @@ export const PAGE_GUIDES = {
 				selector: '#guide-fb-dtsh-hub',
 				prefer: 'below',
 				title: '垃圾分类工作台',
-				desc: '学习、打卡、督导监测、积分排行等集中在这里，点「进入工作台」。'
+				desc: '学习、打卡、督导监测、积分排行等集中在这里，点这张卡片进入工作台。'
 			},
 			{
 				selector: '#guide-fb-qxl',
