@@ -87,15 +87,11 @@
           :hover-stay-time="80"
           @click="gotoHomeScene"
         >
-          <text class="fb-entry-mark">01 家庭</text>
+          <text class="fb-entry-mark">01</text>
           <view class="fb-entry-main">
             <text class="fb-entry-emoji">🏠</text>
             <view class="fb-entry-text">
               <text class="fb-entry-title">家庭场景</text>
-              <text class="fb-entry-sub">厨房客厅，全家日常投放</text>
-            </view>
-            <view class="fb-entry-go fb-entry-go--dark">
-              <text class="fb-entry-arrow">›</text>
             </view>
           </view>
         </view>
@@ -105,15 +101,11 @@
           :hover-stay-time="80"
           @click="gotoOfficeBuilding"
         >
-          <text class="fb-entry-mark">02 办公</text>
+          <text class="fb-entry-mark">02</text>
           <view class="fb-entry-main">
             <text class="fb-entry-emoji">🏢</text>
             <view class="fb-entry-text">
               <text class="fb-entry-title">办公场景</text>
-              <text class="fb-entry-sub">大厦真分角投放</text>
-            </view>
-            <view class="fb-entry-go">
-              <text class="fb-entry-arrow">›</text>
             </view>
           </view>
         </view>
@@ -123,15 +115,11 @@
           :hover-stay-time="80"
           @click="gotoStreetShop"
         >
-          <text class="fb-entry-mark">03 沿街</text>
+          <text class="fb-entry-mark">03</text>
           <view class="fb-entry-main">
             <text class="fb-entry-emoji">🏪</text>
             <view class="fb-entry-text">
               <text class="fb-entry-title">沿街商铺</text>
-              <text class="fb-entry-sub">路边门店分类投放</text>
-            </view>
-            <view class="fb-entry-go">
-              <text class="fb-entry-arrow">›</text>
             </view>
           </view>
         </view>
