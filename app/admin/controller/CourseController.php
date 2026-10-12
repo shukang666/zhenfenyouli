@@ -300,7 +300,7 @@ class CourseController extends AdminBaseController
         $where = [];
         $where[] = ['pid', '=', $exam_id];
         $where[] = ['status', '=', 1];
-        $q_list = $QuestionModel->where($where)->order('list_order asc,id asc')->select();
+        $q_list = $QuestionModel->where($where)->order('id asc')->select();
         $answer_arr = [];
         $q_head = [];
         foreach ($q_list as $v) {
