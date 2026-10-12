@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use api\wxapp\service\ClockScenePointRewardService;
 use app\admin\model\forum\ClockSceneGuideModel;
 use app\admin\model\forum\ClockScenePointModel;
 use think\facade\Db;
@@ -120,11 +121,15 @@ class ClockScenePointController extends AuthController
                 $this->error('该点位由社区配置，无法自行修改');
             }
             Db::name('clock_scene_point')->where('id', $id)->update($row);
-            $savedImg = Db::name('clock_scene_point')->where('id', $id)->value('point_image');
+            $afterRow = Db::name('clock_scene_point')->where('id', $id)->find();
+            $reward = ClockScenePointRewardService::tryGrantAfterSave($id, (int)$this->user_id, $exists, $afterRow ?: []);
+            $savedImg = (string)($afterRow['point_image'] ?? '');
             $this->success('已保存', [
                 'id' => $id,
-                'point_image_raw' => (string)$savedImg,
+                'point_image_raw' => $savedImg,
                 'point_image' => $savedImg ? cmf_get_asset_url($savedImg) : '',
+                'reward_point' => (float)($afterRow['reward_point'] ?? 0),
+                'reward_granted' => (float)$reward['granted'],
             ]);
             return;
         }
@@ -140,11 +145,15 @@ class ClockScenePointController extends AuthController
         $row['list_order'] = $maxOrder + 1;
         $row['create_time'] = $now;
         $newId = Db::name('clock_scene_point')->insertGetId($row);
-        $savedImg = Db::name('clock_scene_point')->where('id', $newId)->value('point_image');
+        $afterRow = Db::name('clock_scene_point')->where('id', $newId)->find();
+        $reward = ClockScenePointRewardService::tryGrantAfterSave($newId, (int)$this->user_id, null, $afterRow ?: []);
+        $savedImg = (string)($afterRow['point_image'] ?? '');
         $this->success('已添加', [
             'id' => $newId,
-            'point_image_raw' => (string)$savedImg,
+            'point_image_raw' => $savedImg,
             'point_image' => $savedImg ? cmf_get_asset_url($savedImg) : '',
+            'reward_point' => (float)($afterRow['reward_point'] ?? 0),
+            'reward_granted' => (float)$reward['granted'],
         ]);
     }
 

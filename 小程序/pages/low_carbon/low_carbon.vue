@@ -570,12 +570,25 @@ import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 /** 活动 Tab 底部「全部活动」仅预览条数，完整列表见 active-list */
 const ACTIVE_LIST_PREVIEW_SIZE = 2;
 
-/** 社区专题卡片封面（COS static/，与 staticAssetBase 拼接） */
+/** 换 COS 图后递增，避免小程序/WebView 缓存旧图 */
+const SPOT_MODULE_COVER_VER = "2026101016";
+
+function spotModuleCoverUrl(fileName) {
+  return (
+    settings.staticAssetBase +
+    "spot-modules/" +
+    fileName +
+    "?v=" +
+    SPOT_MODULE_COVER_VER
+  );
+}
+
+/** 社区专题：整卡仅一张图（文案/图标都在图里） */
 const SPOT_MODULE_COVERS = {
-  qxl: settings.staticAssetBase + "spot-modules/qxl-cover.png",
-  hiking: settings.staticAssetBase + "spot-modules/hiking-cover.png",
-  flea_market: settings.staticAssetBase + "spot-modules/flea-market-cover.png",
-  zhenfen_class: settings.staticAssetBase + "spot-modules/zhenfen-class-cover.png",
+  qxl: spotModuleCoverUrl("qxl-cover.png"),
+  hiking: spotModuleCoverUrl("hiking-cover.png"),
+  flea_market: spotModuleCoverUrl("flea-market-cover.png"),
+  zhenfen_class: spotModuleCoverUrl("zhenfen-class-cover.png"),
 };
 
 /** 社区专题卡片展示文案（以前端为准，避免线上 API 未发版时副标题被旧数据覆盖） */

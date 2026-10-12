@@ -32,6 +32,7 @@
             <th>点位名称</th>
             <th width="88">垃圾种类</th>
             <th width="100">布置照片</th>
+            <th width="120">布置积分</th>
             <th width="140">更新时间</th>
         </tr>
         </thead>
@@ -65,6 +66,18 @@
                         </a>
                     <else/>
                         <span class="text-muted">未上传</span>
+                    </if>
+                </td>
+                <td>
+                    <if condition="!empty($vo.reward_point) && $vo.reward_point gt 0">
+                        <span class="text-success">已发放 {$vo.reward_point}</span>
+                        <if condition="!empty($vo.reward_time)">
+                            <br><small class="text-muted">{$vo.reward_time|date='Y-m-d H:i'}</small>
+                        </if>
+                    <elseif condition="!empty($vo.point_image)">
+                        <span class="text-muted">未发放</span>
+                    <else/>
+                        <span class="text-muted">—</span>
                     </if>
                 </td>
                 <td>{$vo.update_time|date='Y-m-d H:i'}</td>

@@ -455,6 +455,11 @@ FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='clock_tutorial_index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Forum' AND `action`='user_clock_scene_point_index' LIMIT 1);
 
+-- 场景真分点：布置照片积分（后台用户点位布置列表展示）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_clock_scene_point' AND COLUMN_NAME = 'reward_point');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_clock_scene_point` ADD COLUMN `reward_point` decimal(10,2) NOT NULL DEFAULT ''0.00'' COMMENT ''布置积分已发放数量'' AFTER `point_image`, ADD COLUMN `reward_log_id` int(10) unsigned NOT NULL DEFAULT ''0'' COMMENT ''对应cmf_user_account_log.id'' AFTER `reward_point`, ADD COLUMN `reward_time` int(10) unsigned NOT NULL DEFAULT ''0'' COMMENT ''布置积分发放时间'' AFTER `reward_log_id`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
 -- 七贤岭学考：按板块通关（每模块随机抽 3 题）
 SET @__col := (SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_qxl_module_log');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'CREATE TABLE `cmf_qxl_module_log` (
