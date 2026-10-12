@@ -19,17 +19,19 @@ class ProblemController extends ToolController
 
     public function index()
     {
-        $type = $this->request->param('type');
+        // 菜单可能直接打开 index 未带 type，答题考试默认为 type=1
+        $type = $this->request->param('type', 1, 'intval');
+        if ($type <= 0) {
+            $type = 1;
+        }
 
         $title = $this->request->param('title');
         $params = $this->request->param();
+        $params['type'] = $type;
 
         $where = [];
 
-//
-        if ($type) {
-            $where[] = ['type', '=', $type];
-        }
+        $where[] = ['type', '=', $type];
         if (!empty($title)) {
             $where[] = ['name', 'like', '%' . trim($title) . '%'];
         }
