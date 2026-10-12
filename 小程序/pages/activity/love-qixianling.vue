@@ -8,13 +8,13 @@
 		</view>
 
 		<view class="qxl-body">
-			<!-- 统一专题区：认识（学考）与 发现（100瞬间）为同一路径两步，避免双主题对立 -->
+			<!-- 统一专题区：认识（视频+小互动）与 发现（100瞬间）为同一路径两步 -->
 			<view class="qxl-journey">
 				<view class="qxl-journey-intro">
-					<text class="qxl-journey-intro-text">先读懂七贤岭，再用镜头记录与分享</text>
+					<text class="qxl-journey-intro-text">先认识七贤岭，再用镜头记录与分享</text>
 				</view>
 
-				<!-- 有「发现」步：网格对齐，左侧竖线随学考卡片增高 -->
+				<!-- 有「发现」步：网格对齐，左侧竖线随认识卡片增高 -->
 				<view class="qxl-journey-grid" v-if="momentActive || momentLoading">
 					<view class="qxl-grid-rail qxl-grid-rail--learn">
 						<view class="qxl-step-badge">
@@ -33,18 +33,18 @@
 									lazy-load
 								></image>
 								<view v-else class="qxl-learn-cover-ph">
-									<text class="qxl-learn-cover-ph-icon">📖</text>
-									<text class="qxl-learn-cover-ph-text">七贤岭 · 读与测</text>
+									<text class="qxl-learn-cover-ph-icon">▶</text>
+									<text class="qxl-learn-cover-ph-text">七贤岭 · 视频介绍</text>
 								</view>
 							</view>
 							<view class="qxl-learn-content">
-								<text class="qxl-learn-kicker">七贤岭学考</text>
-							<text class="qxl-learn-lead">人口、人文、地理等六大主题，按模块选你关心的内容。</text>
-							<text class="qxl-learn-detail">每篇先读短文，读完在文末做本篇测验。</text>
+								<text class="qxl-learn-kicker">认识七贤岭</text>
+							<text class="qxl-learn-lead">看视频，用几道小互动快速了解本地人文与地理。</text>
+							<text class="qxl-learn-detail">看完短视频，在下方完成 3 个小问题即可。</text>
 							<view class="qxl-learn-tags">
-								<text class="qxl-learn-tag">六大主题</text>
-								<text class="qxl-learn-tag">边读边测</text>
-								<text class="qxl-learn-tag">随选随学</text>
+								<text class="qxl-learn-tag">短视频</text>
+								<text class="qxl-learn-tag">小互动</text>
+								<text class="qxl-learn-tag">约几分钟</text>
 							</view>
 								<view class="qxl-learn-foot">
 									<view class="qxl-learn-progress">
@@ -104,18 +104,18 @@
 								lazy-load
 							></image>
 							<view v-else class="qxl-learn-cover-ph">
-								<text class="qxl-learn-cover-ph-icon">📖</text>
-								<text class="qxl-learn-cover-ph-text">七贤岭 · 读与测</text>
+								<text class="qxl-learn-cover-ph-icon">▶</text>
+								<text class="qxl-learn-cover-ph-text">七贤岭 · 视频介绍</text>
 							</view>
 						</view>
 						<view class="qxl-learn-content">
-							<text class="qxl-learn-kicker">七贤岭学考</text>
-							<text class="qxl-learn-lead">人口、人文、地理等六大主题，按模块选你关心的内容。</text>
-							<text class="qxl-learn-detail">每篇先读短文，读完在文末做本篇测验。</text>
+							<text class="qxl-learn-kicker">认识七贤岭</text>
+							<text class="qxl-learn-lead">看视频，用几道小互动快速了解本地人文与地理。</text>
+							<text class="qxl-learn-detail">看完短视频，在下方完成 3 个小问题即可。</text>
 							<view class="qxl-learn-tags">
-								<text class="qxl-learn-tag">六大主题</text>
-								<text class="qxl-learn-tag">边读边测</text>
-								<text class="qxl-learn-tag">随选随学</text>
+								<text class="qxl-learn-tag">短视频</text>
+								<text class="qxl-learn-tag">小互动</text>
+								<text class="qxl-learn-tag">约几分钟</text>
 							</view>
 							<view class="qxl-learn-foot">
 								<view class="qxl-learn-progress">
@@ -149,7 +149,7 @@
 import { openActiveDetailWithContext, isWebDisplayActive } from '@/common/activeOpen.js'
 import settings from '@/common/settings.js'
 
-// 学考卡片顶图（COS static/img/，换图后重跑 data/cos_upload_one_qxl_learn_cover.php 或覆盖桶内同名对象）
+// 认识七贤岭卡片顶图（COS static/img/，换图后重跑 data/cos_upload_one_qxl_learn_cover.php 或覆盖桶内同名对象）
 const QXL_LEARN_CARD_COVER = settings.staticAssetBase + 'img/qxl-learn-cover.png'
 
 export default {
@@ -173,9 +173,8 @@ export default {
 			return raw
 		},
 		learnCtaText() {
-			if (this.learnTotal && this.learnPassed >= this.learnTotal) return '回顾模块'
-			if (this.learnPassed > 0) return '继续选学'
-			return '进入学考'
+			if (this.learnTotal && this.learnPassed >= this.learnTotal) return '再看一遍'
+			return '开始认识'
 		},
 		heroBgStyle() {
 			if (this.heroBgImage) {
@@ -188,9 +187,9 @@ export default {
 			return Math.max(12, Math.round((this.learnPassed / this.learnTotal) * 100)) + '%'
 		},
 		learnProgressText() {
-			if (!this.learnTotal) return '六大板块 · 每模块抽 3 题'
-			if (this.learnPassed >= this.learnTotal) return '六大板块已全部通关'
-			return '板块通关 ' + this.learnPassed + '/' + this.learnTotal
+			if (!this.learnTotal) return '视频 + 3 道小互动'
+			if (this.learnPassed >= this.learnTotal) return '已完成认识七贤岭'
+			return '进行中 · 完成小互动即可'
 		},
 	},
 	onLoad() {

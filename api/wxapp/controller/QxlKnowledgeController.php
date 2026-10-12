@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use api\wxapp\service\QxlIntroExperienceService;
 use api\wxapp\service\QxlLearnModuleService;
 use think\facade\Db;
 
@@ -65,7 +66,7 @@ class QxlKnowledgeController extends AuthController
      */
     public function get_learn_modules()
     {
-        $data = QxlLearnModuleService::buildModulesSummary(intval($this->user_id));
+        $data = QxlIntroExperienceService::buildSummary(intval($this->user_id));
         $this->success('success', $data);
     }
 
@@ -75,13 +76,10 @@ class QxlKnowledgeController extends AuthController
      */
     public function get_learn_feed()
     {
-        $data = QxlLearnModuleService::buildLearnFeed(
+        $data = QxlIntroExperienceService::buildIntroFeed(
             intval($this->user_id),
-            function ($raw) {
-                return $this->formatContent($raw);
-            },
-            function ($raw) {
-                return $this->formatImage($raw);
+            function ($cosKey) {
+                return $this->formatImage($cosKey);
             }
         );
         $this->success('success', $data);

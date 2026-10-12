@@ -3,6 +3,7 @@
 namespace api\wxapp\controller;
 
 use api\wxapp\model\AccountLogModel;
+use api\wxapp\service\QxlIntroExperienceService;
 use api\wxapp\service\QxlLearnModuleService;
 use think\facade\Db;
 
@@ -202,6 +203,11 @@ class QxlQuizController extends AuthController
         if ($category === '' && !empty($rawParams['category'])) {
             $category = trim((string)$rawParams['category']);
         }
+        if (QxlIntroExperienceService::isIntroCategory($category)) {
+            $this->submitIntroQuiz($rawParams, $category);
+            return;
+        }
+
         if (!QxlLearnModuleService::isValidModuleCategory($category)) {
             $this->error('请指定有效模块');
         }
@@ -314,6 +320,115 @@ class QxlQuizController extends AuthController
             'already_passed' => false,
             'correct_count'  => $correctCount,
             'total_count'    => $draw,
+            'point'          => $point,
+            'redraw'         => 0,
+        ]);
+    }
+
+    /**
+     * 「认识七贤岭」固定 3 题小互动
+     */
+    private function submitIntroQuiz(array $rawParams, $category)
+    {
+        if (QxlIntroExperienceService::userPassedIntro($this->user_id)) {
+            $this->success('已完成认识七贤岭', [
+                'passed'         => true,
+                'already_passed' => true,
+                'correct_count'  => QxlIntroExperienceService::expectedQuestionCount(),
+                'total_count'    => QxlIntroExperienceService::expectedQuestionCount(),
+                'point'          => 0,
+                'redraw'         => 0,
+            ]);
+        }
+
+        $answers = $this->parseAnswers($rawParams);
+        $expected = QxlIntroExperienceService::expectedQuestionCount();
+        if (count($answers) < $expected) {
+            $this->error('请完成全部小互动题目');
+        }
+
+        $qids = [];
+        foreach ($answers as $ans) {
+            $qid = intval($ans['qid'] ?? 0);
+            if ($qid <= 0) {
+                $this->error('题目无效');
+            }
+            $qids[] = $qid;
+        }
+        if (count(array_unique($qids)) !== $expected) {
+            $this->error('请答完全部题目');
+        }
+
+        $bank = QxlIntroExperienceService::answerBankForSubmitted($qids);
+        if (count($bank) !== $expected) {
+            $this->error('题目不属于认识七贤岭');
+        }
+
+        $correctCount = 0;
+        foreach ($answers as $ans) {
+            $qid = intval($ans['qid']);
+            $answer = strtoupper(trim($ans['answer'] ?? ''));
+            if ($answer !== '' && isset($bank[$qid]) && $answer === $bank[$qid]) {
+                $correctCount++;
+            }
+        }
+
+        if ($correctCount !== $expected) {
+            $this->success('还有题目没选对，请结合视频内容再试', [
+                'passed'         => false,
+                'already_passed' => false,
+                'correct_count'  => $correctCount,
+                'total_count'    => $expected,
+                'point'          => 0,
+                'redraw'         => 0,
+            ]);
+        }
+
+        $existLog = Db::name('qxl_module_log')
+            ->where('user_id', $this->user_id)
+            ->where('category', $category)
+            ->find();
+        $point = 0;
+        if (empty($existLog) || intval($existLog['point']) === 0) {
+            $point = $expected * self::POINT_PER_Q;
+        }
+
+        $now = time();
+        $save = [
+            'user_id'       => $this->user_id,
+            'category'      => $category,
+            'total_count'   => $expected,
+            'correct_count' => $correctCount,
+            'passed'        => 1,
+            'detail'        => '',
+            'update_time'   => $now,
+        ];
+        if ($existLog) {
+            if ($point > 0) {
+                $save['point'] = $point;
+            }
+            Db::name('qxl_module_log')->where('id', $existLog['id'])->update($save);
+        } else {
+            $save['point'] = $point;
+            $save['create_time'] = $now;
+            Db::name('qxl_module_log')->insertGetId($save);
+        }
+
+        if ($point > 0) {
+            AccountLogModel::add_account_log(
+                $this->user_id,
+                2,
+                201,
+                $point,
+                ['remark' => '认识七贤岭小互动完成']
+            );
+        }
+
+        $this->success('认识七贤岭已完成', [
+            'passed'         => true,
+            'already_passed' => false,
+            'correct_count'  => $correctCount,
+            'total_count'    => $expected,
             'point'          => $point,
             'redraw'         => 0,
         ]);

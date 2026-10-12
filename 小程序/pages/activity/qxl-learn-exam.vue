@@ -1,392 +1,197 @@
 <template>
-	<view class="feed-page">
-		<view class="feed-banner">
-			<image class="feed-banner-img" :src="bannerUrl" mode="widthFix" lazy-load></image>
-		</view>
-		<view class="feed-progress-card">
-			<text class="feed-progress-label">板块通关</text>
-			<text class="feed-progress-num">{{ passedCount }}/{{ moduleCount }}</text>
-			<view class="feed-progress-track">
-				<view class="feed-progress-fill" :style="{ width: progressWidth }"></view>
-			</view>
+	<view class="intro-page">
+		<view class="intro-head">
+			<text class="intro-title">{{ pageTitle }}</text>
+			<text class="intro-sub">{{ pageSubtitle }}</text>
 		</view>
 
-		<view class="feed-loading" v-if="loading">
+		<view class="intro-loading" v-if="loading">
 			<u-loading mode="circle" color="#0F6E56" size="48"></u-loading>
-			<text class="feed-loading-txt">加载学考内容</text>
+			<text class="intro-loading-txt">加载中</text>
 		</view>
 
-		<view class="feed-empty" v-else-if="units.length === 0">
-			<text class="feed-empty-txt">内容筹备中</text>
-		</view>
-
-		<view class="feed-stream" v-else>
-			<view class="feed-unit" v-for="(unit, uIdx) in units" :key="unit.category">
-				<view class="feed-unit-head" hover-class="feed-unit-head--press" @tap="toggleUnitExpand(unit.category)">
-					<view class="feed-unit-head-main">
-						<view class="feed-mod-tag" :style="modTagStyle(unit.category)">
-							<text class="feed-mod-emoji">{{ modEmoji(unit.category) }}</text>
-							<text class="feed-mod-name">{{ unit.category }}</text>
-						</view>
-						<text class="feed-unit-idx">{{ unit.subtitle }}</text>
-						<text class="feed-unit-status" v-if="unit.passed">已过关</text>
-						<text class="feed-unit-status feed-unit-status--todo" v-else-if="isUnitExpanded(unit.category)">进行中</text>
-					</view>
-					<view class="feed-unit-toggle">
-						<text class="feed-unit-toggle-t">{{ isUnitExpanded(unit.category) ? '收起' : '展开' }}</text>
-						<text class="feed-unit-toggle-arrow" :class="{ 'is-open': isUnitExpanded(unit.category) }">›</text>
-					</view>
-				</view>
-
-				<block v-if="isUnitExpanded(unit.category)">
-				<view class="feed-learn" :style="learnBorderStyle(unit.category)">
-					<view class="feed-phase-row">
-						<text class="feed-phase feed-phase--learn">学习</text>
-						<text class="feed-phase-sub">后台配置 · {{ unit.articles.length }} 篇</text>
-					</view>
-					<block v-if="unit.articles && unit.articles.length">
-						<view class="feed-art-block" v-for="(art, aIdx) in unit.articles" :key="art.id">
-							<text class="feed-art-title">{{ art.title }}</text>
-							<image
-								v-if="art.image"
-								class="feed-learn-cover"
-								:src="art.image"
-								mode="widthFix"
-								lazy-load
-							></image>
-							<view class="feed-learn-body">
-								<rich-text :nodes="art.content || ''"></rich-text>
-							</view>
-							<view class="feed-art-divider" v-if="aIdx < unit.articles.length - 1"></view>
-						</view>
-					</block>
-					<view class="feed-learn-empty" v-else>
-						<text>该模块学习正文尚未配置</text>
-					</view>
-				</view>
-
-				<view class="feed-connector">
-					<view class="feed-connector-line"></view>
-					<text class="feed-connector-txt">↓ 考试</text>
-					<view class="feed-connector-line"></view>
-				</view>
-
-				<view class="feed-exam">
-					<view class="feed-phase-row">
-						<text class="feed-phase feed-phase--exam">考试</text>
-						<text class="feed-phase-sub" v-if="unit.passed">本模块已过关</text>
-						<text class="feed-phase-sub" v-else>{{ unitExamSub(unit) }}</text>
-					</view>
-
-					<view class="feed-exam-done" v-if="unit.passed">
-						<text class="feed-exam-done-txt">本模块测验已通过，可随时回看学习内容</text>
-					</view>
-
-					<view class="feed-exam-loading" v-else-if="quizLoadingMap[unit.category]">
-						<text>正在抽题...</text>
-					</view>
-
-					<block v-else-if="moduleQuestions(unit.category).length">
-						<view class="feed-q" v-for="(q, qIdx) in moduleQuestions(unit.category)" :key="q.id">
-							<text class="feed-q-title">{{ qIdx + 1 }}. {{ q.title }}</text>
-							<view
-								class="feed-opt"
-								v-for="(opt, optIdx) in questionOptions(q)"
-								:key="optIdx"
-								:class="optionClass(unit.category, qIdx, optIdx)"
-								@tap="onSelectOpt(uIdx, qIdx, optIdx)"
-							>
-								<text class="feed-opt-key">{{ opt.key }}</text>
-								<text class="feed-opt-text">{{ opt.text }}</text>
-							</view>
-						</view>
-						<view class="feed-fail" v-if="failHint(unit.category)">
-							<text>{{ failHint(unit.category) }}</text>
-						</view>
-						<view class="feed-submit" @tap="onSubmitModule(uIdx)">
-							<text>{{ submittingCat === unit.category ? '提交中...' : '提交本模块测验' }}</text>
-						</view>
-					</block>
-
-					<view class="feed-exam-empty" v-else>
-						<text v-if="(unit.pool_count || 0) < 1">该模块暂无题目，请联系管理员</text>
-						<text v-else>题目加载失败，请下拉刷新或稍后再试</text>
-					</view>
-				</view>
-				</block>
-				<view class="feed-unit-folded" v-else @tap="toggleUnitExpand(unit.category)">
-					<text class="feed-unit-folded-t">{{ unit.passed ? '本模块已过关，点击展开回看' : '点击展开学习与测验' }}</text>
+		<block v-else>
+			<view class="intro-video-wrap">
+				<video
+					v-if="videoUrl"
+					class="intro-video"
+					:src="videoUrl"
+					controls
+					show-center-play-btn
+					object-fit="contain"
+					:poster="posterUrl"
+				></video>
+				<view class="intro-video-ph" v-else>
+					<text>视频加载中，请稍后下拉刷新</text>
 				</view>
 			</view>
-			<view class="feed-footer-space"></view>
-		</view>
+
+			<view class="intro-progress" v-if="moduleCount">
+				<text class="intro-progress-label">{{ passed ? '已完成认识' : '完成小互动即可继续探索七贤岭' }}</text>
+				<view class="intro-progress-track">
+					<view class="intro-progress-fill" :style="{ width: progressWidth }"></view>
+				</view>
+			</view>
+
+			<view class="intro-done" v-if="passed">
+				<text class="intro-done-icon">✓</text>
+				<text class="intro-done-txt">您已完成「认识七贤岭」，可随时回看视频</text>
+			</view>
+
+			<view class="intro-quiz" v-else-if="questions.length">
+				<text class="intro-quiz-head">看完视频，点一点下面 3 个小问题</text>
+				<view class="intro-q" v-for="(q, qIdx) in questions" :key="q.id">
+					<text class="intro-q-title">{{ qIdx + 1 }}. {{ q.title }}</text>
+					<view
+						class="intro-opt"
+						v-for="(opt, optIdx) in questionOptions(q)"
+						:key="optIdx"
+						:class="optionClass(qIdx, optIdx)"
+						@tap="onSelectOpt(qIdx, optIdx)"
+					>
+						<text class="intro-opt-key">{{ opt.key }}</text>
+						<text class="intro-opt-text">{{ opt.text }}</text>
+					</view>
+				</view>
+				<view class="intro-fail" v-if="failHint">
+					<text>{{ failHint }}</text>
+				</view>
+				<view class="intro-submit" @tap="onSubmit">
+					<text>{{ submitting ? '提交中...' : '提交' }}</text>
+				</view>
+			</view>
+		</block>
 	</view>
 </template>
 
 <script>
-import { getModuleUi } from '@/common/qxlLearnModules.js'
 import settings from '@/common/settings.js'
 
-const QXL_LEARN_BANNER = settings.staticAssetBase + 'img/qxl-learn-banner.png'
+const INTRO_CATEGORY = '认识七贤岭'
+const POSTER = settings.staticAssetBase + 'img/qxl-learn-banner.png'
 
 export default {
 	data() {
 		return {
-			bannerUrl: QXL_LEARN_BANNER,
 			loading: true,
-			units: [],
+			pageTitle: '认识七贤岭',
+			pageSubtitle: '看视频，用几道小互动快速了解本地人文与地理',
+			videoUrl: '',
+			posterUrl: POSTER,
+			passed: false,
+			moduleCount: 1,
 			passedCount: 0,
-			moduleCount: 6,
-			drawCount: 3,
-			quizMap: {},
-			quizLoadingMap: {},
-			answersMap: {},
-			failMap: {},
-			submittingCat: '',
-			expandedMap: {},
+			questions: [],
+			answers: {},
+			failHint: '',
+			submitting: false,
 		}
 	},
 	computed: {
 		progressWidth() {
-			if (!this.moduleCount) return '0%'
-			return Math.min(100, Math.round((this.passedCount / this.moduleCount) * 100)) + '%'
+			if (this.passed) return '100%'
+			return '20%'
 		},
 	},
 	onShow() {
 		this.loadFeed()
 	},
 	methods: {
-		formatArticleContent(html) {
-			if (!html) return ''
-			let s = String(html)
-			if (s.indexOf('&lt;') !== -1 && s.indexOf('<') === -1) {
-				s = s
-					.replace(/&lt;/g, '<')
-					.replace(/&gt;/g, '>')
-					.replace(/&amp;/g, '&')
-					.replace(/&quot;/g, '"')
-					.replace(/&#39;/g, "'")
+		resolveUrl(raw) {
+			const s = (raw || '').trim()
+			if (!s) return ''
+			if (typeof this.$u !== 'undefined' && this.$u.func && typeof this.$u.func.resolveAssetUrl === 'function') {
+				return this.$u.func.resolveAssetUrl(s)
 			}
 			return s
 		},
-		moduleQuestions(category) {
-			return this.quizMap[category] || []
+		questionOptions(q) {
+			const keys = ['A', 'B', 'C', 'D']
+			const fields = ['option_a', 'option_b', 'option_c', 'option_d']
+			const list = []
+			fields.forEach((f, i) => {
+				const text = (q[f] || '').trim()
+				if (text) list.push({ key: keys[i], text })
+			})
+			return list
 		},
-		isUnitExpanded(category) {
-			return !!this.expandedMap[category]
+		optionClass(qIdx, optIdx) {
+			const sel = this.answers[qIdx]
+			if (sel === undefined) return ''
+			return sel === optIdx ? 'is-selected' : ''
 		},
-		unitExamSub(unit) {
-			const n = this.unitQuizDrawCount(unit)
-			if (n < 1) return '暂无测验题'
-			const pool = unit.pool_count || 0
-			if (pool > 0 && pool < (this.drawCount || 3)) {
-				return '共 ' + n + ' 题（题库 ' + pool + ' 题全出）· 未全对将重新抽题'
-			}
-			return '随机 ' + n + ' 题 · 未全对将重新抽题'
-		},
-		unitQuizDrawCount(unit) {
-			const qs = this.moduleQuestions(unit.category)
-			if (qs.length) return qs.length
-			const planned = unit.draw_count || 0
-			if (planned > 0) return planned
-			const pool = unit.pool_count || 0
-			const cap = this.drawCount || 3
-			return pool > 0 ? Math.min(cap, pool) : cap
-		},
-		modEmoji(category) {
-			return getModuleUi(category).emoji || '📖'
-		},
-		modTagStyle(category) {
-			const ui = getModuleUi(category)
-			return 'background:' + (ui.gradient || 'linear-gradient(145deg,#0f6e56,#1fa971)')
-		},
-		learnBorderStyle(category) {
-			const ui = getModuleUi(category)
-			return 'border-left-color:' + (ui.accent || '#0f6e56')
+		onSelectOpt(qIdx, optIdx) {
+			if (this.passed) return
+			this.$set(this.answers, qIdx, optIdx)
+			this.failHint = ''
 		},
 		loadFeed() {
 			this.loading = true
 			this.$u.api.getQxlLearnFeed().then(res => {
-				if (res.code == 1) {
-					const data = res.data || {}
-					this.units = (data.units || data.modules || []).map(u => ({
-						...u,
-						articles: (u.articles || []).map(a => ({
-							...a,
-							content: this.formatArticleContent(a.content),
-						})),
-					}))
-					this.passedCount = data.passed_count || 0
-					this.moduleCount = data.module_count || this.units.length || 6
-					this.drawCount = (this.units[0] && this.units[0].draw_count) || 3
-					this.quizMap = {}
-					this.answersMap = {}
-					this.failMap = {}
-					this.applyDefaultExpanded()
-					this.units.forEach(u => {
-						if (!u.passed && this.isUnitExpanded(u.category)) {
-							this.fetchModuleQuiz(u.category)
-						}
-					})
-				}
+				if (res.code != 1) return
+				const data = res.data || {}
+				this.pageTitle = data.title || this.pageTitle
+				this.pageSubtitle = data.subtitle || this.pageSubtitle
+				this.videoUrl = this.resolveUrl(data.video_url || '')
+				this.passed = !!(data.passed || data.all_passed)
+				this.passedCount = data.passed_count || (this.passed ? 1 : 0)
+				this.moduleCount = data.module_count || 1
+				this.questions = data.questions || []
+				this.answers = {}
+				this.failHint = ''
 			}).finally(() => {
 				this.loading = false
 			})
 		},
-		fetchModuleQuiz(category) {
-			if (!category) return
-			this.$set(this.quizLoadingMap, category, true)
-			this.$set(this.quizMap, category, [])
-			this.$set(this.answersMap, category, {})
-			this.$set(this.failMap, category, '')
-			this.$u.api.getQxlModuleQuiz({ category }).then(res => {
-				if (res.code == 1 && res.data) {
-					if (res.data.passed) {
-						this.refreshUnitPassed(category)
-					} else {
-						this.$set(this.quizMap, category, res.data.questions || [])
-						if (res.data.draw_count) {
-							const idx = this.units.findIndex(u => u.category === category)
-							if (idx >= 0) {
-								this.$set(this.units[idx], 'draw_count', res.data.draw_count)
-							}
-						}
-					}
-				}
-			}).catch(err => {
-				uni.showToast({ title: (err && err.msg) || '抽题失败', icon: 'none' })
-			}).finally(() => {
-				this.$set(this.quizLoadingMap, category, false)
-			})
-		},
-		refreshUnitPassed(category) {
-			const idx = this.units.findIndex(u => u.category === category)
-			if (idx >= 0) {
-				this.$set(this.units[idx], 'passed', 1)
+		buildAnswerPayload() {
+			const keys = ['A', 'B', 'C', 'D']
+			const payload = []
+			for (let i = 0; i < this.questions.length; i++) {
+				const q = this.questions[i]
+				const optIdx = this.answers[i]
+				if (optIdx === undefined) return null
+				payload.push({
+					qid: q.id,
+					answer: keys[optIdx] || '',
+				})
 			}
+			return payload
 		},
-		applyDefaultExpanded() {
-			const map = {}
-			let firstTodo = -1
-			for (let i = 0; i < (this.units || []).length; i++) {
-				if (!this.units[i].passed) {
-					firstTodo = i
-					break
-				}
+		onSubmit() {
+			if (this.submitting || this.passed) return
+			const answers = this.buildAnswerPayload()
+			if (!answers || answers.length < this.questions.length) {
+				this.$u.toast('请先答完全部题目')
+				return
 			}
-			for (let j = 0; j < (this.units || []).length; j++) {
-				const cat = this.units[j].category
-				map[cat] = j === firstTodo
-			}
-			this.expandedMap = map
-		},
-		toggleUnitExpand(category) {
-			if (!category) return
-			const next = !this.isUnitExpanded(category)
-			this.$set(this.expandedMap, category, next)
-			if (next) {
-				const unit = (this.units || []).find(u => u.category === category)
-				if (
-					unit &&
-					!unit.passed &&
-					!this.moduleQuestions(category).length &&
-					!this.quizLoadingMap[category]
-				) {
-					this.fetchModuleQuiz(category)
-				}
-			}
-		},
-		questionOptions(q) {
-			const list = []
-			if (q.option_a) list.push({ key: 'A', text: q.option_a })
-			if (q.option_b) list.push({ key: 'B', text: q.option_b })
-			if (q.option_c) list.push({ key: 'C', text: q.option_c })
-			if (q.option_d) list.push({ key: 'D', text: q.option_d })
-			return list
-		},
-		unitAnswers(category) {
-			return this.answersMap[category] || {}
-		},
-		optionClass(category, qIdx, optIdx) {
-			const questions = this.moduleQuestions(category)
-			const q = questions[qIdx]
-			if (!q) return ''
-			const opts = this.questionOptions(q)
-			const opt = opts[optIdx]
-			if (!opt) return ''
-			const picked = this.unitAnswers(category)[q.id]
-			return picked === opt.key ? 'is-on' : ''
-		},
-		onSelectOpt(uIdx, qIdx, optIdx) {
-			const unit = (this.units || [])[uIdx]
-			if (!unit || unit.passed) return
-			const questions = this.moduleQuestions(unit.category)
-			const q = questions[qIdx]
-			if (!q) return
-			const opts = this.questionOptions(q)
-			const opt = opts[optIdx]
-			if (!opt) return
-			if (!this.answersMap[unit.category]) {
-				this.$set(this.answersMap, unit.category, {})
-			}
-			this.$set(this.answersMap[unit.category], q.id, opt.key)
-		},
-		failHint(category) {
-			return this.failMap[category] || ''
-		},
-		onSubmitModule(uIdx) {
-			const unit = (this.units || [])[uIdx]
-			if (!unit || unit.passed || this.submittingCat) return
-			const category = unit.category
-			const questions = this.moduleQuestions(category)
-			const picked = this.unitAnswers(category)
-			for (let i = 0; i < questions.length; i++) {
-				if (!picked[questions[i].id]) {
-					uni.showToast({ title: '请答完第' + (i + 1) + '题', icon: 'none' })
-					return
-				}
-			}
-			if (!this.$u.func.checkLogin()) return
-
-			const answers = questions.map(q => ({
-				qid: q.id,
-				answer: picked[q.id],
-			}))
-			this.submittingCat = category
+			this.submitting = true
+			this.failHint = ''
 			this.$u.api.submitQxlModuleQuiz({
-				category,
+				category: INTRO_CATEGORY,
 				answers,
 			}).then(res => {
-				this.submittingCat = ''
 				if (res.code != 1) {
-					uni.showToast({ title: res.msg || '提交失败', icon: 'none' })
+					this.$u.toast(res.msg || '提交失败')
 					return
 				}
-				const data = res.data || {}
-				if (data.passed) {
-					this.$set(this.failMap, category, '')
-					let msg = '本模块已过关'
-					if (data.point > 0) msg = '过关 +' + data.point + '积分'
-					uni.showToast({ title: msg, icon: 'success' })
-					this.loadFeed()
+				const d = res.data || {}
+				if (d.passed) {
+					this.passed = true
+					this.passedCount = 1
+					this.questions = []
+					if (d.point > 0) {
+						this.$u.toast('完成啦，获得' + d.point + '积分')
+					} else {
+						this.$u.toast('认识七贤岭已完成')
+					}
 				} else {
-					const wrong = (data.total_count || 0) - (data.correct_count || 0)
-					this.$set(
-						this.failMap,
-						category,
-						'答对 ' + data.correct_count + '/' + data.total_count + (wrong > 0 ? '，已为你换一批新题' : '')
-					)
-					uni.showToast({ title: '尚未全部答对', icon: 'none' })
-					this.fetchModuleQuiz(category)
+					this.failHint = res.msg || '还有题目没选对，请结合视频再试'
+					this.answers = {}
 				}
-			}).catch(err => {
-				this.submittingCat = ''
-				const msg = err && err.msg
-				if (msg === '用户不存在') {
-					this.$u.func.checkLogin()
-					return
-				}
-				uni.showToast({ title: msg || '网络错误', icon: 'none' })
+			}).catch(() => {
+				this.$u.toast('提交失败，请稍后再试')
+			}).finally(() => {
+				this.submitting = false
 			})
 		},
 	},
@@ -394,348 +199,210 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.feed-page {
+$green: #0f6e56;
+$green-mid: #1fa971;
+
+.intro-page {
 	min-height: 100vh;
-	background: #e8efeb;
+	background: #eef3f0;
+	padding: 24rpx 24rpx 80rpx;
+	box-sizing: border-box;
 }
-.feed-banner {
-	position: relative;
-	width: 100%;
-	overflow: hidden;
-	background: #0f6e56;
+
+.intro-head {
+	padding: 8rpx 8rpx 24rpx;
 }
-.feed-banner-img {
-	width: 100%;
+.intro-title {
 	display: block;
-	vertical-align: top;
-}
-.feed-progress-card {
-	margin: -16rpx 20rpx 0;
-	padding: 22rpx 24rpx 20rpx;
-	position: relative;
-	z-index: 4;
-	background: #fff;
-	border-radius: 20rpx;
-	box-shadow: 0 10rpx 28rpx rgba(15, 110, 86, 0.1);
-	border: 1rpx solid #dceee4;
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 12rpx 16rpx;
-}
-.feed-progress-label {
-	font-size: 26rpx;
-	font-weight: 700;
-	color: #16332b;
-}
-.feed-progress-num {
-	font-size: 28rpx;
+	font-size: 40rpx;
 	font-weight: 800;
-	color: #0f6e56;
-	margin-left: auto;
+	color: #1a2e28;
+	line-height: 1.35;
 }
-.feed-progress-track {
+.intro-sub {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 26rpx;
+	color: #5a6b63;
+	line-height: 1.55;
+}
+
+.intro-loading {
+	padding: 120rpx 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 24rpx;
+}
+.intro-loading-txt {
+	font-size: 26rpx;
+	color: #5a6b63;
+}
+
+.intro-video-wrap {
+	background: #000;
+	border-radius: 20rpx;
+	overflow: hidden;
+	box-shadow: 0 8rpx 28rpx rgba(15, 110, 86, 0.12);
+}
+.intro-video {
 	width: 100%;
+	height: 420rpx;
+	display: block;
+}
+.intro-video-ph {
+	height: 420rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 32rpx;
+	text-align: center;
+	font-size: 26rpx;
+	color: #ccc;
+}
+
+.intro-progress {
+	margin-top: 28rpx;
+	padding: 24rpx;
+	background: #fff;
+	border-radius: 16rpx;
+	border: 1rpx solid #c5e8d8;
+}
+.intro-progress-label {
+	font-size: 24rpx;
+	color: #5a6b63;
+	display: block;
+	margin-bottom: 16rpx;
+}
+.intro-progress-track {
 	height: 12rpx;
 	border-radius: 12rpx;
-	background: #e8f0ec;
+	background: rgba(15, 110, 86, 0.12);
 	overflow: hidden;
 }
-.feed-progress-fill {
+.intro-progress-fill {
 	height: 100%;
 	border-radius: 12rpx;
-	background: linear-gradient(90deg, #0f6e56, #1fa971);
+	background: linear-gradient(90deg, $green, $green-mid);
+	transition: width 0.3s ease;
 }
 
-.feed-loading,
-.feed-empty {
-	padding: 80rpx 0;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 16rpx;
-}
-.feed-loading-txt,
-.feed-empty-txt {
-	font-size: 26rpx;
-	color: #6b7c75;
-}
-
-.feed-stream {
-	margin-top: 20rpx;
-	padding: 0 20rpx;
-	position: relative;
-	z-index: 3;
-}
-.feed-unit {
-	margin-bottom: 36rpx;
-}
-.feed-unit-head {
+.intro-done {
+	margin-top: 28rpx;
+	padding: 32rpx 28rpx;
+	background: #e8f5ef;
+	border-radius: 16rpx;
+	border: 1rpx solid #c5e8d8;
 	display: flex;
 	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
+	align-items: flex-start;
 	gap: 16rpx;
-	margin-bottom: 16rpx;
-	padding: 16rpx 12rpx;
+}
+.intro-done-icon {
+	font-size: 36rpx;
+	color: $green;
+	font-weight: 700;
+}
+.intro-done-txt {
+	flex: 1;
+	font-size: 28rpx;
+	color: #1a2e28;
+	line-height: 1.5;
+}
+
+.intro-quiz {
+	margin-top: 28rpx;
+	padding: 28rpx 24rpx 32rpx;
 	background: #fff;
 	border-radius: 20rpx;
-	border: 1rpx solid #dceee4;
-	box-shadow: 0 8rpx 20rpx rgba(15, 110, 86, 0.06);
+	border: 1rpx solid #e4e6eb;
 }
-.feed-unit-head--press {
-	opacity: 0.92;
-}
-.feed-unit-head-main {
-	flex: 1;
-	min-width: 0;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	gap: 10rpx;
-}
-.feed-unit-status {
-	font-size: 22rpx;
+.intro-quiz-head {
+	display: block;
+	font-size: 28rpx;
 	font-weight: 700;
-	color: #0f6e56;
+	color: #1a2e28;
+	margin-bottom: 24rpx;
 }
-.feed-unit-status--todo {
-	color: #9a6700;
+
+.intro-q {
+	margin-bottom: 32rpx;
 }
-.feed-unit-toggle {
-	flex-shrink: 0;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 4rpx;
-}
-.feed-unit-toggle-t {
-	font-size: 24rpx;
-	color: #6b7c75;
+.intro-q-title {
+	display: block;
+	font-size: 28rpx;
 	font-weight: 600;
-}
-.feed-unit-toggle-arrow {
-	font-size: 36rpx;
-	color: #0f6e56;
-	line-height: 1;
-	transform: rotate(90deg);
-	transition: transform 0.2s ease;
-}
-.feed-unit-toggle-arrow.is-open {
-	transform: rotate(-90deg);
-}
-.feed-unit-folded {
-	margin-bottom: 8rpx;
-	padding: 20rpx 24rpx;
-	border-radius: 16rpx;
-	background: #f3f8f5;
-	border: 1rpx dashed #c5e8d8;
-}
-.feed-unit-folded-t {
-	font-size: 24rpx;
-	color: #6b7c75;
-}
-.feed-mod-tag {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 10rpx;
-	padding: 10rpx 22rpx;
-	border-radius: 999rpx;
-	box-shadow: 0 8rpx 20rpx rgba(15, 110, 86, 0.2);
-}
-.feed-mod-emoji {
-	font-size: 28rpx;
-}
-.feed-mod-name {
-	font-size: 26rpx;
-	font-weight: 800;
-	color: #fff;
-}
-.feed-unit-idx {
-	font-size: 22rpx;
-	color: #8a9691;
+	color: #1a2e28;
+	line-height: 1.45;
+	margin-bottom: 16rpx;
 }
 
-.feed-learn {
-	background: #fff;
-	border-radius: 24rpx;
-	border-left: 8rpx solid #0f6e56;
-	box-shadow: 0 16rpx 40rpx rgba(15, 110, 86, 0.08);
-	overflow: hidden;
-}
-.feed-phase-row {
+.intro-opt {
 	display: flex;
 	flex-direction: row;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 12rpx;
-	padding: 24rpx 24rpx 12rpx;
-}
-.feed-phase {
-	font-size: 22rpx;
-	font-weight: 800;
-	padding: 6rpx 16rpx;
-	border-radius: 8rpx;
-}
-.feed-phase--learn {
-	color: #9a6700;
-	background: #fff8e6;
-	border: 1rpx solid #ffe4a8;
-}
-.feed-phase--exam {
-	color: #fff;
-	background: linear-gradient(90deg, #0f6e56, #1fa971);
-}
-.feed-phase-sub {
-	font-size: 22rpx;
-	color: #6b7c75;
-}
-.feed-art-block {
-	padding-bottom: 8rpx;
-}
-.feed-art-title {
-	display: block;
-	padding: 0 28rpx 12rpx;
-	font-size: 30rpx;
-	font-weight: 700;
-	color: #16332b;
-}
-.feed-learn-cover {
-	width: 100%;
-	display: block;
-	background: #eef3f0;
-}
-.feed-learn-body {
-	padding: 8rpx 28rpx 20rpx;
-	font-size: 28rpx;
-	color: #2c3d37;
-	line-height: 1.85;
-}
-.feed-art-divider {
-	height: 1rpx;
-	margin: 8rpx 28rpx 16rpx;
-	background: linear-gradient(90deg, transparent, #dceee4, transparent);
-}
-.feed-learn-empty {
-	padding: 24rpx 28rpx 32rpx;
-	color: #8a9691;
-	font-size: 24rpx;
-}
-
-.feed-connector {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
+	align-items: flex-start;
 	gap: 16rpx;
-	padding: 16rpx 0;
-}
-.feed-connector-line {
-	flex: 1;
-	height: 2rpx;
-	background: linear-gradient(90deg, transparent, #b7e0cb, transparent);
-}
-.feed-connector-txt {
-	font-size: 22rpx;
-	color: #0f6e56;
-	font-weight: 700;
-}
-
-.feed-exam {
-	background: linear-gradient(180deg, #f7fbf9 0%, #ffffff 100%);
-	border-radius: 24rpx;
-	border: 2rpx solid #c5e8d8;
-	box-shadow: 0 12rpx 32rpx rgba(15, 110, 86, 0.06);
-	padding-bottom: 24rpx;
-}
-.feed-exam-done,
-.feed-exam-loading {
-	margin: 0 24rpx 24rpx;
-	padding: 24rpx;
-	text-align: center;
-	background: #e8f7ee;
-	border-radius: 16rpx;
-	color: #0f6e56;
-	font-size: 26rpx;
-}
-.feed-exam-empty {
-	padding: 24rpx;
-	text-align: center;
-	color: #8a9691;
-	font-size: 24rpx;
-}
-.feed-q {
-	padding: 0 24rpx 8rpx;
-}
-.feed-q-title {
-	display: block;
-	font-size: 28rpx;
-	font-weight: 700;
-	color: #16332b;
-	line-height: 1.55;
-	margin: 16rpx 0 12rpx;
-}
-.feed-opt {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 16rpx;
-	padding: 20rpx 18rpx;
+	padding: 22rpx 20rpx;
 	margin-bottom: 12rpx;
-	border-radius: 16rpx;
-	background: #fff;
-	border: 2rpx solid #e4ebe7;
+	border-radius: 14rpx;
+	border: 2rpx solid #e8ece9;
+	background: #fafbfa;
 }
-.feed-opt.is-on {
-	border-color: #0f6e56;
-	background: #eaf7f0;
+.intro-opt.is-selected {
+	border-color: $green;
+	background: #e8f5ef;
 }
-.feed-opt-key {
-	width: 48rpx;
-	height: 48rpx;
+.intro-opt-key {
+	width: 44rpx;
+	height: 44rpx;
 	border-radius: 50%;
-	background: #eef3f0;
-	color: #0f6e56;
+	background: #fff;
+	border: 2rpx solid #c5e8d8;
 	font-size: 24rpx;
-	font-weight: 800;
+	font-weight: 700;
+	color: $green;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
 }
-.feed-opt.is-on .feed-opt-key {
-	background: #0f6e56;
+.intro-opt.is-selected .intro-opt-key {
+	background: $green;
 	color: #fff;
+	border-color: $green;
 }
-.feed-opt-text {
+.intro-opt-text {
 	flex: 1;
 	font-size: 26rpx;
-	color: #2c3d37;
+	color: #3d524a;
+	line-height: 1.5;
+	padding-top: 4rpx;
+}
+
+.intro-fail {
+	margin-bottom: 16rpx;
+	padding: 16rpx 20rpx;
+	background: #fff5f5;
+	border-radius: 12rpx;
+	font-size: 24rpx;
+	color: #c0392b;
 	line-height: 1.45;
 }
-.feed-fail {
-	margin: 8rpx 24rpx 16rpx;
-	padding: 16rpx 18rpx;
-	border-radius: 12rpx;
-	background: #fff4e8;
-	color: #b36b00;
-	font-size: 24rpx;
-}
-.feed-submit {
-	margin: 8rpx 24rpx 0;
+
+.intro-submit {
+	margin-top: 8rpx;
 	height: 88rpx;
 	border-radius: 44rpx;
-	background: linear-gradient(90deg, #0f6e56, #1fa971);
+	background: linear-gradient(90deg, $green, $green-mid);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	color: #fff;
 	font-size: 30rpx;
 	font-weight: 700;
+	box-shadow: 0 8rpx 20rpx rgba(15, 110, 86, 0.22);
 }
-.feed-footer-space {
-	height: 48rpx;
+.intro-submit:active {
+	opacity: 0.92;
 }
 </style>
