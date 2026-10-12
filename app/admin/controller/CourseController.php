@@ -292,48 +292,52 @@ class CourseController extends AdminBaseController
         $map = [];
         if($shop_id)  $map[] = ['shop_id','=',$shop_id];
         if($exam_id)  $map[] = ['exam_id','=',$exam_id];
-        if(!empty($keyword)) $map[] = ['c.title|b.true_name|b.nickname|b.mobile','like',"%$keyword%"];
+        if (!empty($keyword)) {
+            $map[] = ['b.true_name|b.nickname|b.mobile', 'like', "%{$keyword}%"];
+        }
         //题目
         $QuestionModel = new QuestionModel();
         $where = [];
-        $where[] = ['pid','=',$exam_id];
-        $where[] = ['status','=',1];
-        $q_list = $QuestionModel->where($where)->select();
+        $where[] = ['pid', '=', $exam_id];
+        $where[] = ['status', '=', 1];
+        $q_list = $QuestionModel->where($where)->order('list_order asc,id asc')->select();
         $answer_arr = [];
-        foreach ($q_list as $v){
-            $answer_arr[] = 'answer'.$v['id'].'_status_name';
+        $q_head = [];
+        foreach ($q_list as $v) {
+            $answer_arr[] = 'answer' . $v['id'] . '_status_name';
+            $q_head[] = strip_tags(htmlspecialchars_decode((string)$v['title']));
         }
         $AnswerLogModel = new AnswerLogModel();
-        $answer_status_name = [1=>'正确',2=>'错误',3=>'未回答'];
-        $list = $Model->getInfo($map,-1);
-        foreach ($list as &$item){
-            $item['create_time'] = date('Y-m-d H:i:s',$item['create_time']);
+        $answer_status_name = [1 => '正确', 2 => '错误', 3 => '未回答'];
+        $list = $Model->getInfo($map, -1);
+        if ($list->isEmpty()) {
+            $this->error('暂无数据可导出');
+        }
+        foreach ($list as &$item) {
+            $item['create_time'] = date('Y-m-d H:i:s', $item['create_time']);
 
-            foreach ($q_list as $value){
-                //答案
-                $map = [];
-                $map[] = ['answer_id','=',$item['id']];
-                $map[] = ['q_id','=',$value['id']];
-                $is = $AnswerLogModel->where($map)->find();
-                if(!empty($is)){
-                    $item['answer'.$value['id'].'_status_name'] = $answer_status_name[$is['answer_status']];
-                }else{
-                    $item['answer'.$value['id'].'_status_name'] = '错误';
+            foreach ($q_list as $value) {
+                $logMap = [];
+                $logMap[] = ['answer_id', '=', $item['id']];
+                $logMap[] = ['q_id', '=', $value['id']];
+                $is = $AnswerLogModel->where($logMap)->find();
+                if (!empty($is)) {
+                    $item['answer' . $value['id'] . '_status_name'] = $answer_status_name[$is['answer_status']] ?? '错误';
+                } else {
+                    $item['answer' . $value['id'] . '_status_name'] = '错误';
                 }
             }
         }
-        $filename = '答题列表'.date('Y-m-d');
+        unset($item);
+        $problemName = $list[0]['problem_name'] ?? '';
+        $filename = '答题记录' . ($problemName ? '_' . $problemName : '') . '_' . date('Y-m-d');
 
+        $head = ['ID', '昵称', '姓名', '手机号', '考试名称', '答题数', '得分', '答题时间'];
+        $head = array_merge($head, $q_head);
 
-        $title = $QuestionModel->where($where)->column('title');
-
-        $head = ['ID','昵称','姓名','手机号','备注','门店','视频名称','答题数','正确数','答题时间'];//设置表头
-
-        $head = array_merge($head,$title);
-
-        $keys = ['id','nickname','true_name','mobile','remark','shop_name','title','total_num','right_num','create_time'];//设置表头
-        $keys = array_merge($keys,$answer_arr);
-        CommonModel::outData($filename,$list,$head,$keys);
+        $keys = ['id', 'nickname', 'true_name', 'mobile', 'problem_name', 'total_num', 'score', 'create_time'];
+        $keys = array_merge($keys, $answer_arr);
+        CommonModel::outData($filename, $list, $head, $keys);
     }
 
     public function answerLog(){
