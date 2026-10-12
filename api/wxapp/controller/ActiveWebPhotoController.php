@@ -34,8 +34,10 @@ class ActiveWebPhotoController extends AuthController
     protected function buildShareUrls(int $activeId, string $shareToken, string $page, array $extraQuery = []): array
     {
         $base = rtrim(cmf_get_domain(), '/');
+        $webUrl = (string)ActiveModel::where('id', $activeId)->value('web_url');
+        $indexPath = ActiveWebPhotoService::h5IndexPathFromWebUrl($webUrl);
         $q = array_merge(['active_id' => $activeId, 'share' => $shareToken], $extraQuery);
-        $h5 = $base . '/static/mp-active-web/qxl-photo-share/index.html?' . http_build_query($q) . $page;
+        $h5 = $base . $indexPath . '?' . http_build_query($q) . $page;
         $mp = '/pages/h5/h5?url=' . rawurlencode($h5);
         return ['h5_url' => $h5, 'mp_path' => $mp];
     }
@@ -72,9 +74,34 @@ class ActiveWebPhotoController extends AuthController
             }
         }
 
+        $contentRaw = (string)($active['content'] ?? '');
+        if ($contentRaw !== '' && strpos($contentRaw, '&lt;') !== false) {
+            $contentRaw = htmlspecialchars_decode($contentRaw, ENT_QUOTES);
+        }
+        if ($contentRaw !== '' && function_exists('cmf_replace_content_file_url')) {
+            $contentRaw = cmf_replace_content_file_url($contentRaw);
+        }
+        $clockEnd = (int)($active['clock_end_time'] ?? 0);
+        if ($clockEnd <= 0) {
+            $clockEnd = (int)($active['date'] ?? 0);
+        }
+
         $this->success('请求成功', [
             'active_name' => (string)$active['name'],
+            'intro_html' => $contentRaw,
+            'address' => (string)($active['address'] ?? ''),
+            'contact_phone' => (string)($active['phone'] ?? ''),
+            'end_time' => $clockEnd,
+            'end_time_text' => $clockEnd > 0 ? date('Y-m-d', $clockEnd) : '',
             'categories' => ActiveWebPhotoService::categoryLabels(),
+            'rewards' => [
+                'approve_point' => ActiveWebPhotoService::POINT_ON_APPROVE,
+                'max_upload_per_day' => ActiveWebPhotoService::MAX_UPLOAD_PER_DAY,
+                'max_points_per_day' => ActiveWebPhotoService::MAX_POINTS_PER_DAY,
+                'bonus_like_threshold' => ActiveWebPhotoService::BONUS_LIKE_THRESHOLD,
+                'bonus_like_points' => ActiveWebPhotoService::BONUS_LIKE_POINTS,
+                'badge_approved_count' => ActiveWebPhotoService::BADGE_APPROVED_COUNT,
+            ],
             'limits' => [
                 'max_upload_per_day' => ActiveWebPhotoService::MAX_UPLOAD_PER_DAY,
                 'max_points_per_day' => ActiveWebPhotoService::MAX_POINTS_PER_DAY,

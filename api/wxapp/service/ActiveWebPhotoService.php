@@ -56,6 +56,21 @@ class ActiveWebPhotoService
         return $active->toArray();
     }
 
+    /** 从活动 web_url 解析 H5 入口 path（分享链接用） */
+    public static function h5IndexPathFromWebUrl(string $webUrl): string
+    {
+        $default = '/static/mp-active-web/qxl-photo-share/index.html';
+        $webUrl = trim($webUrl);
+        if ($webUrl === '') {
+            return $default;
+        }
+        $path = parse_url($webUrl, PHP_URL_PATH);
+        if (is_string($path) && $path !== '' && strpos($path, '/static/mp-active-web/') !== false) {
+            return $path;
+        }
+        return $default;
+    }
+
     public static function todayStart(): int
     {
         return strtotime(date('Y-m-d 00:00:00'));
