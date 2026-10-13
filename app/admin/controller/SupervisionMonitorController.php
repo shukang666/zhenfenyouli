@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use api\wxapp\model\CommonModel;
 use app\common\SupervisionMonitorPhotos;
 use cmf\controller\AdminBaseController;
 use think\facade\Db;
@@ -121,12 +122,10 @@ class SupervisionMonitorController extends AdminBaseController
     }
 
     /**
-     * 导出（与 index 筛选一致；流式 CSV：先响应下载，逐行追加；照片列为可访问 URL，不拉图嵌入）
+     * 导出 xlsx：照片嵌入单元格（与商户打卡导出一致）；游标逐行拉图，避免先拼全量 CSV
      */
     public function outData()
     {
-        @set_time_limit(0);
-        @ini_set('memory_limit', '128M');
         if (function_exists('session_write_close')) {
             session_write_close();
         }
@@ -143,69 +142,35 @@ class SupervisionMonitorController extends AdminBaseController
         $head = ['ID', '提交人', '手机号', '所属社区', '单位名称', '单位类型', '检查日期', '地址', '联系人', '联系电话',
             '是否产生厨余垃圾', '厨余垃圾是否正确分出', '厨余垃圾流向', '内部环境是否合格', '是否需要整改',
             '投放点是否合格', '点位管理是否合格', '总体评价', '提交时间'];
-        foreach ($photoFields as $label) {
-            $head[] = $label;
+        $keys = ['id', 'display_submitter', 'mobile', 'community_name', 'unit_name', 'unit_type_name', 'check_date', 'address',
+            'contact', 'contact_phone', 'yes_no_has_waste', 'yes_no_waste_correct', 'waste_flow', 'yes_no_inner_qualified',
+            'yes_no_need_rectify', 'yes_no_point_qualified', 'yes_no_manage_qualified', 'overall_evaluation', 'create_time'];
+        $types = array_fill(0, count($head), '1');
+
+        foreach (array_keys($photoFields) as $field) {
+            $head[] = $photoFields[$field];
+            $keys[] = $field;
+            $types[] = '2';
         }
 
-        $filename = '督导监测' . date('Y-m-d');
-        if (ob_get_level()) {
-            ob_end_clean();
-        }
-        header('Content-Type: text/csv; charset=UTF-8');
-        $encodedName = rawurlencode($filename . '.csv');
-        header('Content-Disposition: attachment; filename="supervision_monitor.csv"; filename*=UTF-8\'\'' . $encodedName);
-        header('Cache-Control: max-age=0');
-        header('X-Accel-Buffering: no');
-
-        $fp = fopen('php://output', 'w');
-        fwrite($fp, "\xEF\xBB\xBF");
-        fputcsv($fp, $head);
-
+        $image_array = [];
+        $list = [];
         $cursor = $this->exportBaseQuery()
             ->where($where)
             ->order('r.id desc')
             ->cursor();
 
-        $rowNum = 0;
         foreach ($cursor as $row) {
             $rowArr = (array) $row;
             $item = $this->mapExportRow($rowArr, $unit_type_list);
-            $line = [
-                $item['id'],
-                $item['display_submitter'],
-                $item['mobile'],
-                $item['community_name'],
-                $item['unit_name'],
-                $item['unit_type_name'],
-                $item['check_date'],
-                $item['address'],
-                $item['contact'],
-                $item['contact_phone'],
-                $item['yes_no_has_waste'],
-                $item['yes_no_waste_correct'],
-                $item['waste_flow'],
-                $item['yes_no_inner_qualified'],
-                $item['yes_no_need_rectify'],
-                $item['yes_no_point_qualified'],
-                $item['yes_no_manage_qualified'],
-                $item['overall_evaluation'],
-                $item['create_time'],
-            ];
             foreach (array_keys($photoFields) as $field) {
-                $line[] = $this->formatPhotoUrlsForExport($rowArr[$field] ?? '');
+                $item[$field] = $this->prepareExportPhotoCell($rowArr[$field] ?? '', $image_array);
             }
-            fputcsv($fp, $line);
-            $rowNum++;
-            if ($rowNum % 200 === 0) {
-                fflush($fp);
-                if (function_exists('flush')) {
-                    flush();
-                }
-            }
+            $list[] = $item;
         }
 
-        fclose($fp);
-        exit;
+        $filename = '督导监测' . date('Y-m-d');
+        CommonModel::outData($filename, $list, $head, $keys, $types, $image_array);
     }
 
     /**
@@ -244,19 +209,94 @@ class SupervisionMonitorController extends AdminBaseController
         ];
     }
 
-    /** 多图时用换行分隔，Excel 打开 CSV 后单元格内可分行显示 */
-    private function formatPhotoUrlsForExport($stored): string
+    /**
+     * 多图字段取首张写入 Excel；其余张在详情页查看
+     *
+     * @return string 供 PhpSpreadsheet Drawing 使用的本地相对路径，失败返回空
+     */
+    private function prepareExportPhotoCell($stored, array &$image_array): string
     {
         $paths = SupervisionMonitorPhotos::urlsFromStored($stored);
         if ($paths === []) {
             return '';
         }
-        $full = [];
-        foreach ($paths as $path) {
-            $full[] = cmf_get_image_preview_url($path);
+
+        $local = $this->resolveStoredImageToLocalFile($paths[0]);
+        if ($local === '') {
+            return '';
+        }
+        if (!in_array($local, $image_array, true)) {
+            $image_array[] = $local;
         }
 
-        return implode("\n", $full);
+        return $local;
+    }
+
+    private function resolveStoredImageToLocalFile(string $storedPath): string
+    {
+        $storedPath = trim($storedPath);
+        if ($storedPath === '') {
+            return '';
+        }
+
+        if (!preg_match('#^https?://#i', $storedPath)) {
+            $root = defined('CMF_ROOT') ? CMF_ROOT : root_path();
+            foreach ([
+                $root . 'public/upload/' . ltrim($storedPath, '/'),
+                $root . 'public/' . ltrim($storedPath, '/'),
+                $root . ltrim($storedPath, '/'),
+            ] as $abs) {
+                if (is_file($abs)) {
+                    return $this->copyImageToExportTemp($abs, $storedPath);
+                }
+            }
+        }
+
+        $url = preg_match('#^https?://#i', $storedPath) ? $storedPath : cmf_get_asset_url($storedPath);
+        $ctx = stream_context_create([
+            'http' => ['timeout' => 20, 'follow_location' => 1],
+            'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false],
+        ]);
+        $bin = @file_get_contents($url, false, $ctx);
+        if ($bin === false || $bin === '') {
+            return '';
+        }
+
+        return $this->writeExportTempBinary($bin, $storedPath, $url);
+    }
+
+    private function copyImageToExportTemp(string $absPath, string $hintPath): string
+    {
+        $bin = @file_get_contents($absPath);
+        if ($bin === false || $bin === '') {
+            return '';
+        }
+
+        return $this->writeExportTempBinary($bin, $hintPath, $absPath);
+    }
+
+    private function writeExportTempBinary(string $bin, string $hintPath, string $cacheKey): string
+    {
+        $ext = '.jpg';
+        if (preg_match('/\.(png|jpe?g|gif|webp)(\?|#|$)/i', $hintPath, $m)) {
+            $ext = '.' . strtolower($m[1]);
+            if ($ext === '.jpeg') {
+                $ext = '.jpg';
+            }
+        }
+        $rel = 'upload/file/sm_exp_' . md5($cacheKey) . $ext;
+        if (is_file($rel) && filesize($rel) > 0) {
+            return $rel;
+        }
+        $dir = dirname($rel);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        if (@file_put_contents($rel, $bin) === false) {
+            return '';
+        }
+
+        return $rel;
     }
 
     private function mapExportRow(array $item, array $unit_type_list): array
