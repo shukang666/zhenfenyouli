@@ -12,21 +12,28 @@
 		
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="mall"></skeleton-screen>
-		<u-navbar title-color="#fff" :is-back="false" background="transparent" :borderBottom="false">
-			<view class="points-nav">
-				<text class="points-nav__title">积分权益</text>
-			</view>
-			<view slot="right" class="points-nav__actions">
-				<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goPointsLog">
-					<u-icon name="order" size="40" color="#2d4a3e"></u-icon>
+		<view class="mall-top">
+			<u-navbar
+				title-color="#1d1d1f"
+				:is-back="false"
+				:is-fixed="false"
+				:immersive="false"
+				:border-bottom="false"
+				:background="{ background: '#e4e8e5' }"
+			>
+				<view class="points-nav">
+					<text class="points-nav__title">积分权益</text>
 				</view>
-				<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goCart">
-					<u-icon name="shopping-cart" size="40" color="#2d4a3e"></u-icon>
+				<view slot="right" class="points-nav__actions">
+					<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goPointsLog">
+						<u-icon name="order" size="40" color="#2d4a3e"></u-icon>
+					</view>
+					<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goCart">
+						<u-icon name="shopping-cart" size="40" color="#2d4a3e"></u-icon>
+					</view>
 				</view>
-			</view>
-		</u-navbar>
-		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
-		<view class="mall-body glass-page__content">
+			</u-navbar>
+			<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			<view class="points-hub" id="guide-mall-points">
 				<view class="points-hub__card">
 					<text class="points-hub__label">我的可用积分</text>
@@ -43,6 +50,8 @@
 					</view>
 				</view>
 			</view>
+		</view>
+		<view class="mall-body glass-page__content">
 			<view class="u-p-30 mall-body-inner">
 			<view class="mall-search-wrap glass-search" id="guide-mall-search">
 				<u-search
@@ -463,8 +472,16 @@
 		position: relative;
 	}
 
+	.mall-top {
+		position: relative;
+		z-index: 2;
+		background: #e4e8e5;
+		padding-bottom: 4rpx;
+	}
+
 	.mall-body {
 		position: relative;
+		z-index: 1;
 	}
 
 	.mall-body-inner {
@@ -506,7 +523,7 @@
 	}
 
 	.points-hub {
-		padding: 8rpx 30rpx 24rpx;
+		padding: 0 30rpx 20rpx;
 	}
 
 	.points-hub__card {
@@ -582,10 +599,8 @@
 
 	.mall-search-wrap {
 		position: relative;
-		z-index: 4;
-		padding: 12rpx 8rpx 28rpx;
+		padding: 4rpx 8rpx 28rpx;
 		margin-bottom: 8rpx;
-		background: transparent;
 	}
 
 	.mall-cate {
