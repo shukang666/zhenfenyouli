@@ -579,6 +579,17 @@
 
 	.mall-page {
 		position: relative;
+		background: #e4e8e5;
+	}
+
+	/* 积分 Tab：整页统一底色，避免 top/body 分层 + ambient 渐变在卡片间隙色差 */
+	.mall-page.glass-page::before,
+	.mall-page.glass-page::after {
+		display: none;
+	}
+
+	.mall-page .glass-page__ambient {
+		display: none;
 	}
 
 	.mall-top {
@@ -591,6 +602,7 @@
 	.mall-body {
 		position: relative;
 		z-index: 1;
+		background: #e4e8e5;
 	}
 
 	.mall-body-inner {
