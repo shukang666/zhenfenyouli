@@ -24,31 +24,39 @@
 				<view class="points-nav">
 					<text class="points-nav__title">积分权益</text>
 				</view>
-				<view slot="right" class="points-nav__actions">
-					<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goPointsLog">
-						<u-icon name="order" size="40" color="#2d4a3e"></u-icon>
-					</view>
-					<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goRanking">
-						<u-icon name="star" size="40" color="#2d4a3e"></u-icon>
-					</view>
-					<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goCart">
-						<u-icon name="shopping-cart" size="40" color="#2d4a3e"></u-icon>
-					</view>
-				</view>
 			</u-navbar>
 			<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			<view class="points-hub" id="guide-mall-points">
 				<view class="points-hub__card">
-					<text class="points-hub__label">我的可用积分</text>
+					<view class="points-hub__bg-grid"></view>
+					<view class="points-hub__orb"></view>
+					<view class="points-hub__head">
+						<view class="points-hub__label-wrap">
+							<view class="points-hub__label-icon">
+								<u-icon name="integral-fill" size="34" color="#18AF38"></u-icon>
+							</view>
+							<view class="points-hub__label-col">
+								<text class="points-hub__label">我的可用积分</text>
+								<text class="points-hub__label-sub">环保行动累积 · 可兑好物</text>
+							</view>
+						</view>
+						<view class="points-hub__rank" hover-class="points-hub__rank--press" @tap="goRanking">
+							<text>排行</text>
+							<u-icon name="arrow-right" size="22" color="#076d3d"></u-icon>
+						</view>
+					</view>
 					<view class="points-hub__value-row">
 						<text class="points-hub__value">{{ displayPointText }}</text>
 						<text class="points-hub__unit">积分</text>
 					</view>
-					<view class="points-hub__foot">
-						<text class="points-hub__slogan">环保行动，让积分发挥价值</text>
-						<view class="points-hub__link" hover-class="points-hub__link--press" @tap="goPointsLog">
+					<view class="points-hub__actions">
+						<view class="points-hub__btn points-hub__btn--primary" hover-class="points-hub__btn--press" @tap="goPointsLog">
+							<u-icon name="order" size="32" color="#fff"></u-icon>
 							<text>积分明细</text>
-							<u-icon name="arrow-right" size="24" color="#076d3d"></u-icon>
+						</view>
+						<view class="points-hub__btn points-hub__btn--ghost" hover-class="points-hub__btn--press" @tap="goCart">
+							<u-icon name="shopping-cart" size="32" color="#076d3d"></u-icon>
+							<text>购物车</text>
 						</view>
 					</view>
 				</view>
@@ -624,26 +632,6 @@
 		letter-spacing: 1rpx;
 	}
 
-	.points-nav__actions {
-		display: flex;
-		align-items: center;
-		gap: 8rpx;
-		padding-right: 24rpx;
-	}
-
-	.points-nav__action {
-		width: 72rpx;
-		height: 72rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 50%;
-	}
-
-	.points-nav__action--press {
-		background: rgba(45, 74, 62, 0.08);
-	}
-
 	$mall-block-gap: 24rpx;
 
 	.points-hub {
@@ -651,74 +639,172 @@
 	}
 
 	.points-hub__card {
-		background: #fff;
-		border-radius: 24rpx;
-		padding: 32rpx 32rpx 28rpx;
-		box-shadow: 0 8rpx 32rpx rgba(7, 109, 61, 0.06);
-		border: 1rpx solid rgba(255, 255, 255, 0.9);
+		position: relative;
+		overflow: hidden;
+		border-radius: 28rpx;
+		padding: 28rpx 28rpx 24rpx;
+		background: linear-gradient(145deg, #ffffff 0%, #f4fbf6 48%, #eef8f1 100%);
+		box-shadow: 0 10rpx 40rpx rgba(7, 109, 61, 0.08);
+		border: 1rpx solid rgba(24, 175, 56, 0.12);
+	}
+
+	.points-hub__bg-grid {
+		position: absolute;
+		right: -20rpx;
+		top: -20rpx;
+		width: 280rpx;
+		height: 200rpx;
+		opacity: 0.35;
+		background-image: linear-gradient(rgba(24, 175, 56, 0.08) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(24, 175, 56, 0.08) 1px, transparent 1px);
+		background-size: 24rpx 24rpx;
+		pointer-events: none;
+	}
+
+	.points-hub__orb {
+		position: absolute;
+		width: 200rpx;
+		height: 200rpx;
+		right: -60rpx;
+		top: -80rpx;
+		border-radius: 50%;
+		background: radial-gradient(circle, rgba(24, 175, 56, 0.14) 0%, transparent 70%);
+		pointer-events: none;
+	}
+
+	.points-hub__head {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: row;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 16rpx;
+	}
+
+	.points-hub__label-wrap {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.points-hub__label-icon {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 18rpx;
+		background: rgba(24, 175, 56, 0.12);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		margin-right: 16rpx;
+	}
+
+	.points-hub__label-col {
+		flex: 1;
+		min-width: 0;
 	}
 
 	.points-hub__label {
 		display: block;
-		font-size: 26rpx;
+		font-size: 28rpx;
+		font-weight: 600;
+		color: #1d1d1f;
+		line-height: 1.35;
+	}
+
+	.points-hub__label-sub {
+		display: block;
+		margin-top: 4rpx;
+		font-size: 22rpx;
 		color: #8e8e93;
 		line-height: 1.4;
 	}
 
+	.points-hub__rank {
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		padding: 10rpx 16rpx;
+		border-radius: 999rpx;
+		background: rgba(255, 255, 255, 0.85);
+		border: 1rpx solid rgba(7, 109, 61, 0.15);
+		font-size: 24rpx;
+		font-weight: 600;
+		color: #076d3d;
+		gap: 2rpx;
+	}
+
+	.points-hub__rank--press {
+		opacity: 0.75;
+	}
+
 	.points-hub__value-row {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		align-items: baseline;
-		margin-top: 12rpx;
-		gap: 8rpx;
+		margin-top: 24rpx;
+		gap: 10rpx;
 	}
 
 	.points-hub__value {
-		font-size: 72rpx;
+		font-size: 80rpx;
 		font-weight: 700;
 		color: #076d3d;
-		line-height: 1.1;
+		line-height: 1.05;
 		font-variant-numeric: tabular-nums;
-		letter-spacing: -1rpx;
+		letter-spacing: -2rpx;
 	}
 
 	.points-hub__unit {
-		font-size: 30rpx;
+		font-size: 28rpx;
 		font-weight: 600;
-		color: #076d3d;
-		opacity: 0.92;
+		color: #18af38;
+		opacity: 0.95;
+		padding-bottom: 8rpx;
 	}
 
-	.points-hub__foot {
+	.points-hub__actions {
+		position: relative;
+		z-index: 1;
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		flex-direction: row;
+		gap: 16rpx;
 		margin-top: 28rpx;
-		padding-top: 24rpx;
-		border-top: 1rpx solid #f0f2f1;
-		gap: 20rpx;
 	}
 
-	.points-hub__slogan {
+	.points-hub__btn {
 		flex: 1;
-		min-width: 0;
-		font-size: 26rpx;
-		font-weight: 600;
-		color: #076d3d;
-		line-height: 1.45;
-	}
-
-	.points-hub__link {
-		flex-shrink: 0;
+		height: 76rpx;
+		border-radius: 16rpx;
 		display: flex;
+		flex-direction: row;
 		align-items: center;
-		gap: 4rpx;
+		justify-content: center;
+		gap: 8rpx;
 		font-size: 26rpx;
 		font-weight: 600;
-		color: #076d3d;
 	}
 
-	.points-hub__link--press {
-		opacity: 0.72;
+	.points-hub__btn--primary {
+		background: linear-gradient(135deg, #22b84a 0%, #076d3d 100%);
+		color: #fff;
+		box-shadow: 0 6rpx 20rpx rgba(7, 109, 61, 0.22);
+	}
+
+	.points-hub__btn--ghost {
+		background: rgba(255, 255, 255, 0.92);
+		color: #076d3d;
+		border: 1rpx solid rgba(7, 109, 61, 0.2);
+	}
+
+	.points-hub__btn--press {
+		opacity: 0.88;
+		transform: scale(0.98);
 	}
 
 	.mall-secondhand-entry {
