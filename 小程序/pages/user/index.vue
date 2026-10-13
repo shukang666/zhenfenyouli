@@ -1,7 +1,5 @@
 <template>
-	<view class="me-page glass-page" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
-		<view class="glass-page__ambient"></view>
-
+	<view class="me-page" @touchstart="onCareTouchStart" @touchmove="onCareTouchMove" @touchend="onCareTouchEnd">
 		<view class="care-pull-layer" :style="{ height: carePullHeight + 'px', opacity: careHintOpacity }" v-if="showCareHint">
 			<view class="care-pull-content">
 				<text class="care-pull-text">{{ carePullHeight >= 90 ? '松开进入关怀版' : '下拉进入关怀版' }}</text>
@@ -12,198 +10,160 @@
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 		<skeleton-screen :show="isLoading" type="user"></skeleton-screen>
 
-		<view class="me-hero" id="guide-me-hero">
-			<image v-if="imgUrl" :src="`${imgUrl}user-bg.png`" class="me-hero__bg" mode="aspectFill"></image>
-			<view class="me-hero__orb me-hero__orb--a"></view>
-			<view class="me-hero__orb me-hero__orb--b"></view>
-			<view class="me-hero__body">
-				<view class="me-user">
-					<view class="me-avatar">
-						<u-avatar :src="userInfo.avatar" size="130"></u-avatar>
+		<!-- 顶区：扁平个人信息 -->
+		<view class="me-head" id="guide-me-hero">
+			<view class="me-profile" @click="onProfileTap">
+				<view class="me-profile__avatar">
+					<u-avatar :src="isLogin ? userInfo.avatar : ''" size="120"></u-avatar>
+				</view>
+				<view class="me-profile__main" v-if="!isLogin">
+					<text class="me-profile__title">登录 / 注册</text>
+					<text class="me-profile__sub">登录后查看积分、活动与订单</text>
+				</view>
+				<view class="me-profile__main" v-else>
+					<view class="me-profile__name-row">
+						<text class="me-profile__title">{{ userInfo.nickname }}</text>
+						<view class="me-profile__tag" v-if="userInfo.is_environmental">环保达人</view>
+						<view class="me-profile__tag me-profile__tag--staff" v-if="userInfo.type == 2">员工</view>
 					</view>
-					<view class="me-user__info" v-if="!isLogin">
-						<view class="user-login-btn" @click="$u.route('/pages/public/login')">
-							<text class="user-login-btn__text">立即登录</text>
-						</view>
-						<text class="user-login-sub">登录后解锁积分、活动与真分</text>
-					</view>
-					<view class="me-user__info" v-else>
-						<view class="me-name-row">
-							<text class="me-name">{{userInfo.nickname}}</text>
-							<u-tag v-if="userInfo.is_environmental" text="环保达人" bg-color="#FFD56A" color="#7A5A00" border-color="#FFD56A" size="mini" />
-							<image :src="item.image" class="me-badge" mode="aspectFill" v-for="item in badge_list" :key="item.id"></image>
-						</view>
-						<text class="me-mobile">{{userInfo.mobile}}</text>
-						<view class="me-staff" v-if="userInfo.type==2">
-							<u-tag text="员工" bg-color="#fff" color="#B181CE" border-color="#fff" size="mini" shape="circle" />
-						</view>
+					<text class="me-profile__sub">{{ userInfo.mobile }}</text>
+					<view class="me-profile__badges" v-if="badge_list.length">
+						<image
+							v-for="item in badge_list"
+							:key="item.id"
+							:src="item.image"
+							class="me-profile__badge"
+							mode="aspectFill"
+						></image>
 					</view>
 				</view>
-				<view class="me-stat" v-if="isLogin" @click="navigator('/pages/points/points')">
-					<view class="me-stat__left">
-						<text class="me-stat__label">账户积分</text>
-						<text class="me-stat__num">{{userInfo.point || 0}}</text>
-					</view>
-					<view class="me-stat__go">
-						<text class="me-stat__go-text">明细</text>
-						<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
-					</view>
+				<u-icon name="arrow-right" size="28" color="#C7C7CC"></u-icon>
+			</view>
+
+			<view class="me-metrics" v-if="isLogin">
+				<view class="me-metrics__item" @click="navigator('/pages/points/points')">
+					<text class="me-metrics__val">{{ userInfo.point || 0 }}</text>
+					<text class="me-metrics__label">积分</text>
+				</view>
+				<view class="me-metrics__sep"></view>
+				<view class="me-metrics__item" @click="navigator('/pages/activity/my_activity')">
+					<text class="me-metrics__val">—</text>
+					<text class="me-metrics__label">我的活动</text>
+				</view>
+				<view class="me-metrics__sep"></view>
+				<view class="me-metrics__item" @click="navigator('/pages/member/badge')">
+					<text class="me-metrics__val">{{ badge_list.length }}</text>
+					<text class="me-metrics__label">徽章</text>
 				</view>
 			</view>
 		</view>
 
-		<view class="me-sheet glass-page__content">
-			<view class="me-grow" v-if="!userInfo.is_environmental && isLogin">
-				<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/jiankangdaren.png" class="me-grow__img" mode="aspectFill"></image>
-				<view class="me-grow__body">
-					<view class="me-grow__top">
+		<view class="me-body">
+			<!-- 运营 Banner 占位：meAssets.banner 填 COS 地址即可 -->
+			<view class="me-banner" v-if="isLogin">
+				<image v-if="meAssets.banner" class="me-banner__img" :src="meAssets.banner" mode="aspectFill"></image>
+				<view v-else class="me-banner__ph">
+					<text class="me-banner__ph-title">运营 Banner 占位</text>
+					<text class="me-banner__ph-size">建议 750 × 280 px · 替换 meAssets.banner</text>
+				</view>
+			</view>
+
+			<view class="me-grow flat-card" v-if="!userInfo.is_environmental && isLogin">
+				<view class="me-grow__icon-wrap">
+					<image
+						v-if="meAssets.growBadge"
+						class="me-grow__icon"
+						:src="meAssets.growBadge"
+						mode="aspectFill"
+					></image>
+					<view v-else class="me-grow__icon-ph">
+						<text>110×110</text>
+					</view>
+				</view>
+				<view class="me-grow__content">
+					<view class="me-grow__head">
 						<text class="me-grow__title">环保达人</text>
-						<view class="me-grow__help" @click="openDesc">
-							<text>等级说明</text>
-							<u-icon name="question-circle" size="26" color="#8a9b8d"></u-icon>
+						<view class="me-grow__help" @click.stop="openDesc">
+							<text>说明</text>
+							<u-icon name="question-circle" size="24" color="#86868B"></u-icon>
 						</view>
 					</view>
-					<u-line-progress :striped="true" :percent="(userInfo.clock_count / userInfo.continuous_check) * 100" height="18" active-color="#18AF38" :show-percent="false"></u-line-progress>
-					<text class="me-grow__desc">已连续真分 <text class="me-grow__em">{{userInfo.clock_count}}</text> 天，还差 <text class="me-grow__warn">{{userInfo.remaining_count}}</text> 天</text>
+					<u-line-progress
+						:striped="true"
+						:percent="growPercent"
+						height="12"
+						active-color="#18AF38"
+						inactive-color="#E8E8ED"
+						:show-percent="false"
+					></u-line-progress>
+					<text class="me-grow__desc">
+						已连续真分 {{ userInfo.clock_count }} 天，还差 {{ userInfo.remaining_count }} 天
+					</text>
 				</view>
 			</view>
 
-			<view class="me-card glass-card" id="guide-me-common">
-				<text class="me-card__title">常用功能</text>
-				<view class="me-grid">
-					<view class="me-grid__item" @click="navigator('/pages/points/points')">
-						<view class="me-grid__icon me-grid__icon--a">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-1.png" :size="50"></u-icon>
+			<!-- 常用功能 -->
+			<view class="flat-section flat-card" id="guide-me-common">
+				<text class="flat-section__title">常用</text>
+				<view class="me-quick">
+					<view
+						class="me-quick__item"
+						v-for="item in quickMenus"
+						:key="item.key"
+						@click="navigator(item.url)"
+					>
+						<view class="me-quick__icon">
+							<image v-if="meAssets.quick[item.key]" :src="meAssets.quick[item.key]" mode="aspectFit" class="me-quick__img"></image>
+							<view v-else class="me-quick__ph">
+								<text>80</text>
+							</view>
 						</view>
-						<text class="me-grid__name">积分明细</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('/pages/activity/my_activity')">
-						<view class="me-grid__icon me-grid__icon--b">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-2.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">我的活动</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('/pages/order_list/order_list')">
-						<view class="me-grid__icon me-grid__icon--c">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-3.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">兑换订单</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('/pages/msg_list/msg_list')">
-						<view class="me-grid__icon me-grid__icon--d">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-4.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">消息通知</text>
-					</view>
-				</view>
-			</view>
-<!-- 下面暂时注释，应对审核 -->
-			<!-- <view class="me-shop" v-if="userInfo.shop_status==0">
-				<u-image width="100%" height="130" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
-					@click="navigator('/pages/settled/settled')"></u-image>
-			</view>
-			<view class="me-shop" v-if="userInfo.shop_status==1||userInfo.shop_status==3">
-				<u-image width="100%" height="130" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250610/5457d5a5128588468ce6ff8019b57ae2.png"
-					@click="navigator('/pages/settled/state')"></u-image>
-			</view>
-			<view class="me-shop" v-if="userInfo.shop_status==2">
-				<u-image width="100%" height="130" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250610/3d7904797608c5d73cf85b06a2043fda.png"
-					@click="navigator('/pages/store/store')"></u-image>
-			</view> -->
-
-			<view class="me-card" id="guide-me-service">
-				<text class="me-card__title">我的服务</text>
-				<view class="me-grid">
-					<view class="me-grid__item" @click="navigator('pages/my_comment/my_comment')" v-if="!setting.app_test">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-5.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">我的评论</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('pages/my_evaluation/my_evaluation')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-6.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">我的测评记录</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('pages/my_questionnaire/my_questionnaire')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-7.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">我的问卷</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('pages/my_reservation/my_reservation')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-8.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">我的预约</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('pages/community/record')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-9.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">健康生活社区</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('/pages/flhd/record')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-10.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">垃圾分类真分</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('/pages/flhd/list')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250512/40bfaab5aeaffdd0457cf369eca0e567.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">垃圾分类指导</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('/pages/answer/examine?id=1')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250512/ee564dd59c747c37e5b5b01eb2db7c54.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">答题考试</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('/pages/member/badge')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-9.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">我的徽章</text>
+						<text class="me-quick__name">{{ item.name }}</text>
 					</view>
 				</view>
 			</view>
 
-			<view class="me-card">
-				<text class="me-card__title">其他功能</text>
-				<view class="me-grid">
-					<view class="me-grid__item" @click="navigator('/pages/coupon/my_coupon')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-11.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">优惠券</text>
+			<!-- 我的服务（精简） -->
+			<view class="flat-section flat-card" id="guide-me-service">
+				<text class="flat-section__title">服务</text>
+				<view
+					class="flat-row"
+					v-for="item in serviceMenus"
+					:key="item.key"
+					@click="navigator(item.url)"
+				>
+					<view class="flat-row__icon">
+						<image v-if="meAssets.service[item.key]" :src="meAssets.service[item.key]" mode="aspectFit" class="flat-row__img"></image>
+						<view v-else class="flat-row__ph"></view>
 					</view>
-					<view class="me-grid__item" @click="navigator('/pages/address/index')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-12.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">地址管理</text>
+					<text class="flat-row__label">{{ item.name }}</text>
+					<text v-if="item.desc" class="flat-row__desc">{{ item.desc }}</text>
+					<u-icon name="arrow-right" size="24" color="#C7C7CC"></u-icon>
+				</view>
+			</view>
+
+			<!--
+			以下入口暂时下线（2026-03）
+			我的评论、我的测评记录、我的问卷、我的预约、
+			垃圾分类真分、垃圾分类指导、答题考试
+			<view class="me-grid__item" @click="navigator('pages/my_comment/my_comment')" ...
+			-->
+
+			<view class="flat-section flat-card">
+				<text class="flat-section__title">更多</text>
+				<view
+					class="flat-row"
+					v-for="item in moreMenus"
+					:key="item.key"
+					@click="onMoreTap(item)"
+				>
+					<view class="flat-row__icon">
+						<image v-if="meAssets.more[item.key]" :src="meAssets.more[item.key]" mode="aspectFit" class="flat-row__img"></image>
+						<view v-else class="flat-row__ph"></view>
 					</view>
-					<view class="me-grid__item" @click="openKf">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-13.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">联系客服</text>
-					</view>
-					<view class="me-grid__item" @click="navigator('/pages/member/info')">
-						<view class="me-grid__icon">
-							<u-icon name="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/user-14.png" :size="50"></u-icon>
-						</view>
-						<text class="me-grid__name">个人信息</text>
-					</view>
-					<view class="me-grid__item" @click="goShukangAbout">
-						<view class="me-grid__icon me-grid__icon--sk">
-							<text class="me-grid__sk">SK</text>
-						</view>
-						<text class="me-grid__name">关于数康</text>
-					</view>
+					<text class="flat-row__label">{{ item.name }}</text>
+					<text v-if="item.desc" class="flat-row__desc">{{ item.desc }}</text>
+					<u-icon name="arrow-right" size="24" color="#C7C7CC"></u-icon>
 				</view>
 			</view>
 		</view>
@@ -218,8 +178,13 @@
 						</view>
 						<view class="kf-tip">扫码添加客服微信</view>
 						<view class="kf-btn">
-							<u-button type="success" shape="circle" :customStyle="{background: 'linear-gradient( 141deg, #A4DB88 0%, #18AF38 100%)'}" hover-class="none"
-								open-type="contact">在线客服</u-button>
+							<u-button
+								type="success"
+								shape="circle"
+								:customStyle="{ background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)' }"
+								hover-class="none"
+								open-type="contact"
+							>在线客服</u-button>
 						</view>
 					</view>
 					<view class="kf-close" @click="closeKf">
@@ -232,7 +197,7 @@
 			<view class="desc-box">
 				<view class="desc-title">等级说明</view>
 				<scroll-view scroll-y="true" class="desc-scroll">
-					<view class="desc-text">{{setting.level_description}}</view>
+					<view class="desc-text">{{ setting.level_description }}</view>
 				</scroll-view>
 				<view class="desc-ok" @click="closeDesc">我知道了</view>
 			</view>
@@ -248,17 +213,65 @@
 	import careGesture from '@/common/care-gesture.mixin.js'
 	import { shouldTabRefresh } from '@/common/tab-refresh.js'
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
+
 	export default {
-	components: { SkeletonScreen },
-	mixins: [careGesture],
-	data() {
-		return {
-			isLoading: true,
-			mask_show: false,
-			descShow: false,
-			badge_list: [],
-		}
-	},
+		components: { SkeletonScreen },
+		mixins: [careGesture],
+		data() {
+			return {
+				isLoading: true,
+				mask_show: false,
+				descShow: false,
+				badge_list: [],
+				/** 视觉资源：填 COS 完整地址后占位自动隐藏 */
+				meAssets: {
+					banner: '',
+					growBadge: '',
+					quick: {
+						points: '',
+						activity: '',
+						order: '',
+						msg: '',
+					},
+					service: {
+						community: '',
+						badge: '',
+					},
+					more: {
+						coupon: '',
+						address: '',
+						kf: '',
+						profile: '',
+						about: '',
+					},
+				},
+				quickMenus: [
+					{ key: 'points', name: '积分明细', url: '/pages/points/points' },
+					{ key: 'activity', name: '我的活动', url: '/pages/activity/my_activity' },
+					{ key: 'order', name: '兑换订单', url: '/pages/order_list/order_list' },
+					{ key: 'msg', name: '消息通知', url: '/pages/msg_list/msg_list' },
+				],
+				serviceMenus: [
+					{ key: 'community', name: '健康生活社区', url: '/pages/community/record' },
+					{ key: 'badge', name: '我的徽章', url: '/pages/member/badge' },
+				],
+				moreMenus: [
+					{ key: 'coupon', name: '优惠券', url: '/pages/coupon/my_coupon', needLogin: true },
+					{ key: 'address', name: '地址管理', url: '/pages/address/index', needLogin: true },
+					{ key: 'kf', name: '联系客服', action: 'kf' },
+					{ key: 'profile', name: '个人信息', desc: '小区设置在这里', url: '/pages/member/info', needLogin: true },
+					{ key: 'about', name: '关于数康', action: 'about' },
+				],
+			}
+		},
+		computed: {
+			growPercent() {
+				const total = Number(this.userInfo.continuous_check) || 0
+				const done = Number(this.userInfo.clock_count) || 0
+				if (total <= 0) return 0
+				return Math.min(100, (done / total) * 100)
+			},
+		},
 		onLoad() {},
 		onShow() {
 			this.updateTabBarSelected(4)
@@ -276,17 +289,21 @@
 		methods: {
 			fetchUserTabHome(opts = {}) {
 				const params = opts.refresh ? { refresh: 1 } : {}
-				return this.$u.api.get_user_tab_home(params).then(res => {
-					const d = res.data || {}
-					if (!d.logged_in) return
-					this.$u.vuex('userInfo', d.user_info || {})
-					this.badge_list = d.badge_list || []
-				}).catch(e => {
-					console.log(e)
-					if (e && e.msg) this.$u.toast(e.msg)
-				}).finally(() => {
-					this.isLoading = false
-				})
+				return this.$u.api
+					.get_user_tab_home(params)
+					.then((res) => {
+						const d = res.data || {}
+						if (!d.logged_in) return
+						this.$u.vuex('userInfo', d.user_info || {})
+						this.badge_list = d.badge_list || []
+					})
+					.catch((e) => {
+						console.log(e)
+						if (e && e.msg) this.$u.toast(e.msg)
+					})
+					.finally(() => {
+						this.isLoading = false
+					})
 			},
 			updateTabBarSelected(index) {
 				const tabBar = this.$mp?.page?.getTabBar && this.$mp.page.getTabBar()
@@ -294,29 +311,31 @@
 					tabBar.setSelected(index)
 				}
 			},
-			async get_new_badge_list() {
-				try {
-					let params = {}
-					let res = await this.$u.api.get_new_badge_list(params)
-					this.badge_list = res.data
-				} catch (e) {
-					console.log(e);
-					this.$u.toast(e.msg)
-				}
-			},
 			navigator(url) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				this.$u.route(url)
 			},
-			getUserInfo() {
-				this.$u.api.getUserInfo().then(res => {
-					this.$u.vuex('userInfo', res.data)
-				}).catch(err => {
-					this.$u.vuex('userInfo', {})
-					this.$u.vuex('isLogin', false)
-				}).finally(() => {
-					this.isLoading = false
-				})
+			onProfileTap() {
+				if (!this.isLogin) {
+					this.$u.route('/pages/public/login')
+					return
+				}
+				this.$u.route('/pages/member/info')
+			},
+			onMoreTap(item) {
+				if (item.action === 'kf') {
+					this.openKf()
+					return
+				}
+				if (item.action === 'about') {
+					this.goShukangAbout()
+					return
+				}
+				if (item.needLogin && !this.isLogin) {
+					this.$u.route('/pages/public/login')
+					return
+				}
+				if (item.url) this.$u.route(item.url)
 			},
 			openKf() {
 				this.mask_show = true
@@ -333,185 +352,196 @@
 			goShukangAbout() {
 				this.$u.route('/pages/public/shukang-about')
 			},
-		}
+		},
 	}
 </script>
 
 <style lang="scss" scoped>
-	@import '@/static/styles/glass-ui.scss';
+	$flat-bg: #f2f3f5;
+	$flat-card: #ffffff;
+	$flat-text: #1d1d1f;
+	$flat-sub: #86868b;
+	$flat-line: rgba(0, 0, 0, 0.06);
+	$flat-brand: #18af38;
 
 	.me-page {
-		position: relative;
+		min-height: 100vh;
+		background: $flat-bg;
+		padding-bottom: env(safe-area-inset-bottom);
 	}
 
-	.me-hero {
-		position: relative;
-		overflow: hidden;
-		background: linear-gradient(165deg, rgba(24, 175, 56, 0.92) 0%, rgba(18, 150, 46, 0.88) 100%);
-		padding: 120rpx 32rpx 88rpx;
-	}
-	.me-hero__bg {
-		position: absolute;
-		left: 0;
-		top: 0;
-		width: 750rpx;
-		height: 448rpx;
-		opacity: 0.28;
-		pointer-events: none;
-	}
-	.me-hero__orb {
-		position: absolute;
-		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.12);
-		pointer-events: none;
-	}
-	.me-hero__orb--a {
-		width: 220rpx;
-		height: 220rpx;
-		top: -60rpx;
-		right: -40rpx;
-	}
-	.me-hero__orb--b {
-		width: 120rpx;
-		height: 120rpx;
-		bottom: 40rpx;
-		left: -30rpx;
-		background: rgba(255, 220, 80, 0.16);
-	}
-	.me-hero__body {
-		position: relative;
-		z-index: 1;
+	.me-head {
+		background: $flat-card;
+		padding: 100rpx 32rpx 0;
+		border-bottom: 1rpx solid $flat-line;
 	}
 
-	.me-user {
+	.me-profile {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
+		padding-bottom: 32rpx;
 	}
-	.me-avatar {
+	.me-profile__avatar {
 		flex-shrink: 0;
-		border-radius: 50%;
-		box-shadow: 0 0 0 6rpx rgba(255, 255, 255, 0.35);
-		overflow: hidden;
 	}
-	.me-user__info {
+	.me-profile__main {
 		flex: 1;
 		min-width: 0;
-		margin-left: 28rpx;
+		margin: 0 20rpx;
 	}
-	.me-name-row {
+	.me-profile__name-row {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
 		flex-wrap: wrap;
 	}
-	.me-name {
+	.me-profile__title {
 		font-size: 36rpx;
-		font-weight: 700;
-		color: #fff;
-		margin-right: 12rpx;
-	}
-	.me-badge {
-		width: 36rpx;
-		height: 36rpx;
-		margin-left: 10rpx;
-	}
-	.me-mobile {
-		display: block;
-		margin-top: 12rpx;
-		font-size: 24rpx;
-		color: rgba(255, 255, 255, 0.86);
-	}
-	.me-staff {
-		margin-top: 12rpx;
-	}
-
-	.me-stat {
-		@include glass-surface-strong(48px);
-		margin-top: 28rpx;
-		border-radius: 24rpx;
-		padding: 22rpx 28rpx;
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: space-between;
-	}
-	.me-stat__left {
-		display: flex;
-		flex-direction: row;
-		align-items: baseline;
-	}
-	.me-stat__label {
-		font-size: 24rpx;
-		color: #6a7b6e;
-		margin-right: 12rpx;
-	}
-	.me-stat__num {
-		font-size: 40rpx;
-		font-weight: 700;
-		color: #18af38;
-		line-height: 1;
-	}
-	.me-stat__go {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-	}
-	.me-stat__go-text {
-		font-size: 24rpx;
-		color: #18af38;
 		font-weight: 600;
-		margin-right: 4rpx;
+		color: $flat-text;
+		line-height: 1.3;
+	}
+	.me-profile__sub {
+		display: block;
+		margin-top: 8rpx;
+		font-size: 26rpx;
+		color: $flat-sub;
+	}
+	.me-profile__tag {
+		margin-left: 12rpx;
+		margin-top: 4rpx;
+		padding: 4rpx 14rpx;
+		font-size: 20rpx;
+		color: #7a5a00;
+		background: #fff4cc;
+		border-radius: 8rpx;
+	}
+	.me-profile__tag--staff {
+		color: #6b4f99;
+		background: #f0ebfa;
+	}
+	.me-profile__badges {
+		display: flex;
+		flex-direction: row;
+		margin-top: 12rpx;
+	}
+	.me-profile__badge {
+		width: 40rpx;
+		height: 40rpx;
+		margin-right: 8rpx;
+		border-radius: 8rpx;
 	}
 
-	.user-login-btn {
-		display: inline-flex;
+	.me-metrics {
+		display: flex;
 		flex-direction: row;
+		align-items: center;
+		padding: 28rpx 0 32rpx;
+		border-top: 1rpx solid $flat-line;
+	}
+	.me-metrics__item {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.me-metrics__val {
+		font-size: 36rpx;
+		font-weight: 600;
+		color: $flat-text;
+		font-variant-numeric: tabular-nums;
+	}
+	.me-metrics__label {
+		margin-top: 6rpx;
+		font-size: 22rpx;
+		color: $flat-sub;
+	}
+	.me-metrics__sep {
+		width: 1rpx;
+		height: 48rpx;
+		background: $flat-line;
+	}
+
+	.me-body {
+		padding: 24rpx 24rpx 0;
+	}
+
+	.flat-card {
+		background: $flat-card;
+		border-radius: 24rpx;
+		margin-bottom: 20rpx;
+		overflow: hidden;
+		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
+	}
+
+	.me-banner {
+		border-radius: 24rpx;
+		overflow: hidden;
+		margin-bottom: 20rpx;
+		height: 280rpx;
+		background: $flat-card;
+	}
+	.me-banner__img {
+		width: 100%;
+		height: 280rpx;
+		display: block;
+	}
+	.me-banner__ph {
+		height: 280rpx;
+		display: flex;
+		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		padding: 16rpx 40rpx;
-		border-radius: 40rpx;
-		background: #fff;
+		background: linear-gradient(135deg, #eef0f3 0%, #e4e8ec 100%);
+		border: 2rpx dashed rgba(0, 0, 0, 0.08);
+		box-sizing: border-box;
+		margin: 0;
+		border-radius: 24rpx;
 	}
-	.user-login-btn__text {
-		margin-left: 8rpx;
-		color: #18af38;
-		font-size: 30rpx;
-		font-weight: 700;
+	.me-banner__ph-title {
+		font-size: 28rpx;
+		font-weight: 600;
+		color: $flat-sub;
 	}
-	.user-login-sub {
-		display: block;
-		margin-top: 14rpx;
+	.me-banner__ph-size {
+		margin-top: 8rpx;
 		font-size: 22rpx;
-		color: rgba(255, 255, 255, 0.82);
-	}
-
-	.me-sheet {
-		position: relative;
-		margin-top: -40rpx;
-		padding: 0 24rpx 8rpx;
+		color: #aeaeb2;
 	}
 
 	.me-grow {
-		@include glass-sheet;
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		border-radius: 28rpx;
-		padding: 24rpx;
-		margin-bottom: 20rpx;
+		padding: 28rpx;
 	}
-	.me-grow__img {
+	.me-grow__icon-wrap {
+		flex-shrink: 0;
+		margin-right: 24rpx;
+	}
+	.me-grow__icon {
 		width: 110rpx;
 		height: 110rpx;
-		flex-shrink: 0;
-		margin-right: 20rpx;
+		border-radius: 20rpx;
 	}
-	.me-grow__body {
+	.me-grow__icon-ph {
+		width: 110rpx;
+		height: 110rpx;
+		border-radius: 20rpx;
+		background: #eef0f3;
+		border: 2rpx dashed rgba(0, 0, 0, 0.08);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 20rpx;
+		color: #aeaeb2;
+	}
+	.me-grow__content {
 		flex: 1;
 		min-width: 0;
 	}
-	.me-grow__top {
+	.me-grow__head {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
@@ -520,91 +550,125 @@
 	}
 	.me-grow__title {
 		font-size: 30rpx;
-		font-weight: 700;
-		color: #18af38;
+		font-weight: 600;
+		color: $flat-text;
 	}
 	.me-grow__help {
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		font-size: 22rpx;
-		color: #8a9b8d;
+		font-size: 24rpx;
+		color: $flat-sub;
 	}
 	.me-grow__desc {
 		display: block;
 		margin-top: 12rpx;
-		font-size: 22rpx;
-		color: #6a7b6e;
-	}
-	.me-grow__em {
-		color: #18af38;
-		font-weight: 700;
-	}
-	.me-grow__warn {
-		color: #e67a22;
-		font-weight: 700;
+		font-size: 24rpx;
+		color: $flat-sub;
+		line-height: 1.45;
 	}
 
-	.me-card {
-		border-radius: 28rpx;
-		margin-bottom: 20rpx;
-		overflow: hidden;
-	}
-	.me-card__title {
+	.flat-section__title {
 		display: block;
 		padding: 28rpx 28rpx 8rpx;
-		font-size: 30rpx;
-		font-weight: 700;
-		color: #1c2b1e;
+		font-size: 26rpx;
+		font-weight: 600;
+		color: $flat-sub;
+		letter-spacing: 1rpx;
 	}
 
-	.me-grid {
+	.me-quick {
 		display: flex;
+		flex-direction: row;
 		flex-wrap: wrap;
-		padding: 8rpx 8rpx 20rpx;
+		padding: 8rpx 12rpx 24rpx;
 	}
-	.me-grid__item {
+	.me-quick__item {
 		width: 25%;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 20rpx 8rpx 12rpx;
+		padding: 16rpx 0;
 		box-sizing: border-box;
 	}
-	.me-grid__icon {
+	.me-quick__icon {
 		width: 88rpx;
 		height: 88rpx;
-		border-radius: 28rpx;
-		background: #f3f8f4;
+		border-radius: 22rpx;
+		background: #f2f3f5;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-bottom: 12rpx;
+		overflow: hidden;
 	}
-	.me-grid__icon--a { background: #e8f8ec; }
-	.me-grid__icon--b { background: #e8f2ff; }
-	.me-grid__icon--c { background: #fff1e6; }
-	.me-grid__icon--d { background: #f1ebff; }
-	.me-grid__icon--sk {
-		background: linear-gradient(145deg, rgba(15, 61, 34, 0.92), rgba(24, 175, 56, 0.88));
+	.me-quick__img {
+		width: 56rpx;
+		height: 56rpx;
 	}
-	.me-grid__sk {
-		font-size: 26rpx;
-		font-weight: 800;
-		color: #fff;
-		letter-spacing: 2rpx;
+	.me-quick__ph {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 2rpx dashed rgba(0, 0, 0, 0.06);
+		border-radius: 22rpx;
+		box-sizing: border-box;
+		font-size: 20rpx;
+		color: #c7c7cc;
 	}
-	.me-grid__name {
-		font-size: 22rpx;
-		color: #2c3a2f;
+	.me-quick__name {
+		font-size: 24rpx;
+		color: $flat-text;
 		text-align: center;
-		line-height: 1.3;
 	}
 
-	.me-shop {
-		margin-bottom: 20rpx;
-		border-radius: 24rpx;
+	.flat-row {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		padding: 28rpx;
+		border-top: 1rpx solid $flat-line;
+	}
+	.flat-row:first-of-type {
+		border-top: none;
+	}
+	.flat-row__icon {
+		width: 64rpx;
+		height: 64rpx;
+		border-radius: 16rpx;
+		background: #f2f3f5;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-right: 24rpx;
+		flex-shrink: 0;
 		overflow: hidden;
+	}
+	.flat-row__img {
+		width: 40rpx;
+		height: 40rpx;
+	}
+	.flat-row__ph {
+		width: 36rpx;
+		height: 36rpx;
+		border-radius: 8rpx;
+		border: 2rpx dashed #c7c7cc;
+	}
+	.flat-row__label {
+		flex: 1;
+		font-size: 30rpx;
+		color: $flat-text;
+		font-weight: 400;
+	}
+	.flat-row__desc {
+		flex-shrink: 0;
+		max-width: 280rpx;
+		margin-right: 8rpx;
+		font-size: 24rpx;
+		color: $flat-sub;
+		text-align: right;
 	}
 
 	.warp {
@@ -623,7 +687,7 @@
 	.kf-title {
 		font-size: 32rpx;
 		font-weight: 700;
-		color: #1c2b1e;
+		color: $flat-text;
 	}
 	.kf-code {
 		margin-top: 20rpx;
@@ -633,7 +697,7 @@
 	.kf-tip {
 		margin-top: 10rpx;
 		font-size: 24rpx;
-		color: #6a7b6e;
+		color: $flat-sub;
 	}
 	.kf-btn {
 		margin-top: 30rpx;
@@ -659,7 +723,7 @@
 		font-weight: 700;
 		padding: 30rpx;
 		text-align: center;
-		color: #1c2b1e;
+		color: $flat-text;
 	}
 	.desc-scroll {
 		height: 700rpx;
@@ -673,11 +737,11 @@
 	.desc-ok {
 		padding: 28rpx 30rpx;
 		margin-top: 20rpx;
-		border-top: 1rpx solid #eef2ef;
+		border-top: 1rpx solid $flat-line;
 		text-align: center;
 		font-size: 32rpx;
-		color: #18af38;
-		font-weight: 700;
+		color: $flat-brand;
+		font-weight: 600;
 	}
 
 	.me-tabbar-space {

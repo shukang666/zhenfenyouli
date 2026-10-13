@@ -140,8 +140,8 @@ export const PAGE_GUIDES = {
 			{
 				selector: '#guide-me-service',
 				prefer: 'above',
-				title: '我的服务',
-				desc: '打卡记录、测评与问卷、健康生活社区、答题考试、徽章等，按名称点进去。'
+				title: '服务',
+				desc: '健康生活社区、我的徽章等，点右侧箭头进入。'
 			},
 			{
 				selector: '#pg-tabbar',

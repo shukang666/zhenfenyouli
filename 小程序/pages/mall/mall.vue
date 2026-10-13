@@ -57,12 +57,12 @@
 		<view class="mall-body glass-page__content">
 			<view class="mall-body-inner">
 			<view class="mall-secondhand-entry" hover-class="mall-secondhand-entry--press" @tap="goSecondhand">
-				<view class="mall-secondhand-entry__icon">♻️</view>
-				<view class="mall-secondhand-entry__main">
-					<text class="mall-secondhand-entry__title">社区闲置 · 积分交换</text>
-					<text class="mall-secondhand-entry__sub">发布自家闲置，用积分邻里互换</text>
-				</view>
-				<u-icon name="arrow-right" size="28" color="#076d3d"></u-icon>
+				<image
+					class="mall-secondhand-entry__img"
+					:src="secondhandEntryBanner"
+					mode="widthFix"
+					show-menu-by-longpress="false"
+				></image>
 			</view>
 			<view class="mall-search-box glass-search" id="guide-mall-search">
 				<u-search
@@ -228,6 +228,10 @@
 	import MallChinaMap from '@/components/mall-china-map/mall-china-map.vue'
 	import { zonesInRegion, zoneShortName, matchZoneToRegion, regionLabel } from '@/common/mallGeoMap.js'
 	import careGesture from '@/common/care-gesture.mixin.js'
+	import settings from '@/common/settings.js'
+
+	const SECONDHAND_ENTRY_BANNER = settings.staticAssetBase + 'mall/secondhand-entry-banner.png'
+
 	export default {
 		components: {
 			SkeletonScreen,
@@ -249,6 +253,7 @@
 				total: 0,
 				loadingGoods: false,
 				keyword: '',
+				secondhandEntryBanner: SECONDHAND_ENTRY_BANNER,
 			};
 		},
 		computed: {
@@ -705,49 +710,20 @@
 	}
 
 	.mall-secondhand-entry {
-		display: flex;
-		align-items: center;
-		gap: 20rpx;
-		padding: 24rpx 24rpx;
 		margin-bottom: $mall-block-gap;
-		background: linear-gradient(135deg, #ffffff 0%, #f0faf4 100%);
 		border-radius: 24rpx;
-		border: 1rpx solid #dceee3;
-		box-shadow: 0 6rpx 24rpx rgba(7, 109, 61, 0.05);
+		overflow: hidden;
+		box-shadow: 0 6rpx 24rpx rgba(7, 109, 61, 0.06);
 	}
 
 	.mall-secondhand-entry--press {
 		opacity: 0.92;
 	}
 
-	.mall-secondhand-entry__icon {
-		width: 72rpx;
-		height: 72rpx;
-		line-height: 72rpx;
-		text-align: center;
-		font-size: 36rpx;
-		background: #e3f3ea;
-		border-radius: 16rpx;
-		flex-shrink: 0;
-	}
-
-	.mall-secondhand-entry__main {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.mall-secondhand-entry__title {
+	.mall-secondhand-entry__img {
 		display: block;
-		font-size: 30rpx;
-		font-weight: 700;
-		color: #1a1a1a;
-	}
-
-	.mall-secondhand-entry__sub {
-		display: block;
-		margin-top: 6rpx;
-		font-size: 24rpx;
-		color: #6b7370;
+		width: 100%;
+		border-radius: 24rpx;
 	}
 
 	.mall-search-box {
