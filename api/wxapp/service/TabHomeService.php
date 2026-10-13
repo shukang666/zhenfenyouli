@@ -137,16 +137,17 @@ class TabHomeService
         return $data;
     }
 
-    public function buildMallTabHome(int $page, int $secondCate, string $keyword): array
+    public function buildMallTabHome(int $page, int $secondCate, int $firstCate, string $keyword): array
     {
         $pageSize = 10;
         $data = ['goods_page' => $page];
-        $withBlocks = ($page === 1 && $secondCate <= 0 && $keyword === '');
+        $withBlocks = ($page === 1 && $secondCate <= 0 && $firstCate <= 0 && $keyword === '');
         if ($withBlocks) {
             $data['coupon_list'] = $this->fetchShopCouponList();
             $data['cate_list'] = $this->fetchGeoZoneCategories();
+            $data['first_cate_list'] = $this->fetchMallFirstCategories();
         }
-        $goods = $this->fetchGoodsListPage($page, $pageSize, $secondCate, $keyword);
+        $goods = $this->fetchGoodsListPage($page, $pageSize, $secondCate, $firstCate, $keyword);
         $data['goods_list'] = $goods['list'];
         $data['goods_total'] = $goods['total'];
         $data['goods_page_size'] = $pageSize;
@@ -370,6 +371,25 @@ class TabHomeService
         return $out;
     }
 
+    /** 积分商城一级分类（不含「地理产区」） */
+    protected function fetchMallFirstCategories(): array
+    {
+        $list = GoodsCategoryModel::field('id,cate_name')
+            ->where([
+                ['parent_id', '=', 0],
+                ['status', 'in', [1, 2]],
+                ['cate_name', '<>', '地理产区'],
+                ['delete_time', '=', 0],
+            ])
+            ->order('list_order asc,id asc')
+            ->select();
+        $out = [];
+        foreach ($list as $item) {
+            $out[] = is_array($item) ? $item : $item->toArray();
+        }
+        return $out;
+    }
+
     protected function fetchShopCouponList(): array
     {
         $couponModel = new CouponModel();
@@ -389,7 +409,7 @@ class TabHomeService
         return $out;
     }
 
-    protected function fetchGoodsListPage(int $page, int $pageSize, int $secondCate, string $keyword): array
+    protected function fetchGoodsListPage(int $page, int $pageSize, int $secondCate, int $firstCate, string $keyword): array
     {
         $GoodsModel = new GoodsModel();
         $map = [];
@@ -398,6 +418,9 @@ class TabHomeService
         $map[] = ['a.delete_time', '=', 0];
         if ($keyword !== '') {
             $map[] = ['a.goods_name', 'like', '%' . $keyword . '%'];
+        }
+        if ($firstCate > 0) {
+            $map[] = ['a.first_cate', '=', $firstCate];
         }
         if ($secondCate > 0) {
             $map[] = ['a.second_cate', '=', $secondCate];

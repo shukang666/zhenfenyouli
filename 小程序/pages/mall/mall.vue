@@ -86,26 +86,26 @@
 				</view>
 			</view>
 
-			<!-- 地理产区：可折叠，选完自动收起（canvas 地图须 v-if 卸载，真机无法用 overflow 裁剪） -->
-			<view class="zone-panel glass-card" id="guide-mall-cate">
-				<view class="zone-panel__head" hover-class="u-hover-class" @tap="toggleZonePanel">
-					<view class="zone-panel__head-main">
-						<view class="zone-panel__title-wrap">
-							<view class="zone-panel__dot"></view>
-							<text class="zone-panel__title">地理产区</text>
+			<!-- 分类：一行切换「全部 / 产区地图 / 商品类型」 -->
+			<view class="mall-cate glass-card" id="guide-mall-cate">
+				<scroll-view scroll-x class="mall-cate__primary" :show-scrollbar="false">
+					<view class="mall-cate__primary-inner">
+						<view
+							class="mall-cate-pill"
+							:class="{ 'mall-cate-pill--on': primaryKey === tab.key }"
+							v-for="tab in primaryTabs"
+							:key="tab.key"
+							hover-class="mall-cate-pill--press"
+							@tap="onPrimaryTab(tab)"
+						>
+							<text>{{ tab.label }}</text>
 						</view>
-						<text class="zone-panel__summary">{{ zonePanelSummary }}</text>
 					</view>
-					<u-icon
-						class="zone-panel__chevron"
-						:class="{ 'zone-panel__chevron--up': zonePanelOpen }"
-						name="arrow-down"
-						size="28"
-						color="#999"
-					></u-icon>
-				</view>
-				<view class="zone-panel__body" v-if="zonePanelOpen">
-					<text class="zone-panel__hint">点地图大区，再选具体产区</text>
+				</scroll-view>
+				<text class="mall-cate__hint">{{ primaryHint }}</text>
+
+				<view class="mall-cate__geo" v-if="primaryKey === 'geo'">
+					<text class="mall-cate__geo-tip">在地图上点选大区，再选具体产区</text>
 					<mall-china-map :value="mapRegion" @change="onMapRegionChange" />
 					<scroll-view
 						v-if="regionZoneList.length"
@@ -125,6 +125,7 @@
 							</view>
 						</view>
 					</scroll-view>
+					<text class="mall-cate__geo-summary">{{ zonePanelSummary }}</text>
 				</view>
 			</view>
 
@@ -185,16 +186,45 @@
 				isLoading: true,
 				coupon_list: [],
 				cate_list: [],
+				first_cate_list: [],
 				cate_type: 0,
+				primaryKey: 'all',
+				first_cate_id: 0,
 				mapRegion: 'all',
 				goods_list: [],
 				page: 1,
 				total: 0,
 				loadingGoods: false,
-				zonePanelOpen: true,
+				keyword: '',
 			};
 		},
 		computed: {
+			primaryTabs() {
+				const tabs = [
+					{ key: 'all', label: '全部', mode: 'all' },
+					{ key: 'geo', label: '产区地图', mode: 'geo' },
+				]
+				;(this.first_cate_list || []).forEach(item => {
+					if (!item || !item.id) return
+					tabs.push({
+						key: 'first-' + item.id,
+						label: item.cate_name,
+						mode: 'first',
+						firstId: item.id,
+					})
+				})
+				return tabs
+			},
+			primaryHint() {
+				if (this.primaryKey === 'geo') {
+					return '按地图探索各地特色好物'
+				}
+				if (this.first_cate_id > 0) {
+					const name = this.first_cate_list.find(c => Number(c.id) === Number(this.first_cate_id))?.cate_name || '该类型'
+					return '当前浏览：' + name + ' · 列表筛选'
+				}
+				return '浏览全部可兑换好物'
+			},
 			displayPointText() {
 				if (!this.isLogin) {
 					return '--'
@@ -218,8 +248,15 @@
 				return zone || '已选产区'
 			},
 			goodsSectionTitle() {
-				const name = this.cate_list[this.cate_type]?.cate_name || '全部'
-				return name === '全部' ? '全部好物' : name + ' · 特色好物'
+				if (this.primaryKey === 'geo') {
+					const name = this.cate_list[this.cate_type]?.cate_name || '全部'
+					return name === '全部' ? '产区好物' : name + ' · 特色好物'
+				}
+				if (this.first_cate_id > 0) {
+					const fc = this.first_cate_list.find(c => Number(c.id) === Number(this.first_cate_id))
+					return (fc && fc.cate_name) ? fc.cate_name + ' · 精选' : '分类好物'
+				}
+				return '全部好物'
 			},
 			regionZoneList() {
 				if (!this.mapRegion || this.mapRegion === 'all') return []
@@ -301,13 +338,19 @@
 					}
 				}
 			},
-			fetchMallTabHome({ page = 1, secondCate = 0 } = {}) {
-				const zoneId = secondCate || (this.cate_list[this.cate_type]?.id || 0)
+			fetchMallTabHome({ page = 1, secondCate = 0, firstCate = 0 } = {}) {
+				const zoneId = this.primaryKey === 'geo'
+					? (secondCate || (this.cate_list[this.cate_type]?.id || 0))
+					: 0
+				const firstId = this.primaryKey.startsWith('first-')
+					? (firstCate || this.first_cate_id || 0)
+					: 0
 				const params = {
 					page,
 					keyword: this.keyword || ''
 				}
 				if (zoneId) params.second_cate = zoneId
+				if (firstId) params.first_cate = firstId
 				return this.$u.api.get_mall_tab_home(params).then(res => {
 					const d = res.data || {}
 					if (Object.prototype.hasOwnProperty.call(d, 'coupon_list')) {
@@ -315,6 +358,9 @@
 					}
 					if (Object.prototype.hasOwnProperty.call(d, 'cate_list')) {
 						this.cate_list = [{ id: 0, cate_name: '全部' }, ...(d.cate_list || [])]
+					}
+					if (Object.prototype.hasOwnProperty.call(d, 'first_cate_list')) {
+						this.first_cate_list = d.first_cate_list || []
 					}
 					const list = d.goods_list || []
 					if (page === 1) {
@@ -335,13 +381,25 @@
 				this.goods_list = []
 				return this.fetchMallTabHome({ page: 1 })
 			},
-			toggleZonePanel() {
-				this.zonePanelOpen = !this.zonePanelOpen
-			},
-			collapseZonePanel() {
-				this.zonePanelOpen = false
+			onPrimaryTab(tab) {
+				if (!tab || tab.key === this.primaryKey) return
+				this.primaryKey = tab.key
+				this.cate_type = 0
+				this.mapRegion = 'all'
+				if (tab.mode === 'first') {
+					this.first_cate_id = tab.firstId || 0
+				} else {
+					this.first_cate_id = 0
+				}
+				this.page = 1
+				this.goods_list = []
+				this.get_goods_list()
 			},
 			cate_btn(index) {
+				if (this.primaryKey !== 'geo') {
+					this.primaryKey = 'geo'
+					this.first_cate_id = 0
+				}
 				const changed = this.cate_type !== index
 				this.cate_type = index
 				this.syncMapFromCateIndex(index)
@@ -350,9 +408,6 @@
 					this.goods_list = []
 					this.get_goods_list()
 				}
-				this.$nextTick(() => {
-					this.collapseZonePanel()
-				})
 			},
 			get_goods_list() {
 				if (this.loadingGoods) return Promise.resolve()
@@ -360,7 +415,8 @@
 				const zoneId = this.cate_list[this.cate_type]?.id || 0
 				return this.fetchMallTabHome({
 					page: this.page,
-					secondCate: zoneId
+					secondCate: zoneId,
+					firstCate: this.first_cate_id,
 				})
 			},
 			receive_coupon(item) {
@@ -521,84 +577,78 @@
 		padding: 8rpx 16rpx;
 	}
 
-	.zone-panel {
-		padding: 8rpx 24rpx 8rpx;
+	.mall-cate {
+		padding: 20rpx 8rpx 16rpx;
 		margin-bottom: 30rpx;
+	}
+
+	.mall-cate__primary {
+		width: 100%;
+		white-space: nowrap;
+	}
+
+	.mall-cate__primary-inner {
+		display: inline-flex;
+		padding: 0 16rpx 4rpx;
+		gap: 16rpx;
+	}
+
+	.mall-cate-pill {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 16rpx 32rpx;
+		border-radius: 999rpx;
+		background: #f2f4f3;
+		font-size: 28rpx;
+		color: #3a3a3c;
+		flex-shrink: 0;
+		transition: background 0.2s ease, color 0.2s ease;
+	}
+
+	.mall-cate-pill--on {
+		background: #e3f3ea;
+		color: #076d3d;
+		font-weight: 600;
+	}
+
+	.mall-cate-pill--press {
+		opacity: 0.85;
+	}
+
+	.mall-cate__hint {
+		display: block;
+		padding: 12rpx 24rpx 0;
+		font-size: 24rpx;
+		color: #8e8e93;
+		line-height: 1.45;
+	}
+
+	.mall-cate__geo {
+		padding: 16rpx 16rpx 8rpx;
+	}
+
+	.mall-cate__geo-tip {
+		display: block;
+		font-size: 24rpx;
+		color: #666;
+		margin-bottom: 12rpx;
+		padding-left: 8rpx;
+	}
+
+	.mall-cate__geo-summary {
+		display: block;
+		margin-top: 12rpx;
+		padding: 0 8rpx 8rpx;
+		font-size: 24rpx;
+		color: #18af38;
+		font-weight: 500;
 	}
 
 	.goods-section {
 		@include glass-sheet;
 		margin-top: 8rpx;
 		padding: 24rpx 20rpx 8rpx;
-	}
-
-	.zone-panel__head {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 20rpx 0;
-		width: 100%;
-	}
-
-	.zone-panel__head-main {
-		flex: 1;
-		min-width: 0;
-		padding-right: 16rpx;
-	}
-
-	.zone-panel__title-wrap {
-		display: flex;
-		align-items: center;
-		margin-bottom: 8rpx;
-	}
-
-	.zone-panel__summary {
-		display: block;
-		font-size: 24rpx;
-		color: #18af38;
-		padding-left: 20rpx;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.zone-panel__chevron {
-		flex-shrink: 0;
-		transition: transform 0.3s ease;
-		margin-right: 4rpx;
-	}
-
-	.zone-panel__chevron--up {
-		transform: rotate(180deg);
-	}
-
-	.zone-panel__body {
-		padding-bottom: 16rpx;
-	}
-
-	.zone-panel__hint {
-		display: block;
-		margin-bottom: 16rpx;
-	}
-
-	.zone-panel__dot {
-		width: 8rpx;
-		height: 32rpx;
-		border-radius: 4rpx;
-		background: #18AF38;
-		margin-right: 12rpx;
-	}
-
-	.zone-panel__title {
-		font-size: 34rpx;
-		font-weight: 700;
-		color: #222;
-	}
-
-	.zone-panel__hint {
-		font-size: 24rpx;
-		color: #999;
-		padding-left: 20rpx;
 	}
 
 	.zone-strip {
