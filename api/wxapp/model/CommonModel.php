@@ -21,6 +21,7 @@ use think\Model;
 use think\facade\Cache;
 use PHPMailer\PHPMailer\PHPMailer;
 use cmf\lib\Storage;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -784,7 +785,7 @@ class CommonModel extends Model
         // 是导出耗时的主要来源之一（列宽本来就每列固定 20，设置一次即可）。
         $colLetters = [];
         for ($i = 0; $i < $count; $i++) {
-            $colLetters[$i] = strtoupper(chr(65 + $i)); //数字转字母从65开始
+            $colLetters[$i] = Coordinate::stringFromColumnIndex($i + 1);
             $sheet->getColumnDimension($colLetters[$i])->setWidth(20); //固定列宽
         }
 
