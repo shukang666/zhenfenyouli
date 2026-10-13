@@ -107,14 +107,27 @@ class CheckController extends AuthController
     public function get_check(CheckModel $checkModel)
     {
         $this->checkUser();
+        $isSupervisor = !empty($this->user_info['is_supervisor']);
         $item = $checkModel->where('user_id', $this->user_id)->order('id desc')->find();
-        if (empty($item)) $this->error('暂无数据');
+        if (empty($item)) {
+            if ($isSupervisor) {
+                $this->success('请求成功', [
+                    'status' => 2,
+                    'status_name' => '已通过',
+                    'is_approved' => true,
+                    'role_name' => '督导员',
+                    'role_type' => 1,
+                ]);
+                return;
+            }
+            $this->error('暂无数据');
+        }
         $item['status_name'] = $checkModel->get_status()[$item['status']]??'';
         $getType = $checkModel->get_type();
         $item['active_name'] = $getType[$item['active_type']]??'';
         $item['role_type'] = intval($item['role_type'] ?? 1);
-        // 督导员统一权限：任一角色（督导员role_type=1 或 指导员role_type=2）通过审核即算通过
-        $item['is_approved'] = ($item['status'] == 2);
+        // 督导员统一权限：申请审核通过，或会员表已标记为督导员（含后台直接开通）
+        $item['is_approved'] = ($item['status'] == 2) || $isSupervisor;
         $item['role_name'] = '督导员';
         $item['role_type'] = 1;  // 统一为督导员类型
 

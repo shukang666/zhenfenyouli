@@ -114,7 +114,13 @@
 		},
 		computed: {
 			isVolunteer() {
-				return this.checkRole && this.checkRole.is_approved;
+				if (this.checkRole && this.checkRole.is_approved) {
+					return true;
+				}
+				if (!this.isLogin || !this.userInfo) {
+					return false;
+				}
+				return Number(this.userInfo.is_supervisor) === 1;
 			},
 			displayName() {
 				if (this.isLogin && this.userInfo && this.userInfo.nickname) {
@@ -163,15 +169,25 @@
 				}
 				this.$u.api.getCheckRole().then(res => {
 					this.checkRole = res.data || null;
-					if (this.checkRole && this.checkRole.is_approved) {
+				}).catch(() => {
+					this.checkRole = null;
+				}).finally(() => {
+					if (this.isVolunteer) {
 						this.loadVolunteerSupervision();
 					} else {
 						this.volunteerSupervision = { total: 0, last_date: '' };
 					}
-				}).catch(() => {
-					this.checkRole = null;
-					this.volunteerSupervision = { total: 0, last_date: '' };
 				});
+			},
+			ensureVolunteerApproved() {
+				if (this.isVolunteer) {
+					return true;
+				}
+				uni.showToast({
+					title: '请先申请并通过督导员审核',
+					icon: 'none',
+				});
+				return false;
 			},
 			loadVolunteerSupervision() {
 				this.$u.api.getVolunteerMyList({ page: 1, page_size: 1 }).then(res => {
@@ -183,15 +199,17 @@
 			},
 			goVolunteerPage(url) {
 				if (!this.$u.func.checkLogin()) return;
+				if (!this.ensureVolunteerApproved()) return;
 				this.$u.route(url);
 			},
 			goVolunteerMonitor() {
 				if (!this.$u.func.checkLogin()) return;
-				const approved = this.isVolunteer ? 1 : 0;
-				this.$u.route(`/pages/dtsh/supervision-monitor?can_submit=${approved}`);
+				if (!this.ensureVolunteerApproved()) return;
+				this.$u.route('/pages/dtsh/supervision-monitor?can_submit=1');
 			},
 			goVolunteerMerchantInspect() {
 				if (!this.$u.func.checkLogin()) return;
+				if (!this.ensureVolunteerApproved()) return;
 				this.$u.route('/pages/dtsh/merchant-inspect');
 			},
 			goVolunteerApply() {
