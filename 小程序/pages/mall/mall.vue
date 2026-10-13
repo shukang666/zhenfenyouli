@@ -28,6 +28,9 @@
 					<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goPointsLog">
 						<u-icon name="order" size="40" color="#2d4a3e"></u-icon>
 					</view>
+					<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goRanking">
+						<u-icon name="star" size="40" color="#2d4a3e"></u-icon>
+					</view>
 					<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goCart">
 						<u-icon name="shopping-cart" size="40" color="#2d4a3e"></u-icon>
 					</view>
@@ -53,6 +56,14 @@
 		</view>
 		<view class="mall-body glass-page__content">
 			<view class="mall-body-inner">
+			<view class="mall-secondhand-entry" hover-class="mall-secondhand-entry--press" @tap="goSecondhand">
+				<view class="mall-secondhand-entry__icon">♻️</view>
+				<view class="mall-secondhand-entry__main">
+					<text class="mall-secondhand-entry__title">社区闲置 · 积分交换</text>
+					<text class="mall-secondhand-entry__sub">发布自家闲置，用积分邻里互换</text>
+				</view>
+				<u-icon name="arrow-right" size="28" color="#076d3d"></u-icon>
+			</view>
 			<view class="mall-search-box glass-search" id="guide-mall-search">
 				<u-search
 					class="mall-search-field"
@@ -206,12 +217,6 @@
 			</view>
 		</view>
 
-		<view class="mall-float-btn" @click="$u.route('/pages/shop/cart')">
-			<u-image width="100" height="100" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/0ee9d98c2273efcb512c5ea5abc876f1.png"></u-image>
-		</view>
-		<view class="mall-float-btn mall-float-btn--rank" @click="$u.route('/pages/shop/ranking')">
-			<u-image width="100" height="100" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/4c26a124df730861668dd53ab9842f27.png"></u-image>
-		</view>
 		<view class="tabbar-placeholder"></view>
 		<page-guide page="mall"></page-guide>
 	</view>
@@ -355,6 +360,12 @@
 			goCart() {
 				if (!this.$u.func.checkLogin()) return
 				this.$u.route('/pages/shop/cart')
+			},
+			goRanking() {
+				this.$u.route('/pages/shop/ranking')
+			},
+			goSecondhand() {
+				this.$u.route('/pages/points/secondhand-list')
 			},
 			zoneShortName(name) {
 				return zoneShortName(name)
@@ -693,6 +704,52 @@
 		opacity: 0.72;
 	}
 
+	.mall-secondhand-entry {
+		display: flex;
+		align-items: center;
+		gap: 20rpx;
+		padding: 24rpx 24rpx;
+		margin-bottom: $mall-block-gap;
+		background: linear-gradient(135deg, #ffffff 0%, #f0faf4 100%);
+		border-radius: 24rpx;
+		border: 1rpx solid #dceee3;
+		box-shadow: 0 6rpx 24rpx rgba(7, 109, 61, 0.05);
+	}
+
+	.mall-secondhand-entry--press {
+		opacity: 0.92;
+	}
+
+	.mall-secondhand-entry__icon {
+		width: 72rpx;
+		height: 72rpx;
+		line-height: 72rpx;
+		text-align: center;
+		font-size: 36rpx;
+		background: #e3f3ea;
+		border-radius: 16rpx;
+		flex-shrink: 0;
+	}
+
+	.mall-secondhand-entry__main {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.mall-secondhand-entry__title {
+		display: block;
+		font-size: 30rpx;
+		font-weight: 700;
+		color: #1a1a1a;
+	}
+
+	.mall-secondhand-entry__sub {
+		display: block;
+		margin-top: 6rpx;
+		font-size: 24rpx;
+		color: #6b7370;
+	}
+
 	.mall-search-box {
 		display: flex;
 		align-items: center;
@@ -922,17 +979,6 @@
 		margin-top: 20rpx;
 		font-size: 28rpx;
 		color: #999;
-	}
-
-	.mall-float-btn {
-		position: fixed;
-		right: 30rpx;
-		bottom: 180rpx;
-		z-index: 9;
-	}
-
-	.mall-float-btn--rank {
-		bottom: 280rpx;
 	}
 
 	.tabbar-placeholder {

@@ -973,6 +973,38 @@
 				"style": {
 					"navigationBarTitleText": "积分明细"
 				}
+			}, {
+				"path": "secondhand-list",
+				"style": {
+					"navigationBarTitleText": "社区闲置",
+					"componentPlaceholder": {
+						"u-icon": "view",
+						"u-search": "view",
+						"u-avatar": "view"
+					}
+				}
+			}, {
+				"path": "secondhand-publish",
+				"style": {
+					"navigationBarTitleText": "发布闲置",
+					"componentPlaceholder": {
+						"u-icon": "view"
+					}
+				}
+			}, {
+				"path": "secondhand-detail",
+				"style": {
+					"navigationBarTitleText": "闲置详情",
+					"componentPlaceholder": {
+						"u-icon": "view",
+						"u-avatar": "view"
+					}
+				}
+			}, {
+				"path": "secondhand-my",
+				"style": {
+					"navigationBarTitleText": "我的发布"
+				}
 			}]
 		},
 		{
