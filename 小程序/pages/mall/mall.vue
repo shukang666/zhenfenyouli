@@ -52,15 +52,17 @@
 			</view>
 		</view>
 		<view class="mall-body glass-page__content">
-			<view class="u-p-30 mall-body-inner">
-			<view class="mall-search-wrap glass-search" id="guide-mall-search">
+			<view class="mall-body-inner">
+			<view class="mall-search-box glass-search" id="guide-mall-search">
 				<u-search
+					class="mall-search-field"
 					placeholder="搜索商品名称"
 					v-model="keyword"
+					margin="0"
 					border-color="transparent"
 					search-icon-color="#18AF38"
-					bg-color="#ffffff"
-					height="72"
+					bg-color="#f5f7f6"
+					height="68"
 					:show-action="false"
 				></u-search>
 			</view>
@@ -567,7 +569,7 @@
 		position: relative;
 		z-index: 2;
 		background: #e4e8e5;
-		padding-bottom: 4rpx;
+		padding-bottom: 0;
 	}
 
 	.mall-body {
@@ -576,7 +578,8 @@
 	}
 
 	.mall-body-inner {
-		padding-top: 0;
+		padding: 0 30rpx 30rpx;
+		box-sizing: border-box;
 	}
 
 	.points-nav {
@@ -613,8 +616,10 @@
 		background: rgba(45, 74, 62, 0.08);
 	}
 
+	$mall-block-gap: 24rpx;
+
 	.points-hub {
-		padding: 0 30rpx 20rpx;
+		padding: 0 30rpx $mall-block-gap;
 	}
 
 	.points-hub__card {
@@ -688,17 +693,32 @@
 		opacity: 0.72;
 	}
 
-	.mall-search-wrap {
-		position: relative;
-		padding: 4rpx 8rpx 28rpx;
-		margin-bottom: 8rpx;
+	.mall-search-box {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		min-height: 96rpx;
+		padding: 14rpx 16rpx;
+		margin-bottom: $mall-block-gap;
+	}
+
+	.mall-search-box ::v-deep .u-search,
+	.mall-search-box ::v-deep .mall-search-field {
+		flex: 1;
+		width: 100%;
+	}
+
+	.mall-search-box ::v-deep .u-content {
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.mall-cate {
 		position: relative;
 		z-index: 2;
 		padding: 24rpx 12rpx 20rpx;
-		margin-bottom: 30rpx;
+		margin-bottom: $mall-block-gap;
 		background: #fff;
 		border-radius: 24rpx;
 		box-shadow: 0 8rpx 32rpx rgba(7, 109, 61, 0.05);
