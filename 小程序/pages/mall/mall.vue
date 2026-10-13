@@ -13,12 +13,37 @@
 		<!-- 骨架屏 -->
 		<skeleton-screen :show="isLoading" type="mall"></skeleton-screen>
 		<u-navbar title-color="#fff" :is-back="false" background="transparent" :borderBottom="false">
-			<view class="u-m-l-30">
-				<u-image width="231" height="64" :src="setting.min_logo"></u-image>
+			<view class="points-nav">
+				<text class="points-nav__title">积分权益</text>
+			</view>
+			<view slot="right" class="points-nav__actions">
+				<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goPointsLog">
+					<u-icon name="order" size="40" color="#2d4a3e"></u-icon>
+				</view>
+				<view class="points-nav__action" hover-class="points-nav__action--press" @tap="goCart">
+					<u-icon name="shopping-cart" size="40" color="#2d4a3e"></u-icon>
+				</view>
 			</view>
 		</u-navbar>
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
-		<view class="u-p-30 mall-body glass-page__content">
+		<view class="mall-body glass-page__content">
+			<view class="points-hub" id="guide-mall-points">
+				<view class="points-hub__card">
+					<text class="points-hub__label">我的可用积分</text>
+					<view class="points-hub__value-row">
+						<text class="points-hub__value">{{ displayPointText }}</text>
+						<text class="points-hub__unit">积分</text>
+					</view>
+					<view class="points-hub__foot">
+						<text class="points-hub__slogan">环保行动，让积分发挥价值</text>
+						<view class="points-hub__link" hover-class="points-hub__link--press" @tap="goPointsLog">
+							<text>积分明细</text>
+							<u-icon name="arrow-right" size="24" color="#076d3d"></u-icon>
+						</view>
+					</view>
+				</view>
+			</view>
+			<view class="u-p-30 mall-body-inner">
 			<view class="u-p-b-20 mall-search-wrap glass-search" id="guide-mall-search">
 				<u-search placeholder="搜索商品名称" v-model="keyword" border-color="transparent" search-icon-color="#18AF38" bg-color="transparent" :show-action="false"></u-search>
 			</view>
@@ -129,6 +154,7 @@
 					<text class="goods-empty__text">该产区暂无商品</text>
 				</view>
 			</view>
+			</view>
 		</view>
 
 		<view class="mall-float-btn" @click="$u.route('/pages/shop/cart')">
@@ -169,6 +195,14 @@
 			};
 		},
 		computed: {
+			displayPointText() {
+				if (!this.isLogin) {
+					return '--'
+				}
+				const n = Number(this.userInfo && this.userInfo.point)
+				const val = Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0
+				return String(val).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+			},
 			zonePanelSummary() {
 				if (this.mapRegion === 'creative') {
 					return '综合文创'
@@ -203,8 +237,25 @@
 		onShow() {
 			this.updateTabBarSelected(3)
 			if (checkCommunity(this)) return
+			this.refreshUserPoint()
 		},
 		methods: {
+			refreshUserPoint() {
+				if (!this.isLogin) return
+				this.$u.api.getUserInfo().then(res => {
+					if (res.data) {
+						this.$u.vuex('userInfo', res.data)
+					}
+				}).catch(() => {})
+			},
+			goPointsLog() {
+				if (!this.$u.func.checkLogin()) return
+				this.$u.route('/pages/points/points')
+			},
+			goCart() {
+				if (!this.$u.func.checkLogin()) return
+				this.$u.route('/pages/shop/cart')
+			},
 			zoneShortName(name) {
 				return zoneShortName(name)
 			},
@@ -351,6 +402,119 @@
 
 	.mall-body {
 		position: relative;
+	}
+
+	.mall-body-inner {
+		padding-top: 0;
+	}
+
+	.points-nav {
+		padding-left: 30rpx;
+		display: flex;
+		align-items: center;
+		height: 100%;
+	}
+
+	.points-nav__title {
+		font-size: 40rpx;
+		font-weight: 700;
+		color: #1d1d1f;
+		letter-spacing: 1rpx;
+	}
+
+	.points-nav__actions {
+		display: flex;
+		align-items: center;
+		gap: 8rpx;
+		padding-right: 24rpx;
+	}
+
+	.points-nav__action {
+		width: 72rpx;
+		height: 72rpx;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+	}
+
+	.points-nav__action--press {
+		background: rgba(45, 74, 62, 0.08);
+	}
+
+	.points-hub {
+		padding: 8rpx 30rpx 24rpx;
+	}
+
+	.points-hub__card {
+		background: #fff;
+		border-radius: 24rpx;
+		padding: 32rpx 32rpx 28rpx;
+		box-shadow: 0 8rpx 32rpx rgba(7, 109, 61, 0.06);
+		border: 1rpx solid rgba(255, 255, 255, 0.9);
+	}
+
+	.points-hub__label {
+		display: block;
+		font-size: 26rpx;
+		color: #8e8e93;
+		line-height: 1.4;
+	}
+
+	.points-hub__value-row {
+		display: flex;
+		align-items: baseline;
+		margin-top: 12rpx;
+		gap: 8rpx;
+	}
+
+	.points-hub__value {
+		font-size: 72rpx;
+		font-weight: 700;
+		color: #076d3d;
+		line-height: 1.1;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: -1rpx;
+	}
+
+	.points-hub__unit {
+		font-size: 30rpx;
+		font-weight: 600;
+		color: #076d3d;
+		opacity: 0.92;
+	}
+
+	.points-hub__foot {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: 28rpx;
+		padding-top: 24rpx;
+		border-top: 1rpx solid #f0f2f1;
+		gap: 20rpx;
+	}
+
+	.points-hub__slogan {
+		flex: 1;
+		min-width: 0;
+		font-size: 26rpx;
+		font-weight: 600;
+		color: #076d3d;
+		line-height: 1.45;
+	}
+
+	.points-hub__link {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		gap: 4rpx;
+		font-size: 26rpx;
+		font-weight: 600;
+		color: #076d3d;
+	}
+
+	.points-hub__link--press {
+		opacity: 0.72;
 	}
 
 	.mall-search-wrap {
