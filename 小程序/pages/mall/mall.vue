@@ -141,7 +141,37 @@
 							</view>
 						</view>
 					</scroll-view>
-					<text class="mall-cate__geo-summary">{{ zonePanelSummary }}</text>
+					<view
+						class="mall-cate__geo-reset"
+						v-if="mapRegion !== 'all' || cate_type > 0"
+						hover-class="mall-cate__geo-reset--press"
+						@tap="resetGeoFilter"
+					>
+						<text>查看全国产区</text>
+					</view>
+					<text class="mall-cate__geo-summary" v-if="cate_type > 0">{{ zonePanelSummary }}</text>
+				</view>
+
+				<view class="mall-cate__creative" v-else-if="primaryKey === 'creative'">
+					<scroll-view
+						v-if="creativeZoneList.length > 1"
+						scroll-x
+						class="zone-strip"
+						:show-scrollbar="false"
+					>
+						<view class="zone-strip__inner">
+							<view
+								class="zone-chip"
+								:class="{ 'zone-chip--on': cate_type === item.index }"
+								v-for="item in creativeZoneList"
+								:key="item.id"
+								@click="cate_btn(item.index)"
+							>
+								<text>{{ zoneShortName(item.cate_name) }}</text>
+							</view>
+						</view>
+					</scroll-view>
+					<text class="mall-cate__creative-summary">{{ creativeSummary }}</text>
 				</view>
 			</view>
 
@@ -219,6 +249,7 @@
 				const tabs = [
 					{ key: 'all', label: '全部', mode: 'all' },
 					{ key: 'geo', label: '产区地图', mode: 'geo' },
+					{ key: 'creative', label: '综合文创', mode: 'creative' },
 				]
 				;(this.first_cate_list || []).forEach(item => {
 					if (!item || !item.id) return
@@ -233,7 +264,10 @@
 			},
 			primaryHint() {
 				if (this.primaryKey === 'geo') {
-					return '点地图选大区，或选下方具体产区'
+					return '点地图选大区，再选具体产区'
+				}
+				if (this.primaryKey === 'creative') {
+					return '文创与特色周边 · 积分兑换'
 				}
 				if (this.first_cate_id > 0) {
 					const name = this.first_cate_list.find(c => Number(c.id) === Number(this.first_cate_id))?.cate_name || '该类型'
@@ -249,10 +283,17 @@
 				const val = Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0
 				return String(val).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 			},
-			zonePanelSummary() {
-				if (this.mapRegion === 'creative') {
-					return '综合文创'
+			creativeZoneList() {
+				return zonesInRegion(this.cate_list, 'creative')
+			},
+			creativeSummary() {
+				const name = this.cate_list[this.cate_type]?.cate_name
+				if (name) {
+					return '当前：' + zoneShortName(name)
 				}
+				return '综合文创好物'
+			},
+			zonePanelSummary() {
 				if (this.cate_type <= 0) {
 					return '全国 · 全部产区'
 				}
@@ -267,6 +308,10 @@
 				if (this.primaryKey === 'geo') {
 					const name = this.cate_list[this.cate_type]?.cate_name || '全部'
 					return name === '全部' ? '产区好物' : name + ' · 特色好物'
+				}
+				if (this.primaryKey === 'creative') {
+					const name = this.cate_list[this.cate_type]?.cate_name
+					return name ? zoneShortName(name) + ' · 文创精选' : '综合文创 · 精选'
 				}
 				if (this.first_cate_id > 0) {
 					const fc = this.first_cate_list.find(c => Number(c.id) === Number(this.first_cate_id))
@@ -313,9 +358,13 @@
 				return zoneShortName(name)
 			},
 			onMapRegionChange(key) {
+				if (key === 'creative') {
+					this.onPrimaryTab({ key: 'creative', mode: 'creative' })
+					return
+				}
 				this.mapRegion = key
 				if (key === 'all') {
-					this.cate_btn(0)
+					this.resetGeoFilter()
 					return
 				}
 				const zones = zonesInRegion(this.cate_list, key)
@@ -325,6 +374,31 @@
 					this.cate_btn(0)
 				}
 			},
+			isCreativeZoneIndex(index) {
+				if (index <= 0) return false
+				const name = this.cate_list[index]?.cate_name || ''
+				return matchZoneToRegion(name) === 'creative' || name.indexOf('综合') >= 0
+			},
+			applyCreativeSelection() {
+				const zones = zonesInRegion(this.cate_list, 'creative')
+				if (zones.length) {
+					this.cate_type = zones[0].index
+				} else {
+					this.cate_type = 0
+				}
+				this.mapRegion = 'all'
+			},
+			resetGeoFilter() {
+				if (this.primaryKey !== 'geo') {
+					this.primaryKey = 'geo'
+					this.first_cate_id = 0
+				}
+				this.mapRegion = 'all'
+				this.cate_type = 0
+				this.page = 1
+				this.goods_list = []
+				this.get_goods_list()
+			},
 			syncMapFromCateIndex(index) {
 				if (index <= 0) {
 					this.mapRegion = 'all'
@@ -332,6 +406,10 @@
 				}
 				const name = this.cate_list[index]?.cate_name || ''
 				const region = matchZoneToRegion(name)
+				if (region === 'creative') {
+					this.mapRegion = 'all'
+					return
+				}
 				this.mapRegion = region ? region : 'all'
 			},
 			async loadAllData() {
@@ -355,7 +433,8 @@
 				}
 			},
 			fetchMallTabHome({ page = 1, secondCate = 0, firstCate = 0 } = {}) {
-				const zoneId = this.primaryKey === 'geo'
+				const useZone = this.primaryKey === 'geo' || this.primaryKey === 'creative'
+				const zoneId = useZone
 					? (secondCate || (this.cate_list[this.cate_type]?.id || 0))
 					: 0
 				const firstId = this.primaryKey.startsWith('first-')
@@ -402,23 +481,35 @@
 				this.primaryKey = tab.key
 				this.cate_type = 0
 				this.mapRegion = 'all'
+				this.first_cate_id = 0
 				if (tab.mode === 'first') {
 					this.first_cate_id = tab.firstId || 0
-				} else {
-					this.first_cate_id = 0
+				} else if (tab.mode === 'creative') {
+					this.applyCreativeSelection()
 				}
 				this.page = 1
 				this.goods_list = []
 				this.get_goods_list()
 			},
 			cate_btn(index) {
-				if (this.primaryKey !== 'geo') {
-					this.primaryKey = 'geo'
-					this.first_cate_id = 0
+				const creative = this.isCreativeZoneIndex(index)
+				if (creative) {
+					if (this.primaryKey !== 'creative') {
+						this.primaryKey = 'creative'
+						this.first_cate_id = 0
+						this.mapRegion = 'all'
+					}
+				} else if (index > 0) {
+					if (this.primaryKey !== 'geo') {
+						this.primaryKey = 'geo'
+						this.first_cate_id = 0
+					}
+					this.syncMapFromCateIndex(index)
+				} else if (this.primaryKey === 'geo') {
+					this.mapRegion = 'all'
 				}
 				const changed = this.cate_type !== index
 				this.cate_type = index
-				this.syncMapFromCateIndex(index)
 				if (changed) {
 					this.page = 1
 					this.goods_list = []
@@ -660,7 +751,20 @@
 		padding: 8rpx 12rpx 4rpx;
 	}
 
-	.mall-cate__geo-summary {
+	.mall-cate__geo-reset {
+		margin-top: 12rpx;
+		padding: 8rpx 12rpx;
+		display: inline-flex;
+		font-size: 24rpx;
+		color: #18af38;
+	}
+
+	.mall-cate__geo-reset--press {
+		opacity: 0.7;
+	}
+
+	.mall-cate__geo-summary,
+	.mall-cate__creative-summary {
 		display: block;
 		margin-top: 16rpx;
 		padding: 12rpx 16rpx;
@@ -669,6 +773,10 @@
 		font-weight: 500;
 		background: #f3faf6;
 		border-radius: 12rpx;
+	}
+
+	.mall-cate__creative {
+		padding: 8rpx 12rpx 4rpx;
 	}
 
 	.goods-section {

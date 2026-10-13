@@ -1,23 +1,5 @@
 <template>
 	<view class="china-map">
-		<view class="china-map__quick">
-			<view
-				class="china-map__quick-pill"
-				:class="{ 'china-map__quick-pill--on': value === 'creative' }"
-				hover-class="china-map__quick-pill--press"
-				@tap="onTap('creative')"
-			>
-				<text>综合文创</text>
-			</view>
-			<view
-				class="china-map__quick-pill"
-				:class="{ 'china-map__quick-pill--on': value === 'all' }"
-				hover-class="china-map__quick-pill--press"
-				@tap="onTap('all')"
-			>
-				<text>全国产区</text>
-			</view>
-		</view>
 		<view class="china-map__canvas-wrap">
 			<canvas
 				canvas-id="mallChinaMap"
@@ -285,34 +267,6 @@
 .china-map {
 	position: relative;
 	width: 100%;
-}
-
-.china-map__quick {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 16rpx;
-	padding: 0 4rpx 16rpx;
-}
-
-.china-map__quick-pill {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 12rpx 28rpx;
-	border-radius: 999rpx;
-	background: #f2f4f3;
-	font-size: 26rpx;
-	color: #3a3a3c;
-}
-
-.china-map__quick-pill--on {
-	background: #e3f3ea;
-	color: #076d3d;
-	font-weight: 600;
-}
-
-.china-map__quick-pill--press {
-	opacity: 0.82;
 }
 
 .china-map__canvas-wrap {
