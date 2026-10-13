@@ -109,6 +109,17 @@
 					"style": {
 						"navigationBarTitleText": "关于"
 					}
+				},
+				{
+					"path": "shukang-about",
+					"style": {
+						"navigationBarTitleText": "关于数康",
+						"navigationStyle": "custom",
+						"disableScroll": true,
+						"componentPlaceholder": {
+							"u-icon": "view"
+						}
+					}
 				}
 			]
 		},

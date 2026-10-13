@@ -198,6 +198,12 @@
 						</view>
 						<text class="me-grid__name">个人信息</text>
 					</view>
+					<view class="me-grid__item" @click="goShukangAbout">
+						<view class="me-grid__icon me-grid__icon--sk">
+							<text class="me-grid__sk">SK</text>
+						</view>
+						<text class="me-grid__name">关于数康</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -323,6 +329,9 @@
 			},
 			closeDesc() {
 				this.descShow = false
+			},
+			goShukangAbout() {
+				this.$u.route('/pages/public/shukang-about')
 			},
 		}
 	}
@@ -576,6 +585,15 @@
 	.me-grid__icon--b { background: #e8f2ff; }
 	.me-grid__icon--c { background: #fff1e6; }
 	.me-grid__icon--d { background: #f1ebff; }
+	.me-grid__icon--sk {
+		background: linear-gradient(145deg, rgba(15, 61, 34, 0.92), rgba(24, 175, 56, 0.88));
+	}
+	.me-grid__sk {
+		font-size: 26rpx;
+		font-weight: 800;
+		color: #fff;
+		letter-spacing: 2rpx;
+	}
 	.me-grid__name {
 		font-size: 22rpx;
 		color: #2c3a2f;
