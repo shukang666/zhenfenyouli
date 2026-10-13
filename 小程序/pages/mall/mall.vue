@@ -44,8 +44,16 @@
 				</view>
 			</view>
 			<view class="u-p-30 mall-body-inner">
-			<view class="u-p-b-20 mall-search-wrap glass-search" id="guide-mall-search">
-				<u-search placeholder="搜索商品名称" v-model="keyword" border-color="transparent" search-icon-color="#18AF38" bg-color="transparent" :show-action="false"></u-search>
+			<view class="mall-search-wrap glass-search" id="guide-mall-search">
+				<u-search
+					placeholder="搜索商品名称"
+					v-model="keyword"
+					border-color="transparent"
+					search-icon-color="#18AF38"
+					bg-color="#ffffff"
+					height="72"
+					:show-action="false"
+				></u-search>
 			</view>
 
 			<!-- 优惠券 -->
@@ -87,7 +95,7 @@
 			</view>
 
 			<!-- 分类：一行切换「全部 / 产区地图 / 商品类型」 -->
-			<view class="mall-cate glass-card" id="guide-mall-cate">
+			<view class="mall-cate" id="guide-mall-cate">
 				<scroll-view scroll-x class="mall-cate__primary" :show-scrollbar="false">
 					<view class="mall-cate__primary-inner">
 						<view
@@ -105,7 +113,6 @@
 				<text class="mall-cate__hint">{{ primaryHint }}</text>
 
 				<view class="mall-cate__geo" v-if="primaryKey === 'geo'">
-					<text class="mall-cate__geo-tip">在地图上点选大区，再选具体产区</text>
 					<mall-china-map :value="mapRegion" @change="onMapRegionChange" />
 					<scroll-view
 						v-if="regionZoneList.length"
@@ -217,7 +224,7 @@
 			},
 			primaryHint() {
 				if (this.primaryKey === 'geo') {
-					return '按地图探索各地特色好物'
+					return '点地图选大区，或选下方具体产区'
 				}
 				if (this.first_cate_id > 0) {
 					const name = this.first_cate_list.find(c => Number(c.id) === Number(this.first_cate_id))?.cate_name || '该类型'
@@ -574,12 +581,22 @@
 	}
 
 	.mall-search-wrap {
-		padding: 8rpx 16rpx;
+		position: relative;
+		z-index: 4;
+		padding: 12rpx 8rpx 28rpx;
+		margin-bottom: 8rpx;
+		background: transparent;
 	}
 
 	.mall-cate {
-		padding: 20rpx 8rpx 16rpx;
+		position: relative;
+		z-index: 2;
+		padding: 24rpx 12rpx 20rpx;
 		margin-bottom: 30rpx;
+		background: #fff;
+		border-radius: 24rpx;
+		box-shadow: 0 8rpx 32rpx rgba(7, 109, 61, 0.05);
+		border: 1rpx solid rgba(232, 238, 235, 0.95);
 	}
 
 	.mall-cate__primary {
@@ -625,24 +642,18 @@
 	}
 
 	.mall-cate__geo {
-		padding: 16rpx 16rpx 8rpx;
-	}
-
-	.mall-cate__geo-tip {
-		display: block;
-		font-size: 24rpx;
-		color: #666;
-		margin-bottom: 12rpx;
-		padding-left: 8rpx;
+		padding: 8rpx 12rpx 4rpx;
 	}
 
 	.mall-cate__geo-summary {
 		display: block;
-		margin-top: 12rpx;
-		padding: 0 8rpx 8rpx;
+		margin-top: 16rpx;
+		padding: 12rpx 16rpx;
 		font-size: 24rpx;
-		color: #18af38;
+		color: #076d3d;
 		font-weight: 500;
+		background: #f3faf6;
+		border-radius: 12rpx;
 	}
 
 	.goods-section {
@@ -677,11 +688,11 @@
 	}
 
 	.zone-chip--on {
-		background: linear-gradient(135deg, #2fb74c 0%, #18af38 100%);
-		border-color: transparent;
-		color: #fff;
+		background: #e3f3ea;
+		border-color: #c5e6d2;
+		color: #076d3d;
 		font-weight: 600;
-		box-shadow: 0 6rpx 16rpx rgba(24, 175, 56, 0.28);
+		box-shadow: none;
 	}
 
 	.goods-section__head {

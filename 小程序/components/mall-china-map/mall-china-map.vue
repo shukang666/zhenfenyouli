@@ -1,5 +1,23 @@
 <template>
 	<view class="china-map">
+		<view class="china-map__quick">
+			<view
+				class="china-map__quick-pill"
+				:class="{ 'china-map__quick-pill--on': value === 'creative' }"
+				hover-class="china-map__quick-pill--press"
+				@tap="onTap('creative')"
+			>
+				<text>综合文创</text>
+			</view>
+			<view
+				class="china-map__quick-pill"
+				:class="{ 'china-map__quick-pill--on': value === 'all' }"
+				hover-class="china-map__quick-pill--press"
+				@tap="onTap('all')"
+			>
+				<text>全国产区</text>
+			</view>
+		</view>
 		<view class="china-map__canvas-wrap">
 			<canvas
 				canvas-id="mallChinaMap"
@@ -12,22 +30,6 @@
 				@touchend="onTouchEnd"
 			/>
 		</view>
-		<view class="china-map__footer">
-			<view
-				class="china-map__btn"
-				:class="{ 'china-map__btn--on': value === 'creative' }"
-				@click="onTap('creative')"
-			>
-				<text>文创</text>
-			</view>
-			<view
-				class="china-map__btn"
-				:class="{ 'china-map__btn--on': value === 'all' }"
-				@click="onTap('all')"
-			>
-				<text>全国</text>
-			</view>
-		</view>
 	</view>
 </template>
 
@@ -37,15 +39,15 @@
 
 	const REGION_ORDER = ['northwest', 'north', 'northeast', 'central', 'east', 'southwest', 'south']
 
-	/** 分区配色：柔和区分，选中略加深 */
+	/** 分区配色：同页绿色体系，仅用深浅区分大区 */
 	const REGION_PALETTE = {
-		northwest: { fill: '#c5d4eb', stroke: '#94a8c8', fillOn: '#7b96c4', strokeOn: '#5a78a8', label: '#3d4f66' },
-		north: { fill: '#e8d5c4', stroke: '#c4a68a', fillOn: '#c49a72', strokeOn: '#a07850', label: '#5c4a38' },
-		northeast: { fill: '#c8e2d4', stroke: '#94b8a4', fillOn: '#6aab88', strokeOn: '#4a8c6c', label: '#3d5248' },
-		central: { fill: '#efe4c8', stroke: '#cfc08a', fillOn: '#d4bc78', strokeOn: '#b09a58', label: '#5c5238' },
-		east: { fill: '#c8dce8', stroke: '#94b4c8', fillOn: '#6a9ec4', strokeOn: '#4a7ea8', label: '#3d4f5c' },
-		southwest: { fill: '#ddd4e4', stroke: '#b0a0bc', fillOn: '#9a88b0', strokeOn: '#7a6890', label: '#4a4258' },
-		south: { fill: '#ecd4d8', stroke: '#c8a0a8', fillOn: '#c48894', strokeOn: '#a06874', label: '#5c4248' },
+		northwest: { fill: '#e4efe8', stroke: '#c5d9cc', fillOn: '#18af38', strokeOn: '#12962e', label: '#4a6358' },
+		north: { fill: '#dfece4', stroke: '#bdd4c8', fillOn: '#18af38', strokeOn: '#12962e', label: '#4a6358' },
+		northeast: { fill: '#e8f2ec', stroke: '#c8ddd0', fillOn: '#18af38', strokeOn: '#12962e', label: '#4a6358' },
+		central: { fill: '#dceee3', stroke: '#b8d4c4', fillOn: '#18af38', strokeOn: '#12962e', label: '#4a6358' },
+		east: { fill: '#e2f0e8', stroke: '#c0d8ca', fillOn: '#18af38', strokeOn: '#12962e', label: '#4a6358' },
+		southwest: { fill: '#d9ebe1', stroke: '#b5cfc0', fillOn: '#18af38', strokeOn: '#12962e', label: '#4a6358' },
+		south: { fill: '#e6f0ea', stroke: '#c4d9cc', fillOn: '#18af38', strokeOn: '#12962e', label: '#4a6358' },
 	}
 
 	export default {
@@ -169,7 +171,7 @@
 				const h = this.canvasH
 				ctx.clearRect(0, 0, w, h)
 
-				ctx.setFillStyle('#f3f4f6')
+				ctx.setFillStyle('#f7faf8')
 				ctx.fillRect(0, 0, w, h)
 
 				const selected = this.value
@@ -181,11 +183,11 @@
 					const rings = regions[key] || []
 					const c = this.regionColors(key, selected, hasFocus)
 					if (c.dim && hasFocus) {
-						ctx.setGlobalAlpha(0.65)
+						ctx.setGlobalAlpha(0.45)
 					} else {
 						ctx.setGlobalAlpha(1)
 					}
-					this.drawPolygon(rings, c.fill, c.stroke, selected === key ? 1.6 : 0.9)
+					this.drawPolygon(rings, c.fill, c.stroke, selected === key ? 1.4 : 0.75)
 				}
 				ctx.setGlobalAlpha(1)
 
@@ -199,7 +201,13 @@
 					if (!pos) continue
 					const p = this.project(pos[0], pos[1])
 					const c = this.regionColors(key, selected, hasFocus)
-					ctx.setFillStyle(c.label)
+					const on = selected === key
+					ctx.setFillStyle(on ? '#ffffff' : c.label)
+					if (on) {
+						ctx.setFontSize(11)
+					} else {
+						ctx.setFontSize(10)
+					}
 					ctx.fillText(this.labelOf(key), p[0], p[1])
 				}
 
@@ -277,45 +285,47 @@
 .china-map {
 	position: relative;
 	width: 100%;
-	border-radius: 20rpx;
-	overflow: hidden;
-	background: #f7f8fa;
+}
+
+.china-map__quick {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16rpx;
+	padding: 0 4rpx 16rpx;
+}
+
+.china-map__quick-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12rpx 28rpx;
+	border-radius: 999rpx;
+	background: #f2f4f3;
+	font-size: 26rpx;
+	color: #3a3a3c;
+}
+
+.china-map__quick-pill--on {
+	background: #e3f3ea;
+	color: #076d3d;
+	font-weight: 600;
+}
+
+.china-map__quick-pill--press {
+	opacity: 0.82;
 }
 
 .china-map__canvas-wrap {
 	width: 100%;
-	padding: 8rpx 0 0;
+	padding: 4rpx 0 8rpx;
+	border-radius: 20rpx;
+	background: #f7faf8;
+	border: 1rpx solid #e8eeeb;
+	overflow: hidden;
 }
 
 .china-map__canvas {
 	display: block;
 	margin: 0 auto;
-}
-
-.china-map__footer {
-	display: flex;
-	justify-content: space-between;
-	padding: 12rpx 20rpx 20rpx;
-	gap: 20rpx;
-}
-
-.china-map__btn {
-	flex: 1;
-	height: 72rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 16rpx;
-	background: #fff;
-	border: 2rpx solid #e2e5ea;
-	font-size: 26rpx;
-	color: #5c6370;
-}
-
-.china-map__btn--on {
-	background: #4a5568;
-	border-color: #4a5568;
-	color: #fff;
-	font-weight: 600;
 }
 </style>
