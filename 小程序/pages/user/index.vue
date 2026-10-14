@@ -69,17 +69,7 @@
 			</view>
 
 			<view class="me-grow flat-card" v-if="!userInfo.is_environmental && isLogin">
-				<view class="me-grow__icon-wrap">
-					<image
-						v-if="meAssets.growBadge"
-						class="me-grow__icon"
-						:src="meAssets.growBadge"
-						mode="aspectFill"
-					></image>
-					<view v-else class="me-grow__icon-ph">
-						<text>110×110</text>
-					</view>
-				</view>
+				<image class="me-grow__icon" :src="envGrowBadgeUrl" mode="aspectFill"></image>
 				<view class="me-grow__content">
 					<view class="me-grow__head">
 						<text class="me-grow__title">环保达人</text>
@@ -219,6 +209,8 @@
 	import settings from '@/common/settings.js'
 
 	const ME_QUICK_ICON_BASE = settings.staticAssetBase + 'user/quick/'
+	/** 我的页环保达人进度卡插图（COS static，与改版前一致） */
+	const ENV_GROW_BADGE_URL = settings.staticAssetBase + 'images/jiankangdaren.png'
 
 	export default {
 		components: { SkeletonScreen },
@@ -229,10 +221,10 @@
 				mask_show: false,
 				descShow: false,
 				badge_list: [],
+				envGrowBadgeUrl: ENV_GROW_BADGE_URL,
 				/** 视觉资源：填 COS 完整地址后占位自动隐藏 */
 				meAssets: {
 					banner: '',
-					growBadge: '',
 					quick: {
 						/* 小程序 image 不支持远程 SVG，用 PNG（与 static/user/quick 同名） */
 						points: ME_QUICK_ICON_BASE + 'jifenshangcheng.png',
@@ -576,26 +568,12 @@
 		align-items: center;
 		padding: 28rpx;
 	}
-	.me-grow__icon-wrap {
-		flex-shrink: 0;
-		margin-right: 24rpx;
-	}
 	.me-grow__icon {
 		width: 110rpx;
 		height: 110rpx;
+		flex-shrink: 0;
+		margin-right: 24rpx;
 		border-radius: 20rpx;
-	}
-	.me-grow__icon-ph {
-		width: 110rpx;
-		height: 110rpx;
-		border-radius: 20rpx;
-		background: #eef0f3;
-		border: 2rpx dashed rgba(0, 0, 0, 0.08);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 20rpx;
-		color: #aeaeb2;
 	}
 	.me-grow__content {
 		flex: 1;
