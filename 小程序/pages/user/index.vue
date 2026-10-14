@@ -112,11 +112,8 @@
 						:key="item.key"
 						@click="navigator(item.url)"
 					>
-						<view class="me-quick__icon">
-							<image v-if="meAssets.quick[item.key]" :src="meAssets.quick[item.key]" mode="aspectFit" class="me-quick__img"></image>
-							<view v-else class="me-quick__ph">
-								<text>80</text>
-							</view>
+						<view class="me-quick__icon me-quick__icon--img">
+							<image :src="meAssets.quick[item.key]" mode="aspectFit" class="me-quick__img"></image>
 						</view>
 						<text class="me-quick__name">{{ item.name }}</text>
 					</view>
@@ -213,6 +210,9 @@
 	import careGesture from '@/common/care-gesture.mixin.js'
 	import { shouldTabRefresh } from '@/common/tab-refresh.js'
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
+	import settings from '@/common/settings.js'
+
+	const ME_QUICK_ICON_BASE = settings.staticAssetBase + 'user/quick/'
 
 	export default {
 		components: { SkeletonScreen },
@@ -228,10 +228,11 @@
 					banner: '',
 					growBadge: '',
 					quick: {
-						points: '',
-						activity: '',
-						order: '',
-						msg: '',
+						/* 小程序 image 不支持远程 SVG，用 PNG（与 static/user/quick 同名） */
+						points: ME_QUICK_ICON_BASE + 'jifenshangcheng.png',
+						activity: ME_QUICK_ICON_BASE + 'wodehuodong.png',
+						order: ME_QUICK_ICON_BASE + 'duihuandingdan.png',
+						msg: ME_QUICK_ICON_BASE + 'xiaoxitongzhi.png',
 					},
 					service: {
 						community: '',
@@ -634,47 +635,43 @@
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
-		padding: 8rpx 12rpx 24rpx;
+		padding: 4rpx 8rpx 28rpx;
 	}
 	.me-quick__item {
 		width: 25%;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		padding: 16rpx 0;
+		align-items: stretch;
+		padding: 8rpx 6rpx;
 		box-sizing: border-box;
 	}
 	.me-quick__icon {
-		width: 88rpx;
-		height: 88rpx;
-		border-radius: 22rpx;
+		width: 100%;
+		height: 0;
+		padding-bottom: 100%;
+		position: relative;
+		border-radius: 24rpx;
 		background: #f2f3f5;
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		margin-bottom: 12rpx;
 		overflow: hidden;
 	}
-	.me-quick__img {
-		width: 56rpx;
-		height: 56rpx;
+	.me-quick__icon--img {
+		background: transparent;
 	}
-	.me-quick__ph {
+	.me-quick__img {
+		position: absolute;
+		left: 0;
+		top: 0;
 		width: 100%;
 		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 2rpx dashed rgba(0, 0, 0, 0.06);
-		border-radius: 22rpx;
-		box-sizing: border-box;
-		font-size: 20rpx;
-		color: #c7c7cc;
+		border-radius: 24rpx;
 	}
 	.me-quick__name {
 		font-size: 24rpx;
 		color: $flat-text;
 		text-align: center;
+		line-height: 1.35;
+		padding: 0 4rpx;
 	}
 
 	.flat-row {
