@@ -378,7 +378,7 @@
 				this.$u.route('/pages/shop/ranking')
 			},
 			goSecondhand() {
-				this.$u.route('/pages/points/secondhand-list')
+				this.$u.route('/pages/points/secondhand-intro')
 			},
 			zoneShortName(name) {
 				return zoneShortName(name)

@@ -138,7 +138,8 @@
 				"path": "care",
 				"style": {
 					"navigationBarTitleText": "关怀版",
-					"navigationStyle": "custom"
+					"navigationStyle": "custom",
+					"disableScroll": true
 				}
 			}]
 		},
@@ -983,6 +984,11 @@
 				"path": "points",
 				"style": {
 					"navigationBarTitleText": "积分明细"
+				}
+			}, {
+				"path": "secondhand-intro",
+				"style": {
+					"navigationBarTitleText": "社区闲置说明"
 				}
 			}, {
 				"path": "secondhand-list",

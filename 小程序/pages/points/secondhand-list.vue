@@ -2,7 +2,15 @@
 	<view class="sh-page">
 		<view class="sh-head">
 			<text class="sh-head__title">社区闲置</text>
-			<text class="sh-head__sub">用积分交换闲置，就近自提更环保</text>
+			<text class="sh-head__sub">线上浏览与发布；换货请到绿色二手市集现场交接</text>
+		</view>
+		<view class="sh-link-row" @tap="goIntro">
+			<text class="sh-link-row__t">规则说明</text>
+			<u-icon name="arrow-right" size="24" color="#076d3d"></u-icon>
+		</view>
+		<view class="sh-link-row sh-link-row--hub" @tap="goFleaHub">
+			<text class="sh-link-row__t">查看市集活动时间与地点</text>
+			<u-icon name="arrow-right" size="24" color="#076d3d"></u-icon>
 		</view>
 		<view class="sh-search glass-search">
 			<u-search
@@ -29,7 +37,7 @@
 				>{{ c.label }}</view>
 			</view>
 		</scroll-view>
-		<view class="sh-demo-tip">演示版：数据保存在本机，正式版将同步云端并扣减积分</view>
+		<view class="sh-demo-tip">演示版：数据保存在本机。正式版将同步云端；积分交割仅在市集活动现场办理。</view>
 		<view class="sh-grid" v-if="list.length">
 			<view class="sh-card" v-for="item in list" :key="item.id" @tap="goDetail(item.id)">
 				<image v-if="cover(item)" class="sh-card__img" :src="cover(item)" mode="aspectFill"></image>
@@ -56,6 +64,7 @@
 
 <script>
 import { getCategories, listSecondhand } from '@/common/secondhandStore.js'
+import { fleaMarketHubUrl, secondhandIntroUrl } from '@/common/secondhandNav.js'
 
 export default {
 	data() {
@@ -94,6 +103,12 @@ export default {
 			if (!this.$u.func.checkLogin()) return
 			this.$u.route('/pages/points/secondhand-my')
 		},
+		goIntro() {
+			this.$u.route(secondhandIntroUrl())
+		},
+		goFleaHub() {
+			this.$u.route(fleaMarketHubUrl())
+		},
 	},
 }
 </script>
@@ -120,6 +135,29 @@ export default {
 	margin-top: 8rpx;
 	font-size: 26rpx;
 	color: #8e8e93;
+	line-height: 1.45;
+}
+
+.sh-link-row {
+	margin-top: 16rpx;
+	padding: 20rpx 24rpx;
+	background: #fff;
+	border-radius: 16rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.sh-link-row--hub {
+	margin-top: 12rpx;
+	background: #e3f3ea;
+}
+
+.sh-link-row__t {
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #076d3d;
 }
 
 .sh-search {

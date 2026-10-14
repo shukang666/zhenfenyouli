@@ -26,7 +26,7 @@
 			<u-avatar :src="item.seller_avatar" size="80"></u-avatar>
 			<view class="sh-detail__seller-main">
 				<text class="sh-detail__seller-name">{{ item.seller_nickname }}</text>
-				<text class="sh-detail__seller-sub">邻里闲置 · 线下交接</text>
+				<text class="sh-detail__seller-sub">邻里闲置 · 市集现场交接</text>
 			</view>
 		</view>
 		<view class="sh-detail__foot">
@@ -59,8 +59,9 @@ export default {
 		onWant() {
 			if (!this.$u.func.checkLogin()) return
 			uni.showModal({
-				title: '演示说明',
-				content: '正式版将冻结您的积分并与卖家确认交接。当前为前端演示，请线下自行联系邻居完成交换。',
+				title: '下一步怎么做',
+				content:
+					'请先与对方确认要交换的闲置与积分价。真正交物品、办积分，请到「七贤岭绿色二手市集」活动现场，由工作人员统一组织（不在私下自行完成官方积分交割）。\n\n当前为演示版，预约与扣积分功能尚未开通。',
 				showCancel: false,
 				confirmText: '知道了',
 			})
