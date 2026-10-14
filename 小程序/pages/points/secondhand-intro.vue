@@ -55,11 +55,14 @@
 
 
 
-		<view class="shi-card shi-card--warn">
+		<view class="shi-notice">
 
-			<text class="shi-card__title">请您留意</text>
-
-			<text class="shi-li" v-for="(line, idx) in notices" :key="idx">{{ line }}</text>
+			<image
+				class="shi-notice__img"
+				:src="introNoticeUrl"
+				mode="widthFix"
+				show-menu-by-longpress="false"
+			></image>
 
 		</view>
 
@@ -117,6 +120,8 @@ import {
 
 const INTRO_HERO_URL = settings.staticAssetBase + 'mall/secondhand-intro-hero.png'
 
+const INTRO_NOTICE_URL = settings.staticAssetBase + 'mall/secondhand-intro-notice.png'
+
 
 
 export default {
@@ -126,6 +131,8 @@ export default {
 		return {
 
 			introHeroUrl: INTRO_HERO_URL,
+
+			introNoticeUrl: INTRO_NOTICE_URL,
 
 			steps: [
 
@@ -152,18 +159,6 @@ export default {
 					desc: '按「绿色二手市集」公布的场次，携带物品到指定场地，由工作人员统一组织交换，完成物品与积分的确认。',
 
 				},
-
-			],
-
-			notices: [
-
-				'· 不支持居民在私下地点自行完成「官方积分」交割，请到市集现场办理。',
-
-				'· 市集为定期活动，场次以活动页公布为准，去之前请先查看时间与地址。',
-
-				'· 发布需审核通过后才会在列表展示。',
-
-				'· 与官方商城商品无关；商城兑换仍走订单与快递/自提流程。',
 
 			],
 
@@ -257,11 +252,25 @@ export default {
 
 
 
-.shi-card--warn {
+.shi-notice {
 
-	background: #fffef8;
+	margin-top: 24rpx;
 
-	border: 2rpx solid #f0e6c8;
+	border-radius: 20rpx;
+
+	overflow: hidden;
+
+}
+
+
+
+.shi-notice__img {
+
+	width: 100%;
+
+	display: block;
+
+	vertical-align: top;
 
 }
 
@@ -390,22 +399,6 @@ export default {
 	color: #666;
 
 	line-height: 1.55;
-
-}
-
-
-
-.shi-li {
-
-	display: block;
-
-	font-size: 26rpx;
-
-	color: #5c4a32;
-
-	line-height: 1.6;
-
-	margin-top: 10rpx;
 
 }
 
