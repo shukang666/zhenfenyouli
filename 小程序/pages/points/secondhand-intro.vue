@@ -2,87 +2,81 @@
 
 	<view class="shi-page">
 
-		<view class="shi-hero">
-
+		<view class="shi-album">
 			<image
-				class="shi-hero__img"
+				class="shi-album__img"
 				:src="introHeroUrl"
 				mode="widthFix"
 				show-menu-by-longpress="false"
 			></image>
-
-		</view>
-
-
-
-		<view class="shi-summary">
-
+			<view class="shi-album__deco" aria-hidden="true">
+				<view class="shi-album__deco-line"></view>
+				<view class="shi-album__deco-badge">
+					<view class="shi-album__deco-orn"></view>
+					<view class="shi-album__deco-orn shi-album__deco-orn--on"></view>
+					<view class="shi-album__deco-orn"></view>
+				</view>
+				<view class="shi-album__deco-line"></view>
+			</view>
 			<image
-				class="shi-summary__img"
+				class="shi-album__img"
 				:src="introSummaryUrl"
 				mode="widthFix"
 				show-menu-by-longpress="false"
 			></image>
-
-		</view>
-
-
-
-		<view class="shi-steps">
-
+			<view class="shi-album__deco" aria-hidden="true">
+				<view class="shi-album__deco-line"></view>
+				<view class="shi-album__deco-badge">
+					<view class="shi-album__deco-orn"></view>
+					<view class="shi-album__deco-orn shi-album__deco-orn--on"></view>
+					<view class="shi-album__deco-orn"></view>
+				</view>
+				<view class="shi-album__deco-line"></view>
+			</view>
 			<image
-				class="shi-steps__img"
+				class="shi-album__img"
 				:src="introStepsUrl"
 				mode="widthFix"
 				show-menu-by-longpress="false"
 			></image>
-
-		</view>
-
-
-
-		<view class="shi-notice">
-
+			<view class="shi-album__deco" aria-hidden="true">
+				<view class="shi-album__deco-line"></view>
+				<view class="shi-album__deco-badge">
+					<view class="shi-album__deco-orn"></view>
+					<view class="shi-album__deco-orn shi-album__deco-orn--on"></view>
+					<view class="shi-album__deco-orn"></view>
+				</view>
+				<view class="shi-album__deco-line"></view>
+			</view>
 			<image
-				class="shi-notice__img"
+				class="shi-album__img"
 				:src="introNoticeUrl"
 				mode="widthFix"
 				show-menu-by-longpress="false"
 			></image>
-
 		</view>
 
-
-
-		<view class="shi-acts">
-			<text class="shi-acts__kicker">快捷入口</text>
-			<view class="shi-acts__panel">
-				<view class="shi-acts__hero" hover-class="shi-acts__hero--press" @tap="goFleaHub">
-					<view class="shi-acts__hero-icon" aria-hidden="true">
-						<u-icon name="calendar-fill" size="44" color="#fff"></u-icon>
-					</view>
-					<view class="shi-acts__hero-text">
-						<text class="shi-acts__hero-title">查看市集时间与地点</text>
-						<text class="shi-acts__hero-sub">七贤岭绿色二手集市 · 线下交接</text>
-					</view>
-					<u-icon name="arrow-right" size="28" color="rgba(255,255,255,0.85)"></u-icon>
+		<view class="shi-btns">
+			<view class="shi-btns__row shi-btns__row--main" hover-class="shi-btns__row--press" @tap="goFleaHub">
+				<view class="shi-btns__icon shi-btns__icon--main">
+					<u-icon name="calendar-fill" size="36" color="#fff"></u-icon>
 				</view>
-				<view class="shi-acts__duo">
-					<view class="shi-acts__tile" hover-class="shi-acts__tile--press" @tap="goList">
-						<view class="shi-acts__tile-icon shi-acts__tile-icon--browse">
-							<u-icon name="bag-fill" size="40" color="#076d3d"></u-icon>
-						</view>
-						<text class="shi-acts__tile-title">浏览闲置</text>
-						<text class="shi-acts__tile-sub">看看邻居发布</text>
-					</view>
-					<view class="shi-acts__tile" hover-class="shi-acts__tile--press" @tap="goPublish">
-						<view class="shi-acts__tile-icon shi-acts__tile-icon--publish">
-							<u-icon name="camera-fill" size="40" color="#18af38"></u-icon>
-						</view>
-						<text class="shi-acts__tile-title">发布闲置</text>
-						<text class="shi-acts__tile-sub">上传照片与积分价</text>
-					</view>
+				<text class="shi-btns__label">查看市集活动时间与地点</text>
+				<u-icon name="arrow-right" size="26" color="#18af38"></u-icon>
+			</view>
+			<view class="shi-btns__row" hover-class="shi-btns__row--press" @tap="goList">
+				<view class="shi-btns__icon">
+					<u-icon name="bag-fill" size="36" color="#18af38"></u-icon>
 				</view>
+				<text class="shi-btns__label">浏览社区闲置</text>
+				<u-icon name="arrow-right" size="26" color="#c7c7cc"></u-icon>
+			</view>
+			<view class="shi-btns__row" hover-class="shi-btns__row--press" @tap="goPublish">
+				<view class="shi-btns__icon">
+					<u-icon name="camera-fill" size="36" color="#18af38"></u-icon>
+				</view>
+				<text class="shi-btns__label">发布我的闲置</text>
+				<u-icon name="arrow-right" size="26" color="#c7c7cc"></u-icon>
 			</view>
 		</view>
 
@@ -186,142 +180,109 @@ export default {
 
 
 
-.shi-hero {
-
-	border-radius: 24rpx;
-
-	overflow: hidden;
-
-	background: #076d3d;
-
-}
-
-
-
-.shi-hero__img {
-
-	width: 100%;
-
-	display: block;
-
-	vertical-align: top;
-
-}
-
-
-
-.shi-summary {
-
-	margin-top: 24rpx;
-
-	border-radius: 20rpx;
-
-	overflow: hidden;
-
-}
-
-
-
-.shi-summary__img {
-
-	width: 100%;
-
-	display: block;
-
-	vertical-align: top;
-
-}
-
-
-
-.shi-steps {
-
-	margin-top: 24rpx;
-
-	border-radius: 20rpx;
-
-	overflow: hidden;
-
-}
-
-
-
-.shi-steps__img {
-
-	width: 100%;
-
-	display: block;
-
-	vertical-align: top;
-
-}
-
-
-
-.shi-notice {
-
-	margin-top: 24rpx;
-
-	border-radius: 20rpx;
-
-	overflow: hidden;
-
-}
-
-
-
-.shi-notice__img {
-
-	width: 100%;
-
-	display: block;
-
-	vertical-align: top;
-
-}
-
-
-
-.shi-acts {
-	margin-top: 32rpx;
-}
-
-.shi-acts__kicker {
-	display: block;
-	margin-bottom: 16rpx;
-	padding-left: 8rpx;
-	font-size: 28rpx;
-	font-weight: 600;
-	color: #3a3a3c;
-}
-
-.shi-acts__panel {
+.shi-album {
+	margin-top: 0;
 	background: #fff;
 	border-radius: 24rpx;
-	padding: 20rpx;
-	box-shadow: 0 8rpx 28rpx rgba(7, 109, 61, 0.08);
+	overflow: hidden;
+	box-shadow: 0 8rpx 32rpx rgba(7, 109, 61, 0.07);
+	border: 2rpx solid rgba(24, 175, 56, 0.08);
 }
 
-.shi-acts__hero {
+.shi-album__img {
+	width: 100%;
+	display: block;
+	vertical-align: top;
+}
+
+.shi-album__deco {
+	height: 44rpx;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	padding: 28rpx 24rpx;
+	justify-content: center;
+	padding: 0 28rpx;
+	background-color: #f3f8f5;
+	background-image: repeating-linear-gradient(
+		-48deg,
+		transparent,
+		transparent 10rpx,
+		rgba(24, 175, 56, 0.05) 10rpx,
+		rgba(24, 175, 56, 0.05) 20rpx
+	);
+}
+
+.shi-album__deco-line {
+	flex: 1;
+	height: 2rpx;
+	background: linear-gradient(90deg, transparent, #b8d9c4 40%, #b8d9c4 60%, transparent);
+}
+
+.shi-album__deco-badge {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	padding: 0 16rpx;
+	flex-shrink: 0;
+}
+
+.shi-album__deco-orn {
+	width: 10rpx;
+	height: 10rpx;
+	border-radius: 50%;
+	background: #b8d9c4;
+	margin: 0 10rpx;
+}
+
+.shi-album__deco-orn--on {
+	width: 16rpx;
+	height: 16rpx;
+	border-radius: 4rpx;
+	background: #18af38;
+	transform: rotate(45deg);
+	margin: 0 12rpx;
+}
+
+.shi-btns {
+	margin-top: 28rpx;
+	background: #fff;
+	border-radius: 24rpx;
+	overflow: hidden;
+	box-shadow: 0 8rpx 28rpx rgba(7, 109, 61, 0.08);
+	border: 2rpx solid rgba(24, 175, 56, 0.08);
+}
+
+.shi-btns__row {
+	min-height: 104rpx;
+	padding: 24rpx 28rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	border-top: 2rpx solid #eef2f0;
+}
+
+.shi-btns__row:first-child {
+	border-top: none;
+}
+
+.shi-btns__row--main {
+	background: linear-gradient(90deg, #f0faf4 0%, #fff 100%);
+}
+
+.shi-btns__row--press {
+	background: #eef5f0;
+}
+
+.shi-btns__row--main.shi-btns__row--press {
+	background: #e3f3ea;
+}
+
+.shi-btns__icon {
+	width: 72rpx;
+	height: 72rpx;
 	border-radius: 20rpx;
-	background: linear-gradient(135deg, #0a7a3e 0%, #18af38 55%, #3ec96a 100%);
-	box-shadow: 0 10rpx 24rpx rgba(24, 175, 56, 0.28);
-}
-
-.shi-acts__hero--press {
-	opacity: 0.92;
-	transform: scale(0.99);
-}
-
-.shi-acts__hero-icon {
-	width: 80rpx;
-	height: 80rpx;
-	border-radius: 22rpx;
-	background: rgba(255, 255, 255, 0.22);
+	background: #e8f5ec;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -329,82 +290,17 @@ export default {
 	margin-right: 20rpx;
 }
 
-.shi-acts__hero-text {
+.shi-btns__icon--main {
+	background: linear-gradient(145deg, #18af38, #0d8a2c);
+}
+
+.shi-btns__label {
 	flex: 1;
-	min-width: 0;
-	padding-right: 12rpx;
-}
-
-.shi-acts__hero-title {
-	display: block;
-	font-size: 32rpx;
-	font-weight: 700;
-	color: #fff;
-	line-height: 1.35;
-}
-
-.shi-acts__hero-sub {
-	display: block;
-	margin-top: 8rpx;
-	font-size: 24rpx;
-	color: rgba(255, 255, 255, 0.88);
-	line-height: 1.4;
-}
-
-.shi-acts__duo {
-	display: flex;
-	flex-direction: row;
-	gap: 16rpx;
-	margin-top: 20rpx;
-}
-
-.shi-acts__tile {
-	flex: 1;
-	padding: 24rpx 16rpx 22rpx;
-	border-radius: 20rpx;
-	background: #f4f7f5;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	text-align: center;
-}
-
-.shi-acts__tile--press {
-	background: #e8f0eb;
-}
-
-.shi-acts__tile-icon {
-	width: 88rpx;
-	height: 88rpx;
-	border-radius: 28rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-bottom: 14rpx;
-}
-
-.shi-acts__tile-icon--browse {
-	background: #e3f3ea;
-}
-
-.shi-acts__tile-icon--publish {
-	background: #eaf8ee;
-}
-
-.shi-acts__tile-title {
-	display: block;
 	font-size: 30rpx;
-	font-weight: 700;
+	font-weight: 600;
 	color: #1d1d1f;
-	line-height: 1.3;
-}
-
-.shi-acts__tile-sub {
-	display: block;
-	margin-top: 6rpx;
-	font-size: 22rpx;
-	color: #8e8e93;
 	line-height: 1.35;
+	padding-right: 12rpx;
 }
 
 
