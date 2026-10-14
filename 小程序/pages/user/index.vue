@@ -104,7 +104,9 @@
 
 			<!-- 常用功能 -->
 			<view class="flat-section flat-section--quick flat-card" id="guide-me-common">
-				<text class="flat-section__title">常用</text>
+				<view class="flat-section__head">
+					<text class="flat-section__title">常用</text>
+				</view>
 				<view class="me-quick">
 					<view
 						class="me-quick__item"
@@ -112,10 +114,14 @@
 						:key="item.key"
 						@click="navigator(item.url)"
 					>
-						<view class="me-quick__icon me-quick__icon--img">
-							<image :src="meAssets.quick[item.key]" mode="aspectFill" class="me-quick__img"></image>
+						<view class="me-quick__cell">
+							<image
+								class="me-quick__img"
+								:src="meAssets.quick[item.key]"
+								mode="aspectFill"
+							></image>
+							<view class="me-quick__name">{{ item.name }}</view>
 						</view>
-						<text class="me-quick__name">{{ item.name }}</text>
 					</view>
 				</view>
 			</view>
@@ -631,51 +637,59 @@
 		letter-spacing: 1rpx;
 	}
 
+	.flat-section--quick .flat-section__head {
+		padding: 24rpx 28rpx 0;
+	}
+
 	.flat-section--quick .flat-section__title {
-		padding-bottom: 16rpx;
+		padding: 0;
 	}
 
 	.me-quick {
 		display: flex;
 		flex-direction: row;
-		flex-wrap: wrap;
-		align-items: center;
-		padding: 12rpx 12rpx 28rpx;
+		align-items: stretch;
+		padding: 20rpx 8rpx 24rpx;
+		box-sizing: border-box;
 	}
+
 	.me-quick__item {
-		width: 25%;
+		flex: 1;
+		width: 0;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: flex-start;
+		box-sizing: border-box;
+	}
+
+	.me-quick__cell {
+		width: 120rpx;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		padding: 8rpx 4rpx;
-		box-sizing: border-box;
+		justify-content: flex-start;
 	}
-	.me-quick__icon {
-		width: 88rpx;
-		height: 88rpx;
-		border-radius: 22rpx;
-		background: #f2f3f5;
-		flex-shrink: 0;
-		overflow: hidden;
-	}
-	.me-quick__icon--img {
-		background: #f7f8fa;
-	}
+
 	.me-quick__img {
 		display: block;
 		width: 88rpx;
 		height: 88rpx;
 		border-radius: 22rpx;
+		flex-shrink: 0;
+		/* PNG 切图视觉略偏左，整体右移与下方文案居中对齐 */
+		transform: translateX(8rpx);
 	}
+
 	.me-quick__name {
-		display: block;
 		width: 100%;
-		margin-top: 10rpx;
+		margin-top: 12rpx;
+		min-height: 64rpx;
 		font-size: 24rpx;
 		color: $flat-text;
 		text-align: center;
-		line-height: 1.35;
+		line-height: 32rpx;
+		box-sizing: border-box;
 	}
 
 	.flat-row {
