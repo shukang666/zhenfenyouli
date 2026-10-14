@@ -1,0 +1,71 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('admin/SecondhandItem/index')}">社区闲置审核</a></li>
+        <li><a href="{:url('admin/SecondhandItem/intent_index')}">交换意向</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('admin/SecondhandItem/index')}">
+        <div class="form-group">
+            <label>状态：</label>
+            <select name="status" class="form-control" style="width: 140px;">
+                <option value="">全部</option>
+                <option value="0" <if condition="$status eq '0'">selected="selected"</if>>待审核</option>
+                <option value="1" <if condition="$status eq '1'">selected="selected"</if>>出售中</option>
+                <option value="2" <if condition="$status eq '2'">selected="selected"</if>>已预订</option>
+                <option value="3" <if condition="$status eq '3'">selected="selected"</if>>已关闭</option>
+                <option value="4" <if condition="$status eq '4'">selected="selected"</if>>审核拒绝</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>标题：</label>
+            <input type="text" class="form-control" name="keyword" style="width: 160px;" value="{$keyword}" placeholder="物品名称">
+        </div>
+        <button type="submit" class="btn btn-primary">搜索</button>
+        <a class="btn btn-default" href="{:url('admin/SecondhandItem/index')}">清空</a>
+    </form>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>封面</th>
+            <th>标题</th>
+            <th>积分价</th>
+            <th>发布人</th>
+            <th>手机</th>
+            <th>状态</th>
+            <th>发布时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>
+                    <notempty name="$vo.cover">
+                        <img src="{$vo.cover}" style="width:56px;height:56px;object-fit:cover;border-radius:4px;">
+                    </notempty>
+                </td>
+                <td style="max-width:180px;word-break:break-all;">{$vo.title}</td>
+                <td>{$vo.point_price}</td>
+                <td>{$vo.nickname}</td>
+                <td>{$vo.mobile}</td>
+                <td>{$vo.status_name}</td>
+                <td>{:date('Y-m-d H:i', $vo.create_time)}</td>
+                <td>
+                    <if condition="$vo.status == 0">
+                        <a class="btn btn-xs btn-success js-ajax-dialog-btn" data-msg="确认通过并在小程序展示？" href="{:url('admin/SecondhandItem/pass', ['id'=>$vo.id])}">通过</a>
+                        <a class="btn btn-xs btn-danger js-ajax-dialog-btn" data-msg="确认拒绝该发布？" href="{:url('admin/SecondhandItem/reject', ['id'=>$vo.id])}">拒绝</a>
+                    </if>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

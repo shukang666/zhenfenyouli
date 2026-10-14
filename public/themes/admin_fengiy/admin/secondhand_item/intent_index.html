@@ -1,0 +1,60 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('admin/SecondhandItem/index')}">社区闲置审核</a></li>
+        <li class="active"><a href="{:url('admin/SecondhandItem/intent_index')}">交换意向</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('admin/SecondhandItem/intent_index')}">
+        <div class="form-group">
+            <label>状态：</label>
+            <select name="intent_status" class="form-control" style="width: 140px;">
+                <option value="">全部</option>
+                <option value="0" <if condition="$intent_status eq '0'">selected="selected"</if>>已登记</option>
+                <option value="1" <if condition="$intent_status eq '1'">selected="selected"</if>>待现场交割</option>
+                <option value="2" <if condition="$intent_status eq '2'">selected="selected"</if>>已完成</option>
+                <option value="3" <if condition="$intent_status eq '3'">selected="selected"</if>>已取消</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">筛选</button>
+    </form>
+    <p class="help-block">市集现场确认交换后，点「交割完成」将扣买家积分并给卖家加积分。</p>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>物品</th>
+            <th>积分</th>
+            <th>买家</th>
+            <th>卖家</th>
+            <th>状态</th>
+            <th>登记时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.item_title}</td>
+                <td>{$vo.point_price}</td>
+                <td>{$vo.buyer_nickname}<br><small>{$vo.buyer_mobile}</small></td>
+                <td>{$vo.seller_nickname}</td>
+                <td>{$vo.status_name}</td>
+                <td>{:date('Y-m-d H:i', $vo.create_time)}</td>
+                <td>
+                    <if condition="$vo.status == 0 || $vo.status == 1">
+                        <a class="btn btn-xs btn-success js-ajax-dialog-btn" data-msg="确认现场交割已完成？将划转积分。" href="{:url('admin/SecondhandItem/complete_intent', ['id'=>$vo.id])}">交割完成</a>
+                        <a class="btn btn-xs btn-warning js-ajax-dialog-btn" data-msg="确认取消该意向？" href="{:url('admin/SecondhandItem/cancel_intent', ['id'=>$vo.id])}">取消</a>
+                    </if>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

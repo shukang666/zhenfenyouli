@@ -478,3 +478,61 @@ SET @__sql := IF(@__col > 0, 'SELECT 1', 'CREATE TABLE `cmf_qxl_module_log` (
   KEY `passed` (`passed`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT=''七贤岭学考模块通关记录''');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+-- 社区闲置（积分权益 Tab · 二手交换）
+CREATE TABLE IF NOT EXISTS `cmf_secondhand_item` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '发布者 member.id',
+  `title` varchar(80) NOT NULL DEFAULT '',
+  `description` varchar(500) NOT NULL DEFAULT '',
+  `images` text COMMENT 'JSON 相对路径数组，最多6张',
+  `point_price` int(10) unsigned NOT NULL DEFAULT 0,
+  `category` varchar(32) NOT NULL DEFAULT 'other',
+  `condition` varchar(32) NOT NULL DEFAULT 'used',
+  `area_text` varchar(120) NOT NULL DEFAULT '',
+  `status` tinyint(3) NOT NULL DEFAULT 0 COMMENT '0待审1在售2预订3关闭4拒绝',
+  `reject_reason` varchar(200) NOT NULL DEFAULT '',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `update_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `audit_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_status_time` (`status`,`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='社区闲置物品';
+
+CREATE TABLE IF NOT EXISTS `cmf_secondhand_intent` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `item_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `buyer_user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `seller_user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `point_price` int(10) unsigned NOT NULL DEFAULT 0,
+  `status` tinyint(3) NOT NULL DEFAULT 0 COMMENT '0登记1待交割2完成3取消',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `update_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `complete_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_item` (`item_id`),
+  KEY `idx_buyer` (`buyer_user_id`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='社区闲置交换意向';
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
+        SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1
+    )), 0) + 5,
+    'admin','SecondhandItem','index','','社区闲置审核','','发布审核与交换意向'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1);
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1),
+    1, 1, 1,
+    'admin','SecondhandItem','intent_index','','交换意向','','市集现场交割完成'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='intent_index' LIMIT 1);
