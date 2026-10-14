@@ -4,11 +4,12 @@
 
 		<view class="shi-hero">
 
-			<text class="shi-hero__emoji">♻️</text>
-
-			<text class="shi-hero__title">社区闲置 · 绿色二手市集</text>
-
-			<text class="shi-hero__sub">线上看货、发布信息；线下在市集统一切换</text>
+			<image
+				class="shi-hero__img"
+				:src="introHeroUrl"
+				mode="widthFix"
+				show-menu-by-longpress="false"
+			></image>
 
 		</view>
 
@@ -100,6 +101,8 @@
 
 <script>
 
+import settings from '@/common/settings.js'
+
 import {
 
 	fleaMarketHubUrl,
@@ -112,11 +115,17 @@ import {
 
 
 
+const INTRO_HERO_URL = settings.staticAssetBase + 'mall/secondhand-intro-hero.png'
+
+
+
 export default {
 
 	data() {
 
 		return {
+
+			introHeroUrl: INTRO_HERO_URL,
 
 			steps: [
 
@@ -210,55 +219,23 @@ export default {
 
 .shi-hero {
 
-	background: linear-gradient(145deg, #076d3d 0%, #18af38 100%);
-
 	border-radius: 24rpx;
 
-	padding: 40rpx 32rpx;
+	overflow: hidden;
 
-	color: #fff;
-
-}
-
-
-
-.shi-hero__emoji {
-
-	font-size: 56rpx;
-
-	display: block;
+	background: #076d3d;
 
 }
 
 
 
-.shi-hero__title {
+.shi-hero__img {
+
+	width: 100%;
 
 	display: block;
 
-	margin-top: 16rpx;
-
-	font-size: 40rpx;
-
-	font-weight: 700;
-
-	line-height: 1.35;
-
-}
-
-
-
-.shi-hero__sub {
-
-	display: block;
-
-	margin-top: 12rpx;
-
-	font-size: 28rpx;
-
-	opacity: 0.92;
-
-	line-height: 1.5;
+	vertical-align: top;
 
 }
 
