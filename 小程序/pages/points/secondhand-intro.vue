@@ -15,41 +15,27 @@
 
 
 
-		<view class="shi-card">
+		<view class="shi-summary">
 
-			<text class="shi-card__title">一句话说明</text>
-
-			<text class="shi-card__p">
-
-				您可以在小程序里浏览邻居的闲置、发布自己的闲置并标积分价；真正换货、交物品，请到
-
-				<text class="shi-em">「七贤岭绿色二手市集」</text>
-
-				活动现场，由工作人员统一组织，不在线上自行完成交接。
-
-			</text>
+			<image
+				class="shi-summary__img"
+				:src="introSummaryUrl"
+				mode="widthFix"
+				show-menu-by-longpress="false"
+			></image>
 
 		</view>
 
 
 
-		<view class="shi-card">
+		<view class="shi-steps">
 
-			<text class="shi-card__title">怎么参与（三步）</text>
-
-			<view class="shi-step" v-for="(s, idx) in steps" :key="idx">
-
-				<text class="shi-step__num">{{ idx + 1 }}</text>
-
-				<view class="shi-step__body">
-
-					<text class="shi-step__t">{{ s.title }}</text>
-
-					<text class="shi-step__d">{{ s.desc }}</text>
-
-				</view>
-
-			</view>
+			<image
+				class="shi-steps__img"
+				:src="introStepsUrl"
+				mode="widthFix"
+				show-menu-by-longpress="false"
+			></image>
 
 		</view>
 
@@ -122,6 +108,10 @@ const INTRO_HERO_URL = settings.staticAssetBase + 'mall/secondhand-intro-hero.pn
 
 const INTRO_NOTICE_URL = settings.staticAssetBase + 'mall/secondhand-intro-notice.png'
 
+const INTRO_SUMMARY_URL = settings.staticAssetBase + 'mall/secondhand-intro-summary.png'
+
+const INTRO_STEPS_URL = settings.staticAssetBase + 'mall/secondhand-intro-steps.png'
+
 
 
 export default {
@@ -134,33 +124,9 @@ export default {
 
 			introNoticeUrl: INTRO_NOTICE_URL,
 
-			steps: [
+			introSummaryUrl: INTRO_SUMMARY_URL,
 
-				{
-
-					title: '线上：看闲置或发布',
-
-					desc: '在「社区闲置」里搜索、浏览他人发布；登录后可上传照片、填写说明和积分价，发布自己的物品。',
-
-				},
-
-				{
-
-					title: '线上：和对方约好换什么',
-
-					desc: '看中某件物品后，先通过沟通确认要交换的闲置与积分价（正式版将提供预约记录；当前演示版请自行联系发布者）。',
-
-				},
-
-				{
-
-					title: '线下：到市集现场交接',
-
-					desc: '按「绿色二手市集」公布的场次，携带物品到指定场地，由工作人员统一组织交换，完成物品与积分的确认。',
-
-				},
-
-			],
+			introStepsUrl: INTRO_STEPS_URL,
 
 		}
 
@@ -236,17 +202,49 @@ export default {
 
 
 
-.shi-card {
+.shi-summary {
 
 	margin-top: 24rpx;
 
-	background: #fff;
+	border-radius: 20rpx;
+
+	overflow: hidden;
+
+}
+
+
+
+.shi-summary__img {
+
+	width: 100%;
+
+	display: block;
+
+	vertical-align: top;
+
+}
+
+
+
+.shi-steps {
+
+	margin-top: 24rpx;
 
 	border-radius: 20rpx;
 
-	padding: 28rpx;
+	overflow: hidden;
 
-	box-shadow: 0 8rpx 24rpx rgba(7, 109, 61, 0.06);
+}
+
+
+
+.shi-steps__img {
+
+	width: 100%;
+
+	display: block;
+
+	vertical-align: top;
 
 }
 
@@ -271,134 +269,6 @@ export default {
 	display: block;
 
 	vertical-align: top;
-
-}
-
-
-
-.shi-card__title {
-
-	display: block;
-
-	font-size: 32rpx;
-
-	font-weight: 700;
-
-	color: #1d1d1f;
-
-	margin-bottom: 16rpx;
-
-}
-
-
-
-.shi-card__p {
-
-	display: block;
-
-	font-size: 28rpx;
-
-	color: #444;
-
-	line-height: 1.65;
-
-}
-
-
-
-.shi-em {
-
-	color: #076d3d;
-
-	font-weight: 600;
-
-}
-
-
-
-.shi-step {
-
-	display: flex;
-
-	flex-direction: row;
-
-	align-items: flex-start;
-
-	margin-top: 20rpx;
-
-}
-
-
-
-.shi-step:first-of-type {
-
-	margin-top: 0;
-
-}
-
-
-
-.shi-step__num {
-
-	width: 44rpx;
-
-	height: 44rpx;
-
-	border-radius: 50%;
-
-	background: #e3f3ea;
-
-	color: #076d3d;
-
-	font-size: 26rpx;
-
-	font-weight: 700;
-
-	text-align: center;
-
-	line-height: 44rpx;
-
-	flex-shrink: 0;
-
-	margin-right: 16rpx;
-
-}
-
-
-
-.shi-step__body {
-
-	flex: 1;
-
-}
-
-
-
-.shi-step__t {
-
-	display: block;
-
-	font-size: 30rpx;
-
-	font-weight: 600;
-
-	color: #1d1d1f;
-
-}
-
-
-
-.shi-step__d {
-
-	display: block;
-
-	margin-top: 8rpx;
-
-	font-size: 26rpx;
-
-	color: #666;
-
-	line-height: 1.55;
 
 }
 
