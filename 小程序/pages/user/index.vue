@@ -113,7 +113,7 @@
 						@click="navigator(item.url)"
 					>
 						<view class="me-quick__icon me-quick__icon--img">
-							<image :src="meAssets.quick[item.key]" mode="aspectFit" class="me-quick__img"></image>
+							<image :src="meAssets.quick[item.key]" mode="aspectFill" class="me-quick__img"></image>
 						</view>
 						<text class="me-quick__name">{{ item.name }}</text>
 					</view>
@@ -635,43 +635,40 @@
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
-		padding: 4rpx 8rpx 28rpx;
+		padding: 8rpx 12rpx 24rpx;
 	}
 	.me-quick__item {
 		width: 25%;
 		display: flex;
 		flex-direction: column;
-		align-items: stretch;
-		padding: 8rpx 6rpx;
+		align-items: center;
+		padding: 16rpx 0;
 		box-sizing: border-box;
 	}
 	.me-quick__icon {
-		width: 100%;
-		height: 0;
-		padding-bottom: 100%;
-		position: relative;
-		border-radius: 24rpx;
+		width: 88rpx;
+		height: 88rpx;
+		border-radius: 22rpx;
 		background: #f2f3f5;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		margin-bottom: 12rpx;
 		overflow: hidden;
 	}
 	.me-quick__icon--img {
-		background: transparent;
+		background: #f7f8fa;
+		padding: 0;
 	}
 	.me-quick__img {
-		position: absolute;
-		left: 0;
-		top: 0;
 		width: 100%;
 		height: 100%;
-		border-radius: 24rpx;
+		border-radius: 22rpx;
 	}
 	.me-quick__name {
 		font-size: 24rpx;
 		color: $flat-text;
 		text-align: center;
-		line-height: 1.35;
-		padding: 0 4rpx;
 	}
 
 	.flat-row {
