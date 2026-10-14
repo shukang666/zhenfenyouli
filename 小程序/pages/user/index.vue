@@ -103,7 +103,7 @@
 			</view>
 
 			<!-- 常用功能 -->
-			<view class="flat-section flat-card" id="guide-me-common">
+			<view class="flat-section flat-section--quick flat-card" id="guide-me-common">
 				<text class="flat-section__title">常用</text>
 				<view class="me-quick">
 					<view
@@ -631,18 +631,24 @@
 		letter-spacing: 1rpx;
 	}
 
+	.flat-section--quick .flat-section__title {
+		padding-bottom: 16rpx;
+	}
+
 	.me-quick {
 		display: flex;
 		flex-direction: row;
 		flex-wrap: wrap;
-		padding: 8rpx 12rpx 24rpx;
+		align-items: center;
+		padding: 12rpx 12rpx 28rpx;
 	}
 	.me-quick__item {
 		width: 25%;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 16rpx 0;
+		justify-content: center;
+		padding: 8rpx 4rpx;
 		box-sizing: border-box;
 	}
 	.me-quick__icon {
@@ -650,25 +656,26 @@
 		height: 88rpx;
 		border-radius: 22rpx;
 		background: #f2f3f5;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		margin-bottom: 12rpx;
+		flex-shrink: 0;
 		overflow: hidden;
 	}
 	.me-quick__icon--img {
 		background: #f7f8fa;
-		padding: 0;
 	}
 	.me-quick__img {
-		width: 100%;
-		height: 100%;
+		display: block;
+		width: 88rpx;
+		height: 88rpx;
 		border-radius: 22rpx;
 	}
 	.me-quick__name {
+		display: block;
+		width: 100%;
+		margin-top: 10rpx;
 		font-size: 24rpx;
 		color: $flat-text;
 		text-align: center;
+		line-height: 1.35;
 	}
 
 	.flat-row {
