@@ -132,9 +132,9 @@
 					:key="item.key"
 					@click="navigator(item.url)"
 				>
-					<view class="flat-row__icon">
+					<view class="flat-row__icon" :style="{ background: item.iconBg }">
 						<image v-if="meAssets.service[item.key]" :src="meAssets.service[item.key]" mode="aspectFit" class="flat-row__img"></image>
-						<view v-else class="flat-row__ph"></view>
+						<u-icon v-else :name="item.icon" :size="38" :color="item.iconColor"></u-icon>
 					</view>
 					<text class="flat-row__label">{{ item.name }}</text>
 					<text v-if="item.desc" class="flat-row__desc">{{ item.desc }}</text>
@@ -157,9 +157,9 @@
 					:key="item.key"
 					@click="onMoreTap(item)"
 				>
-					<view class="flat-row__icon">
+					<view class="flat-row__icon" :style="{ background: item.iconBg }">
 						<image v-if="meAssets.more[item.key]" :src="meAssets.more[item.key]" mode="aspectFit" class="flat-row__img"></image>
-						<view v-else class="flat-row__ph"></view>
+						<u-icon v-else :name="item.icon" :size="38" :color="item.iconColor"></u-icon>
 					</view>
 					<text class="flat-row__label">{{ item.name }}</text>
 					<text v-if="item.desc" class="flat-row__desc">{{ item.desc }}</text>
@@ -252,15 +252,68 @@
 					{ key: 'msg', name: '消息通知', url: '/pages/msg_list/msg_list' },
 				],
 				serviceMenus: [
-					{ key: 'community', name: '健康生活社区', url: '/pages/community/record' },
-					{ key: 'badge', name: '我的徽章', url: '/pages/member/badge' },
+					{
+						key: 'community',
+						name: '健康生活社区',
+						url: '/pages/community/record',
+						icon: 'heart-fill',
+						iconColor: '#18AF38',
+						iconBg: 'rgba(24, 175, 56, 0.12)',
+					},
+					{
+						key: 'badge',
+						name: '我的徽章',
+						url: '/pages/member/badge',
+						icon: 'star-fill',
+						iconColor: '#D4A017',
+						iconBg: 'rgba(255, 214, 106, 0.35)',
+					},
 				],
 				moreMenus: [
-					{ key: 'coupon', name: '优惠券', url: '/pages/coupon/my_coupon', needLogin: true },
-					{ key: 'address', name: '地址管理', url: '/pages/address/index', needLogin: true },
-					{ key: 'kf', name: '联系客服', action: 'kf' },
-					{ key: 'profile', name: '个人信息', desc: '小区设置在这里', url: '/pages/member/info', needLogin: true },
-					{ key: 'about', name: '关于数康', action: 'about' },
+					{
+						key: 'coupon',
+						name: '优惠券',
+						url: '/pages/coupon/my_coupon',
+						needLogin: true,
+						icon: 'coupon-fill',
+						iconColor: '#E85D4C',
+						iconBg: 'rgba(232, 93, 76, 0.12)',
+					},
+					{
+						key: 'address',
+						name: '地址管理',
+						url: '/pages/address/index',
+						needLogin: true,
+						icon: 'map-fill',
+						iconColor: '#3974F2',
+						iconBg: 'rgba(57, 116, 242, 0.12)',
+					},
+					{
+						key: 'kf',
+						name: '联系客服',
+						action: 'kf',
+						icon: 'chat-fill',
+						iconColor: '#18AF38',
+						iconBg: 'rgba(24, 175, 56, 0.12)',
+					},
+					{
+						key: 'profile',
+						name: '个人信息',
+						desc: '小区设置在这里',
+						url: '/pages/member/info',
+						needLogin: true,
+						icon: 'account-fill',
+						iconColor: '#5856D6',
+						iconBg: 'rgba(88, 86, 214, 0.12)',
+					},
+					{
+						key: 'about',
+						name: '关于数康',
+						action: 'about',
+						icon: 'bookmark-fill',
+						iconColor: '#0F5C32',
+						iconBg: 'rgba(15, 92, 50, 0.1)',
+					},
 				],
 			}
 		},
@@ -635,10 +688,9 @@
 		border-top: none;
 	}
 	.flat-row__icon {
-		width: 64rpx;
-		height: 64rpx;
-		border-radius: 16rpx;
-		background: #f2f3f5;
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 18rpx;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -649,12 +701,6 @@
 	.flat-row__img {
 		width: 40rpx;
 		height: 40rpx;
-	}
-	.flat-row__ph {
-		width: 36rpx;
-		height: 36rpx;
-		border-radius: 8rpx;
-		border: 2rpx dashed #c7c7cc;
 	}
 	.flat-row__label {
 		flex: 1;
