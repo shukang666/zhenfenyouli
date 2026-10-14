@@ -541,7 +541,7 @@ import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 const ACTIVE_LIST_PREVIEW_SIZE = 2;
 
 /** 换 COS 图后递增，避免小程序/WebView 缓存旧图 */
-const SPOT_MODULE_COVER_VER = "2026101211";
+const SPOT_MODULE_COVER_VER = "2026101415";
 const DTSH_SPOTLIGHT_POSTER_VER = "2026101216";
 const DTSH_SPOTLIGHT_POSTER =
   settings.staticAssetBase +
