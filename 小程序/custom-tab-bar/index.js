@@ -1,3 +1,5 @@
+const settings = require('../common/settings.js')
+
 function getAppSafe() {
   try {
     return getApp()
@@ -19,6 +21,27 @@ function writeTabIndex(index) {
   app.globalData.tabBarIndex = index
 }
 
+function clearLocalSession() {
+  const app = getAppSafe()
+  if (app && app.$store) {
+    app.$store.commit('$uStore', { name: 'userInfo', value: {} })
+    app.$store.commit('$uStore', { name: 'isLogin', value: false })
+  }
+  try {
+    wx.removeStorageSync('vcode')
+  } catch (e) {}
+}
+
+function getOpenid() {
+  const app = getAppSafe()
+  const st = app && app.$store && app.$store.state
+  const u = (st && st.userInfo) || {}
+  return u.openid || ''
+}
+
+const ME_TAB_INDEX = 4
+const DEV_GATE = '110'
+
 Component({
   options: {
     styleIsolation: 'shared'
@@ -26,6 +49,10 @@ Component({
   data: {
     selected: -1,
     animOn: false,
+    devPwdShow: false,
+    devPwdFocus: false,
+    devPwdInput: '',
+    devMenuShow: false,
     list: [
       {
         pagePath: '/pages/index/index',
@@ -65,6 +92,7 @@ Component({
     }
   },
   methods: {
+    noop() {},
     _enableAnim() {
       if (this.data.animOn) return
       this.setData({ animOn: true })
@@ -93,6 +121,81 @@ Component({
       this.setData({
         selected: index,
         animOn: this.data.selected >= 0
+      })
+    },
+    onTabLongPress(e) {
+      const index = e.currentTarget.dataset.index
+      if (index !== ME_TAB_INDEX) return
+      this.setData({
+        devPwdShow: true,
+        devPwdInput: '',
+        devPwdFocus: true
+      })
+    },
+    onDevPwdInput(e) {
+      this.setData({ devPwdInput: (e.detail && e.detail.value) || '' })
+    },
+    closeDevPwd() {
+      this.setData({ devPwdShow: false, devPwdFocus: false, devPwdInput: '' })
+    },
+    confirmDevPwd() {
+      if (String(this.data.devPwdInput).trim() !== DEV_GATE) {
+        wx.showToast({ title: '密码错误', icon: 'none' })
+        return
+      }
+      this.setData({
+        devPwdShow: false,
+        devPwdFocus: false,
+        devPwdInput: '',
+        devMenuShow: true
+      })
+    },
+    closeDevMenu() {
+      this.setData({ devMenuShow: false })
+    },
+    doLogout() {
+      clearLocalSession()
+      this.setData({ devMenuShow: false })
+      wx.showToast({ title: '已退出登录', icon: 'none' })
+    },
+    doDeleteAccount() {
+      const openid = getOpenid()
+      if (!openid) {
+        clearLocalSession()
+        this.setData({ devMenuShow: false })
+        wx.showToast({ title: '已退出（未登录）', icon: 'none' })
+        return
+      }
+      wx.showModal({
+        title: '删除账户',
+        content: '将永久删除当前小程序账户，再次微信登录将作为新用户。确定继续？',
+        confirmColor: '#c1121f',
+        success: (res) => {
+          if (!res.confirm) return
+          const base = (settings.prodUrl || settings.devUrl || '').replace(/\/$/, '')
+          wx.request({
+            url: base + '/wxapp/user/delete_account',
+            method: 'POST',
+            header: {
+              'Content-Type': 'application/json;charset=UTF-8',
+              openid
+            },
+            data: { dev_gate: DEV_GATE },
+            success: (resp) => {
+              const body = resp.data || {}
+              if (body.code === 1) {
+                clearLocalSession()
+                this.setData({ devMenuShow: false })
+                wx.showToast({ title: '已删除并退出', icon: 'none' })
+                return
+              }
+              wx.showToast({ title: body.msg || '删除失败', icon: 'none' })
+            },
+            fail: () => {
+              wx.showToast({ title: '网络错误', icon: 'none' })
+            }
+          })
+        }
       })
     }
   }

@@ -14,6 +14,7 @@
       hover-class="tab-item--press"
       hover-stay-time="70"
       catchtap="switchTab"
+      catchlongpress="onTabLongPress"
     >
       <view class="tab-icon-wrap">
         <image
@@ -24,5 +25,35 @@
       </view>
       <text class="tab-text">{{item.text}}</text>
     </view>
+  </view>
+</view>
+
+<view class="dev-mask" wx:if="{{devPwdShow}}" catchtouchmove="noop">
+  <view class="dev-dialog" catchtap="noop">
+    <text class="dev-title">请输入密码</text>
+    <input
+      class="dev-input"
+      password
+      type="number"
+      focus="{{devPwdFocus}}"
+      value="{{devPwdInput}}"
+      bindinput="onDevPwdInput"
+      placeholder="密码"
+      confirm-type="done"
+      bindconfirm="confirmDevPwd"
+    />
+    <view class="dev-row">
+      <button class="dev-btn dev-btn--ghost" bindtap="closeDevPwd">取消</button>
+      <button class="dev-btn dev-btn--primary" bindtap="confirmDevPwd">确定</button>
+    </view>
+  </view>
+</view>
+
+<view class="dev-mask" wx:if="{{devMenuShow}}" catchtouchmove="noop">
+  <view class="dev-sheet" catchtap="noop">
+    <text class="dev-sheet-title">账户操作</text>
+    <button class="dev-sheet-btn" bindtap="doLogout">退出登录</button>
+    <button class="dev-sheet-btn dev-sheet-btn--danger" bindtap="doDeleteAccount">删除账户并退出登录</button>
+    <button class="dev-sheet-btn dev-sheet-btn--cancel" bindtap="closeDevMenu">取消</button>
   </view>
 </view>

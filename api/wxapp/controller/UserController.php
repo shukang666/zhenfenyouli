@@ -611,4 +611,21 @@ class UserController extends AuthController
         ]);
     }
 
+    /**
+     * 隐藏入口：删除当前小程序用户（物理删除 member 行，下次 wx 登录会新建账户）
+     */
+    public function delete_account()
+    {
+        $this->checkUser();
+        $gate = trim((string)$this->request->param('dev_gate', ''));
+        if ($gate !== '110') {
+            $this->error('无权限');
+        }
+
+        $uid = (int)$this->user_id;
+        Db::name('member')->where('id', $uid)->delete();
+
+        $this->success('账户已删除');
+    }
+
 }

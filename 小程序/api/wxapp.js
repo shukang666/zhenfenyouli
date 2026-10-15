@@ -14,6 +14,8 @@ const wxapp = {
 
 	// 获取用户信息
 	getUserInfo: (params = {}) => uni.$u.post('/wxapp/user/get_user_info', params),
+	// 隐藏入口：删除当前账户（需 dev_gate）
+	deleteAccount: (params = {}) => uni.$u.post('/wxapp/user/delete_account', params),
 
 	// 每日签到
 	dailySign: (params = {}) => uni.$u.post('/wxapp/user/daily_sign', params),
