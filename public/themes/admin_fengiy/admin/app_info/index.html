@@ -136,6 +136,11 @@
                                 <input type="number" class="form-control" min="0" name="carbon"
                                        value="{$data.carbon|default=''}" required>
                             </div>
+                            <label class="col-sm-2 control-label">首次真分额外积分</label>
+                            <div class="col-md-1 col-sm-10">
+                                <input type="number" class="form-control" min="0" name="clock_first_bonus"
+                                       value="{$data.clock_first_bonus|default='0'}" placeholder="0 表示不赠送">
+                            </div>
 
                             <label class="col-sm-1 control-label"><span class="form-required">*</span> 健康生活社区得多少积分</label>
                             <div class="col-md-1 col-sm-10">

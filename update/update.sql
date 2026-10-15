@@ -536,3 +536,15 @@ SELECT
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='intent_index' LIMIT 1);
+
+CREATE TABLE IF NOT EXISTS `cmf_active_web_zhenfen_gift_claim` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `goods_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `order_num` varchar(32) NOT NULL DEFAULT '',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_active` (`user_id`,`active_id`),
+  KEY `idx_active` (`active_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='三次真分 Web 活动兑换记录';

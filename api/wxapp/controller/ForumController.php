@@ -401,19 +401,31 @@ class ForumController extends AuthController
                     $this->success("获得{$health_point}积分！");
                 }
             } elseif ($type == 2) {
-                $carbon = $this->get_config['carbon'];
-                if ($carbon > 0) {
-                    //每天只能领取一次积分
-                    $count = $forumModel->where('user_id', $this->user_id)
-                        ->where('type', 2)
-                        ->whereBetweenTime('create_time', strtotime(date('Y-m-d')), time())
-                        ->count();
-                    if ($count > 1) {
-                        $this->respondType2ClockSuccess('发布成功');
-                    }
-                    $forumModel->where('id', $id)->update(['point' => $carbon]);
+                $carbon      = (int)($this->get_config['carbon'] ?? 0);
+                $firstBonus  = (int)($this->get_config['clock_first_bonus'] ?? 0);
+                $todayCount  = $forumModel->where('user_id', $this->user_id)
+                    ->where('type', 2)
+                    ->whereBetweenTime('create_time', strtotime(date('Y-m-d')), time())
+                    ->count();
+                $isFirstEver = $forumModel->where('user_id', $this->user_id)->where('type', 2)->count() === 1;
+
+                if ($carbon > 0 && $todayCount > 1) {
+                    $this->respondType2ClockSuccess('发布成功');
+                }
+
+                $earned = 0;
+                if ($carbon > 0 && $todayCount <= 1) {
                     AccountLogModel::add_account_log($this->user_id, 2, 200, $carbon, ['from_uid' => $id]);
-                    $this->respondType2ClockSuccess("获得{$carbon}积分！", ['point' => $carbon]);
+                    $earned += $carbon;
+                }
+                if ($isFirstEver && $firstBonus > 0) {
+                    AccountLogModel::add_account_log($this->user_id, 2, 231, $firstBonus, ['from_uid' => $id]);
+                    $earned += $firstBonus;
+                }
+
+                if ($earned > 0) {
+                    $forumModel->where('id', $id)->update(['point' => $earned]);
+                    $this->respondType2ClockSuccess("获得{$earned}积分！", ['point' => $earned]);
                 }
             }
 //            if ($type == 6) {
