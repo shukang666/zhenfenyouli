@@ -1,4 +1,5 @@
-const settings = require('../common/settings.js')
+/** custom-tab-bar 独立上下文，不可 require 主包 common/settings.js */
+const API_BASE = 'https://admin.circular-economy.cn/api'
 
 function getAppSafe() {
   try {
@@ -172,9 +173,8 @@ Component({
         confirmColor: '#c1121f',
         success: (res) => {
           if (!res.confirm) return
-          const base = (settings.prodUrl || settings.devUrl || '').replace(/\/$/, '')
           wx.request({
-            url: base + '/wxapp/user/delete_account',
+            url: API_BASE + '/wxapp/user/delete_account',
             method: 'POST',
             header: {
               'Content-Type': 'application/json;charset=UTF-8',
