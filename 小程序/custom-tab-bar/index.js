@@ -22,14 +22,38 @@ function writeTabIndex(index) {
   app.globalData.tabBarIndex = index
 }
 
-function clearLocalSession() {
-  const app = getAppSafe()
-  if (app && app.$store) {
-    app.$store.commit('$uStore', { name: 'userInfo', value: {} })
-    app.$store.commit('$uStore', { name: 'isLogin', value: false })
-  }
+function persistLifeDataLogout() {
+  try {
+    const tmp = wx.getStorageSync('lifeData') || {}
+    tmp.userInfo = {}
+    tmp.isLogin = false
+    wx.setStorageSync('lifeData', tmp)
+  } catch (e) {}
   try {
     wx.removeStorageSync('vcode')
+  } catch (e) {}
+}
+
+/** custom-tab-bar 与主包 Vue 实例隔离，需写 storage + 同步已打开页的 $vm */
+function clearLocalSession() {
+  persistLifeDataLogout()
+  const app = getAppSafe()
+  const rootVm = (app && (app.$vm || app)) || null
+  if (rootVm && rootVm.$store) {
+    rootVm.$store.commit('$uStore', { name: 'userInfo', value: {} })
+    rootVm.$store.commit('$uStore', { name: 'isLogin', value: false })
+  } else if (rootVm && rootVm.$u && rootVm.$u.vuex) {
+    rootVm.$u.vuex('userInfo', {})
+    rootVm.$u.vuex('isLogin', false)
+  }
+  try {
+    const pages = getCurrentPages() || []
+    pages.forEach((p) => {
+      const vm = p.$vm
+      if (!vm || !vm.$u || !vm.$u.vuex) return
+      vm.$u.vuex('userInfo', {})
+      vm.$u.vuex('isLogin', false)
+    })
   } catch (e) {}
 }
 
@@ -42,6 +66,7 @@ function getOpenid() {
 
 const ME_TAB_INDEX = 4
 const DEV_GATE = '110'
+const ME_LONG_PRESS_MS = 2000
 
 Component({
   options: {
@@ -90,10 +115,39 @@ Component({
   lifetimes: {
     attached() {
       this._snapTo(readTabIndex())
+    },
+    detached() {
+      this._clearMeLongPressTimer()
     }
   },
   methods: {
     noop() {},
+    _clearMeLongPressTimer() {
+      if (this._meLongPressTimer) {
+        clearTimeout(this._meLongPressTimer)
+        this._meLongPressTimer = null
+      }
+    },
+    onTabTouchStart(e) {
+      const index = e.currentTarget.dataset.index
+      if (index !== ME_TAB_INDEX) return
+      this._clearMeLongPressTimer()
+      this._meLongPressTimer = setTimeout(() => {
+        this._meLongPressTimer = null
+        this._meLongPressFired = true
+        try {
+          wx.vibrateShort({ type: 'light' })
+        } catch (err) {}
+        this.setData({
+          devPwdShow: true,
+          devPwdInput: '',
+          devPwdFocus: true
+        })
+      }, ME_LONG_PRESS_MS)
+    },
+    onTabTouchEnd() {
+      this._clearMeLongPressTimer()
+    },
     _enableAnim() {
       if (this.data.animOn) return
       this.setData({ animOn: true })
@@ -116,21 +170,16 @@ Component({
     switchTab(e) {
       const index = e.currentTarget.dataset.index
       const path = e.currentTarget.dataset.path
+      if (index === ME_TAB_INDEX && this._meLongPressFired) {
+        this._meLongPressFired = false
+        return
+      }
       if (this.data.selected === index) return
       writeTabIndex(index)
       wx.switchTab({ url: path })
       this.setData({
         selected: index,
         animOn: this.data.selected >= 0
-      })
-    },
-    onTabLongPress(e) {
-      const index = e.currentTarget.dataset.index
-      if (index !== ME_TAB_INDEX) return
-      this.setData({
-        devPwdShow: true,
-        devPwdInput: '',
-        devPwdFocus: true
       })
     },
     onDevPwdInput(e) {
@@ -158,6 +207,7 @@ Component({
       clearLocalSession()
       this.setData({ devMenuShow: false })
       wx.showToast({ title: '已退出登录', icon: 'none' })
+      wx.switchTab({ url: '/pages/user/index' })
     },
     doDeleteAccount() {
       const openid = getOpenid()
