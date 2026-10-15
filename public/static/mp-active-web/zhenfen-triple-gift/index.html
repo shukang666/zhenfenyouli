@@ -6,51 +6,182 @@
   <title>三次真分专享礼</title>
   <script src="../sdk.js"></script>
   <style>
-    :root { --green: #2d6a4f; --green-light: #40916c; --bg: linear-gradient(165deg, #d8f3dc 0%, #f1faee 45%, #fff 100%); }
+    :root {
+      --green: #1b6b4a;
+      --green-mid: #2d8a5e;
+      --green-soft: #7bc9a0;
+      --gold: #e9a319;
+      --text: #153829;
+      --muted: #4d7a62;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
-      color: #1b4332;
-      padding: 20px 16px 36px;
+      color: var(--text);
+      background: #e8f6ed;
+      padding-bottom: 40px;
     }
+    .hero {
+      position: relative;
+      padding: 28px 20px 36px;
+      background: linear-gradient(145deg, #0f5c3f 0%, #2a9d6a 55%, #7dcea0 100%);
+      color: #fff;
+      overflow: hidden;
+      border-radius: 0 0 28px 28px;
+      box-shadow: 0 12px 40px rgba(15, 92, 63, .25);
+    }
+    .hero::before, .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+    }
+    .hero::before { width: 180px; height: 180px; top: -60px; right: -40px; }
+    .hero::after { width: 120px; height: 120px; bottom: -30px; left: -20px; }
+    .hero-inner { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      backdrop-filter: blur(4px);
+    }
+    .hero h1 { font-size: 26px; line-height: 1.3; font-weight: 700; letter-spacing: .02em; margin-bottom: 8px; }
+    .hero p { font-size: 14px; line-height: 1.65; opacity: .92; max-width: 340px; }
+
+    .shell { max-width: 480px; margin: -22px auto 0; padding: 0 14px; position: relative; z-index: 2; }
+
     .card {
-      background: rgba(255,255,255,.94);
-      border-radius: 18px;
-      padding: 20px 16px;
-      box-shadow: 0 10px 36px rgba(27,67,50,.08);
-      max-width: 480px;
-      margin: 0 auto 14px;
-    }
-    .pill { display: inline-block; font-size: 12px; background: var(--green); color: #fff; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
-    h1 { font-size: 21px; line-height: 1.35; margin-bottom: 10px; }
-    .desc { font-size: 15px; line-height: 1.65; color: var(--green-light); margin-bottom: 12px; }
-    .progress-box {
-      background: #f1faee;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 14px;
-      font-size: 14px;
-      line-height: 1.55;
-    }
-    .progress-box strong { color: var(--green); font-size: 18px; }
-    .warn { color: #c1121f; font-size: 14px; line-height: 1.55; }
-    .goods {
-      display: flex;
-      gap: 12px;
-      border: 2px solid #b7e4c7;
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 10px;
-      cursor: pointer;
       background: #fff;
+      border-radius: 20px;
+      padding: 18px 16px;
+      box-shadow: 0 8px 32px rgba(21, 56, 41, .08);
+      margin-bottom: 14px;
+      border: 1px solid rgba(123, 201, 160, .35);
     }
-    .goods.selected { border-color: var(--green); background: #f1faee; }
-    .goods img { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #eee; }
-    .goods-info { flex: 1; min-width: 0; }
-    .goods-info h3 { font-size: 14px; line-height: 1.45; font-weight: 600; margin-bottom: 6px; }
-    .goods-info .tag { font-size: 12px; color: var(--green); }
+
+    .progress-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
+    .progress-head span { font-size: 13px; color: var(--muted); }
+    .progress-head strong { font-size: 22px; color: var(--green); font-weight: 700; }
+    .bar-track {
+      height: 10px;
+      background: #e3f5eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2a9d6a, #7dcea0);
+      transition: width .45s ease;
+    }
+    .status-tip {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--muted);
+      padding: 10px 12px;
+      background: #f4fbf7;
+      border-radius: 12px;
+      border-left: 3px solid var(--green-soft);
+    }
+    .status-tip.warn { background: #fff5f5; border-left-color: #e07a7a; color: #9b3d3d; }
+
+    .sec-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .sec-title::before {
+      content: "";
+      width: 4px;
+      height: 16px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, var(--green-mid), var(--green-soft));
+    }
+    .sec-sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; padding-left: 12px; }
+
+    .reward-list { display: flex; flex-direction: column; gap: 12px; }
+    .reward {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid #dceee4;
+      background: #fafdfb;
+      transition: border-color .2s, box-shadow .2s, transform .15s;
+    }
+    .reward.selectable { cursor: pointer; }
+    .reward.selectable:active { transform: scale(.985); }
+    .reward.selected {
+      border-color: var(--green-mid);
+      box-shadow: 0 0 0 3px rgba(45, 138, 94, .15);
+    }
+    .reward.preview { opacity: .98; }
+    .reward-img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      background: linear-gradient(135deg, #eef8f2, #dceee4);
+    }
+    .reward-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .badge-free {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: linear-gradient(135deg, #ff9f1c, #e76f00);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(231, 111, 0, .35);
+    }
+    .badge-check {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--green-mid);
+      color: #fff;
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+    .reward.selected .badge-check { display: flex; }
+    .reward-body { padding: 12px 14px 14px; }
+    .reward-body h3 { font-size: 15px; line-height: 1.45; margin-bottom: 6px; font-weight: 600; }
+    .reward-body .price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .price-row .free { color: var(--green); font-weight: 700; font-size: 14px; }
+    .price-row .orig { font-size: 12px; color: #8aa896; text-decoration: line-through; }
+    .price-row .stock { font-size: 11px; color: #8aa896; margin-left: auto; }
+
+    .pick-panel {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed #cce5d8;
+    }
+    .pick-panel.hidden { display: none; }
+    .addr-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
     .addr {
       width: 100%;
       border: 1px solid #b7e4c7;
@@ -58,9 +189,10 @@
       padding: 12px;
       font-size: 14px;
       background: #fff;
-      color: #1b4332;
-      margin-bottom: 10px;
+      color: var(--text);
+      margin-bottom: 8px;
     }
+    .addr-hint { font-size: 12px; color: #8aa896; margin-bottom: 12px; line-height: 1.5; }
     .btn {
       width: 100%;
       border: none;
@@ -68,63 +200,80 @@
       padding: 15px;
       font-size: 16px;
       font-weight: 600;
-      background: var(--green);
+      background: linear-gradient(135deg, #1b6b4a, #2a9d6a);
       color: #fff;
-      margin-top: 6px;
+      box-shadow: 0 8px 20px rgba(27, 107, 74, .3);
     }
-    .btn:disabled { opacity: .45; }
-    .btn.secondary { background: #74c69d; margin-top: 10px; }
+    .btn:disabled { opacity: .45; box-shadow: none; }
+
+    .done {
+      text-align: center;
+      padding: 8px 0 4px;
+    }
+    .done .reward { max-width: 280px; margin: 0 auto 14px; pointer-events: none; }
+    .done-tip { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    .loading-card { text-align: center; padding: 48px 20px; color: var(--muted); }
     .hidden { display: none !important; }
-    .err { color: #c1121f; font-size: 14px; margin-top: 8px; }
-    .done { text-align: center; padding: 8px 0; }
-    .done img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; margin-bottom: 10px; }
   </style>
 </head>
 <body>
-  <div class="card" id="panel-loading">
-    <span class="pill">Web 式活动</span>
-    <h1>加载中…</h1>
-    <p class="desc">正在获取活动与用户进度</p>
+  <div id="panel-loading">
+    <div class="hero"><div class="hero-inner"><span class="hero-tag">真分新手礼</span><h1>加载中…</h1></div></div>
+    <div class="shell"><div class="card loading-card">正在获取活动与赠品信息</div></div>
   </div>
 
-  <div class="card hidden" id="panel-main">
-    <span class="pill">真分新手礼</span>
-    <h1 id="title">三次真分专享兑换</h1>
-    <p class="desc">
-      自 <strong>2026 年 10 月 15 日</strong>起，此前从未进行过真分打卡的用户，累计完成 <strong>3 次</strong>真分（不要求连续），即可在以下两件健康好物中<strong>免费任选其一</strong>，0 积分兑换，订单可在小程序「兑换记录」查看。
-    </p>
-    <div class="progress-box" id="progress"></div>
-    <p class="warn hidden" id="ineligible"></p>
-
-    <div id="pick-block" class="hidden">
-      <p class="desc" style="margin-bottom:8px;">请选择一件赠品：</p>
-      <div id="goods-list"></div>
-      <select class="addr" id="address-select"><option value="">加载收货地址…</option></select>
-      <p class="desc" style="font-size:13px;">没有地址？请先在小程序「我的 → 收货地址」中添加。</p>
-      <button type="button" class="btn" id="btn-claim" disabled>确认 0 积分兑换</button>
+  <div id="panel-main" class="hidden">
+    <div class="hero">
+      <div class="hero-inner">
+        <span class="hero-tag">🌱 完成 3 次真分 · 0 积分兑好礼</span>
+        <h1 id="title">三次真分专享兑换</h1>
+        <p>2026.10.15 起，首次参与真分的新朋友，累计打卡 3 次（不必连续），以下三件好物任选其一包邮到家。</p>
+      </div>
     </div>
 
-    <div id="done-block" class="done hidden">
-      <p class="desc">您已领取本次活动赠品</p>
-      <img id="done-thumb" alt="" />
-      <p id="done-name" style="font-size:15px;font-weight:600;margin-bottom:8px;"></p>
-      <p class="desc">订单号：<span id="done-order"></span></p>
-      <p class="desc">请前往小程序「我的 → 兑换记录」查看物流进度。</p>
+    <div class="shell">
+      <div class="card">
+        <div class="progress-head">
+          <span>我的真分进度</span>
+          <strong id="progress-num">0 / 3</strong>
+        </div>
+        <div class="bar-track"><div class="bar-fill" id="progress-bar"></div></div>
+        <div class="status-tip" id="status-tip">加载中…</div>
+      </div>
+
+      <div class="card" id="rewards-section">
+        <div class="sec-title">活动赠品 · 三选一</div>
+        <p class="sec-sub">达成条件后点选一件，确认地址即可 0 积分兑换（兑换记录可查物流）</p>
+        <div class="reward-list" id="goods-list"></div>
+
+        <div class="pick-panel hidden" id="pick-panel">
+          <p class="addr-label">收货地址</p>
+          <select class="addr" id="address-select"><option value="">加载中…</option></select>
+          <p class="addr-hint">暂无地址？请先在小程序「我的 → 收货地址」中添加。</p>
+          <button type="button" class="btn" id="btn-claim" disabled>确认 0 积分兑换</button>
+        </div>
+      </div>
+
+      <div class="card done hidden" id="done-block">
+        <div class="sec-title">已领取</div>
+        <p class="sec-sub">感谢参与，请留意物流信息</p>
+        <div id="done-goods"></div>
+        <p class="done-tip">订单号：<span id="done-order"></span><br/>小程序「我的 → 兑换记录」查看详情</p>
+      </div>
     </div>
-    <p class="err hidden" id="err"></p>
   </div>
 
   <script>
     (function () {
-      var ctx = null;
       var activeId = '';
       var apiBase = '';
       var openid = '';
-      var state = { goodsId: 0, status: null };
+      var state = { goodsId: 0, canSelect: false, goods: [] };
 
       function $(id) { return document.getElementById(id); }
-      function show(id) { $(id).classList.remove('hidden'); }
-      function hide(id) { $(id).classList.add('hidden'); }
+      function show(el) { $(el).classList.remove('hidden'); }
+      function hide(el) { $(el).classList.add('hidden'); }
 
       function apiPost(path, body) {
         return ActiveWebSdk.apiPost(apiBase, openid, path, body || {}).then(function (res) {
@@ -135,50 +284,84 @@
 
       function apiGet(path) {
         var url = apiBase.replace(/\/$/, '') + path;
-        return fetch(url, { headers: { openid: openid || '' } }).then(function (r) { return r.json(); }).then(function (res) {
-          if (!res || res.code !== 1) throw new Error((res && res.msg) || '请求失败');
-          return res.data;
-        });
+        return fetch(url, { headers: { openid: openid || '' } })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (!res || res.code !== 1) throw new Error((res && res.msg) || '请求失败');
+            return res.data;
+          });
+      }
+
+      function escapeHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
       }
 
       function renderProgress(st) {
         var e = st.eligibility || {};
-        var html = '真分进度（10月15日起）：<strong>' + (e.since_start_clock_count || 0) + ' / ' + (e.required || 3) + '</strong> 次';
-        if (e.prior_clock_count > 0) {
-          html += '<br/><span class="warn">活动开始前已有 ' + e.prior_clock_count + ' 次真分记录</span>';
-        } else if (!st.has_claimed && !e.eligible) {
-          html += '<br/>' + (e.reason || '');
-        } else if (e.eligible && !st.has_claimed) {
-          html += '<br/>' + (e.reason || '');
-        }
-        $('progress').innerHTML = html;
-        if (!e.eligible && !st.has_claimed) {
-          $('ineligible').textContent = e.reason || '暂不符合条件';
-          show('ineligible');
+        var cur = e.since_start_clock_count || 0;
+        var req = e.required || 3;
+        $('progress-num').textContent = cur + ' / ' + req;
+        var pct = Math.min(100, Math.round((cur / req) * 100));
+        $('progress-bar').style.width = pct + '%';
+
+        var tip = $('status-tip');
+        tip.classList.remove('warn');
+        if (st.has_claimed) {
+          tip.textContent = '您已领取本次活动赠品，每人限领一次。';
+        } else if (e.prior_clock_count > 0) {
+          tip.textContent = '活动仅限 10 月 15 日前从未真分打卡的新朋友；您此前已有 ' + e.prior_clock_count + ' 次记录。';
+          tip.classList.add('warn');
+        } else if (e.eligible) {
+          tip.textContent = '恭喜达成！请在下方选择一件赠品并填写地址。';
         } else {
-          hide('ineligible');
+          tip.textContent = e.reason || ('还需完成 ' + (req - cur) + ' 次真分打卡');
         }
       }
 
-      function renderGoods(goods) {
+      function buildRewardCard(g, opts) {
+        opts = opts || {};
+        var selectable = !!opts.selectable;
+        var selected = opts.selectedId === g.id;
+        var cls = 'reward' + (selectable ? ' selectable' : ' preview') + (selected ? ' selected' : '');
+        var name = g.short_name || g.goods_name;
+        var thumb = g.thumb || '';
+        return (
+          '<div class="' + cls + '" data-id="' + g.id + '">' +
+            '<div class="reward-img-wrap">' +
+              '<span class="badge-free">活动 0 积分</span>' +
+              '<span class="badge-check">✓</span>' +
+              '<img src="' + escapeHtml(thumb) + '" alt="' + escapeHtml(name) + '" loading="lazy"/>' +
+            '</div>' +
+            '<div class="reward-body">' +
+              '<h3>' + escapeHtml(name) + '</h3>' +
+              '<div class="price-row">' +
+                '<span class="free">本活动免费</span>' +
+                '<span class="orig">商城 ' + g.point + ' 积分</span>' +
+                (g.stock != null ? '<span class="stock">库存 ' + g.stock + '</span>' : '') +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderGoods(goods, canSelect, selectedId) {
+        state.goods = goods || [];
+        state.canSelect = canSelect;
         var wrap = $('goods-list');
-        wrap.innerHTML = '';
-        (goods || []).forEach(function (g) {
-          var div = document.createElement('div');
-          div.className = 'goods';
-          div.dataset.id = g.id;
-          div.innerHTML =
-            '<img src="' + (g.thumb || '') + '" alt=""/>' +
-            '<div class="goods-info"><h3>' + g.goods_name + '</h3>' +
-            '<span class="tag">商城原价 ' + g.point + ' 积分 · 本活动 0 积分</span></div>';
-          div.onclick = function () {
-            wrap.querySelectorAll('.goods').forEach(function (el) { el.classList.remove('selected'); });
-            div.classList.add('selected');
-            state.goodsId = parseInt(g.id, 10);
-            $('btn-claim').disabled = !state.goodsId || !$('address-select').value;
-          };
-          wrap.appendChild(div);
-        });
+        wrap.innerHTML = state.goods.map(function (g) {
+          return buildRewardCard(g, { selectable: canSelect, selectedId: selectedId });
+        }).join('');
+
+        if (canSelect) {
+          wrap.querySelectorAll('.reward.selectable').forEach(function (el) {
+            el.onclick = function () {
+              var id = parseInt(el.getAttribute('data-id'), 10);
+              state.goodsId = id;
+              renderGoods(state.goods, true, id);
+              $('btn-claim').disabled = !$('address-select').value;
+            };
+          });
+        }
       }
 
       function loadAddresses() {
@@ -192,7 +375,7 @@
           list.forEach(function (a) {
             var opt = document.createElement('option');
             opt.value = a.id;
-            opt.textContent = (a.username || '') + ' ' + (a.phone || '') + ' ' +
+            opt.textContent = (a.username || '') + ' ' + (a.phone || '') + ' · ' +
               (a.province || '') + (a.city || '') + (a.county || '') + (a.address || '');
             sel.appendChild(opt);
           });
@@ -205,29 +388,36 @@
 
       function refreshStatus() {
         return apiPost('/wxapp/active_web_zhenfen_gift/status', { active_id: activeId }).then(function (st) {
-          state.status = st;
           $('title').textContent = st.active_name || '三次真分专享兑换';
           renderProgress(st);
+
           if (st.has_claimed && st.claim) {
-            hide('pick-block');
+            hide('rewards-section');
             show('done-block');
-            var g = (st.claim.goods || {});
-            $('done-thumb').src = g.thumb || '';
-            $('done-name').textContent = g.goods_name || '';
+            var g = st.claim.goods || {};
+            $('done-goods').innerHTML = buildRewardCard(g, { selectable: false });
             $('done-order').textContent = st.claim.order_num || '';
             return;
           }
-          if (st.eligibility && st.eligibility.eligible) {
-            show('pick-block');
-            renderGoods(st.goods);
-            return loadAddresses();
+
+          show('rewards-section');
+          hide('done-block');
+          var canSelect = !!(st.eligibility && st.eligibility.eligible);
+          renderGoods(st.goods, canSelect, state.goodsId);
+
+          if (canSelect) {
+            show('pick-panel');
+            return loadAddresses().then(function () {
+              $('btn-claim').disabled = !state.goodsId || !$('address-select').value;
+            });
           }
-          hide('pick-block');
+          hide('pick-panel');
+          state.goodsId = 0;
         });
       }
 
       $('btn-claim').onclick = function () {
-        if (!state.goodsId) return;
+        if (!state.goodsId) { alert('请先点选一件赠品'); return; }
         var addressId = parseInt($('address-select').value, 10);
         if (!addressId) { alert('请选择收货地址'); return; }
         $('btn-claim').disabled = true;
@@ -245,7 +435,6 @@
       };
 
       ActiveWebSdk.bootstrap().then(function (data) {
-        ctx = data;
         apiBase = (data.api && data.api.base) || '';
         openid = (data.session && data.session.openid) || '';
         activeId = (data.active && data.active.id) || (new URLSearchParams(location.search).get('active_id') || '');
@@ -253,7 +442,7 @@
         show('panel-main');
         return refreshStatus();
       }).catch(function (e) {
-        $('panel-loading').innerHTML = '<p class="warn">' + (e.message || e) + '</p>';
+        $('panel-loading').innerHTML = '<div class="shell"><div class="card status-tip warn">' + escapeHtml(e.message || e) + '</div></div>';
       });
     })();
   </script>

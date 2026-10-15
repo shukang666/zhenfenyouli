@@ -12,12 +12,12 @@ use app\admin\model\goods\GoodsSellModel;
 use think\facade\Db;
 
 /**
- * Web 式活动：2026-10-15 起新用户完成 3 次真分（type=2）可 0 积分兑赠品二选一
+ * Web 式活动：2026-10-15 起新用户完成 3 次真分（type=2）可 0 积分兑赠品三选一
  */
 class ActiveWebZhenfenGiftService
 {
-    /** @var int[] 亚麻籽姜黄芝麻盐 / 南美绿檀木按摩梳 */
-    const GIFT_GOODS_IDS = [95, 96];
+    /** @var int[] 亚麻籽姜黄芝麻盐 / 绿檀木按摩梳 / 捏捏乐 */
+    const GIFT_GOODS_IDS = [95, 96, 100];
 
     const REQUIRED_CLOCKS = 3;
 
@@ -107,9 +107,11 @@ class ActiveWebZhenfenGiftService
                 continue;
             }
             $row = $g->toArray();
+            $gid = (int)$row['id'];
             $list[] = [
-                'id' => (int)$row['id'],
+                'id' => $gid,
                 'goods_name' => (string)$row['goods_name'],
+                'short_name' => self::giftShortName($gid, (string)$row['goods_name']),
                 'point' => (float)$row['point'],
                 'exchange_point' => 0,
                 'stock' => (int)$row['stock'],
@@ -122,6 +124,19 @@ class ActiveWebZhenfenGiftService
     public static function isAllowedGoodsId(int $goodsId): bool
     {
         return in_array($goodsId, self::GIFT_GOODS_IDS, true);
+    }
+
+    protected static function giftShortName(int $goodsId, string $fullName): string
+    {
+        $map = [
+            95 => '亚麻籽姜黄芝麻盐',
+            96 => '南美绿檀木按摩梳',
+            100 => '解压捏捏乐',
+        ];
+        if (isset($map[$goodsId])) {
+            return $map[$goodsId];
+        }
+        return mb_strlen($fullName) > 14 ? mb_substr($fullName, 0, 14) . '…' : $fullName;
     }
 
     /**
