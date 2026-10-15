@@ -57,11 +57,18 @@ function clearLocalSession() {
   } catch (e) {}
 }
 
+/** TabBar 与主包隔离，openid 以 lifeData 为准，再尝试 $vm.$store */
 function getOpenid() {
+  try {
+    const life = wx.getStorageSync('lifeData') || {}
+    const u = life.userInfo || {}
+    if (u.openid) return String(u.openid)
+  } catch (e) {}
   const app = getAppSafe()
-  const st = app && app.$store && app.$store.state
+  const rootVm = app && (app.$vm || app)
+  const st = rootVm && rootVm.$store && rootVm.$store.state
   const u = (st && st.userInfo) || {}
-  return u.openid || ''
+  return u.openid ? String(u.openid) : ''
 }
 
 const ME_TAB_INDEX = 4
@@ -222,9 +229,7 @@ Component({
     doDeleteAccount() {
       const openid = getOpenid()
       if (!openid) {
-        clearLocalSession()
-        this.setData({ devMenuShow: false })
-        wx.showToast({ title: '已退出（未登录）', icon: 'none' })
+        wx.showToast({ title: '未获取到登录态，无法删除', icon: 'none' })
         return
       }
       wx.showModal({
@@ -233,25 +238,36 @@ Component({
         confirmColor: '#c1121f',
         success: (res) => {
           if (!res.confirm) return
+          wx.showLoading({ title: '处理中…', mask: true })
           wx.request({
             url: API_BASE + '/wxapp/user/delete_account',
             method: 'POST',
             header: {
               'Content-Type': 'application/json;charset=UTF-8',
-              openid
+              openid: openid
             },
-            data: { dev_gate: DEV_GATE },
+            data: { dev_gate: DEV_GATE, openid: openid },
             success: (resp) => {
-              const body = resp.data || {}
+              wx.hideLoading()
+              let body = resp.data || {}
+              if (typeof body === 'string') {
+                try {
+                  body = JSON.parse(body)
+                } catch (e) {
+                  body = {}
+                }
+              }
               if (body.code === 1) {
                 clearLocalSession()
                 this.setData({ devMenuShow: false })
                 wx.showToast({ title: '已删除并退出', icon: 'none' })
+                wx.switchTab({ url: '/pages/user/index' })
                 return
               }
               wx.showToast({ title: body.msg || '删除失败', icon: 'none' })
             },
             fail: () => {
+              wx.hideLoading()
               wx.showToast({ title: '网络错误', icon: 'none' })
             }
           })

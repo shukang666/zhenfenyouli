@@ -623,7 +623,10 @@ class UserController extends AuthController
         }
 
         $uid = (int)$this->user_id;
-        Db::name('member')->where('id', $uid)->delete();
+        $deleted = Db::name('member')->where('id', $uid)->delete();
+        if (!$deleted) {
+            $this->error('删除失败，用户不存在或已被删除');
+        }
 
         $this->success('账户已删除');
     }
