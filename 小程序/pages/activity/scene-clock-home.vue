@@ -230,6 +230,20 @@
 				<view class="scf-hc-foot">
 
 					<view
+						class="scf-hc-pledge"
+						hover-class="scf-card--press"
+						@tap="toggleSetupPointPledge"
+					>
+						<view
+							class="scf-hc-pledge-box"
+							:class="{ 'scf-hc-pledge-box--on': setupPointPledged }"
+						>
+							<text v-if="setupPointPledged" class="scf-hc-pledge-check">✓</text>
+						</view>
+						<text class="scf-hc-pledge-t">{{ homeClockSetupPledgeText }}</text>
+					</view>
+
+					<view
 
 						class="scf-hc-submit"
 
@@ -244,8 +258,6 @@
 					<text class="scf-hc-foot-note">{{ homeClockFootNote }}</text>
 
 					<text class="scf-hc-foot-points">{{ homeClockFootPoints }}</text>
-
-					<text class="scf-hc-foot-link" hover-class="scf-card--press" @tap="goResidentialHomeSetup">修改家庭点位布置图</text>
 
 				</view>
 

@@ -299,11 +299,6 @@ class ForumController extends AuthController
         }
         if ($type == 2) {
             $scene = trim((string)($params['clock_scene'] ?? ''));
-            if (in_array($scene, ['home', 'qinzi'], true)) {
-                if (!ClockScenePointController::isHomeFixedSetupComplete((int)$this->user_id)) {
-                    $this->error('请先完成厨房厨余桶、其他桶、可回收物、有害垃圾四处点位的布置照片');
-                }
-            }
             if (in_array($scene, ['office', 'zhenfenjiao'], true)) {
                 $cateIdCheck = (int)($params['cate_id'] ?? 0);
                 if ($cateIdCheck <= 0) {
@@ -343,6 +338,12 @@ class ForumController extends AuthController
                 $params['clock_sub_scene'] = 'merchant_' . (int)$merchant['id'];
                 if (empty($params['cate_id'])) {
                     $params['cate_id'] = (int)$merchant['cate_id'];
+                }
+            }
+            $sceneFinal = trim((string)($params['clock_scene'] ?? ''));
+            if (in_array($sceneFinal, ['home', 'qinzi', 'street'], true)) {
+                if ((int)$this->request->param('setup_point_pledge', 0) !== 1) {
+                    $this->error('请确认已完成点位布置');
                 }
             }
         }

@@ -4,9 +4,7 @@ import settings, { uploadUrl } from '@/common/settings'
 	import { getHub, mergeGuide, normalizeClockHubKey } from '@/common/sceneClockHub.js'
 	import { openSceneClockHub } from '@/common/sceneClockEntry.js'
 	import {
-		openSceneClockHomeSetup,
 		openSceneClockHomeClock,
-		finishSceneClockHomeSetupNavigation,
 	} from '@/common/sceneClock/sceneClockRoutes.js'
 	import { buildSceneCateSubtitle, guideCateLabelFromName, resolveCateKind, SECTION_HINTS } from '@/common/clockScene.js'
 	import {
@@ -122,6 +120,7 @@ import settings, { uploadUrl } from '@/common/settings'
 		getHomeClockPhotoRules,
 		getHomeClockSubmitCta,
 		getHomeClockFootNote,
+		getHomeClockSetupPledgeText,
 		getHomeClockFootPoints,
 		getHomeClockAmountOptions,
 		getOfficeClockNavTitle,
@@ -299,6 +298,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeClockPhotoRules: getHomeClockPhotoRules(),
 				homeClockSubmitCta: getHomeClockSubmitCta(),
 				homeClockFootNote: getHomeClockFootNote(),
+				homeClockSetupPledgeText: getHomeClockSetupPledgeText(),
+				setupPointPledged: false,
 				homeClockFootPoints: getHomeClockFootPoints(),
 				homeClockAmountOptions: getHomeClockAmountOptions(),
 				officeBuildingKey: '',
@@ -895,14 +896,11 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.homeHubPage = String(po.homePage || '').trim()
 				if (this.homeHubPage === 'clock') {
 					this.flowStep = 'learn'
-				} else if (this.homeHubPage === 'setup') {
-					this.flowStep = 'setup'
 				}
 				this.bootstrapHub(normalizeClockHubKey(hubKey))
 			},
-			goResidentialHomeSetup() {
-				if (!this.isResidentialHub) return
-				openSceneClockHomeSetup()
+			toggleSetupPointPledge() {
+				this.setupPointPledged = !this.setupPointPledged
 			},
 			goFlowStepSurvey() {
 				this.flowStep = 'survey'
@@ -1148,28 +1146,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				return true
 			},
 			enterResidentialSetupFlow(opts) {
-				const replace = !!(opts && opts.replace)
-				if (this.isResidentialHub) {
-					if (this.homeHubPage === 'setup') {
-						this.residentialPickMode = false
-						this.residentialBinSettingsOpen = false
-						this.syncHomeFixedSlots()
-						this.flowStep = 'setup'
-						if (this.hub && this.hub.title) {
-							uni.setNavigationBarTitle({ title: this.hub.title })
-						}
-						return
-					}
-					openSceneClockHomeSetup({ replace })
-					return
-				}
-				this.residentialPickMode = false
-				this.residentialBinSettingsOpen = false
-				this.syncHomeFixedSlots()
-				this.flowStep = 'setup'
-				if (this.hub && this.hub.title) {
-					uni.setNavigationBarTitle({ title: this.hub.title })
-				}
+				this.enterResidentialClockFlow(opts)
 			},
 			syncHomeFixedSlots() {
 				const defs = getHomeFixedSetupSlots()
@@ -1265,14 +1242,6 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			enterResidentialClockFlow(opts) {
 				const replace = !!(opts && opts.replace)
-				if (!this.isHomeFixedSetupComplete()) {
-					this.enterResidentialSetupFlow({ replace: true })
-					return
-				}
-				if (this.homeHubPage === 'setup') {
-					finishSceneClockHomeSetupNavigation()
-					return
-				}
 				if (this.homeHubPage === 'clock') {
 					this.residentialPickMode = false
 					this.residentialBinSettingsOpen = false
@@ -1284,10 +1253,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				openSceneClockHomeClock({ replace })
 			},
 			applyResidentialHomeClockPageAfterLoad() {
-				if (!this.isHomeFixedSetupComplete()) {
-					openSceneClockHomeSetup({ replace: true })
-					return
-				}
 				this.residentialPickMode = false
 				this.residentialBinSettingsOpen = false
 				this.flowStep = 'learn'
@@ -1414,6 +1379,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.activeCateName = ''
 				this.pointId = 0
 				this.pointName = ''
+				this.setupPointPledged = false
 				this.clockContent = ''
 				this.accumDuration = ''
 				this.sortDuration = ''
@@ -1422,10 +1388,6 @@ import settings, { uploadUrl } from '@/common/settings'
 			selectHomeClockCate(card) {
 				if (!card || !card.cateId) {
 					this.$u.toast('分类种类加载中，请稍后再试')
-					return
-				}
-				if (this.isStreetHub && card.ready === false) {
-					this.$u.toast('请先在布置页上传该种类点位照片')
 					return
 				}
 				this.homeClockCateKey = card.key
@@ -1437,12 +1399,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.cateLabel = guideCateLabelFromName(card.cateName)
 				this.subKey = this.guideSubKeyForHub()
 				this.loadGuide()
-				const locs = this.homeClockLocationOptions
-				if (locs.length) {
-					this.pickHomeClockLocation(locs[0])
-				} else {
-					this.$u.toast('请先完成对应点位的布置照片')
-				}
 			},
 			pickHomeClockLocation(loc) {
 				if (!loc || !loc.pointId) return
@@ -1624,17 +1580,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.pointName = ''
 			},
 			backFromLearn() {
-				if (this.isResidentialHub) {
-					this.enterResidentialSetupFlow()
-					if (this.hub && this.hub.title) {
-						uni.setNavigationBarTitle({ title: this.hub.title })
-					}
-					return
-				}
-				if (this.isStreetHub) {
-					this.enterStreetSetupFlow()
-					return
-				}
 				this.flowStep = 'survey'
 			},
 			guideSubKeyForHub() {
@@ -1779,24 +1724,16 @@ import settings, { uploadUrl } from '@/common/settings'
 				return defs.length > 0
 			},
 			enterStreetSetupFlow() {
-				this.residentialPickMode = false
-				this.residentialBinSettingsOpen = false
-				this.syncStreetFixedSlots()
-				this.flowStep = 'setup'
-				uni.setNavigationBarTitle({ title: getStreetSetupPageTitle() })
+				this.enterStreetClockFlow()
 			},
 			enterStreetClockFlow() {
-				if (!this.isStreetFixedSetupComplete()) {
-					this.enterStreetSetupFlow()
-					return
-				}
 				this.residentialPickMode = false
 				this.residentialBinSettingsOpen = false
 				this.resetHomeClockForm()
 				this.flowStep = 'learn'
 				uni.setNavigationBarTitle({ title: getStreetClockNavTitle() })
 				const cards = this.streetClockCateCards || []
-				if (cards.length === 1 && cards[0].ready) {
+				if (cards.length === 1) {
 					this.selectHomeClockCate(cards[0])
 				}
 			},
@@ -1863,19 +1800,7 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			routeStreetAfterMerchantLoaded(keepFlow) {
 				if (keepFlow === 'guide' || keepFlow === 'survey') return
-				if (keepFlow === 'learn' || keepFlow === 'pick') {
-					this.enterStreetClockFlow()
-					return
-				}
-				if (keepFlow === 'setup') {
-					this.enterStreetSetupFlow()
-					return
-				}
-				if (this.isStreetFixedSetupComplete()) {
-					this.enterStreetClockFlow()
-				} else {
-					this.enterStreetSetupFlow()
-				}
+				this.enterStreetClockFlow()
 			},
 			initStreetMerchantFlow(keepFlow) {
 				this.pointsLoading = true
@@ -1889,10 +1814,8 @@ import settings, { uploadUrl } from '@/common/settings'
 						return
 					}
 					this.applyStreetMerchantToSession(merchant)
-					return this.$u.api.list_clock_scene_point({ hub_key: 'street' }).then(pr => {
-						this.points = (pr.data || []).map(p => this.normalizeScenePoint(p))
-						this.routeStreetAfterMerchantLoaded(keepFlow)
-					})
+					this.points = []
+					this.routeStreetAfterMerchantLoaded(keepFlow)
 				}).catch(err => {
 					this.scfDbg('initStreetMerchantFlow error', err && (err.msg || err.message))
 					this.flowStep = 'street_merchant'
@@ -1923,7 +1846,7 @@ import settings, { uploadUrl } from '@/common/settings'
 					}
 					this.applyStreetMerchantToSession(merchant)
 					this.$u.toast(res.msg || '已保存')
-					return this.initStreetMerchantFlow('setup')
+					return this.initStreetMerchantFlow('learn')
 				}).catch(e => {
 					this.$u.toast((e && e.msg) || '保存失败')
 				})
@@ -1943,12 +1866,8 @@ import settings, { uploadUrl } from '@/common/settings'
 					flowStepBefore: this.flowStep,
 				})
 				if (!this.isLogin) {
-					if (this.isResidentialHub) {
-						if (this.homeHubPage === 'clock') {
-							openSceneClockHomeSetup({ replace: true })
-						} else {
-							this.applyResidentialHomeSetupPageAfterLoad()
-						}
+					if (this.isResidentialHub && this.homeHubPage === 'clock') {
+						this.flowStep = 'learn'
 					} else if (this.isStreetHub) {
 						this.flowStep = 'street_merchant'
 					} else {
@@ -1964,6 +1883,15 @@ import settings, { uploadUrl } from '@/common/settings'
 				}
 				if (this.isStreetHub) {
 					return this.initStreetMerchantFlow(keepFlow)
+				}
+				if (this.isResidentialHub) {
+					this.pointsBootstrapped = true
+					if (keepFlow === 'learn' || this.homeHubPage === 'clock') {
+						this.applyResidentialHomeClockPageAfterLoad()
+					} else if (!keepFlow) {
+						this.enterResidentialClockFlow()
+					}
+					return Promise.resolve()
 				}
 				this.pointsLoading = true
 				return this.$u.api.list_clock_scene_point({ hub_key: this.hubKey }).then(res => {
@@ -1986,55 +1914,12 @@ import settings, { uploadUrl } from '@/common/settings'
 						}
 						return
 					}
-					if (keepFlow === 'cate' || keepFlow === 'points') {
-						if (this.isResidentialHub) {
-							if (this.isHomeFixedSetupComplete()) {
-								this.enterResidentialClockFlow()
-							} else {
-								this.enterResidentialSetupFlow()
-							}
-						}
-						return
-					}
 					if (this.isCommunityHub) {
 						if (keepFlow === 'learn') return
 						if (this.points.length > 0) {
 							this.enterOfficeClockFlow()
 						} else {
 							this.flowStep = 'hub_empty'
-						}
-						return
-					}
-					if (this.isResidentialHub) {
-						if (this.homeHubPage === 'setup') {
-							if (keepFlow === 'setup' || keepFlow === 'manage') {
-								this.applyResidentialHomeSetupPageAfterLoad()
-								return
-							}
-							if (keepFlow === 'learn') {
-								finishSceneClockHomeSetupNavigation()
-								return
-							}
-							this.applyResidentialHomeSetupPageAfterLoad()
-							return
-						}
-						if (this.homeHubPage === 'clock') {
-							if (keepFlow === 'learn' || keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate') {
-								if (keepFlow === 'learn') {
-									this.applyResidentialHomeClockPageAfterLoad()
-								}
-								return
-							}
-							this.applyResidentialHomeClockPageAfterLoad()
-							return
-						}
-						if (keepFlow === 'setup' || keepFlow === 'manage' || keepFlow === 'cate' || keepFlow === 'learn') {
-							return
-						}
-						if (this.isHomeFixedSetupComplete()) {
-							this.enterResidentialClockFlow()
-						} else {
-							this.enterResidentialSetupFlow({ replace: true })
 						}
 						return
 					}
@@ -2515,7 +2400,9 @@ import settings, { uploadUrl } from '@/common/settings'
 					if (!this.homeClockCateKey || !this.cateId) {
 						return this.$u.toast('请选择今天打卡的垃圾种类')
 					}
-					if (!this.pointId) return this.$u.toast('请先完成对应点位的布置照片')
+					if (!this.setupPointPledged) {
+						return this.$u.toast('请勾选「我承诺我已完成点位布置」')
+					}
 					if (!this.homeClockAmount) return this.$u.toast('请选择今天大约有多少')
 					if (!String(this.clockSlotUrls[0] || '').trim()) {
 						return this.$u.toast('请上传今日真分照片')
@@ -2619,6 +2506,9 @@ import settings, { uploadUrl } from '@/common/settings'
 						}
 						if (this.isStreetHub && this.streetMerchant && this.streetMerchant.id) {
 							payload.street_merchant_id = this.streetMerchant.id
+						}
+						if (this.isResidentialHub || this.isStreetHub) {
+							payload.setup_point_pledge = 1
 						}
 						return this.$u.api.add_forum(payload)
 					})

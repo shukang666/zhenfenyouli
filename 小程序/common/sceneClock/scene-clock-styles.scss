@@ -924,6 +924,46 @@
 	color: #6a8572;
 	margin-top: 4rpx;
 }
+.scf-hc-pledge {
+	display: flex;
+	align-items: flex-start;
+	gap: 16rpx;
+	margin-bottom: 24rpx;
+	padding: 20rpx 24rpx;
+	background: #f6fbf8;
+	border-radius: 16rpx;
+	border: 2rpx solid #dceee4;
+}
+.scf-hc-pledge-box {
+	flex-shrink: 0;
+	width: 40rpx;
+	height: 40rpx;
+	border-radius: 8rpx;
+	border: 2rpx solid #8fb9a3;
+	background: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.scf-hc-pledge-box--on {
+	background: #1b7a4a;
+	border-color: #1b7a4a;
+}
+.scf-hc-pledge-check {
+	color: #fff;
+	font-size: 26rpx;
+	font-weight: 700;
+	line-height: 1;
+}
+.scf-hc-pledge-t {
+	flex: 1;
+	font-size: 28rpx;
+	color: #2d4a3a;
+	line-height: 1.5;
+}
+.scf-sk-pledge {
+	margin-bottom: 20rpx;
+}
 .scf-hc-foot-link {
 	display: block;
 	text-align: center;

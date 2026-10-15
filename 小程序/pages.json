@@ -356,14 +356,6 @@
 					}
 				},
 				{
-					"path": "scene-clock-home-setup",
-					"style": {
-						"navigationBarTitleText": "布置家庭点位",
-						"navigationBarBackgroundColor": "#E8F7EE",
-						"navigationBarTextStyle": "black"
-					}
-				},
-				{
 					"path": "scene-clock-office",
 					"style": {
 						"navigationBarTitleText": "办公场景",

@@ -285,7 +285,7 @@ export function getSceneHubCards() {
 			hub: 'home',
 			illusKey: 'home',
 			title: '家庭真分',
-			desc: '布置居家环境中的垃圾投放点位，正确分类垃圾，完成真分。',
+			desc: '在家正确分类垃圾、拍照记录，完成真分。',
 			theme: 'home',
 		},
 		{
@@ -299,7 +299,7 @@ export function getSceneHubCards() {
 			hub: 'street',
 			illusKey: 'street',
 			title: '商户真分',
-			desc: '按店铺类别，布置对应垃圾投放点位，正确分类垃圾，完成真分。',
+			desc: '在店内正确分类垃圾、拍照记录，完成真分。',
 			theme: 'street',
 		},
 	]
@@ -742,6 +742,10 @@ export function getHomeClockSubmitCta() {
 
 export function getHomeClockFootNote() {
 	return '完成后提交，记录今天的真分行动'
+}
+
+export function getHomeClockSetupPledgeText() {
+	return '我承诺我已完成点位布置'
 }
 
 export function getHomeClockFootPoints() {

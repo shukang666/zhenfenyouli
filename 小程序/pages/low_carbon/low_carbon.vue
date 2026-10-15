@@ -42,7 +42,7 @@
       <view class="fb-zhenfen-hub-head">
         <view class="fb-zhenfen-hub-brand">
           <text class="fb-zhenfen-hub-badge">垃圾真分</text>
-          <text class="fb-zhenfen-hub-sub">选场景 · 摆桶 · 拍照真分</text>
+          <text class="fb-zhenfen-hub-sub">选场景 · 拍照真分</text>
         </view>
         <text class="fb-zhenfen-hub-hint">看海报 · 选场景 · 马上真分</text>
       </view>
