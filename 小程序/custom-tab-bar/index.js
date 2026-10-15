@@ -68,6 +68,12 @@ const ME_TAB_INDEX = 4
 const DEV_GATE = '110'
 const ME_LONG_PRESS_MS = 2000
 
+function tabIndexFromEvent(e) {
+  const raw = e.currentTarget.dataset.index
+  const n = parseInt(raw, 10)
+  return Number.isNaN(n) ? -1 : n
+}
+
 Component({
   options: {
     styleIsolation: 'shared'
@@ -129,8 +135,9 @@ Component({
       }
     },
     onTabTouchStart(e) {
-      const index = e.currentTarget.dataset.index
+      const index = tabIndexFromEvent(e)
       if (index !== ME_TAB_INDEX) return
+      this._meLongPressFired = false
       this._clearMeLongPressTimer()
       this._meLongPressTimer = setTimeout(() => {
         this._meLongPressTimer = null
@@ -145,8 +152,11 @@ Component({
         })
       }, ME_LONG_PRESS_MS)
     },
-    onTabTouchEnd() {
-      this._clearMeLongPressTimer()
+    onTabTouchEnd(e) {
+      const index = tabIndexFromEvent(e)
+      if (index === ME_TAB_INDEX) {
+        this._clearMeLongPressTimer()
+      }
     },
     _enableAnim() {
       if (this.data.animOn) return
@@ -168,7 +178,7 @@ Component({
       this.setData({ selected: index })
     },
     switchTab(e) {
-      const index = e.currentTarget.dataset.index
+      const index = tabIndexFromEvent(e)
       const path = e.currentTarget.dataset.path
       if (index === ME_TAB_INDEX && this._meLongPressFired) {
         this._meLongPressFired = false

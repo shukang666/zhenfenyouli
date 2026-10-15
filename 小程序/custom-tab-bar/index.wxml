@@ -14,9 +14,9 @@
       hover-class="tab-item--press"
       hover-stay-time="70"
       catchtap="switchTab"
-      catchtouchstart="onTabTouchStart"
-      catchtouchend="onTabTouchEnd"
-      catchtouchcancel="onTabTouchEnd"
+      bindtouchstart="onTabTouchStart"
+      bindtouchend="onTabTouchEnd"
+      bindtouchcancel="onTabTouchEnd"
     >
       <view class="tab-icon-wrap">
         <image
