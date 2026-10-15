@@ -64,43 +64,15 @@
 								<text class="scf-hc-preset-label">{{ preset.label }}</text>
 								<text class="scf-hc-preset-hint">{{ preset.hint }}</text>
 							</view>
-						</view>
-
-						<view class="scf-hc-cate-row">
-							<view
-								v-for="card in homeClockFormCateCards"
-								:key="card.key"
-								class="scf-hc-cate-card"
-								:class="[
-									'scf-hc-cate-card--' + card.tone,
-									{ 'scf-hc-cate-card--on': card.selected },
-								]"
-								hover-class="scf-hc-cate-card--press"
-								@tap="toggleHomeClockCateCard(card)"
-							>
-								<image
-									v-if="card.imgUrl"
-									class="scf-hc-cate-img"
-									:src="card.imgUrl"
-									mode="aspectFill"
-									@error="onHomeClockCateImgError(card.key)"
-								/>
-								<view v-else class="scf-hc-cate-illus">
-									<text class="scf-hc-cate-illus-ph">{{ card.illusPh }}</text>
-								</view>
-								<view v-if="card.selected" class="scf-hc-cate-tick">✓</view>
 							</view>
 						</view>
-
-						<text class="scf-hc-cate-sum">{{ homeClockSelectedSummary }}</text>
 					</view>
-				</view>
 
-				<view class="scf-hc-step scf-hc-step--photo" :class="{ 'scf-ps-gate-lock': !canEditZhenfenSteps }">
-					<text class="scf-hc-step-no">③</text>
-					<view class="scf-hc-step-body">
+					<view class="scf-hc-step scf-hc-step--photo" :class="{ 'scf-ps-gate-lock': !canEditZhenfenSteps }">
+						<text class="scf-hc-step-no">③</text>
+						<view class="scf-hc-step-body">
 
-						<view class="scf-hc-photo-head">
+							<view class="scf-hc-photo-head">
 							<view class="scf-hc-photo-head-l">
 								<text class="scf-hc-step-title">{{ homeClockStep3PhotoTitle }}</text>
 								<text class="scf-hc-step-sub scf-hc-step-sub--tight">{{ homeClockStep4Sub }}</text>
