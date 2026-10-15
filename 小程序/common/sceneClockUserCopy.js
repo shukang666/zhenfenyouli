@@ -663,29 +663,74 @@ export function getHomeFixedSetupRequiredHint() {
 	return '厨余桶、其他桶、可回收与有害四处布置照片均需上传，缺一不可'
 }
 
-/** 真分前：线下完成点位设置 + 用户承诺（不再在小程序上传布置照片） */
-export function getPointSetupGateKicker() {
-	return '开启真分前'
+export function getPointSetupGuideNavTitle() {
+	return '如何布置点位'
 }
 
 export function getPointSetupTutorialTitle() {
-	return '如何完成点位设置？'
+	return '布置要点'
 }
 
 export function getPointSetupTutorialIntroForHome() {
-	return '在家把四类垃圾「扔哪儿」固定下来即可（线下摆桶/收纳，不用在本页上传布置照片）。参考下面几处，弄好后勾选承诺就能开始真分。'
+	return '在家把四类垃圾「扔哪儿」固定下来即可（线下摆桶或收纳区，无需在小程序上传布置照片）。'
 }
 
 export function getPointSetupTutorialIntroForStreet() {
-	return '按认领时的店铺类型，在店内固定本店主营那一类垃圾的投放点即可（线下设置，不用上传布置照片）。'
+	return '按店铺类型，在店内固定对应垃圾的投放点即可（线下设置，无需上传布置照片）。'
 }
 
-export function getPointSetupGateHint() {
-	return '请先阅读教程并勾选承诺，再选种类、拍照提交真分'
+export function getPointSetupQuestionText(isStreet) {
+	return isStreet ? '您已完成店内的点位布置了吗？' : '您已完成家里的点位布置了吗？'
 }
 
-export function getHomeClockSetupPledgeText() {
-	return '我承诺我已完成点位设置'
+export function getPointSetupGuideLinkText() {
+	return '如何布置点位'
+}
+
+export function getPointSetupNoHint() {
+	return '请先按教程完成布置，确认后选「是」再继续。'
+}
+
+/** @returns {{id:string,label:string,keys:string[],hint:string}[]} */
+export function getHomeClockCatePresets() {
+	return [
+		{
+			id: 'daily2',
+			label: '厨余 + 其他',
+			keys: ['food', 'other'],
+			hint: '在家做饭最常见',
+		},
+		{
+			id: 'daily3',
+			label: '厨余 + 其他 + 可回收',
+			keys: ['food', 'other', 'recycle'],
+			hint: '顺手清了纸箱瓶罐',
+		},
+		{
+			id: 'recycle',
+			label: '仅可回收物',
+			keys: ['recycle'],
+			hint: '按周集中清理',
+		},
+		{
+			id: 'harm',
+			label: '仅有害垃圾',
+			keys: ['harm'],
+			hint: '电池、药品等',
+		},
+	]
+}
+
+export function getHomeClockStep2MultiTitle() {
+	return '今天真分了哪几类？'
+}
+
+export function getHomeClockStep2MultiSub() {
+	return '可点选下面快捷组合，或在四分类图标上点多选；请按您本次真实分好、准备投放的类别填写。'
+}
+
+export function getHomeClockStep3PhotoTitle() {
+	return '上传分类照片'
 }
 
 /** @returns {{key:string,title:string,desc:string,exampleImgKey?:string}[]} */

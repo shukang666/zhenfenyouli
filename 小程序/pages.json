@@ -356,9 +356,9 @@
 					}
 				},
 				{
-					"path": "scene-clock-home-setup",
+					"path": "scene-clock-point-setup-guide",
 					"style": {
-						"navigationBarTitleText": "布置家庭点位",
+						"navigationBarTitleText": "如何布置点位",
 						"navigationBarBackgroundColor": "#E8F7EE",
 						"navigationBarTextStyle": "black"
 					}

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
 	<view class="scene-clock-root">
 		<view :class="['scf-page', hubTheme]" v-if="hub">
 		<view class="scf-body scf-body--street-merchant" v-if="isStreetHub && flowStep === 'street_merchant'">
@@ -263,40 +263,31 @@
 		<!-- 沿街：今日真分（与家庭同逻辑，界面独立） -->
 		<view class="scf-body scf-body--shop-clock" v-if="flowStep === 'learn' && isStreetHub">
 			<view class="scf-ps-gate">
-				<text class="scf-ps-gate-k">{{ pointSetupGateKicker }}</text>
-				<view class="scf-ps-tutorial-head" hover-class="scf-card--press" @tap="togglePointSetupTutorial">
-					<text class="scf-ps-tutorial-title">{{ pointSetupTutorialTitle }}</text>
-					<text class="scf-ps-tutorial-toggle">{{ pointSetupTutorialOpen ? '收起教程' : '展开教程' }}</text>
+				<view class="scf-ps-q">
+					<text class="scf-ps-q-t">{{ pointSetupQuestionText }}</text>
+					<text
+						class="scf-ps-q-link"
+						hover-class="scf-ps-q-link--press"
+						@tap="goPointSetupGuide"
+					>{{ pointSetupGuideLinkText }}</text>
 				</view>
-				<view v-if="pointSetupTutorialOpen" class="scf-ps-tutorial-body">
-					<text class="scf-ps-tutorial-intro">{{ pointSetupTutorialIntro }}</text>
+				<view class="scf-ps-ans-row">
 					<view
-						v-for="item in pointSetupTutorialItems"
-						:key="item.key"
-						class="scf-ps-tutorial-item"
-					>
-						<view class="scf-ps-tutorial-item-text">
-							<text class="scf-ps-tutorial-item-title">{{ item.title }}</text>
-							<text class="scf-ps-tutorial-item-desc">{{ item.desc }}</text>
-						</view>
-						<image
-							v-if="item.exampleImgUrl"
-							class="scf-ps-tutorial-item-img"
-							:src="item.exampleImgUrl"
-							mode="aspectFit"
-							@error="onPointSetupTutorialImgError(item.key)"
-						/>
-					</view>
+						class="scf-ps-ans"
+						:class="{ 'scf-ps-ans--on': setupPointAnswer === 'yes' }"
+						hover-class="scf-card--press"
+						@tap="pickSetupPointAnswer('yes')"
+					>是</view>
+					<view
+						class="scf-ps-ans"
+						:class="{ 'scf-ps-ans--off': setupPointAnswer === 'no' }"
+						hover-class="scf-card--press"
+						@tap="pickSetupPointAnswer('no')"
+					>否</view>
 				</view>
-				<view class="scf-hc-pledge scf-ps-pledge" hover-class="scf-card--press" @tap="toggleSetupPointPledge">
-					<view class="scf-hc-pledge-box" :class="{ 'scf-hc-pledge-box--on': setupPointPledged }">
-						<text v-if="setupPointPledged" class="scf-hc-pledge-check">✓</text>
-					</view>
-					<text class="scf-hc-pledge-t">{{ homeClockSetupPledgeText }}</text>
-				</view>
-				<text v-if="!setupPointPledged" class="scf-ps-gate-hint">{{ pointSetupGateHint }}</text>
+				<text v-if="setupPointAnswer !== 'yes'" class="scf-ps-gate-hint">{{ pointSetupNoHint }}</text>
 			</view>
-			<view class="scf-ps-clock-main" :class="{ 'scf-ps-gate-lock': !setupPointPledged }">
+			<view class="scf-ps-clock-main" :class="{ 'scf-ps-gate-lock': !canEditZhenfenSteps }">
 			<view class="scf-sk-shop-bar" v-if="streetMerchant">
 				<view class="scf-sk-shop-bar-l">
 					<text class="scf-sk-shop-name">{{ streetMerchant.shop_name }}</text>
@@ -360,7 +351,7 @@
 			<view class="scf-sk-foot">
 				<view
 					class="scf-sk-submit"
-					:class="{ 'scf-sk-submit--disabled': clockSubmitting || !setupPointPledged }"
+					:class="{ 'scf-sk-submit--disabled': clockSubmitting || !canEditZhenfenSteps }"
 					hover-class="scf-card--press"
 					@tap="submitClock"
 				>{{ clockSubmitting ? '提交中…' : streetClockSubmitCta }}</view>

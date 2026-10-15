@@ -120,14 +120,13 @@ import settings, { uploadUrl } from '@/common/settings'
 		getHomeClockPhotoRules,
 		getHomeClockSubmitCta,
 		getHomeClockFootNote,
-		getHomeClockSetupPledgeText,
-		getPointSetupGateKicker,
-		getPointSetupTutorialTitle,
-		getPointSetupTutorialIntroForHome,
-		getPointSetupTutorialIntroForStreet,
-		getPointSetupGateHint,
-		getHomePointSetupTutorialItems,
-		getStreetPointSetupTutorialItems,
+		getPointSetupGuideLinkText,
+		getPointSetupNoHint,
+		getPointSetupQuestionText,
+		getHomeClockCatePresets,
+		getHomeClockStep2MultiTitle,
+		getHomeClockStep2MultiSub,
+		getHomeClockStep3PhotoTitle,
 		getHomeClockFootPoints,
 		getHomeClockAmountOptions,
 		getOfficeClockNavTitle,
@@ -305,13 +304,15 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeClockPhotoRules: getHomeClockPhotoRules(),
 				homeClockSubmitCta: getHomeClockSubmitCta(),
 				homeClockFootNote: getHomeClockFootNote(),
-				homeClockSetupPledgeText: getHomeClockSetupPledgeText(),
+				setupPointAnswer: '',
 				setupPointPledged: false,
-				pointSetupTutorialOpen: true,
-				pointSetupGateKicker: getPointSetupGateKicker(),
-				pointSetupTutorialTitle: getPointSetupTutorialTitle(),
-				pointSetupGateHint: getPointSetupGateHint(),
-				pointSetupTutorialImgOk: {},
+				homeClockSelectedKeys: [],
+				homeClockCatePresetId: '',
+				homeClockStep2MultiTitle: getHomeClockStep2MultiTitle(),
+				homeClockStep2MultiSub: getHomeClockStep2MultiSub(),
+				homeClockStep3PhotoTitle: getHomeClockStep3PhotoTitle(),
+				pointSetupGuideLinkText: getPointSetupGuideLinkText(),
+				pointSetupNoHint: getPointSetupNoHint(),
 				homeClockFootPoints: getHomeClockFootPoints(),
 				homeClockAmountOptions: getHomeClockAmountOptions(),
 				officeBuildingKey: '',
@@ -423,10 +424,10 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			homeClockCateCards() {
 				const defs = [
-					{ key: 'food', label: '厨余垃圾', tone: 'food', match: '厨余', imgFile: 'home-cate-food.jpg', illusPh: '🥕' },
-					{ key: 'other', label: '其他垃圾', tone: 'other', match: '其他', imgFile: 'home-cate-other.jpg', illusPh: '🗑️' },
-					{ key: 'recycle', label: '可回收垃圾', tone: 'recycle', match: '可回收', exclude: '不可', imgFile: 'home-cate-recycle.jpg', illusPh: '♻️' },
-					{ key: 'harm', label: '有害垃圾', tone: 'harm', match: '有害', imgFile: 'home-cate-harm.jpg', illusPh: '☣️' },
+					{ key: 'food', label: '厨余垃圾', shortLabel: '厨余', tone: 'food', match: '厨余', imgFile: 'home-cate-food.jpg', illusPh: '🥕' },
+					{ key: 'other', label: '其他垃圾', shortLabel: '其他', tone: 'other', match: '其他', imgFile: 'home-cate-other.jpg', illusPh: '🗑️' },
+					{ key: 'recycle', label: '可回收垃圾', shortLabel: '可回收', tone: 'recycle', match: '可回收', exclude: '不可', imgFile: 'home-cate-recycle.jpg', illusPh: '♻️' },
+					{ key: 'harm', label: '有害垃圾', shortLabel: '有害', tone: 'harm', match: '有害', imgFile: 'home-cate-harm.jpg', illusPh: '☣️' },
 				]
 				const list = this.cateList || []
 				const base = this.scenePickCosBase
@@ -564,23 +565,32 @@ import settings, { uploadUrl } from '@/common/settings'
 			isResidentialHub() {
 				return this.hubKey === 'home'
 			},
-			pointSetupTutorialIntro() {
-				if (this.isStreetHub) return getPointSetupTutorialIntroForStreet()
-				return getPointSetupTutorialIntroForHome()
+			pointSetupQuestionText() {
+				return getPointSetupQuestionText(this.isStreetHub)
 			},
-			pointSetupTutorialItems() {
-				const base = this.scenePickCosBase
-				const okMap = this.pointSetupTutorialImgOk || {}
-				const rawItems = this.isStreetHub
-					? getStreetPointSetupTutorialItems(this.streetMerchantPrimaryCateKw())
-					: getHomePointSetupTutorialItems()
-				return (rawItems || []).map(item => {
-					const key = item.key || item.title
-					const imgKey = item.exampleImgKey || ''
-					const imgOk = okMap[key] !== false
-					const exampleImgUrl = imgKey && imgOk ? base + imgKey + '.png' : ''
-					return Object.assign({}, item, { exampleImgUrl })
-				})
+			homeClockCatePresets() {
+				return getHomeClockCatePresets()
+			},
+			homeClockFormCateCards() {
+				const cards = this.isStreetHub ? (this.streetClockCateCards || []) : (this.homeClockCateCards || [])
+				const keys = this.homeClockSelectedKeys || []
+				return cards.map(c => Object.assign({}, c, { selected: keys.indexOf(c.key) >= 0 }))
+			},
+			homeClockSelectedCateLabels() {
+				const cards = this.homeClockFormCateCards || []
+				const keys = this.homeClockSelectedKeys || []
+				return keys.map(k => {
+					const c = cards.find(x => x.key === k)
+					return (c && (c.shortLabel || c.label || c.cateName)) || k
+				}).filter(Boolean)
+			},
+			canEditZhenfenSteps() {
+				return this.setupPointAnswer === 'yes'
+			},
+			homeClockSelectedSummary() {
+				const labels = this.homeClockSelectedCateLabels || []
+				if (!labels.length) return '还没选，先点上面的组合或卡片'
+				return '今天真分了 ' + labels.length + ' 类：' + labels.join('、')
 			},
 			isOwnPointHub() {
 				return this.isResidentialHub || (this.isStreetHub && !!this.streetMerchant)
@@ -929,25 +939,101 @@ import settings, { uploadUrl } from '@/common/settings'
 				}
 				this.bootstrapHub(normalizeClockHubKey(hubKey))
 			},
-			toggleSetupPointPledge() {
-				this.setupPointPledged = !this.setupPointPledged
-				if (this.setupPointPledged && this.isStreetHub && !this.homeClockCateKey) {
-					const cards = this.streetClockCateCards || []
-					if (cards.length === 1) {
-						this.selectHomeClockCate(cards[0])
+			goPointSetupGuide() {
+				let url = '/pages/activity/scene-clock-point-setup-guide?hub=' + (this.isStreetHub ? 'street' : 'home')
+				if (this.isStreetHub) {
+					url += '&cate_kw=' + encodeURIComponent(this.streetMerchantPrimaryCateKw())
+				}
+				uni.navigateTo({ url })
+			},
+			pickSetupPointAnswer(answer) {
+				if (answer === 'no') {
+					this.setupPointAnswer = 'no'
+					this.setupPointPledged = false
+					this.$u.toast(this.pointSetupNoHint || getPointSetupNoHint())
+					return
+				}
+				this.setupPointAnswer = 'yes'
+				this.setupPointPledged = true
+				if (!(this.homeClockSelectedKeys || []).length) {
+					if (this.isStreetHub) {
+						const cards = this.homeClockFormCateCards || []
+						if (cards.length && cards[0].key) {
+							this.homeClockSelectedKeys = [cards[0].key]
+							this.homeClockCatePresetId = ''
+							this.syncPrimaryCateFromSelection()
+						}
+						return
+					}
+					const preset = (this.homeClockCatePresets || []).find(p => p.id === 'daily2')
+					if (preset) {
+						this.applyHomeClockCatePreset(preset)
 					}
 				}
 			},
-			togglePointSetupTutorial() {
-				this.pointSetupTutorialOpen = !this.pointSetupTutorialOpen
+			isHomeClockCateKeySelected(key) {
+				return (this.homeClockSelectedKeys || []).indexOf(key) >= 0
 			},
-			onPointSetupTutorialImgError(key) {
-				if (!key) return
-				this.$set(this.pointSetupTutorialImgOk, key, false)
+			applyHomeClockCatePreset(preset) {
+				if (!this.requireSetupPointYes()) return
+				if (!preset || !(preset.keys || []).length) return
+				this.homeClockSelectedKeys = preset.keys.slice()
+				this.homeClockCatePresetId = preset.id
+				this.syncPrimaryCateFromSelection()
 			},
-			requireSetupPointPledge() {
-				if (this.setupPointPledged) return true
-				this.$u.toast('请先勾选「' + (this.homeClockSetupPledgeText || '我承诺我已完成点位设置') + '」')
+			toggleHomeClockCateCard(card) {
+				if (!this.requireSetupPointYes()) return
+				if (!card || !card.cateId) {
+					this.$u.toast('分类种类加载中，请稍后再试')
+					return
+				}
+				const key = card.key
+				const keys = (this.homeClockSelectedKeys || []).slice()
+				const pos = keys.indexOf(key)
+				if (pos >= 0) {
+					if (keys.length <= 1) {
+						this.$u.toast('请至少选择一类')
+						return
+					}
+					keys.splice(pos, 1)
+				} else {
+					keys.push(key)
+				}
+				this.homeClockSelectedKeys = keys
+				this.homeClockCatePresetId = ''
+				this.syncPrimaryCateFromSelection()
+			},
+			syncPrimaryCateFromSelection() {
+				const order = ['food', 'other', 'recycle', 'harm']
+				const sorted = (this.homeClockSelectedKeys || []).slice().sort(
+					(a, b) => order.indexOf(a) - order.indexOf(b)
+				)
+				const cards = this.homeClockFormCateCards || []
+				let primary = null
+				for (let i = 0; i < sorted.length; i++) {
+					const c = cards.find(x => x.key === sorted[i])
+					if (c && c.cateId) {
+						primary = c
+						break
+					}
+				}
+				if (!primary) {
+					this.homeClockCateKey = ''
+					this.cateId = 0
+					this.activeCateName = ''
+					return
+				}
+				this.homeClockCateKey = primary.key
+				this.cateId = primary.cateId
+				const labels = this.homeClockSelectedCateLabels
+				this.activeCateName = labels.length ? labels.join('、') : primary.cateName
+				this.cateLabel = guideCateLabelFromName(primary.cateName)
+				this.subKey = this.guideSubKeyForHub()
+				this.loadGuide()
+			},
+			requireSetupPointYes() {
+				if (this.setupPointAnswer === 'yes' && this.setupPointPledged) return true
+				this.$u.toast('请先确认已完成点位布置（选「是」）')
 				return false
 			},
 			goFlowStepSurvey() {
@@ -1089,7 +1175,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				openSceneClockHub(this, hub)
 			},
 			pickHomeClockAmount(opt) {
-				if ((this.isResidentialHub || this.isStreetHub) && !this.requireSetupPointPledge()) return
+				if ((this.isResidentialHub || this.isStreetHub) && !this.requireSetupPointYes()) return
 				this.homeClockAmount = opt
 			},
 			selectPresetTip(tip) {
@@ -1428,27 +1514,20 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.activeCateName = ''
 				this.pointId = 0
 				this.pointName = ''
+				this.setupPointAnswer = ''
 				this.setupPointPledged = false
+				this.homeClockSelectedKeys = []
+				this.homeClockCatePresetId = ''
 				this.clockContent = ''
 				this.accumDuration = ''
 				this.sortDuration = ''
 				this.resetClockSlots()
 			},
 			selectHomeClockCate(card) {
-				if (!this.requireSetupPointPledge()) return
-				if (!card || !card.cateId) {
-					this.$u.toast('分类种类加载中，请稍后再试')
-					return
-				}
-				this.homeClockCateKey = card.key
-				this.homeClockLocationKey = ''
-				this.pointId = 0
-				this.pointName = ''
-				this.cateId = card.cateId
-				this.activeCateName = card.cateName
-				this.cateLabel = guideCateLabelFromName(card.cateName)
-				this.subKey = this.guideSubKeyForHub()
-				this.loadGuide()
+				if (!card || !card.key) return
+				this.homeClockSelectedKeys = [card.key]
+				this.homeClockCatePresetId = ''
+				this.syncPrimaryCateFromSelection()
 			},
 			pickHomeClockLocation(loc) {
 				if (!loc || !loc.pointId) return
@@ -1783,9 +1862,6 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.flowStep = 'learn'
 				uni.setNavigationBarTitle({ title: getStreetClockNavTitle() })
 				const cards = this.streetClockCateCards || []
-				if (cards.length === 1 && this.setupPointPledged) {
-					this.selectHomeClockCate(cards[0])
-				}
 			},
 			chooseStreetFixedPhoto(slotKey) {
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
@@ -2367,7 +2443,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				if (
 					(this.isResidentialHub || this.isStreetHub)
 					&& this.flowStep === 'learn'
-					&& !this.requireSetupPointPledge()
+					&& !this.requireSetupPointYes()
 				) {
 					return
 				}
@@ -2454,13 +2530,15 @@ import settings, { uploadUrl } from '@/common/settings'
 				if (!this.isLogin) return this.$u.route('/pages/public/login')
 				if (!this.userInfo.community_id) return this.$u.route('/pages/member/info')
 				if (this.isResidentialHub || this.isStreetHub) {
-					if (!this.homeClockCateKey || !this.cateId) {
-						return this.$u.toast('请选择今天打卡的垃圾种类')
+					if (this.setupPointAnswer !== 'yes') {
+						return this.$u.toast('请先确认已完成点位布置（选「是」）')
 					}
-					if (!this.setupPointPledged) {
-						return this.$u.toast('请勾选「' + (this.homeClockSetupPledgeText || '我承诺我已完成点位设置') + '」')
+					if (!(this.homeClockSelectedKeys || []).length || !this.cateId) {
+						return this.$u.toast('请选择今天真分了哪几类')
 					}
-					if (!this.homeClockAmount) return this.$u.toast('请选择今天大约有多少')
+					if (this.isStreetHub && !this.homeClockAmount) {
+						return this.$u.toast('请选择今天大约有多少')
+					}
 					if (!String(this.clockSlotUrls[0] || '').trim()) {
 						return this.$u.toast('请上传今日真分照片')
 					}
@@ -2496,6 +2574,10 @@ import settings, { uploadUrl } from '@/common/settings'
 				if (note) parts.push(note)
 				if (this.isResidentialHub || this.isStreetHub) {
 					if (this.pointName) parts.push('打卡位置：' + this.pointName)
+					const cateLabels = this.homeClockSelectedCateLabels || []
+					if (cateLabels.length) {
+						parts.push('今日分类：' + cateLabels.length + ' 类（' + cateLabels.join('、') + '）')
+					}
 					if (this.homeClockAmount) parts.push('今日数量：' + this.homeClockAmount)
 				} else if (this.isOfficeHub) {
 					if (this.officeBuildingKey) parts.push('办公楼宇：' + this.officeBuildingKey)
@@ -2613,6 +2695,8 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.clockSuccessShow = false
 				this.resetHomeClockForm()
 				this.flowStep = 'learn'
+				this.setupPointAnswer = 'yes'
+				this.setupPointPledged = true
 				const cateCards = this.isStreetHub
 					? (this.streetClockCateCards || [])
 					: (this.homeClockCateCards || [])

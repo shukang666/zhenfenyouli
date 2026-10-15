@@ -1,114 +1,82 @@
 <template>
-
 	<view class="scene-clock-root">
-
 		<view :class="['scf-page', hubTheme]" v-if="hub">
 
 			<view class="scf-body scf-body--home-clock" v-if="flowStep === 'learn'">
 
-				<view class="scf-ps-gate">
-					<text class="scf-ps-gate-k">{{ pointSetupGateKicker }}</text>
-					<view class="scf-ps-tutorial-head" hover-class="scf-card--press" @tap="togglePointSetupTutorial">
-						<text class="scf-ps-tutorial-title">{{ pointSetupTutorialTitle }}</text>
-						<text class="scf-ps-tutorial-toggle">{{ pointSetupTutorialOpen ? '收起教程' : '展开教程' }}</text>
-					</view>
-					<view v-if="pointSetupTutorialOpen" class="scf-ps-tutorial-body">
-						<text class="scf-ps-tutorial-intro">{{ pointSetupTutorialIntro }}</text>
-						<view
-							v-for="item in pointSetupTutorialItems"
-							:key="item.key"
-							class="scf-ps-tutorial-item"
-						>
-							<view class="scf-ps-tutorial-item-text">
-								<text class="scf-ps-tutorial-item-title">{{ item.title }}</text>
-								<text class="scf-ps-tutorial-item-desc">{{ item.desc }}</text>
-							</view>
-							<image
-								v-if="item.exampleImgUrl"
-								class="scf-ps-tutorial-item-img"
-								:src="item.exampleImgUrl"
-								mode="aspectFit"
-								@error="onPointSetupTutorialImgError(item.key)"
-							/>
-						</view>
-					</view>
-					<view class="scf-hc-pledge scf-ps-pledge" hover-class="scf-card--press" @tap="toggleSetupPointPledge">
-						<view class="scf-hc-pledge-box" :class="{ 'scf-hc-pledge-box--on': setupPointPledged }">
-							<text v-if="setupPointPledged" class="scf-hc-pledge-check">✓</text>
-						</view>
-						<text class="scf-hc-pledge-t">{{ homeClockSetupPledgeText }}</text>
-					</view>
-					<text v-if="!setupPointPledged" class="scf-ps-gate-hint">{{ pointSetupGateHint }}</text>
-				</view>
-
-				<view class="scf-ps-clock-main" :class="{ 'scf-ps-gate-lock': !setupPointPledged }">
-
 				<view class="scf-hc-banner">
-
 					<view class="scf-hc-banner-ph" :class="{ 'scf-hc-banner-ph--img': !!homeClockBannerImgUrl }">
-
 						<image
-
 							v-if="homeClockBannerImgUrl"
-
 							class="scf-hc-banner-img"
-
 							:src="homeClockBannerImgUrl"
-
 							mode="widthFix"
-
 							@error="onHomeClockBannerImgError"
-
 						/>
-
 						<text v-else class="scf-hc-banner-slogan">{{ homeClockBannerSlogan }}</text>
-
 					</view>
-
 				</view>
-
-
 
 				<view class="scf-hc-rhythm-note">
-
 					<text class="scf-hc-rhythm-note-t">{{ homeClockSortRhythmNote }}</text>
-
 				</view>
 
-
-
 				<view class="scf-hc-step">
-
 					<text class="scf-hc-step-no">①</text>
-
 					<view class="scf-hc-step-body">
+						<view class="scf-ps-q">
+							<text class="scf-ps-q-t">{{ pointSetupQuestionText }}</text>
+							<text class="scf-ps-q-link" hover-class="scf-ps-q-link--press" @tap="goPointSetupGuide">{{ pointSetupGuideLinkText }}</text>
+						</view>
+						<view class="scf-ps-ans-row">
+							<view
+								class="scf-ps-ans"
+								:class="{ 'scf-ps-ans--on': setupPointAnswer === 'yes' }"
+								hover-class="scf-card--press"
+								@tap="pickSetupPointAnswer('yes')"
+							>是</view>
+							<view
+								class="scf-ps-ans"
+								:class="{ 'scf-ps-ans--off': setupPointAnswer === 'no' }"
+								hover-class="scf-card--press"
+								@tap="pickSetupPointAnswer('no')"
+							>否</view>
+						</view>
+						<text v-if="setupPointAnswer !== 'yes'" class="scf-ps-gate-hint">{{ pointSetupNoHint }}</text>
+					</view>
+				</view>
 
-						<text class="scf-hc-step-title">{{ homeClockStep1Title }}</text>
+				<view class="scf-hc-step" :class="{ 'scf-ps-gate-lock': !canEditZhenfenSteps }">
+					<text class="scf-hc-step-no">②</text>
+					<view class="scf-hc-step-body">
+						<text class="scf-hc-step-title">{{ homeClockStep2MultiTitle }}</text>
+						<text class="scf-hc-step-sub">{{ homeClockStep2MultiSub }}</text>
 
-						<text class="scf-hc-step-sub">{{ homeClockStep1Sub }}</text>
+						<view class="scf-hc-preset-row">
+							<view
+								v-for="preset in homeClockCatePresets"
+								:key="preset.id"
+								class="scf-hc-preset"
+								:class="{ 'scf-hc-preset--on': homeClockCatePresetId === preset.id }"
+								hover-class="scf-card--press"
+								@tap="applyHomeClockCatePreset(preset)"
+							>
+								<text class="scf-hc-preset-label">{{ preset.label }}</text>
+								<text class="scf-hc-preset-hint">{{ preset.hint }}</text>
+							</view>
+						</view>
 
 						<view class="scf-hc-cate-row">
-
 							<view
-
-								v-for="card in homeClockCateCards"
-
+								v-for="card in homeClockFormCateCards"
 								:key="card.key"
-
 								class="scf-hc-cate-card"
-
 								:class="[
-
 									'scf-hc-cate-card--' + card.tone,
-
-									{ 'scf-hc-cate-card--on': homeClockCateKey === card.key },
-
+									{ 'scf-hc-cate-card--on': card.selected },
 								]"
-
 								hover-class="scf-hc-cate-card--press"
-
-								@tap="selectHomeClockCate(card)"
-
+								@tap="toggleHomeClockCateCard(card)"
 							>
 								<image
 									v-if="card.imgUrl"
@@ -120,68 +88,23 @@
 								<view v-else class="scf-hc-cate-illus">
 									<text class="scf-hc-cate-illus-ph">{{ card.illusPh }}</text>
 								</view>
+								<view v-if="card.selected" class="scf-hc-cate-tick">✓</view>
 							</view>
-
 						</view>
 
+						<text class="scf-hc-cate-sum">{{ homeClockSelectedSummary }}</text>
 					</view>
-
 				</view>
 
-
-
-				<view class="scf-hc-step">
-
-					<text class="scf-hc-step-no">②</text>
-
-					<view class="scf-hc-step-body">
-
-						<text class="scf-hc-step-title">{{ homeClockStep2Title }}</text>
-
-						<view class="scf-hc-amount-row">
-
-							<view
-
-								v-for="opt in homeClockAmountOptions"
-
-								:key="opt"
-
-								class="scf-hc-amount-chip"
-
-								:class="{ 'scf-hc-amount-chip--on': homeClockAmount === opt }"
-
-								hover-class="scf-card--press"
-
-								@tap="pickHomeClockAmount(opt)"
-
-							>{{ opt }}</view>
-
-						</view>
-
-						<text class="scf-hc-amount-note">● {{ homeClockAmountNote }}</text>
-
-					</view>
-
-				</view>
-
-
-
-				<view class="scf-hc-step scf-hc-step--photo">
-
+				<view class="scf-hc-step scf-hc-step--photo" :class="{ 'scf-ps-gate-lock': !canEditZhenfenSteps }">
 					<text class="scf-hc-step-no">③</text>
-
 					<view class="scf-hc-step-body">
 
 						<view class="scf-hc-photo-head">
-
 							<view class="scf-hc-photo-head-l">
-
-								<text class="scf-hc-step-title">{{ homeClockStep4Title }}</text>
-
+								<text class="scf-hc-step-title">{{ homeClockStep3PhotoTitle }}</text>
 								<text class="scf-hc-step-sub scf-hc-step-sub--tight">{{ homeClockStep4Sub }}</text>
-
 							</view>
-
 							<view class="scf-hc-photo-example">
 								<image
 									v-if="homeClockPhotoExampleImgUrl"
@@ -195,100 +118,57 @@
 								</view>
 								<text class="scf-hc-photo-example-cap">{{ homeClockPhotoExampleCap }} →</text>
 							</view>
-
 						</view>
 
 						<view
-
 							class="scf-hc-upload"
-
 							:class="{ 'scf-hc-upload--done': !!clockSlotUrls[0] }"
-
 							hover-class="scf-card--press"
-
 							@tap="onClockSlotTap(0)"
-
 						>
-
 							<image
-
 								v-if="clockSlotUrls[0]"
-
 								class="scf-hc-upload-img"
-
 								:src="clockSlotUrls[0]"
-
 								mode="aspectFill"
-
 							/>
-
 							<block v-else>
-
 								<text class="scf-hc-upload-ico">📷</text>
-
 								<text class="scf-hc-upload-t">{{ homeClockPhotoUploadCta }}</text>
-
 							</block>
-
 							<view
 								v-if="clockSlotUrls[0]"
 								class="scf-photo-del scf-photo-del--round"
 								@tap.stop="clearClockSlot(0)"
 							>×</view>
-
 						</view>
 
 						<view class="scf-hc-rules">
-
 							<view
-
 								class="scf-hc-rule"
-
 								v-for="(rule, ri) in homeClockPhotoRules"
-
 								:key="ri"
-
 							>
-
 								<text class="scf-hc-rule-ico">{{ rule.ok ? '✓' : '✕' }}</text>
-
 								<text class="scf-hc-rule-t" :class="{ 'scf-hc-rule-t--ok': rule.ok }">{{ rule.text }}</text>
-
 							</view>
-
 						</view>
 
 					</view>
-
 				</view>
-
-
 
 				<view class="scf-hc-foot">
-
 					<view
-
 						class="scf-hc-submit"
-
-						:class="{ 'scf-hc-submit--disabled': clockSubmitting || !setupPointPledged }"
-
+						:class="{ 'scf-hc-submit--disabled': clockSubmitting || !canEditZhenfenSteps }"
 						hover-class="scf-card--press"
-
 						@tap="submitClock"
-
 					>{{ clockSubmitting ? '提交中…' : homeClockSubmitCta }}</view>
-
 					<text class="scf-hc-foot-note">{{ homeClockFootNote }}</text>
-
 					<text class="scf-hc-foot-points">{{ homeClockFootPoints }}</text>
-
-				</view>
-
 				</view>
 
 			</view>
-
-
 
 			<view class="scf-success-mask" v-if="isClockSuccessVisible" @tap="goActivityTab">
 
@@ -437,5 +317,3 @@ export default {
 @import '@/common/sceneClock/scene-clock-styles.scss';
 
 </style>
-
-
