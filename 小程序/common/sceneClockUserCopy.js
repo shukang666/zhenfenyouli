@@ -26,11 +26,11 @@ export function getIntroLead() {
 }
 
 export function getWhyIntroLead() {
-	return '为什么要分？分开扔才好回收；混装一袋，后面很难再利用。'
+	return '为什么要分？混装一袋，后面很难再利用；分开后厨余能堆肥、可回收能再生，有害也能单独处理'
 }
 
 export function getWhyIntroSummary() {
-	return '看下面要点，选好生活场景，按提示打卡即可'
+	return '先看下面要点，再选您今天的场景，跟着提示摆桶、打卡即可'
 }
 
 /** 建议家里各房间放什么桶（户型示意用 planId 定位格子） */
@@ -79,7 +79,7 @@ export function getBinSetupLead() {
 }
 
 export function getBinSetupLeadNote() {
-	return '首次设置即可；保存后下次直接选桶打卡'
+	return '这是「设置」不是每次打卡都要做；保存后下次进来直接选桶即可'
 }
 
 export function getAccumDurationOptions() {
@@ -92,55 +92,50 @@ export function getSortDurationOptions() {
 
 /** 设置页：一句话说清要做什么 */
 export function getSetupIntroLine() {
-	return '按房间添桶、选种类，拍张照，以后打卡好对照。'
+	return '厨房放厨余桶、客厅放可回收桶…添好名字和种类，给桶拍张照，方便以后打卡对照。'
 }
 
 /** 选择页：还没有位置时 */
 export function getIntroSummary() {
-	return '在家定好扔哪儿，按提示拍照提交即可。'
+	return '在家固定好「扔哪儿」，扔的时候按提示拍几张照片就可以。'
 }
 
 /** 展开「了解更多」 */
 export function getIntroBlocks() {
-	const local = '在七贤岭：手机学分类，扔对拍照可攒积分。'
+	const local =
+		'在七贤岭：手机上学怎么分，扔对了拍照还能攒积分；全家一起动手，记得更牢。'
 
 	return [
 		{
 			id: 'what',
 			title: '混装会带来什么',
-			body: '混装难再利用，厨余混进其他垃圾还容易发臭、招虫。',
+			body: '一袋混装，后面很难分拣再利用；厨余混进其他垃圾还容易发臭、招虫，处理成本更高。',
 		},
 		{
 			id: 'benefit',
 			title: '分开之后的好处',
-			body: '厨余、可回收、有害分开收，小区更干净，资源少浪费。',
+			body: '厨余专门处理，纸箱瓶罐能回收再造，电池药品单独收更安全，小区更干净、少浪费。',
 		},
 		{
 			id: 'policy',
 			title: '社区一起参与',
-			body: '垃圾分类人人有责。' + local,
+			body: '现在都要做垃圾分类。' + local,
 		},
 		{
 			id: 'vision',
 			title: '打卡在记录什么',
-			body: '记录您认真分类的成果，不是考试；常用有积分。',
+			body: '不是考你会不会分，而是记录您认真分类的成果；用得勤有积分，邻里一起把习惯留住。',
 		},
 	]
 }
 
 export function getCommunityEmptyTitle(isStreetHub, isOfficeHub) {
 	if (isStreetHub) return '店里还没安排投放点'
-	if (isOfficeHub) return '办公真分角尚未配置'
+	if (isOfficeHub) return '楼里还没安排投放点'
 	return '还没安排投放点'
 }
 
-export function getCommunityEmptyDesc(isStreetHub, isOfficeHub) {
-	if (isOfficeHub) {
-		return '请社区工作人员在后台「场景回收点配置」中添加办公场景、所属社区、楼宇名与可回收物真分角。配置完成后重新进入本页即可打卡。'
-	}
-	if (isStreetHub) {
-		return '社区会根据商铺情况安排投放点，弄好后会出现在这里。不清楚可以问社区或物业。'
-	}
+export function getCommunityEmptyDesc() {
 	return '社区会根据商铺或单位情况安排扔垃圾的地方，弄好后会出现在这里。不清楚可以问社区或物业。'
 }
 
@@ -197,7 +192,7 @@ export function getThemeIntroHeadline() {
 }
 
 export function getThemeIntroSubline() {
-	return '四步走，不用一次做完，慢慢养成习惯'
+	return '不用一次做完，跟着下面四步，慢慢就养成习惯'
 }
 
 export function getThemeIntroSteps() {
@@ -205,25 +200,25 @@ export function getThemeIntroSteps() {
 		{
 			num: '1',
 			title: '选对场景',
-			desc: '在家、上班或店里，选您今天主要在哪儿扔。',
+			desc: '在家、上班或店里——选您今天主要在哪儿扔垃圾。',
 			icon: '🏠',
 		},
 		{
 			num: '2',
 			title: '分清种类',
-			desc: '四类分开；拿不准可看分类说明。',
+			desc: '厨余、可回收、有害、其他要分开。拿不准可回看分类说明。',
 			icon: '♻️',
 		},
 		{
 			num: '3',
 			title: '动手投放',
-			desc: '投进对应颜色桶，别混装。',
+			desc: '按提示投进对应颜色的桶，别混装、别投错桶。',
 			icon: '🗑️',
 		},
 		{
 			num: '4',
 			title: '拍照留记录',
-			desc: '拍清本次投放，提交记积分。',
+			desc: '拍清楚本次投放，提交后可得积分。',
 			icon: '📷',
 		},
 	]
@@ -233,258 +228,26 @@ export function getThemeIntroCta() {
 	return '我准备好了，开始'
 }
 
-/** 场景选择页（原型 Screen 4）——场景指生活情境（家/上班/商铺），不是扔垃圾的物理点位 */
+/** 场景选择页（原型 Screen 4） */
 export function getScenePickNavTitle() {
 	return '垃圾分类打卡'
 }
 
-export function getScenePickKicker() {
-	return '选生活场景'
-}
-
 export function getScenePickHint() {
-	return '选一个和今天最贴近的场景：家里、上班，还是店铺。后面再按场景引导您分类打卡'
-}
-
-/** 选场景首屏顶栏文案 */
-export function getScenePickWelcomeBanner(returning) {
-	if (returning) {
-		return '欢迎回来。开始今天的真分吧！'
-	}
-	return '欢迎参与真分。开始今天的真分吧！'
-}
-
-export function getScenePickMainTitle() {
-	return '选择你今日的真分场景吧！'
-}
-
-/** 选场景前：是否愿意参加真分（仅下方卡片区，上方「为什么要分」不动） */
-export function getThemeOptInEyebrow() {
-	return '真分打卡'
-}
-
-export function getThemeOptInTitle() {
-	return '今天愿意认真真分吗？'
-}
-
-export function getThemeOptInDesc() {
-	return '真分就是分对类别、投进对的桶，并拍照留记录。点「愿意」后，先选和今天最贴近的生活场景（家里、上班或店铺）。'
-}
-
-export function getThemeOptInYes() {
-	return '愿意，去选场景'
-}
-
-export function getThemeOptInLater() {
-	return '今天先不打了'
+	return '您今天主要在哪儿扔垃圾？点选一个就行'
 }
 
 export function getSceneHubCards() {
 	return [
-		{
-			hub: 'home',
-			illusKey: 'home',
-			title: '家庭真分',
-			desc: '在家正确分类垃圾、拍照记录，完成真分。',
-			theme: 'home',
-		},
-		{
-			hub: 'office',
-			illusKey: 'office',
-			title: '办公场所真分',
-			desc: '在办公区域设置的真分角正确投递可回收物，完成真分。',
-			theme: 'office',
-		},
-		{
-			hub: 'street',
-			illusKey: 'street',
-			title: '商户真分',
-			desc: '在店内正确分类垃圾、拍照记录，完成真分。',
-			theme: 'street',
-		},
+		{ hub: 'home', emoji: '🏠', title: '家庭场景', desc: '厨房、客厅、卫生间，全家日常投放', theme: 'home' },
+		{ hub: 'office', emoji: '🏢', title: '上班 / 楼宇', desc: '工位、茶水间、办公区', theme: 'office' },
+		{ hub: 'street', emoji: '🏪', title: '沿街商铺', desc: '门店前后堂产生的垃圾', theme: 'street' },
 	]
-}
-
-/** 沿街：登记商铺 + 自传投放点照片（同家庭摆桶逻辑） */
-export function getStreetMerchantHeroTitle() {
-	return '店里也能真分'
-}
-
-export function getStreetMerchantHeroSub() {
-	return '分得好，店里更清爽'
-}
-
-export function getStreetClaimTitle() {
-	return '填写公司信息'
-}
-
-export function getStreetClaimLead() {
-	return ''
-}
-
-export function getStreetClaimShopNamePh() {
-	return '请输入门店/公司名称'
-}
-
-export function getStreetClaimCompanyLabel() {
-	return '公司名称'
-}
-
-export function getStreetClaimTypeHint() {
-	return '公司类型'
-}
-
-export function getStreetClaimSubmit() {
-	return '下一步，布置店内投放点位'
-}
-
-/** 沿街：本店主营垃圾种类对应 1 个布置点位（与认领时店铺类型一致） */
-export function getStreetShopSetupSlotDefs(primaryCateKw) {
-	const kw = String(primaryCateKw || '其他').trim()
-	const presets = {
-		厨余: {
-			slotKey: 'shop_primary_food',
-			cateKw: '厨余',
-			point_name: '店内投放点',
-			title: '厨余垃圾投放点',
-			desc: '在后厨或操作台旁固定厨余桶，拍清楚桶或投放区域即可。',
-			uploadCta: '拍摄厨余投放点',
-			uploadDone: '已布置，点击可更换',
-			tone: 'food',
-			tag: '本店主营',
-		},
-		可回收: {
-			slotKey: 'shop_primary_recycle',
-			cateKw: '可回收',
-			point_name: '店内投放点',
-			title: '可回收物收集点',
-			desc: '纸箱、瓶罐等集中存放处，拍清楚即可。',
-			uploadCta: '拍摄可回收收集点',
-			uploadDone: '已布置，点击可更换',
-			tone: 'recycle',
-			tag: '本店主营',
-		},
-		有害: {
-			slotKey: 'shop_primary_harm',
-			cateKw: '有害',
-			point_name: '店内投放点',
-			title: '有害垃圾收集点',
-			desc: '专用收集盒或桶，拍清楚位置即可。',
-			uploadCta: '拍摄有害垃圾收集点',
-			uploadDone: '已布置，点击可更换',
-			tone: 'harm',
-			tag: '本店主营',
-		},
-		其他: {
-			slotKey: 'shop_primary_other',
-			cateKw: '其他',
-			point_name: '店内投放点',
-			title: '其他垃圾投放点',
-			desc: '店内其他垃圾桶或投放区，拍清楚即可。',
-			uploadCta: '拍摄其他垃圾投放点',
-			uploadDone: '已布置，点击可更换',
-			tone: 'other',
-			tag: '本店主营',
-		},
-	}
-	if (presets[kw]) return [presets[kw]]
-	for (const key of Object.keys(presets)) {
-		if (kw.indexOf(key) >= 0) return [presets[key]]
-	}
-	return [presets.其他]
-}
-
-export function getStreetSetupPageTitle() {
-	return '布置店内分类投放点'
-}
-
-export function getStreetSetupPageSub() {
-	return '按认领时选定的店铺类型，只需布置本店主营那一类垃圾的投放点'
-}
-
-export function getStreetSetupFinishCta() {
-	return '完成布置，开始今日打卡'
-}
-
-export function getStreetClockNavTitle() {
-	return '沿街商铺 · 今日真分'
-}
-
-export function getStreetClockShopBarHint() {
-	return '今日真分'
-}
-
-export function getStreetClockStep1Title() {
-	return '今日打卡种类'
-}
-
-export function getStreetClockStep1Sub() {
-	return '已按店铺类型为您匹配主营垃圾种类'
-}
-
-export function getStreetClockStep2Title() {
-	return '大概有多少？'
-}
-
-export function getStreetClockPhotoTitle() {
-	return '上传分类成果'
-}
-
-export function getStreetClockPhotoSub() {
-	return '对准刚分好的垃圾或桶内成果，拍清楚即可'
-}
-
-export function getStreetClockSubmitCta() {
-	return '提交今日真分'
-}
-
-export function getStreetSetupKicker() {
-	return '拍您店的投放点'
-}
-
-export function getStreetSetupSub() {
-	return '和家里一样：起个名字、拍清楚桶或投放位置，保存后点选即可打卡。'
-}
-
-export function getStreetSetupNamePh() {
-	return '如：店后垃圾桶、门口分类桶'
-}
-
-export function getStreetSetupFootnote() {
-	return '种类已按商铺类型定好，不用另选。'
-}
-
-export function getStreetSetupNextCta() {
-	return '保存，去选点打卡'
-}
-
-export function getStreetPickLead() {
-	return '点选下面这个投放点，上传分类照片'
-}
-
-export function getStreetPickSub() {
-	return '需要改照片或名字，点下方「展开」'
-}
-
-export function getStreetPickMaskHint() {
-	return '轻触空白处返回'
-}
-
-export function getStreetBinSettingsFoldTitle() {
-	return '改投放点照片或名称'
-}
-
-export function getStreetBinSettingsFoldHint() {
-	return '展开后可修改，保存即生效'
-}
-
-export function getStreetEditShop() {
-	return '改店名或类型'
 }
 
 /** 任务说明（原型 Screen 5） */
 export function getThemeBriefTagline() {
-	return '分对、扔对，就是在为绿色生活出力'
+	return '分对了、扔对了，就是在为绿色生活出一份力'
 }
 
 export function getThemeBriefTaskTitle() {
@@ -504,7 +267,7 @@ export function getThemeBriefCta() {
 }
 
 export function getThemeIntroHeroSlogan() {
-	return { line1: '垃圾分类', line2: '从身边做起' }
+	return { line1: '垃圾分类', line2: '从我做起 让绿色成为习惯' }
 }
 
 export function getThemePromoHeadline() {
@@ -576,254 +339,4 @@ export function getClockSuccessPromoEmptyBody() {
 export function getClockSuccessPromoMoreLabel(count) {
 	if (count <= 0) return ''
 	return `还有 ${count} 个活动可以看看`
-}
-
-/** 家庭场景：固定布置点位（厨房厨余+其他两桶，加可回收、有害；不可增删改名称/种类） */
-export function getHomeFixedSetupSlots() {
-	return [
-		{
-			slotKey: 'kitchen_food',
-			section: 'start',
-			groupKey: 'kitchen',
-			groupRole: 'lead',
-			title: '建议上传厨房点位布置',
-			desc: '厨房里要放两个桶：一个厨余，一个其他。做饭时顺手分，不用来回跑。',
-			exampleCaption: '厨房布置点位示例图',
-			exampleImgKey: 'home-setup-example-kitchen',
-			uploadLabel: '厨余桶',
-			uploadCta: '点击上传厨余垃圾桶',
-			uploadDone: '厨余桶已布置，点击可更换',
-			point_name: '厨房厨余桶',
-			cateKw: '厨余',
-			legacyPointNames: ['厨房分类点位'],
-		},
-		{
-			slotKey: 'kitchen_other',
-			section: 'start',
-			groupKey: 'kitchen',
-			groupRole: 'member',
-			uploadLabel: '其他桶',
-			uploadCta: '点击上传其他垃圾桶',
-			uploadDone: '其他桶已布置，点击可更换',
-			point_name: '厨房其他桶',
-			cateKw: '其他',
-		},
-		{
-			slotKey: 'recycle',
-			section: 'recycle_harm',
-			title: '布置可回收物点位',
-			desc: '家里找个角落放可回收物，纸箱、瓶子攒着卖。以后打卡可回收物，记得拍售卖照片。',
-			exampleCaption: '可回收物点位布置示例图',
-			exampleImgKey: 'home-setup-example-recycle',
-			uploadCta: '点击开始布置可回收物点位',
-			uploadDone: '可回收物点位已布置，点击可更换照片',
-			point_name: '可回收物点位',
-			cateKw: '可回收',
-		},
-		{
-			slotKey: 'hazard',
-			section: 'recycle_harm',
-			title: '布置有害垃圾点位',
-			desc: '有害垃圾别乱扔，找个盒子专门放。',
-			exampleCaption: '有害垃圾点位布置示例图',
-			exampleImgKey: 'home-setup-example-hazard',
-			uploadCta: '点击开始布置有害垃圾点位',
-			uploadDone: '有害垃圾点位已布置，点击可更换照片',
-			point_name: '有害垃圾点位',
-			cateKw: '有害',
-		},
-	]
-}
-
-export function getHomeFixedSetupHeroTitle() {
-	return '布置家庭垃圾分类的点位'
-}
-
-export function getHomeFixedSetupHeroSub() {
-	return '家里摆好桶，真分不费劲'
-}
-
-export function getHomeFixedSectionStartTitle() {
-	return '开始布置家庭分类点位吧'
-}
-
-export function getHomeFixedSectionRecycleTitle() {
-	return '开始布置可回收物和有害垃圾点位'
-}
-
-export function getHomeFixedSetupRewardHint() {
-	return '完成布置可获得100积分'
-}
-
-export function getHomeFixedSetupFinishCta() {
-	return '完成全部上传开始今日真分'
-}
-
-export function getHomeFixedSetupRequiredHint() {
-	return '厨余桶、其他桶、可回收与有害四处布置照片均需上传，缺一不可'
-}
-
-export function getHomeClockNavTitle() {
-	return '开始今天的真分吧'
-}
-
-export function getHomeClockBannerSlogan() {
-	return '把分类融入每一天的生活'
-}
-
-export function getHomeClockStep1Title() {
-	return '今天真分哪类垃圾？'
-}
-
-export function getHomeClockStep1Sub() {
-	return '先选今天真实产生、并已分好的一类。'
-}
-
-/** 日常 2 分类 vs 四类按周，避免形式化打卡 */
-export function getHomeClockSortRhythmNote() {
-	return '在家做饭吃饭，日常按「厨余 + 其他」两类投就好；可回收、有害不必每天打卡，一般按周集中清理时再记一次即可。'
-}
-
-export function getHomeClockLocationStepTitle() {
-	return '选择打卡位置'
-}
-
-export function getHomeClockLocationStepHint() {
-	return '选您实际投放的一处家庭布置点位。'
-}
-
-export function getHomeClockLocationLabel(slotKey) {
-	const map = {
-		kitchen_food: '厨房厨余桶',
-		kitchen_other: '厨房其他桶',
-		kitchen: '厨房点位（厨余/其他）',
-		recycle: '可回收物点位',
-		hazard: '有害垃圾点位',
-	}
-	return map[slotKey] || '布置点位'
-}
-
-export function getHomeClockStep2Title() {
-	return '今天大约有多少？'
-}
-
-export function getHomeClockAmountNote() {
-	return '仅作参考，不要求称重'
-}
-
-export function getHomeClockStep4Title() {
-	return '上传真分照片'
-}
-
-export function getHomeClockStep4Sub() {
-	return '需要拍下「垃圾+分类容器」的完整画面'
-}
-
-export function getHomeClockPhotoExampleCap() {
-	return '真分照片示例图'
-}
-
-export function getHomeClockPhotoUploadCta() {
-	return '点击上传今日真分照片'
-}
-
-export function getHomeClockPhotoRules() {
-	return [
-		{ ok: false, text: '单独拍一个矿泉水瓶' },
-		{ ok: false, text: '拍一张已经扔完的垃圾桶' },
-		{ ok: false, text: '审核不通过会扣除本日积分' },
-		{ ok: true, text: '真实产生的垃圾 → 正确分类 → 准备投递' },
-	]
-}
-
-export function getHomeClockSubmitCta() {
-	return '提交真分'
-}
-
-export function getHomeClockFootNote() {
-	return '完成后提交，记录今天的真分行动'
-}
-
-export function getHomeClockSetupPledgeText() {
-	return '我承诺我已完成点位布置'
-}
-
-export function getHomeClockFootPoints() {
-	return '审核成功可获得30积分'
-}
-
-export function getHomeClockAmountOptions() {
-	return ['少量', '一小袋', '一桶', '较多']
-}
-
-export function getOfficeClockNavTitle() {
-	return '开始今天的真分吧'
-}
-
-export function getOfficeClockBannerTitle() {
-	return '在办公室也能真分'
-}
-
-export function getOfficeClockBannerSub() {
-	return '纸箱、瓶子、废纸，攒着投真分角 / 拍摄投递过程，别只拍一个瓶子'
-}
-
-export function getOfficeClockBannerBadge() {
-	return '每天一次，+30分，攒着好物'
-}
-
-export function getOfficeClockRecycleAlertTitle() {
-	return '本次只记录可回收物'
-}
-
-export function getOfficeClockRecycleAlertBody() {
-	return '请投递纸箱、瓶子、纸张等可回收物，并上传投递过程照片。'
-}
-
-export function getOfficeClockBuildingTitle() {
-	return '你在哪栋楼办公？'
-}
-
-export function getOfficeClockBuildingPlaceholder() {
-	return '点击选择或搜索办公楼宇'
-}
-
-export function getOfficeClockCornerTitle() {
-	return '真分角位置'
-}
-
-export function getOfficeClockCornerPendingText() {
-	return '正在推进中'
-}
-
-export function getOfficeClockConfirmTitle() {
-	return '真分前先确认'
-}
-
-export function getOfficeClockItemTitle() {
-	return '今天投了什么？'
-}
-
-export function getOfficeClockItemTags() {
-	return ['纸箱', '瓶子', '其他']
-}
-
-export function getOfficeClockSaveTitle() {
-	return '攒了多久？'
-}
-
-export function getOfficeClockSaveOptions() {
-	return ['今天', '1-3天', '3天以上']
-}
-
-export function getOfficeClockPhotoTitle() {
-	return '上传真分照片'
-}
-
-export function getOfficeClockPhotoUploadCta() {
-	return '点击上传可回收物真分投递照片'
-}
-
-export function getOfficeClockSubmitCta() {
-	return '完成提交，记录今日真分行为'
 }
