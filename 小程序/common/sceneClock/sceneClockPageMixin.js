@@ -121,6 +121,13 @@ import settings, { uploadUrl } from '@/common/settings'
 		getHomeClockSubmitCta,
 		getHomeClockFootNote,
 		getHomeClockSetupPledgeText,
+		getPointSetupGateKicker,
+		getPointSetupTutorialTitle,
+		getPointSetupTutorialIntroForHome,
+		getPointSetupTutorialIntroForStreet,
+		getPointSetupGateHint,
+		getHomePointSetupTutorialItems,
+		getStreetPointSetupTutorialItems,
 		getHomeClockFootPoints,
 		getHomeClockAmountOptions,
 		getOfficeClockNavTitle,
@@ -300,6 +307,11 @@ import settings, { uploadUrl } from '@/common/settings'
 				homeClockFootNote: getHomeClockFootNote(),
 				homeClockSetupPledgeText: getHomeClockSetupPledgeText(),
 				setupPointPledged: false,
+				pointSetupTutorialOpen: true,
+				pointSetupGateKicker: getPointSetupGateKicker(),
+				pointSetupTutorialTitle: getPointSetupTutorialTitle(),
+				pointSetupGateHint: getPointSetupGateHint(),
+				pointSetupTutorialImgOk: {},
 				homeClockFootPoints: getHomeClockFootPoints(),
 				homeClockAmountOptions: getHomeClockAmountOptions(),
 				officeBuildingKey: '',
@@ -551,6 +563,24 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			isResidentialHub() {
 				return this.hubKey === 'home'
+			},
+			pointSetupTutorialIntro() {
+				if (this.isStreetHub) return getPointSetupTutorialIntroForStreet()
+				return getPointSetupTutorialIntroForHome()
+			},
+			pointSetupTutorialItems() {
+				const base = this.scenePickCosBase
+				const okMap = this.pointSetupTutorialImgOk || {}
+				const rawItems = this.isStreetHub
+					? getStreetPointSetupTutorialItems(this.streetMerchantPrimaryCateKw())
+					: getHomePointSetupTutorialItems()
+				return (rawItems || []).map(item => {
+					const key = item.key || item.title
+					const imgKey = item.exampleImgKey || ''
+					const imgOk = okMap[key] !== false
+					const exampleImgUrl = imgKey && imgOk ? base + imgKey + '.png' : ''
+					return Object.assign({}, item, { exampleImgUrl })
+				})
 			},
 			isOwnPointHub() {
 				return this.isResidentialHub || (this.isStreetHub && !!this.streetMerchant)
@@ -901,6 +931,24 @@ import settings, { uploadUrl } from '@/common/settings'
 			},
 			toggleSetupPointPledge() {
 				this.setupPointPledged = !this.setupPointPledged
+				if (this.setupPointPledged && this.isStreetHub && !this.homeClockCateKey) {
+					const cards = this.streetClockCateCards || []
+					if (cards.length === 1) {
+						this.selectHomeClockCate(cards[0])
+					}
+				}
+			},
+			togglePointSetupTutorial() {
+				this.pointSetupTutorialOpen = !this.pointSetupTutorialOpen
+			},
+			onPointSetupTutorialImgError(key) {
+				if (!key) return
+				this.$set(this.pointSetupTutorialImgOk, key, false)
+			},
+			requireSetupPointPledge() {
+				if (this.setupPointPledged) return true
+				this.$u.toast('请先勾选「' + (this.homeClockSetupPledgeText || '我承诺我已完成点位设置') + '」')
+				return false
 			},
 			goFlowStepSurvey() {
 				this.flowStep = 'survey'
@@ -1041,6 +1089,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				openSceneClockHub(this, hub)
 			},
 			pickHomeClockAmount(opt) {
+				if ((this.isResidentialHub || this.isStreetHub) && !this.requireSetupPointPledge()) return
 				this.homeClockAmount = opt
 			},
 			selectPresetTip(tip) {
@@ -1386,6 +1435,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.resetClockSlots()
 			},
 			selectHomeClockCate(card) {
+				if (!this.requireSetupPointPledge()) return
 				if (!card || !card.cateId) {
 					this.$u.toast('分类种类加载中，请稍后再试')
 					return
@@ -1733,7 +1783,7 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.flowStep = 'learn'
 				uni.setNavigationBarTitle({ title: getStreetClockNavTitle() })
 				const cards = this.streetClockCateCards || []
-				if (cards.length === 1) {
+				if (cards.length === 1 && this.setupPointPledged) {
 					this.selectHomeClockCate(cards[0])
 				}
 			},
@@ -2314,6 +2364,13 @@ import settings, { uploadUrl } from '@/common/settings'
 				this.chooseClockSlot(slotIdx)
 			},
 			chooseClockSlot(slotIdx) {
+				if (
+					(this.isResidentialHub || this.isStreetHub)
+					&& this.flowStep === 'learn'
+					&& !this.requireSetupPointPledge()
+				) {
+					return
+				}
 				uni.chooseImage({
 					count: 1,
 					sourceType: ['camera', 'album'],
@@ -2401,7 +2458,7 @@ import settings, { uploadUrl } from '@/common/settings'
 						return this.$u.toast('请选择今天打卡的垃圾种类')
 					}
 					if (!this.setupPointPledged) {
-						return this.$u.toast('请勾选「我承诺我已完成点位布置」')
+						return this.$u.toast('请勾选「' + (this.homeClockSetupPledgeText || '我承诺我已完成点位设置') + '」')
 					}
 					if (!this.homeClockAmount) return this.$u.toast('请选择今天大约有多少')
 					if (!String(this.clockSlotUrls[0] || '').trim()) {

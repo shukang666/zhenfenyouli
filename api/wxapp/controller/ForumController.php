@@ -343,7 +343,7 @@ class ForumController extends AuthController
             $sceneFinal = trim((string)($params['clock_scene'] ?? ''));
             if (in_array($sceneFinal, ['home', 'qinzi', 'street'], true)) {
                 if ((int)$this->request->param('setup_point_pledge', 0) !== 1) {
-                    $this->error('请确认已完成点位布置');
+                    $this->error('请确认已完成点位设置');
                 }
             }
         }
