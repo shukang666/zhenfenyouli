@@ -64,15 +64,15 @@
 								<text class="scf-hc-preset-label">{{ preset.label }}</text>
 								<text class="scf-hc-preset-hint">{{ preset.hint }}</text>
 							</view>
-							</view>
 						</view>
 					</view>
+				</view>
 
-					<view class="scf-hc-step scf-hc-step--photo" :class="{ 'scf-ps-gate-lock': !canEditZhenfenSteps }">
-						<text class="scf-hc-step-no">③</text>
-						<view class="scf-hc-step-body">
+				<view class="scf-hc-step scf-hc-step--photo" :class="{ 'scf-ps-gate-lock': !canEditZhenfenSteps }">
+					<text class="scf-hc-step-no">③</text>
+					<view class="scf-hc-step-body">
 
-							<view class="scf-hc-photo-head">
+						<view class="scf-hc-photo-head">
 							<view class="scf-hc-photo-head-l">
 								<text class="scf-hc-step-title">{{ homeClockStep3PhotoTitle }}</text>
 								<text class="scf-hc-step-sub scf-hc-step-sub--tight">{{ homeClockStep4Sub }}</text>

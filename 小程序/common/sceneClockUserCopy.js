@@ -726,7 +726,7 @@ export function getHomeClockStep2MultiTitle() {
 }
 
 export function getHomeClockStep2MultiSub() {
-	return '可点选下面快捷组合，或在四分类图标上点多选；请按您本次真实分好、准备投放的类别填写。'
+	return '可点选下面快捷组合；请按您本次真实分好、准备投放的类别填写。'
 }
 
 export function getHomeClockStep3PhotoTitle() {
