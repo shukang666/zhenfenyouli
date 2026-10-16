@@ -1,10 +1,6 @@
 <template>
 	<view class="intro-page">
-		<view class="intro-hero">
-			<view class="intro-mark">邻里闲置 · 自由交易</view>
-			<text class="intro-title">让好物继续发光</text>
-			<text class="intro-sub">发布闲置，和附近邻居直接联系</text>
-		</view>
+		<image class="intro-hero" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/secondhand-intro-banner.png" mode="widthFix"></image>
 		<view class="intro-card">
 			<view class="intro-line"><text class="intro-num">01</text><text>发布照片、描述、价格和联系方式</text></view>
 			<view class="intro-line"><text class="intro-num">02</text><text>选择同小区、同社区或整个七贤岭</text></view>
@@ -34,10 +30,7 @@ export default {
 
 <style lang="scss" scoped>
 .intro-page { min-height: 100vh; box-sizing: border-box; padding: 40rpx 30rpx calc(48rpx + env(safe-area-inset-bottom)); background: #f4f7f5; }
-.intro-hero { padding: 54rpx 38rpx 48rpx; border-radius: 28rpx; color: #fff; background: linear-gradient(135deg, #17864d, #54b77a); }
-.intro-mark { font-size: 23rpx; opacity: .86; }
-.intro-title { display: block; margin-top: 22rpx; font-size: 44rpx; line-height: 1.3; font-weight: 700; }
-.intro-sub { display: block; margin-top: 14rpx; font-size: 27rpx; opacity: .92; }
+.intro-hero { display: block; width: 100%; border-radius: 28rpx; }
 .intro-card { margin-top: 26rpx; padding: 12rpx 28rpx; border-radius: 24rpx; background: #fff; box-shadow: 0 8rpx 28rpx rgba(30,90,55,.06); }
 .intro-line { display: flex; align-items: center; min-height: 100rpx; border-bottom: 1rpx solid #edf1ee; font-size: 27rpx; color: #34453b; }
 .intro-line:last-child { border-bottom: 0; }
