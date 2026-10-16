@@ -446,7 +446,8 @@ class OrderController extends AuthController
         $map[] = ['a.delete_time', '=', 0];
         $map[] = ['a.user_id', '=', $this->user_id];
         $list = $ShopOrderModel->getInfo($map, 'a.id,a.order_num,a.price,a.total_price,
-        a.status,a.create_time,a.need_pay_time,a.pay_type,a.point,a.pay_order_num', $this->page_size);
+        a.status,a.create_time,a.need_pay_time,a.pay_type,a.point,a.pay_order_num,
+        a.express_name,a.express_sn,a.send_time', $this->page_size);
         $this->success('获取成功', $list);
     }
 

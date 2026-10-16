@@ -13,6 +13,13 @@
 						<text>订单号：{{item.order_num}}</text>
 						<text style="color: #18AF38;">{{item.status_name}}</text>
 					</view>
+					<view class="u-flex u-row-between u-font-24 u-m-t-20" v-if="item.express_sn">
+						<view>
+							<text class="u-type-info">快递{{item.express_name ? '（' + item.express_name + '）' : ''}}：</text>
+							<text>{{item.express_sn}}</text>
+						</view>
+						<text class="u-type-primary" @click.stop="copyExpressSn(item.express_sn)">复制</text>
+					</view>
 					<u-line color="#F7F7F7" margin="30rpx 0" />
 					<view class="u-flex u-col-top u-m-b-30" v-for="(obj,val) in item.goods_list" :key="val">
 						<view class="u-m-r-20">
@@ -135,6 +142,11 @@
 			})
 		},
 		methods: {
+			copyExpressSn(expressSn) {
+				uni.setClipboardData({
+					data: expressSn
+				});
+			},
 			// 取消订单
 			cancel_order(item) {
 				this.$u.api.cancel_order({
