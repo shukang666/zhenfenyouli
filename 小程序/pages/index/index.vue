@@ -47,40 +47,14 @@
 			</view>
 
 			<!-- 问候 + 快捷真分（浅色卡片，入口指向三场景选场景页） -->
-			<view id="guide-hello" class="hello-card" v-if="isLogin && todayTask.show">
-				<view class="hello-card__orb hello-card__orb--a"></view>
-				<view class="hello-card__orb hello-card__orb--b"></view>
-				<view class="hello-card__main" @click="$u.route({type:'switchTab', url:'/pages/user/index'})">
-					<view class="hello-card__avatar">
-						<u-image :src="userInfo.avatar || 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/default-avatar.png'" width="80" height="80" shape="circle" mode="aspectFill"></u-image>
-					</view>
-					<view class="hello-card__text">
-						<view class="hello-card__greet-row">
-							<text class="hello-card__greet">{{ greetingText }}</text>
-							<view class="hello-card__sign" :class="{ 'hello-card__sign--done': signStatus.today_signed }"
-								hover-class="hello-card__sign--on" @click.stop="handleSign">
-								<u-icon :name="signStatus.today_signed ? 'checkbox-mark' : 'calendar'" size="28" color="#18AF38"></u-icon>
-								<text class="hello-card__sign-text">{{ signStatus.today_signed ? '已签到' : '签到' }}</text>
-								<text v-if="signStatus.continue_days > 0" class="hello-card__sign-days">{{ signStatus.continue_days }}天</text>
-							</view>
-						</view>
-						<view class="hello-card__meta">
-							<text class="hello-card__level">{{ userInfo.nickname || '环保新人' }}</text>
-							<text class="hello-card__dot">·</text>
-							<text>连续真分 {{ todayTask.streak }} 天</text>
-							<text v-if="todayTask.daysToGoal > 0">，再坚持 {{ todayTask.daysToGoal }} 天</text>
-						</view>
-					</view>
-				</view>
-				<view class="hello-card__btn" hover-class="hello-card__btn--on" @click.stop="goToClock">
-					<text class="hello-card__btn-title">快捷真分</text>
-					<text class="hello-card__btn-sub">垃圾分类</text>
-				</view>
-			</view>
+			<view id="guide-hello" class="home-quick-grid">
+<view class="home-quick-item home-quick-item--sign" hover-class="home-quick-item--on" @click="handleSign"><view class="home-quick-sign-circle" :class="{ 'home-quick-sign-circle--done': signStatus.today_signed }"><u-icon :name="signStatus.today_signed ? 'checkbox-mark' : 'calendar'" size="34" color="#fff"></u-icon></view><text class="home-quick-label">{{ signStatus.today_signed ? '已签到' : '签到' }}</text></view>
+<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToClock"><view class="home-quick-icon home-quick-icon--classify"><u-icon name="trash" size="34" color="#18AF38"></u-icon></view><text class="home-quick-label">垃圾分类</text></view>
+<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToQixianling"><view class="home-quick-icon home-quick-icon--qxl"><u-icon name="map" size="34" color="#d28a25"></u-icon></view><text class="home-quick-label">认识七贤岭</text></view>
+<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToCommunityMarket"><view class="home-quick-icon home-quick-icon--market"><u-icon name="shopping-cart" size="34" color="#5782d2"></u-icon></view><text class="home-quick-label">社区市集</text></view>
+</view>
 
-			
-
-			<!-- 内容区：活动 / 积分商品 -->
+<!-- 内容区：活动 / 积分商品 -->
 			<view class="content-panel">
 			<view id="guide-tabs" class="content-tabs">
 				<view class="tab-list">
@@ -532,7 +506,6 @@ export default {
 				const helloReady = this.todayTask.show || Date.now() - started > 2200
 				if ((pageReady && helloReady) || Date.now() - started > 4000) {
 					this.playingGuideSteps = (this.guideSteps || []).filter(step => {
-						if (step.selector === '#guide-hello' && !this.todayTask.show) return false
 						return true
 					})
 					this.showGuide = true
@@ -809,7 +782,13 @@ export default {
 			},
 			// 快捷真分：学考通过后进三场景选场景页（与 Banner / 热门活动垃圾真分一致）
 			goToClock() {
-				runSceneClockLearnExamGate(this)
+				 runSceneClockLearnExamGate(this)
+			},
+			goToQixianling() {
+				 navigateHomeHotSpotEntry(this, { key: 'qxl', entry_type: 'qxl_page' })
+			},
+			goToCommunityMarket() {
+				 navigateHomeHotSpotEntry(this, { key: 'flea_market', entry_type: 'spot_hub', name: '七贤岭绿色二手集市' })
 			},
 			// 获取签到状态
 			async getSignStatus() {
@@ -822,7 +801,11 @@ export default {
 			},
 			// 点击签到
 			async handleSign() {
-				if (this.signStatus.today_signed) return
+                if (!this.isLogin) {
+                    this.$u.route('/pages/public/login')
+                    return
+                }
+                if (this.signStatus.today_signed) return
 				try {
 					let res = await this.$u.api.dailySign()
 					this.signStatus.today_signed = true
@@ -932,131 +915,16 @@ export default {
 		@include glass-surface(0.55, 36px);
 	}
 
-	.hello-card {
-		@include glass-accent-card(rgba(24, 175, 56, 0.05));
-		position: relative;
-		z-index: 1;
-		overflow: hidden;
-		display: flex;
-		align-items: center;
-		margin: 24rpx 32rpx 0;
-		padding: 28rpx 24rpx;
-		box-sizing: border-box;
-	}
-	.hello-card__orb {
-		display: none;
-	}
-	.hello-card__main {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		align-items: center;
-		flex: 1;
-		min-width: 0;
-	}
-	.hello-card__avatar {
-		flex-shrink: 0;
-		margin-right: 18rpx;
-		border-radius: 50%;
-		overflow: hidden;
-		box-shadow: 0 0 0 4rpx rgba(255, 255, 255, 0.35);
-	}
-	.hello-card__text {
-		flex: 1;
-		min-width: 0;
-	}
-	.hello-card__greet-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-	.hello-card__greet {
-		flex: 1;
-		font-size: 30rpx;
-		font-weight: 600;
-		color: $glass-text;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		margin-right: 12rpx;
-	}
-	.hello-card__sign {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		padding: 8rpx 16rpx;
-		background: $glass-brand-soft;
-		border-radius: 999rpx;
-		border: 1rpx solid rgba(24, 175, 56, 0.12);
-	}
-	.hello-card__sign--done {
-		background: rgba(0, 0, 0, 0.04);
-		border-color: $glass-hairline;
-	}
-	.hello-card__sign--on {
-		transform: scale(0.92);
-		opacity: 0.85;
-	}
-	.hello-card__sign-text {
-		margin-left: 6rpx;
-		font-size: 22rpx;
-		font-weight: 500;
-		color: $glass-brand-dark;
-		line-height: 1.2;
-	}
-	.hello-card__sign-days {
-		margin-left: 6rpx;
-		font-size: 20rpx;
-		color: $glass-text-tertiary;
-		line-height: 1.2;
-	}
-	.hello-card__meta {
-		margin-top: 10rpx;
-		font-size: 22rpx;
-		color: $glass-text-secondary;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	.hello-card__level {
-		color: $glass-text;
-		font-weight: 600;
-	}
-	.hello-card__dot {
-		margin: 0 6rpx;
-		color: $glass-text-tertiary;
-	}
-	.hello-card__btn {
-		position: relative;
-		z-index: 1;
-		flex-shrink: 0;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		margin-left: 16rpx;
-		padding: 18rpx 22rpx;
-		min-width: 128rpx;
-		background: $brand;
-		border-radius: $glass-radius-md;
-		box-shadow: 0 8rpx 20rpx rgba(24, 175, 56, 0.25);
-	}
-	.hello-card__btn--on {
-		opacity: 0.88;
-		transform: scale(0.97);
-	}
-	.hello-card__btn-title {
-		font-size: 24rpx;
-		font-weight: 600;
-		color: #fff;
-		line-height: 1.2;
-	}
-	.hello-card__btn-sub {
-		margin-top: 4rpx;
-		font-size: 18rpx;
-		color: rgba(255, 255, 255, 0.82);
-		line-height: 1.2;
-	}
+	.home-quick-grid { position:relative; z-index:1; display:flex; align-items:flex-start; justify-content:space-between; margin:24rpx 32rpx 0; padding:22rpx 12rpx; border-radius:24rpx; @include glass-surface(0.58, 36px); }
+	.home-quick-item { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:4rpx 0; }
+	.home-quick-item--on { transform:scale(0.94); opacity:0.82; }
+	.home-quick-sign-circle, .home-quick-icon { width:88rpx; height:88rpx; display:flex; align-items:center; justify-content:center; border-radius:100%; }
+	.home-quick-sign-circle { background:linear-gradient(145deg,#39c75a,#12962e); box-shadow:0 8rpx 20rpx rgba(24,175,56,0.24); }
+	.home-quick-sign-circle--done { background:linear-gradient(145deg,#aebbb1,#87958b); box-shadow:0 8rpx 20rpx rgba(80,100,85,0.16); }
+	.home-quick-icon--classify { background:#e8f7ec; }
+	.home-quick-icon--qxl { background:#fff3df; }
+	.home-quick-icon--market { background:#eaf0ff; }
+	.home-quick-label { display:block; margin-top:12rpx; font-size:23rpx; font-weight:600; color:$text; white-space:nowrap; }
 
 	.entry-grid {
 		display: flex;
