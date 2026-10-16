@@ -152,6 +152,47 @@ class ActiveController extends ToolController
         return $item;
     }
 
+    public function getList($item)
+    {
+        $item = $this->setData($item, 2);
+        $tags = array_filter(array_map('trim', explode(',', (string)($item['tags'] ?? ''))));
+        $item['is_light_task'] = in_array('轻活动', $tags, true) ? 1 : 0;
+        return $item;
+    }
+
+    /** 活动列表预览区独立开关轻任务标签。 */
+    public function toggleLightTask()
+    {
+        if (!$this->request->isAjax()) {
+            $this->error('非法请求');
+        }
+
+        $id = (int)$this->request->post('id', 0);
+        $enabled = (int)$this->request->post('enabled', -1);
+        if ($id <= 0 || !in_array($enabled, [0, 1], true)) {
+            $this->error('参数错误');
+        }
+
+        $active = ActiveModel::where('id', $id)->find();
+        if (!$active) {
+            $this->error('活动不存在');
+        }
+
+        $tags = array_filter(array_map('trim', explode(',', (string)($active['tags'] ?? ''))));
+        $tags = array_values(array_filter($tags, function ($tag) {
+            return $tag !== '轻活动';
+        }));
+        if ($enabled === 1) {
+            $tags[] = '轻活动';
+        }
+
+        $saved = $active->save(['tags' => implode(',', array_unique($tags))]);
+        if (!$saved) {
+            $this->error('轻任务状态保存失败');
+        }
+        $this->success($enabled === 1 ? '已加入轻任务' : '已从轻任务移除');
+    }
+
     //操作页面
     public function update()
     {
@@ -174,8 +215,6 @@ class ActiveController extends ToolController
             $item['role'] = explode(',', $item['role']);
         }
         $item = $this->getParamData($item);
-        $activeTags = array_filter(array_map('trim', explode(',', (string)($item['tags'] ?? ''))));
-        $item['is_light_task'] = in_array('轻活动', $activeTags, true);
         $this->assign('item', $item);
         $badge_list = '';
         $this->assign('badge_list', $badge_list);
@@ -256,10 +295,6 @@ class ActiveController extends ToolController
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            // param() may also contain merged query values; use the submitted form value so
-            // an unchecked checkbox cannot inherit an old/query-string value.
-            $params['is_light_task'] = (int)$this->request->post('is_light_task', 0);
-
             $params['display_mode'] = (int)($params['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
             if (!in_array($params['display_mode'], [ActiveModel::DISPLAY_MODE_CONFIG, ActiveModel::DISPLAY_MODE_WEB], true)) {
                 $params['display_mode'] = ActiveModel::DISPLAY_MODE_CONFIG;
@@ -269,15 +304,6 @@ class ActiveController extends ToolController
             if (!empty($params['id'])) {
                 $existingRow = ActiveModel::where('id', (int)$params['id'])->find();
             }
-            $activeTags = array_filter(array_map('trim', explode(',', (string)($existingRow['tags'] ?? ''))));
-            $activeTags = array_values(array_filter($activeTags, function ($tag) {
-                return $tag !== '轻活动';
-            }));
-            if (!empty($params['is_light_task'])) {
-                $activeTags[] = '轻活动';
-            }
-            $params['tags'] = implode(',', array_unique($activeTags));
-            unset($params['is_light_task']);
             if ($isWebDisplay && $existingRow) {
                 $params = $this->mergeWebActiveEditParams($params, $existingRow->toArray());
             }
