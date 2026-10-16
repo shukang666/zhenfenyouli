@@ -238,7 +238,7 @@
 	import careGesture from '@/common/care-gesture.mixin.js'
 	import settings from '@/common/settings.js'
 
-	const SECONDHAND_ENTRY_BANNER = settings.staticAssetBase + 'mall/secondhand-entry-banner.png'
+	const SECONDHAND_ENTRY_BANNER = settings.staticAssetBase + 'mall/secondhand-entry-banner-v2.png'
 
 	export default {
 		components: {
