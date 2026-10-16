@@ -48,10 +48,23 @@
 
 			<!-- 问候 + 快捷真分（浅色卡片，入口指向三场景选场景页） -->
 			<view id="guide-hello" class="home-quick-grid">
-<view class="home-quick-item home-quick-item--sign" hover-class="home-quick-item--on" @click="handleSign"><view class="home-quick-sign-circle" :class="{ 'home-quick-sign-circle--done': signStatus.today_signed }"><u-icon :name="signStatus.today_signed ? 'checkbox-mark' : 'calendar'" size="34" color="#fff"></u-icon></view><text class="home-quick-label">{{ signStatus.today_signed ? '已签到' : '签到' }}</text></view>
-<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToClock"><view class="home-quick-icon home-quick-icon--classify"><u-icon name="trash" size="34" color="#18AF38"></u-icon></view><text class="home-quick-label">垃圾分类</text></view>
-<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToQixianling"><view class="home-quick-icon home-quick-icon--qxl"><u-icon name="map" size="34" color="#d28a25"></u-icon></view><text class="home-quick-label">认识七贤岭</text></view>
-<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToCommunityMarket"><view class="home-quick-icon home-quick-icon--market"><u-icon name="shopping-cart" size="34" color="#5782d2"></u-icon></view><text class="home-quick-label">社区市集</text></view>
+<view class="home-quick-item home-quick-item--sign" hover-class="home-quick-item--on" @click="handleSign">
+					<image v-if="!signStatus.today_signed" class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/qiandao.svg" mode="aspectFit"></image>
+					<view v-else class="home-quick-sign-circle home-quick-sign-circle--done"><u-icon name="checkbox-mark" size="34" color="#fff"></u-icon></view>
+					<text class="home-quick-label">{{ signStatus.today_signed ? '已签到' : '签到' }}</text>
+				</view>
+				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToClock">
+					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/lajifenlei.svg" mode="aspectFit"></image>
+					<text class="home-quick-label">垃圾分类</text>
+				</view>
+				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToQixianling">
+					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/renshiqixianling.svg" mode="aspectFit"></image>
+					<text class="home-quick-label">认识七贤岭</text>
+				</view>
+				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToCommunityMarket">
+					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/shequshiji.svg" mode="aspectFit"></image>
+					<text class="home-quick-label">社区市集</text>
+				</view>
 </view>
 
 <!-- 内容区：活动 / 积分商品 -->
@@ -918,12 +931,9 @@ export default {
 	.home-quick-grid { position:relative; z-index:1; display:flex; align-items:flex-start; justify-content:space-between; margin:24rpx 32rpx 0; padding:22rpx 12rpx; border-radius:24rpx; @include glass-surface(0.58, 36px); }
 	.home-quick-item { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:4rpx 0; }
 	.home-quick-item--on { transform:scale(0.94); opacity:0.82; }
-	.home-quick-sign-circle, .home-quick-icon { width:88rpx; height:88rpx; display:flex; align-items:center; justify-content:center; border-radius:100%; }
-	.home-quick-sign-circle { background:linear-gradient(145deg,#39c75a,#12962e); box-shadow:0 8rpx 20rpx rgba(24,175,56,0.24); }
+	.home-quick-sign-circle { width:88rpx; height:88rpx; display:flex; align-items:center; justify-content:center; border-radius:100%; background:linear-gradient(145deg,#39c75a,#12962e); box-shadow:0 8rpx 20rpx rgba(24,175,56,0.24); }
 	.home-quick-sign-circle--done { background:linear-gradient(145deg,#aebbb1,#87958b); box-shadow:0 8rpx 20rpx rgba(80,100,85,0.16); }
-	.home-quick-icon--classify { background:#e8f7ec; }
-	.home-quick-icon--qxl { background:#fff3df; }
-	.home-quick-icon--market { background:#eaf0ff; }
+	.home-quick-img { width:88rpx; height:88rpx; display:block; }
 	.home-quick-label { display:block; margin-top:12rpx; font-size:23rpx; font-weight:600; color:$text; white-space:nowrap; }
 
 	.entry-grid {
