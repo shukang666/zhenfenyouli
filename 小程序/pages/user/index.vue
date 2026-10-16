@@ -60,13 +60,13 @@
 
 		<view class="me-body">
 			<!-- 运营 Banner 占位：meAssets.banner 填 COS 地址即可 -->
-			<view class="me-banner" v-if="isLogin">
+			<!-- <view class="me-banner" v-if="isLogin">
 				<image v-if="meAssets.banner" class="me-banner__img" :src="meAssets.banner" mode="aspectFill"></image>
 				<view v-else class="me-banner__ph">
 					<text class="me-banner__ph-title">运营 Banner 占位</text>
 					<text class="me-banner__ph-size">建议 750 × 280 px · 替换 meAssets.banner</text>
 				</view>
-			</view>
+			</view> -->
 
 			<view class="me-grow flat-card" v-if="!userInfo.is_environmental && isLogin">
 				<image class="me-grow__icon" :src="envGrowBadgeUrl" mode="aspectFill"></image>
