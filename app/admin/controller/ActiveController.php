@@ -174,6 +174,8 @@ class ActiveController extends ToolController
             $item['role'] = explode(',', $item['role']);
         }
         $item = $this->getParamData($item);
+        $activeTags = array_filter(array_map('trim', explode(',', (string)($item['tags'] ?? ''))));
+        $item['is_light_task'] = in_array('轻活动', $activeTags, true);
         $this->assign('item', $item);
         $badge_list = '';
         $this->assign('badge_list', $badge_list);
@@ -264,6 +266,15 @@ class ActiveController extends ToolController
             if (!empty($params['id'])) {
                 $existingRow = ActiveModel::where('id', (int)$params['id'])->find();
             }
+            $activeTags = array_filter(array_map('trim', explode(',', (string)($existingRow['tags'] ?? ''))));
+            $activeTags = array_values(array_filter($activeTags, function ($tag) {
+                return $tag !== '轻活动';
+            }));
+            if (!empty($params['is_light_task'])) {
+                $activeTags[] = '轻活动';
+            }
+            $params['tags'] = implode(',', array_unique($activeTags));
+            unset($params['is_light_task']);
             if ($isWebDisplay && $existingRow) {
                 $params = $this->mergeWebActiveEditParams($params, $existingRow->toArray());
             }

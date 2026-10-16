@@ -129,6 +129,40 @@
     </view>
 
     <!-- 垃圾分类工作台（运营切图，点击进入 /pages/dtsh/dtsh） -->
+    <!-- 轻任务：后台配置的 Web 式活动，作为活动页醒目线上入口 -->
+    <view class="fb-task-section" v-if="light_list && light_list.length">
+      <view class="fb-task-heading">
+        <view class="fb-task-heading-main">
+          <text class="fb-task-title">轻任务</text>
+          <text class="fb-task-label">线上活动</text>
+        </view>
+        <view class="fb-task-more" @click="goMoreLight">
+          <text>更多任务</text>
+          <u-icon name="arrow-right" size="22" color="#b65b22"></u-icon>
+        </view>
+      </view>
+      <view
+        class="fb-task-card"
+        v-if="light_task_featured"
+        hover-class="fb-task-card--pressed"
+        :hover-stay-time="90"
+        @click="$u.func.openActiveDetail(light_task_featured)"
+      >
+        <view class="fb-task-copy">
+          <text class="fb-task-eyebrow">轻松参与 · 线上完成</text>
+          <text class="fb-task-name u-line-2">{{ light_task_featured.name }}</text>
+          <view class="fb-task-cta">
+            <text>立即参与</text>
+            <u-icon name="arrow-right" size="22" color="#fff"></u-icon>
+          </view>
+        </view>
+        <view class="fb-task-image-wrap" v-if="light_task_featured.thumb">
+          <u-image width="100%" height="100%" :src="light_task_featured.thumb" mode="aspectFill"></u-image>
+        </view>
+        <view class="fb-task-orb"></view>
+      </view>
+    </view>
+
     <view class="fb-dtsh-spotlight" id="guide-fb-dtsh-hub">
       <view
         class="fb-dtsh-spotlight-poster"
@@ -683,6 +717,9 @@ export default {
   computed: {
     weekly_display_list() {
       return getWeeklyRecommendDisplayList();
+    },
+    light_task_featured() {
+      return (this.light_list || [])[0] || null;
     },
     active_list_preview() {
       return (this.active_list || []).slice(0, ACTIVE_LIST_PREVIEW_SIZE);
@@ -1490,9 +1527,11 @@ export default {
   gap: 10rpx;
 }
 .fb-zhenfen-hub-frame .fb-entry-card {
-  background: rgba(255, 255, 255, 0.78);
-  border: 1rpx solid rgba(24, 175, 56, 0.12);
-  box-shadow: 0 4rpx 14rpx rgba(16, 48, 24, 0.06);
+  background: rgba(255, 255, 255, 0.58);
+  border: 1rpx solid rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8rpx 24rpx rgba(31, 54, 42, 0.06), inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
 }
 .fb-entry-row--triple .fb-entry-card {
   padding: 14rpx 10rpx 12rpx;
@@ -1577,19 +1616,19 @@ export default {
 }
 .fb-entry-home {
   border-left: 4rpx solid #d4a832;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.52);
 }
 .fb-entry-xsd {
   border-left: 4rpx solid #e85d7a;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.52);
 }
 .fb-entry-office {
   border-left: 4rpx solid #5c6b8a;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.52);
 }
 .fb-entry-street {
   border-left: 4rpx solid #18af38;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.52);
 }
 .fb-entry-home::after,
 .fb-entry-xsd::after,
@@ -1665,7 +1704,7 @@ export default {
   border-radius: 20rpx;
   padding: 0;
   overflow: hidden;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12rpx 30rpx rgba(31, 54, 42, 0.1), 0 0 0 1rpx rgba(255, 255, 255, 0.72);
   background: transparent;
 }
 .fb-spot-poster-img {
@@ -1912,6 +1951,115 @@ export default {
 .fb-section {
   margin: 28rpx 0 8rpx;
 }
+.fb-task-section {
+  margin: 18rpx 24rpx 8rpx;
+  padding: 22rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.85);
+  border-radius: 24rpx;
+  background: linear-gradient(130deg, #fff8e9 0%, #fff1dd 52%, #ffe5c5 100%);
+  box-shadow: 0 12rpx 30rpx rgba(177, 95, 35, 0.13), inset 0 1rpx 0 #fff;
+}
+.fb-task-heading,
+.fb-task-heading-main {
+  display: flex;
+  align-items: center;
+}
+.fb-task-heading {
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.fb-task-title {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #713a19;
+}
+.fb-task-label {
+  margin-left: 12rpx;
+  padding: 5rpx 12rpx;
+  border-radius: 999rpx;
+  background: #f7d5ad;
+  color: #a45220;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+.fb-task-more {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  color: #a45220;
+  font-size: 22rpx;
+}
+.fb-task-card {
+  min-height: 196rpx;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(115deg, #c95d27 0%, #e98235 55%, #f6ad54 100%);
+}
+.fb-task-card--pressed {
+  opacity: 0.88;
+  transform: scale(0.99);
+}
+.fb-task-copy {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-right: 12rpx;
+}
+.fb-task-eyebrow {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 21rpx;
+}
+.fb-task-name {
+  max-width: 100%;
+  margin-top: 10rpx;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 800;
+  line-height: 1.35;
+  white-space: normal;
+}
+.fb-task-cta {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-top: 16rpx;
+  padding: 9rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(117, 49, 20, 0.3);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.fb-task-image-wrap {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 170rpx;
+  height: 148rpx;
+  overflow: hidden;
+  border: 3rpx solid rgba(255, 255, 255, 0.55);
+  border-radius: 18rpx;
+  box-shadow: 0 8rpx 20rpx rgba(93, 43, 20, 0.2);
+}
+.fb-task-orb {
+  position: absolute;
+  right: 116rpx;
+  top: -100rpx;
+  width: 270rpx;
+  height: 270rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
 .fb-section-header {
   display: flex;
   align-items: center;
@@ -2156,8 +2304,11 @@ export default {
   clip-path: polygon(0 0, 100% 0, 100% 82%, 0 100%);
 }
 .fb-light-info {
-  @include glass-surface(0.85, 16px);
+  @include glass-surface(0.68, 24px);
   padding: 16rpx 16rpx 8rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.82);
+  box-shadow: 0 10rpx 28rpx rgba(31, 54, 42, 0.07), inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
 }
 .fb-light-name {
   font-size: 26rpx;

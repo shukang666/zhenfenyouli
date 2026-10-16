@@ -32,9 +32,6 @@
 					<view class="points-hub__orb"></view>
 					<view class="points-hub__head">
 						<view class="points-hub__label-wrap">
-							<view class="points-hub__label-icon">
-								<u-icon name="integral-fill" size="34" color="#18AF38"></u-icon>
-							</view>
 							<view class="points-hub__label-col">
 								<text class="points-hub__label">我的可用积分</text>
 								<text class="points-hub__label-sub">环保行动累积 · 可兑好物</text>
@@ -47,16 +44,18 @@
 					</view>
 					<view class="points-hub__value-row">
 						<text class="points-hub__value">{{ displayPointText }}</text>
-						<text class="points-hub__unit">积分</text>
+						<view class="points-hub__unit"><text>积分</text></view>
 					</view>
 					<view class="points-hub__actions">
 						<view class="points-hub__btn points-hub__btn--primary" hover-class="points-hub__btn--press" @tap="goPointsLog">
-							<u-icon name="order" size="32" color="#fff"></u-icon>
-							<text>积分明细</text>
+							<view class="points-hub__btn-icon points-hub__btn-icon--primary"><u-icon name="order" size="30" color="#fff"></u-icon></view>
+							<view class="points-hub__btn-copy"><text class="points-hub__btn-title">积分明细</text><text class="points-hub__btn-sub">查看收支记录</text></view>
+							<u-icon class="points-hub__btn-arrow" name="arrow-right" size="22" color="#7b8d82"></u-icon>
 						</view>
 						<view class="points-hub__btn points-hub__btn--ghost" hover-class="points-hub__btn--press" @tap="goCart">
-							<u-icon name="shopping-cart" size="32" color="#076d3d"></u-icon>
-							<text>购物车</text>
+							<view class="points-hub__btn-icon"><u-icon name="shopping-cart" size="30" color="#176b43"></u-icon></view>
+							<view class="points-hub__btn-copy"><text class="points-hub__btn-title">购物车</text><text class="points-hub__btn-sub">好物等你兑换</text></view>
+							<u-icon class="points-hub__btn-arrow" name="arrow-right" size="22" color="#7b8d82"></u-icon>
 						</view>
 					</view>
 				</view>
@@ -641,11 +640,12 @@
 	.points-hub__card {
 		position: relative;
 		overflow: hidden;
-		border-radius: 28rpx;
-		padding: 28rpx 28rpx 24rpx;
-		background: linear-gradient(145deg, #ffffff 0%, #f4fbf6 48%, #eef8f1 100%);
-		box-shadow: 0 10rpx 40rpx rgba(7, 109, 61, 0.08);
-		border: 1rpx solid rgba(24, 175, 56, 0.12);
+		border-radius: 32rpx;
+		padding: 30rpx 30rpx 28rpx;
+		background: rgba(255, 255, 255, 0.68);
+		box-shadow: 0 16rpx 48rpx rgba(31, 54, 42, 0.08), inset 0 1rpx 0 rgba(255, 255, 255, 0.92);
+		border: 1rpx solid rgba(255, 255, 255, 0.9);
+		backdrop-filter: blur(24rpx);
 	}
 
 	.points-hub__bg-grid {
@@ -654,10 +654,10 @@
 		top: -20rpx;
 		width: 280rpx;
 		height: 200rpx;
-		opacity: 0.35;
-		background-image: linear-gradient(rgba(24, 175, 56, 0.08) 1px, transparent 1px),
-			linear-gradient(90deg, rgba(24, 175, 56, 0.08) 1px, transparent 1px);
-		background-size: 24rpx 24rpx;
+		opacity: 0.18;
+		background-image: linear-gradient(rgba(7, 109, 61, 0.045) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(7, 109, 61, 0.045) 1px, transparent 1px);
+		background-size: 32rpx 32rpx;
 		pointer-events: none;
 	}
 
@@ -668,7 +668,7 @@
 		right: -60rpx;
 		top: -80rpx;
 		border-radius: 50%;
-		background: radial-gradient(circle, rgba(24, 175, 56, 0.14) 0%, transparent 70%);
+		background: radial-gradient(circle, rgba(94, 190, 126, 0.18) 0%, transparent 70%);
 		pointer-events: none;
 	}
 
@@ -694,7 +694,7 @@
 		width: 64rpx;
 		height: 64rpx;
 		border-radius: 18rpx;
-		background: rgba(24, 175, 56, 0.12);
+		background: rgba(7, 109, 61, 0.08);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -709,10 +709,11 @@
 
 	.points-hub__label {
 		display: block;
-		font-size: 28rpx;
+		font-size: 25rpx;
 		font-weight: 600;
-		color: #1d1d1f;
+		color: #617267;
 		line-height: 1.35;
+		letter-spacing: 1rpx;
 	}
 
 	.points-hub__label-sub {
@@ -730,8 +731,8 @@
 		align-items: center;
 		padding: 10rpx 16rpx;
 		border-radius: 999rpx;
-		background: rgba(255, 255, 255, 0.85);
-		border: 1rpx solid rgba(7, 109, 61, 0.15);
+		background: rgba(255, 255, 255, 0.66);
+		border: 1rpx solid rgba(7, 109, 61, 0.1);
 		font-size: 24rpx;
 		font-weight: 600;
 		color: #076d3d;
@@ -747,25 +748,34 @@
 		z-index: 1;
 		display: flex;
 		align-items: baseline;
-		margin-top: 24rpx;
-		gap: 10rpx;
+		margin-top: 20rpx;
+		gap: 14rpx;
+		min-height: 100rpx;
 	}
 
 	.points-hub__value {
-		font-size: 80rpx;
-		font-weight: 700;
-		color: #076d3d;
-		line-height: 1.05;
+		font-size: 82rpx;
+		font-weight: 500;
+		font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+		color: #173e2a;
+		line-height: 1;
 		font-variant-numeric: tabular-nums;
-		letter-spacing: -2rpx;
+		letter-spacing: -3rpx;
 	}
 
 	.points-hub__unit {
-		font-size: 28rpx;
-		font-weight: 600;
-		color: #18af38;
-		opacity: 0.95;
-		padding-bottom: 8rpx;
+		width: 66rpx;
+		height: 34rpx;
+		align-self: center;
+		border-radius: 999rpx;
+		background: rgba(23, 107, 67, 0.08);
+		color: #4f7961;
+		font-size: 20rpx;
+		font-weight: 700;
+		letter-spacing: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.points-hub__actions {
@@ -773,38 +783,81 @@
 		z-index: 1;
 		display: flex;
 		flex-direction: row;
-		gap: 16rpx;
-		margin-top: 28rpx;
+		gap: 12rpx;
+		margin-top: 24rpx;
+		padding-top: 20rpx;
+		border-top: 1rpx solid rgba(7, 109, 61, 0.08);
 	}
 
 	.points-hub__btn {
 		flex: 1;
-		height: 76rpx;
-		border-radius: 16rpx;
+		height: 92rpx;
+		padding: 0 14rpx;
+		border-radius: 22rpx;
 		display: flex;
 		flex-direction: row;
 		align-items: center;
-		justify-content: center;
-		gap: 8rpx;
-		font-size: 26rpx;
-		font-weight: 600;
+		justify-content: flex-start;
+		gap: 12rpx;
+		box-sizing: border-box;
+		transition: transform 0.12s ease, opacity 0.12s ease;
 	}
 
 	.points-hub__btn--primary {
-		background: linear-gradient(135deg, #22b84a 0%, #076d3d 100%);
-		color: #fff;
-		box-shadow: 0 6rpx 20rpx rgba(7, 109, 61, 0.22);
+		background: rgba(23, 107, 67, 0.07);
+		color: #173e2a;
 	}
 
 	.points-hub__btn--ghost {
-		background: rgba(255, 255, 255, 0.92);
+		background: rgba(255, 255, 255, 0.42);
 		color: #076d3d;
-		border: 1rpx solid rgba(7, 109, 61, 0.2);
+		border: 1rpx solid rgba(7, 109, 61, 0.08);
+	}
+
+	.points-hub__btn-icon {
+		width: 54rpx;
+		height: 54rpx;
+		border-radius: 18rpx;
+		background: rgba(23, 107, 67, 0.08);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.points-hub__btn-icon--primary {
+		background: #176b43;
+	}
+
+	.points-hub__btn-copy {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	.points-hub__btn-title {
+		font-size: 24rpx;
+		font-weight: 600;
+		color: #254533;
+		line-height: 1.3;
+	}
+
+	.points-hub__btn-sub {
+		margin-top: 4rpx;
+		font-size: 19rpx;
+		color: #87958c;
+		line-height: 1.25;
+	}
+
+	.points-hub__btn-arrow {
+		flex-shrink: 0;
 	}
 
 	.points-hub__btn--press {
-		opacity: 0.88;
-		transform: scale(0.98);
+		opacity: 0.78;
+		transform: scale(0.97);
 	}
 
 	.mall-secondhand-entry {
