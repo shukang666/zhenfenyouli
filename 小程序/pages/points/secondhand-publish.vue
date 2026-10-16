@@ -10,6 +10,7 @@
 				<view class="photo photo-add" v-if="form.images.length < 6" @tap="choosePhoto"><u-icon name="camera" size="42" color="#16864b"></u-icon><text>添加照片</text></view>
 			</view>
 			<view class="field"><text class="field-label">物品名称 <text class="required">*</text></text><input class="input" v-model="form.title" placeholder="例如：闲置儿童自行车" maxlength="40" /></view>
+			<view class="field"><text class="field-label">物品分类 <text class="required">*</text></text><view class="chips"><view class="chip" :class="{on: form.category === category.key}" v-for="category in categoryOptions" :key="category.key" @tap="chooseCategory(category.key)">{{ category.label }}</view></view></view>
 			<view class="field"><text class="field-label">文字介绍</text><textarea class="textarea" v-model="form.description" placeholder="介绍新旧程度、使用情况等" maxlength="500" /></view>
 			<view class="field"><text class="field-label">售价（人民币） <text class="required">*</text></text><view class="price-input"><text>¥</text><input v-model="form.price" type="digit" placeholder="输入售价" /></view></view>
 			<view class="field"><text class="field-label">展示范围 <text class="required">*</text></text><view class="chips"><view class="chip" :class="{on: form.scope_type === 'community'}" @tap="chooseScope('community')">同小区</view><view class="chip" :class="{on: form.scope_type === 'parent'}" @tap="chooseScope('parent')">同社区</view><view class="chip" :class="{on: form.scope_type === 'all'}" @tap="chooseScope('all')">整个七贤岭</view></view><text class="scope-name" v-if="scopeName">展示给：{{ scopeName }}</text></view>
@@ -23,17 +24,19 @@
 <script>
 import { uploadUrl, headerTokenName, userTokenName } from '@/common/settings.js'
 import { parseUploadAssetResponse, resolveAssetShowUrl } from '@/common/uploadAsset.js'
+import { getCategories } from '@/common/secondhandStore.js'
 
 export default {
 	data() {
 		return {
+			categoryOptions: getCategories().filter(category => category.key !== 'all'),
 			submitting: false,
 			imagePaths: [],
 			communityId: 0,
 			parentId: 0,
 			communityName: '',
 			parentName: '',
-			form: { title: '', description: '', price: '', contact: '', scope_type: 'community', scope_id: 0, images: [] },
+			form: { title: '', description: '', price: '', contact: '', category: 'other', scope_type: 'community', scope_id: 0, images: [] },
 		}
 	},
 	onLoad() {
@@ -56,6 +59,7 @@ export default {
 		},
 	},
 	methods: {
+		chooseCategory(key) { this.form.category = key },
 		chooseScope(type) {
 			if (type === 'community' && !this.communityId) { uni.showToast({ title: '请先完善个人资料中的小区信息', icon: 'none' }); return }
 			if (type === 'parent' && !this.parentId) { uni.showToast({ title: '请先完善个人资料中的社区信息', icon: 'none' }); return }
@@ -105,7 +109,7 @@ export default {
 					paths.push(this.imagePaths[i])
 				}
 				uni.showLoading({ title: '提交中…', mask: true })
-				await this.$u.api.secondhandPublish({ title: this.form.title, description: this.form.description, price: this.form.price, contact: this.form.contact, scope_type: this.form.scope_type, scope_id: this.form.scope_id, category: 'other', condition: 'used', images: JSON.stringify(paths) })
+				await this.$u.api.secondhandPublish({ title: this.form.title, description: this.form.description, price: this.form.price, contact: this.form.contact, scope_type: this.form.scope_type, scope_id: this.form.scope_id, category: this.form.category, condition: 'used', images: JSON.stringify(paths) })
 				uni.hideLoading(); uni.showToast({ title: '已提交，等待审核', icon: 'success' })
 				setTimeout(() => uni.navigateBack({ fail: () => uni.redirectTo({ url: '/pages/points/secondhand-list' }) }), 600)
 			} catch (e) { uni.hideLoading(); uni.showToast({ title: (e && (e.message || e.msg)) || '发布失败', icon: 'none' }) }
