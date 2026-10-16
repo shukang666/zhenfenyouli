@@ -256,6 +256,9 @@ class ActiveController extends ToolController
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
+            // param() may also contain merged query values; use the submitted form value so
+            // an unchecked checkbox cannot inherit an old/query-string value.
+            $params['is_light_task'] = (int)$this->request->post('is_light_task', 0);
 
             $params['display_mode'] = (int)($params['display_mode'] ?? ActiveModel::DISPLAY_MODE_CONFIG);
             if (!in_array($params['display_mode'], [ActiveModel::DISPLAY_MODE_CONFIG, ActiveModel::DISPLAY_MODE_WEB], true)) {
