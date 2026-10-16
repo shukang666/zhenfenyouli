@@ -4,7 +4,7 @@
 			<image class="sh-my__img" :src="cover(item)" mode="aspectFill"></image>
 			<view class="sh-my__main">
 				<text class="sh-my__title u-line-2">{{ item.title }}</text>
-				<text class="sh-my__point">{{ item.point_price }} 积分</text>
+				<text class="sh-my__point">¥{{ Number(item.price || 0).toFixed(2) }}</text>
 				<text class="sh-my__status">{{ statusText(item) }}</text>
 			</view>
 			<view class="sh-my__off" v-if="canOff(item)" @tap.stop="offShelf(item.id)">下架</view>

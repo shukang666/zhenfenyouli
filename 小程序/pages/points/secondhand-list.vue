@@ -2,16 +2,13 @@
 	<view class="sh-page">
 		<view class="sh-head">
 			<text class="sh-head__title">社区闲置</text>
-			<text class="sh-head__sub">线上浏览与发布；换货请到绿色二手市集现场交接</text>
+			<text class="sh-head__sub">邻里闲置自由发布，买卖双方自行联系</text>
 		</view>
 		<view class="sh-link-row" @tap="goIntro">
 			<text class="sh-link-row__t">规则说明</text>
 			<u-icon name="arrow-right" size="24" color="#076d3d"></u-icon>
 		</view>
-		<view class="sh-link-row sh-link-row--hub" @tap="goFleaHub">
-			<text class="sh-link-row__t">查看市集活动时间与地点</text>
-			<u-icon name="arrow-right" size="24" color="#076d3d"></u-icon>
-		</view>
+
 		<view class="sh-search glass-search">
 			<u-search
 				v-model="keyword"
@@ -45,7 +42,7 @@
 				<view class="sh-card__body">
 					<text class="sh-card__title u-line-2">{{ item.title }}</text>
 					<view class="sh-card__foot">
-						<text class="sh-card__point">{{ item.point_price }} 积分</text>
+						<text class="sh-card__point">¥{{ Number(item.price || 0).toFixed(2) }}</text>
 						<text class="sh-card__area u-line-1">{{ item.area_text }}</text>
 					</view>
 				</view>
@@ -64,7 +61,7 @@
 
 <script>
 import { getCategories } from '@/common/secondhandStore.js'
-import { fleaMarketHubUrl, secondhandIntroUrl } from '@/common/secondhandNav.js'
+import { secondhandIntroUrl } from '@/common/secondhandNav.js'
 
 export default {
 	data() {
@@ -120,9 +117,7 @@ export default {
 		goIntro() {
 			this.$u.route(secondhandIntroUrl())
 		},
-		goFleaHub() {
-			this.$u.route(fleaMarketHubUrl())
-		},
+
 	},
 }
 </script>

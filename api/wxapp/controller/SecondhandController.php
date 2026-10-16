@@ -3,7 +3,6 @@
 namespace api\wxapp\controller;
 
 use api\wxapp\service\SecondhandService;
-use app\admin\model\member\MemberModel;
 use think\facade\Db;
 
 class SecondhandController extends AuthController
@@ -11,9 +10,19 @@ class SecondhandController extends AuthController
     /** 分类/成色元数据 */
     public function meta()
     {
+        $this->checkUser();
+        $communityId = (int)($this->user_info['community_id'] ?? 0);
+        $parentId = (int)($this->user_info['community_parent_id'] ?? 0);
+        if ($parentId <= 0 && $communityId > 0) $parentId = (int)Db::name('member_community')->where('id', $communityId)->value('pid');
+        $community = $communityId ? Db::name('member_community')->field('id,name,pid')->where('id', $communityId)->find() : null;
+        $parent = $parentId ? Db::name('member_community_parent')->field('id,name')->where('id', $parentId)->find() : null;
         $this->success('获取成功', [
             'categories' => array_merge([['key' => 'all', 'label' => '全部']], SecondhandService::categories()),
             'conditions' => SecondhandService::conditions(),
+            'community_id' => $communityId,
+            'community_name' => $community['name'] ?? '',
+            'community_parent_id' => $parentId,
+            'community_parent_name' => $parent['name'] ?? '',
         ]);
     }
 
@@ -27,8 +36,23 @@ class SecondhandController extends AuthController
 
         $q = Db::name(SecondhandService::TABLE_ITEM)->alias('i')
             ->leftJoin('member m', 'm.id = i.user_id')
-            ->field('i.*,m.nickname as seller_nickname,m.avatar as seller_avatar')
+            ->leftJoin('member_community c', 'c.id = i.scope_id and i.scope_type = "community"')
+            ->leftJoin('member_community_parent p', 'p.id = i.scope_id and i.scope_type = "parent"')
+            ->field('i.*,m.nickname as seller_nickname,m.avatar as seller_avatar,IF(i.scope_type="community",c.name,IF(i.scope_type="parent",p.name,"整个七贤岭")) as scope_name')
             ->where('i.status', SecondhandService::STATUS_ON_SALE);
+
+        if ($this->user_id) {
+            $communityId = (int)($this->user_info['community_id'] ?? 0);
+            $parentId = (int)($this->user_info['community_parent_id'] ?? 0);
+            if ($parentId <= 0 && $communityId > 0) $parentId = (int)Db::name('member_community')->where('id', $communityId)->value('pid');
+            $q->where(function ($query) use ($communityId, $parentId) {
+                $query->where('i.scope_type', 'all');
+                if ($communityId > 0) $query->whereOr(function ($sub) use ($communityId) { $sub->where('i.scope_type', 'community')->where('i.scope_id', $communityId); });
+                if ($parentId > 0) $query->whereOr(function ($sub) use ($parentId) { $sub->where('i.scope_type', 'parent')->where('i.scope_id', $parentId); });
+            });
+        } else {
+            $q->where('i.scope_type', 'all');
+        }
 
         if ($category !== '' && $category !== 'all') {
             $q->where('i.category', $category);
@@ -65,7 +89,9 @@ class SecondhandController extends AuthController
         }
         $row = Db::name(SecondhandService::TABLE_ITEM)->alias('i')
             ->leftJoin('member m', 'm.id = i.user_id')
-            ->field('i.*,m.nickname as seller_nickname,m.avatar as seller_avatar')
+            ->leftJoin('member_community c', 'c.id = i.scope_id and i.scope_type = "community"')
+            ->leftJoin('member_community_parent p', 'p.id = i.scope_id and i.scope_type = "parent"')
+            ->field('i.*,m.nickname as seller_nickname,m.avatar as seller_avatar,IF(i.scope_type="community",c.name,IF(i.scope_type="parent",p.name,"整个七贤岭")) as scope_name')
             ->where('i.id', $id)
             ->find();
         if (empty($row)) {
@@ -73,28 +99,29 @@ class SecondhandController extends AuthController
         }
         $status = (int)$row['status'];
         $isOwner = $this->user_id && (int)$row['user_id'] === (int)$this->user_id;
+        if (!$isOwner && !$this->canViewScope($row)) {
+            $this->error('该闲置仅对指定社区居民开放');
+        }
         if (!$isOwner && !in_array($status, [SecondhandService::STATUS_ON_SALE, SecondhandService::STATUS_RESERVED], true)) {
             $this->error('物品已下架');
         }
 
-        $data = SecondhandService::formatItemForApi($row);
+        $data = SecondhandService::formatItemForApi($row, true, true);
         $data['is_owner'] = $isOwner;
-        $data['my_intent'] = null;
-        if ($this->user_id) {
-            $intent = Db::name(SecondhandService::TABLE_INTENT)
-                ->where('item_id', $id)
-                ->where('buyer_user_id', $this->user_id)
-                ->whereIn('status', [SecondhandService::INTENT_REGISTERED, SecondhandService::INTENT_WAIT_HANDOVER])
-                ->order('id desc')
-                ->find();
-            if ($intent) {
-                $data['my_intent'] = [
-                    'id' => (int)$intent['id'],
-                    'status' => (int)$intent['status'],
-                ];
-            }
-        }
         $this->success('获取成功', $data);
+    }
+
+    private function canViewScope(array $row): bool
+    {
+        $type = (string)($row['scope_type'] ?? 'all');
+        if ($type === 'all') return true;
+        if (!$this->user_id) return false;
+        $communityId = (int)($this->user_info['community_id'] ?? 0);
+        $parentId = (int)($this->user_info['community_parent_id'] ?? 0);
+        if ($parentId <= 0 && $communityId > 0) $parentId = (int)Db::name('member_community')->where('id', $communityId)->value('pid');
+        if ($type === 'community') return $communityId > 0 && $communityId === (int)$row['scope_id'];
+        if ($type === 'parent') return $parentId > 0 && $parentId === (int)$row['scope_id'];
+        return false;
     }
 
     /** 发布闲置 */
@@ -104,7 +131,10 @@ class SecondhandController extends AuthController
 
         $title = trim((string)$this->request->param('title', ''));
         $description = trim((string)$this->request->param('description', ''));
-        $pointPrice = (int)$this->request->param('point_price', 0);
+        $price = (float)$this->request->param('price', -1);
+        $contact = trim((string)$this->request->param('contact', ''));
+        $scopeType = trim((string)$this->request->param('scope_type', ''));
+        $scopeId = (int)$this->request->param('scope_id', 0);
         $category = trim((string)$this->request->param('category', 'other'));
         $condition = trim((string)$this->request->param('condition', 'used'));
         $areaText = trim((string)$this->request->param('area_text', ''));
@@ -116,12 +146,30 @@ class SecondhandController extends AuthController
         if (mb_strlen($title) > 40) {
             $this->error('名称不超过40字');
         }
-        if ($pointPrice < 1) {
-            $this->error('请填写正确的积分价格');
+        if ($price < 0 || $price > 9999999 || !preg_match('/^\d{1,7}(\.\d{1,2})?$/', (string)$this->request->param('price', ''))) {
+            $this->error('请填写正确的人民币售价');
         }
-        if ($pointPrice > 99999) {
-            $this->error('积分价格过高');
+        if ($contact === '' || mb_strlen($contact) > 40) {
+            $this->error('请填写有效联系方式');
         }
+        $memberCommunityId = (int)($this->user_info['community_id'] ?? 0);
+        $memberParentId = (int)($this->user_info['community_parent_id'] ?? 0);
+        if ($memberParentId <= 0 && $memberCommunityId > 0) {
+            $memberParentId = (int)Db::name('member_community')->where('id', $memberCommunityId)->value('pid');
+        }
+        if (!in_array($scopeType, ['community', 'parent', 'all'], true)) {
+            $this->error('请选择展示范围');
+        }
+        if ($scopeType === 'community' && ($memberCommunityId <= 0 || $scopeId !== $memberCommunityId)) {
+            $this->error('只能选择您绑定的小区');
+        }
+        if ($scopeType === 'parent' && $memberParentId <= 0) {
+            $this->error('请先完善所属社区信息');
+        }
+        if ($scopeType === 'parent') {
+            $scopeId = $memberParentId;
+        }
+        if ($scopeType === 'all') $scopeId = 0;
         if (empty($images)) {
             $this->error('请至少上传一张图片');
         }
@@ -141,7 +189,10 @@ class SecondhandController extends AuthController
             'title' => $title,
             'description' => $description,
             'images' => SecondhandService::encodeImages($images),
-            'point_price' => $pointPrice,
+            'price' => number_format($price, 2, '.', ''),
+            'contact' => $contact,
+            'scope_type' => $scopeType,
+            'scope_id' => $scopeId,
             'category' => $category,
             'condition' => $condition,
             'area_text' => $areaText,
@@ -164,14 +215,16 @@ class SecondhandController extends AuthController
 
         $paginator = Db::name(SecondhandService::TABLE_ITEM)->alias('i')
             ->leftJoin('member m', 'm.id = i.user_id')
-            ->field('i.*,m.nickname as seller_nickname,m.avatar as seller_avatar')
+            ->leftJoin('member_community c', 'c.id = i.scope_id and i.scope_type = "community"')
+            ->leftJoin('member_community_parent p', 'p.id = i.scope_id and i.scope_type = "parent"')
+            ->field('i.*,m.nickname as seller_nickname,m.avatar as seller_avatar,IF(i.scope_type="community",c.name,IF(i.scope_type="parent",p.name,"整个七贤岭")) as scope_name')
             ->where('i.user_id', $this->user_id)
             ->order('i.id desc')
             ->paginate(['list_rows' => $pageSize, 'page' => $page]);
 
         $items = [];
         foreach ($paginator->items() as $row) {
-            $items[] = SecondhandService::formatItemForApi($row);
+            $items[] = SecondhandService::formatItemForApi($row, true, true);
         }
 
         $this->success('获取成功', [
@@ -217,73 +270,6 @@ class SecondhandController extends AuthController
     /** 我想要 — 登记交换意向 */
     public function create_intent()
     {
-        $this->checkUser();
-        $itemId = (int)$this->request->param('item_id');
-        if ($itemId <= 0) {
-            $this->error('参数错误');
-        }
-
-        $item = Db::name(SecondhandService::TABLE_ITEM)->where('id', $itemId)->find();
-        if (empty($item)) {
-            $this->error('物品不存在');
-        }
-        if ((int)$item['user_id'] === (int)$this->user_id) {
-            $this->error('不能预约自己的闲置');
-        }
-        if ((int)$item['status'] !== SecondhandService::STATUS_ON_SALE) {
-            $this->error('该物品当前不可预约');
-        }
-
-        $price = (int)$item['point_price'];
-        $member = MemberModel::where('id', $this->user_id)->field('id,point')->find();
-        if (empty($member)) {
-            $this->error('用户不存在');
-        }
-        if ((float)$member['point'] < $price) {
-            $this->error('积分不足，无法登记意向（交割时将在市集现场扣减）');
-        }
-
-        $exists = Db::name(SecondhandService::TABLE_INTENT)
-            ->where('item_id', $itemId)
-            ->where('buyer_user_id', $this->user_id)
-            ->whereIn('status', [SecondhandService::INTENT_REGISTERED, SecondhandService::INTENT_WAIT_HANDOVER])
-            ->find();
-        if ($exists) {
-            $this->success('您已登记过意向', ['intent_id' => (int)$exists['id']]);
-            return;
-        }
-
-        $activeOther = Db::name(SecondhandService::TABLE_INTENT)
-            ->where('item_id', $itemId)
-            ->whereIn('status', [SecondhandService::INTENT_REGISTERED, SecondhandService::INTENT_WAIT_HANDOVER])
-            ->find();
-        if ($activeOther) {
-            $this->error('该物品已被他人预约');
-        }
-
-        $now = time();
-        Db::startTrans();
-        try {
-            $intentId = Db::name(SecondhandService::TABLE_INTENT)->insertGetId([
-                'item_id' => $itemId,
-                'buyer_user_id' => $this->user_id,
-                'seller_user_id' => (int)$item['user_id'],
-                'point_price' => $price,
-                'status' => SecondhandService::INTENT_REGISTERED,
-                'create_time' => $now,
-                'update_time' => $now,
-                'complete_time' => 0,
-            ]);
-            Db::name(SecondhandService::TABLE_ITEM)->where('id', $itemId)->update([
-                'status' => SecondhandService::STATUS_RESERVED,
-                'update_time' => $now,
-            ]);
-            Db::commit();
-        } catch (\Throwable $e) {
-            Db::rollback();
-            $this->error('登记失败，请稍后再试');
-        }
-
-        $this->success('已登记意向，请按说明前往绿色二手市集现场交接', ['intent_id' => (int)$intentId]);
+        $this->error('社区闲置由买卖双方自行联系，请查看物品详情中的联系方式');
     }
 }

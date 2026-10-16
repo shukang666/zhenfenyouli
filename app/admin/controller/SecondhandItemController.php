@@ -68,6 +68,9 @@ class SecondhandItemController extends AdminBaseController
         if ((int)$row['status'] !== SecondhandService::STATUS_PENDING) {
             $this->error('当前状态不可审核通过');
         }
+        if (empty($row['contact']) || ((float)($row['price'] ?? 0) <= 0 && (int)($row['point_price'] ?? 0) > 0)) {
+            $this->error('该旧发布缺少人民币售价或联系方式，请联系用户重新发布');
+        }
         $this->itemTable()->where('id', $id)->update([
             'status' => SecondhandService::STATUS_ON_SALE,
             'audit_time' => time(),
@@ -135,6 +138,7 @@ class SecondhandItemController extends AdminBaseController
     /** 现场交割完成：扣买家积分、加卖家积分 */
     public function complete_intent()
     {
+        $this->error('社区闲置已改为买卖双方自行联系，旧积分意向不再办理');
         $id = (int)$this->request->param('id');
         $intent = $this->intentTable()->where('id', $id)->find();
         if (empty($intent)) {

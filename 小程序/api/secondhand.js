@@ -5,5 +5,4 @@ export default {
 	secondhandPublish: (params = {}) => uni.$u.post('/wxapp/secondhand/publish', params),
 	secondhandMyList: (params = {}) => uni.$u.post('/wxapp/secondhand/my_list', params),
 	secondhandOffShelf: (params = {}) => uni.$u.post('/wxapp/secondhand/off_shelf', params),
-	secondhandCreateIntent: (params = {}) => uni.$u.post('/wxapp/secondhand/create_intent', params),
 }

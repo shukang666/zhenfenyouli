@@ -44,7 +44,7 @@
 
 					</view>
 
-					<text class="spot-section-hint" v-if="isFleaMarket">线上约好交换后，请在下表场次到指定场地交接；积分与物品由现场统一组织，不支持私下自行交割。</text>
+					<text class="spot-section-hint" v-if="isFleaMarket">查看线下活动时间、地点并报名参加。</text>
 
 					<text class="spot-section-hint" v-else>选择就近地点，参与本次环保行动</text>
 
@@ -52,7 +52,7 @@
 
 
 
-				<view class="spot-flea-bridge" v-if="isFleaMarket">
+				<view class="spot-flea-bridge" v-if="false">
 
 					<text class="spot-flea-bridge__title">线上闲置</text>
 
@@ -163,8 +163,8 @@
 <script>
 
 import { openActiveDetailWithContext, appendActiveIdToWebUrl, buildH5WrapperPath, isWebDisplayActive } from '@/common/activeOpen.js'
-
 import { secondhandIntroUrl, secondhandListUrl } from '@/common/secondhandNav.js'
+
 
 
 
@@ -275,18 +275,9 @@ export default {
 	},
 
 	methods: {
+		goSecondhandIntro() { this.$u.route(secondhandIntroUrl()) },
+		goSecondhandList() { this.$u.route(secondhandListUrl()) },
 
-		goSecondhandIntro() {
-
-			this.$u.route(secondhandIntroUrl())
-
-		},
-
-		goSecondhandList() {
-
-			this.$u.route(secondhandListUrl())
-
-		},
 
 		showVenueAddress(item) {
 

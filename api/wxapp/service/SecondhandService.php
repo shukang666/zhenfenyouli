@@ -79,7 +79,7 @@ class SecondhandService
     }
 
     /** @param array<string,mixed> $row */
-    public static function formatItemForApi(array $row, bool $withSeller = true): array
+    public static function formatItemForApi(array $row, bool $withSeller = true, bool $includeContact = false): array
     {
         $images = self::decodeImages($row['images'] ?? '');
         $imageUrls = [];
@@ -92,12 +92,15 @@ class SecondhandService
             'description' => (string)$row['description'],
             'images' => $imageUrls,
             'image_paths' => $images,
-            'point_price' => (int)$row['point_price'],
+            'price' => number_format((float)($row['price'] ?? 0), 2, '.', ''),
+            'scope_type' => (string)($row['scope_type'] ?? ''),
+            'scope_id' => (int)($row['scope_id'] ?? 0),
+            'scope_name' => (string)($row['scope_name'] ?? ''),
             'category' => (string)$row['category'],
             'category_label' => self::categoryLabel((string)$row['category']),
             'condition' => (string)$row['condition'],
             'condition_label' => self::conditionLabel((string)$row['condition']),
-            'area_text' => (string)$row['area_text'],
+            'area_text' => (string)($row['scope_name'] ?? $row['area_text'] ?? ''),
             'status' => (int)$row['status'],
             'status_label' => self::statusLabel((int)$row['status']),
             'status_key' => self::statusKey((int)$row['status']),
@@ -108,6 +111,9 @@ class SecondhandService
         if ($withSeller) {
             $out['seller_nickname'] = (string)($row['seller_nickname'] ?? '');
             $out['seller_avatar'] = empty($row['seller_avatar']) ? '' : cmf_get_asset_url($row['seller_avatar']);
+        }
+        if ($includeContact) {
+            $out['contact'] = (string)($row['contact'] ?? '');
         }
         return $out;
     }

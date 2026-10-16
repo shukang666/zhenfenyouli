@@ -486,7 +486,11 @@ CREATE TABLE IF NOT EXISTS `cmf_secondhand_item` (
   `title` varchar(80) NOT NULL DEFAULT '',
   `description` varchar(500) NOT NULL DEFAULT '',
   `images` text COMMENT 'JSON 相对路径数组，最多6张',
-  `point_price` int(10) unsigned NOT NULL DEFAULT 0,
+  `point_price` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'legacy only; community sales use RMB price',
+  `price` decimal(9,2) unsigned NOT NULL DEFAULT 0.00 COMMENT '人民币售价，由买卖双方自行交易',
+  `contact` varchar(40) NOT NULL DEFAULT '' COMMENT '发布者联系方式',
+  `scope_type` varchar(16) NOT NULL DEFAULT 'all' COMMENT 'community小区/parent社区/all七贤岭',
+  `scope_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '小区或社区ID，all为0',
   `category` varchar(32) NOT NULL DEFAULT 'other',
   `condition` varchar(32) NOT NULL DEFAULT 'used',
   `area_text` varchar(120) NOT NULL DEFAULT '',
@@ -523,19 +527,10 @@ SELECT
     IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
         SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1
     )), 0) + 5,
-    'admin','SecondhandItem','index','','社区闲置审核','','发布审核与交换意向'
+    'admin','SecondhandItem','index','','社区闲置审核','','居民发布信息审核'
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1);
-
-INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
-SELECT
-    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1),
-    1, 1, 1,
-    'admin','SecondhandItem','intent_index','','交换意向','','市集现场交割完成'
-FROM DUAL
-WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1)
-  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='intent_index' LIMIT 1);
 
 CREATE TABLE IF NOT EXISTS `cmf_active_web_zhenfen_gift_claim` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
