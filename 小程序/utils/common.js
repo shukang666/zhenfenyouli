@@ -3,6 +3,7 @@ import { staticUploadBase } from '@/common/settings'
 import {
 	buildActiveOpenPath,
 	buildH5WrapperPath,
+	isBareActiveIdOpen,
 	isWebDisplayActive,
 	openActiveDetailWithContext,
 	resolveWebActivityPageUrl,
@@ -134,18 +135,40 @@ const install = (Vue, vm) => {
 	const openActiveDetail = (itemOrId, extra) => {
 		const item = typeof itemOrId === 'object' && itemOrId !== null ? itemOrId : { id: itemOrId, ...(extra || {}) }
 		const id = item.id || itemOrId
-		if (!isWebDisplayActive(item)) {
-			vm.$u.route('/pages/activity/lsxf/details-new?id=' + id)
-			return
-		}
-		if (!vm.isLogin || !vm.userInfo?.openid) {
-			if (!checkLogin()) return
-		}
 		const issueContext = (activeId) =>
 			vm.$u.post('/wxapp/active/issue_web_context', { active_id: activeId }).then((res) => res.data || {})
-		openActiveDetailWithContext(item, extra, issueContext, () => {
-			checkLogin()
-		})
+		const openConfigDetail = () => {
+			vm.$u.route('/pages/activity/lsxf/details-new?id=' + id)
+		}
+		if (isWebDisplayActive(item)) {
+			if (!vm.isLogin || !vm.userInfo?.openid) {
+				if (!checkLogin()) return
+			}
+			openActiveDetailWithContext(item, extra, issueContext, () => {
+				checkLogin()
+			})
+			return
+		}
+		// 首页 Banner 等只有活动 id：先签发 Web 式上下文，直达 web-view，避免详情页闪屏
+		if (isBareActiveIdOpen(item, itemOrId)) {
+			if (!vm.isLogin || !vm.userInfo?.openid) {
+				if (!checkLogin()) return
+			}
+			issueContext(id)
+				.then((ctx) => {
+					const launch = ctx && ctx.web_launch_url
+					if (launch) {
+						uni.navigateTo({ url: buildH5WrapperPath(launch) })
+						return
+					}
+					openConfigDetail()
+				})
+				.catch(() => {
+					openConfigDetail()
+				})
+			return
+		}
+		openConfigDetail()
 	}
 
 	// 校验是否是H5页面

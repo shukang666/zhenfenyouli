@@ -1,5 +1,6 @@
 <template>
-	<view class="container">
+	<view v-if="!detailReady" class="detail-boot"></view>
+	<view v-else class="container">
 		<!-- 沉浸式封面区域 -->
 		<view class="hero-section">
 			<u-image width="750" height="480" :src="info.thumb" mode="aspectFill"></u-image>
@@ -425,6 +426,7 @@
 	export default {
 		data() {
 			return {
+				detailReady: false,
 				uploadUrl,
 				popup_show: false,
 				image: [],
@@ -1059,7 +1061,8 @@
 			},
 			// 活动详情
 			get_new_active_detail(id) {
-				this.$u.api.get_new_active_detail({
+				this.detailReady = false
+				return this.$u.api.get_new_active_detail({
 					active_id: id
 				}).then(res => {
 					const data = res.data || {}
@@ -1070,6 +1073,9 @@
 						return
 					}
 					this.info = data
+					this.detailReady = true
+				}).catch(() => {
+					this.detailReady = true
 				})
 			},
 			// 上传图片
@@ -1094,6 +1100,11 @@
 	$pad-page: 28rpx;
 	$border-hairline: 1rpx solid rgba(42, 50, 46, 0.06);
 	$shadow-card: 0 2rpx 16rpx rgba(42, 50, 46, 0.04);
+
+	.detail-boot {
+		min-height: 100vh;
+		background: $page-bg;
+	}
 
 	.container {
 		min-height: 100vh;

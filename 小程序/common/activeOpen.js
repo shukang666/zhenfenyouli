@@ -42,6 +42,30 @@ export function buildH5WrapperPath(pageUrl) {
 
 
 
+/** 从 Banner/链接解析活动详情 id（如 .../details-new?id=57） */
+export function parseActiveDetailIdFromPath(url) {
+	const raw = String(url || '').trim()
+	if (!raw) return ''
+	if (raw.indexOf('details-new') === -1 && raw.indexOf('lsxf/details') === -1) return ''
+	const query = raw.indexOf('?') >= 0 ? raw.split('?')[1] : ''
+	const m = query.match(/(?:^|&)id=(\d+)/)
+	return m ? m[1] : ''
+}
+
+
+
+/** 仅带 id、未带 display_mode/web_url 的打开（如首页 Banner） */
+export function isBareActiveIdOpen(item, itemOrId) {
+	if (!item || typeof item !== 'object') return !!itemOrId
+	if (isWebDisplayActive(item)) return false
+	if (String(item.web_url || '').trim() !== '') return false
+	if (item.web_launch_url) return false
+	if (item.display_mode != null && item.display_mode !== '') return false
+	return !!(item.id || itemOrId)
+}
+
+
+
 /**
 
  * 是否 Web 式活动（支持列表项或详情字段）

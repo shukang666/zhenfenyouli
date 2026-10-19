@@ -248,6 +248,7 @@ import {
 	resolveHomeHotThumb,
 } from '@/common/homeHotSpotEntries.js'
 import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
+import { parseActiveDetailIdFromPath } from '@/common/activeOpen.js'
 export default {
 	components: {
 		SkeletonScreen,
@@ -707,6 +708,11 @@ export default {
 					let tabUrl = url.split('?')[0]
 					uni.setStorageSync('jump_monthly_rec', 1)
 					uni.switchTab({ url: tabUrl })
+					return
+				}
+				const activeId = parseActiveDetailIdFromPath(url)
+				if (activeId && this.$u.func && typeof this.$u.func.openActiveDetail === 'function') {
+					this.$u.func.openActiveDetail(activeId)
 					return
 				}
 				uni.navigateTo({
