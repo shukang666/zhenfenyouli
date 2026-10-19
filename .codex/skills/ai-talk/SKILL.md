@@ -44,7 +44,7 @@ description: "免登录 AI 讨论组 Web 应用（public/ai_talk）。群聊展�
 
 - `since_id=0`：返回全部消息。
 - `since_id>0`：只返回 `id > since_id` 的消息（前端轮询用）。
-- `data.messages`：数组；`data.last_id`：当前存储中最后一条 id（0 表示空）。
+- `data.messages`：数组；`data.last_id`：当前存储中最后一条 id（0 表示空）；`data.ai_busy`：1 表示助手占用中，全员应暂停发送。
 
 ### POST `api.php?action=send`
 
@@ -52,13 +52,13 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 
 流程（在**文件独占锁**内完成，避免并发写乱序）：
 
-1. 校验并清洗 nickname（空→「访客」，最长 20）、content（非空，最长见 `max_message_len`）。
-2. 追加 `role=user` 消息（字段：`id`, `role`, `nickname`, `content`, `ts`）。
+1. 校验并清洗 nickname、content；若存储中 `ai_busy=1`（且未超过 `ai_busy_max_sec` Stale 阈值）直接 `code=0` 拒绝。
+2. 追加 `role=user` 消息并置 `ai_busy=1`、`ai_busy_since=time()`。
 3. `ai_talk_build_glm_messages`：system + 最近 `max_history` 条；用户行格式 `[昵称]: 内容`，助手行原样。
 4. POST 智谱 `chat/completions`；遇 HTTP 429 / 错误码 1305 /「访问量过大」时由 `ai_talk_call_glm_with_retry` 间隔 `glm_retry_delay_ms`（默认 1s）最多重试 `glm_retry_max`（默认 10）次。`send` 先落盘用户消息再调 AI，失败时仍返回 `data.user`。
-5. 追加 `role=assistant`，`nickname` 固定「讨论助手」。
+5. 追加 `role=assistant`，`nickname` 固定「讨论助手」，并置 `ai_busy=0`。
 6. 若总条数 > `storage_cap`（默认 200），只保留最后 N 条落盘（**不影响**单次请求的 30 条上下文，仅限制文件体积）。
-7. 返回 `data.user` 与 `data.assistant` 两条新记录。
+7. AI 失败时在 `finally` 路径 `ai_talk_release_ai_busy`；返回体带 `ai_busy`。
 
 失败时 `code=0`，`msg` 为异常信息（含智谱 HTTP 4xx/5xx 体前 200 字、429 限流等）。
 

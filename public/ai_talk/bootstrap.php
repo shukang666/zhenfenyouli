@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+class AiTalkBusyException extends RuntimeException
+{
+}
+
 define('AI_TALK_ROOT', __DIR__ . DIRECTORY_SEPARATOR);
 define('CMF_ROOT', dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR);
 
@@ -117,6 +121,9 @@ function ai_talk_config(): array
     }
     if (!isset($cfg['glm_retry_delay_ms'])) {
         $cfg['glm_retry_delay_ms'] = 1000;
+    }
+    if (!isset($cfg['ai_busy_max_sec'])) {
+        $cfg['ai_busy_max_sec'] = 180;
     }
     if (!isset($cfg['system_prompt']) || (string)$cfg['system_prompt'] === '') {
         $cfg['system_prompt'] = '你正在一个开放的群聊讨论组里，多名用户会用昵称发言。请根据最近对话内容，以「讨论助手」的身份回复：简洁、友好、有信息量，可以总结观点、提问或补充建议。不要冒充某个具体昵称，不要输出过长段落。';
@@ -270,10 +277,51 @@ function ai_talk_json(int $code, string $msg, $data = null): void
     exit;
 }
 
+function ai_talk_normalize_store(array $data): array
+{
+    if (!isset($data['messages']) || !is_array($data['messages'])) {
+        $data['messages'] = [];
+    }
+    $data['ai_busy'] = !empty($data['ai_busy']) ? 1 : 0;
+    $data['ai_busy_since'] = (int)($data['ai_busy_since'] ?? 0);
+    return $data;
+}
+
+function ai_talk_maybe_clear_stale_busy(array &$data, int $maxSec): void
+{
+    if (empty($data['ai_busy'])) {
+        return;
+    }
+    $since = (int)($data['ai_busy_since'] ?? 0);
+    if ($since <= 0) {
+        return;
+    }
+    if (time() - $since > $maxSec) {
+        $data['ai_busy']       = 0;
+        $data['ai_busy_since'] = 0;
+    }
+}
+
+function ai_talk_store_ai_busy(array $data): int
+{
+    $data = ai_talk_normalize_store($data);
+    return (int)$data['ai_busy'];
+}
+
+function ai_talk_release_ai_busy(string $path): void
+{
+    ai_talk_with_store($path, static function (array &$data) {
+        $data = ai_talk_normalize_store($data);
+        $data['ai_busy']       = 0;
+        $data['ai_busy_since'] = 0;
+        return null;
+    });
+}
+
 function ai_talk_read_store(string $path): array
 {
     if (!is_file($path)) {
-        return ['messages' => []];
+        return ai_talk_normalize_store(['messages' => []]);
     }
     $fp = fopen($path, 'r');
     if ($fp === false) {
@@ -289,13 +337,13 @@ function ai_talk_read_store(string $path): array
         fclose($fp);
     }
     if ($raw === false || $raw === '') {
-        return ['messages' => []];
+        return ai_talk_normalize_store(['messages' => []]);
     }
     $data = json_decode($raw, true);
-    if (!is_array($data) || !isset($data['messages']) || !is_array($data['messages'])) {
-        return ['messages' => []];
+    if (!is_array($data)) {
+        return ai_talk_normalize_store(['messages' => []]);
     }
-    return $data;
+    return ai_talk_normalize_store($data);
 }
 
 function ai_talk_with_store(string $path, callable $fn)
@@ -311,11 +359,11 @@ function ai_talk_with_store(string $path, callable $fn)
             throw new RuntimeException('聊天记录锁定失败');
         }
         $raw = stream_get_contents($fp);
-        $data = ['messages' => []];
+        $data = ai_talk_normalize_store(['messages' => []]);
         if ($raw !== false && $raw !== '') {
             $decoded = json_decode($raw, true);
-            if (is_array($decoded) && isset($decoded['messages']) && is_array($decoded['messages'])) {
-                $data = $decoded;
+            if (is_array($decoded)) {
+                $data = ai_talk_normalize_store($decoded);
             }
         }
         $result = $fn($data);
