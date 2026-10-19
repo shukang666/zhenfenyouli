@@ -44,6 +44,7 @@ try {
     }
 
     if ($action === 'send' && $method === 'POST') {
+        @set_time_limit(300);
         $raw  = file_get_contents('php://input');
         $body = json_decode($raw ?: '{}', true);
         if (!is_array($body)) {
@@ -61,7 +62,7 @@ try {
             ai_talk_json(0, '消息过长（最多 ' . $maxLen . ' 字）');
         }
 
-        $newItems = ai_talk_with_store($path, static function (array &$data) use ($nickname, $content, $cfg, $cap) {
+        $user = ai_talk_with_store($path, static function (array &$data) use ($nickname, $content, $cap) {
             $user = [
                 'id'       => ai_talk_next_id($data['messages']),
                 'role'     => 'user',
@@ -70,27 +71,32 @@ try {
                 'ts'       => time(),
             ];
             $data['messages'][] = $user;
-
-            $glmMessages = ai_talk_build_glm_messages($data['messages'], $cfg);
-            $replyText   = ai_talk_call_glm($glmMessages, $cfg);
-
-            $bot = [
-                'id'       => ai_talk_next_id($data['messages']),
-                'role'     => 'assistant',
-                'nickname' => '讨论助手',
-                'content'  => $replyText,
-                'ts'       => time(),
-            ];
-            $data['messages'][] = $bot;
-
-            if ($cap > 0 && count($data['messages']) > $cap) {
-                $data['messages'] = array_slice($data['messages'], -$cap);
-            }
-
-            return ['user' => $user, 'assistant' => $bot];
+            ai_talk_apply_storage_cap($data, $cap);
+            return $user;
         });
 
-        ai_talk_json(1, 'ok', $newItems);
+        try {
+            $store   = ai_talk_read_store($path);
+            $glmMessages = ai_talk_build_glm_messages($store['messages'], $cfg);
+            $replyText   = ai_talk_call_glm_with_retry($glmMessages, $cfg);
+
+            $bot = ai_talk_with_store($path, static function (array &$data) use ($replyText, $cap) {
+                $bot = [
+                    'id'       => ai_talk_next_id($data['messages']),
+                    'role'     => 'assistant',
+                    'nickname' => '讨论助手',
+                    'content'  => $replyText,
+                    'ts'       => time(),
+                ];
+                $data['messages'][] = $bot;
+                ai_talk_apply_storage_cap($data, $cap);
+                return $bot;
+            });
+
+            ai_talk_json(1, 'ok', ['user' => $user, 'assistant' => $bot]);
+        } catch (Throwable $e) {
+            ai_talk_json(0, $e->getMessage(), ['user' => $user]);
+        }
     }
 
     ai_talk_json(0, '未知操作');

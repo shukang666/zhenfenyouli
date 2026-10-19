@@ -55,7 +55,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 1. 校验并清洗 nickname（空→「访客」，最长 20）、content（非空，最长见 `max_message_len`）。
 2. 追加 `role=user` 消息（字段：`id`, `role`, `nickname`, `content`, `ts`）。
 3. `ai_talk_build_glm_messages`：system + 最近 `max_history` 条；用户行格式 `[昵称]: 内容`，助手行原样。
-4. POST `https://open.bigmodel.cn/api/paas/v4/chat/completions`，`model` 来自 `config.php`（默认 `glm-4.7-flash`），`temperature` 0.75。
+4. POST 智谱 `chat/completions`；遇 HTTP 429 / 错误码 1305 /「访问量过大」时由 `ai_talk_call_glm_with_retry` 间隔 `glm_retry_delay_ms`（默认 1s）最多重试 `glm_retry_max`（默认 10）次。`send` 先落盘用户消息再调 AI，失败时仍返回 `data.user`。
 5. 追加 `role=assistant`，`nickname` 固定「讨论助手」。
 6. 若总条数 > `storage_cap`（默认 200），只保留最后 N 条落盘（**不影响**单次请求的 30 条上下文，仅限制文件体积）。
 7. 返回 `data.user` 与 `data.assistant` 两条新记录。
@@ -66,7 +66,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 
 - 首次/改昵称：遮罩输入，写入 `localStorage`。
 - 进入后 `history` 全量拉取；之后每 2.5s `history&since_id=lastId`（发送中暂停轮询逻辑上的重复由 `sending` 标志处理）。
-- 发送：POST send，本地追加 user + assistant；Enter 发送，Shift+Enter 换行。
+- 发送：先本地展示用户气泡 + 助手「AI输入中…」占位，POST send（可能较久）；成功后用服务端 id/正文替换占位；失败保留用户消息并在助手气泡显示错误文案。
 - 气泡：`role=assistant` 与**其他昵称**的 `user` 均在左侧（`ai` / `peer`）；仅 localStorage 昵称与消息 `nickname` 一致（trim 后）的 `user` 在右侧（`mine`）。改昵称后会全量重绘列表。
 
 ## 后端实现要点

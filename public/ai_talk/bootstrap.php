@@ -112,6 +112,12 @@ function ai_talk_config(): array
     if (!isset($cfg['storage_cap'])) {
         $cfg['storage_cap'] = 200;
     }
+    if (!isset($cfg['glm_retry_max'])) {
+        $cfg['glm_retry_max'] = 10;
+    }
+    if (!isset($cfg['glm_retry_delay_ms'])) {
+        $cfg['glm_retry_delay_ms'] = 1000;
+    }
     if (!isset($cfg['system_prompt']) || (string)$cfg['system_prompt'] === '') {
         $cfg['system_prompt'] = '你正在一个开放的群聊讨论组里，多名用户会用昵称发言。请根据最近对话内容，以「讨论助手」的身份回复：简洁、友好、有信息量，可以总结观点、提问或补充建议。不要冒充某个具体昵称，不要输出过长段落。';
     }
@@ -440,6 +446,47 @@ function ai_talk_call_glm(array $glmMessages, array $cfg): string
         throw new RuntimeException('AI 无有效回复：' . mb_substr((string)$errMsg, 0, 200));
     }
     return trim($text);
+}
+
+function ai_talk_is_rate_limit_error(Throwable $e): bool
+{
+    $msg = $e->getMessage();
+    if (strpos($msg, 'HTTP 429') !== false) {
+        return true;
+    }
+    if (strpos($msg, '1305') !== false) {
+        return true;
+    }
+    return strpos($msg, '访问量过大') !== false;
+}
+
+function ai_talk_call_glm_with_retry(array $glmMessages, array $cfg): string
+{
+    $max     = max(1, (int)($cfg['glm_retry_max'] ?? 10));
+    $delayMs = max(200, (int)($cfg['glm_retry_delay_ms'] ?? 1000));
+    $last    = null;
+    for ($attempt = 1; $attempt <= $max; $attempt++) {
+        try {
+            return ai_talk_call_glm($glmMessages, $cfg);
+        } catch (RuntimeException $e) {
+            $last = $e;
+            if (!ai_talk_is_rate_limit_error($e) || $attempt >= $max) {
+                throw $e;
+            }
+            usleep($delayMs * 1000);
+        }
+    }
+    if ($last !== null) {
+        throw $last;
+    }
+    throw new RuntimeException('AI 请求失败');
+}
+
+function ai_talk_apply_storage_cap(array &$data, int $cap): void
+{
+    if ($cap > 0 && count($data['messages']) > $cap) {
+        $data['messages'] = array_slice($data['messages'], -$cap);
+    }
 }
 
 function ai_talk_sanitize_nickname(string $nick): string

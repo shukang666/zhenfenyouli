@@ -63,6 +63,19 @@
     .msg.peer .bubble { background: var(--other); }
     .msg.mine .bubble { background: var(--mine); }
     .msg.ai .bubble { background: var(--ai); border: 1px solid #cce5ff; }
+    .bubble.bubble-pending { color: #5a7a99; }
+    .bubble.bubble-pending .typing-dots { display: inline-block; min-width: 1.2em; }
+    .bubble.bubble-pending .typing-dots::after {
+      content: '…';
+      animation: ai-dots 1.2s steps(4, end) infinite;
+    }
+    @keyframes ai-dots {
+      0%, 20% { content: ''; }
+      40% { content: '.'; }
+      60% { content: '..'; }
+      80%, 100% { content: '...'; }
+    }
+    .bubble.bubble-error { color: #c1121f; background: #fde8e8 !important; border-color: #f5c2c7 !important; }
     .time { font-size: 10px; color: #aaa; margin-top: 4px; }
     .msg.mine .time { text-align: right; }
     .composer {
@@ -192,8 +205,9 @@
     return normNick(m.nickname) === normNick(nickname);
   }
 
-  function appendMessage(m, scroll) {
-    if (!m || !m.id) return;
+  function appendMessage(m, scroll, opts) {
+    opts = opts || {};
+    if (!m || m.id === undefined || m.id === null || m.id === '') return;
     if (document.querySelector('[data-id="' + m.id + '"]')) return;
 
     var isAi = m.role === 'assistant';
@@ -201,6 +215,7 @@
     var isPeer = m.role === 'user' && !isMine;
     var wrap = document.createElement('div');
     wrap.className = 'msg' + (isMine ? ' mine' : '') + (isAi ? ' ai' : '') + (isPeer ? ' peer' : '');
+    if (opts.pending) wrap.classList.add('pending');
     wrap.setAttribute('data-id', String(m.id));
 
     var av = document.createElement('div');
@@ -216,11 +231,19 @@
 
     var bubble = document.createElement('div');
     bubble.className = 'bubble';
-    bubble.textContent = m.content || '';
+    if (opts.pending) {
+      bubble.classList.add('bubble-pending');
+      bubble.innerHTML = 'AI输入中<span class="typing-dots"></span>';
+    } else if (opts.error) {
+      bubble.classList.add('bubble-error');
+      bubble.textContent = m.content || '生成失败';
+    } else {
+      bubble.textContent = m.content || '';
+    }
 
     var time = document.createElement('div');
     time.className = 'time';
-    time.textContent = formatTime(m.ts);
+    time.textContent = formatTime(m.ts || Math.floor(Date.now() / 1000));
 
     bw.appendChild(nick);
     bw.appendChild(bubble);
@@ -229,10 +252,30 @@
     wrap.appendChild(bw);
     elMessages.appendChild(wrap);
 
-    if (m.id > lastId) lastId = m.id;
+    var numId = typeof m.id === 'number' ? m.id : parseInt(String(m.id), 10);
+    if (!isNaN(numId) && numId > lastId) lastId = numId;
     if (scroll !== false) {
       elMessages.scrollTop = elMessages.scrollHeight;
     }
+    return wrap;
+  }
+
+  function replaceMessage(tempId, m, opts) {
+    var old = document.querySelector('[data-id="' + tempId + '"]');
+    if (old) old.remove();
+    appendMessage(m, true, opts || {});
+  }
+
+  function failPendingAi(tempAiId, errText) {
+    var wrap = document.querySelector('[data-id="' + tempAiId + '"]');
+    if (!wrap) return;
+    wrap.classList.remove('pending');
+    var bubble = wrap.querySelector('.bubble');
+    if (!bubble) return;
+    bubble.classList.remove('bubble-pending');
+    bubble.classList.add('bubble-error');
+    bubble.textContent = errText || 'AI 暂时无法回复，请稍后再试';
+    elMessages.scrollTop = elMessages.scrollHeight;
   }
 
   function setStatus(text) {
@@ -306,23 +349,45 @@
       elOverlay.classList.remove('hidden');
       return;
     }
+    var ts = Math.floor(Date.now() / 1000);
+    var tempUserId = 'tmp-u-' + Date.now();
+    var tempAiId = 'tmp-a-' + Date.now();
+    appendMessage({
+      id: tempUserId,
+      role: 'user',
+      nickname: nickname,
+      content: text,
+      ts: ts
+    }, true);
+    appendMessage({
+      id: tempAiId,
+      role: 'assistant',
+      nickname: '讨论助手',
+      content: '',
+      ts: ts
+    }, true, { pending: true });
+    elInput.value = '';
+
     sending = true;
     elSend.disabled = true;
-    setStatus('助手思考中…');
+    setStatus('');
     fetchJson(API + '?action=send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nickname: nickname, content: text })
     }).then(function (res) {
-      if (!res || res.code !== 1) throw new Error((res && res.msg) || '发送失败');
-      elInput.value = '';
-      var d = res.data || {};
-      appendMessage(d.user, true);
-      appendMessage(d.assistant, true);
-      setStatus('');
+      var d = (res && res.data) || {};
+      if (res && res.code === 1 && d.user && d.assistant) {
+        replaceMessage(tempUserId, d.user);
+        replaceMessage(tempAiId, d.assistant);
+        return;
+      }
+      if (d.user) {
+        replaceMessage(tempUserId, d.user);
+      }
+      failPendingAi(tempAiId, (res && res.msg) || '发送失败');
     }).catch(function (e) {
-      setStatus('');
-      alert(e.message || '发送失败');
+      failPendingAi(tempAiId, e.message || '网络异常');
     }).finally(function () {
       sending = false;
       elSend.disabled = false;
