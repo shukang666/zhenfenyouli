@@ -532,6 +532,26 @@ FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1);
 
+CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_progress` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `cycle_no` int(10) unsigned NOT NULL DEFAULT 1,
+  `cycle_start` int(10) unsigned NOT NULL DEFAULT 0,
+  `anchor_day1_at` int(10) unsigned NOT NULL DEFAULT 0,
+  `deadline_at` int(10) unsigned NOT NULL DEFAULT 0,
+  `completed_days` varchar(32) NOT NULL DEFAULT '',
+  `zhenfen_map` text COMMENT 'JSON: day=>forum_id',
+  `share_ack_at` int(10) unsigned NOT NULL DEFAULT 0,
+  `reward_300_at` int(10) unsigned NOT NULL DEFAULT 0,
+  `reward_800_at` int(10) unsigned NOT NULL DEFAULT 0,
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `update_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_active` (`user_id`,`active_id`),
+  KEY `idx_active` (`active_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='1+1 Web活动用户进度';
+
 CREATE TABLE IF NOT EXISTS `cmf_active_web_zhenfen_gift_claim` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL DEFAULT 0,

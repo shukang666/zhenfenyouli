@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>1+1 活动</title>
+  <script src="../sdk.js"></script>
+  <style>
+    :root {
+      --green: #1b6b4a;
+      --green-mid: #2d8a5e;
+      --green-soft: #7bc9a0;
+      --gold: #e9a319;
+      --text: #153829;
+      --muted: #4d7a62;
+      --bg: #e8f6ed;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      color: var(--text);
+      background: var(--bg);
+      padding-bottom: 48px;
+    }
+    .hidden { display: none !important; }
+    .hero {
+      padding: 26px 18px 32px;
+      background: linear-gradient(145deg, #0f5c3f 0%, #2a9d6a 55%, #7dcea0 100%);
+      color: #fff;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 10px 36px rgba(15, 92, 63, .22);
+    }
+    .hero h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .hero p { font-size: 13px; line-height: 1.6; opacity: .92; }
+    .shell { max-width: 480px; margin: -18px auto 0; padding: 0 14px; }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(123, 201, 160, .35);
+      box-shadow: 0 6px 24px rgba(21, 56, 41, .06);
+    }
+    .guide-line { font-size: 13px; color: var(--muted); line-height: 1.55; margin-bottom: 8px; }
+    .guide-line:last-child { margin-bottom: 0; }
+    .stat-row { display: flex; gap: 10px; margin-bottom: 4px; }
+    .stat {
+      flex: 1;
+      text-align: center;
+      background: #f4fbf7;
+      border-radius: 12px;
+      padding: 10px 6px;
+    }
+    .stat strong { display: block; font-size: 20px; color: var(--green); }
+    .stat span { font-size: 11px; color: var(--muted); }
+    .deadline {
+      font-size: 12px;
+      color: #9b3d3d;
+      background: #fff5f5;
+      border-left: 3px solid #e07a7a;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .cell {
+      aspect-ratio: 1;
+      border-radius: 14px;
+      border: 2px solid #dceee4;
+      background: #fafdfb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s, background .15s;
+    }
+    .cell:active { transform: scale(.97); }
+    .cell .num { font-size: 18px; font-weight: 700; color: var(--green); }
+    .cell .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; line-height: 1.25; }
+    .cell.partial { border-color: var(--gold); background: #fffbeb; }
+    .cell.done { border-color: var(--green-mid); background: linear-gradient(145deg, #e8f8ef, #fff); }
+    .cell.done .num::after { content: ' ✓'; font-size: 14px; }
+    .sec-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+    .btn {
+      display: block;
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .btn-primary { background: linear-gradient(90deg, var(--green-mid), var(--green-soft)); color: #fff; }
+    .btn-ghost { background: #f0faf4; color: var(--green); border: 1px solid #b7e4c7; }
+    .detail-hero { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .detail-sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .part {
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border: 1px solid #dceee4;
+    }
+    .part.zhenfen { background: #f0faf4; }
+    .part.task { background: #fff; }
+    .part h3 { font-size: 15px; margin-bottom: 6px; }
+    .part p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 6px;
+    }
+    .badge.ok { background: #d8f3dc; color: var(--green); }
+    .badge.wait { background: #fff3cd; color: #856404; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      color: var(--green-mid);
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .loading { text-align: center; padding: 48px 16px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div id="panel-loading" class="loading">加载中…</div>
+
+  <div id="panel-home" class="hidden">
+    <div class="hero">
+      <h1 id="hero-title">1+1 七日挑战</h1>
+      <p id="hero-sub">每日真分 + 一项任务，完成有积分奖励</p>
+    </div>
+    <div class="shell">
+      <div class="card" id="guide-card"></div>
+      <div class="card">
+        <div class="stat-row">
+          <div class="stat"><strong id="stat-done">0</strong><span>已完成天</span></div>
+          <div class="stat"><strong id="stat-reward3">300</strong><span>前3天积分</span></div>
+          <div class="stat"><strong id="stat-reward7">800</strong><span>7天积分</span></div>
+        </div>
+        <div id="deadline-box" class="deadline hidden"></div>
+      </div>
+      <div class="card">
+        <div class="sec-title">挑战进度（7 天）</div>
+        <div class="grid" id="day-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-day" class="hidden">
+    <div class="shell" style="margin-top:16px;">
+      <div class="back-link" id="btn-back">← 返回日历</div>
+      <div class="card">
+        <div class="detail-hero" id="day-title"></div>
+        <div class="detail-sub" id="day-brief"></div>
+        <div class="part zhenfen">
+          <h3>真分打卡 <span class="badge wait" id="badge-z">待完成</span></h3>
+          <p>进入三场景选择器，任选家庭 / 办公 / 沿街等场景完成一次垃圾分类拍照打卡。</p>
+          <button type="button" class="btn btn-primary" id="btn-zhenfen">去真分打卡</button>
+        </div>
+        <div class="part task">
+          <h3>当日任务 <span class="badge wait" id="badge-t">待完成</span></h3>
+          <p id="task-detail"></p>
+          <button type="button" class="btn btn-primary" id="btn-task">去做任务</button>
+          <button type="button" class="btn btn-ghost hidden" id="btn-share-ack">我已分享，刷新进度</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var apiBase = '';
+      var openid = '';
+      var activeId = '';
+      var state = null;
+      var currentDay = 0;
+      var zhenfenPath = '/pages/activity/scene-clock-flow?mode=theme';
+
+      function $(id) { return document.getElementById(id); }
+
+      function apiPost(path, body) {
+        return ActiveWebSdk.apiPost(apiBase, openid, path, body).then(function (res) {
+          if (!res || res.code !== 1) throw new Error((res && res.msg) || '请求失败');
+          return res.data;
+        });
+      }
+
+      function navigateMp(path) {
+        if (!path) return;
+        if (typeof wx !== 'undefined' && wx.miniProgram && wx.miniProgram.navigateTo) {
+          wx.miniProgram.navigateTo({ url: path });
+        } else {
+          alert('请在小程内打开：' + path);
+        }
+      }
+
+      function show(id) { $(id).classList.remove('hidden'); }
+      function hide(id) { $(id).classList.add('hidden'); }
+
+      function renderHome(data) {
+        state = data;
+        zhenfenPath = data.zhenfen_entry || zhenfenPath;
+        var g = data.guide || {};
+        $('hero-title').textContent = g.title || '1+1 七日挑战';
+        var guideHtml = (g.lines || []).map(function (line) {
+          return '<div class="guide-line">' + line + '</div>';
+        }).join('');
+        $('guide-card').innerHTML = guideHtml;
+        $('stat-done').textContent = data.completed_count || 0;
+        if (data.rewards) {
+          $('stat-reward3').textContent = data.rewards.milestone_3;
+          $('stat-reward7').textContent = data.rewards.milestone_7;
+        }
+        if (data.deadline_hint) {
+          $('deadline-box').textContent = data.deadline_hint;
+          show('deadline-box');
+        } else {
+          hide('deadline-box');
+        }
+        var grid = $('day-grid');
+        grid.innerHTML = '';
+        (data.days || []).forEach(function (d) {
+          var el = document.createElement('div');
+          var cls = 'cell';
+          if (d.done) cls += ' done';
+          else if (d.zhenfen_done || d.task_done) cls += ' partial';
+          el.className = cls;
+          el.innerHTML = '<div class="num">' + d.day + '</div><div class="lbl">' + (d.task_title || '') + '</div>';
+          el.onclick = function () { openDay(d.day); };
+          grid.appendChild(el);
+        });
+      }
+
+      function openDay(day) {
+        currentDay = day;
+        var d = (state.days || []).find(function (x) { return x.day === day; });
+        if (!d) return;
+        hide('panel-home');
+        show('panel-day');
+        $('day-title').textContent = d.title + ' · ' + d.task_title;
+        $('day-brief').textContent = d.task_brief;
+        $('task-detail').textContent = d.task_detail || '';
+        $('badge-z').textContent = d.zhenfen_done ? '已完成' : '待完成';
+        $('badge-z').className = 'badge ' + (d.zhenfen_done ? 'ok' : 'wait');
+        $('badge-t').textContent = d.task_done ? '已完成' : '待完成';
+        $('badge-t').className = 'badge ' + (d.task_done ? 'ok' : 'wait');
+        $('btn-zhenfen').onclick = function () { navigateMp(zhenfenPath); };
+        $('btn-task').onclick = function () {
+          if (d.needs_share_ack) {
+            apiPost('/wxapp/active_web_one_plus_one/share_ack', { active_id: activeId }).then(function () {
+              alert('已记录，请完成分享后返回刷新');
+            }).catch(function (e) { alert(e.message || e); });
+          }
+          navigateMp(d.mp_path);
+        };
+        if (d.needs_share_ack) show('btn-share-ack'); else hide('btn-share-ack');
+        $('btn-share-ack').onclick = function () {
+          refresh().then(function () { alert('进度已更新'); });
+        };
+      }
+
+      function refresh() {
+        return apiPost('/wxapp/active_web_one_plus_one/status', { active_id: activeId }).then(function (data) {
+          renderHome(data);
+          if (currentDay > 0) {
+            var d = (data.days || []).find(function (x) { return x.day === currentDay; });
+            if (d) openDay(currentDay);
+          }
+          return data;
+        });
+      }
+
+      $('btn-back').onclick = function () {
+        currentDay = 0;
+        hide('panel-day');
+        show('panel-home');
+      };
+
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden && activeId) refresh().catch(function () {});
+      });
+
+      ActiveWebSdk.bootstrap().then(function (data) {
+        apiBase = (data.api && data.api.base) || '';
+        openid = (data.session && data.session.openid) || '';
+        activeId = (data.active && data.active.id) || (new URLSearchParams(location.search).get('active_id') || '');
+        hide('panel-loading');
+        show('panel-home');
+        var hash = location.hash || '';
+        var m = hash.match(/day\/(\d+)/);
+        return refresh().then(function () {
+          if (m) openDay(parseInt(m[1], 10));
+        });
+      }).catch(function (e) {
+        $('panel-loading').textContent = e.message || String(e);
+      });
+    })();
+  </script>
+</body>
+</html>
