@@ -68,6 +68,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 - 进入后 `history` 全量拉取并滚到底；轮询增量消息时**仅当用户已在底部附近**才自动滚动，避免看历史时被拽回最新。
 - 发送：先本地展示用户气泡 + 助手「AI输入中…」占位，POST send（可能较久）；成功后用服务端 id/正文替换占位；失败保留用户消息并在助手气泡显示错误文案。
 - 气泡：`role=assistant` 与**其他昵称**的 `user` 均在左侧（`ai` / `peer`）；仅 localStorage 昵称与消息 `nickname` 一致（trim 后）的 `user` 在右侧（`mine`）。改昵称后会全量重绘列表。
+- 助手正文：`marked`（GFM）转 HTML，`DOMPurify` 消毒后插入；用户消息仍纯文本。依赖 `index.html` 引用的 jsDelivr `marked` + `dompurify`。
 
 ## 后端实现要点
 
