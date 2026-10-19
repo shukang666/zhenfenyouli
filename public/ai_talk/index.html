@@ -76,6 +76,26 @@
       80%, 100% { content: '...'; }
     }
     .bubble.bubble-error { color: #c1121f; background: #fde8e8 !important; border-color: #f5c2c7 !important; }
+    .bubble.bubble-has-fold { padding-bottom: 8px; }
+    .bubble-body { white-space: pre-wrap; word-break: break-word; }
+    .bubble-body.is-clamped {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      overflow: hidden;
+    }
+    .bubble-toggle {
+      display: block;
+      margin-top: 8px;
+      padding: 0;
+      border: none;
+      background: none;
+      font-size: 13px;
+      color: #576b95;
+      cursor: pointer;
+      text-align: left;
+    }
+    .msg.mine .bubble-toggle { color: #058743; text-align: right; width: 100%; }
     .time { font-size: 10px; color: #aaa; margin-top: 4px; }
     .msg.mine .time { text-align: right; }
     .composer {
@@ -175,6 +195,8 @@
   var polling = null;
   var sending = false;
   var roomAiBusy = false;
+  var LONG_MSG_MIN_CHARS = 96;
+  var LONG_MSG_MIN_LINES = 5;
 
   var elOverlay = document.getElementById('nickOverlay');
   var elNickInput = document.getElementById('nickInput');
@@ -218,6 +240,47 @@
     }
   }
 
+  function shouldFoldLongMessage(text) {
+    if (!text) return false;
+    if (text.length >= LONG_MSG_MIN_CHARS) return true;
+    return text.split('\n').length >= LONG_MSG_MIN_LINES;
+  }
+
+  function fillBubbleContent(bubble, content, opts) {
+    opts = opts || {};
+    var text = content || '';
+    if (opts.pending) {
+      bubble.classList.add('bubble-pending');
+      bubble.innerHTML = 'AI输入中<span class="typing-dots"></span>';
+      return;
+    }
+    if (opts.error) {
+      bubble.classList.add('bubble-error');
+      bubble.textContent = text || '生成失败';
+      return;
+    }
+    if (!shouldFoldLongMessage(text)) {
+      bubble.textContent = text;
+      return;
+    }
+    bubble.classList.add('bubble-has-fold');
+    var body = document.createElement('div');
+    body.className = 'bubble-body is-clamped';
+    body.textContent = text;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'bubble-toggle';
+    btn.textContent = '展开全文';
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var clamped = body.classList.toggle('is-clamped');
+      btn.textContent = clamped ? '展开全文' : '收起';
+    });
+    bubble.appendChild(body);
+    bubble.appendChild(btn);
+  }
+
   function appendMessage(m, scroll, opts) {
     opts = opts || {};
     if (!m || m.id === undefined || m.id === null || m.id === '') return;
@@ -244,15 +307,7 @@
 
     var bubble = document.createElement('div');
     bubble.className = 'bubble';
-    if (opts.pending) {
-      bubble.classList.add('bubble-pending');
-      bubble.innerHTML = 'AI输入中<span class="typing-dots"></span>';
-    } else if (opts.error) {
-      bubble.classList.add('bubble-error');
-      bubble.textContent = m.content || '生成失败';
-    } else {
-      bubble.textContent = m.content || '';
-    }
+    fillBubbleContent(bubble, m.content || '', opts);
 
     var time = document.createElement('div');
     time.className = 'time';
