@@ -206,6 +206,18 @@
     return normNick(m.nickname) === normNick(nickname);
   }
 
+  function isNearBottom(threshold) {
+    threshold = threshold == null ? 100 : threshold;
+    var el = elMessages;
+    return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
+  }
+
+  function scrollMessagesToBottom(force) {
+    if (force || isNearBottom()) {
+      elMessages.scrollTop = elMessages.scrollHeight;
+    }
+  }
+
   function appendMessage(m, scroll, opts) {
     opts = opts || {};
     if (!m || m.id === undefined || m.id === null || m.id === '') return;
@@ -255,8 +267,10 @@
 
     var numId = typeof m.id === 'number' ? m.id : parseInt(String(m.id), 10);
     if (!isNaN(numId) && numId > lastId) lastId = numId;
-    if (scroll !== false) {
-      elMessages.scrollTop = elMessages.scrollHeight;
+    if (scroll === true || scroll === 'force') {
+      scrollMessagesToBottom(true);
+    } else if (scroll === 'auto') {
+      scrollMessagesToBottom(false);
     }
     return wrap;
   }
@@ -264,7 +278,7 @@
   function replaceMessage(tempId, m, opts) {
     var old = document.querySelector('[data-id="' + tempId + '"]');
     if (old) old.remove();
-    appendMessage(m, true, opts || {});
+    appendMessage(m, 'auto', opts || {});
   }
 
   function failPendingAi(tempAiId, errText) {
@@ -276,7 +290,7 @@
     bubble.classList.remove('bubble-pending');
     bubble.classList.add('bubble-error');
     bubble.textContent = errText || 'AI 暂时无法回复，请稍后再试';
-    elMessages.scrollTop = elMessages.scrollHeight;
+    scrollMessagesToBottom(false);
   }
 
   function setStatus(text) {
@@ -324,7 +338,9 @@
       if (d.ai_busy !== undefined) {
         applyRoomBusy(d.ai_busy === 1 || d.ai_busy === true);
       }
-      elMessages.scrollTop = elMessages.scrollHeight;
+      if (list.length > 0) {
+        scrollMessagesToBottom(sinceId === 0);
+      }
     });
   }
 
@@ -385,14 +401,14 @@
       nickname: nickname,
       content: text,
       ts: ts
-    }, true);
+    }, 'force');
     appendMessage({
       id: tempAiId,
       role: 'assistant',
       nickname: '讨论助手',
       content: '',
       ts: ts
-    }, true, { pending: true });
+    }, 'force', { pending: true });
     elInput.value = '';
 
     sending = true;
