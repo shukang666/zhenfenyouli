@@ -82,11 +82,112 @@
     };
   }
 
+  var JWEIXIN_SRC = 'https://res.wx.qq.com/open/js/jweixin-1.6.0.js';
+  var miniProgramReady = null;
+
+  function loadScriptOnce(src) {
+    return new Promise(function (resolve, reject) {
+      if (!global.document) {
+        reject(new Error('非浏览器环境'));
+        return;
+      }
+      var existing = global.document.querySelector('script[data-active-web-sdk="' + src + '"]');
+      if (existing) {
+        if (existing.getAttribute('data-loaded') === '1') {
+          resolve();
+          return;
+        }
+        existing.addEventListener('load', function () { resolve(); });
+        existing.addEventListener('error', function () { reject(new Error('JSSDK 加载失败')); });
+        return;
+      }
+      var s = global.document.createElement('script');
+      s.src = src;
+      s.setAttribute('data-active-web-sdk', src);
+      s.onload = function () {
+        s.setAttribute('data-loaded', '1');
+        resolve();
+      };
+      s.onerror = function () {
+        reject(new Error('JSSDK 加载失败'));
+      };
+      global.document.head.appendChild(s);
+    });
+  }
+
+  /** web-view 内需 JSSDK 才有 wx.miniProgram */
+  function ensureMiniProgramApi() {
+    if (miniProgramReady) {
+      return miniProgramReady;
+    }
+    if (global.wx && global.wx.miniProgram) {
+      miniProgramReady = Promise.resolve(global.wx.miniProgram);
+      return miniProgramReady;
+    }
+    miniProgramReady = loadScriptOnce(JWEIXIN_SRC).then(function () {
+      if (global.wx && global.wx.miniProgram) {
+        return global.wx.miniProgram;
+      }
+      throw new Error('当前环境无法跳转小程序页面，请确认从微信小程序内打开本活动');
+    });
+    return miniProgramReady;
+  }
+
+  var TAB_BAR_PATHS = [
+    '/pages/index/index',
+    '/pages/low_carbon/low_carbon',
+    '/pages/mall/mall',
+    '/pages/health/health',
+    '/pages/sjhd/sjhd',
+  ];
+
+  function isTabBarPath(path) {
+    var base = String(path || '').split('?')[0];
+    return TAB_BAR_PATHS.indexOf(base) >= 0;
+  }
+
+  /**
+   * H5 内跳转到小程序页面（web-view 专用）
+   * @param {string} path 如 /pages/activity/scene-clock-flow?mode=theme
+   * @returns {Promise<void>}
+   */
+  function navigateMp(path) {
+    path = String(path || '').trim();
+    if (!path) {
+      return Promise.reject(new Error('无效跳转路径'));
+    }
+    if (path.charAt(0) !== '/') {
+      path = '/' + path;
+    }
+    return ensureMiniProgramApi().then(function (mp) {
+      return new Promise(function (resolve, reject) {
+        var tabUrl = path.split('?')[0];
+        var onFail = function (err) {
+          var msg = (err && err.errMsg) ? err.errMsg : '跳转失败';
+          reject(new Error(msg));
+        };
+        if (isTabBarPath(path)) {
+          mp.switchTab({ url: tabUrl, success: resolve, fail: onFail });
+          return;
+        }
+        mp.navigateTo({
+          url: path,
+          success: resolve,
+          fail: function () {
+            mp.redirectTo({ url: path, success: resolve, fail: onFail });
+          },
+        });
+      });
+    });
+  }
+
   global.ActiveWebSdk = {
     bootstrap: bootstrap,
     apiPost: apiPost,
     getQuery: qs,
     defaultApiBase: defaultApiBase,
     guestSession: guestSession,
+    navigateMp: navigateMp,
+    ensureMiniProgramApi: ensureMiniProgramApi,
   };
 })(typeof window !== 'undefined' ? window : this);

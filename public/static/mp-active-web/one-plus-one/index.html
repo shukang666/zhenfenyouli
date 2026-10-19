@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>1+1 活动</title>
-  <script src="../sdk.js"></script>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+  <script src="../sdk.js?v=20261019"></script>
   <style>
     :root {
       --green: #1b6b4a;
@@ -202,11 +203,9 @@
 
       function navigateMp(path) {
         if (!path) return;
-        if (typeof wx !== 'undefined' && wx.miniProgram && wx.miniProgram.navigateTo) {
-          wx.miniProgram.navigateTo({ url: path });
-        } else {
-          alert('请在小程内打开：' + path);
-        }
+        ActiveWebSdk.navigateMp(path).catch(function (e) {
+          alert((e && e.message) ? e.message : '跳转失败，请稍后重试');
+        });
       }
 
       function show(id) { $(id).classList.remove('hidden'); }
@@ -301,6 +300,9 @@
         activeId = (data.active && data.active.id) || (new URLSearchParams(location.search).get('active_id') || '');
         hide('panel-loading');
         show('panel-home');
+        if (ActiveWebSdk.ensureMiniProgramApi) {
+          ActiveWebSdk.ensureMiniProgramApi().catch(function () {});
+        }
         var hash = location.hash || '';
         var m = hash.match(/day\/(\d+)/);
         return refresh().then(function () {
