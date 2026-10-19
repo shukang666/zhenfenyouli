@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 define('AI_TALK_ROOT', __DIR__ . DIRECTORY_SEPARATOR);
 define('CMF_ROOT', dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR);
-define('CMF_DATA', CMF_ROOT . 'data' . DIRECTORY_SEPARATOR);
 
 function ai_talk_parse_dotenv(string $root): array
 {
@@ -69,16 +68,17 @@ function ai_talk_env_get(string $key, string $default = ''): string
     return is_scalar($v) ? trim((string)$v) : $default;
 }
 
-function ai_talk_default_config(): array
+function ai_talk_merge_config_file(string $path, array $cfg): array
 {
-    return [
-        'model'           => 'glm-4.7-flash',
-        'max_history'     => 30,
-        'max_message_len' => 800,
-        'storage_cap'     => 200,
-        'storage_file'    => AI_TALK_ROOT . 'data' . DIRECTORY_SEPARATOR . 'room.json',
-        'system_prompt'   => '你正在一个开放的群聊讨论组里，多名用户会用昵称发言。请根据最近对话内容，以「讨论助手」的身份回复：简洁、友好、有信息量，可以总结观点、提问或补充建议。不要冒充某个具体昵称，不要输出过长段落。',
-    ];
+    if (!is_readable($path)) {
+        return $cfg;
+    }
+    $over = require $path;
+    if (!is_array($over)) {
+        return $cfg;
+    }
+    unset($over['storage_file']);
+    return array_merge($cfg, $over);
 }
 
 function ai_talk_config(): array
@@ -87,25 +87,34 @@ function ai_talk_config(): array
     if ($cfg !== null) {
         return $cfg;
     }
-    $cfg = ai_talk_default_config();
-    $optional = CMF_DATA . 'ai_talk.config.php';
-    if (is_readable($optional)) {
-        $over = require $optional;
-        if (is_array($over)) {
-            unset($over['storage_file']);
-            $cfg = array_merge($cfg, $over);
-        }
+    $cfg = [
+        'storage_file' => AI_TALK_ROOT . 'data' . DIRECTORY_SEPARATOR . 'room.json',
+    ];
+    $cfg = ai_talk_merge_config_file(AI_TALK_ROOT . 'config.php', $cfg);
+    $cfg = ai_talk_merge_config_file(AI_TALK_ROOT . 'config.local.php', $cfg);
+    $envKey = ai_talk_env_get('AI_TALK_API_KEY');
+    $cfg['api_key'] = $envKey !== '' ? $envKey : (string)($cfg['api_key'] ?? '');
+    $keyId = ai_talk_env_get('AI_TALK_KEY_ID');
+    if ($keyId !== '') {
+        $cfg['key_id'] = $keyId;
+    } elseif (!isset($cfg['key_id']) || (string)$cfg['key_id'] === '') {
+        $cfg['key_id'] = 'product-shukang';
     }
-    $local = AI_TALK_ROOT . 'config.local.php';
-    if (is_readable($local)) {
-        $over = require $local;
-        if (is_array($over)) {
-            $cfg = array_merge($cfg, $over);
-        }
+    if (!isset($cfg['model']) || (string)$cfg['model'] === '') {
+        $cfg['model'] = 'glm-4.7-flash';
     }
-    $cfg['api_key'] = ai_talk_env_get('AI_TALK_API_KEY');
-    $keyId          = ai_talk_env_get('AI_TALK_KEY_ID');
-    $cfg['key_id']  = $keyId !== '' ? $keyId : 'product-shukang';
+    if (!isset($cfg['max_history'])) {
+        $cfg['max_history'] = 30;
+    }
+    if (!isset($cfg['max_message_len'])) {
+        $cfg['max_message_len'] = 800;
+    }
+    if (!isset($cfg['storage_cap'])) {
+        $cfg['storage_cap'] = 200;
+    }
+    if (!isset($cfg['system_prompt']) || (string)$cfg['system_prompt'] === '') {
+        $cfg['system_prompt'] = '你正在一个开放的群聊讨论组里，多名用户会用昵称发言。请根据最近对话内容，以「讨论助手」的身份回复：简洁、友好、有信息量，可以总结观点、提问或补充建议。不要冒充某个具体昵称，不要输出过长段落。';
+    }
     return $cfg;
 }
 
