@@ -1,5 +1,6 @@
 <?php
 return [
-    'api_key' => '',
-    'key_id'  => 'product-shukang',
+    'api_key'      => '',
+    'key_id'       => 'product-shukang',
+    // 'storage_file' => '/tmp/ai_talk_room.json',
 ];

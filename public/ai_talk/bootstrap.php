@@ -118,6 +118,113 @@ function ai_talk_config(): array
     return $cfg;
 }
 
+function ai_talk_storage_pointer_file(): string
+{
+    return AI_TALK_ROOT . 'data' . DIRECTORY_SEPARATOR . 'storage.path';
+}
+
+function ai_talk_dir_writable(string $dir): bool
+{
+    if ($dir === '') {
+        return false;
+    }
+    if (!is_dir($dir)) {
+        if (!@mkdir($dir, 0755, true) && !is_dir($dir)) {
+            return false;
+        }
+    }
+    return is_writable($dir);
+}
+
+function ai_talk_probe_storage_file(string $path): bool
+{
+    if ($path === '') {
+        return false;
+    }
+    $dir = dirname($path);
+    if (!ai_talk_dir_writable($dir)) {
+        return false;
+    }
+    $fp = @fopen($path, 'c+');
+    if ($fp === false) {
+        return false;
+    }
+    fclose($fp);
+    return true;
+}
+
+function ai_talk_read_storage_pointer(): string
+{
+    $file = ai_talk_storage_pointer_file();
+    if (!is_readable($file)) {
+        return '';
+    }
+    return trim((string)file_get_contents($file));
+}
+
+function ai_talk_write_storage_pointer(string $path): void
+{
+    if ($path === '') {
+        return;
+    }
+    $pointer = ai_talk_storage_pointer_file();
+    $dir     = dirname($pointer);
+    if (!ai_talk_dir_writable($dir)) {
+        return;
+    }
+    @file_put_contents($pointer, $path);
+}
+
+function ai_talk_storage_path(): string
+{
+    static $resolved;
+    if (is_string($resolved) && $resolved !== '') {
+        return $resolved;
+    }
+
+    $local = AI_TALK_ROOT . 'config.local.php';
+    if (is_readable($local)) {
+        $c = require $local;
+        if (is_array($c) && !empty($c['storage_file'])) {
+            $custom = (string)$c['storage_file'];
+            if (ai_talk_probe_storage_file($custom)) {
+                $resolved = $custom;
+                return $resolved;
+            }
+        }
+    }
+
+    $fromPointer = ai_talk_read_storage_pointer();
+    if ($fromPointer !== '' && ai_talk_probe_storage_file($fromPointer)) {
+        $resolved = $fromPointer;
+        return $resolved;
+    }
+
+    $default = AI_TALK_ROOT . 'data' . DIRECTORY_SEPARATOR . 'room.json';
+    $candidates = [
+        $default,
+        AI_TALK_ROOT . 'room.json',
+    ];
+    $tmpBase = sys_get_temp_dir();
+    if (is_string($tmpBase) && $tmpBase !== '') {
+        $candidates[] = rtrim($tmpBase, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'ai_talk_' . md5(AI_TALK_ROOT) . '.json';
+    }
+
+    foreach ($candidates as $candidate) {
+        if (ai_talk_probe_storage_file($candidate)) {
+            $resolved = $candidate;
+            if ($candidate !== $default) {
+                ai_talk_write_storage_pointer($candidate);
+            }
+            return $resolved;
+        }
+    }
+
+    throw new RuntimeException(
+        '无法打开聊天记录文件：请为 public/ai_talk/data 设置可写权限，或在 config.local.php 配置 storage_file 指向可写路径'
+    );
+}
+
 function ai_talk_register_shutdown_json(): void
 {
     static $done = false;
@@ -157,17 +264,8 @@ function ai_talk_json(int $code, string $msg, $data = null): void
     exit;
 }
 
-function ai_talk_ensure_storage_dir(string $path): void
-{
-    $dir = dirname($path);
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
-    }
-}
-
 function ai_talk_read_store(string $path): array
 {
-    ai_talk_ensure_storage_dir($path);
     if (!is_file($path)) {
         return ['messages' => []];
     }
@@ -196,10 +294,11 @@ function ai_talk_read_store(string $path): array
 
 function ai_talk_with_store(string $path, callable $fn)
 {
-    ai_talk_ensure_storage_dir($path);
-    $fp = fopen($path, 'c+');
+    $fp = @fopen($path, 'c+');
     if ($fp === false) {
-        throw new RuntimeException('无法打开聊天记录文件');
+        throw new RuntimeException(
+            '无法打开聊天记录文件：' . $path . '（请检查目录可写或 config.local.php 的 storage_file）'
+        );
     }
     try {
         if (!flock($fp, LOCK_EX)) {

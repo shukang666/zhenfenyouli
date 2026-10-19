@@ -74,7 +74,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 - **不走 ThinkCMF、不读 `data/`**：`config.php` + 可选 `config.local.php` 合并；`storage_file` 固定为 `AI_TALK_ROOT/data/room.json`（合并配置时忽略外部传入的 `storage_file`）。
 - **`.env`**：解析到内存数组（**禁止 `putenv`**），尝试 `CMF_ROOT` 与 `AI_TALK_ROOT` 下的 `.env`，并合并 `$_ENV` / `$_SERVER['AI_TALK_API_KEY']`。
 - **`api.php`**：全流程 `try/catch`；fatal 时 shutdown 仍尽量返回 JSON；`display_errors=0` 且输出 JSON 前清空 output buffer。
-- **存储**：单文件 JSON `{ "messages": [ ... ] }`；写路径 `flock(LOCK_EX)`；历史只读 `LOCK_SH`。
+- **存储**：`ai_talk_storage_path()` 按序探测可写路径：`config.local.php` 的 `storage_file` → `data/storage.path` 记录 → `data/room.json` → `room.json`（与 index 同级）→ 系统 temp；首次用回退路径时会写入 `data/storage.path` 便于 history/send 一致。单文件 JSON `{ "messages": [ ... ] }`；写 `flock(LOCK_EX)`；读 `LOCK_SH`。
 - **智谱响应**：取 `choices[0].message.content`；空则抛错并带上 `error.message`（若有）。
 - **无 DB、无 session**：多房间需自行加 `room` 参数与分文件存储。
 
@@ -98,6 +98,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 | HTTP 429 / 1305 | 智谱限流 |
 | 多人看不到彼此消息 | 同一台机上的 `public/ai_talk/data/room.json`；多机需 Redis/DB |
 | 发送后无助手回复 | 接口 `msg`；curl 120s 超时；模型名与密钥 |
+| 无法打开聊天记录文件 | `data/` 或 `ai_talk/` 对 PHP 用户不可写；chmod 775/777 或 `config.local.php` 设 `storage_file` |
 
 ## 扩展建议（未实现）
 

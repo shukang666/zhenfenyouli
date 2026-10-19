@@ -6,3 +6,5 @@
 /public/upload/
 /public/ai_talk/config.local.php
 /public/ai_talk/data/room.json
+/public/ai_talk/data/storage.path
+/public/ai_talk/room.json

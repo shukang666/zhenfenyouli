@@ -9,7 +9,7 @@ try {
     require __DIR__ . '/bootstrap.php';
 
     $cfg  = ai_talk_config();
-    $path = (string)$cfg['storage_file'];
+    $path = ai_talk_storage_path();
 
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     $action = isset($_GET['action']) ? (string)$_GET['action'] : '';
