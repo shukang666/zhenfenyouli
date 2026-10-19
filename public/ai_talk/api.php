@@ -5,26 +5,29 @@ ini_set('display_errors', '0');
 error_reporting(E_ALL);
 ob_start();
 
-require __DIR__ . '/bootstrap.php';
-
-$cfg  = ai_talk_config();
-$path = (string)$cfg['storage_file'];
-
-$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$action = isset($_GET['action']) ? (string)$_GET['action'] : '';
-if ($action === '' && $method === 'POST') {
-    $action = 'send';
-}
-if ($action === '') {
-    $action = 'history';
-}
-
-if ($method === 'OPTIONS') {
-    header('Allow: GET, POST, OPTIONS');
-    exit;
-}
-
 try {
+    require __DIR__ . '/bootstrap.php';
+
+    $cfg  = ai_talk_config();
+    $path = (string)$cfg['storage_file'];
+
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    $action = isset($_GET['action']) ? (string)$_GET['action'] : '';
+    if ($action === '' && $method === 'POST') {
+        $action = 'send';
+    }
+    if ($action === '') {
+        $action = 'history';
+    }
+
+    if ($method === 'OPTIONS') {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        header('Allow: GET, POST, OPTIONS');
+        exit;
+    }
+
     if ($action === 'history' && $method === 'GET') {
         $sinceId = (int)($_GET['since_id'] ?? 0);
         $data    = ai_talk_read_store($path);
@@ -92,5 +95,12 @@ try {
 
     ai_talk_json(0, '未知操作');
 } catch (Throwable $e) {
-    ai_talk_json(0, $e->getMessage());
+    if (function_exists('ai_talk_json')) {
+        ai_talk_json(0, $e->getMessage());
+    }
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['code' => 0, 'msg' => $e->getMessage(), 'data' => null], JSON_UNESCAPED_UNICODE);
 }

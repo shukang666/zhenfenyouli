@@ -18,8 +18,9 @@ description: "免登录 AI 讨论组 Web 应用（public/ai_talk）。群聊展�
 | `public/ai_talk/index.html` | 群聊 UI、轮询、localStorage 昵称 |
 | `public/ai_talk/api.php` | JSON 接口入口 |
 | `public/ai_talk/bootstrap.php` | `.env` 加载、存储锁、智谱 HTTP |
-| `data/ai_talk.config.php` | 模型、上下文条数、单条字数、落盘条数上限 `storage_cap`、系统提示词、存储路径 |
-| `data/runtime/ai_talk_room.json` | 运行时聊天记录（自动创建） |
+| `data/ai_talk.config.php` | 可选覆盖项（模型、条数、提示词等），**不含**存储路径 |
+| `public/ai_talk/data/room.json` | 聊天记录（自动创建；目录有 `.htaccess` 禁止 HTTP 直读） |
+| `public/ai_talk/config.local.php` | 可选本目录覆盖配置（可不提交 git） |
 
 密钥与 SSL 开关在**项目根 `.env`**（勿提交公开仓库）：
 
@@ -66,8 +67,8 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 
 ## 后端实现要点
 
-- **不走 ThinkCMF**：`bootstrap.php` 自读 `.env` 到内存数组（**禁止 `putenv`**，部分主机禁用会导致 Warning 污染 JSON），再与 `$_ENV` 合并；`define CMF_ROOT/CMF_DATA` 后 `require data/ai_talk.config.php`。`api.php` 入口 `display_errors=0` 且输出 JSON 前清空 output buffer。
-- **存储**：单文件 JSON `{ "messages": [ ... ] }`；写与「读-改-写」发送路径用 `flock(LOCK_EX)`；历史只读用 `LOCK_SH`，避免读到半写文件。
+- **不走 ThinkCMF**：默认配置内置于 `bootstrap.php`；`data/ai_talk.config.php` 仅可选、且需主机 `open_basedir` 能读到 `data/`。`.env` 解析到内存（**禁止 `putenv`**），依次尝试 `CMF_ROOT`、 `AI_TALK_ROOT` 下的 `.env`，并合并 `$_ENV` / `$_SERVER['AI_TALK_API_KEY']`。`api.php` 全流程包在 `try/catch`，fatal 时 shutdown 仍尽量返回 JSON。
+- **存储**：`public/ai_talk/data/room.json`（在 PHP 可写且常在 `open_basedir` 内）；单文件 JSON `{ "messages": [ ... ] }`；写与「读-改-写」发送路径用 `flock(LOCK_EX)`；历史只读用 `LOCK_SH`。
 - **智谱响应**：取 `choices[0].message.content`；空则抛错并带上 `error.message`（若有）。
 - **无 DB、无 session**：扩展多房间时需改 `storage_file` 或加 `room` 参数分文件，并自行考虑滥用（频率限制、鉴权）——当前未做。
 
@@ -85,6 +86,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 | 现象 | 方向 |
 |------|------|
 | 前端 `Unexpected token '<'` / 非 JSON | 多为 PHP Warning 混在响应里；查是否旧版用了 `putenv`、或接口 404 返回 HTML；部署最新 `bootstrap.php` |
+| HTTP 500 空 body | 多为 `data/ai_talk.config.php` 未部署或 `open_basedir` 禁止读 `data/`；用新版（配置内置 + 存储在 `public/ai_talk/data/`） |
 | 未配置 AI_TALK_API_KEY | 检查 `.env` 与 php-fpm/Apache 是否读到同一工作目录 |
 | SSL certificate problem | 本机设 `AI_TALK_SSL_VERIFY=false` 或对齐 `COS_CURL_SSL_VERIFY` |
 | HTTP 429 / 1305 访问量过大 | 智谱限流，稍后重试或换时段 |

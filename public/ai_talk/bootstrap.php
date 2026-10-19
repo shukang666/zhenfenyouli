@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-define('CMF_ROOT', dirname(__DIR__, 2) . '/');
-define('CMF_DATA', CMF_ROOT . 'data/');
+define('AI_TALK_ROOT', __DIR__ . DIRECTORY_SEPARATOR);
+define('CMF_ROOT', dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR);
+define('CMF_DATA', CMF_ROOT . 'data' . DIRECTORY_SEPARATOR);
 
 function ai_talk_parse_dotenv(string $root): array
 {
@@ -40,7 +41,16 @@ function ai_talk_env(): array
     if ($env !== null) {
         return $env;
     }
-    $env = ai_talk_parse_dotenv(CMF_ROOT);
+    $env = [];
+    foreach ([CMF_ROOT, AI_TALK_ROOT] as $root) {
+        if ($root === '' || !is_dir($root)) {
+            continue;
+        }
+        $env = array_merge($env, ai_talk_parse_dotenv($root));
+    }
+    if (isset($_SERVER['AI_TALK_API_KEY']) && is_scalar($_SERVER['AI_TALK_API_KEY'])) {
+        $env['AI_TALK_API_KEY'] = (string)$_SERVER['AI_TALK_API_KEY'];
+    }
     foreach ($_ENV as $name => $value) {
         if (is_string($name) && $name !== '' && !isset($env[$name])) {
             $env[$name] = is_scalar($value) ? (string)$value : '';
@@ -59,18 +69,70 @@ function ai_talk_env_get(string $key, string $default = ''): string
     return is_scalar($v) ? trim((string)$v) : $default;
 }
 
+function ai_talk_default_config(): array
+{
+    return [
+        'model'           => 'glm-4.7-flash',
+        'max_history'     => 30,
+        'max_message_len' => 800,
+        'storage_cap'     => 200,
+        'storage_file'    => AI_TALK_ROOT . 'data' . DIRECTORY_SEPARATOR . 'room.json',
+        'system_prompt'   => '你正在一个开放的群聊讨论组里，多名用户会用昵称发言。请根据最近对话内容，以「讨论助手」的身份回复：简洁、友好、有信息量，可以总结观点、提问或补充建议。不要冒充某个具体昵称，不要输出过长段落。',
+    ];
+}
+
 function ai_talk_config(): array
 {
     static $cfg;
     if ($cfg !== null) {
         return $cfg;
     }
-    $cfg = require CMF_DATA . 'ai_talk.config.php';
+    $cfg = ai_talk_default_config();
+    $optional = CMF_DATA . 'ai_talk.config.php';
+    if (is_readable($optional)) {
+        $over = require $optional;
+        if (is_array($over)) {
+            unset($over['storage_file']);
+            $cfg = array_merge($cfg, $over);
+        }
+    }
+    $local = AI_TALK_ROOT . 'config.local.php';
+    if (is_readable($local)) {
+        $over = require $local;
+        if (is_array($over)) {
+            $cfg = array_merge($cfg, $over);
+        }
+    }
     $cfg['api_key'] = ai_talk_env_get('AI_TALK_API_KEY');
     $keyId          = ai_talk_env_get('AI_TALK_KEY_ID');
     $cfg['key_id']  = $keyId !== '' ? $keyId : 'product-shukang';
     return $cfg;
 }
+
+function ai_talk_register_shutdown_json(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    register_shutdown_function(static function () {
+        $err = error_get_last();
+        if ($err === null) {
+            return;
+        }
+        $fatal = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
+        if (!in_array($err['type'], $fatal, true)) {
+            return;
+        }
+        if (!function_exists('ai_talk_json')) {
+            return;
+        }
+        ai_talk_json(0, '服务异常：' . ($err['message'] ?? 'fatal'));
+    });
+}
+
+ai_talk_register_shutdown_json();
 
 function ai_talk_json(int $code, string $msg, $data = null): void
 {
