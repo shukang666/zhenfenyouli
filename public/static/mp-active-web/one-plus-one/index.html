@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>1+1 活动</title>
   <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
-  <script src="../sdk.js?v=20261019"></script>
+  <script src="../sdk.js?v=20261020"></script>
   <style>
     :root {
       --green: #1b6b4a;
@@ -135,6 +135,47 @@
       cursor: pointer;
     }
     .loading { text-align: center; padding: 48px 16px; color: var(--muted); }
+    .harmful-box {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #dceee4;
+    }
+    .harmful-preview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin: 10px 0;
+      display: none;
+      background: #f0faf4;
+    }
+    .harmful-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #b7e4c7;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .record-list { margin-top: 14px; }
+    .record-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eef5f0;
+    }
+    .record-item:last-child { border-bottom: none; }
+    .record-item img {
+      width: 52px;
+      height: 52px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .record-meta { flex: 1; min-width: 0; }
+    .record-meta .t { font-size: 12px; color: var(--muted); }
+    .record-meta .r { font-size: 13px; color: var(--text); margin-top: 2px; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -178,6 +219,14 @@
           <p id="task-detail"></p>
           <button type="button" class="btn btn-primary" id="btn-task">去做任务</button>
           <button type="button" class="btn btn-ghost hidden" id="btn-share-ack">我已分享，刷新进度</button>
+          <div id="harmful-panel" class="harmful-box hidden">
+            <input type="file" accept="image/*" capture="environment" id="harmful-file" />
+            <img id="harmful-preview" class="harmful-preview" alt="" />
+            <input type="text" class="harmful-input" id="harmful-remark" maxlength="200" placeholder="选填：说明一下拍摄地点或物品（200字内）" />
+            <button type="button" class="btn btn-primary" id="btn-harmful-submit">提交有害垃圾打卡</button>
+            <div class="sec-title" style="margin-top:16px;font-size:14px;">我的打卡记录</div>
+            <div class="record-list" id="harmful-records"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -245,6 +294,40 @@
         });
       }
 
+      function renderHarmfulRecords(list) {
+        var box = $('harmful-records');
+        if (!list || !list.length) {
+          box.innerHTML = '<div class="guide-line">暂无记录，上传照片后将显示在这里。</div>';
+          return;
+        }
+        box.innerHTML = list.map(function (r) {
+          var time = r.create_time ? new Date(r.create_time * 1000).toLocaleString() : '';
+          var remark = r.remark ? r.remark : '（无说明）';
+          return '<div class="record-item"><img src="' + r.image + '" alt=""/><div class="record-meta"><div class="t">' + time + ' · 第' + (r.cycle_no || 1) + '轮</div><div class="r">' + remark + '</div></div></div>';
+        }).join('');
+      }
+
+      function loadHarmfulRecords() {
+        return apiPost('/wxapp/active_web_one_plus_one/harmful_list', { active_id: activeId }).then(function (data) {
+          renderHarmfulRecords(data.list || []);
+        }).catch(function () {
+          renderHarmfulRecords([]);
+        });
+      }
+
+      function uploadHarmfulImage(file) {
+        var fd = new FormData();
+        fd.append('file', file);
+        return fetch(apiBase.replace(/\/$/, '') + '/wxapp/public/upload_asset?filetype=image', {
+          method: 'POST',
+          headers: { openid: openid },
+          body: fd
+        }).then(function (r) { return r.json(); }).then(function (up) {
+          if (!up || up.code !== 1) throw new Error((up && up.msg) || '上传失败');
+          return (up.data && (up.data.filepath || up.data.url)) || '';
+        });
+      }
+
       function openDay(day) {
         currentDay = day;
         var d = (state.days || []).find(function (x) { return x.day === day; });
@@ -259,14 +342,55 @@
         $('badge-t').textContent = d.task_done ? '已完成' : '待完成';
         $('badge-t').className = 'badge ' + (d.task_done ? 'ok' : 'wait');
         $('btn-zhenfen').onclick = function () { navigateMp(zhenfenPath); };
-        $('btn-task').onclick = function () {
-          if (d.needs_share_ack) {
-            apiPost('/wxapp/active_web_one_plus_one/share_ack', { active_id: activeId }).then(function () {
-              alert('已记录，请完成分享后返回刷新');
-            }).catch(function (e) { alert(e.message || e); });
-          }
-          navigateMp(d.mp_path);
-        };
+
+        var isHarmfulWeb = d.task_kind === 'harmful_web' || day === 1;
+        if (isHarmfulWeb) {
+          hide('btn-task');
+          show('harmful-panel');
+          $('harmful-file').value = '';
+          $('harmful-remark').value = '';
+          var prev = $('harmful-preview');
+          prev.style.display = 'none';
+          prev.src = '';
+          loadHarmfulRecords();
+          $('harmful-file').onchange = function () {
+            var f = $('harmful-file').files[0];
+            if (!f) return;
+            prev.src = URL.createObjectURL(f);
+            prev.style.display = 'block';
+          };
+          $('btn-harmful-submit').onclick = function () {
+            var file = $('harmful-file').files[0];
+            if (!file) { alert('请先选择或拍摄照片'); return; }
+            $('btn-harmful-submit').disabled = true;
+            uploadHarmfulImage(file).then(function (path) {
+              return apiPost('/wxapp/active_web_one_plus_one/harmful_submit', {
+                active_id: activeId,
+                image: path,
+                remark: $('harmful-remark').value.trim()
+              });
+            }).then(function () {
+              alert('打卡成功');
+              return refresh();
+            }).catch(function (e) {
+              alert(e.message || e);
+            }).then(function () {
+              $('btn-harmful-submit').disabled = false;
+            });
+          };
+        } else {
+          show('btn-task');
+          hide('harmful-panel');
+          $('btn-task').onclick = function () {
+            if (d.needs_share_ack) {
+              apiPost('/wxapp/active_web_one_plus_one/share_ack', { active_id: activeId }).then(function () {
+                alert('已记录，请完成分享后返回刷新');
+              }).catch(function (e) { alert(e.message || e); });
+            }
+            if (d.mp_path) navigateMp(d.mp_path);
+          };
+        }
+
         if (d.needs_share_ack) show('btn-share-ack'); else hide('btn-share-ack');
         $('btn-share-ack').onclick = function () {
           refresh().then(function () { alert('进度已更新'); });

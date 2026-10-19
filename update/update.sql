@@ -552,6 +552,31 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_progress` (
   KEY `idx_active` (`active_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='1+1 Web活动用户进度';
 
+CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_harmful_clock` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `cycle_no` int(10) unsigned NOT NULL DEFAULT 1,
+  `image` varchar(255) NOT NULL DEFAULT '',
+  `remark` varchar(255) NOT NULL DEFAULT '',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_active_user` (`active_id`,`user_id`),
+  KEY `idx_user_time` (`user_id`,`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='1+1活动第1天有害垃圾Web打卡';
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveController' AND `action`='index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
+        SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveController' AND `action`='index' LIMIT 1
+    )), 0) + 8,
+    'admin','ActiveOnePlusOneHarmful','index','','1+1有害垃圾打卡','','1+1活动第1天Web打卡记录'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveController' AND `action`='index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveOnePlusOneHarmful' AND `action`='index' LIMIT 1);
+
 CREATE TABLE IF NOT EXISTS `cmf_active_web_zhenfen_gift_claim` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL DEFAULT 0,

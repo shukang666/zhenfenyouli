@@ -31,6 +31,11 @@ class ActiveWebOnePlusOneService
         return 'active_web_one_plus_one_progress';
     }
 
+    public static function harmfulClockTable(): string
+    {
+        return 'active_web_one_plus_one_harmful_clock';
+    }
+
     /** @return array<int, array<string, mixed>> */
     public static function dayDefinitions(): array
     {
@@ -39,8 +44,9 @@ class ActiveWebOnePlusOneService
                 'title' => '第 1 天',
                 'task_title' => '有害垃圾',
                 'task_brief' => '找到并拍摄一张有害垃圾的图片',
-                'task_detail' => '在家庭、亲子或沿街等真分场景中，选择「有害垃圾」种类并完成拍照打卡。',
-                'mp_path' => '/pages/activity/scene-clock-flow?mode=theme',
+                'task_detail' => '在本页直接上传有害垃圾照片即可完成当日任务，无需进入真分选场景页。可填写简短说明（选填）。',
+                'task_kind' => 'harmful_web',
+                'mp_path' => '',
             ],
             2 => [
                 'title' => '第 2 天',
@@ -147,6 +153,87 @@ class ActiveWebOnePlusOneService
         $row = self::findProgress($userId, $activeId) ?: $row;
 
         return self::formatStatus($userId, $activeId, $row);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function submitHarmfulClock(int $userId, int $activeId, string $image, string $remark): array
+    {
+        self::loadWebActive($activeId);
+        $image = trim($image);
+        $remark = trim($remark);
+        if ($image === '') {
+            throw new \InvalidArgumentException('请上传有害垃圾照片');
+        }
+        if (mb_strlen($remark, 'UTF-8') > 200) {
+            throw new \InvalidArgumentException('说明不超过 200 字');
+        }
+
+        self::syncAndBuildStatus($userId, $activeId);
+        $row = self::findProgress($userId, $activeId);
+        if (empty($row)) {
+            throw new \InvalidArgumentException('进度初始化失败');
+        }
+
+        $cycleNo = (int)($row['cycle_no'] ?? 1);
+        $now = time();
+        $id = (int)Db::name(self::harmfulClockTable())->insertGetId([
+            'active_id' => $activeId,
+            'user_id' => $userId,
+            'cycle_no' => $cycleNo,
+            'image' => $image,
+            'remark' => $remark,
+            'create_time' => $now,
+        ]);
+
+        self::syncAndBuildStatus($userId, $activeId);
+
+        return [
+            'id' => $id,
+            'image' => cmf_get_asset_url($image),
+            'remark' => $remark,
+            'create_time' => $now,
+        ];
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public static function listHarmfulClocks(int $userId, int $activeId, int $limit = 30): array
+    {
+        self::loadWebActive($activeId);
+        $rows = Db::name(self::harmfulClockTable())
+            ->where('user_id', $userId)
+            ->where('active_id', $activeId)
+            ->order('id desc')
+            ->limit(max(1, min(50, $limit)))
+            ->select()
+            ->toArray();
+        $out = [];
+        foreach ($rows as $r) {
+            $out[] = [
+                'id' => (int)$r['id'],
+                'cycle_no' => (int)$r['cycle_no'],
+                'image' => empty($r['image']) ? '' : cmf_get_asset_url($r['image']),
+                'remark' => (string)($r['remark'] ?? ''),
+                'create_time' => (int)$r['create_time'],
+            ];
+        }
+        return $out;
+    }
+
+    protected static function hasHarmfulWebClock(int $userId, int $activeId, array $row): bool
+    {
+        $since = (int)($row['cycle_start'] ?? 0);
+        $cycleNo = (int)($row['cycle_no'] ?? 1);
+        if ($since <= 0) {
+            return false;
+        }
+        return (int)Db::name(self::harmfulClockTable())
+            ->where('user_id', $userId)
+            ->where('active_id', $activeId)
+            ->where('cycle_no', $cycleNo)
+            ->where('create_time', '>=', $since)
+            ->count() > 0;
     }
 
     public static function markShareAck(int $userId, int $activeId): void
@@ -296,11 +383,11 @@ class ActiveWebOnePlusOneService
         return $row;
     }
 
-    protected static function isTaskDone(int $userId, int $day, int $since, array $row): bool
+    protected static function isTaskDone(int $userId, int $activeId, int $day, int $since, array $row): bool
     {
         switch ($day) {
             case 1:
-                return self::countForumClock($userId, $since, ['cate_id' => self::HARMFUL_CATE_ID]) > 0;
+                return self::hasHarmfulWebClock($userId, $activeId, $row);
             case 2:
                 if ((int)($row['share_ack_at'] ?? 0) >= $since) {
                     return true;
@@ -373,7 +460,7 @@ class ActiveWebOnePlusOneService
                 continue;
             }
             $hasZ = isset($map[$day]);
-            $hasT = self::isTaskDone($userId, $day, $cycleStart, $row);
+            $hasT = self::isTaskDone($userId, $activeId, $day, $cycleStart, $row);
             if ($hasZ && $hasT) {
                 $completed[] = $day;
                 $completedFlip[$day] = true;
@@ -459,7 +546,7 @@ class ActiveWebOnePlusOneService
         $days = [];
         for ($d = 1; $d <= self::TOTAL_DAYS; $d++) {
             $def = $defs[$d];
-            $taskDone = self::isTaskDone($userId, $d, $cycleStart, $row);
+            $taskDone = self::isTaskDone($userId, $activeId, $d, $cycleStart, $row);
             $zhenfenDone = isset($map[$d]);
             $done = isset($completedFlip[$d]);
             $days[] = [
@@ -473,6 +560,7 @@ class ActiveWebOnePlusOneService
                 'task_done' => $taskDone ? 1 : 0,
                 'done' => $done ? 1 : 0,
                 'needs_share_ack' => !empty($def['needs_share_ack']) ? 1 : 0,
+                'task_kind' => (string)($def['task_kind'] ?? ''),
             ];
         }
 
