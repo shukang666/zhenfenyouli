@@ -66,7 +66,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 
 ## 后端实现要点
 
-- **不走 ThinkCMF**：`bootstrap.php` 自读 `.env`（简单 `KEY = value` 行，已存在的环境变量不覆盖），`define CMF_ROOT/CMF_DATA` 后 `require data/ai_talk.config.php`。
+- **不走 ThinkCMF**：`bootstrap.php` 自读 `.env` 到内存数组（**禁止 `putenv`**，部分主机禁用会导致 Warning 污染 JSON），再与 `$_ENV` 合并；`define CMF_ROOT/CMF_DATA` 后 `require data/ai_talk.config.php`。`api.php` 入口 `display_errors=0` 且输出 JSON 前清空 output buffer。
 - **存储**：单文件 JSON `{ "messages": [ ... ] }`；写与「读-改-写」发送路径用 `flock(LOCK_EX)`；历史只读用 `LOCK_SH`，避免读到半写文件。
 - **智谱响应**：取 `choices[0].message.content`；空则抛错并带上 `error.message`（若有）。
 - **无 DB、无 session**：扩展多房间时需改 `storage_file` 或加 `room` 参数分文件，并自行考虑滥用（频率限制、鉴权）——当前未做。
@@ -84,6 +84,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 
 | 现象 | 方向 |
 |------|------|
+| 前端 `Unexpected token '<'` / 非 JSON | 多为 PHP Warning 混在响应里；查是否旧版用了 `putenv`、或接口 404 返回 HTML；部署最新 `bootstrap.php` |
 | 未配置 AI_TALK_API_KEY | 检查 `.env` 与 php-fpm/Apache 是否读到同一工作目录 |
 | SSL certificate problem | 本机设 `AI_TALK_SSL_VERIFY=false` 或对齐 `COS_CURL_SSL_VERIFY` |
 | HTTP 429 / 1305 访问量过大 | 智谱限流，稍后重试或换时段 |

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <title>AI 讨论组</title>
+  <title>数康Chatgpt AI 讨论组</title>
   <style>
     :root {
       --bg: #ededed;
@@ -139,7 +139,7 @@
 
   <div class="app">
     <header>
-      AI 讨论组
+      数康Chatgpt AI 讨论组
       <small>每人发言后，助手会根据最近 30 条记录回复</small>
       <button type="button" class="nick-edit" id="editNick">改昵称</button>
     </header>
@@ -228,7 +228,16 @@
   }
 
   function fetchJson(url, opts) {
-    return fetch(url, opts || {}).then(function (r) { return r.json(); });
+    return fetch(url, opts || {}).then(function (r) {
+      return r.text().then(function (text) {
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          var hint = (text || '').replace(/\s+/g, ' ').slice(0, 120);
+          throw new Error(hint.indexOf('<') >= 0 ? '接口返回异常（非 JSON），请确认已部署最新 ai_talk 后端' : hint || '响应解析失败');
+        }
+      });
+    });
   }
 
   function loadHistory(sinceId) {

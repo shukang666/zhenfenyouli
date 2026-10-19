@@ -4,15 +4,16 @@ declare(strict_types=1);
 define('CMF_ROOT', dirname(__DIR__, 2) . '/');
 define('CMF_DATA', CMF_ROOT . 'data/');
 
-function ai_talk_load_dotenv(string $root): void
+function ai_talk_parse_dotenv(string $root): array
 {
+    $env  = [];
     $file = $root . '/.env';
     if (!is_file($file)) {
-        return;
+        return $env;
     }
     $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     if ($lines === false) {
-        return;
+        return $env;
     }
     foreach ($lines as $line) {
         $line = trim($line);
@@ -28,14 +29,35 @@ function ai_talk_load_dotenv(string $root): void
         if ($name === '') {
             continue;
         }
-        if (!getenv($name)) {
-            putenv("{$name}={$value}");
-            $_ENV[$name] = $value;
-        }
+        $env[$name] = $value;
     }
+    return $env;
 }
 
-ai_talk_load_dotenv(CMF_ROOT);
+function ai_talk_env(): array
+{
+    static $env;
+    if ($env !== null) {
+        return $env;
+    }
+    $env = ai_talk_parse_dotenv(CMF_ROOT);
+    foreach ($_ENV as $name => $value) {
+        if (is_string($name) && $name !== '' && !isset($env[$name])) {
+            $env[$name] = is_scalar($value) ? (string)$value : '';
+        }
+    }
+    return $env;
+}
+
+function ai_talk_env_get(string $key, string $default = ''): string
+{
+    $env = ai_talk_env();
+    if (!isset($env[$key])) {
+        return $default;
+    }
+    $v = $env[$key];
+    return is_scalar($v) ? trim((string)$v) : $default;
+}
 
 function ai_talk_config(): array
 {
@@ -44,13 +66,17 @@ function ai_talk_config(): array
         return $cfg;
     }
     $cfg = require CMF_DATA . 'ai_talk.config.php';
-    $cfg['api_key'] = (string)(getenv('AI_TALK_API_KEY') ?: '');
-    $cfg['key_id']  = (string)(getenv('AI_TALK_KEY_ID') ?: 'product-shukang');
+    $cfg['api_key'] = ai_talk_env_get('AI_TALK_API_KEY');
+    $keyId          = ai_talk_env_get('AI_TALK_KEY_ID');
+    $cfg['key_id']  = $keyId !== '' ? $keyId : 'product-shukang';
     return $cfg;
 }
 
 function ai_talk_json(int $code, string $msg, $data = null): void
 {
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'code' => $code,
@@ -267,11 +293,11 @@ function ai_talk_sanitize_content(string $text): string
 
 function ai_talk_ssl_verify(): bool
 {
-    $v = getenv('AI_TALK_SSL_VERIFY');
-    if ($v !== false && $v !== '') {
+    $v = ai_talk_env_get('AI_TALK_SSL_VERIFY');
+    if ($v !== '') {
         return filter_var($v, FILTER_VALIDATE_BOOLEAN);
     }
-    $cos = getenv('COS_CURL_SSL_VERIFY');
+    $cos = ai_talk_env_get('COS_CURL_SSL_VERIFY');
     if ($cos === 'false' || $cos === '0') {
         return false;
     }
