@@ -77,6 +77,7 @@ description: "xiayuxuan.com 三端代码位置决策与项目总览。ThinkCMF6 
 | `volunteer-task` | 整改任务发布/领取/提交记录；照片 JSON、log 状态 0/1/2/3 |
 | `field-worker-workpad` | 外勤 Pad 督导台 |
 | `oa-portal` | 手机 OA 独立登录与工作台 |
+| `ai-talk` | 免登录 public/ai_talk 群聊 + 智谱 GLM 讨论助手 |
 | `cron-task-system` | 定时任务（当前多为历史参考） |
 | `py-desktop-tool` | `py/` 桌面小工具 |
 

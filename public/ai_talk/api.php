@@ -7,7 +7,13 @@ $cfg  = ai_talk_config();
 $path = (string)$cfg['storage_file'];
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$action = $_GET['action'] ?? $_POST['action'] ?? 'history';
+$action = isset($_GET['action']) ? (string)$_GET['action'] : '';
+if ($action === '' && $method === 'POST') {
+    $action = 'send';
+}
+if ($action === '') {
+    $action = 'history';
+}
 
 if ($method === 'OPTIONS') {
     header('Allow: GET, POST, OPTIONS');
@@ -26,7 +32,7 @@ try {
         }
         ai_talk_json(1, 'ok', [
             'messages' => $list,
-            'last_id'  => empty($data['messages']) ? 0 : (int)end($data['messages'])['id'],
+            'last_id'  => ai_talk_last_message_id($data['messages']),
         ]);
     }
 
@@ -39,6 +45,7 @@ try {
         $nickname = ai_talk_sanitize_nickname((string)($body['nickname'] ?? ''));
         $content  = ai_talk_sanitize_content((string)($body['content'] ?? ''));
         $maxLen   = (int)($cfg['max_message_len'] ?? 800);
+        $cap      = (int)($cfg['storage_cap'] ?? 200);
 
         if ($content === '') {
             ai_talk_json(0, '请输入消息内容');
@@ -47,24 +54,21 @@ try {
             ai_talk_json(0, '消息过长（最多 ' . $maxLen . ' 字）');
         }
 
-        $newItems = ai_talk_with_store($path, static function (array &$data) use ($nickname, $content, $cfg) {
-            $ts   = time();
-            $uid  = ai_talk_next_id($data['messages']);
+        $newItems = ai_talk_with_store($path, static function (array &$data) use ($nickname, $content, $cfg, $cap) {
             $user = [
-                'id'       => $uid,
+                'id'       => ai_talk_next_id($data['messages']),
                 'role'     => 'user',
                 'nickname' => $nickname,
                 'content'  => $content,
-                'ts'       => $ts,
+                'ts'       => time(),
             ];
             $data['messages'][] = $user;
 
             $glmMessages = ai_talk_build_glm_messages($data['messages'], $cfg);
             $replyText   = ai_talk_call_glm($glmMessages, $cfg);
 
-            $aid = ai_talk_next_id($data['messages']);
             $bot = [
-                'id'       => $aid,
+                'id'       => ai_talk_next_id($data['messages']),
                 'role'     => 'assistant',
                 'nickname' => '讨论助手',
                 'content'  => $replyText,
@@ -72,9 +76,8 @@ try {
             ];
             $data['messages'][] = $bot;
 
-            // 只保留最近 200 条落盘，避免文件无限增大
-            if (count($data['messages']) > 200) {
-                $data['messages'] = array_slice($data['messages'], -200);
+            if ($cap > 0 && count($data['messages']) > $cap) {
+                $data['messages'] = array_slice($data['messages'], -$cap);
             }
 
             return ['user' => $user, 'assistant' => $bot];

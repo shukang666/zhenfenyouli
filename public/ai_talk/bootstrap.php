@@ -1,9 +1,6 @@
 <?php
 declare(strict_types=1);
 
-/**
- * AI 讨论组轻量引导（不走 ThinkCMF 路由，与后台账号无关）
- */
 define('CMF_ROOT', dirname(__DIR__, 2) . '/');
 define('CMF_DATA', CMF_ROOT . 'data/');
 
@@ -47,8 +44,8 @@ function ai_talk_config(): array
         return $cfg;
     }
     $cfg = require CMF_DATA . 'ai_talk.config.php';
-    $cfg['api_key']  = (string)(getenv('AI_TALK_API_KEY') ?: '');
-    $cfg['key_id']   = (string)(getenv('AI_TALK_KEY_ID') ?: 'product-shukang');
+    $cfg['api_key'] = (string)(getenv('AI_TALK_API_KEY') ?: '');
+    $cfg['key_id']  = (string)(getenv('AI_TALK_KEY_ID') ?: 'product-shukang');
     return $cfg;
 }
 
@@ -71,14 +68,25 @@ function ai_talk_ensure_storage_dir(string $path): void
     }
 }
 
-/** @return array{messages: list<array<string,mixed>>} */
 function ai_talk_read_store(string $path): array
 {
     ai_talk_ensure_storage_dir($path);
     if (!is_file($path)) {
         return ['messages' => []];
     }
-    $raw = file_get_contents($path);
+    $fp = fopen($path, 'r');
+    if ($fp === false) {
+        return ['messages' => []];
+    }
+    $raw = '';
+    try {
+        if (flock($fp, LOCK_SH)) {
+            $raw = stream_get_contents($fp);
+            flock($fp, LOCK_UN);
+        }
+    } finally {
+        fclose($fp);
+    }
     if ($raw === false || $raw === '') {
         return ['messages' => []];
     }
@@ -89,33 +97,6 @@ function ai_talk_read_store(string $path): array
     return $data;
 }
 
-/** @param array{messages: list<array<string,mixed>>} $data */
-function ai_talk_write_store(string $path, array $data): void
-{
-    ai_talk_ensure_storage_dir($path);
-    $fp = fopen($path, 'c+');
-    if ($fp === false) {
-        throw new RuntimeException('无法打开聊天记录文件');
-    }
-    try {
-        if (!flock($fp, LOCK_EX)) {
-            throw new RuntimeException('聊天记录锁定失败');
-        }
-        ftruncate($fp, 0);
-        rewind($fp);
-        $json = json_encode($data, JSON_UNESCAPED_UNICODE);
-        if ($json === false) {
-            throw new RuntimeException('聊天记录序列化失败');
-        }
-        fwrite($fp, $json);
-        fflush($fp);
-    } finally {
-        flock($fp, LOCK_UN);
-        fclose($fp);
-    }
-}
-
-/** @param array{messages: list<array<string,mixed>>} $data */
 function ai_talk_with_store(string $path, callable $fn)
 {
     ai_talk_ensure_storage_dir($path);
@@ -163,7 +144,6 @@ function ai_talk_next_id(array $messages): int
     return $max + 1;
 }
 
-/** @param list<array<string,mixed>> $messages */
 function ai_talk_build_glm_messages(array $messages, array $cfg): array
 {
     $limit = (int)($cfg['max_history'] ?? 30);
@@ -176,7 +156,7 @@ function ai_talk_build_glm_messages(array $messages, array $cfg): array
         if ($role === 'assistant') {
             $content = (string)($m['content'] ?? '');
         } else {
-            $nick = trim((string)($m['nickname'] ?? '访客'));
+            $nick    = trim((string)($m['nickname'] ?? '访客'));
             $content = '[' . $nick . ']: ' . (string)($m['content'] ?? '');
         }
         if ($content === '') {
@@ -202,7 +182,7 @@ function ai_talk_call_glm(array $glmMessages, array $cfg): string
         throw new RuntimeException('请求体编码失败');
     }
 
-    $url = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
+    $url     = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
     $headers = [
         'Content-Type: application/json',
         'Authorization: Bearer ' . $apiKey,
@@ -222,10 +202,10 @@ function ai_talk_call_glm(array $glmMessages, array $cfg): string
             CURLOPT_TIMEOUT        => 120,
             CURLOPT_SSL_VERIFYPEER => ai_talk_ssl_verify(),
         ]);
-        $body = curl_exec($ch);
+        $body  = curl_exec($ch);
         $errno = curl_errno($ch);
-        $err = curl_error($ch);
-        $http = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err   = curl_error($ch);
+        $http  = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         if ($errno !== 0 || $body === false) {
             throw new RuntimeException('AI 接口请求失败：' . ($err ?: 'network'));
@@ -245,6 +225,12 @@ function ai_talk_call_glm(array $glmMessages, array $cfg): string
         $body = @file_get_contents($url, false, $ctx);
         if ($body === false) {
             throw new RuntimeException('AI 接口请求失败');
+        }
+        if (isset($http_response_header[0]) && preg_match('/\s(\d{3})\s/', $http_response_header[0], $m)) {
+            $http = (int)$m[1];
+            if ($http < 200 || $http >= 300) {
+                throw new RuntimeException('AI 接口 HTTP ' . $http . '：' . mb_substr((string)$body, 0, 200));
+            }
         }
     }
 
@@ -290,4 +276,13 @@ function ai_talk_ssl_verify(): bool
         return false;
     }
     return true;
+}
+
+function ai_talk_last_message_id(array $messages): int
+{
+    if ($messages === []) {
+        return 0;
+    }
+    $last = end($messages);
+    return (int)($last['id'] ?? 0);
 }
