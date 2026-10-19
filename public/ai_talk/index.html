@@ -107,19 +107,43 @@
       gap: 8px;
       align-items: flex-end;
     }
-    .composer textarea {
+    .composer-main {
       flex: 1;
-      min-height: 40px;
-      max-height: 120px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .composer textarea {
+      width: 100%;
+      min-height: 42px;
+      max-height: 168px;
+      height: 42px;
       resize: none;
+      overflow-y: auto;
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 10px 12px;
       font-size: 15px;
-      line-height: 1.4;
+      line-height: 1.45;
       background: #fff;
+      -webkit-appearance: none;
+    }
+    .composer.is-expanded textarea {
+      max-height: min(52vh, 360px);
     }
     .composer textarea:focus { outline: none; border-color: var(--accent); }
+    .composer textarea:disabled { background: #eee; color: #999; }
+    .btn-expand-input {
+      align-self: flex-end;
+      padding: 2px 8px;
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      color: #576b95;
+      cursor: pointer;
+    }
+    .btn-expand-input:disabled { color: #bbb; cursor: not-allowed; }
     .btn-send {
       flex-shrink: 0;
       border: none;
@@ -180,8 +204,11 @@
     </header>
     <div class="status-bar" id="statusBar"></div>
     <div class="messages" id="messages"></div>
-    <div class="composer">
-      <textarea id="input" rows="1" placeholder="说点什么…" maxlength="800"></textarea>
+    <div class="composer" id="composer">
+      <div class="composer-main">
+        <textarea id="input" rows="1" placeholder="说点什么…（Shift+Enter 换行）" maxlength="800"></textarea>
+        <button type="button" class="btn-expand-input" id="expandInput">展开输入</button>
+      </div>
       <button type="button" class="btn-send" id="sendBtn">发送</button>
     </div>
   </div>
@@ -204,6 +231,10 @@
   var elInput = document.getElementById('input');
   var elSend = document.getElementById('sendBtn');
   var elStatus = document.getElementById('statusBar');
+  var elComposer = document.getElementById('composer');
+  var elExpandInput = document.getElementById('expandInput');
+  var INPUT_MAX_NORMAL = 168;
+  var INPUT_MAX_EXPANDED = 360;
 
   function avatarText(name, isAi) {
     if (isAi) return 'AI';
@@ -352,10 +383,44 @@
     elStatus.textContent = text || '';
   }
 
+  function inputMaxHeightPx() {
+    if (elComposer && elComposer.classList.contains('is-expanded')) {
+      return Math.min(window.innerHeight * 0.52, INPUT_MAX_EXPANDED);
+    }
+    return INPUT_MAX_NORMAL;
+  }
+
+  function resizeInputHeight() {
+    if (!elInput) return;
+    elInput.style.height = 'auto';
+    var next = Math.min(elInput.scrollHeight, inputMaxHeightPx());
+    next = Math.max(42, next);
+    elInput.style.height = next + 'px';
+  }
+
+  function setInputExpanded(expanded) {
+    if (!elComposer || !elExpandInput) return;
+    if (expanded) {
+      elComposer.classList.add('is-expanded');
+      elExpandInput.textContent = '收起输入';
+    } else {
+      elComposer.classList.remove('is-expanded');
+      elExpandInput.textContent = '展开输入';
+    }
+    resizeInputHeight();
+  }
+
+  function resetInputAfterSend() {
+    elInput.value = '';
+    setInputExpanded(false);
+    elInput.style.height = '42px';
+  }
+
   function applyRoomBusy(busy) {
     roomAiBusy = !!busy;
     var lock = roomAiBusy && !sending;
     elInput.disabled = lock;
+    if (elExpandInput) elExpandInput.disabled = lock;
     if (lock) {
       elSend.disabled = true;
       setStatus('讨论助手正在输入，请稍候…');
@@ -464,7 +529,7 @@
       content: '',
       ts: ts
     }, 'force', { pending: true });
-    elInput.value = '';
+    resetInputAfterSend();
 
     sending = true;
     applyRoomBusy(true);
@@ -484,6 +549,7 @@
         removeMessageById(tempUserId);
         removeMessageById(tempAiId);
         elInput.value = text;
+        resizeInputHeight();
         applyRoomBusy(true);
         setStatus((res && res.msg) || '讨论助手正在输入，请稍候…');
         return;
@@ -522,12 +588,19 @@
   };
 
   elSend.onclick = sendMessage;
+  elExpandInput.addEventListener('click', function () {
+    var expanded = elComposer.classList.contains('is-expanded');
+    setInputExpanded(!expanded);
+  });
+  elInput.addEventListener('input', resizeInputHeight);
   elInput.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   });
+  window.addEventListener('resize', resizeInputHeight);
+  resizeInputHeight();
 
   ensureNick().then(function () {
     setStatus('加载记录…');
