@@ -67,7 +67,7 @@ Body JSON：`{ "nickname": "展示名", "content": "正文" }`。
 - 首次/改昵称：遮罩输入，写入 `localStorage`。
 - 进入后 `history` 全量拉取；之后每 2.5s `history&since_id=lastId`（发送中暂停轮询逻辑上的重复由 `sending` 标志处理）。
 - 发送：POST send，本地追加 user + assistant；Enter 发送，Shift+Enter 换行。
-- 气泡：`role=assistant` 为助手样式；`user` 且 nickname 与本地相同视为「我」右对齐。
+- 气泡：`role=assistant` 与**其他昵称**的 `user` 均在左侧（`ai` / `peer`）；仅 localStorage 昵称与消息 `nickname` 一致（trim 后）的 `user` 在右侧（`mine`）。改昵称后会全量重绘列表。
 
 ## 后端实现要点
 
