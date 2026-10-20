@@ -136,6 +136,7 @@ class ActiveWebOnePlusOneService
                 'deadline_at' => 0,
                 'completed_days' => '',
                 'zhenfen_map' => '{}',
+                'day_done_at' => '{}',
                 'share_ack_at' => 0,
                 'reward_300_at' => 0,
                 'reward_800_at' => 0,
@@ -146,6 +147,7 @@ class ActiveWebOnePlusOneService
         }
 
         $row = self::applyDeadlineReset($userId, $activeId, $row);
+        $row = self::backfillDayDoneAt($row);
         $row = self::syncZhenfenAssignments($userId, $row);
         $row = self::syncDayCompletions($userId, $activeId, $row);
         $row = self::maybeGrantRewards($userId, $activeId, $row);
@@ -175,6 +177,7 @@ class ActiveWebOnePlusOneService
         if (empty($row)) {
             throw new \InvalidArgumentException('进度初始化失败');
         }
+        self::assertCanWorkOnDay($row, 1);
 
         $cycleNo = (int)($row['cycle_no'] ?? 1);
         $now = time();
@@ -221,9 +224,8 @@ class ActiveWebOnePlusOneService
         return $out;
     }
 
-    protected static function hasHarmfulWebClock(int $userId, int $activeId, array $row): bool
+    protected static function hasHarmfulWebClock(int $userId, int $activeId, array $row, int $since): bool
     {
-        $since = (int)($row['cycle_start'] ?? 0);
         $cycleNo = (int)($row['cycle_no'] ?? 1);
         if ($since <= 0) {
             return false;
@@ -236,10 +238,66 @@ class ActiveWebOnePlusOneService
             ->count() > 0;
     }
 
+    /** @return array<int, int> day => unix ts */
+    protected static function decodeDayDoneAt(string $json): array
+    {
+        $json = trim($json);
+        if ($json === '') {
+            return [];
+        }
+        $data = json_decode($json, true);
+        if (!is_array($data)) {
+            return [];
+        }
+        $out = [];
+        foreach ($data as $k => $v) {
+            $d = (int)$k;
+            $t = (int)$v;
+            if ($d >= 1 && $d <= self::TOTAL_DAYS && $t > 0) {
+                $out[$d] = $t;
+            }
+        }
+        return $out;
+    }
+
+    protected static function encodeDayDoneAt(array $map): string
+    {
+        ksort($map);
+        return json_encode($map, JSON_UNESCAPED_UNICODE);
+    }
+
+    /** 当日任务/真分只统计该时间点之后的行为（第 1 天从 cycle_start 起） */
+    protected static function dayWindowSince(array $row, int $day): int
+    {
+        if ($day <= 1) {
+            return (int)($row['cycle_start'] ?? 0);
+        }
+        $doneAt = self::decodeDayDoneAt((string)($row['day_done_at'] ?? '{}'));
+        $prev = $day - 1;
+        return isset($doneAt[$prev]) ? (int)$doneAt[$prev] : 0;
+    }
+
+    /** 未解锁或该日已完成则不可再做 */
+    protected static function assertCanWorkOnDay(array $row, int $day): void
+    {
+        $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
+        if (!self::isDayUnlocked($day, $completedFlip)) {
+            throw new \InvalidArgumentException('请先完成第 ' . ($day - 1) . ' 天后再进行第 ' . $day . ' 天');
+        }
+        if (!empty($completedFlip[$day])) {
+            throw new \InvalidArgumentException('第 ' . $day . ' 天已完成，请进行下一天或等待新一轮');
+        }
+    }
+
     public static function markShareAck(int $userId, int $activeId): void
     {
         self::loadWebActive($activeId);
         self::syncAndBuildStatus($userId, $activeId);
+        $row = self::findProgress($userId, $activeId);
+        if (empty($row)) {
+            throw new \InvalidArgumentException('进度不存在');
+        }
+        self::assertCanWorkOnDay($row, 2);
         Db::name(self::progressTable())
             ->where('user_id', $userId)
             ->where('active_id', $activeId)
@@ -337,11 +395,45 @@ class ActiveWebOnePlusOneService
                 'deadline_at' => 0,
                 'completed_days' => '',
                 'zhenfen_map' => '{}',
+                'day_done_at' => '{}',
                 'share_ack_at' => 0,
                 'reward_300_at' => 0,
                 'reward_800_at' => 0,
                 'update_time' => $now,
             ]);
+    }
+
+    /** 旧数据：已 completed_days 但无 day_done_at 时补时间戳，避免下一天窗口为 0 */
+    protected static function backfillDayDoneAt(array $row): array
+    {
+        $completed = self::parseCompletedDays((string)($row['completed_days'] ?? ''));
+        if (empty($completed)) {
+            return $row;
+        }
+        $dayDoneAt = self::decodeDayDoneAt((string)($row['day_done_at'] ?? '{}'));
+        $changed = false;
+        $fallback = (int)($row['update_time'] ?? time());
+        foreach ($completed as $d) {
+            if (!empty($dayDoneAt[$d])) {
+                continue;
+            }
+            if ($d === 1 && (int)($row['anchor_day1_at'] ?? 0) > 0) {
+                $dayDoneAt[1] = (int)$row['anchor_day1_at'];
+            } else {
+                $dayDoneAt[$d] = $fallback;
+            }
+            $changed = true;
+        }
+        if (!$changed) {
+            return $row;
+        }
+        $json = self::encodeDayDoneAt($dayDoneAt);
+        Db::name(self::progressTable())->where('id', $row['id'])->update([
+            'day_done_at' => $json,
+            'update_time' => time(),
+        ]);
+        $row['day_done_at'] = $json;
+        return $row;
     }
 
     /** 第 N 天可进入/计进度：第 1 天默认可用，其后须前一天已全部完成 */
@@ -370,19 +462,31 @@ class ActiveWebOnePlusOneService
             ->where('create_time', '>=', $cycleStart)
             ->where('clock_scene', '<>', '')
             ->order('id asc')
-            ->column('id');
+            ->field('id,create_time')
+            ->select()
+            ->toArray();
 
         $map = [];
-        $forumIndex = 0;
+        $usedForumIds = [];
         for ($day = 1; $day <= self::TOTAL_DAYS; $day++) {
             if (!self::isDayUnlocked($day, $completedFlip)) {
                 break;
             }
-            if ($forumIndex >= count($forums)) {
+            $since = self::dayWindowSince($row, $day);
+            if ($since <= 0) {
                 break;
             }
-            $map[$day] = (int)$forums[$forumIndex];
-            $forumIndex++;
+            foreach ($forums as $f) {
+                $fid = (int)$f['id'];
+                if (in_array($fid, $usedForumIds, true)) {
+                    continue;
+                }
+                if ((int)$f['create_time'] >= $since) {
+                    $map[$day] = $fid;
+                    $usedForumIds[] = $fid;
+                    break;
+                }
+            }
         }
 
         $newJson = self::encodeZhenfenMap($map);
@@ -395,11 +499,20 @@ class ActiveWebOnePlusOneService
         return $row;
     }
 
-    protected static function isTaskDone(int $userId, int $activeId, int $day, int $since, array $row): bool
+    protected static function isTaskDone(int $userId, int $activeId, int $day, array $row): bool
     {
+        $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
+        if (!self::isDayUnlocked($day, $completedFlip)) {
+            return false;
+        }
+        $since = self::dayWindowSince($row, $day);
+        if ($since <= 0) {
+            return false;
+        }
+
         switch ($day) {
             case 1:
-                return self::hasHarmfulWebClock($userId, $activeId, $row);
+                return self::hasHarmfulWebClock($userId, $activeId, $row, $since);
             case 2:
                 if ((int)($row['share_ack_at'] ?? 0) >= $since) {
                     return true;
@@ -466,6 +579,7 @@ class ActiveWebOnePlusOneService
         $completed = self::parseCompletedDays((string)($row['completed_days'] ?? ''));
         $completedFlip = array_fill_keys($completed, true);
 
+        $dayDoneAt = self::decodeDayDoneAt((string)($row['day_done_at'] ?? '{}'));
         $changed = false;
         for ($day = 1; $day <= self::TOTAL_DAYS; $day++) {
             if (isset($completedFlip[$day])) {
@@ -475,15 +589,16 @@ class ActiveWebOnePlusOneService
                 continue;
             }
             $hasZ = isset($map[$day]);
-            $hasT = self::isTaskDone($userId, $activeId, $day, $cycleStart, $row);
+            $hasT = self::isTaskDone($userId, $activeId, $day, $row);
             if ($hasZ && $hasT) {
                 $completed[] = $day;
                 $completedFlip[$day] = true;
+                $nowDone = time();
+                $dayDoneAt[$day] = $nowDone;
                 $changed = true;
                 if ($day === 1 && (int)($row['anchor_day1_at'] ?? 0) <= 0) {
-                    $anchor = time();
-                    $row['anchor_day1_at'] = $anchor;
-                    $row['deadline_at'] = $anchor + self::DEADLINE_DAYS_AFTER_DAY1 * 86400;
+                    $row['anchor_day1_at'] = $nowDone;
+                    $row['deadline_at'] = $nowDone + self::DEADLINE_DAYS_AFTER_DAY1 * 86400;
                 }
             }
         }
@@ -495,6 +610,7 @@ class ActiveWebOnePlusOneService
         sort($completed);
         $update = [
             'completed_days' => self::completedDaysToCsv($completed),
+            'day_done_at' => self::encodeDayDoneAt($dayDoneAt),
             'update_time' => time(),
         ];
         if ((int)($row['anchor_day1_at'] ?? 0) > 0) {
@@ -562,7 +678,7 @@ class ActiveWebOnePlusOneService
         for ($d = 1; $d <= self::TOTAL_DAYS; $d++) {
             $def = $defs[$d];
             $unlocked = self::isDayUnlocked($d, $completedFlip);
-            $taskDone = $unlocked && self::isTaskDone($userId, $activeId, $d, $cycleStart, $row);
+            $taskDone = self::isTaskDone($userId, $activeId, $d, $row);
             $zhenfenDone = $unlocked && isset($map[$d]);
             $done = isset($completedFlip[$d]);
             $lockHint = '';

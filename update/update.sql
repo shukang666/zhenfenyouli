@@ -542,6 +542,7 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_progress` (
   `deadline_at` int(10) unsigned NOT NULL DEFAULT 0,
   `completed_days` varchar(32) NOT NULL DEFAULT '',
   `zhenfen_map` text COMMENT 'JSON: day=>forum_id',
+  `day_done_at` text COMMENT 'JSON: day=>完成时间戳',
   `share_ack_at` int(10) unsigned NOT NULL DEFAULT 0,
   `reward_300_at` int(10) unsigned NOT NULL DEFAULT 0,
   `reward_800_at` int(10) unsigned NOT NULL DEFAULT 0,
