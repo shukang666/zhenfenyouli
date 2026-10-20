@@ -15,6 +15,9 @@ class ActiveWebOnePlusOneService
 {
     const TOTAL_DAYS = 7;
 
+    /** 第 1～3 天格子始终可点进浏览（只读），第 4 天起须按顺序解锁浏览 */
+    const BROWSE_ALWAYS_OPEN_DAYS = 3;
+
     const REWARD_AFTER_3 = 300;
 
     const REWARD_AFTER_7 = 800;
@@ -277,15 +280,94 @@ class ActiveWebOnePlusOneService
         return isset($doneAt[$prev]) ? (int)$doneAt[$prev] : 0;
     }
 
+    protected static function todayStartTs(): int
+    {
+        return strtotime(date('Y-m-d 00:00:00'));
+    }
+
+    protected static function firstIncompleteDay(array $completedFlip): int
+    {
+        for ($d = 1; $d <= self::TOTAL_DAYS; $d++) {
+            if (empty($completedFlip[$d])) {
+                return $d;
+            }
+        }
+        return self::TOTAL_DAYS + 1;
+    }
+
+    /** 自然日内是否已完成某一整天的进度（真分+任务） */
+    protected static function dayCompletedToday(array $row): ?int
+    {
+        $todayStart = self::todayStartTs();
+        foreach (self::decodeDayDoneAt((string)($row['day_done_at'] ?? '{}')) as $d => $ts) {
+            if ((int)$ts >= $todayStart) {
+                return (int)$d;
+            }
+        }
+        return null;
+    }
+
+    /** 第 4 天起：须按顺序解锁后才可浏览；前 3 天始终可浏览说明 */
+    protected static function canBrowseDay(int $day, array $completedFlip): bool
+    {
+        if ($day <= self::BROWSE_ALWAYS_OPEN_DAYS) {
+            return true;
+        }
+        return self::isDayUnlocked($day, $completedFlip);
+    }
+
+    /**
+     * 是否可在本页提交/跳转完成当日（自然日仅允许完成 1 个进度天；做完须等次日）
+     */
+    protected static function canActOnDay(array $row, int $day): bool
+    {
+        $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
+        if (!empty($completedFlip[$day])) {
+            return false;
+        }
+        if (!self::isDayUnlocked($day, $completedFlip)) {
+            return false;
+        }
+        if ($day !== self::firstIncompleteDay($completedFlip)) {
+            return false;
+        }
+        if (self::dayCompletedToday($row) !== null) {
+            return false;
+        }
+        return true;
+    }
+
+    protected static function buildActHint(array $row, int $day, array $completedFlip): string
+    {
+        if (self::canActOnDay($row, $day)) {
+            return '';
+        }
+        if (!empty($completedFlip[$day])) {
+            return '本日已全部完成';
+        }
+        if (!self::isDayUnlocked($day, $completedFlip)) {
+            if ($day <= self::BROWSE_ALWAYS_OPEN_DAYS) {
+                return '请先完成第 ' . ($day - 1) . ' 天（真分+任务）；可先浏览本日说明，暂不可操作';
+            }
+            return '请先完成第 ' . ($day - 1) . ' 天后再解锁本日';
+        }
+        $next = self::firstIncompleteDay($completedFlip);
+        if ($day !== $next) {
+            return '请先完成第 ' . $next . ' 天（可先浏览后续天数说明）';
+        }
+        $doneToday = self::dayCompletedToday($row);
+        if ($doneToday !== null) {
+            return '今日已完成第 ' . $doneToday . ' 天，请明天再来做第 ' . ($doneToday + 1) . ' 天';
+        }
+        return '当前暂不可操作';
+    }
+
     /** 未解锁或该日已完成则不可再做 */
     protected static function assertCanWorkOnDay(array $row, int $day): void
     {
-        $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
-        if (!self::isDayUnlocked($day, $completedFlip)) {
-            throw new \InvalidArgumentException('请先完成第 ' . ($day - 1) . ' 天后再进行第 ' . $day . ' 天');
-        }
-        if (!empty($completedFlip[$day])) {
-            throw new \InvalidArgumentException('第 ' . $day . ' 天已完成，请进行下一天或等待新一轮');
+        if (!self::canActOnDay($row, $day)) {
+            $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
+            throw new \InvalidArgumentException(self::buildActHint($row, $day, $completedFlip) ?: '当前不可进行该天任务');
         }
     }
 
@@ -466,15 +548,26 @@ class ActiveWebOnePlusOneService
             ->select()
             ->toArray();
 
+        $oldMap = self::decodeZhenfenMap((string)($row['zhenfen_map'] ?? '{}'));
         $map = [];
-        $usedForumIds = [];
+        $usedForumIds = array_values($oldMap);
         for ($day = 1; $day <= self::TOTAL_DAYS; $day++) {
-            if (!self::isDayUnlocked($day, $completedFlip)) {
+            if (!empty($completedFlip[$day])) {
+                if (!empty($oldMap[$day])) {
+                    $map[$day] = (int)$oldMap[$day];
+                }
+                continue;
+            }
+            if (!self::canActOnDay($row, $day)) {
                 break;
             }
             $since = self::dayWindowSince($row, $day);
             if ($since <= 0) {
                 break;
+            }
+            if (!empty($oldMap[$day])) {
+                $map[$day] = (int)$oldMap[$day];
+                continue;
             }
             foreach ($forums as $f) {
                 $fid = (int)$f['id'];
@@ -502,7 +595,10 @@ class ActiveWebOnePlusOneService
     protected static function isTaskDone(int $userId, int $activeId, int $day, array $row): bool
     {
         $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
-        if (!self::isDayUnlocked($day, $completedFlip)) {
+        if (!empty($completedFlip[$day])) {
+            return true;
+        }
+        if (!self::canActOnDay($row, $day)) {
             return false;
         }
         $since = self::dayWindowSince($row, $day);
@@ -585,7 +681,7 @@ class ActiveWebOnePlusOneService
             if (isset($completedFlip[$day])) {
                 continue;
             }
-            if (!self::isDayUnlocked($day, $completedFlip)) {
+            if (!self::canActOnDay($row, $day)) {
                 continue;
             }
             $hasZ = isset($map[$day]);
@@ -677,14 +773,16 @@ class ActiveWebOnePlusOneService
         $days = [];
         for ($d = 1; $d <= self::TOTAL_DAYS; $d++) {
             $def = $defs[$d];
-            $unlocked = self::isDayUnlocked($d, $completedFlip);
-            $taskDone = self::isTaskDone($userId, $activeId, $d, $row);
-            $zhenfenDone = $unlocked && isset($map[$d]);
+            $canBrowse = self::canBrowseDay($d, $completedFlip);
+            $canAct = self::canActOnDay($row, $d);
             $done = isset($completedFlip[$d]);
+            $taskDone = $done ? 1 : (self::isTaskDone($userId, $activeId, $d, $row) ? 1 : 0);
+            $zhenfenDone = isset($map[$d]) && ($done || $canAct) ? 1 : 0;
             $lockHint = '';
-            if (!$unlocked) {
-                $lockHint = '请先完成第 ' . ($d - 1) . ' 天（真分 + 当日任务）后再解锁本日';
+            if (!$canBrowse) {
+                $lockHint = '请先完成第 ' . ($d - 1) . ' 天后再解锁本日';
             }
+            $actHint = self::buildActHint($row, $d, $completedFlip);
             $days[] = [
                 'day' => $d,
                 'title' => $def['title'],
@@ -692,11 +790,14 @@ class ActiveWebOnePlusOneService
                 'task_brief' => $def['task_brief'],
                 'task_detail' => $def['task_detail'],
                 'mp_path' => $def['mp_path'],
-                'zhenfen_done' => $zhenfenDone ? 1 : 0,
-                'task_done' => $taskDone ? 1 : 0,
+                'zhenfen_done' => $zhenfenDone,
+                'task_done' => $taskDone,
                 'done' => $done ? 1 : 0,
-                'locked' => $unlocked ? 0 : 1,
+                'locked' => $canBrowse ? 0 : 1,
                 'lock_hint' => $lockHint,
+                'can_act' => $canAct ? 1 : 0,
+                'read_only' => ($canBrowse && !$canAct && !$done) ? 1 : 0,
+                'act_hint' => $actHint,
                 'needs_share_ack' => !empty($def['needs_share_ack']) ? 1 : 0,
                 'task_kind' => (string)($def['task_kind'] ?? ''),
             ];
@@ -728,10 +829,11 @@ class ActiveWebOnePlusOneService
             'guide' => [
                 'title' => '1+1 七日挑战',
                 'lines' => [
-                    '须按第 1→7 天顺序进行：完成前一天（真分 + 任务）后，下一天格子才会解锁。',
-                    '每天 = 1 次真分打卡 + 1 项当日任务；7 天可在不同日期完成，不必连续日历日。',
+                    '前 3 天格子可随时点进浏览任务说明；第 4 天起须按顺序解锁后才可浏览。',
+                    '每个自然日只能完成 1 个进度天（真分 + 当日任务）；做完后须等到次日 0 点才能做下一天。',
+                    '须按第 1→7 天顺序推进；未完成上一天时，下一天仅可浏览（前 3 天）或上锁不可进（第 4 天起）。',
                     '完成前 3 天赠送 ' . self::REWARD_AFTER_3 . ' 积分；7 天全部完成再送 ' . self::REWARD_AFTER_7 . ' 积分。',
-                    '第 1 天完成后，请在 10 日内完成剩余天数，逾期进度清零；7 天全部完成后也会自动开启新一轮。',
+                    '第 1 天整格完成后，请在 10 个自然日内完成剩余天数，逾期清零；7 天全完成后开启新一轮。',
                 ],
             ],
             'zhenfen_entry' => '/pages/activity/scene-clock-flow?mode=theme',

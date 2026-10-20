@@ -97,6 +97,21 @@
       cursor: not-allowed;
     }
     .cell.locked .lbl::after { content: ' 🔒'; font-size: 10px; }
+    .cell.preview { border-style: dashed; opacity: .88; }
+    .act-hint {
+      font-size: 13px;
+      line-height: 1.55;
+      color: #856404;
+      background: #fff8e6;
+      border-left: 3px solid #e9a319;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+    .read-only .btn-primary,
+    .read-only .btn-ghost { opacity: .45; pointer-events: none; }
+    .read-only input[type=file],
+    .read-only .harmful-input { pointer-events: none; opacity: .6; }
     .sec-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--text); }
     .btn {
       display: block;
@@ -216,12 +231,13 @@
       <div class="card">
         <div class="detail-hero" id="day-title"></div>
         <div class="detail-sub" id="day-brief"></div>
-        <div class="part zhenfen">
+        <div id="act-hint-box" class="act-hint hidden"></div>
+        <div class="part zhenfen" id="part-zhenfen">
           <h3>真分打卡 <span class="badge wait" id="badge-z">待完成</span></h3>
           <p>进入三场景选择器，任选家庭 / 办公 / 沿街等场景完成一次垃圾分类拍照打卡。</p>
           <button type="button" class="btn btn-primary" id="btn-zhenfen">去真分打卡</button>
         </div>
-        <div class="part task">
+        <div class="part task" id="part-task">
           <h3>当日任务 <span class="badge wait" id="badge-t">待完成</span></h3>
           <p id="task-detail"></p>
           <button type="button" class="btn btn-primary" id="btn-task">去做任务</button>
@@ -294,6 +310,7 @@
           var cls = 'cell';
           if (d.locked) cls += ' locked';
           else if (d.done) cls += ' done';
+          else if (d.read_only) cls += ' preview';
           else if (d.zhenfen_done || d.task_done) cls += ' partial';
           el.className = cls;
           el.innerHTML = '<div class="num">' + d.day + '</div><div class="lbl">' + (d.task_title || '') + '</div>';
@@ -350,8 +367,23 @@
           alert(d.lock_hint || ('请先完成第 ' + (day - 1) + ' 天'));
           return;
         }
+        var readOnly = !!(d.read_only && !d.done);
         hide('panel-home');
         show('panel-day');
+        var card = $('panel-day').querySelector('.card');
+        if (card) {
+          if (readOnly) card.classList.add('read-only'); else card.classList.remove('read-only');
+        }
+        var hintBox = $('act-hint-box');
+        if (readOnly && d.act_hint) {
+          hintBox.textContent = d.act_hint;
+          show('act-hint-box');
+        } else if (!d.can_act && d.act_hint && !d.done) {
+          hintBox.textContent = d.act_hint;
+          show('act-hint-box');
+        } else {
+          hide('act-hint-box');
+        }
         $('day-title').textContent = d.title + ' · ' + d.task_title;
         $('day-brief').textContent = d.task_brief;
         $('task-detail').textContent = d.task_detail || '';
