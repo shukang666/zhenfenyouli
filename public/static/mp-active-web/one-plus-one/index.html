@@ -232,11 +232,15 @@
   <div id="panel-home" class="hidden">
     <div class="hero">
       <h1 id="hero-title">1+1 七日挑战</h1>
-      <p id="hero-sub">每日真分 + 一项任务，完成有积分奖励</p>
+      <p id="hero-sub">点击日历格子进入当天挑战</p>
     </div>
     <div class="shell">
-      <div class="card" id="guide-card"></div>
       <div class="card">
+        <div class="sec-title">挑战日历（7 天）</div>
+        <div class="grid" id="day-grid"></div>
+      </div>
+      <div class="card">
+        <div class="sec-title">我的进度</div>
         <div class="stat-row">
           <div class="stat"><strong id="stat-done">0</strong><span>已完成天</span></div>
           <div class="stat"><strong id="stat-reward3">300</strong><span>前3天积分</span></div>
@@ -244,10 +248,7 @@
         </div>
         <div id="deadline-box" class="deadline hidden"></div>
       </div>
-      <div class="card">
-        <div class="sec-title">挑战进度（7 天）</div>
-        <div class="grid" id="day-grid"></div>
-      </div>
+      <div class="card" id="guide-card"></div>
     </div>
   </div>
 
@@ -325,7 +326,7 @@
         var guideHtml = (g.lines || []).map(function (line) {
           return '<div class="guide-line">' + line + '</div>';
         }).join('');
-        $('guide-card').innerHTML = guideHtml;
+        $('guide-card').innerHTML = '<div class="sec-title">活动说明</div>' + guideHtml;
         $('stat-done').textContent = data.completed_count || 0;
         if (data.rewards) {
           $('stat-reward3').textContent = data.rewards.milestone_3;
