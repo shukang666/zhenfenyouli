@@ -90,6 +90,13 @@
     .cell.partial { border-color: var(--gold); background: #fffbeb; }
     .cell.done { border-color: var(--green-mid); background: linear-gradient(145deg, #e8f8ef, #fff); }
     .cell.done .num::after { content: ' ✓'; font-size: 14px; }
+    .cell.locked {
+      opacity: .45;
+      border-color: #e0e0e0;
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+    .cell.locked .lbl::after { content: ' 🔒'; font-size: 10px; }
     .sec-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; color: var(--text); }
     .btn {
       display: block;
@@ -285,11 +292,18 @@
         (data.days || []).forEach(function (d) {
           var el = document.createElement('div');
           var cls = 'cell';
-          if (d.done) cls += ' done';
+          if (d.locked) cls += ' locked';
+          else if (d.done) cls += ' done';
           else if (d.zhenfen_done || d.task_done) cls += ' partial';
           el.className = cls;
           el.innerHTML = '<div class="num">' + d.day + '</div><div class="lbl">' + (d.task_title || '') + '</div>';
-          el.onclick = function () { openDay(d.day); };
+          el.onclick = function () {
+            if (d.locked) {
+              alert(d.lock_hint || ('请先完成第 ' + (d.day - 1) + ' 天'));
+              return;
+            }
+            openDay(d.day);
+          };
           grid.appendChild(el);
         });
       }
@@ -332,6 +346,10 @@
         currentDay = day;
         var d = (state.days || []).find(function (x) { return x.day === day; });
         if (!d) return;
+        if (d.locked) {
+          alert(d.lock_hint || ('请先完成第 ' + (day - 1) + ' 天'));
+          return;
+        }
         hide('panel-home');
         show('panel-day');
         $('day-title').textContent = d.title + ' · ' + d.task_title;

@@ -344,14 +344,27 @@ class ActiveWebOnePlusOneService
             ]);
     }
 
+    /** 第 N 天可进入/计进度：第 1 天默认可用，其后须前一天已全部完成 */
+    protected static function isDayUnlocked(int $day, array $completedFlip): bool
+    {
+        if ($day <= 1) {
+            return true;
+        }
+        for ($p = 1; $p < $day; $p++) {
+            if (empty($completedFlip[$p])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     protected static function syncZhenfenAssignments(int $userId, array $row): array
     {
         $cycleStart = (int)($row['cycle_start'] ?? 0);
         if ($cycleStart <= 0) {
             return $row;
         }
-        $map = self::decodeZhenfenMap((string)($row['zhenfen_map'] ?? '{}'));
-        $usedForumIds = array_values($map);
+        $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
         $forums = ForumModel::where('user_id', $userId)
             ->where('type', 2)
             ->where('create_time', '>=', $cycleStart)
@@ -359,18 +372,17 @@ class ActiveWebOnePlusOneService
             ->order('id asc')
             ->column('id');
 
-        foreach ($forums as $fid) {
-            $fid = (int)$fid;
-            if (in_array($fid, $usedForumIds, true)) {
-                continue;
+        $map = [];
+        $forumIndex = 0;
+        for ($day = 1; $day <= self::TOTAL_DAYS; $day++) {
+            if (!self::isDayUnlocked($day, $completedFlip)) {
+                break;
             }
-            for ($day = 1; $day <= self::TOTAL_DAYS; $day++) {
-                if (!isset($map[$day])) {
-                    $map[$day] = $fid;
-                    $usedForumIds[] = $fid;
-                    break;
-                }
+            if ($forumIndex >= count($forums)) {
+                break;
             }
+            $map[$day] = (int)$forums[$forumIndex];
+            $forumIndex++;
         }
 
         $newJson = self::encodeZhenfenMap($map);
@@ -457,6 +469,9 @@ class ActiveWebOnePlusOneService
         $changed = false;
         for ($day = 1; $day <= self::TOTAL_DAYS; $day++) {
             if (isset($completedFlip[$day])) {
+                continue;
+            }
+            if (!self::isDayUnlocked($day, $completedFlip)) {
                 continue;
             }
             $hasZ = isset($map[$day]);
@@ -546,9 +561,14 @@ class ActiveWebOnePlusOneService
         $days = [];
         for ($d = 1; $d <= self::TOTAL_DAYS; $d++) {
             $def = $defs[$d];
-            $taskDone = self::isTaskDone($userId, $activeId, $d, $cycleStart, $row);
-            $zhenfenDone = isset($map[$d]);
+            $unlocked = self::isDayUnlocked($d, $completedFlip);
+            $taskDone = $unlocked && self::isTaskDone($userId, $activeId, $d, $cycleStart, $row);
+            $zhenfenDone = $unlocked && isset($map[$d]);
             $done = isset($completedFlip[$d]);
+            $lockHint = '';
+            if (!$unlocked) {
+                $lockHint = '请先完成第 ' . ($d - 1) . ' 天（真分 + 当日任务）后再解锁本日';
+            }
             $days[] = [
                 'day' => $d,
                 'title' => $def['title'],
@@ -559,6 +579,8 @@ class ActiveWebOnePlusOneService
                 'zhenfen_done' => $zhenfenDone ? 1 : 0,
                 'task_done' => $taskDone ? 1 : 0,
                 'done' => $done ? 1 : 0,
+                'locked' => $unlocked ? 0 : 1,
+                'lock_hint' => $lockHint,
                 'needs_share_ack' => !empty($def['needs_share_ack']) ? 1 : 0,
                 'task_kind' => (string)($def['task_kind'] ?? ''),
             ];
@@ -590,7 +612,8 @@ class ActiveWebOnePlusOneService
             'guide' => [
                 'title' => '1+1 七日挑战',
                 'lines' => [
-                    '每天 = 1 次真分打卡 + 1 项当日任务，7 天不必连续完成。',
+                    '须按第 1→7 天顺序进行：完成前一天（真分 + 任务）后，下一天格子才会解锁。',
+                    '每天 = 1 次真分打卡 + 1 项当日任务；7 天可在不同日期完成，不必连续日历日。',
                     '完成前 3 天赠送 ' . self::REWARD_AFTER_3 . ' 积分；7 天全部完成再送 ' . self::REWARD_AFTER_7 . ' 积分。',
                     '第 1 天完成后，请在 10 日内完成剩余天数，逾期进度清零；7 天全部完成后也会自动开启新一轮。',
                 ],
@@ -610,6 +633,9 @@ class ActiveWebOnePlusOneService
         $status = self::syncAndBuildStatus($userId, $activeId);
         foreach ($status['days'] as $item) {
             if ((int)$item['day'] === $day) {
+                if (!empty($item['locked'])) {
+                    throw new \InvalidArgumentException($item['lock_hint'] ?: '请先完成前一天任务');
+                }
                 return $item;
             }
         }
