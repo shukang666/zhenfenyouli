@@ -3,7 +3,6 @@
 namespace api\wxapp\service;
 
 use api\wxapp\model\AccountLogModel;
-use api\wxapp\model\AnswerModel;
 use app\admin\model\active\ActiveModel;
 use app\admin\model\forum\ForumModel;
 use think\facade\Db;
@@ -61,10 +60,11 @@ class ActiveWebOnePlusOneService
             ],
             3 => [
                 'title' => '第 3 天',
-                'task_title' => '垃圾分类学习',
-                'task_brief' => '在线学习垃圾分类知识',
-                'task_detail' => '完成「欢迎来真分」学考一体（阅读 + 练一练全部答对），或完成一次垃圾分类知识测验。',
-                'mp_path' => '/pages/flhd/pre_learn',
+                'task_title' => '分类知识答题',
+                'task_brief' => '完成 4 道垃圾分类选择题',
+                'task_detail' => '在本页完成 4 道单选题，全部答对即视为完成当日任务（可查看解析后重答）。',
+                'task_kind' => 'quiz_web',
+                'mp_path' => '',
             ],
             4 => [
                 'title' => '第 4 天',
@@ -363,7 +363,7 @@ class ActiveWebOnePlusOneService
     }
 
     /** 未解锁或该日已完成则不可再做 */
-    protected static function assertCanWorkOnDay(array $row, int $day): void
+    public static function assertCanWorkOnDay(array $row, int $day): void
     {
         if (!self::canActOnDay($row, $day)) {
             $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
@@ -620,20 +620,12 @@ class ActiveWebOnePlusOneService
                     ->where('create_time', '>=', $since)
                     ->count() > 0;
             case 3:
-                $exam = (new AnswerModel())
-                    ->where('user_id', $userId)
-                    ->where('type', 1)
-                    ->where('status', 3)
-                    ->where('create_time', '>=', $since)
-                    ->count();
-                if ($exam > 0) {
-                    return true;
-                }
-                return (int)Db::name('qxl_chapter_log')
-                    ->where('user_id', $userId)
-                    ->where('passed', 1)
-                    ->where('update_time', '>=', $since)
-                    ->count() > 0;
+                return ActiveWebOnePlusOneQuizService::hasPassedInWindow(
+                    $userId,
+                    $activeId,
+                    (int)($row['cycle_no'] ?? 1),
+                    $since
+                );
             case 4:
                 return (int)Db::name(ActiveWebPhotoService::photoTable())
                     ->where('user_id', $userId)

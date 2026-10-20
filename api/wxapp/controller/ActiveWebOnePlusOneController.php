@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use api\wxapp\service\ActiveWebOnePlusOneQuizService;
 use api\wxapp\service\ActiveWebOnePlusOneService;
 
 /**
@@ -66,6 +67,43 @@ class ActiveWebOnePlusOneController extends AuthController
             'record' => $row,
             'status' => $status,
         ]);
+    }
+
+    /** 第 3 天：获取 H5 答题题库（无正确答案） */
+    public function quiz_questions()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        try {
+            ActiveWebOnePlusOneService::loadWebActive($activeId);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('请求成功', [
+            'questions' => ActiveWebOnePlusOneQuizService::questionsForClient(),
+            'total' => 4,
+        ]);
+    }
+
+    /** 第 3 天：提交答题（须 4 题全对） */
+    public function quiz_submit()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        $answers = $this->request->param('answers/a', []);
+        if (empty($answers) || !is_array($answers)) {
+            $this->error('请提交答题结果');
+        }
+        try {
+            $data = ActiveWebOnePlusOneQuizService::submitAnswers((int)$this->user_id, $activeId, $answers);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        if (empty($data['passed'])) {
+            $this->success('未全部答对，请查看解析后重试', $data);
+            return;
+        }
+        $this->success('答题通过，当日任务已完成', $data);
     }
 
     /** 第 2 天：用户在 H5 点击「去分享」后标记（可与积分分享记录二选一满足） */

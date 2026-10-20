@@ -566,6 +566,19 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_harmful_clock` (
   KEY `idx_user_time` (`user_id`,`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='1+1活动第1天有害垃圾Web打卡';
 
+CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_day3_quiz` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `cycle_no` int(10) unsigned NOT NULL DEFAULT 1,
+  `passed` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `detail` text COMMENT 'JSON: 每题选项与解析',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_active_user_cycle` (`active_id`,`user_id`,`cycle_no`),
+  KEY `idx_user_time` (`user_id`,`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='1+1活动第3天H5答题记录';
+
 INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
 SELECT
     (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveController' AND `action`='index' LIMIT 1),
