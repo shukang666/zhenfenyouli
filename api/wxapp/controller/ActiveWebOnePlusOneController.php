@@ -85,7 +85,7 @@ class ActiveWebOnePlusOneController extends AuthController
         ]);
     }
 
-    /** 第 3 天：提交答题（须 4 题全对） */
+    /** 第 3 天：提交答题（提交即完成，答错返解析） */
     public function quiz_submit()
     {
         $this->checkUser();
@@ -99,11 +99,8 @@ class ActiveWebOnePlusOneController extends AuthController
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
         }
-        if (empty($data['passed'])) {
-            $this->success('未全部答对，请查看解析后重试', $data);
-            return;
-        }
-        $this->success('答题通过，当日任务已完成', $data);
+        $msg = !empty($data['has_wrong']) ? '已提交，请查看错题解析' : '提交成功，当日任务已完成';
+        $this->success($msg, $data);
     }
 
     /** 第 2 天：用户在 H5 点击「去分享」后标记（可与积分分享记录二选一满足） */

@@ -62,7 +62,7 @@ class ActiveWebOnePlusOneService
                 'title' => '第 3 天',
                 'task_title' => '分类知识答题',
                 'task_brief' => '完成 4 道垃圾分类选择题',
-                'task_detail' => '在本页完成 4 道单选题，全部答对即视为完成当日任务（可查看解析后重答）。',
+                'task_detail' => '在本页完成 4 道单选题并提交即视为完成当日任务；若有答错的题目会显示解析供参考。',
                 'task_kind' => 'quiz_web',
                 'mp_path' => '',
             ],

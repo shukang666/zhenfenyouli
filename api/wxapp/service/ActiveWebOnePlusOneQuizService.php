@@ -113,7 +113,7 @@ class ActiveWebOnePlusOneQuizService
 
         $bank = self::questionBank();
         $detail = [];
-        $passed = true;
+        $hasWrong = false;
         foreach ($bank as $q) {
             $qid = (int)$q['id'];
             $pick = strtoupper(trim((string)($answers[$qid] ?? $answers[(string)$qid] ?? '')));
@@ -122,7 +122,7 @@ class ActiveWebOnePlusOneQuizService
             }
             $ok = ($pick === $q['answer']);
             if (!$ok) {
-                $passed = false;
+                $hasWrong = true;
             }
             $detail[] = [
                 'id' => $qid,
@@ -139,18 +139,16 @@ class ActiveWebOnePlusOneQuizService
             'user_id' => $userId,
             'active_id' => $activeId,
             'cycle_no' => $cycleNo,
-            'passed' => $passed ? 1 : 0,
+            'passed' => 1,
             'detail' => json_encode($detail, JSON_UNESCAPED_UNICODE),
             'create_time' => $now,
         ]);
 
-        $status = null;
-        if ($passed) {
-            $status = ActiveWebOnePlusOneService::syncAndBuildStatus($userId, $activeId);
-        }
+        $status = ActiveWebOnePlusOneService::syncAndBuildStatus($userId, $activeId);
 
         return [
-            'passed' => $passed ? 1 : 0,
+            'passed' => 1,
+            'has_wrong' => $hasWrong ? 1 : 0,
             'detail' => $detail,
             'status' => $status,
         ];
