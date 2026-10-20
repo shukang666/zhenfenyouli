@@ -111,6 +111,8 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      overflow: hidden;
+      max-width: 100%;
     }
     .guide-line {
       font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 10px;
@@ -145,15 +147,25 @@
       border: 1px solid rgba(224, 122, 122, .35);
       padding: 10px 12px; border-radius: 12px; margin-top: 12px; line-height: 1.5;
     }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
     .cell {
-      aspect-ratio: 1; border-radius: 16px;
+      aspect-ratio: 1; min-width: 0; max-width: 100%;
+      border-radius: 16px;
       border: 2px solid rgba(26, 143, 92, .15);
       background: linear-gradient(165deg, #fff 0%, #f4fbf7 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 6px; cursor: pointer;
+      text-align: center; padding: 6px 4px; cursor: pointer;
       transition: transform .2s cubic-bezier(.34,1.4,.64,1), box-shadow .2s, border-color .2s;
       box-shadow: 0 4px 14px rgba(13, 79, 54, .06);
+      overflow: hidden;
+    }
+    .cell:nth-child(7):last-child {
+      grid-column: 2;
     }
     .cell:active { transform: scale(.94); }
     .cell .num {
@@ -161,7 +173,15 @@
       width: 36px; height: 36px; line-height: 36px; border-radius: 50%;
       background: rgba(26, 143, 92, .08);
     }
-    .cell .lbl { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.25; font-weight: 500; }
+    .cell .lbl {
+      font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.25; font-weight: 500;
+      width: 100%; padding: 0 2px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      word-break: break-all;
+    }
     .cell.partial {
       border-color: var(--gold);
       background: linear-gradient(165deg, #fffbeb, #fff);
