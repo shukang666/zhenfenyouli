@@ -1236,7 +1236,10 @@ HTML;
             $mobileMask = substr($mobile, 0, 3) . '****' . substr($mobile, -4);
         }
 
-        $apiBase = rtrim(cmf_get_domain(), '/') . '/api';
+        $apiBase = rtrim($this->request->domain(true), '/') . '/api';
+        if ($apiBase === '/api' || strpos($apiBase, '://') === false) {
+            $apiBase = rtrim(cmf_get_domain(), '/') . '/api';
+        }
 
         $this->success('请求成功', [
             'expires_at' => (int)$payload['exp'],

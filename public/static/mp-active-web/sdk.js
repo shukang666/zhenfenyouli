@@ -14,7 +14,20 @@
 
   function fetchJson(url, options) {
     return fetch(url, options || {}).then(function (r) {
-      return r.json();
+      return r.text().then(function (text) {
+        var trimmed = (text || '').trim();
+        if (!trimmed) {
+          throw new Error('接口无响应（HTTP ' + r.status + '）');
+        }
+        if (trimmed.charAt(0) === '<') {
+          throw new Error('接口返回了网页而非 JSON（HTTP ' + r.status + '），请确认 API 地址：' + url);
+        }
+        try {
+          return JSON.parse(trimmed);
+        } catch (e) {
+          throw new Error('接口 JSON 解析失败（HTTP ' + r.status + '）');
+        }
+      });
     });
   }
 
@@ -53,7 +66,12 @@
       if (!res || res.code !== 1) {
         throw new Error((res && res.msg) || 'bootstrap 失败');
       }
-      return res.data;
+      var data = res.data || {};
+      // 与 H5 当前访问域名同域调 API，避免后台「站点域名」与线上访问域不一致时请求落到 HTML 404
+      if (data.api) {
+        data.api.base = defaultApiBase();
+      }
+      return data;
     });
   }
 
