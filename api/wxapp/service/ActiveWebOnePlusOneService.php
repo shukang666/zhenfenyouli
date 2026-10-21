@@ -44,11 +44,11 @@ class ActiveWebOnePlusOneService
         return [
             1 => [
                 'title' => '第 1 天',
-                'task_title' => '有害垃圾',
-                'task_brief' => '找到并拍摄一张有害垃圾的图片',
-                'task_detail' => '在本页直接上传有害垃圾照片即可完成当日任务，无需进入真分选场景页。可填写简短说明（选填）。',
-                'task_kind' => 'harmful_web',
-                'mp_path' => '',
+                'task_title' => '真分前置学习',
+                'task_brief' => '完成真分前的分类学习与练一练',
+                'task_detail' => '进入真分前置学习页，阅读分类知识并完成练一练题目。通过后即打通真分打卡前置条件（老用户也可再学一遍）。',
+                'task_kind' => 'pre_learn_mp',
+                'mp_path' => '/pages/flhd/pre_learn?from=one_plus_one',
             ],
             2 => [
                 'title' => '第 2 天',
@@ -84,7 +84,7 @@ class ActiveWebOnePlusOneService
                 'title' => '第 6 天',
                 'task_title' => '分类设施',
                 'task_brief' => '拍摄分类垃圾箱/桶',
-                'task_detail' => '真分打卡时拍摄厨余、可回收、其他等分类桶/箱（不含第 1 天有害垃圾专项）。',
+                'task_detail' => '真分打卡时拍摄厨余、可回收、其他等分类桶/箱。',
                 'mp_path' => '/pages/activity/scene-clock-flow?mode=theme',
             ],
             7 => [
@@ -267,6 +267,12 @@ class ActiveWebOnePlusOneService
     {
         ksort($map);
         return json_encode($map, JSON_UNESCAPED_UNICODE);
+    }
+
+    /** 供子模块判断任务时间窗 */
+    public static function dayWindowSincePublic(array $row, int $day): int
+    {
+        return self::dayWindowSince($row, $day);
     }
 
     /** 当日任务/真分只统计该时间点之后的行为（第 1 天从 cycle_start 起） */
@@ -608,6 +614,14 @@ class ActiveWebOnePlusOneService
 
         switch ($day) {
             case 1:
+                if (ActiveWebOnePlusOnePreLearnService::hasCompletedInWindow(
+                    $userId,
+                    $activeId,
+                    (int)($row['cycle_no'] ?? 1),
+                    $since
+                )) {
+                    return true;
+                }
                 return self::hasHarmfulWebClock($userId, $activeId, $row, $since);
             case 2:
                 if ((int)($row['share_ack_at'] ?? 0) >= $since) {
@@ -775,13 +789,17 @@ class ActiveWebOnePlusOneService
                 $lockHint = '请先完成第 ' . ($d - 1) . ' 天后再解锁本日';
             }
             $actHint = self::buildActHint($row, $d, $completedFlip);
+            $mpPath = (string)($def['mp_path'] ?? '');
+            if ($d === 1 && ($def['task_kind'] ?? '') === 'pre_learn_mp' && $mpPath !== '') {
+                $mpPath .= (strpos($mpPath, '?') !== false ? '&' : '?') . 'active_id=' . $activeId;
+            }
             $days[] = [
                 'day' => $d,
                 'title' => $def['title'],
                 'task_title' => $def['task_title'],
                 'task_brief' => $def['task_brief'],
                 'task_detail' => $def['task_detail'],
-                'mp_path' => $def['mp_path'],
+                'mp_path' => $mpPath,
                 'zhenfen_done' => $zhenfenDone,
                 'task_done' => $taskDone,
                 'done' => $done ? 1 : 0,

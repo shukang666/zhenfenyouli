@@ -115,7 +115,13 @@
 				completed: false,
 				submitting: false,
 				loaded: false,
+				learnContext: '',
+				onePlusActiveId: '',
 			}
+		},
+		onLoad(options) {
+			this.learnContext = (options && options.from) ? String(options.from) : ''
+			this.onePlusActiveId = (options && options.active_id) ? String(options.active_id) : ''
 		},
 		computed: {
 			preLearnImg() {
@@ -143,6 +149,10 @@
 				return this.$u.route('/pages/public/login')
 			}
 			this.refreshUser().then(() => {
+				if (this.learnContext === 'one_plus_one') {
+					this.loadBlocks()
+					return
+				}
 				const u = this.userInfo || {}
 				if (Number(u.is_learn) === 1 && Number(u.is_answer) === 1) {
 					this.goToSceneClockPick()
@@ -156,7 +166,7 @@
 				return this.$u.api.get_clock_learn_exam().then(res => {
 					const data = res.data || {}
 					this.blocks = data.blocks || []
-					if (Number(data.completed) === 1) {
+					if (Number(data.completed) === 1 && this.learnContext !== 'one_plus_one') {
 						this.goToSceneClockPick()
 						return
 					}
@@ -211,6 +221,15 @@
 				this.$u.api.submit_clock_learn_exam({ answers: this.answers }).then(() => {
 					return this.refreshUser()
 				}).then(() => {
+					if (this.learnContext === 'one_plus_one' && this.onePlusActiveId) {
+						return this.$u.api.one_plus_one_pre_learn_ack({ active_id: this.onePlusActiveId })
+					}
+				}).then(() => {
+					if (this.learnContext === 'one_plus_one') {
+						this.$u.toast('学习完成')
+						this.finishOnePlusOneLearn()
+						return
+					}
 					this.$u.toast('学考完成')
 					this.goToSceneClockPick()
 				}).catch(err => {
@@ -222,6 +241,14 @@
 					this.$u.toast((err && err.msg) || '提交失败')
 				}).finally(() => {
 					this.submitting = false
+				})
+			},
+			finishOnePlusOneLearn() {
+				uni.navigateBack({
+					delta: 1,
+					fail() {
+						uni.switchTab({ url: '/pages/index/index' })
+					},
 				})
 			},
 			goToSceneClockPick() {

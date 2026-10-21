@@ -2,6 +2,7 @@
 
 namespace api\wxapp\controller;
 
+use api\wxapp\service\ActiveWebOnePlusOnePreLearnService;
 use api\wxapp\service\ActiveWebOnePlusOneQuizService;
 use api\wxapp\service\ActiveWebOnePlusOneService;
 
@@ -37,7 +38,20 @@ class ActiveWebOnePlusOneController extends AuthController
         $this->success('请求成功', $data);
     }
 
-    /** 第 1 天：有害垃圾 Web 打卡记录 */
+    /** 第 1 天：完成真分前置学习后回写 1+1 进度 */
+    public function pre_learn_ack()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        try {
+            $data = ActiveWebOnePlusOnePreLearnService::recordCompletion((int)$this->user_id, $activeId);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('已记录学习完成', $data);
+    }
+
+    /** 第 1 天：有害垃圾 Web 打卡记录（历史兼容） */
     public function harmful_list()
     {
         $this->checkUser();

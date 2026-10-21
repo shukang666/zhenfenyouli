@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>1+1 活动</title>
   <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
-  <script src="../sdk.js?v=20261020b"></script>
+  <script src="../sdk.js?v=20261020c"></script>
   <style>
     :root {
       --green: #0d4f36;
@@ -519,6 +519,11 @@
         });
       }
 
+      function preLearnMpPath(d) {
+        if (d && d.mp_path) return d.mp_path;
+        return '/pages/flhd/pre_learn?from=one_plus_one&active_id=' + encodeURIComponent(activeId || '');
+      }
+
       function show(id) { $(id).classList.remove('hidden'); }
       function hide(id) { $(id).classList.add('hidden'); }
 
@@ -550,6 +555,10 @@
           el.onclick = function () {
             if (d.locked) {
               alert(d.lock_hint || ('请先完成第 ' + (d.day - 1) + ' 天'));
+              return;
+            }
+            if (d.day === 1 && d.task_kind === 'pre_learn_mp' && Number(d.can_act) === 1 && !Number(d.task_done) && !Number(d.done)) {
+              navigateMp(preLearnMpPath(d));
               return;
             }
             openDay(d.day);
@@ -733,10 +742,27 @@
         $('btn-zhenfen').onclick = function () { navigateMp(zhenfenPath); };
 
         var isQuizWeb = d.task_kind === 'quiz_web' || day === 3;
-        var isHarmfulWeb = d.task_kind === 'harmful_web' || day === 1;
+        var isPreLearnMp = d.task_kind === 'pre_learn_mp';
+        var isHarmfulWeb = d.task_kind === 'harmful_web';
         hide('quiz-panel');
         if (isQuizWeb) {
           loadQuizPanel(d);
+        } else if (isPreLearnMp) {
+          hide('harmful-panel');
+          hide('quiz-panel');
+          show('btn-task');
+          $('btn-task').textContent = Number(d.task_done) ? '再看一遍前置学习' : '进入前置学习';
+          $('btn-task').onclick = function () {
+            if (readOnly && !Number(d.task_done)) {
+              alert(d.act_hint || '当前仅可浏览，暂不可操作');
+              return;
+            }
+            if (!Number(d.can_act) && !Number(d.task_done)) {
+              alert(d.act_hint || '当前不可进行该天任务');
+              return;
+            }
+            navigateMp(preLearnMpPath(d));
+          };
         } else if (isHarmfulWeb) {
           hide('btn-task');
           hide('quiz-panel');

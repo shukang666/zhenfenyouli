@@ -566,6 +566,17 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_harmful_clock` (
   KEY `idx_user_time` (`user_id`,`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='1+1活动第1天有害垃圾Web打卡';
 
+CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_day1_pre_learn` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `cycle_no` int(10) unsigned NOT NULL DEFAULT 1,
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_active_user_cycle` (`active_id`,`user_id`,`cycle_no`),
+  KEY `idx_user_time` (`user_id`,`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='1+1活动第1天真分前置学习完成记录';
+
 CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_day3_quiz` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `active_id` int(10) unsigned NOT NULL DEFAULT 0,

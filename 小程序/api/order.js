@@ -17,6 +17,7 @@ const order = {
     get_scene_clock_pick_state: (params = {}) => uni.$u.post('/wxapp/forum/get_scene_clock_pick_state', params),
     submit_clock_learn_exam: (params = {}) => uni.$u.post('/wxapp/forum/submit_clock_learn_exam', params),
     complete_clock_pre_learn: (params = {}) => uni.$u.post('/wxapp/forum/complete_clock_pre_learn', params),
+    one_plus_one_pre_learn_ack: (params = {}) => uni.$u.post('/wxapp/active_web_one_plus_one/pre_learn_ack', params),
     submit_clock_scene_survey: (params = {}) => uni.$u.post('/wxapp/forum/submit_clock_scene_survey', params),
     list_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/list', params),
     save_clock_scene_point: (params = {}) => uni.$u.post('/wxapp/clock_scene_point/save', params),
