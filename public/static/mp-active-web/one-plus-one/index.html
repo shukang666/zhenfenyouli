@@ -1034,7 +1034,7 @@
           $('badge-t').className = 'badge ' + (d.task_done ? 'ok' : 'wait');
         }
 
-        var isQuizWeb = d.task_kind === 'quiz_web' || day === 3;
+        var isQuizWeb = d.task_kind === 'quiz_web';
         var isHarmfulWeb = d.task_kind === 'harmful_web';
         hide('quiz-panel');
         if (isQuizWeb) {

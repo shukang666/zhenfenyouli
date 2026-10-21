@@ -128,19 +128,17 @@ class ActiveWebOnePlusOneService
             ],
             2 => [
                 'title' => '第 2 天',
-                'task_title' => '分享小程序',
-                'task_brief' => '分享小程序给好友',
-                'task_detail' => '点击右上角或下方按钮，将小程序分享给至少一位好友。分享成功后返回本页刷新即可。',
-                'mp_path' => '/pages/index/index',
-                'needs_share_ack' => 1,
+                'task_title' => '发布闲置',
+                'task_brief' => '上传一个闲置物品',
+                'task_detail' => '在积分权益 · 社区闲置中发布一条闲置信息。',
+                'mp_path' => '/pages/points/secondhand-publish',
             ],
             3 => [
                 'title' => '第 3 天',
-                'task_title' => '分类知识答题',
-                'task_brief' => '完成 4 道垃圾分类选择题',
-                'task_detail' => '在本页完成 4 道单选题并提交即视为完成当日任务；若有答错的题目会显示解析供参考。',
-                'task_kind' => 'quiz_web',
-                'mp_path' => '',
+                'task_title' => '打卡可回收',
+                'task_brief' => '完成一次可回收物真分打卡',
+                'task_detail' => '在家庭真分中选择可回收类垃圾种类，拍照提交真分打卡；或前往小程序垃圾分类打卡并完成一次可回收投放记录。',
+                'mp_path' => '/pages/activity/scene-clock-flow?mode=theme',
             ],
             4 => [
                 'title' => '第 4 天',
@@ -151,10 +149,11 @@ class ActiveWebOnePlusOneService
             ],
             5 => [
                 'title' => '第 5 天',
-                'task_title' => '发布闲置',
-                'task_brief' => '上传一个闲置物品',
-                'task_detail' => '在积分权益 · 社区闲置中发布一条闲置信息。',
-                'mp_path' => '/pages/points/secondhand-publish',
+                'task_title' => '分享小程序',
+                'task_brief' => '分享小程序给好友',
+                'task_detail' => '点击右上角或下方按钮，将小程序分享给至少一位好友。分享成功后返回本页刷新即可。',
+                'mp_path' => '/pages/index/index',
+                'needs_share_ack' => 1,
             ],
             6 => [
                 'title' => '第 6 天',
@@ -485,7 +484,7 @@ class ActiveWebOnePlusOneService
         if (empty($row)) {
             throw new \InvalidArgumentException('进度不存在');
         }
-        self::assertCanWorkOnDay($row, 2, $userId);
+        self::assertCanWorkOnDay($row, 5, $userId);
         Db::name(self::progressTable())
             ->where('user_id', $userId)
             ->where('active_id', $activeId)
@@ -724,6 +723,18 @@ class ActiveWebOnePlusOneService
                 }
                 return self::hasHarmfulWebClock($userId, $activeId, $row, $since);
             case 2:
+                return (int)Db::name(SecondhandService::TABLE_ITEM)
+                    ->where('user_id', $userId)
+                    ->where('create_time', '>=', $since)
+                    ->count() > 0;
+            case 3:
+                return self::countRecycleForumClock($userId, $since) > 0;
+            case 4:
+                return (int)Db::name(ActiveWebPhotoService::photoTable())
+                    ->where('user_id', $userId)
+                    ->where('create_time', '>=', $since)
+                    ->count() > 0;
+            case 5:
                 if ((int)($row['share_ack_at'] ?? 0) >= $since) {
                     return true;
                 }
@@ -731,23 +742,6 @@ class ActiveWebOnePlusOneService
                     ->where('user_id', $userId)
                     ->where('account_type', 2)
                     ->where('type', 223)
-                    ->where('create_time', '>=', $since)
-                    ->count() > 0;
-            case 3:
-                return ActiveWebOnePlusOneQuizService::hasPassedInWindow(
-                    $userId,
-                    $activeId,
-                    (int)($row['cycle_no'] ?? 1),
-                    $since
-                );
-            case 4:
-                return (int)Db::name(ActiveWebPhotoService::photoTable())
-                    ->where('user_id', $userId)
-                    ->where('create_time', '>=', $since)
-                    ->count() > 0;
-            case 5:
-                return (int)Db::name(SecondhandService::TABLE_ITEM)
-                    ->where('user_id', $userId)
                     ->where('create_time', '>=', $since)
                     ->count() > 0;
             case 6:
@@ -772,6 +766,25 @@ class ActiveWebOnePlusOneService
             $q->where('cate_id', '<>', (int)$opts['cate_not']);
         }
         return (int)$q->count();
+    }
+
+    /** 垃圾打卡 type=2，种类为可回收（basic_select type=2 名称含「可回收」且不含「不可」） */
+    protected static function countRecycleForumClock(int $userId, int $since): int
+    {
+        $cateIds = Db::name('basic_select')
+            ->where('type', 2)
+            ->where('status', 1)
+            ->where('name', 'like', '%可回收%')
+            ->where('name', 'not like', '%不可%')
+            ->column('id');
+        if (empty($cateIds)) {
+            return 0;
+        }
+        return (int)ForumModel::where('user_id', $userId)
+            ->where('type', 2)
+            ->where('create_time', '>=', $since)
+            ->whereIn('cate_id', $cateIds)
+            ->count();
     }
 
     protected static function syncDayCompletions(int $userId, int $activeId, array $row): array
