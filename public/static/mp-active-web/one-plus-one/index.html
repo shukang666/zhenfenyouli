@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>1+1 活动</title>
   <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
-  <script src="../sdk.js?v=20261021c"></script>
+  <script src="../sdk.js?v=20261021d"></script>
   <style>
     :root {
       --green: #0d4f36;
@@ -380,12 +380,17 @@
       border-radius: 8px; font-size: 12px; margin-right: 6px;
       background: linear-gradient(135deg, var(--green-mid), var(--green-soft)); color: #fff;
     }
+    .quiz-opts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
     .quiz-opt {
       display: block; width: 100%; text-align: left;
       border: 2px solid rgba(26, 143, 92, .12);
       background: linear-gradient(90deg, #fafdfb, #fff);
-      border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
-      font-size: 14px; color: var(--text); line-height: 1.45; cursor: pointer;
+      border-radius: 12px; padding: 10px 10px; margin-bottom: 0;
+      font-size: 12px; color: var(--text); line-height: 1.4; cursor: pointer;
       transition: border-color .2s, transform .15s, box-shadow .2s;
       -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none;
     }
@@ -413,6 +418,56 @@
     #quiz-panel.quiz-locked #btn-quiz-submit { pointer-events: none; opacity: .55; }
     .read-only #quiz-panel:not(.quiz-locked) .quiz-opt,
     .read-only #quiz-panel:not(.quiz-locked) #btn-quiz-submit { pointer-events: auto; opacity: 1; }
+    .zf-inline { margin-top: 4px; }
+    .zf-scenes {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .zf-scene {
+      flex: 1; min-width: 0; border: 2px solid rgba(26, 143, 92, .15);
+      border-radius: 14px; padding: 10px 6px; text-align: center; cursor: pointer;
+      background: rgba(255,255,255,.85); font-size: 12px; font-weight: 700; color: var(--muted);
+      transition: border-color .2s, background .2s, transform .15s;
+    }
+    .zf-scene.on {
+      border-color: var(--green-mid); color: var(--green);
+      background: linear-gradient(160deg, #e8f8ef, #fff);
+      box-shadow: 0 0 0 3px rgba(95, 212, 160, .2);
+    }
+    .zf-scene-icon { display: block; font-size: 20px; line-height: 1.2; margin-bottom: 2px; }
+    .zf-label {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      margin: 8px 0 6px; letter-spacing: .04em;
+    }
+    .zf-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+    .zf-pill {
+      font-size: 12px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+      border: 1px solid rgba(26, 143, 92, .2); background: #fff; color: var(--text);
+      max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .zf-pill.on {
+      border-color: var(--green-mid); background: #e8f8ef; color: #0d5c3f; font-weight: 700;
+    }
+    .zf-upload {
+      position: relative; margin-top: 10px; border-radius: 14px;
+      border: 2px dashed rgba(26, 143, 92, .3);
+      background: rgba(255,255,255,.7); min-height: 88px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .zf-upload.has-img { border-style: solid; min-height: 0; padding: 4px; }
+    .zf-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
+    .zf-upload-placeholder { font-size: 13px; color: var(--muted); text-align: center; padding: 16px; pointer-events: none; }
+    .zf-upload-placeholder strong { display: block; color: var(--green-mid); font-size: 14px; margin-bottom: 4px; }
+    .zf-upload-preview { width: 100%; max-height: 160px; object-fit: cover; border-radius: 10px; display: block; }
+    .zf-note { font-size: 11px; color: var(--muted); line-height: 1.5; margin-top: 10px; }
+    .read-only .zf-inline .zf-upload,
+    .read-only .zf-inline .zf-pill,
+    .read-only .zf-inline .zf-scene,
+    .read-only .zf-inline #btn-zhenfen-submit { pointer-events: none; opacity: .55; }
+    #zhenfen-inline.zf-locked .zf-upload,
+    #zhenfen-inline.zf-locked .zf-pill,
+    #zhenfen-inline.zf-locked .zf-scene,
+    #zhenfen-inline.zf-locked #btn-zhenfen-submit { pointer-events: none; opacity: .55; }
   </style>
 </head>
 <body>
@@ -453,8 +508,21 @@
         <div id="act-hint-box" class="act-hint hidden"></div>
         <div class="part zhenfen" id="part-zhenfen">
           <h3>真分打卡 <span class="badge wait" id="badge-z">待完成</span></h3>
-          <p>进入三场景选择器，任选家庭 / 办公 / 沿街等场景完成一次垃圾分类拍照打卡。</p>
-          <button type="button" class="btn btn-primary" id="btn-zhenfen">去真分打卡</button>
+          <p style="margin-bottom:0;">选场景、选种类，拍照提交即可完成（无需跳转小程序）。</p>
+          <div id="zhenfen-done-tip" class="quiz-done-tip hidden" style="margin-top:12px;">真分打卡已完成</div>
+          <div id="zhenfen-inline" class="zf-inline">
+            <div class="zf-scenes" id="zf-scenes"></div>
+            <div id="zf-extra-wrap"></div>
+            <div class="zf-label">垃圾种类</div>
+            <div class="zf-pills" id="zf-cates"></div>
+            <label class="zf-upload" id="zf-upload-zone">
+              <input type="file" accept="image/*" capture="environment" id="zf-file" />
+              <div class="zf-upload-placeholder" id="zf-upload-ph"><strong>📷 拍摄分类照片</strong>点击上传打卡图</div>
+              <img id="zf-preview" class="zf-upload-preview hidden" alt="预览" />
+            </label>
+            <p class="zf-note">提交即表示已在对应场景完成正确分类投放。</p>
+            <button type="button" class="btn btn-primary" id="btn-zhenfen-submit" style="margin-top:10px;">提交真分打卡</button>
+          </div>
         </div>
         <div class="part task" id="part-task">
           <h3>当日任务 <span class="badge wait" id="badge-t">待完成</span></h3>
@@ -647,7 +715,7 @@
           var explain = res && !Number(res.correct) && res.explain
             ? '<div class="quiz-explain">' + escapeHtml(res.explain) + '</div>' : '';
           return '<div class="quiz-q" data-qid="' + q.id + '"><div class="quiz-q-title"><span class="quiz-q-num">' + (idx + 1) + '</span>' +
-            escapeHtml(q.title) + '</div>' + optsHtml + explain + '</div>';
+            escapeHtml(q.title) + '</div><div class="quiz-opts">' + optsHtml + '</div>' + explain + '</div>';
         }).join('');
         bindQuizOptionClicks();
       }
@@ -723,6 +791,196 @@
         });
       }
 
+      var ZF_SCENES = [
+        { key: 'home', icon: '🏠', label: '家庭' },
+        { key: 'office', icon: '🏢', label: '办公' },
+        { key: 'street', icon: '🏪', label: '沿街' }
+      ];
+      var zfState = { scene: 'home', cateId: 0, pointId: 0, file: null, cates: [], points: [], canAct: true };
+
+      function renderZfScenes() {
+        var box = $('zf-scenes');
+        box.innerHTML = ZF_SCENES.map(function (s) {
+          var cls = 'zf-scene' + (zfState.scene === s.key ? ' on' : '');
+          return '<div class="' + cls + '" data-scene="' + s.key + '"><span class="zf-scene-icon">' + s.icon + '</span>' + s.label + '</div>';
+        }).join('');
+        box.querySelectorAll('.zf-scene').forEach(function (el) {
+          el.onclick = function () {
+            if ($('zhenfen-inline').classList.contains('zf-locked')) return;
+            zfState.scene = el.getAttribute('data-scene');
+            zfState.cateId = 0;
+            zfState.pointId = 0;
+            renderZfScenes();
+            loadZfMeta();
+          };
+        });
+      }
+
+      function renderZfCates() {
+        var box = $('zf-cates');
+        var extra = $('zf-extra-wrap');
+        extra.innerHTML = '';
+        if (zfState.scene === 'office') {
+          extra.innerHTML = '<div class="zf-label">办公真分角</div><div class="zf-pills" id="zf-points"></div>';
+          var pbox = $('zf-points');
+          if (!zfState.points.length) {
+            pbox.innerHTML = '<span class="zf-note">暂无可选真分角，请联系社区工作人员</span>';
+          } else {
+            pbox.innerHTML = zfState.points.map(function (p) {
+              var id = parseInt(p.id, 10);
+              var name = p.building_name || p.point_name || ('点位' + id);
+              var cls = 'zf-pill' + (zfState.pointId === id ? ' on' : '');
+              return '<span class="' + cls + '" data-pid="' + id + '" data-cid="' + (p.cate_id || 0) + '">' + escapeHtml(name) + '</span>';
+            }).join('');
+            pbox.querySelectorAll('.zf-pill').forEach(function (el) {
+              el.onclick = function () {
+                if ($('zhenfen-inline').classList.contains('zf-locked')) return;
+                zfState.pointId = parseInt(el.getAttribute('data-pid'), 10) || 0;
+                var cid = parseInt(el.getAttribute('data-cid'), 10) || 0;
+                if (cid > 0) zfState.cateId = cid;
+                renderZfCates();
+              };
+            });
+          }
+          box.innerHTML = zfState.cateId
+            ? '<span class="zf-note">可回收种类已随真分角自动选择</span>'
+            : '<span class="zf-note">请先选择上方真分角</span>';
+          return;
+        }
+        if (zfState.scene === 'street') {
+          extra.innerHTML = '<p class="zf-note">沿街场景需已在小程序登记商铺。</p>';
+        } else {
+          extra.innerHTML = '';
+        }
+        if (!zfState.cates.length) {
+          box.innerHTML = '<span class="zf-note">暂无种类数据</span>';
+          return;
+        }
+        box.innerHTML = zfState.cates.map(function (c) {
+          var id = c.id;
+          var name = c.name || c.title || ('种类' + id);
+          var cls = 'zf-pill' + (zfState.cateId === id ? ' on' : '');
+          return '<span class="' + cls + '" data-cid="' + id + '">' + escapeHtml(name) + '</span>';
+        }).join('');
+        box.querySelectorAll('.zf-pill').forEach(function (el) {
+          el.onclick = function () {
+            if ($('zhenfen-inline').classList.contains('zf-locked')) return;
+            zfState.cateId = parseInt(el.getAttribute('data-cid'), 10) || 0;
+            renderZfCates();
+          };
+        });
+      }
+
+      function loadZfMeta() {
+        zfState.cates = [];
+        zfState.points = [];
+        var scene = zfState.scene;
+        var tasks = [];
+        if (scene === 'office') {
+          tasks.push(apiPost('/wxapp/clock_scene_point/list', { hub_key: 'office' }).then(function (data) {
+            zfState.points = Array.isArray(data) ? data : [];
+            if (zfState.points.length && !zfState.pointId) {
+              zfState.pointId = parseInt(zfState.points[0].id, 10) || 0;
+              zfState.cateId = parseInt(zfState.points[0].cate_id, 10) || 0;
+            }
+          }).catch(function () { zfState.points = []; }));
+        } else {
+          tasks.push(apiPost('/wxapp/forum/get_cate_list', { pid: 2 }).then(function (data) {
+            zfState.cates = Array.isArray(data) ? data : [];
+          }).catch(function () { zfState.cates = []; }));
+        }
+        return Promise.all(tasks).then(function () {
+          if (scene !== 'office' && zfState.cates.length && !zfState.cateId) {
+            zfState.cateId = parseInt(zfState.cates[0].id, 10) || 0;
+          }
+          renderZfCates();
+        }).catch(function () { renderZfCates(); });
+      }
+
+      function resetZfUpload() {
+        zfState.file = null;
+        var inp = $('zf-file');
+        var prev = $('zf-preview');
+        var ph = $('zf-upload-ph');
+        var zone = $('zf-upload-zone');
+        if (inp) inp.value = '';
+        if (prev) { prev.src = ''; prev.classList.add('hidden'); }
+        if (ph) ph.classList.remove('hidden');
+        if (zone) zone.classList.remove('has-img');
+      }
+
+      function setupZhenfenInline(d, readOnly) {
+        var done = Number(d.zhenfen_done) === 1 || Number(d.done) === 1;
+        var canAct = Number(d.can_act) === 1;
+        zfState.canAct = canAct && !readOnly;
+        var tip = $('zhenfen-done-tip');
+        var inline = $('zhenfen-inline');
+        if (done) {
+          show('zhenfen-done-tip');
+          inline.classList.add('zf-locked');
+        } else {
+          hide('zhenfen-done-tip');
+          inline.classList.remove('zf-locked');
+        }
+        if (!done && !canAct) {
+          inline.classList.add('zf-locked');
+        }
+        resetZfUpload();
+        renderZfScenes();
+        loadZfMeta();
+        var inp = $('zf-file');
+        inp.onchange = function () {
+          var f = inp.files[0];
+          if (!f) return;
+          zfState.file = f;
+          var prev = $('zf-preview');
+          prev.src = URL.createObjectURL(f);
+          prev.classList.remove('hidden');
+          $('zf-upload-ph').classList.add('hidden');
+          $('zf-upload-zone').classList.add('has-img');
+        };
+        $('btn-zhenfen-submit').onclick = function () {
+          if (inline.classList.contains('zf-locked')) return;
+          if (!zfState.cateId && zfState.scene !== 'street') {
+            alert('请选择垃圾种类');
+            return;
+          }
+          if (zfState.scene === 'office' && !zfState.pointId) {
+            alert('请选择办公真分角');
+            return;
+          }
+          if (!zfState.file) {
+            alert('请先拍摄或选择照片');
+            return;
+          }
+          $('btn-zhenfen-submit').disabled = true;
+          uploadHarmfulImage(zfState.file).then(function (path) {
+            var payload = {
+              type: 2,
+              cate_id: zfState.cateId,
+              content: '1+1活动真分打卡',
+              image: [path],
+              clock_scene: zfState.scene
+            };
+            if (zfState.scene === 'office') {
+              payload.clock_point_id = zfState.pointId;
+              payload.clock_sub_scene = 'zhenfenjiao';
+            }
+            if (zfState.scene === 'home' || zfState.scene === 'street') {
+              payload.setup_point_pledge = 1;
+            }
+            return apiPost('/wxapp/forum/add_forum', payload);
+          }).then(function () {
+            alert('真分打卡成功');
+            return refresh();
+          }).catch(function (e) {
+            alert(e.message || e);
+          }).then(function () {
+            $('btn-zhenfen-submit').disabled = false;
+          });
+        };
+      }
+
       function openDay(day) {
         currentDay = day;
         var d = (state.days || []).find(function (x) { return x.day === day; });
@@ -760,7 +1018,7 @@
           show('part-zhenfen');
           $('badge-z').textContent = d.zhenfen_done ? '已完成' : '待完成';
           $('badge-z').className = 'badge ' + (d.zhenfen_done ? 'ok' : 'wait');
-          $('btn-zhenfen').onclick = function () { navigateMp(zhenfenPath); };
+          setupZhenfenInline(d, readOnly);
         }
 
         var taskHead = $('part-task').querySelector('h3');
