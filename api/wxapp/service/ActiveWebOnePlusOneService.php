@@ -1002,17 +1002,44 @@ class ActiveWebOnePlusOneService
     }
 
     /**
-     * @param array<string, mixed> $userInfo
+     * AuthController 的 user_info 多为 Member Model，须转成数组再读 community_id 等字段。
+     *
+     * @param array<string, mixed>|object|null $userInfo
+     * @return array<string, mixed>
+     */
+    protected static function normalizeMemberInfo($userInfo): array
+    {
+        if (empty($userInfo)) {
+            return [];
+        }
+        if (is_array($userInfo)) {
+            return $userInfo;
+        }
+        if (is_object($userInfo)) {
+            if ($userInfo instanceof \think\Model) {
+                return $userInfo->getData();
+            }
+            if (method_exists($userInfo, 'toArray')) {
+                return $userInfo->toArray();
+            }
+        }
+
+        return (array)$userInfo;
+    }
+
+    /**
+     * @param array<string, mixed>|object $userInfo
      */
     public static function submitTaskSecondhand(
         int $userId,
-        array $userInfo,
+        $userInfo,
         int $activeId,
         string $title,
         string $priceRaw,
         string $contact,
         string $imagePath
     ): array {
+        $userInfo = self::normalizeMemberInfo($userInfo);
         self::loadWebActive($activeId);
         self::syncAndBuildStatus($userId, $activeId);
         $row = self::findProgress($userId, $activeId);
@@ -1130,8 +1157,9 @@ class ActiveWebOnePlusOneService
      *
      * @return array{community_id:int,points:array<int,array{id:int,name:string}>}
      */
-    public static function taskDwxjPoints(array $userInfo): array
+    public static function taskDwxjPoints($userInfo): array
     {
+        $userInfo = self::normalizeMemberInfo($userInfo);
         $communityId = (int)($userInfo['community_id'] ?? 0);
         if ($communityId <= 0) {
             throw new \InvalidArgumentException('请先绑定小区后再进行巡查/督导');
@@ -1147,11 +1175,11 @@ class ActiveWebOnePlusOneService
     /**
      * 第 6 天桶边督导(type=4)、第 7 天小区巡查(type=3)，写入 cmf_forum（同 dwxj/add）
      *
-     * @param array<string, mixed> $userInfo
+     * @param array<string, mixed>|object $userInfo
      */
     public static function submitTaskDwxj(
         int $userId,
-        array $userInfo,
+        $userInfo,
         int $activeId,
         int $day,
         int $cateId,
@@ -1161,6 +1189,7 @@ class ActiveWebOnePlusOneService
         if ($day !== 6 && $day !== 7) {
             throw new \InvalidArgumentException('无效任务天');
         }
+        $userInfo = self::normalizeMemberInfo($userInfo);
         $forumType = $day === 6 ? 4 : 3;
 
         self::loadWebActive($activeId);

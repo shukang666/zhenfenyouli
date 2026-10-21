@@ -195,9 +195,11 @@ class ActiveWebOnePlusOneController extends AuthController
     {
         $this->checkUser();
         try {
-            $data = ActiveWebOnePlusOneService::taskDwxjPoints($this->user_info ?: []);
+            $data = ActiveWebOnePlusOneService::taskDwxjPoints($this->user_info);
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
+        } catch (\Throwable $e) {
+            $this->error('点位列表加载失败，请稍后重试');
         }
         $this->success('请求成功', $data);
     }
@@ -220,6 +222,8 @@ class ActiveWebOnePlusOneController extends AuthController
             );
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
+        } catch (\Throwable $e) {
+            $this->error('提交失败，请稍后重试');
         }
         $this->success('提交成功', $data);
     }
