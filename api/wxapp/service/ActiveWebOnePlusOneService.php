@@ -5,6 +5,8 @@ namespace api\wxapp\service;
 use api\wxapp\model\AccountLogModel;
 use app\admin\model\active\ActiveModel;
 use app\admin\model\forum\ForumModel;
+use app\admin\model\member\CommunityCateModel;
+use app\admin\model\member\MemberLevelModel;
 use think\facade\Db;
 
 /**
@@ -161,18 +163,18 @@ class ActiveWebOnePlusOneService
             ],
             6 => [
                 'title' => '第 6 天',
-                'task_title' => '分类设施',
-                'task_brief' => '真分打卡需拍到分类桶/箱',
-                'task_detail' => '完成上方真分打卡且照片中可见分类设施，即同步完成当日任务。',
-                'task_kind' => 'facility_merged',
+                'task_title' => '点位督导',
+                'task_brief' => '桶边督导留证（与督导工作台一致）',
+                'task_detail' => '选择巡检点位，上传点位环境照片，提交后写入桶边督导记录。',
+                'task_kind' => 'supervise_web',
                 'mp_path' => '',
             ],
             7 => [
                 'title' => '第 7 天',
-                'task_title' => '点位巡查',
-                'task_brief' => '提交一条简版巡查记录',
-                'task_detail' => '填写点位名称、地址并上传门头或现场照片。',
-                'task_kind' => 'inspect_web',
+                'task_title' => '小区巡查',
+                'task_brief' => '点位巡查留证（与督导工作台一致）',
+                'task_detail' => '选择本小区巡查点位并上传环境照片，提交后写入小区巡查记录。',
+                'task_kind' => 'community_inspect_web',
                 'mp_path' => '',
             ],
         ];
@@ -752,11 +754,8 @@ class ActiveWebOnePlusOneService
                     ->where('create_time', '>=', $since)
                     ->count() > 0;
             case 6:
-                return self::countForumClock($userId, $since, ['cate_not' => self::HARMFUL_CATE_ID]) > 0;
+                return (int)ForumModel::where('user_id', $userId)->where('type', 4)->where('create_time', '>=', $since)->count() > 0;
             case 7:
-                if ((int)Db::name('supervision_monitor')->where('user_id', $userId)->where('create_time', '>=', $since)->count() > 0) {
-                    return true;
-                }
                 return (int)ForumModel::where('user_id', $userId)->where('type', 3)->where('create_time', '>=', $since)->count() > 0;
             default:
                 return false;
@@ -1127,81 +1126,109 @@ class ActiveWebOnePlusOneService
     }
 
     /**
+     * 小区巡查/桶边督导可选点位（与 forum/get_community_cate_list 一致）
+     *
+     * @return array{community_id:int,points:array<int,array{id:int,name:string}>}
+     */
+    public static function taskDwxjPoints(array $userInfo): array
+    {
+        $communityId = (int)($userInfo['community_id'] ?? 0);
+        if ($communityId <= 0) {
+            throw new \InvalidArgumentException('请先绑定小区后再进行巡查/督导');
+        }
+        $points = CommunityCateModel::field('id,name')
+            ->where('cate_id', $communityId)
+            ->select()
+            ->toArray();
+
+        return ['community_id' => $communityId, 'points' => $points];
+    }
+
+    /**
+     * 第 6 天桶边督导(type=4)、第 7 天小区巡查(type=3)，写入 cmf_forum（同 dwxj/add）
+     *
      * @param array<string, mixed> $userInfo
      */
-    public static function submitTaskInspect(
+    public static function submitTaskDwxj(
         int $userId,
         array $userInfo,
         int $activeId,
-        string $unitName,
-        string $address,
-        string $doorPhoto
+        int $day,
+        int $cateId,
+        string $imageOne,
+        int $inspectCommunityId = 0
     ): array {
+        if ($day !== 6 && $day !== 7) {
+            throw new \InvalidArgumentException('无效任务天');
+        }
+        $forumType = $day === 6 ? 4 : 3;
+
         self::loadWebActive($activeId);
         self::syncAndBuildStatus($userId, $activeId);
         $row = self::findProgress($userId, $activeId);
         if (empty($row)) {
             throw new \InvalidArgumentException('进度不存在');
         }
-        self::assertCanWorkOnDay($row, 7, $userId);
+        self::assertCanWorkOnDay($row, $day, $userId);
 
-        $unitName = trim($unitName);
-        $address = trim($address);
-        $doorPhoto = trim($doorPhoto);
-        if ($unitName === '' || mb_strlen($unitName) > 80) {
-            throw new \InvalidArgumentException('请填写点位/单位名称');
+        $imageOne = trim($imageOne);
+        if ($imageOne === '') {
+            throw new \InvalidArgumentException('请上传点位环境照片');
         }
-        if ($address === '' || mb_strlen($address) > 200) {
-            throw new \InvalidArgumentException('请填写地址');
-        }
-        if ($doorPhoto === '') {
-            throw new \InvalidArgumentException('请上传现场照片');
+        if ($cateId <= 0) {
+            throw new \InvalidArgumentException('请选择巡检点位');
         }
 
-        $communityId = (int)($userInfo['community_id'] ?? 0);
-        $communityName = trim((string)($userInfo['community_name'] ?? ''));
-        if ($communityName === '' && $communityId > 0) {
-            $communityName = (string)Db::name('member_community')->where('id', $communityId)->value('name');
-        }
-        if ($communityName === '') {
-            $communityName = '七贤岭';
+        $cateInfo = CommunityCateModel::where('id', $cateId)->find();
+        if (empty($cateInfo)) {
+            throw new \InvalidArgumentException('点位不存在');
         }
 
-        Db::name('supervision_monitor')->insert([
+        if ($inspectCommunityId <= 0) {
+            $inspectCommunityId = (int)($userInfo['community_id'] ?? 0);
+        }
+        if ($inspectCommunityId <= 0) {
+            throw new \InvalidArgumentException('请先绑定小区');
+        }
+
+        $forumModel = new ForumModel();
+        $last = $forumModel->where('type', $forumType)
+            ->where('user_id', $userId)
+            ->where('cate_id', $cateId)
+            ->order('id desc')
+            ->find();
+        if (!empty($last)) {
+            $hours = (int)($cateInfo['inspection_hour'] ?? 0);
+            if ($hours > 0 && (int)$last['create_time'] > strtotime('-' . $hours . ' hour')) {
+                throw new \InvalidArgumentException('该点位尚在间隔时间内，请稍后再提交');
+            }
+        }
+
+        $content = "现场整洁：整洁\n整改意见：无\n工作情况：1+1活动" . ($forumType === 4 ? '桶边督导' : '小区巡查');
+        $now = time();
+        $point = (float)($cateInfo['inspection_point'] ?? 0);
+        $forumModel->save([
             'user_id' => $userId,
-            'community_id' => $communityId,
-            'community_name' => $communityName,
-            'unit_name' => $unitName,
-            'unit_type' => 1,
-            'check_date' => date('Y-m-d'),
-            'address' => $address,
-            'contact' => (string)($userInfo['nickname'] ?? ''),
-            'contact_phone' => (string)($userInfo['mobile'] ?? ''),
-            'has_waste' => 0,
-            'waste_correct' => 0,
-            'waste_flow' => '',
-            'door_photo' => $doorPhoto,
-            'inner_photo' => '',
-            'publicity_photo' => '',
-            'inner_qualified' => 1,
-            'need_rectify' => 0,
-            'inner_rectify_photo' => '',
-            'point_photo' => '',
-            'point_qualified' => 1,
-            'point_rectify_photo' => '',
-            'manage_photo' => '',
-            'manage_qualified' => 1,
-            'manage_rectify_photo' => '',
-            'transport_photo' => '',
-            'catering_photo' => '',
-            'accuracy_photo' => '',
-            'overall_evaluation' => '1+1活动简版巡查',
-            'create_time' => time(),
+            'type' => $forumType,
+            'cate_id' => $cateId,
+            'content' => $content,
+            'image_one' => $imageOne,
+            'image_two' => '',
+            'image_three' => '',
+            'community_id' => (int)($userInfo['subject_community_id'] ?? $inspectCommunityId),
+            'subject_community_id' => $inspectCommunityId,
+            'create_time' => $now,
+            'update_time' => $now,
         ]);
+        $forumId = (int)$forumModel->id;
+        if ($point > 0) {
+            AccountLogModel::add_account_log($userId, 2, 222, $point, ['from_uid' => $forumId]);
+        }
+        MemberLevelModel::isLevel($userId);
 
         $status = self::syncAndBuildStatus($userId, $activeId);
 
-        return ['status' => $status];
+        return ['forum_id' => $forumId, 'point' => $point, 'status' => $status];
     }
 
     protected static function resolveQxlPhotoActiveId(): int

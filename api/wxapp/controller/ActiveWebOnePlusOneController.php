@@ -190,24 +190,38 @@ class ActiveWebOnePlusOneController extends AuthController
         $this->success('上传成功', $data);
     }
 
-    /** 第 7 天：简版点位巡查 */
-    public function task_inspect_submit()
+    /** 第 6/7 天：巡查点位列表 */
+    public function task_dwxj_points()
+    {
+        $this->checkUser();
+        try {
+            $data = ActiveWebOnePlusOneService::taskDwxjPoints($this->user_info ?: []);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('请求成功', $data);
+    }
+
+    /** 第 6 天桶边督导 / 第 7 天小区巡查 */
+    public function task_dwxj_submit()
     {
         $this->checkUser();
         $activeId = (int)$this->request->param('active_id');
+        $day = (int)$this->request->param('day', 0);
         try {
-            $data = ActiveWebOnePlusOneService::submitTaskInspect(
+            $data = ActiveWebOnePlusOneService::submitTaskDwxj(
                 (int)$this->user_id,
                 $this->user_info ?: [],
                 $activeId,
-                (string)$this->request->param('unit_name', ''),
-                (string)$this->request->param('address', ''),
-                trim((string)$this->request->param('door_photo', ''))
+                $day,
+                (int)$this->request->param('cate_id', 0),
+                trim((string)$this->request->param('image_one', '')),
+                (int)$this->request->param('inspect_community_id', 0)
             );
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
         }
-        $this->success('巡查已提交', $data);
+        $this->success('提交成功', $data);
     }
 
     /** 第 5 天：用户在 H5 确认分享后标记（可与积分分享记录二选一满足） */
