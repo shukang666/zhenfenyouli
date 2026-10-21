@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>1+1 活动</title>
   <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
-  <script src="../sdk.js?v=20261020c"></script>
+  <script src="../sdk.js?v=20261021a"></script>
   <style>
     :root {
       --green: #0d4f36;
@@ -430,6 +430,7 @@
       <div class="card">
         <div class="sec-title">挑战日历（7 天）</div>
         <div class="grid" id="day-grid"></div>
+        <div id="day-grid-error" class="guide-line hidden" style="color:#b42318;margin-top:12px;"></div>
       </div>
       <div class="card">
         <div class="sec-title">我的进度</div>
@@ -527,7 +528,20 @@
       function show(id) { $(id).classList.remove('hidden'); }
       function hide(id) { $(id).classList.add('hidden'); }
 
+      function showLoadError(msg) {
+        var err = $('day-grid-error');
+        if (err) {
+          err.textContent = msg || '活动数据加载失败，请返回后重试';
+          show('day-grid-error');
+        }
+        var grid = $('day-grid');
+        if (grid && !grid.children.length) {
+          grid.innerHTML = '<div class="guide-line" style="grid-column:1/-1;color:#b42318;">' + escapeHtml(msg || '加载失败') + '</div>';
+        }
+      }
+
       function renderHome(data) {
+        hide('day-grid-error');
         state = data;
         zhenfenPath = data.zhenfen_entry || zhenfenPath;
         var g = data.guide || {};
@@ -543,7 +557,12 @@
         }
         var grid = $('day-grid');
         grid.innerHTML = '';
-        (data.days || []).forEach(function (d) {
+        var days = data.days || [];
+        if (!days.length) {
+          showLoadError('未获取到挑战日历数据，请确认活动已发布且后端已更新');
+          return;
+        }
+        days.forEach(function (d) {
           var el = document.createElement('div');
           var cls = 'cell';
           if (d.locked) cls += ' locked';
@@ -837,6 +856,10 @@
             if (d) openDay(currentDay);
           }
           return data;
+        }).catch(function (e) {
+          var msg = (e && e.message) ? e.message : '活动进度加载失败';
+          showLoadError(msg);
+          throw e;
         });
       }
 
@@ -863,7 +886,7 @@
         var m = hash.match(/day\/(\d+)/);
         return refresh().then(function () {
           if (m) openDay(parseInt(m[1], 10));
-        });
+        }).catch(function () {});
       }).catch(function (e) {
         $('panel-loading').textContent = e.message || String(e);
       });

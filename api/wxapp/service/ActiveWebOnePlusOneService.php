@@ -38,6 +38,62 @@ class ActiveWebOnePlusOneService
         return 'active_web_one_plus_one_harmful_clock';
     }
 
+    public static function day1PreLearnTable(): string
+    {
+        return 'active_web_one_plus_one_day1_pre_learn';
+    }
+
+    public static function hasDay1PreLearnInWindow(int $userId, int $activeId, int $cycleNo, int $since): bool
+    {
+        if ($since <= 0) {
+            return false;
+        }
+        try {
+            return (int)Db::name(self::day1PreLearnTable())
+                ->where('user_id', $userId)
+                ->where('active_id', $activeId)
+                ->where('cycle_no', $cycleNo)
+                ->where('create_time', '>=', $since)
+                ->count() > 0;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * 第 1 天：小程序 pre_learn 学考完成后回写
+     *
+     * @return array<string, mixed>
+     */
+    public static function recordDay1PreLearnCompletion(int $userId, int $activeId): array
+    {
+        self::loadWebActive($activeId);
+        self::syncAndBuildStatus($userId, $activeId);
+        $row = self::findProgress($userId, $activeId);
+        if (empty($row)) {
+            throw new \InvalidArgumentException('进度不存在');
+        }
+        self::assertCanWorkOnDay($row, 1);
+
+        $cycleNo = (int)($row['cycle_no'] ?? 1);
+        $since = self::dayWindowSincePublic($row, 1);
+        if (self::hasDay1PreLearnInWindow($userId, $activeId, $cycleNo, $since)) {
+            $status = self::syncAndBuildStatus($userId, $activeId);
+            return ['already' => 1, 'status' => $status];
+        }
+
+        Db::name(self::day1PreLearnTable())->insert([
+            'user_id' => $userId,
+            'active_id' => $activeId,
+            'cycle_no' => $cycleNo,
+            'create_time' => time(),
+        ]);
+
+        $status = self::syncAndBuildStatus($userId, $activeId);
+
+        return ['already' => 0, 'status' => $status];
+    }
+
     /** @return array<int, array<string, mixed>> */
     public static function dayDefinitions(): array
     {
@@ -614,7 +670,7 @@ class ActiveWebOnePlusOneService
 
         switch ($day) {
             case 1:
-                if (ActiveWebOnePlusOnePreLearnService::hasCompletedInWindow(
+                if (self::hasDay1PreLearnInWindow(
                     $userId,
                     $activeId,
                     (int)($row['cycle_no'] ?? 1),

@@ -2,7 +2,6 @@
 
 namespace api\wxapp\controller;
 
-use api\wxapp\service\ActiveWebOnePlusOnePreLearnService;
 use api\wxapp\service\ActiveWebOnePlusOneQuizService;
 use api\wxapp\service\ActiveWebOnePlusOneService;
 
@@ -44,7 +43,7 @@ class ActiveWebOnePlusOneController extends AuthController
         $this->checkUser();
         $activeId = (int)$this->request->param('active_id');
         try {
-            $data = ActiveWebOnePlusOnePreLearnService::recordCompletion((int)$this->user_id, $activeId);
+            $data = ActiveWebOnePlusOneService::recordDay1PreLearnCompletion((int)$this->user_id, $activeId);
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
         }
