@@ -28,6 +28,25 @@ class ActiveWebOnePlusOneService
 
     const ACCOUNT_TYPE_1PLUS1 = 232;
 
+    /** 运营/测试：日历 7 天均可浏览，且任意未完成天均可操作（不受「每日仅 1 天」与顺序限制） */
+    private static $qaFullOpenMobiles = [
+        '13050553897',
+    ];
+
+    protected static function isQaFullOpenUser(int $userId): bool
+    {
+        if ($userId <= 0) {
+            return false;
+        }
+        static $cache = [];
+        if (array_key_exists($userId, $cache)) {
+            return $cache[$userId];
+        }
+        $mobile = preg_replace('/\s+/', '', (string)Db::name('member')->where('id', $userId)->value('mobile'));
+        $cache[$userId] = $mobile !== '' && in_array($mobile, self::$qaFullOpenMobiles, true);
+        return $cache[$userId];
+    }
+
     public static function progressTable(): string
     {
         return 'active_web_one_plus_one_progress';
@@ -73,10 +92,10 @@ class ActiveWebOnePlusOneService
         if (empty($row)) {
             throw new \InvalidArgumentException('进度不存在');
         }
-        self::assertCanWorkOnDay($row, 1);
+        self::assertCanWorkOnDay($row, 1, $userId);
 
         $cycleNo = (int)($row['cycle_no'] ?? 1);
-        $since = self::dayWindowSincePublic($row, 1);
+        $since = self::dayWindowSincePublic($row, 1, $userId);
         if (self::hasDay1PreLearnInWindow($userId, $activeId, $cycleNo, $since)) {
             $status = self::syncAndBuildStatus($userId, $activeId);
             return ['already' => 1, 'status' => $status];
@@ -236,7 +255,7 @@ class ActiveWebOnePlusOneService
         if (empty($row)) {
             throw new \InvalidArgumentException('进度初始化失败');
         }
-        self::assertCanWorkOnDay($row, 1);
+        self::assertCanWorkOnDay($row, 1, $userId);
 
         $cycleNo = (int)($row['cycle_no'] ?? 1);
         $now = time();
@@ -326,20 +345,26 @@ class ActiveWebOnePlusOneService
     }
 
     /** 供子模块判断任务时间窗 */
-    public static function dayWindowSincePublic(array $row, int $day): int
+    public static function dayWindowSincePublic(array $row, int $day, int $userId = 0): int
     {
-        return self::dayWindowSince($row, $day);
+        return self::dayWindowSince($row, $day, $userId);
     }
 
     /** 当日任务/真分只统计该时间点之后的行为（第 1 天从 cycle_start 起） */
-    protected static function dayWindowSince(array $row, int $day): int
+    protected static function dayWindowSince(array $row, int $day, int $userId = 0): int
     {
         if ($day <= 1) {
             return (int)($row['cycle_start'] ?? 0);
         }
         $doneAt = self::decodeDayDoneAt((string)($row['day_done_at'] ?? '{}'));
         $prev = $day - 1;
-        return isset($doneAt[$prev]) ? (int)$doneAt[$prev] : 0;
+        if (isset($doneAt[$prev])) {
+            return (int)$doneAt[$prev];
+        }
+        if ($userId > 0 && self::isQaFullOpenUser($userId)) {
+            return (int)($row['cycle_start'] ?? 0);
+        }
+        return 0;
     }
 
     protected static function todayStartTs(): int
@@ -380,8 +405,11 @@ class ActiveWebOnePlusOneService
     }
 
     /** 第 4 天起：须按顺序解锁后才可浏览；前 3 天始终可浏览说明 */
-    protected static function canBrowseDay(int $day, array $completedFlip): bool
+    protected static function canBrowseDay(int $day, array $completedFlip, int $userId = 0): bool
     {
+        if ($userId > 0 && self::isQaFullOpenUser($userId)) {
+            return true;
+        }
         if ($day <= self::BROWSE_ALWAYS_OPEN_DAYS) {
             return true;
         }
@@ -391,11 +419,14 @@ class ActiveWebOnePlusOneService
     /**
      * 是否可在本页提交/跳转完成当日（自然日仅允许完成 1 个进度天；做完须等次日）
      */
-    protected static function canActOnDay(array $row, int $day): bool
+    protected static function canActOnDay(array $row, int $day, int $userId = 0): bool
     {
         $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
         if (!empty($completedFlip[$day])) {
             return false;
+        }
+        if ($userId > 0 && self::isQaFullOpenUser($userId)) {
+            return true;
         }
         if (!self::isDayUnlocked($day, $completedFlip)) {
             return false;
@@ -409,9 +440,9 @@ class ActiveWebOnePlusOneService
         return true;
     }
 
-    protected static function buildActHint(array $row, int $day, array $completedFlip): string
+    protected static function buildActHint(array $row, int $day, array $completedFlip, int $userId = 0): string
     {
-        if (self::canActOnDay($row, $day)) {
+        if (self::canActOnDay($row, $day, $userId)) {
             return '';
         }
         if (!empty($completedFlip[$day])) {
@@ -437,11 +468,11 @@ class ActiveWebOnePlusOneService
     }
 
     /** 未解锁或该日已完成则不可再做 */
-    public static function assertCanWorkOnDay(array $row, int $day): void
+    public static function assertCanWorkOnDay(array $row, int $day, int $userId = 0): void
     {
-        if (!self::canActOnDay($row, $day)) {
+        if (!self::canActOnDay($row, $day, $userId)) {
             $completedFlip = array_fill_keys(self::parseCompletedDays((string)($row['completed_days'] ?? '')), true);
-            throw new \InvalidArgumentException(self::buildActHint($row, $day, $completedFlip) ?: '当前不可进行该天任务');
+            throw new \InvalidArgumentException(self::buildActHint($row, $day, $completedFlip, $userId) ?: '当前不可进行该天任务');
         }
     }
 
@@ -453,7 +484,7 @@ class ActiveWebOnePlusOneService
         if (empty($row)) {
             throw new \InvalidArgumentException('进度不存在');
         }
-        self::assertCanWorkOnDay($row, 2);
+        self::assertCanWorkOnDay($row, 2, $userId);
         Db::name(self::progressTable())
             ->where('user_id', $userId)
             ->where('active_id', $activeId)
@@ -632,10 +663,10 @@ class ActiveWebOnePlusOneService
                 }
                 continue;
             }
-            if (!self::canActOnDay($row, $day)) {
+            if (!self::canActOnDay($row, $day, $userId)) {
                 break;
             }
-            $since = self::dayWindowSince($row, $day);
+            $since = self::dayWindowSince($row, $day, $userId);
             if ($since <= 0) {
                 break;
             }
@@ -672,10 +703,10 @@ class ActiveWebOnePlusOneService
         if (!empty($completedFlip[$day])) {
             return true;
         }
-        if (!self::canActOnDay($row, $day)) {
+        if (!self::canActOnDay($row, $day, $userId)) {
             return false;
         }
-        $since = self::dayWindowSince($row, $day);
+        $since = self::dayWindowSince($row, $day, $userId);
         if ($since <= 0) {
             return false;
         }
@@ -755,7 +786,7 @@ class ActiveWebOnePlusOneService
             if (isset($completedFlip[$day])) {
                 continue;
             }
-            if (!self::canActOnDay($row, $day)) {
+            if (!self::canActOnDay($row, $day, $userId)) {
                 continue;
             }
             $hasZ = isset($map[$day]);
@@ -848,8 +879,8 @@ class ActiveWebOnePlusOneService
         $days = [];
         for ($d = 1; $d <= self::TOTAL_DAYS; $d++) {
             $def = $defs[$d];
-            $canBrowse = self::canBrowseDay($d, $completedFlip);
-            $canAct = self::canActOnDay($row, $d);
+            $canBrowse = self::canBrowseDay($d, $completedFlip, $userId);
+            $canAct = self::canActOnDay($row, $d, $userId);
             $done = isset($completedFlip[$d]);
             $taskDone = $done ? 1 : (self::isTaskDone($userId, $activeId, $d, $row) ? 1 : 0);
             $taskOnlyDay = ($d === 1 && !self::dayNeedsZhenfen(1));
@@ -858,7 +889,7 @@ class ActiveWebOnePlusOneService
             if (!$canBrowse) {
                 $lockHint = '请先完成第 ' . ($d - 1) . ' 天后再解锁本日';
             }
-            $actHint = self::buildActHint($row, $d, $completedFlip);
+            $actHint = self::buildActHint($row, $d, $completedFlip, $userId);
             $mpPath = (string)($def['mp_path'] ?? '');
             if ($d === 1 && ($def['task_kind'] ?? '') === 'pre_learn_mp' && $mpPath !== '') {
                 $mpPath .= (strpos($mpPath, '?') !== false ? '&' : '?') . 'active_id=' . $activeId;

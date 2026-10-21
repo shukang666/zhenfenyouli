@@ -113,7 +113,7 @@ class ActiveWebOnePlusOneQuizService
         if (empty($row)) {
             throw new \InvalidArgumentException('进度不存在');
         }
-        ActiveWebOnePlusOneService::assertCanWorkOnDay($row, 3);
+        ActiveWebOnePlusOneService::assertCanWorkOnDay($row, 3, $userId);
 
         $bank = self::questionBank();
         $detail = [];

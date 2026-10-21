@@ -585,9 +585,51 @@
         });
       }
 
+      var mpReturnWatch = null;
+
+      function clearMpReturnWatch() {
+        if (!mpReturnWatch) return;
+        if (mpReturnWatch.timer) clearInterval(mpReturnWatch.timer);
+        if (mpReturnWatch.onVis) document.removeEventListener('visibilitychange', mpReturnWatch.onVis);
+        if (mpReturnWatch.onPageShow) window.removeEventListener('pageshow', mpReturnWatch.onPageShow);
+        mpReturnWatch = null;
+      }
+
+      /** 从小程序子页 navigateBack 后，web-view 内 visibilitychange 常不触发，需主动拉进度 */
+      function armRefreshOnMpReturn() {
+        clearMpReturnWatch();
+        var ctx = { sawHidden: false };
+        ctx.markLeft = function () { ctx.sawHidden = true; };
+        var fired = false;
+        function tryFire() {
+          if (fired || !activeId) return;
+          if (document.hidden) {
+            ctx.sawHidden = true;
+            return;
+          }
+          if (!ctx.sawHidden) return;
+          fired = true;
+          clearMpReturnWatch();
+          refresh().catch(function () {});
+        }
+        var onVis = function () { tryFire(); };
+        var onPageShow = function () { tryFire(); };
+        document.addEventListener('visibilitychange', onVis);
+        window.addEventListener('pageshow', onPageShow);
+        var timer = setInterval(tryFire, 400);
+        mpReturnWatch = { onVis: onVis, onPageShow: onPageShow, timer: timer };
+        setTimeout(clearMpReturnWatch, 10 * 60 * 1000);
+        return ctx;
+      }
+
       function navigateMp(path) {
         if (!path) return;
-        ActiveWebSdk.navigateMp(path).catch(function (e) {
+        ActiveWebSdk.navigateMp(path).then(function () {
+          var ctx = armRefreshOnMpReturn();
+          setTimeout(function () {
+            if (ctx && ctx.markLeft) ctx.markLeft();
+          }, 500);
+        }).catch(function (e) {
           alert((e && e.message) ? e.message : '跳转失败，请稍后重试');
         });
       }
@@ -1101,7 +1143,12 @@
       };
 
       document.addEventListener('visibilitychange', function () {
-        if (!document.hidden && activeId) refresh().catch(function () {});
+        if (!document.hidden && activeId) {
+          refresh().catch(function () {});
+        }
+      });
+      window.addEventListener('pageshow', function () {
+        if (activeId) refresh().catch(function () {});
       });
 
       ActiveWebSdk.bootstrap().then(function (data) {
