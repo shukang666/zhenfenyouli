@@ -138,7 +138,7 @@ class SecondhandController extends AuthController
         $category = trim((string)$this->request->param('category', 'other'));
         $condition = trim((string)$this->request->param('condition', 'used'));
         $areaText = trim((string)$this->request->param('area_text', ''));
-        $images = SecondhandService::normalizeImagePaths($this->request->param('images', ''));
+        $images = SecondhandService::extractPublishImagesFromRequest($this->request);
 
         if ($title === '') {
             $this->error('请填写物品名称');

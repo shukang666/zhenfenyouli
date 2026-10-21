@@ -170,14 +170,67 @@ class SecondhandService
         return array_filter(array_map('trim', explode(',', $s)));
     }
 
+    /**
+     * 发布接口：从请求中解析 images（兼容 JSON 体、JSON.stringify、数组、单图 image）
+     *
+     * @param \think\Request $request
+     * @return list<string>
+     */
+    public static function extractPublishImagesFromRequest($request): array
+    {
+        $candidates = [];
+        $post = $request->post(false);
+        if (is_array($post)) {
+            if (array_key_exists('images', $post)) {
+                $candidates[] = $post['images'];
+            }
+            if (!empty($post['image'])) {
+                $candidates[] = $post['image'];
+            }
+        }
+        $fromParam = $request->param('images', null);
+        if ($fromParam !== null && $fromParam !== '') {
+            $candidates[] = $fromParam;
+        }
+        if (empty($candidates)) {
+            $input = method_exists($request, 'getInput') ? (string)$request->getInput() : '';
+            if ($input !== '') {
+                $decoded = json_decode($input, true);
+                if (is_array($decoded)) {
+                    if (array_key_exists('images', $decoded)) {
+                        $candidates[] = $decoded['images'];
+                    }
+                    if (!empty($decoded['image'])) {
+                        $candidates[] = $decoded['image'];
+                    }
+                }
+            }
+        }
+        foreach ($candidates as $raw) {
+            if ($raw === null || $raw === '') {
+                continue;
+            }
+            $paths = self::normalizeImagePaths($raw);
+            if (!empty($paths)) {
+                return $paths;
+            }
+        }
+
+        return [];
+    }
+
     public static function normalizeImagePaths($imagesParam): array
     {
+        $imagesParam = self::unwrapImagesPayload($imagesParam);
         if (is_string($imagesParam)) {
             $imagesParam = trim($imagesParam);
-            if ($imagesParam !== '' && $imagesParam[0] === '[') {
-                $imagesParam = json_decode($imagesParam, true);
+            if ($imagesParam === '') {
+                $imagesParam = [];
+            } elseif ($imagesParam[0] === '[' || $imagesParam[0] === '{') {
+                $decoded = json_decode($imagesParam, true);
+                $imagesParam = is_array($decoded) ? $decoded : self::decodeImages($imagesParam);
             } else {
-                $imagesParam = $imagesParam === '' ? [] : explode(',', $imagesParam);
+                $imagesParam = explode(',', $imagesParam);
             }
         }
         if (!is_array($imagesParam)) {
@@ -185,14 +238,61 @@ class SecondhandService
         }
         $out = [];
         foreach ($imagesParam as $p) {
-            $p = trim((string)$p);
-            if ($p === '') {
+            if (is_array($p)) {
+                $p = $p['filepath'] ?? $p['file_path'] ?? $p['url'] ?? $p['path'] ?? '';
+            }
+            $p = self::toStorageRelativePath(trim((string)$p));
+            if ($p === '' || preg_match('#^wxfile:#i', $p)) {
                 continue;
             }
-            $p = preg_replace('#^upload/#', '', $p);
             $out[] = $p;
         }
         return array_slice($out, 0, 6);
+    }
+
+    /**
+     * @param mixed $payload
+     * @return mixed
+     */
+    protected static function unwrapImagesPayload($payload)
+    {
+        $depth = 0;
+        while (is_string($payload) && $depth < 4) {
+            $t = trim($payload);
+            if ($t === '') {
+                return [];
+            }
+            if ($t[0] !== '[' && $t[0] !== '{') {
+                return $payload;
+            }
+            $decoded = json_decode($t, true);
+            if (!is_array($decoded) && !is_string($decoded)) {
+                return $payload;
+            }
+            $payload = $decoded;
+            $depth++;
+        }
+
+        return $payload;
+    }
+
+    protected static function toStorageRelativePath(string $p): string
+    {
+        if ($p === '') {
+            return '';
+        }
+        if (preg_match('#^https?://#i', $p)) {
+            $path = preg_replace('#^https?://[^/]+/#i', '', $p);
+            $path = preg_replace('#\?.*$#', '', $path);
+            $path = ltrim($path, '/');
+            if (function_exists('cmf_strip_upload_object_key_prefix')) {
+                return cmf_strip_upload_object_key_prefix($path);
+            }
+
+            return preg_replace('#^upload/#', '', $path);
+        }
+
+        return preg_replace('#^upload/#', '', $p);
     }
 
     public static function sellerSnapshot(int $userId): array
