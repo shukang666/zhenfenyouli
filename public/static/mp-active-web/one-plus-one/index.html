@@ -425,6 +425,12 @@
     .zf-cate-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px;
     }
+    .zf-cate-grid--single {
+      grid-template-columns: 1fr;
+    }
+    .zf-cate-grid--single .zf-cate-card {
+      pointer-events: none; cursor: default;
+    }
     .zf-cate-card {
       position: relative; border-radius: 14px; padding: 12px 10px 10px;
       border: 2px solid rgba(26, 143, 92, .12); background: rgba(255,255,255,.92);
@@ -513,11 +519,11 @@
         <div class="detail-sub" id="day-brief"></div>
         <div id="act-hint-box" class="act-hint hidden"></div>
         <div class="part zhenfen" id="part-zhenfen">
-          <h3>真分打卡 <span class="badge wait" id="badge-z">待完成</span></h3>
-          <p style="margin-bottom:0;">家庭场景真分：选垃圾类型、拍照提交（与小程序真分页一致，无需跳转）。</p>
+          <h3><span id="zf-part-title">真分打卡</span> <span class="badge wait" id="badge-z">待完成</span></h3>
+          <p id="zf-part-desc" style="margin-bottom:0;">家庭场景真分：选垃圾类型、拍照提交（与小程序真分页一致，无需跳转）。</p>
           <div id="zhenfen-done-tip" class="quiz-done-tip hidden" style="margin-top:12px;">真分打卡已完成</div>
           <div id="zhenfen-inline" class="zf-inline">
-            <p class="zf-hint">请选择本次投放的垃圾类型</p>
+            <p class="zf-hint" id="zf-cate-hint">请选择本次投放的垃圾类型</p>
             <div class="zf-cate-grid" id="zf-cates"></div>
             <label class="zf-upload" id="zf-upload-zone">
               <input type="file" accept="image/*" capture="environment" id="zf-file" />
@@ -843,7 +849,15 @@
         harm: '电池、灯管、过期药品等',
         food: '剩菜剩饭、果皮菜叶等'
       };
-      var zfState = { cateId: 0, file: null, cates: [], canAct: true };
+      var zfState = { cateId: 0, file: null, cates: [], canAct: true, recycleOnly: false };
+      var ZF_PART_DEFAULT = {
+        title: '真分打卡',
+        desc: '家庭场景真分：选垃圾类型、拍照提交（与小程序真分页一致，无需跳转）。',
+        hint: '请选择本次投放的垃圾类型',
+        doneTip: '真分打卡已完成',
+        submit: '提交真分打卡',
+        success: '真分打卡成功'
+      };
 
       function zfCateKind(name) {
         var n = name || '';
@@ -873,10 +887,27 @@
         return ZF_CATE_HINTS[zfCateKind(name)] || '按社区要求正确投放';
       }
 
+      function isRecycleCateName(name) {
+        var n = String(name || '');
+        if (n.indexOf('不可回收') >= 0) return false;
+        return n.indexOf('可回收') >= 0;
+      }
+
       function renderZfCates() {
         var box = $('zf-cates');
+        box.className = 'zf-cate-grid';
         if (!zfState.cates.length) {
-          box.innerHTML = '<span class="zf-note">暂无垃圾类型，请稍后再试</span>';
+          box.innerHTML = '<span class="zf-note">暂无可回收种类，请稍后再试</span>';
+          return;
+        }
+        if (zfState.recycleOnly && zfState.cates.length === 1) {
+          var only = zfState.cates[0];
+          var onlyId = parseInt(only.id, 10) || 0;
+          zfState.cateId = onlyId;
+          box.className = 'zf-cate-grid zf-cate-grid--single';
+          box.innerHTML = '<div class="zf-cate-card zf-cate-card--recycle on">' +
+            '<span class="zf-cate-name">' + escapeHtml(only.name || '可回收物') + '</span>' +
+            '<span class="zf-cate-sub">' + escapeHtml(zfCateHint(only.name)) + '</span></div>';
           return;
         }
         box.innerHTML = zfState.cates.map(function (c) {
@@ -898,15 +929,44 @@
         });
       }
 
-      function loadZfMeta() {
+      function loadZfMeta(recycleOnly) {
+        zfState.recycleOnly = !!recycleOnly;
         zfState.cates = [];
         return apiPost('/wxapp/select/get_select_list', { type: 2 }).then(function (data) {
-          zfState.cates = Array.isArray(data) ? data : [];
+          var list = Array.isArray(data) ? data : [];
+          if (zfState.recycleOnly) {
+            list = list.filter(function (c) { return isRecycleCateName(c.name); });
+          }
+          zfState.cates = list;
+          if (zfState.recycleOnly && zfState.cates.length === 1) {
+            zfState.cateId = parseInt(zfState.cates[0].id, 10) || 0;
+          }
           renderZfCates();
         }).catch(function () {
           zfState.cates = [];
           renderZfCates();
         });
+      }
+
+      function applyZfPartCopy(recycleOnly) {
+        var title = $('zf-part-title');
+        var desc = $('zf-part-desc');
+        var hint = $('zf-cate-hint');
+        var doneTip = $('zhenfen-done-tip');
+        var btn = $('btn-zhenfen-submit');
+        if (recycleOnly) {
+          if (title) title.textContent = '打卡可回收';
+          if (desc) desc.textContent = '家庭场景：拍摄可回收物投放照片并提交，即可完成第 3 天挑战（无需再做其他任务）。';
+          if (hint) hint.textContent = '垃圾种类';
+          if (doneTip) doneTip.textContent = '可回收打卡已完成';
+          if (btn) btn.textContent = '提交可回收打卡';
+        } else {
+          if (title) title.textContent = ZF_PART_DEFAULT.title;
+          if (desc) desc.textContent = ZF_PART_DEFAULT.desc;
+          if (hint) hint.textContent = ZF_PART_DEFAULT.hint;
+          if (doneTip) doneTip.textContent = ZF_PART_DEFAULT.doneTip;
+          if (btn) btn.textContent = ZF_PART_DEFAULT.submit;
+        }
       }
 
       function resetZfUpload() {
@@ -921,11 +981,17 @@
         if (zone) zone.classList.remove('has-img');
       }
 
-      function setupZhenfenInline(d, readOnly) {
-        var done = Number(d.zhenfen_done) === 1 || Number(d.done) === 1;
+      function setupZhenfenInline(d, readOnly, recycleOnly) {
+        recycleOnly = !!recycleOnly;
+        applyZfPartCopy(recycleOnly);
+        var done = Number(d.done) === 1;
+        if (!done && recycleOnly) {
+          done = Number(d.task_done) === 1;
+        } else if (!done) {
+          done = Number(d.zhenfen_done) === 1;
+        }
         var canAct = Number(d.can_act) === 1;
         zfState.canAct = canAct && !readOnly;
-        var tip = $('zhenfen-done-tip');
         var inline = $('zhenfen-inline');
         if (done) {
           show('zhenfen-done-tip');
@@ -939,7 +1005,7 @@
         }
         zfState.cateId = 0;
         resetZfUpload();
-        loadZfMeta();
+        loadZfMeta(recycleOnly);
         var inp = $('zf-file');
         inp.onchange = function () {
           var f = inp.files[0];
@@ -966,14 +1032,14 @@
             var payload = {
               type: 2,
               cate_id: zfState.cateId,
-              content: '1+1活动真分打卡',
+              content: zfState.recycleOnly ? '1+1活动可回收打卡' : '1+1活动真分打卡',
               image: [path],
               clock_scene: 'home',
               setup_point_pledge: 1
             };
             return apiPost('/wxapp/forum/add_forum', payload);
           }).then(function () {
-            alert('真分打卡成功');
+            alert(zfState.recycleOnly ? '可回收打卡成功' : '真分打卡成功');
             return refresh();
           }).catch(function (e) {
             alert(e.message || e);
@@ -1011,23 +1077,40 @@
         $('day-title').textContent = d.title + ' · ' + d.task_title;
         $('day-brief').textContent = d.task_brief;
         $('task-detail').textContent = d.task_detail || '';
-        var isPreLearnMp = d.task_kind === 'pre_learn_mp' || Number(d.task_only) === 1;
-        var taskOnlyDay = isPreLearnMp && day === 1;
+        var preLearnDay = d.task_kind === 'pre_learn_mp';
+        var recycleOnlyDay = d.task_kind === 'recycle_clock_web';
 
-        if (taskOnlyDay) {
+        if (preLearnDay) {
           hide('part-zhenfen');
+          show('part-task');
+        } else if (recycleOnlyDay) {
+          show('part-zhenfen');
+          hide('part-task');
+          var zDone = Number(d.done) === 1 || Number(d.task_done) === 1;
+          $('badge-z').textContent = zDone ? '已完成' : '待完成';
+          $('badge-z').className = 'badge ' + (zDone ? 'ok' : 'wait');
+          setupZhenfenInline(d, readOnly, true);
         } else {
           show('part-zhenfen');
+          show('part-task');
           $('badge-z').textContent = d.zhenfen_done ? '已完成' : '待完成';
           $('badge-z').className = 'badge ' + (d.zhenfen_done ? 'ok' : 'wait');
-          setupZhenfenInline(d, readOnly);
+          setupZhenfenInline(d, readOnly, false);
+        }
+
+        if (recycleOnlyDay) {
+          hide('quiz-panel');
+          hide('harmful-panel');
+          hide('btn-task');
+          hide('btn-share-ack');
+          return;
         }
 
         var taskHead = $('part-task').querySelector('h3');
         if (taskHead) {
           var badgeCls = d.task_done ? 'ok' : 'wait';
           var badgeTxt = d.task_done ? '已完成' : '待完成';
-          taskHead.innerHTML = (taskOnlyDay ? '学习任务' : '当日任务') +
+          taskHead.innerHTML = (preLearnDay ? '学习任务' : '当日任务') +
             ' <span class="badge ' + badgeCls + '" id="badge-t">' + badgeTxt + '</span>';
         } else {
           $('badge-t').textContent = d.task_done ? '已完成' : '待完成';
@@ -1039,7 +1122,7 @@
         hide('quiz-panel');
         if (isQuizWeb) {
           loadQuizPanel(d);
-        } else if (isPreLearnMp) {
+        } else if (preLearnDay) {
           hide('harmful-panel');
           hide('quiz-panel');
           show('btn-task');

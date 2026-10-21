@@ -136,9 +136,10 @@ class ActiveWebOnePlusOneService
             3 => [
                 'title' => '第 3 天',
                 'task_title' => '打卡可回收',
-                'task_brief' => '完成一次可回收物真分打卡',
-                'task_detail' => '在家庭真分中选择可回收类垃圾种类，拍照提交真分打卡；或前往小程序垃圾分类打卡并完成一次可回收投放记录。',
-                'mp_path' => '/pages/activity/scene-clock-flow?mode=theme',
+                'task_brief' => '拍摄可回收物投放照片并提交即可完成本日挑战',
+                'task_detail' => '',
+                'task_kind' => 'recycle_clock_web',
+                'mp_path' => '',
             ],
             4 => [
                 'title' => '第 4 天',
@@ -382,14 +383,15 @@ class ActiveWebOnePlusOneService
         return self::TOTAL_DAYS + 1;
     }
 
-    /** 第 1 天为前置学习时：整格完成不要求单独真分打卡（真分从第 2 天起与任务并行） */
+    /** 前置学习 / 仅可回收打卡等整日任务：不要求单独真分打卡 */
     protected static function dayNeedsZhenfen(int $day): bool
     {
-        if ($day !== 1) {
-            return true;
+        $def = self::dayDefinitions()[$day] ?? [];
+        $kind = (string)($def['task_kind'] ?? '');
+        if ($kind === 'pre_learn_mp' || $kind === 'recycle_clock_web') {
+            return false;
         }
-        $def = self::dayDefinitions()[1] ?? [];
-        return ($def['task_kind'] ?? '') !== 'pre_learn_mp';
+        return true;
     }
 
     /** 自然日内是否已完成某一整天的进度（真分+任务） */
@@ -897,7 +899,7 @@ class ActiveWebOnePlusOneService
             $canAct = self::canActOnDay($row, $d, $userId);
             $done = isset($completedFlip[$d]);
             $taskDone = $done ? 1 : (self::isTaskDone($userId, $activeId, $d, $row) ? 1 : 0);
-            $taskOnlyDay = ($d === 1 && !self::dayNeedsZhenfen(1));
+            $taskOnlyDay = !self::dayNeedsZhenfen($d);
             $zhenfenDone = $taskOnlyDay ? 0 : (isset($map[$d]) && ($done || $canAct) ? 1 : 0);
             $lockHint = '';
             if (!$canBrowse) {
