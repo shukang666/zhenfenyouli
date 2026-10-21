@@ -885,7 +885,7 @@
             }
           }).catch(function () { zfState.points = []; }));
         } else {
-          tasks.push(apiPost('/wxapp/forum/get_cate_list', { pid: 2 }).then(function (data) {
+          tasks.push(apiPost('/wxapp/select/get_select_list', { type: 2 }).then(function (data) {
             zfState.cates = Array.isArray(data) ? data : [];
           }).catch(function () { zfState.cates = []; }));
         }
