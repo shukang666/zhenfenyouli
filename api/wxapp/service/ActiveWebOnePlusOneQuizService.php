@@ -88,13 +88,17 @@ class ActiveWebOnePlusOneQuizService
         if ($since <= 0) {
             return false;
         }
-        return (int)Db::name(self::logTable())
-            ->where('user_id', $userId)
-            ->where('active_id', $activeId)
-            ->where('cycle_no', $cycleNo)
-            ->where('passed', 1)
-            ->where('create_time', '>=', $since)
-            ->count() > 0;
+        try {
+            return (int)Db::name(self::logTable())
+                ->where('user_id', $userId)
+                ->where('active_id', $activeId)
+                ->where('cycle_no', $cycleNo)
+                ->where('passed', 1)
+                ->where('create_time', '>=', $since)
+                ->count() > 0;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /**

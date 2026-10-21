@@ -19,6 +19,8 @@ class ActiveWebOnePlusOneController extends AuthController
             $data = ActiveWebOnePlusOneService::syncAndBuildStatus((int)$this->user_id, $activeId);
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
+        } catch (\Throwable $e) {
+            $this->error('活动进度加载失败，请联系管理员');
         }
         $this->success('请求成功', $data);
     }

@@ -529,15 +529,12 @@
       function hide(id) { $(id).classList.add('hidden'); }
 
       function showLoadError(msg) {
-        var err = $('day-grid-error');
-        if (err) {
-          err.textContent = msg || '活动数据加载失败，请返回后重试';
-          show('day-grid-error');
-        }
+        var text = msg || '活动数据加载失败，请返回后重试';
         var grid = $('day-grid');
-        if (grid && !grid.children.length) {
-          grid.innerHTML = '<div class="guide-line" style="grid-column:1/-1;color:#b42318;">' + escapeHtml(msg || '加载失败') + '</div>';
+        if (grid) {
+          grid.innerHTML = '<div class="guide-line" style="grid-column:1/-1;color:#b42318;">' + escapeHtml(text) + '</div>';
         }
+        hide('day-grid-error');
       }
 
       function renderHome(data) {
