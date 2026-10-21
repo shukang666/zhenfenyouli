@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>1+1 活动</title>
   <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
-  <script src="../sdk.js?v=20261021b"></script>
+  <script src="../sdk.js?v=20261021c"></script>
   <style>
     :root {
       --green: #0d4f36;
@@ -751,14 +751,30 @@
         $('day-title').textContent = d.title + ' · ' + d.task_title;
         $('day-brief').textContent = d.task_brief;
         $('task-detail').textContent = d.task_detail || '';
-        $('badge-z').textContent = d.zhenfen_done ? '已完成' : '待完成';
-        $('badge-z').className = 'badge ' + (d.zhenfen_done ? 'ok' : 'wait');
-        $('badge-t').textContent = d.task_done ? '已完成' : '待完成';
-        $('badge-t').className = 'badge ' + (d.task_done ? 'ok' : 'wait');
-        $('btn-zhenfen').onclick = function () { navigateMp(zhenfenPath); };
+        var isPreLearnMp = d.task_kind === 'pre_learn_mp' || Number(d.task_only) === 1;
+        var taskOnlyDay = isPreLearnMp && day === 1;
+
+        if (taskOnlyDay) {
+          hide('part-zhenfen');
+        } else {
+          show('part-zhenfen');
+          $('badge-z').textContent = d.zhenfen_done ? '已完成' : '待完成';
+          $('badge-z').className = 'badge ' + (d.zhenfen_done ? 'ok' : 'wait');
+          $('btn-zhenfen').onclick = function () { navigateMp(zhenfenPath); };
+        }
+
+        var taskHead = $('part-task').querySelector('h3');
+        if (taskHead) {
+          var badgeCls = d.task_done ? 'ok' : 'wait';
+          var badgeTxt = d.task_done ? '已完成' : '待完成';
+          taskHead.innerHTML = (taskOnlyDay ? '学习任务' : '当日任务') +
+            ' <span class="badge ' + badgeCls + '" id="badge-t">' + badgeTxt + '</span>';
+        } else {
+          $('badge-t').textContent = d.task_done ? '已完成' : '待完成';
+          $('badge-t').className = 'badge ' + (d.task_done ? 'ok' : 'wait');
+        }
 
         var isQuizWeb = d.task_kind === 'quiz_web' || day === 3;
-        var isPreLearnMp = d.task_kind === 'pre_learn_mp';
         var isHarmfulWeb = d.task_kind === 'harmful_web';
         hide('quiz-panel');
         if (isQuizWeb) {

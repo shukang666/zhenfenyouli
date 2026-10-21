@@ -102,7 +102,7 @@ class ActiveWebOnePlusOneService
                 'title' => '第 1 天',
                 'task_title' => '真分前置学习',
                 'task_brief' => '完成真分前的分类学习与练一练',
-                'task_detail' => '进入真分前置学习页，阅读分类知识并完成练一练题目。通过后即打通真分打卡前置条件（老用户也可再学一遍）。',
+                'task_detail' => '阅读分类知识并完成练一练题目。通过后即打通真分打卡前置条件（老用户也可再学一遍）；完成本项即视为第 1 天挑战完成。',
                 'task_kind' => 'pre_learn_mp',
                 'mp_path' => '/pages/flhd/pre_learn?from=one_plus_one',
             ],
@@ -357,6 +357,16 @@ class ActiveWebOnePlusOneService
         return self::TOTAL_DAYS + 1;
     }
 
+    /** 第 1 天为前置学习时：整格完成不要求单独真分打卡（真分从第 2 天起与任务并行） */
+    protected static function dayNeedsZhenfen(int $day): bool
+    {
+        if ($day !== 1) {
+            return true;
+        }
+        $def = self::dayDefinitions()[1] ?? [];
+        return ($def['task_kind'] ?? '') !== 'pre_learn_mp';
+    }
+
     /** 自然日内是否已完成某一整天的进度（真分+任务） */
     protected static function dayCompletedToday(array $row): ?int
     {
@@ -409,7 +419,9 @@ class ActiveWebOnePlusOneService
         }
         if (!self::isDayUnlocked($day, $completedFlip)) {
             if ($day <= self::BROWSE_ALWAYS_OPEN_DAYS) {
-                return '请先完成第 ' . ($day - 1) . ' 天（真分+任务）；可先浏览本日说明，暂不可操作';
+                $prev = $day - 1;
+                $prevLabel = ($prev === 1 && !self::dayNeedsZhenfen(1)) ? '前置学习' : '真分+任务';
+                return '请先完成第 ' . $prev . ' 天（' . $prevLabel . '）；可先浏览本日说明，暂不可操作';
             }
             return '请先完成第 ' . ($day - 1) . ' 天后再解锁本日';
         }
@@ -748,7 +760,8 @@ class ActiveWebOnePlusOneService
             }
             $hasZ = isset($map[$day]);
             $hasT = self::isTaskDone($userId, $activeId, $day, $row);
-            if ($hasZ && $hasT) {
+            $dayComplete = self::dayNeedsZhenfen($day) ? ($hasZ && $hasT) : $hasT;
+            if ($dayComplete) {
                 $completed[] = $day;
                 $completedFlip[$day] = true;
                 $nowDone = time();
@@ -839,7 +852,8 @@ class ActiveWebOnePlusOneService
             $canAct = self::canActOnDay($row, $d);
             $done = isset($completedFlip[$d]);
             $taskDone = $done ? 1 : (self::isTaskDone($userId, $activeId, $d, $row) ? 1 : 0);
-            $zhenfenDone = isset($map[$d]) && ($done || $canAct) ? 1 : 0;
+            $taskOnlyDay = ($d === 1 && !self::dayNeedsZhenfen(1));
+            $zhenfenDone = $taskOnlyDay ? 0 : (isset($map[$d]) && ($done || $canAct) ? 1 : 0);
             $lockHint = '';
             if (!$canBrowse) {
                 $lockHint = '请先完成第 ' . ($d - 1) . ' 天后再解锁本日';
@@ -866,6 +880,7 @@ class ActiveWebOnePlusOneService
                 'act_hint' => $actHint,
                 'needs_share_ack' => !empty($def['needs_share_ack']) ? 1 : 0,
                 'task_kind' => (string)($def['task_kind'] ?? ''),
+                'task_only' => $taskOnlyDay ? 1 : 0,
             ];
         }
 
@@ -895,7 +910,7 @@ class ActiveWebOnePlusOneService
             'guide' => [
                 'title' => '1+1 七日挑战',
                 'lines' => [
-                    '每天完成一次真分 + 当日任务即挑战完成。',
+                    '第 1 天完成真分前置学习；第 2 天起每天真分 + 当日任务即挑战完成。',
                     '完成 3 次挑战赠送 ' . self::REWARD_AFTER_3 . ' 积分；7 次全部完成再送 ' . self::REWARD_AFTER_7 . ' 积分。',
                     '开始第一次挑战后，每 10 天会重置，请在 10 天内尽量多的完成，重置后可重新挑战。',
                 ],
