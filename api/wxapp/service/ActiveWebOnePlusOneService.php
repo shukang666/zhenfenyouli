@@ -121,17 +121,18 @@ class ActiveWebOnePlusOneService
             1 => [
                 'title' => '第 1 天',
                 'task_title' => '真分前置学习',
-                'task_brief' => '完成真分前的分类学习与练一练',
-                'task_detail' => '阅读分类知识并完成练一练题目。通过后即打通真分打卡前置条件（老用户也可再学一遍）；完成本项即视为第 1 天挑战完成。',
-                'task_kind' => 'pre_learn_mp',
-                'mp_path' => '/pages/flhd/pre_learn?from=one_plus_one',
+                'task_brief' => '阅读要点并完成练一练',
+                'task_detail' => '下方完成练一练全部答对即视为第 1 天完成。',
+                'task_kind' => 'pre_learn_web',
+                'mp_path' => '',
             ],
             2 => [
                 'title' => '第 2 天',
                 'task_title' => '发布闲置',
-                'task_brief' => '上传一个闲置物品',
-                'task_detail' => '在积分权益 · 社区闲置中发布一条闲置信息。',
-                'mp_path' => '/pages/points/secondhand-publish',
+                'task_brief' => '在本页填写并发布一条闲置',
+                'task_detail' => '填写名称、价格、联系方式并上传照片，提交后进入社区闲置审核。',
+                'task_kind' => 'secondhand_web',
+                'mp_path' => '',
             ],
             3 => [
                 'title' => '第 3 天',
@@ -144,31 +145,35 @@ class ActiveWebOnePlusOneService
             4 => [
                 'title' => '第 4 天',
                 'task_title' => '七贤岭美景',
-                'task_brief' => '分享一张美景（七贤岭内）',
-                'task_detail' => '在「我所了解的七贤岭」活动中上传一张七贤岭内拍摄的美景照片。',
-                'mp_path' => '/pages/h5/h5?url=' . rawurlencode('https://admin.circular-economy.cn/static/mp-active-web/qxl-photo-share/index.html'),
+                'task_brief' => '上传一张七贤岭内美景照片',
+                'task_detail' => '拍摄地点须在七贤岭范围内，附一句简要介绍。',
+                'task_kind' => 'photo_web',
+                'mp_path' => '',
             ],
             5 => [
                 'title' => '第 5 天',
                 'task_title' => '分享小程序',
-                'task_brief' => '分享小程序给好友',
-                'task_detail' => '点击右上角或下方按钮，将小程序分享给至少一位好友。分享成功后返回本页刷新即可。',
-                'mp_path' => '/pages/index/index',
+                'task_brief' => '分享给好友后在本页确认',
+                'task_detail' => '点击右上角「…」分享小程序给好友，返回后点「我已分享」记录完成。',
+                'task_kind' => 'share_web',
+                'mp_path' => '',
                 'needs_share_ack' => 1,
             ],
             6 => [
                 'title' => '第 6 天',
                 'task_title' => '分类设施',
-                'task_brief' => '拍摄分类垃圾箱/桶',
-                'task_detail' => '真分打卡时拍摄厨余、可回收、其他等分类桶/箱。',
-                'mp_path' => '/pages/activity/scene-clock-flow?mode=theme',
+                'task_brief' => '真分打卡需拍到分类桶/箱',
+                'task_detail' => '完成上方真分打卡且照片中可见分类设施，即同步完成当日任务。',
+                'task_kind' => 'facility_merged',
+                'mp_path' => '',
             ],
             7 => [
                 'title' => '第 7 天',
                 'task_title' => '点位巡查',
-                'task_brief' => '完成一次点位巡查',
-                'task_detail' => '在小程序「点位巡查 / 督导监测」中提交一次巡查记录。',
-                'mp_path' => '/pages/dtsh/supervision-monitor',
+                'task_brief' => '提交一条简版巡查记录',
+                'task_detail' => '填写点位名称、地址并上传门头或现场照片。',
+                'task_kind' => 'inspect_web',
+                'mp_path' => '',
             ],
         ];
     }
@@ -388,7 +393,7 @@ class ActiveWebOnePlusOneService
     {
         $def = self::dayDefinitions()[$day] ?? [];
         $kind = (string)($def['task_kind'] ?? '');
-        if ($kind === 'pre_learn_mp' || $kind === 'recycle_clock_web') {
+        if (in_array($kind, ['pre_learn_mp', 'pre_learn_web', 'recycle_clock_web'], true)) {
             return false;
         }
         return true;
@@ -964,6 +969,250 @@ class ActiveWebOnePlusOneService
             ],
             'zhenfen_entry' => '/pages/activity/scene-clock-flow?mode=theme',
         ];
+    }
+
+    public static function preLearnBlocks(): array
+    {
+        return ClockLearnExamService::getBlocksForClient();
+    }
+
+    /**
+     * @param array<string, string> $answers
+     * @return array<string, mixed>
+     */
+    public static function submitDay1PreLearnExam(int $userId, int $activeId, array $answers): array
+    {
+        self::loadWebActive($activeId);
+        self::syncAndBuildStatus($userId, $activeId);
+        $row = self::findProgress($userId, $activeId);
+        if (empty($row)) {
+            throw new \InvalidArgumentException('进度不存在');
+        }
+        self::assertCanWorkOnDay($row, 1, $userId);
+
+        $cycleNo = (int)($row['cycle_no'] ?? 1);
+        $since = self::dayWindowSincePublic($row, 1, $userId);
+        if (self::hasDay1PreLearnInWindow($userId, $activeId, $cycleNo, $since)) {
+            $status = self::syncAndBuildStatus($userId, $activeId);
+            return ['already' => 1, 'status' => $status];
+        }
+
+        ClockLearnExamService::markCompleted($userId);
+
+        return self::recordDay1PreLearnCompletion($userId, $activeId);
+    }
+
+    /**
+     * @param array<string, mixed> $userInfo
+     */
+    public static function submitTaskSecondhand(
+        int $userId,
+        array $userInfo,
+        int $activeId,
+        string $title,
+        string $priceRaw,
+        string $contact,
+        string $imagePath
+    ): array {
+        self::loadWebActive($activeId);
+        self::syncAndBuildStatus($userId, $activeId);
+        $row = self::findProgress($userId, $activeId);
+        if (empty($row)) {
+            throw new \InvalidArgumentException('进度不存在');
+        }
+        self::assertCanWorkOnDay($row, 2, $userId);
+
+        $title = trim($title);
+        $contact = trim($contact);
+        $imagePath = trim($imagePath);
+        if ($title === '' || mb_strlen($title) > 40) {
+            throw new \InvalidArgumentException('请填写物品名称（不超过40字）');
+        }
+        $price = (float)$priceRaw;
+        if ($price < 0 || $price > 9999999) {
+            throw new \InvalidArgumentException('请填写正确售价');
+        }
+        if ($contact === '' || mb_strlen($contact) > 40) {
+            throw new \InvalidArgumentException('请填写联系方式');
+        }
+        if ($imagePath === '') {
+            throw new \InvalidArgumentException('请上传物品照片');
+        }
+
+        $communityId = (int)($userInfo['community_id'] ?? 0);
+        $parentId = (int)($userInfo['community_parent_id'] ?? 0);
+        if ($parentId <= 0 && $communityId > 0) {
+            $parentId = (int)Db::name('member_community')->where('id', $communityId)->value('pid');
+        }
+        $scopeType = $communityId > 0 ? 'community' : ($parentId > 0 ? 'parent' : 'all');
+        $scopeId = $scopeType === 'community' ? $communityId : ($scopeType === 'parent' ? $parentId : 0);
+        if ($scopeType === 'community' && $scopeId <= 0) {
+            throw new \InvalidArgumentException('请先绑定小区后再发布闲置');
+        }
+
+        $now = time();
+        $id = (int)Db::name(SecondhandService::TABLE_ITEM)->insertGetId([
+            'user_id' => $userId,
+            'title' => $title,
+            'description' => '1+1活动发布',
+            'images' => SecondhandService::encodeImages([$imagePath]),
+            'price' => number_format($price, 2, '.', ''),
+            'contact' => $contact,
+            'scope_type' => $scopeType,
+            'scope_id' => $scopeId,
+            'category' => 'other',
+            'condition' => 'used',
+            'area_text' => '',
+            'status' => SecondhandService::STATUS_PENDING,
+            'reject_reason' => '',
+            'create_time' => $now,
+            'update_time' => $now,
+            'audit_time' => 0,
+        ]);
+
+        $status = self::syncAndBuildStatus($userId, $activeId);
+
+        return ['id' => $id, 'status' => $status];
+    }
+
+    public static function submitTaskPhoto(int $userId, int $activeId, string $image, string $intro): array
+    {
+        self::loadWebActive($activeId);
+        self::syncAndBuildStatus($userId, $activeId);
+        $row = self::findProgress($userId, $activeId);
+        if (empty($row)) {
+            throw new \InvalidArgumentException('进度不存在');
+        }
+        self::assertCanWorkOnDay($row, 4, $userId);
+
+        $image = trim($image);
+        $intro = trim($intro);
+        if ($image === '') {
+            throw new \InvalidArgumentException('请上传照片');
+        }
+        if ($intro === '' || mb_strlen($intro) > 200) {
+            throw new \InvalidArgumentException('请填写简要介绍（200字内）');
+        }
+
+        $photoActiveId = self::resolveQxlPhotoActiveId();
+        ActiveWebPhotoService::loadWebPhotoActive($photoActiveId);
+
+        $now = time();
+        $token = ActiveWebPhotoService::newShareToken();
+        $point = ActiveWebPhotoService::grantPoints(
+            $userId,
+            $photoActiveId,
+            ActiveWebPhotoService::POINT_ON_APPROVE,
+            '七贤岭摄影·1+1活动'
+        );
+        Db::name(ActiveWebPhotoService::photoTable())->insert([
+            'active_id' => $photoActiveId,
+            'user_id' => $userId,
+            'image' => $image,
+            'intro' => $intro,
+            'category' => 'scenery',
+            'status' => 1,
+            'like_count' => 0,
+            'period_key' => ActiveWebPhotoService::periodKey($now),
+            'point_awarded' => $point,
+            'bonus_point_awarded' => 0,
+            'share_token' => $token,
+            'create_time' => $now,
+            'audit_time' => $now,
+        ]);
+
+        $status = self::syncAndBuildStatus($userId, $activeId);
+
+        return ['status' => $status];
+    }
+
+    /**
+     * @param array<string, mixed> $userInfo
+     */
+    public static function submitTaskInspect(
+        int $userId,
+        array $userInfo,
+        int $activeId,
+        string $unitName,
+        string $address,
+        string $doorPhoto
+    ): array {
+        self::loadWebActive($activeId);
+        self::syncAndBuildStatus($userId, $activeId);
+        $row = self::findProgress($userId, $activeId);
+        if (empty($row)) {
+            throw new \InvalidArgumentException('进度不存在');
+        }
+        self::assertCanWorkOnDay($row, 7, $userId);
+
+        $unitName = trim($unitName);
+        $address = trim($address);
+        $doorPhoto = trim($doorPhoto);
+        if ($unitName === '' || mb_strlen($unitName) > 80) {
+            throw new \InvalidArgumentException('请填写点位/单位名称');
+        }
+        if ($address === '' || mb_strlen($address) > 200) {
+            throw new \InvalidArgumentException('请填写地址');
+        }
+        if ($doorPhoto === '') {
+            throw new \InvalidArgumentException('请上传现场照片');
+        }
+
+        $communityId = (int)($userInfo['community_id'] ?? 0);
+        $communityName = trim((string)($userInfo['community_name'] ?? ''));
+        if ($communityName === '' && $communityId > 0) {
+            $communityName = (string)Db::name('member_community')->where('id', $communityId)->value('name');
+        }
+        if ($communityName === '') {
+            $communityName = '七贤岭';
+        }
+
+        Db::name('supervision_monitor')->insert([
+            'user_id' => $userId,
+            'community_id' => $communityId,
+            'community_name' => $communityName,
+            'unit_name' => $unitName,
+            'unit_type' => 1,
+            'check_date' => date('Y-m-d'),
+            'address' => $address,
+            'contact' => (string)($userInfo['nickname'] ?? ''),
+            'contact_phone' => (string)($userInfo['mobile'] ?? ''),
+            'has_waste' => 0,
+            'waste_correct' => 0,
+            'waste_flow' => '',
+            'door_photo' => $doorPhoto,
+            'inner_photo' => '',
+            'publicity_photo' => '',
+            'inner_qualified' => 1,
+            'need_rectify' => 0,
+            'inner_rectify_photo' => '',
+            'point_photo' => '',
+            'point_qualified' => 1,
+            'point_rectify_photo' => '',
+            'manage_photo' => '',
+            'manage_qualified' => 1,
+            'manage_rectify_photo' => '',
+            'transport_photo' => '',
+            'catering_photo' => '',
+            'accuracy_photo' => '',
+            'overall_evaluation' => '1+1活动简版巡查',
+            'create_time' => time(),
+        ]);
+
+        $status = self::syncAndBuildStatus($userId, $activeId);
+
+        return ['status' => $status];
+    }
+
+    protected static function resolveQxlPhotoActiveId(): int
+    {
+        $id = (int)ActiveModel::where('delete_time', 0)
+            ->where('web_url', 'like', '%qxl-photo-share%')
+            ->value('id');
+        if ($id <= 0) {
+            throw new \InvalidArgumentException('七贤岭摄影活动未配置，请联系管理员');
+        }
+        return $id;
     }
 
     /**

@@ -4,6 +4,7 @@ namespace api\wxapp\controller;
 
 use api\wxapp\service\ActiveWebOnePlusOneQuizService;
 use api\wxapp\service\ActiveWebOnePlusOneService;
+use api\wxapp\service\ClockLearnExamService;
 
 /**
  * Web 式活动「1+1」七日挑战
@@ -118,7 +119,98 @@ class ActiveWebOnePlusOneController extends AuthController
         $this->success($msg, $data);
     }
 
-    /** 第 2 天：用户在 H5 点击「去分享」后标记（可与积分分享记录二选一满足） */
+    /** 第 1 天：练一练题目（无答案） */
+    public function pre_learn_blocks()
+    {
+        $this->checkUser();
+        $this->success('请求成功', ['blocks' => ActiveWebOnePlusOneService::preLearnBlocks()]);
+    }
+
+    /** 第 1 天：提交练一练并回写 1+1 进度 */
+    public function pre_learn_submit()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        $answers = $this->request->param('answers/a', []);
+        if (!is_array($answers) || empty($answers)) {
+            $this->error('请先答完练一练题目');
+        }
+        $grade = ClockLearnExamService::gradeAnswers($answers);
+        if (empty($grade['pass'])) {
+            $this->error('有题目答错了，请修改后再提交', $grade);
+        }
+        try {
+            $data = ActiveWebOnePlusOneService::submitDay1PreLearnExam(
+                (int)$this->user_id,
+                $activeId,
+                $answers
+            );
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('学习完成', $data);
+    }
+
+    /** 第 2 天：发布闲置（写入社区闲置模块） */
+    public function task_secondhand_submit()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        try {
+            $data = ActiveWebOnePlusOneService::submitTaskSecondhand(
+                (int)$this->user_id,
+                $this->user_info ?: [],
+                $activeId,
+                (string)$this->request->param('title', ''),
+                (string)$this->request->param('price', ''),
+                (string)$this->request->param('contact', ''),
+                trim((string)$this->request->param('image', ''))
+            );
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('发布成功，请等待审核', $data);
+    }
+
+    /** 第 4 天：七贤岭摄影上传 */
+    public function task_photo_submit()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        try {
+            $data = ActiveWebOnePlusOneService::submitTaskPhoto(
+                (int)$this->user_id,
+                $activeId,
+                trim((string)$this->request->param('image', '')),
+                trim((string)$this->request->param('intro', ''))
+            );
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('上传成功', $data);
+    }
+
+    /** 第 7 天：简版点位巡查 */
+    public function task_inspect_submit()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        try {
+            $data = ActiveWebOnePlusOneService::submitTaskInspect(
+                (int)$this->user_id,
+                $this->user_info ?: [],
+                $activeId,
+                (string)$this->request->param('unit_name', ''),
+                (string)$this->request->param('address', ''),
+                trim((string)$this->request->param('door_photo', ''))
+            );
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('巡查已提交', $data);
+    }
+
+    /** 第 5 天：用户在 H5 确认分享后标记（可与积分分享记录二选一满足） */
     public function share_ack()
     {
         $this->checkUser();

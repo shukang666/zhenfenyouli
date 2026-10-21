@@ -480,6 +480,27 @@
     #zhenfen-inline.zf-locked .zf-upload,
     #zhenfen-inline.zf-locked .zf-cate-card,
     #zhenfen-inline.zf-locked #btn-zhenfen-submit { pointer-events: none; opacity: .55; }
+    .task-comp { margin-top: 8px; font-size: 13px; }
+    .task-comp label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin: 6px 0 4px; }
+    .task-comp input, .task-comp textarea {
+      width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 10px;
+      border: 1px solid rgba(26, 143, 92, .22); font-size: 13px; margin-bottom: 4px;
+    }
+    .task-comp textarea { min-height: 56px; resize: vertical; }
+    .task-comp-upload {
+      position: relative; border: 2px dashed rgba(26, 143, 92, .28); border-radius: 12px;
+      min-height: 72px; display: flex; align-items: center; justify-content: center;
+      margin: 6px 0 8px; overflow: hidden; background: rgba(255,255,255,.75);
+    }
+    .task-comp-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .task-comp-upload img { width: 100%; max-height: 120px; object-fit: cover; }
+    .task-comp-note { font-size: 11px; color: var(--muted); line-height: 1.5; margin: 4px 0 8px; }
+    .task-comp .btn { margin-top: 6px; padding: 11px 14px; font-size: 14px; }
+    .prelearn-intro { font-size: 12px; color: var(--muted); line-height: 1.55; margin-bottom: 10px; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,.7); }
+    #task-facility-hint { margin-top: 8px; }
+    .part.task--compact { padding: 12px 14px; }
+    .part.task--compact h3 { font-size: 15px; margin-bottom: 6px; }
+    #task-detail { font-size: 12px; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -533,11 +554,48 @@
             <p class="zf-note">照片需拍清楚垃圾内容，分类错误可能影响积分。</p>
             <button type="button" class="btn btn-primary" id="btn-zhenfen-submit" style="margin-top:10px;">提交真分打卡</button>
           </div>
+          <p id="task-facility-hint" class="zf-note hidden">当日任务：真分照片中需拍到分类桶/箱，完成上方打卡即同步完成本日任务。</p>
         </div>
-        <div class="part task" id="part-task">
+        <div class="part task task--compact" id="part-task">
           <h3>当日任务 <span class="badge wait" id="badge-t">待完成</span></h3>
           <p id="task-detail"></p>
-          <button type="button" class="btn btn-primary" id="btn-task">去做任务</button>
+          <div id="task-prelearn" class="task-comp hidden">
+            <div class="prelearn-intro" id="prelearn-intro"></div>
+            <div id="prelearn-questions"></div>
+            <button type="button" class="btn btn-primary" id="btn-prelearn-submit">提交练一练</button>
+          </div>
+          <div id="task-secondhand" class="task-comp hidden">
+            <label>物品名称</label>
+            <input type="text" id="sh-title" maxlength="40" placeholder="如：儿童绘本一套" />
+            <label>售价（元）</label>
+            <input type="number" id="sh-price" min="0" step="0.01" placeholder="0 表示赠送" />
+            <label>联系方式</label>
+            <input type="text" id="sh-contact" maxlength="40" placeholder="手机号或微信" />
+            <label>物品照片</label>
+            <div class="task-comp-upload" id="sh-upload"><input type="file" accept="image/*" id="sh-file" /><span id="sh-upload-ph">点击上传</span><img id="sh-preview" class="hidden" alt="" /></div>
+            <button type="button" class="btn btn-primary" id="btn-sh-submit">发布闲置</button>
+          </div>
+          <div id="task-photo" class="task-comp hidden">
+            <label>美景照片</label>
+            <div class="task-comp-upload" id="photo-upload"><input type="file" accept="image/*" id="photo-file" /><span id="photo-upload-ph">点击上传</span><img id="photo-preview" class="hidden" alt="" /></div>
+            <label>一句话介绍</label>
+            <textarea id="photo-intro" maxlength="200" placeholder="拍摄地点或景物说明"></textarea>
+            <button type="button" class="btn btn-primary" id="btn-photo-submit">提交美景</button>
+          </div>
+          <div id="task-share" class="task-comp hidden">
+            <p class="task-comp-note">请用右上角「…」把小程序分享给好友，返回本页后点击下方按钮记录完成。</p>
+            <button type="button" class="btn btn-primary" id="btn-share-confirm">我已分享给好友</button>
+          </div>
+          <div id="task-inspect" class="task-comp hidden">
+            <label>点位/单位名称</label>
+            <input type="text" id="insp-unit" maxlength="80" placeholder="如：XX小区垃圾分类点" />
+            <label>地址</label>
+            <input type="text" id="insp-address" maxlength="200" placeholder="详细地址" />
+            <label>现场照片</label>
+            <div class="task-comp-upload" id="insp-upload"><input type="file" accept="image/*" id="insp-file" /><span id="insp-upload-ph">点击上传</span><img id="insp-preview" class="hidden" alt="" /></div>
+            <button type="button" class="btn btn-primary" id="btn-insp-submit">提交巡查</button>
+          </div>
+          <button type="button" class="btn btn-primary hidden" id="btn-task">去做任务</button>
           <button type="button" class="btn btn-ghost hidden" id="btn-share-ack">我已分享，刷新进度</button>
           <div id="harmful-panel" class="harmful-box hidden">
             <div class="harmful-kicker">有害垃圾 · 拍照打卡</div>
@@ -691,10 +749,6 @@
           el.onclick = function () {
             if (d.locked) {
               alert(d.lock_hint || ('请先完成第 ' + (d.day - 1) + ' 天'));
-              return;
-            }
-            if (d.day === 1 && d.task_kind === 'pre_learn_mp' && Number(d.can_act) === 1 && !Number(d.task_done) && !Number(d.done)) {
-              navigateMp(preLearnMpPath(d));
               return;
             }
             openDay(d.day);
@@ -1049,6 +1103,173 @@
         };
       }
 
+      var preLearnPicks = {};
+
+      function hideAllInlineTasks() {
+        ['task-prelearn', 'task-secondhand', 'task-photo', 'task-share', 'task-inspect'].forEach(function (id) {
+          hide(id);
+        });
+        hide('btn-task');
+        hide('btn-share-ack');
+        hide('harmful-panel');
+        hide('quiz-panel');
+      }
+
+      function bindCompactUpload(fileId, previewId, phId) {
+        var inp = $(fileId);
+        if (!inp || inp._bound) return;
+        inp._bound = true;
+        inp.onchange = function () {
+          var f = inp.files[0];
+          if (!f) return;
+          var prev = $(previewId);
+          var ph = $(phId);
+          prev.src = URL.createObjectURL(f);
+          prev.classList.remove('hidden');
+          if (ph) ph.classList.add('hidden');
+        };
+      }
+
+      function loadPreLearnInline(d, canAct) {
+        var intro = $('prelearn-intro');
+        intro.textContent = '四类垃圾要点：厨余沥干、可回收保持干燥、有害单独收、其余投其他。答对下方练一练即完成第 1 天。';
+        preLearnPicks = {};
+        apiPost('/wxapp/active_web_one_plus_one/pre_learn_blocks', { active_id: activeId }).then(function (data) {
+          var blocks = data.blocks || [];
+          var qs = blocks.filter(function (b) { return b.type === 'quiz'; });
+          var box = $('prelearn-questions');
+          box.innerHTML = qs.map(function (q, idx) {
+            var opts = (q.options || []).map(function (o) {
+              return '<button type="button" class="quiz-opt" data-qid="' + escapeHtml(q.id) + '" data-key="' + o.key + '">' + escapeHtml(o.key) + '. ' + escapeHtml(o.text) + '</button>';
+            }).join('');
+            return '<div class="quiz-q"><div class="quiz-q-title"><span class="quiz-q-num">' + (idx + 1) + '</span>' + escapeHtml(q.question) + '</div><div class="quiz-opts">' + opts + '</div></div>';
+          }).join('');
+          box.querySelectorAll('.quiz-opt').forEach(function (btn) {
+            btn.onclick = function () {
+              if (!canAct) return;
+              var qid = btn.getAttribute('data-qid');
+              preLearnPicks[qid] = btn.getAttribute('data-key');
+              var parent = btn.closest('.quiz-q');
+              parent.querySelectorAll('.quiz-opt').forEach(function (b) { b.classList.remove('selected'); });
+              btn.classList.add('selected');
+            };
+          });
+        }).catch(function (e) {
+          $('prelearn-questions').innerHTML = '<p class="task-comp-note">' + escapeHtml(e.message || '加载失败') + '</p>';
+        });
+        $('btn-prelearn-submit').disabled = !canAct;
+        $('btn-prelearn-submit').onclick = function () {
+          if (!canAct) return;
+          $('btn-prelearn-submit').disabled = true;
+          apiPost('/wxapp/active_web_one_plus_one/pre_learn_submit', { active_id: activeId, answers: preLearnPicks }).then(function () {
+            alert('学习完成');
+            return refresh();
+          }).catch(function (e) {
+            alert(e.message || e);
+          }).then(function () {
+            $('btn-prelearn-submit').disabled = false;
+          });
+        };
+      }
+
+      function setupTaskInline(d, readOnly) {
+        hideAllInlineTasks();
+        var kind = d.task_kind || '';
+        var done = Number(d.done) === 1 || Number(d.task_done) === 1;
+        var canAct = Number(d.can_act) === 1 && !readOnly && !done;
+
+        if (kind === 'facility_merged' || kind === 'recycle_clock_web') return;
+
+        if (kind === 'pre_learn_web' || kind === 'pre_learn_mp') {
+          show('task-prelearn');
+          loadPreLearnInline(d, canAct);
+          return;
+        }
+        if (kind === 'secondhand_web') {
+          show('task-secondhand');
+          bindCompactUpload('sh-file', 'sh-preview', 'sh-upload-ph');
+          $('btn-sh-submit').disabled = !canAct;
+          $('btn-sh-submit').onclick = function () {
+            if (!canAct) return;
+            var f = $('sh-file').files[0];
+            if (!f) { alert('请上传照片'); return; }
+            $('btn-sh-submit').disabled = true;
+            uploadHarmfulImage(f).then(function (path) {
+              return apiPost('/wxapp/active_web_one_plus_one/task_secondhand_submit', {
+                active_id: activeId,
+                title: $('sh-title').value.trim(),
+                price: $('sh-price').value,
+                contact: $('sh-contact').value.trim(),
+                image: path
+              });
+            }).then(function () {
+              alert('发布成功');
+              return refresh();
+            }).catch(function (e) { alert(e.message || e); }).then(function () {
+              $('btn-sh-submit').disabled = false;
+            });
+          };
+          return;
+        }
+        if (kind === 'photo_web') {
+          show('task-photo');
+          bindCompactUpload('photo-file', 'photo-preview', 'photo-upload-ph');
+          $('btn-photo-submit').disabled = !canAct;
+          $('btn-photo-submit').onclick = function () {
+            if (!canAct) return;
+            var intro = $('photo-intro').value.trim();
+            if (!intro) { alert('请填写介绍'); return; }
+            var f = $('photo-file').files[0];
+            if (!f) { alert('请上传照片'); return; }
+            $('btn-photo-submit').disabled = true;
+            uploadHarmfulImage(f).then(function (path) {
+              return apiPost('/wxapp/active_web_one_plus_one/task_photo_submit', {
+                active_id: activeId, image: path, intro: intro
+              });
+            }).then(function () { alert('提交成功'); return refresh(); })
+              .catch(function (e) { alert(e.message || e); })
+              .then(function () { $('btn-photo-submit').disabled = false; });
+          };
+          return;
+        }
+        if (kind === 'share_web') {
+          show('task-share');
+          $('btn-share-confirm').disabled = !canAct;
+          $('btn-share-confirm').onclick = function () {
+            if (!canAct) return;
+            $('btn-share-confirm').disabled = true;
+            apiPost('/wxapp/active_web_one_plus_one/share_ack', { active_id: activeId }).then(function () {
+              alert('已记录，感谢分享');
+              return refresh();
+            }).catch(function (e) { alert(e.message || e); }).then(function () {
+              $('btn-share-confirm').disabled = false;
+            });
+          };
+          return;
+        }
+        if (kind === 'inspect_web') {
+          show('task-inspect');
+          bindCompactUpload('insp-file', 'insp-preview', 'insp-upload-ph');
+          $('btn-insp-submit').disabled = !canAct;
+          $('btn-insp-submit').onclick = function () {
+            if (!canAct) return;
+            var f = $('insp-file').files[0];
+            if (!f) { alert('请上传照片'); return; }
+            $('btn-insp-submit').disabled = true;
+            uploadHarmfulImage(f).then(function (path) {
+              return apiPost('/wxapp/active_web_one_plus_one/task_inspect_submit', {
+                active_id: activeId,
+                unit_name: $('insp-unit').value.trim(),
+                address: $('insp-address').value.trim(),
+                door_photo: path
+              });
+            }).then(function () { alert('提交成功'); return refresh(); })
+              .catch(function (e) { alert(e.message || e); })
+              .then(function () { $('btn-insp-submit').disabled = false; });
+          };
+        }
+      }
+
       function openDay(day) {
         currentDay = day;
         var d = (state.days || []).find(function (x) { return x.day === day; });
@@ -1077,9 +1298,11 @@
         $('day-title').textContent = d.title + ' · ' + d.task_title;
         $('day-brief').textContent = d.task_brief;
         $('task-detail').textContent = d.task_detail || '';
-        var preLearnDay = d.task_kind === 'pre_learn_mp';
+        var preLearnDay = d.task_kind === 'pre_learn_web' || d.task_kind === 'pre_learn_mp';
         var recycleOnlyDay = d.task_kind === 'recycle_clock_web';
+        var facilityDay = d.task_kind === 'facility_merged';
 
+        hide('task-facility-hint');
         if (preLearnDay) {
           hide('part-zhenfen');
           show('part-task');
@@ -1096,112 +1319,23 @@
           $('badge-z').textContent = d.zhenfen_done ? '已完成' : '待完成';
           $('badge-z').className = 'badge ' + (d.zhenfen_done ? 'ok' : 'wait');
           setupZhenfenInline(d, readOnly, false);
-        }
-
-        if (recycleOnlyDay) {
-          hide('quiz-panel');
-          hide('harmful-panel');
-          hide('btn-task');
-          hide('btn-share-ack');
-          return;
+          if (facilityDay) {
+            hide('part-task');
+            show('task-facility-hint');
+          }
         }
 
         var taskHead = $('part-task').querySelector('h3');
-        if (taskHead) {
+        if (taskHead && !recycleOnlyDay && !facilityDay) {
           var badgeCls = d.task_done ? 'ok' : 'wait';
           var badgeTxt = d.task_done ? '已完成' : '待完成';
           taskHead.innerHTML = (preLearnDay ? '学习任务' : '当日任务') +
             ' <span class="badge ' + badgeCls + '" id="badge-t">' + badgeTxt + '</span>';
-        } else {
-          $('badge-t').textContent = d.task_done ? '已完成' : '待完成';
-          $('badge-t').className = 'badge ' + (d.task_done ? 'ok' : 'wait');
         }
 
-        var isQuizWeb = d.task_kind === 'quiz_web';
-        var isHarmfulWeb = d.task_kind === 'harmful_web';
-        hide('quiz-panel');
-        if (isQuizWeb) {
-          loadQuizPanel(d);
-        } else if (preLearnDay) {
-          hide('harmful-panel');
-          hide('quiz-panel');
-          show('btn-task');
-          $('btn-task').textContent = Number(d.task_done) ? '再看一遍前置学习' : '进入前置学习';
-          $('btn-task').onclick = function () {
-            if (readOnly && !Number(d.task_done)) {
-              alert(d.act_hint || '当前仅可浏览，暂不可操作');
-              return;
-            }
-            if (!Number(d.can_act) && !Number(d.task_done)) {
-              alert(d.act_hint || '当前不可进行该天任务');
-              return;
-            }
-            navigateMp(preLearnMpPath(d));
-          };
-        } else if (isHarmfulWeb) {
-          hide('btn-task');
-          hide('quiz-panel');
-          show('harmful-panel');
-          $('harmful-file').value = '';
-          $('harmful-remark').value = '';
-          var prev = $('harmful-preview');
-          var prevWrap = $('harmful-preview-wrap');
-          var zone = $('harmful-upload-zone');
-          var hint = $('harmful-file-hint');
-          prev.src = '';
-          hide('harmful-preview-wrap');
-          if (zone) zone.classList.remove('has-file');
-          if (hint) hint.textContent = '请拍摄有害垃圾实物照片';
-          loadHarmfulRecords();
-          $('harmful-file').onchange = function () {
-            var f = $('harmful-file').files[0];
-            if (!f) return;
-            prev.src = URL.createObjectURL(f);
-            show('harmful-preview-wrap');
-            if (zone) zone.classList.add('has-file');
-            if (hint) {
-              var name = f.name || '已选照片';
-              if (name.length > 24) name = name.slice(0, 22) + '…';
-              hint.textContent = '已选：' + name;
-            }
-          };
-          $('btn-harmful-submit').onclick = function () {
-            var file = $('harmful-file').files[0];
-            if (!file) { alert('请先选择或拍摄照片'); return; }
-            $('btn-harmful-submit').disabled = true;
-            uploadHarmfulImage(file).then(function (path) {
-              return apiPost('/wxapp/active_web_one_plus_one/harmful_submit', {
-                active_id: activeId,
-                image: path,
-                remark: $('harmful-remark').value.trim()
-              });
-            }).then(function () {
-              alert('打卡成功');
-              return refresh();
-            }).catch(function (e) {
-              alert(e.message || e);
-            }).then(function () {
-              $('btn-harmful-submit').disabled = false;
-            });
-          };
-        } else {
-          show('btn-task');
-          hide('harmful-panel');
-          hide('quiz-panel');
-          $('btn-task').onclick = function () {
-            if (d.needs_share_ack) {
-              apiPost('/wxapp/active_web_one_plus_one/share_ack', { active_id: activeId }).then(function () {
-                alert('已记录，请完成分享后返回刷新');
-              }).catch(function (e) { alert(e.message || e); });
-            }
-            if (d.mp_path) navigateMp(d.mp_path);
-          };
+        if (!recycleOnlyDay && !facilityDay) {
+          setupTaskInline(d, readOnly);
         }
-
-        if (d.needs_share_ack) show('btn-share-ack'); else hide('btn-share-ack');
-        $('btn-share-ack').onclick = function () {
-          refresh().then(function () { alert('进度已更新'); });
-        };
       }
 
       function refresh() {
