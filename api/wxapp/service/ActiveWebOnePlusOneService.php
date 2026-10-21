@@ -31,6 +31,7 @@ class ActiveWebOnePlusOneService
     /** 运营/测试：日历 7 天均可浏览，且任意未完成天均可操作（不受「每日仅 1 天」与顺序限制） */
     private static $qaFullOpenMobiles = [
         '13050553897',
+        '17604092440',
     ];
 
     protected static function isQaFullOpenUser(int $userId): bool
