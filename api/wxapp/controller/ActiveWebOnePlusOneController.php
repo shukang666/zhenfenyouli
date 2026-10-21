@@ -169,7 +169,7 @@ class ActiveWebOnePlusOneController extends AuthController
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
         }
-        $this->success('发布成功，请等待审核', $data);
+        $this->success('发布成功', $data);
     }
 
     /** 第 4 天：七贤岭摄影上传 */

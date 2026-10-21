@@ -1077,6 +1077,7 @@ class ActiveWebOnePlusOneService
         }
 
         $now = time();
+        $publishMeta = SecondhandService::newItemPublishFields($now);
         $id = (int)Db::name(SecondhandService::TABLE_ITEM)->insertGetId([
             'user_id' => $userId,
             'title' => $title,
@@ -1089,11 +1090,11 @@ class ActiveWebOnePlusOneService
             'category' => 'other',
             'condition' => 'used',
             'area_text' => '',
-            'status' => SecondhandService::STATUS_PENDING,
-            'reject_reason' => '',
+            'status' => $publishMeta['status'],
+            'reject_reason' => $publishMeta['reject_reason'],
             'create_time' => $now,
             'update_time' => $now,
-            'audit_time' => 0,
+            'audit_time' => $publishMeta['audit_time'],
         ]);
 
         $status = self::syncAndBuildStatus($userId, $activeId);

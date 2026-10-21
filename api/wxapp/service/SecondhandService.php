@@ -26,6 +26,20 @@ class SecondhandService
     public const INTENT_DONE = 2;
     public const INTENT_CANCEL = 3;
 
+    /**
+     * 小程序发布闲置：免审核，直接出售中
+     *
+     * @return array{status:int,audit_time:int,reject_reason:string}
+     */
+    public static function newItemPublishFields(int $now): array
+    {
+        return [
+            'status' => self::STATUS_ON_SALE,
+            'audit_time' => $now,
+            'reject_reason' => '',
+        ];
+    }
+
     public static function categories(): array
     {
         return [

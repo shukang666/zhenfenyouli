@@ -184,6 +184,7 @@ class SecondhandController extends AuthController
         }
 
         $now = time();
+        $publishMeta = SecondhandService::newItemPublishFields($now);
         $id = Db::name(SecondhandService::TABLE_ITEM)->insertGetId([
             'user_id' => $this->user_id,
             'title' => $title,
@@ -196,14 +197,14 @@ class SecondhandController extends AuthController
             'category' => $category,
             'condition' => $condition,
             'area_text' => $areaText,
-            'status' => SecondhandService::STATUS_PENDING,
-            'reject_reason' => '',
+            'status' => $publishMeta['status'],
+            'reject_reason' => $publishMeta['reject_reason'],
             'create_time' => $now,
             'update_time' => $now,
-            'audit_time' => 0,
+            'audit_time' => $publishMeta['audit_time'],
         ]);
 
-        $this->success('发布成功，请等待审核', ['id' => (int)$id]);
+        $this->success('发布成功', ['id' => (int)$id]);
     }
 
     /** 我的发布 */
