@@ -1306,7 +1306,7 @@ class ForumController extends AuthController
     {
         $page = max(1, (int)$this->request->param('page', 1));
         $keyword = trim((string)$this->request->param('keyword', ''));
-        $cacheKey = ['v' => 5, 'page' => $page, 'kw' => $keyword];
+        $cacheKey = ['v' => 6, 'page' => $page, 'kw' => $keyword];
         $service = new \api\wxapp\service\TabHomeService($this);
         $data = \api\wxapp\support\TabHomeCache::remember(
             'health_tab',

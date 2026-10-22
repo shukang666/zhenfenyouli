@@ -144,8 +144,11 @@ class TabHomeService
     protected function fetchHealthTabHubConfig(): array
     {
         $raw = cmf_get_option('health_tab_config');
-        if (!is_array($raw) || empty($raw['banner']) || empty($raw['shortcuts'])) {
+        if (!is_array($raw) || empty($raw['banner'])) {
             $raw = \app\admin\controller\HealthTabConfigController::defaultConfig();
+        }
+        if (empty($raw['shortcuts']) || !is_array($raw['shortcuts'])) {
+            $raw['shortcuts'] = [];
         }
 
         $banner = $raw['banner'];

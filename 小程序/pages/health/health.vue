@@ -24,7 +24,8 @@
 			<view
 				class="health-hub__banner"
 				hover-class="health-hub__banner--press"
-				@tap="onHealthBannerTap"
+				@tap.stop="onHealthBannerTap"
+				@touchmove.stop=""
 			>
 				<image
 					v-if="healthHubBannerImage"
@@ -187,23 +188,32 @@
 			if (checkCommunity(this)) return
 		},
 		methods: {
+			resolveBannerSurveyId() {
+				const b = this.healthHub && this.healthHub.banner ? this.healthHub.banner : {}
+				let id = parseInt(b.survey_id, 10) || 0
+				if (id <= 0) {
+					id = parseInt(b.exam_id, 10) || 0
+				}
+				return id
+			},
 			onHealthBannerTap() {
 				const b = this.healthHub.banner || {}
 				const mode = b.link_mode === 'page' ? 'page' : 'survey'
 				if (mode === 'survey') {
-					const surveyId = parseInt(b.survey_id, 10) || 0
+					const surveyId = this.resolveBannerSurveyId()
 					if (surveyId <= 0) {
 						return this.$u.toast('问卷尚未配置，请联系管理员')
 					}
-					return this.openHealthRoute('/pages/health/survey?id=' + surveyId, 'navigateTo')
+					return this.openHealthRoute('/pages/health/survey?id=' + surveyId, 'navigateTo', { needLogin: false })
 				}
 				if (!b.url) {
 					return this.$u.toast('跳转地址未配置')
 				}
 				this.openHealthRoute(b.url, b.route_type || 'navigateTo')
 			},
-			openHealthRoute(url, routeType) {
-				if (!this.isLogin) {
+			openHealthRoute(url, routeType, opts = {}) {
+				const needLogin = opts.needLogin !== false
+				if (needLogin && !this.isLogin) {
 					return this.$u.route('/pages/public/login')
 				}
 				const type = routeType || 'navigateTo'
@@ -211,9 +221,21 @@
 					return uni.switchTab({ url })
 				}
 				if (type === 'redirectTo') {
-					return uni.redirectTo({ url })
+					return uni.redirectTo({
+						url,
+						fail: (err) => {
+							console.log('redirectTo fail', err)
+							this.$u.toast('页面打开失败，请重新编译上传小程序')
+						}
+					})
 				}
-				this.$u.route(url)
+				uni.navigateTo({
+					url,
+					fail: (err) => {
+						console.log('navigateTo fail', err)
+						this.$u.toast('页面打开失败，请确认已上传含「问卷调查」页的新版小程序')
+					}
+				})
 			},
 		// 加载数据，完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
 		async loadAllData() {
@@ -265,8 +287,11 @@
 						min_logo: d.page_setting.min_logo
 					}))
 				}
-				if (d.health_hub && d.health_hub.banner) {
-					this.healthHub = Object.assign({}, this.healthHub, d.health_hub)
+				if (d.health_hub) {
+					const hub = d.health_hub
+					this.healthHub = Object.assign({}, this.healthHub, hub, {
+						banner: Object.assign({}, this.healthHub.banner, hub.banner || {})
+					})
 				}
 				const list = d.forum_list || []
 				if (page === 1) {
