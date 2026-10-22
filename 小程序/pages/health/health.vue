@@ -19,6 +19,53 @@
 		</u-navbar>
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 
+		<!-- 主推 Banner + 双入口（配置见 PC 后台「健康 Tab 配置」） -->
+		<view class="health-hub u-m-t-20" id="guide-health-hub">
+			<view
+				class="health-hub__banner"
+				hover-class="health-hub__banner--press"
+				@tap="onHealthBannerTap"
+			>
+				<image
+					v-if="healthHubBannerImage"
+					class="health-hub__banner-img"
+					:src="healthHubBannerImage"
+					mode="aspectFill"
+				/>
+				<view v-else class="health-hub__banner-ph">
+					<view class="health-hub__banner-ph-orb"></view>
+				</view>
+				<view class="health-hub__banner-mask"></view>
+				<view class="health-hub__banner-copy">
+					<text class="health-hub__banner-tag">满意度调查</text>
+					<text class="health-hub__banner-title">{{ healthHub.banner.title }}</text>
+					<text class="health-hub__banner-sub" v-if="healthHub.banner.subtitle">{{ healthHub.banner.subtitle }}</text>
+					<view class="health-hub__banner-cta">
+						<text>立即参与</text>
+						<u-icon name="arrow-right" size="24" color="#fff"></u-icon>
+					</view>
+				</view>
+			</view>
+			<view class="health-hub__shortcuts">
+				<view
+					v-for="(item, idx) in healthHub.shortcuts"
+					:key="item.key || idx"
+					class="health-hub__shortcut glass-card"
+					hover-class="health-hub__shortcut--press"
+					@tap="onHealthShortcutTap(item)"
+				>
+					<view class="health-hub__shortcut-icon" :class="'health-hub__shortcut-icon--' + (idx % 2)">
+						<u-icon :name="item.icon || 'grid'" size="40" color="#fff"></u-icon>
+					</view>
+					<view class="health-hub__shortcut-text">
+						<text class="health-hub__shortcut-name">{{ item.name }}</text>
+						<text class="health-hub__shortcut-desc" v-if="item.desc">{{ item.desc }}</text>
+					</view>
+					<u-icon name="arrow-right" size="22" color="#8e8e93"></u-icon>
+				</view>
+			</view>
+		</view>
+
 		<!-- 为了通过小程序审核，先注释掉下面 -->
 		<!-- <view class="u-radius-10" id="guide-health-diag" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
 			<view class="u-font-36 u-p-20 white">
@@ -119,6 +166,10 @@
 				const logo = this.setting && this.setting.min_logo
 				if (logo) return logo
 				return 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/logo.png'
+			},
+			healthHubBannerImage() {
+				const img = this.healthHub && this.healthHub.banner && this.healthHub.banner.image
+				return img ? String(img) : ''
 			}
 		},
 		data() {
@@ -127,7 +178,22 @@
 				forum_list: [],
 				page: 1,
 				total: 0,
-				health: {}
+				health: {},
+				healthHub: {
+					banner: {
+						title: '瓦房店中心医院公共卫生满意度调查',
+						subtitle: '诚邀您参与，助力公共卫生服务提升',
+						image: '',
+						link_mode: 'exam',
+						exam_id: 0,
+						url: '',
+						route_type: 'navigateTo'
+					},
+					shortcuts: [
+						{ key: 'survey_tool', name: '医疗机构问卷', desc: '问卷列表与填写', icon: 'file-text', url: '/pages/activity/research', route_type: 'navigateTo' },
+						{ key: 'health_quiz', name: '健康问答竞赛', desc: '趣味答题涨知识', icon: 'edit-pen', url: '/pages/sjhd/list?type=3', route_type: 'navigateTo' }
+					]
+				}
 			};
 		},
 		onLoad() {
@@ -139,6 +205,39 @@
 			if (checkCommunity(this)) return
 		},
 		methods: {
+			onHealthBannerTap() {
+				const b = this.healthHub.banner || {}
+				if (b.link_mode === 'exam') {
+					const examId = parseInt(b.exam_id, 10) || 0
+					if (examId <= 0) {
+						return this.$u.toast('问卷尚未配置，请联系管理员')
+					}
+					return this.openHealthRoute('/pages/answer/list?id=' + examId, 'navigateTo')
+				}
+				if (!b.url) {
+					return this.$u.toast('跳转地址未配置')
+				}
+				this.openHealthRoute(b.url, b.route_type || 'navigateTo')
+			},
+			onHealthShortcutTap(item) {
+				if (!item || !item.url) {
+					return this.$u.toast('功能即将上线')
+				}
+				this.openHealthRoute(item.url, item.route_type || 'navigateTo')
+			},
+			openHealthRoute(url, routeType) {
+				if (!this.isLogin) {
+					return this.$u.route('/pages/public/login')
+				}
+				const type = routeType || 'navigateTo'
+				if (type === 'switchTab') {
+					return uni.switchTab({ url })
+				}
+				if (type === 'redirectTo') {
+					return uni.redirectTo({ url })
+				}
+				this.$u.route(url)
+			},
 		// 加载数据，完成后隐藏骨架屏（最少显示 400ms 防止闪烁）
 		async loadAllData() {
 			const startTime = Date.now()
@@ -188,6 +287,9 @@
 					this.$u.vuex('setting', Object.assign({}, this.setting || {}, {
 						min_logo: d.page_setting.min_logo
 					}))
+				}
+				if (d.health_hub && d.health_hub.banner) {
+					this.healthHub = Object.assign({}, this.healthHub, d.health_hub)
 				}
 				const list = d.forum_list || []
 				if (page === 1) {
@@ -259,5 +361,159 @@
 	@include glass-surface(0.55, 40px);
 	padding: 24rpx;
 	border-radius: $glass-radius-md;
+}
+
+.health-hub__banner {
+	position: relative;
+	width: 100%;
+	height: 280rpx;
+	border-radius: $glass-radius-md;
+	overflow: hidden;
+	box-shadow: 0 12rpx 40rpx rgba(57, 116, 242, 0.22);
+}
+
+.health-hub__banner--press {
+	opacity: 0.92;
+	transform: scale(0.995);
+}
+
+.health-hub__banner-img,
+.health-hub__banner-ph {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.health-hub__banner-ph {
+	background: linear-gradient(125deg, #1a6bff 0%, #3974f2 45%, #18af38 100%);
+}
+
+.health-hub__banner-ph-orb {
+	position: absolute;
+	right: -40rpx;
+	top: -60rpx;
+	width: 260rpx;
+	height: 260rpx;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.12);
+}
+
+.health-hub__banner-mask {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	top: 0;
+	background: linear-gradient(90deg, rgba(0, 28, 80, 0.55) 0%, rgba(0, 28, 80, 0.08) 70%);
+}
+
+.health-hub__banner-copy {
+	position: relative;
+	z-index: 2;
+	height: 100%;
+	padding: 28rpx 32rpx;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.health-hub__banner-tag {
+	align-self: flex-start;
+	padding: 4rpx 16rpx;
+	font-size: 20rpx;
+	color: #fff;
+	background: rgba(255, 255, 255, 0.22);
+	border-radius: 999rpx;
+	margin-bottom: 12rpx;
+}
+
+.health-hub__banner-title {
+	font-size: 32rpx;
+	font-weight: 700;
+	color: #fff;
+	line-height: 1.35;
+	max-width: 92%;
+}
+
+.health-hub__banner-sub {
+	margin-top: 8rpx;
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.88);
+	max-width: 88%;
+}
+
+.health-hub__banner-cta {
+	margin-top: 16rpx;
+	display: inline-flex;
+	align-items: center;
+	gap: 8rpx;
+	padding: 8rpx 20rpx;
+	border-radius: 999rpx;
+	background: rgba(255, 255, 255, 0.2);
+	font-size: 22rpx;
+	color: #fff;
+	align-self: flex-start;
+}
+
+.health-hub__shortcuts {
+	display: flex;
+	gap: 20rpx;
+	margin-top: 24rpx;
+}
+
+.health-hub__shortcut {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	padding: 24rpx 20rpx;
+	border-radius: $glass-radius-md;
+	min-width: 0;
+}
+
+.health-hub__shortcut--press {
+	opacity: 0.88;
+}
+
+.health-hub__shortcut-icon {
+	flex-shrink: 0;
+	width: 72rpx;
+	height: 72rpx;
+	border-radius: 20rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 16rpx;
+}
+
+.health-hub__shortcut-icon--0 {
+	background: linear-gradient(145deg, #3974f2, #5b8cff);
+}
+
+.health-hub__shortcut-icon--1 {
+	background: linear-gradient(145deg, #18af38, #3dd068);
+}
+
+.health-hub__shortcut-text {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.health-hub__shortcut-name {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #1d1d1f;
+}
+
+.health-hub__shortcut-desc {
+	margin-top: 6rpx;
+	font-size: 20rpx;
+	color: #8e8e93;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 </style>

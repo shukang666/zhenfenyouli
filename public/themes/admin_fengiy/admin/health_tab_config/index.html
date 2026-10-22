@@ -1,0 +1,145 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <h4 class="page-header">健康 Tab 配置（Banner + 快捷入口）</h4>
+    <p class="text-muted">
+        小程序「健康」Tab 顶部展示主推 Banner 与两个并列入口。Banner 可绑定
+        <a href="{:url('exam/index')}" target="_blank">问卷列表</a>
+        中的某一份问卷（用户填写记录见
+        <a href="{:url('exam/gift_list')}" target="_blank">问卷记录</a>）。
+    </p>
+
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('HealthTabConfig/index')}">
+        <div class="panel panel-primary">
+            <div class="panel-heading"><strong>主推 Banner</strong></div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">主标题</label>
+                    <div class="col-md-8 col-sm-10">
+                        <input type="text" class="form-control" name="banner[title]"
+                               value="{$config.banner.title}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">副标题</label>
+                    <div class="col-md-8 col-sm-10">
+                        <input type="text" class="form-control" name="banner[subtitle]"
+                               value="{$config.banner.subtitle}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Banner 图</label>
+                    <div class="col-md-6 col-sm-10">
+                        <input type="hidden" name="banner[image]" id="banner_image" value="{$config.banner.image}">
+                        <a href="javascript:uploadOneImage('Banner 上传','#banner_image');">
+                            <notempty name="config.banner.image">
+                                <img src="{:cmf_get_image_preview_url($config.banner.image)}" id="banner_image-preview"
+                                     width="320" style="cursor:pointer;border:1px solid #eee;border-radius:6px;"/>
+                                <else/>
+                                <img src="__TMPL__/public/assets/images/default-image.png" id="banner_image-preview"
+                                     width="320" style="cursor:pointer;"/>
+                            </notempty>
+                        </a>
+                        <input type="button" class="btn btn-sm" value="取消图片"
+                               onclick="$('#banner_image-preview').attr('src','__TMPL__/public/assets/images/default-image.png');$('#banner_image').val('');return false;">
+                        <span class="help-block">留空时小程序端显示渐变占位 + 文案</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">点击跳转</label>
+                    <div class="col-md-2 col-sm-10">
+                        <select name="banner[link_mode]" class="form-control" id="banner_link_mode">
+                            <option value="exam" <if condition="$config.banner.link_mode eq 'exam'">selected</if>>绑定问卷（推荐）</option>
+                            <option value="page" <if condition="$config.banner.link_mode eq 'page'">selected</if>>自定义小程序路径</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-sm-10 banner-exam-row">
+                        <select name="banner[exam_id]" class="form-control">
+                            <option value="0">— 请选择问卷 —</option>
+                            <volist name="exam_list" id="ex">
+                                <option value="{$ex.id}" <if condition="$config.banner.exam_id eq $ex.id">selected</if>>{$ex.id} — {$ex.name}</option>
+                            </volist>
+                        </select>
+                    </div>
+                    <div class="col-md-2 col-sm-10 banner-page-row">
+                        <select name="banner[route_type]" class="form-control">
+                            <option value="navigateTo" <if condition="$config.banner.route_type eq 'navigateTo'">selected</if>>navigateTo</option>
+                            <option value="switchTab" <if condition="$config.banner.route_type eq 'switchTab'">selected</if>>switchTab</option>
+                            <option value="redirectTo" <if condition="$config.banner.route_type eq 'redirectTo'">selected</if>>redirectTo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-sm-10 banner-page-row">
+                        <input type="text" class="form-control" name="banner[url]" value="{$config.banner.url}"
+                               placeholder="/pages/answer/list?id=1">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <volist name="shortcuts" id="sc" key="sk">
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>快捷入口 {$sk}</strong></div>
+            <div class="panel-body">
+                <input type="hidden" name="shortcuts[{$sk}][key]" value="{$sc.key}">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">名称</label>
+                    <div class="col-md-3 col-sm-10">
+                        <input type="text" class="form-control" name="shortcuts[{$sk}][name]" value="{$sc.name}" required>
+                    </div>
+                    <label class="col-sm-1 control-label">描述</label>
+                    <div class="col-md-4 col-sm-10">
+                        <input type="text" class="form-control" name="shortcuts[{$sk}][desc]" value="{$sc.desc}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">uView 图标名</label>
+                    <div class="col-md-2 col-sm-10">
+                        <input type="text" class="form-control" name="shortcuts[{$sk}][icon]" value="{$sc.icon}"
+                               placeholder="file-text">
+                    </div>
+                    <label class="col-sm-1 control-label">跳转类型</label>
+                    <div class="col-md-2 col-sm-10">
+                        <select name="shortcuts[{$sk}][route_type]" class="form-control">
+                            <option value="navigateTo" <if condition="$sc.route_type eq 'navigateTo'">selected</if>>navigateTo</option>
+                            <option value="switchTab" <if condition="$sc.route_type eq 'switchTab'">selected</if>>switchTab</option>
+                            <option value="redirectTo" <if condition="$sc.route_type eq 'redirectTo'">selected</if>>redirectTo</option>
+                        </select>
+                    </div>
+                    <label class="col-sm-1 control-label">路径</label>
+                    <div class="col-md-4 col-sm-10">
+                        <input type="text" class="form-control" name="shortcuts[{$sk}][url]" value="{$sc.url}" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </volist>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary js-ajax-submit">保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+(function () {
+    function syncBannerMode() {
+        var mode = document.getElementById('banner_link_mode').value;
+        var examRows = document.querySelectorAll('.banner-exam-row');
+        var pageRows = document.querySelectorAll('.banner-page-row');
+        for (var i = 0; i < examRows.length; i++) {
+            examRows[i].style.display = mode === 'exam' ? '' : 'none';
+        }
+        for (var j = 0; j < pageRows.length; j++) {
+            pageRows[j].style.display = mode === 'page' ? '' : 'none';
+        }
+    }
+    var sel = document.getElementById('banner_link_mode');
+    if (sel) {
+        sel.addEventListener('change', syncBannerMode);
+        syncBannerMode();
+    }
+})();
+</script>
+<include file="public@footer"/>

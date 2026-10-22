@@ -133,8 +133,51 @@ class TabHomeService
             $data['page_setting'] = [
                 'min_logo' => $minLogo,
             ];
+            $data['health_hub'] = $this->fetchHealthTabHubConfig();
         }
         return $data;
+    }
+
+    /**
+     * 健康 Tab 顶部 Banner + 双入口（cmf_option: health_tab_config）
+     */
+    protected function fetchHealthTabHubConfig(): array
+    {
+        $raw = cmf_get_option('health_tab_config');
+        if (!is_array($raw) || empty($raw['banner']) || empty($raw['shortcuts'])) {
+            $raw = \app\admin\controller\HealthTabConfigController::defaultConfig();
+        }
+
+        $banner = $raw['banner'];
+        if (!empty($banner['image'])) {
+            $banner['image'] = cmf_get_asset_url($banner['image']);
+        }
+        $banner['title'] = (string)($banner['title'] ?? '');
+        $banner['subtitle'] = (string)($banner['subtitle'] ?? '');
+        $banner['link_mode'] = (string)($banner['link_mode'] ?? 'exam');
+        $banner['exam_id'] = (int)($banner['exam_id'] ?? 0);
+        $banner['url'] = (string)($banner['url'] ?? '');
+        $banner['route_type'] = (string)($banner['route_type'] ?? 'navigateTo');
+
+        $shortcuts = [];
+        foreach ($raw['shortcuts'] as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $shortcuts[] = [
+                'key'        => (string)($item['key'] ?? ''),
+                'name'       => (string)($item['name'] ?? ''),
+                'desc'       => (string)($item['desc'] ?? ''),
+                'icon'       => (string)($item['icon'] ?? 'grid'),
+                'url'        => (string)($item['url'] ?? ''),
+                'route_type' => (string)($item['route_type'] ?? 'navigateTo'),
+            ];
+        }
+
+        return [
+            'banner'    => $banner,
+            'shortcuts' => $shortcuts,
+        ];
     }
 
     public function buildMallTabHome(int $page, int $secondCate, int $firstCate, string $keyword): array
