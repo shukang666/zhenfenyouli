@@ -124,7 +124,7 @@ class ActiveWebOnePlusOneService
                 'title' => '第 1 天',
                 'task_title' => '真分前置学习',
                 'task_brief' => '阅读要点并完成练一练',
-                'task_detail' => '下方完成练一练全部答对即视为第 1 天完成。',
+                'task_detail' => '在本页完成练一练全部答对即视为第 1 天完成。',
                 'task_kind' => 'pre_learn_web',
                 'mp_path' => '',
             ],
@@ -912,7 +912,9 @@ class ActiveWebOnePlusOneService
             $actHint = self::buildActHint($row, $d, $completedFlip, $userId);
             $mpPath = (string)($def['mp_path'] ?? '');
             if ($d === 1 && ($def['task_kind'] ?? '') === 'pre_learn_mp' && $mpPath !== '') {
-                $mpPath .= (strpos($mpPath, '?') !== false ? '&' : '?') . 'active_id=' . $activeId;
+                if (strpos($mpPath, 'active_id=') === false) {
+                    $mpPath .= (strpos($mpPath, '?') !== false ? '&' : '?') . 'active_id=' . $activeId;
+                }
             }
             $days[] = [
                 'day' => $d,

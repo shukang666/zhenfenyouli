@@ -651,6 +651,7 @@
       }
 
       var mpReturnWatch = null;
+      var expectingMpReturn = false;
 
       function clearMpReturnWatch() {
         if (!mpReturnWatch) return;
@@ -660,41 +661,43 @@
         mpReturnWatch = null;
       }
 
-      /** 从小程序子页 navigateBack 后，web-view 内 visibilitychange 常不触发，需主动拉进度 */
+      /** 从小程序子页 navigateBack 后刷新进度并回到日历首页 */
+      function refreshAfterMpReturn() {
+        if (!activeId) return Promise.resolve();
+        return refresh().then(function () {
+          currentDay = 0;
+          hide('panel-day');
+          show('panel-home');
+        }).catch(function () {});
+      }
+
       function armRefreshOnMpReturn() {
         clearMpReturnWatch();
-        var ctx = { sawHidden: false };
-        ctx.markLeft = function () { ctx.sawHidden = true; };
         var fired = false;
         function tryFire() {
-          if (fired || !activeId) return;
-          if (document.hidden) {
-            ctx.sawHidden = true;
-            return;
-          }
-          if (!ctx.sawHidden) return;
+          if (fired || !activeId || !expectingMpReturn) return;
+          if (document.hidden) return;
           fired = true;
+          expectingMpReturn = false;
           clearMpReturnWatch();
-          refresh().catch(function () {});
+          refreshAfterMpReturn();
         }
         var onVis = function () { tryFire(); };
         var onPageShow = function () { tryFire(); };
         document.addEventListener('visibilitychange', onVis);
         window.addEventListener('pageshow', onPageShow);
-        var timer = setInterval(tryFire, 400);
+        var timer = setInterval(tryFire, 500);
         mpReturnWatch = { onVis: onVis, onPageShow: onPageShow, timer: timer };
         setTimeout(clearMpReturnWatch, 10 * 60 * 1000);
-        return ctx;
       }
 
       function navigateMp(path) {
         if (!path) return;
-        ActiveWebSdk.navigateMp(path).then(function () {
-          var ctx = armRefreshOnMpReturn();
-          setTimeout(function () {
-            if (ctx && ctx.markLeft) ctx.markLeft();
-          }, 500);
-        }).catch(function (e) {
+        expectingMpReturn = true;
+        armRefreshOnMpReturn();
+        ActiveWebSdk.navigateMp(path).catch(function (e) {
+          expectingMpReturn = false;
+          clearMpReturnWatch();
           alert((e && e.message) ? e.message : '跳转失败，请稍后重试');
         });
       }
@@ -1163,8 +1166,7 @@
           if (!canAct) return;
           $('btn-prelearn-submit').disabled = true;
           apiPost('/wxapp/active_web_one_plus_one/pre_learn_submit', { active_id: activeId, answers: preLearnPicks }).then(function () {
-            alert('学习完成');
-            return refresh();
+            return refreshAfterMpReturn();
           }).catch(function (e) {
             alert(e.message || e);
           }).then(function () {
@@ -1375,12 +1377,18 @@
       };
 
       document.addEventListener('visibilitychange', function () {
-        if (!document.hidden && activeId) {
+        if (!document.hidden && activeId && expectingMpReturn) {
+          refreshAfterMpReturn();
+        } else if (!document.hidden && activeId) {
           refresh().catch(function () {});
         }
       });
       window.addEventListener('pageshow', function () {
-        if (activeId) refresh().catch(function () {});
+        if (activeId && expectingMpReturn) {
+          refreshAfterMpReturn();
+        } else if (activeId) {
+          refresh().catch(function () {});
+        }
       });
 
       ActiveWebSdk.bootstrap().then(function (data) {
