@@ -8,6 +8,9 @@ use cmf\controller\AdminBaseController;
 
 class IndexController extends AdminBaseController
 {
+    /** 菜单树缓存键版本（调整 cmf_admin_menu 层级后需递增以刷新侧栏） */
+    private const ADMIN_MENU_CACHE_PREFIX = 'admin_menus_v2_';
+
     public function initialize()
     {
         $adminSettings = cmf_get_option('admin_settings');
@@ -33,11 +36,12 @@ class IndexController extends AdminBaseController
         }
 
         $adminMenuModel = new AdminMenuModel();
-        $menus          = cache('admin_menus_' . cmf_get_current_admin_id(), '', null, 'admin_menus');
+        $menuCacheKey   = self::ADMIN_MENU_CACHE_PREFIX . cmf_get_current_admin_id();
+        $menus          = cache($menuCacheKey, '', null, 'admin_menus');
 
         if (empty($menus)) {
             $menus = $adminMenuModel->menuTree();
-            cache('admin_menus_' . cmf_get_current_admin_id(), $menus, null, 'admin_menus');
+            cache($menuCacheKey, $menus, null, 'admin_menus');
         }
 
         $this->assign('menus', $menus);

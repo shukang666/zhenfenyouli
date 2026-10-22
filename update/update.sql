@@ -534,9 +534,14 @@ WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller
 
 UPDATE `cmf_admin_menu` sh
 INNER JOIN `cmf_admin_menu` g ON g.`app`='admin' AND g.`controller`='Goods' AND g.`action`='index'
-SET sh.`parent_id` = g.`parent_id`
+SET sh.`parent_id` = g.`parent_id`,
+    sh.`list_order` = 30
 WHERE sh.`app`='admin' AND sh.`controller`='SecondhandItem' AND sh.`action`='index'
   AND sh.`parent_id` = g.`id`;
+
+UPDATE `cmf_admin_menu` SET `list_order`=10 WHERE `app`='admin' AND `controller`='Goods' AND `action`='index';
+UPDATE `cmf_admin_menu` SET `list_order`=20 WHERE `app`='admin' AND `controller`='Goods' AND `action`='categoryList';
+UPDATE `cmf_admin_menu` SET `list_order`=30 WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index';
 
 CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_progress` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
