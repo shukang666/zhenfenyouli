@@ -128,7 +128,8 @@
 			"pages": [{
 				"path": "h5",
 				"style": {
-					"navigationBarTitleText": "首页"
+					"navigationBarTitleText": "首页",
+					"enableShareAppMessage": true
 				}
 			}]
 		},
@@ -310,6 +311,12 @@
 						"componentPlaceholder": {
 							"u-icon": "view"
 						}
+					}
+				},
+				{
+					"path": "web-active-entry",
+					"style": {
+						"navigationBarTitleText": "进入活动"
 					}
 				},
 				{

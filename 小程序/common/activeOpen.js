@@ -1,5 +1,7 @@
 /** 活动显示形式：与 cmf_active.display_mode 一致 */
 
+import { parseActiveIdFromWebLaunchUrl } from '@/common/webActiveEntry.js'
+
 export const ACTIVE_DISPLAY_CONFIG = 1
 
 export const ACTIVE_DISPLAY_WEB = 2
@@ -32,12 +34,14 @@ export function appendActiveIdToWebUrl(webUrl, activeId) {
 
 }
 
-
-
-export function buildH5WrapperPath(pageUrl) {
-
-	return '/pages/h5/h5?url=' + encodeURIComponent(String(pageUrl || ''))
-
+export function buildH5WrapperPath(pageUrl, activeId) {
+	const url = String(pageUrl || '')
+	let path = '/pages/h5/h5?url=' + encodeURIComponent(url)
+	const id = String(activeId || '').trim() || parseActiveIdFromWebLaunchUrl(url)
+	if (id) {
+		path += '&active_id=' + encodeURIComponent(id)
+	}
+	return path
 }
 
 
@@ -188,7 +192,7 @@ export function openActiveDetailWithContext(itemOrId, extra, issueContext, onNee
 
 	const openWithUrl = (pageUrl) => {
 
-		uni.navigateTo({ url: buildH5WrapperPath(pageUrl) })
+		uni.navigateTo({ url: buildH5WrapperPath(pageUrl, id) })
 
 	}
 

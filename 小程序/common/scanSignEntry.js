@@ -1,4 +1,4 @@
-const PENDING_KEY = 'pending_after_login'
+export const PENDING_KEY = 'pending_after_login'
 
 export function savePendingActiveDetail(id) {
 	if (!id && id !== 0) return

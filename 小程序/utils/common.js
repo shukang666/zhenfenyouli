@@ -158,7 +158,7 @@ const install = (Vue, vm) => {
 				.then((ctx) => {
 					const launch = ctx && ctx.web_launch_url
 					if (launch) {
-						uni.navigateTo({ url: buildH5WrapperPath(launch) })
+						uni.navigateTo({ url: buildH5WrapperPath(launch, id) })
 						return
 					}
 					openConfigDetail()
