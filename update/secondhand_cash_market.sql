@@ -60,14 +60,21 @@ UPDATE `cmf_secondhand_item` SET `status`=3, `update_time`=UNIX_TIMESTAMP()
 WHERE `status` IN (1,2) AND `price`=0 AND `contact`='';
 
 -- 注册原有后台审核页菜单；旧积分交换意向页不再挂菜单。
+-- 与「商品列表」同级挂在「商品管理」下，勿把 parent_id 设为 Goods/index 自身 id（会导致商品列表只能展开、进不了列表页）
 INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
 SELECT
-    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1),
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1),
     1, 1,
     IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
-        SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1
+        SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1
     )), 0) + 5,
     'admin','SecondhandItem','index','','社区闲置审核','','居民发布信息审核'
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1);
+
+UPDATE `cmf_admin_menu` sh
+INNER JOIN `cmf_admin_menu` g ON g.`app`='admin' AND g.`controller`='Goods' AND g.`action`='index'
+SET sh.`parent_id` = g.`parent_id`
+WHERE sh.`app`='admin' AND sh.`controller`='SecondhandItem' AND sh.`action`='index'
+  AND sh.`parent_id` = g.`id`;

@@ -522,15 +522,21 @@ CREATE TABLE IF NOT EXISTS `cmf_secondhand_intent` (
 
 INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
 SELECT
-    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1),
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1),
     1, 1,
     IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
-        SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1
+        SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1
     )), 0) + 5,
     'admin','SecondhandItem','index','','社区闲置审核','','居民发布信息审核'
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Goods' AND `action`='index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='SecondhandItem' AND `action`='index' LIMIT 1);
+
+UPDATE `cmf_admin_menu` sh
+INNER JOIN `cmf_admin_menu` g ON g.`app`='admin' AND g.`controller`='Goods' AND g.`action`='index'
+SET sh.`parent_id` = g.`parent_id`
+WHERE sh.`app`='admin' AND sh.`controller`='SecondhandItem' AND sh.`action`='index'
+  AND sh.`parent_id` = g.`id`;
 
 CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_progress` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
