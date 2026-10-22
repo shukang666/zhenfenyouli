@@ -55,6 +55,36 @@ class ActivitySpotService
         return in_array($key, [self::SPOT_HIKING, self::SPOT_FLEA, self::SPOT_ZHENFEN_CLASS], true);
     }
 
+    /** 专题页活动介绍（分会场共用一套文案，地点仅为多活动拆分） */
+    public static function spotIntro(string $spotKey): string
+    {
+        $map = [
+            self::SPOT_HIKING => '「步行山海，净美家园」倡导在徒步、登山过程中顺手捡拾沿途垃圾，用行动守护山海廊道。'
+                . '本专题下按线路或集合点拆分为多个活动入口，便于您选择就近参与的场次；进入对应点位后即可查看该场次的签到、打卡与积分规则。',
+            self::SPOT_FLEA => '「七贤岭绿色二手集市」鼓励居民把家中闲置带到线下市集交换、赠送或低价转让，减少浪费、促进循环利用。'
+                . '线上可先浏览社区闲置；线下按场次、地点公布开市时间与集合位置，请从下方列表选择您要参加的市集场次。',
+            self::SPOT_ZHENFEN_CLASS => '「垃圾真分小课堂」面向居民开展垃圾分类知识讲解与实操体验，帮助大家在家、在桶边都能分得准。'
+                . '因各社区授课地点不同，本专题按教学点拆分为多个活动；请选择下方您方便的点位进入，查看该场次时间与参与方式。',
+        ];
+
+        return $map[$spotKey] ?? '';
+    }
+
+    /**
+     * @param array<string,mixed> $module
+     * @return array<string,mixed>
+     */
+    public static function enrichModuleForHub(array $module, string $spotKey): array
+    {
+        $intro = trim((string)($module['intro'] ?? ''));
+        if ($intro === '') {
+            $intro = self::spotIntro($spotKey);
+        }
+        $module['intro'] = $intro;
+
+        return $module;
+    }
+
     /**
      * 分会场列表：配置式活动按 spot_key；二手集市按场次表展开
      *
@@ -108,12 +138,14 @@ class ActivitySpotService
         foreach ($sessions as $s) {
             $aid = (int)$s['active_id'];
             $active = $activeMap[$aid] ?? [];
+            $sessionTitle = self::resolveFleaSessionTitle($s, $active);
             $list[] = [
                 'kind' => 'flea_session',
                 'id' => (int)$s['id'],
                 'session_id' => (int)$s['id'],
                 'active_id' => $aid,
-                'title' => self::resolveFleaSessionTitle($s, $active),
+                'title' => $sessionTitle,
+                'place_name' => $sessionTitle,
                 'address' => (string)$s['address'],
                 'date_text' => (string)$s['date_text'],
                 'thumb' => !empty($active['thumb']) ? cmf_get_asset_url($active['thumb']) : '',
@@ -241,6 +273,7 @@ class ActivitySpotService
             'session_id' => 0,
             'active_id' => (int)$row['id'],
             'title' => $title,
+            'place_name' => $title,
             'address' => $address,
             'date_text' => !empty($row['date']) ? date('Y-m-d', (int)$row['date']) : '',
             'thumb' => $thumb,

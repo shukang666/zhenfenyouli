@@ -432,6 +432,9 @@ class ActiveController extends AuthController
             $row['web_page_url'] = (string)($active['web_page_url'] ?? '');
         }
         unset($row);
+        if (is_array($module)) {
+            $module = ActivitySpotService::enrichModuleForHub($module, $spotKey);
+        }
         $this->success('请求成功', [
             'module' => $module,
             'venues' => $venues,

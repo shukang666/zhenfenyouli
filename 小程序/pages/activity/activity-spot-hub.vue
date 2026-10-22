@@ -32,21 +32,31 @@
 
 		<view class="spot-body">
 
+			<view class="spot-panel spot-panel--intro" v-if="moduleIntro">
+
+				<view class="spot-section-head spot-section-head--tight">
+
+					<text class="spot-section-label">活动介绍</text>
+
+				</view>
+
+				<text class="spot-intro-text">{{ moduleIntro }}</text>
+
+			</view>
+
 			<view class="spot-panel">
 
 				<view class="spot-section-head">
 
 					<view class="spot-section-title-row">
 
-						<text class="spot-section-label">{{ isFleaMarket ? '近期市集场次' : '选择活动地点' }}</text>
+						<text class="spot-section-label">{{ isFleaMarket ? '市集场次' : '线下点位' }}</text>
 
-						<text class="spot-section-count" v-if="venueCount > 0">共 {{ venueCount }} 个{{ isFleaMarket ? '场次' : '活动地点' }}</text>
+						<text class="spot-section-count" v-if="venueCount > 0">共 {{ venueCount }} 个</text>
 
 					</view>
 
-					<text class="spot-section-hint" v-if="isFleaMarket">查看线下活动时间、地点并报名参加。</text>
-
-					<text class="spot-section-hint" v-else>选择就近地点，参与本次环保行动</text>
+					<text class="spot-section-hint">同一专题因地点不同拆成多个入口，请选您方便的{{ isFleaMarket ? '场次' : '点位' }}进入参与。</text>
 
 				</view>
 
@@ -78,17 +88,17 @@
 
 
 
-				<view class="spot-list" v-if="venues.length">
+				<view class="spot-venue-list" v-if="venues.length">
 
 					<view
 
-						class="spot-card"
+						class="spot-venue-row"
 
 						v-for="(item, vIdx) in venues"
 
 						:key="vIdx"
 
-						hover-class="spot-card--press"
+						hover-class="spot-venue-row--press"
 
 						:hover-stay-time="80"
 
@@ -96,41 +106,29 @@
 
 					>
 
-						<view class="spot-card-icon" aria-hidden="true">
+						<view class="spot-venue-pin" aria-hidden="true">
 
-							<u-icon name="map-fill" size="36" :color="iconAccentColor"></u-icon>
-
-						</view>
-
-						<view class="spot-card-main">
-
-							<text class="spot-card-title">{{ item.title }}</text>
-
-							<text
-
-								class="spot-card-sub u-line-2"
-
-								v-if="showVenueAddress(item)"
-
-							>{{ item.address }}</text>
-
-							<text
-
-								class="spot-card-sub u-line-1"
-
-								v-else-if="item.date_text"
-
-							>{{ item.date_text }}</text>
-
-							<text class="spot-card-count" v-if="item.active_count > 0">{{ item.active_count }} 人参与</text>
+							<u-icon name="map-fill" size="32" :color="iconAccentColor"></u-icon>
 
 						</view>
 
-						<view class="spot-card-arrow" aria-hidden="true">
+						<view class="spot-venue-main">
 
-							<u-icon name="arrow-right" size="28" color="#b0b8bc"></u-icon>
+							<text class="spot-venue-place">{{ venuePlaceLabel(item) }}</text>
+
+							<text class="spot-venue-addr u-line-2" v-if="venueAddressLine(item)">{{ venueAddressLine(item) }}</text>
+
+							<view class="spot-venue-meta">
+
+								<text class="spot-venue-meta-item" v-if="item.date_text">{{ item.date_text }}</text>
+
+								<text class="spot-venue-meta-item" v-if="item.active_count > 0">{{ item.active_count }} 人参与</text>
+
+							</view>
 
 						</view>
+
+						<text class="spot-venue-action">进入</text>
 
 					</view>
 
@@ -178,6 +176,16 @@ const SPOT_DECOR = {
 
 }
 
+const SPOT_INTRO_FALLBACK = {
+
+	hiking: '徒步山海沿线捡拾垃圾，净美家园。下方为各线路/集合点入口，请选就近点位参与。',
+
+	flea_market: '线下绿色二手市集，闲置当面交接。下方为各场次时间与地点，请选场次进入。',
+
+	zhenfen_class: '垃圾分类小课堂，现场学习真分。下方为各教学点，请选就近点位进入。',
+
+}
+
 
 
 export default {
@@ -193,6 +201,8 @@ export default {
 			moduleSubtitle: '',
 
 			moduleEmoji: '📌',
+
+			moduleIntro: '',
 
 			venues: [],
 
@@ -270,6 +280,8 @@ export default {
 
 		}
 
+		this.moduleIntro = SPOT_INTRO_FALLBACK[this.spotKey] || ''
+
 		this.loadHub()
 
 	},
@@ -279,24 +291,19 @@ export default {
 		goSecondhandList() { this.$u.route(secondhandListUrl()) },
 
 
-		showVenueAddress(item) {
-
-			if (!item || !item.address) return false
-
-			const addr = String(item.address).trim()
-
-			const title = String(item.title || '').trim()
-
-			if (!addr) return false
-
-			if (!title) return true
-
-			if (addr === title) return false
-
-			if (addr.indexOf(title) >= 0 || title.indexOf(addr) >= 0) return false
-
-			return true
-
+		venuePlaceLabel(item) {
+			if (!item) return '地点待定'
+			const place = String(item.place_name || item.title || '').trim()
+			return place || '地点待定'
+		},
+		venueAddressLine(item) {
+			if (!item) return ''
+			const addr = String(item.address || '').trim()
+			const place = this.venuePlaceLabel(item)
+			if (!addr) return ''
+			if (addr === place) return ''
+			if (addr.indexOf(place) >= 0 && place.length >= 4) return ''
+			return addr
 		},
 
 		loadHub() {
@@ -342,6 +349,10 @@ export default {
 				}
 
 				if (mod.emoji && !decor.emoji) this.moduleEmoji = mod.emoji
+
+				if (mod.intro) {
+					this.moduleIntro = mod.intro
+				}
 
 				this.venues = data.venues || []
 
@@ -673,6 +684,12 @@ export default {
 
 	z-index: 2;
 
+	display: flex;
+
+	flex-direction: column;
+
+	gap: 20rpx;
+
 }
 
 
@@ -686,6 +703,38 @@ export default {
 	overflow: hidden;
 
 	box-shadow: 0 8rpx 32rpx rgba(36, 90, 66, 0.06);
+
+}
+
+
+
+.spot-panel--intro {
+
+	padding-bottom: 8rpx;
+
+}
+
+
+
+.spot-section-head--tight {
+
+	padding-bottom: 12rpx;
+
+}
+
+
+
+.spot-intro-text {
+
+	display: block;
+
+	padding: 0 28rpx 28rpx;
+
+	font-size: 28rpx;
+
+	line-height: 1.65;
+
+	color: #4a524e;
 
 }
 
@@ -849,35 +898,23 @@ export default {
 
 
 
-.spot-list {
+.spot-venue-list {
 
-	padding: 16rpx 20rpx 28rpx;
-
-	display: flex;
-
-	flex-direction: column;
-
-	gap: 20rpx;
+	padding: 8rpx 0 16rpx;
 
 }
 
 
 
-.spot-card {
+.spot-venue-row {
 
 	display: flex;
 
-	align-items: center;
+	align-items: flex-start;
 
-	min-height: 112rpx;
+	padding: 26rpx 28rpx;
 
-	padding: 24rpx 20rpx 24rpx 24rpx;
-
-	background: #f7faf8;
-
-	border-radius: 16rpx;
-
-	border: 1rpx solid #e8eeeb;
+	border-top: 1rpx solid #eef2f0;
 
 	box-sizing: border-box;
 
@@ -885,41 +922,37 @@ export default {
 
 
 
-.spot-card--press {
+.spot-venue-row:first-child {
 
-	background: #eef5f1;
-
-	border-color: #d4e4db;
+	border-top: none;
 
 }
 
 
 
-.spot-card-icon {
+.spot-venue-row--press {
+
+	background: #f6faf7;
+
+}
+
+
+
+.spot-venue-pin {
 
 	flex-shrink: 0;
 
-	width: 72rpx;
+	width: 44rpx;
 
-	height: 72rpx;
+	padding-top: 4rpx;
 
-	border-radius: 50%;
-
-	background: #e8f3ec;
-
-	display: flex;
-
-	align-items: center;
-
-	justify-content: center;
-
-	margin-right: 20rpx;
+	margin-right: 16rpx;
 
 }
 
 
 
-.spot-card-main {
+.spot-venue-main {
 
 	flex: 1;
 
@@ -929,15 +962,15 @@ export default {
 
 	flex-direction: column;
 
-	gap: 6rpx;
+	gap: 8rpx;
 
 }
 
 
 
-.spot-card-title {
+.spot-venue-place {
 
-	font-size: 32rpx;
+	font-size: 30rpx;
 
 	font-weight: 600;
 
@@ -945,51 +978,57 @@ export default {
 
 	line-height: 1.4;
 
-	word-break: break-all;
-
 }
 
 
 
-.spot-card-sub {
+.spot-venue-addr {
 
 	font-size: 24rpx;
 
 	color: #6b7370;
 
-	line-height: 1.4;
+	line-height: 1.45;
 
 }
 
 
 
-.spot-card-count {
-
-	font-size: 22rpx;
-
-	color: #3d8b63;
-
-	font-weight: 500;
-
-	margin-top: 2rpx;
-
-}
-
-
-
-.spot-card-arrow {
-
-	flex-shrink: 0;
-
-	width: 40rpx;
+.spot-venue-meta {
 
 	display: flex;
 
-	align-items: center;
+	flex-wrap: wrap;
 
-	justify-content: flex-end;
+	gap: 16rpx;
+
+}
+
+
+
+.spot-venue-meta-item {
+
+	font-size: 22rpx;
+
+	color: #5a8f72;
+
+}
+
+
+
+.spot-venue-action {
+
+	flex-shrink: 0;
 
 	margin-left: 12rpx;
+
+	padding-top: 4rpx;
+
+	font-size: 26rpx;
+
+	font-weight: 600;
+
+	color: #357a5c;
 
 }
 
