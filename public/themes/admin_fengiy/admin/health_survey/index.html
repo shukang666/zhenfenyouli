@@ -1,0 +1,75 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:;">新版问卷</a></li>
+    </ul>
+    <div class="well form-inline margin-top-20">
+        <form method="get" action="{:url('admin/HealthSurvey/index')}">
+            <div class="form-group">
+                <label>状态：</label>
+                <select name="status" class="form-control" style="width:120px;">
+                    <option value="">全部</option>
+                    <option value="1" <if condition="$status eq '1'">selected</if>>启用</option>
+                    <option value="0" <if condition="$status eq '0'">selected</if>>禁用</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>标题：</label>
+                <input type="text" class="form-control" name="keyword" style="width:220px;" value="{$keyword}" placeholder="问卷标题">
+            </div>
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <a class="btn btn-default" href="{:url('admin/HealthSurvey/index')}">清空</a>
+        </form>
+    </div>
+    <div class="table-actions row" style="margin:10px 0;">
+        <a class="btn btn-primary btn-sm" href="{:url('admin/HealthSurvey/add')}">新建问卷</a>
+        <a class="btn btn-default btn-sm" href="{:url('admin/HealthTabConfig/index')}">健康 Tab Banner 绑定</a>
+    </div>
+    <table class="table table-hover table-bordered">
+        <thead>
+        <tr>
+            <th width="50">ID</th>
+            <th>标题</th>
+            <th width="70">字段数</th>
+            <th width="80">提交数</th>
+            <th width="70">状态</th>
+            <th width="80">重复提交</th>
+            <th width="140">更新时间</th>
+            <th width="220">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>{$vo.title}</td>
+                <td>{$vo.field_count}</td>
+                <td>{$vo.record_count}</td>
+                <td>
+                    <if condition="$vo.status eq 1">
+                        <span class="label label-success">启用</span>
+                    <else/>
+                        <span class="label label-default">禁用</span>
+                    </if>
+                </td>
+                <td><if condition="$vo.allow_repeat eq 1">允许<else/>否</if></td>
+                <td>{$vo.update_time|date='Y-m-d H:i'}</td>
+                <td>
+                    <a class="btn btn-xs btn-primary" href="{:url('admin/HealthSurvey/edit',['id'=>$vo.id])}">编辑</a>
+                    <a class="btn btn-xs btn-info" href="{:url('admin/HealthSurvey/record',['survey_id'=>$vo.id])}">数据</a>
+                    <if condition="$vo.status eq 1">
+                        <a class="btn btn-xs btn-warning js-ajax-dialog-btn" href="{:url('admin/HealthSurvey/set_status',['id'=>$vo.id,'status'=>0])}">停用</a>
+                    <else/>
+                        <a class="btn btn-xs btn-success js-ajax-dialog-btn" href="{:url('admin/HealthSurvey/set_status',['id'=>$vo.id,'status'=>1])}">启用</a>
+                    </if>
+                    <a class="btn btn-xs btn-danger js-ajax-delete" href="{:url('admin/HealthSurvey/delete',['id'=>$vo.id])}">删除</a>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<include file="public@footer"/>

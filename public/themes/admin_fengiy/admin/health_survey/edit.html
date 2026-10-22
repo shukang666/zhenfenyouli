@@ -1,0 +1,161 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('admin/HealthSurvey/index')}">新版问卷</a></li>
+        <li class="active"><a href="javascript:;"><if condition="empty($data.id)">新建<else/>编辑</if></a></li>
+    </ul>
+    <if condition="!empty($data.id)">
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('admin/HealthSurvey/edit',['id'=>$data.id])}">
+    <else/>
+    <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('admin/HealthSurvey/add')}">
+    </if>
+        <div class="panel panel-default">
+            <div class="panel-heading"><strong>基本信息</strong></div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span class="form-required">*</span>标题</label>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" name="title" value="{$data.title}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">说明</label>
+                    <div class="col-md-8">
+                        <textarea class="form-control" name="description" rows="2">{$data.description}</textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">排序</label>
+                    <div class="col-md-2">
+                        <input type="number" class="form-control" name="list_order" value="{$data.list_order|default=0}">
+                    </div>
+                    <label class="col-sm-1 control-label">状态</label>
+                    <div class="col-md-2">
+                        <select name="status" class="form-control">
+                            <option value="1" <if condition="$data.status eq 1">selected</if>>启用</option>
+                            <option value="0" <if condition="$data.status eq 0">selected</if>>禁用</option>
+                        </select>
+                    </div>
+                    <label class="col-sm-2 control-label">允许重复提交</label>
+                    <div class="col-md-2">
+                        <select name="allow_repeat" class="form-control">
+                            <option value="0" <if condition="$data.allow_repeat eq 0">selected</if>>否</option>
+                            <option value="1" <if condition="$data.allow_repeat eq 1">selected</if>>是</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>表单字段</strong>
+                <button type="button" class="btn btn-xs btn-primary pull-right" id="btn-add-field">+ 添加字段</button>
+            </div>
+            <div class="panel-body" id="field-list">
+                <foreach name="fields" item="f" key="fk">
+                <div class="field-row panel panel-info" style="padding:12px;margin-bottom:12px;">
+                    <input type="hidden" name="fields[{$fk}][id]" value="{$f.id}">
+                    <input type="hidden" name="fields[{$fk}][field_key]" value="{$f.field_key}">
+                    <div class="form-group" style="margin-bottom:8px;">
+                        <label class="col-sm-1 control-label">名称</label>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="fields[{$fk}][label]" value="{$f.label}" required>
+                        </div>
+                        <label class="col-sm-1 control-label">类型</label>
+                        <div class="col-md-2">
+                            <select class="form-control field-type" name="fields[{$fk}][field_type]">
+                                <foreach name="field_types" item="tlabel" key="tkey">
+                                <option value="{$tkey}" <if condition="$f.field_type eq $tkey">selected</if>>{$tlabel}</option>
+                                </foreach>
+                            </select>
+                        </div>
+                        <label class="col-sm-1 control-label">必填</label>
+                        <div class="col-md-1">
+                            <input type="checkbox" name="fields[{$fk}][required]" value="1" <if condition="$f.required eq 1">checked</if>>
+                        </div>
+                        <div class="col-md-2 text-right">
+                            <button type="button" class="btn btn-xs btn-danger btn-remove-field">删除</button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label class="col-sm-1 control-label">占位</label>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="fields[{$fk}][placeholder]" value="{$f.placeholder}">
+                        </div>
+                        <label class="col-sm-1 control-label">选项</label>
+                        <div class="col-md-5">
+                            <textarea class="form-control field-options" name="fields[{$fk}][options_text]" rows="2" placeholder="单选/多选/下拉：每行一个选项">{$f.options_text}</textarea>
+                        </div>
+                    </div>
+                </div>
+                </foreach>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2">
+                <button type="submit" class="btn btn-primary js-ajax-submit">保存</button>
+                <a class="btn btn-default" href="{:url('admin/HealthSurvey/index')}">返回列表</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/html" id="field-row-tpl">
+<div class="field-row panel panel-info" style="padding:12px;margin-bottom:12px;">
+    <input type="hidden" name="fields[__IDX__][id]" value="0">
+    <input type="hidden" name="fields[__IDX__][field_key]" value="">
+    <div class="form-group" style="margin-bottom:8px;">
+        <label class="col-sm-1 control-label">名称</label>
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="fields[__IDX__][label]" required>
+        </div>
+        <label class="col-sm-1 control-label">类型</label>
+        <div class="col-md-2">
+            <select class="form-control field-type" name="fields[__IDX__][field_type]">
+                <foreach name="field_types" item="tlabel" key="tkey">
+                <option value="{$tkey}">{$tlabel}</option>
+                </foreach>
+            </select>
+        </div>
+        <label class="col-sm-1 control-label">必填</label>
+        <div class="col-md-1">
+            <input type="checkbox" name="fields[__IDX__][required]" value="1">
+        </div>
+        <div class="col-md-2 text-right">
+            <button type="button" class="btn btn-xs btn-danger btn-remove-field">删除</button>
+        </div>
+    </div>
+    <div class="form-group" style="margin-bottom:0;">
+        <label class="col-sm-1 control-label">占位</label>
+        <div class="col-md-3">
+            <input type="text" class="form-control" name="fields[__IDX__][placeholder]">
+        </div>
+        <label class="col-sm-1 control-label">选项</label>
+        <div class="col-md-5">
+            <textarea class="form-control field-options" name="fields[__IDX__][options_text]" rows="2" placeholder="单选/多选/下拉：每行一个选项"></textarea>
+        </div>
+    </div>
+</div>
+</script>
+<script>
+(function () {
+    var idx = document.querySelectorAll('#field-list .field-row').length;
+    document.getElementById('btn-add-field').addEventListener('click', function () {
+        var tpl = document.getElementById('field-row-tpl').innerHTML;
+        tpl = tpl.replace(/__IDX__/g, String(idx++));
+        var div = document.createElement('div');
+        div.innerHTML = tpl;
+        document.getElementById('field-list').appendChild(div.firstElementChild);
+    });
+    document.getElementById('field-list').addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('btn-remove-field')) {
+            var row = e.target.closest('.field-row');
+            if (row) row.parentNode.removeChild(row);
+        }
+    });
+})();
+</script>
+<include file="public@footer"/>

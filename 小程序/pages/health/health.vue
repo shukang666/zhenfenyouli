@@ -46,24 +46,6 @@
 					</view>
 				</view>
 			</view>
-			<view class="health-hub__shortcuts">
-				<view
-					v-for="(item, idx) in healthHub.shortcuts"
-					:key="item.key || idx"
-					class="health-hub__shortcut glass-card"
-					hover-class="health-hub__shortcut--press"
-					@tap="onHealthShortcutTap(item)"
-				>
-					<view class="health-hub__shortcut-icon" :class="'health-hub__shortcut-icon--' + (idx % 2)">
-						<u-icon :name="item.icon || 'grid'" size="40" color="#fff"></u-icon>
-					</view>
-					<view class="health-hub__shortcut-text">
-						<text class="health-hub__shortcut-name">{{ item.name }}</text>
-						<text class="health-hub__shortcut-desc" v-if="item.desc">{{ item.desc }}</text>
-					</view>
-					<u-icon name="arrow-right" size="22" color="#8e8e93"></u-icon>
-				</view>
-			</view>
 		</view>
 
 		<!-- 为了通过小程序审核，先注释掉下面 -->
@@ -184,8 +166,8 @@
 						title: '瓦房店中心医院公共卫生满意度调查',
 						subtitle: '诚邀您参与，助力公共卫生服务提升',
 						image: '',
-						link_mode: 'exam',
-						exam_id: 0,
+						link_mode: 'survey',
+						survey_id: 0,
 						url: '',
 						route_type: 'navigateTo'
 					},
@@ -207,23 +189,18 @@
 		methods: {
 			onHealthBannerTap() {
 				const b = this.healthHub.banner || {}
-				if (b.link_mode === 'exam') {
-					const examId = parseInt(b.exam_id, 10) || 0
-					if (examId <= 0) {
+				const mode = b.link_mode === 'page' ? 'page' : 'survey'
+				if (mode === 'survey') {
+					const surveyId = parseInt(b.survey_id, 10) || 0
+					if (surveyId <= 0) {
 						return this.$u.toast('问卷尚未配置，请联系管理员')
 					}
-					return this.openHealthRoute('/pages/answer/list?id=' + examId, 'navigateTo')
+					return this.openHealthRoute('/pages/health/survey?id=' + surveyId, 'navigateTo')
 				}
 				if (!b.url) {
 					return this.$u.toast('跳转地址未配置')
 				}
 				this.openHealthRoute(b.url, b.route_type || 'navigateTo')
-			},
-			onHealthShortcutTap(item) {
-				if (!item || !item.url) {
-					return this.$u.toast('功能即将上线')
-				}
-				this.openHealthRoute(item.url, item.route_type || 'navigateTo')
 			},
 			openHealthRoute(url, routeType) {
 				if (!this.isLogin) {

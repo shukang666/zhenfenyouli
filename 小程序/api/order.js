@@ -38,6 +38,8 @@ const order = {
 	
     // 健康管理
     get_health_home_list: (params = {}) => uni.$u.post('/wxapp/health/get_health_home_list', params),
+    health_survey_detail: (params = {}) => uni.$u.post('/wxapp/health_survey/detail', params),
+    health_survey_submit: (params = {}) => uni.$u.post('/wxapp/health_survey/submit', params),
     // 问卷列表
     find_exam_topic_list: (params = {}) => uni.$u.post('/wxapp/exam/find_exam_topic_list', params),
     // 身心健康

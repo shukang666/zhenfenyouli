@@ -2,12 +2,11 @@
 </head>
 <body>
 <div class="wrap">
-    <h4 class="page-header">健康 Tab 配置（Banner + 快捷入口）</h4>
+    <h4 class="page-header">健康 Tab 配置（Banner）</h4>
     <p class="text-muted">
-        小程序「健康」Tab 顶部展示主推 Banner 与两个并列入口。Banner 可绑定
-        <a href="{:url('exam/index')}" target="_blank">问卷列表</a>
-        中的某一份问卷（用户填写记录见
-        <a href="{:url('exam/gift_list')}" target="_blank">问卷记录</a>）。
+        Banner 绑定
+        <a href="{:url('HealthSurvey/index')}" target="_blank">新版问卷</a>
+        （题目配置与提交数据均在「新版问卷」菜单）。
     </p>
 
     <form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('HealthTabConfig/index')}">
@@ -50,15 +49,17 @@
                     <label class="col-sm-2 control-label">点击跳转</label>
                     <div class="col-md-2 col-sm-10">
                         <select name="banner[link_mode]" class="form-control" id="banner_link_mode">
-                            <option value="exam" <if condition="$config.banner.link_mode eq 'exam'">selected</if>>绑定问卷（推荐）</option>
+                            <option value="survey" <if condition="$config.banner.link_mode eq 'survey' or $config.banner.link_mode eq 'exam'">selected</if>>绑定新版问卷</option>
                             <option value="page" <if condition="$config.banner.link_mode eq 'page'">selected</if>>自定义小程序路径</option>
                         </select>
                     </div>
-                    <div class="col-md-3 col-sm-10 banner-exam-row">
-                        <select name="banner[exam_id]" class="form-control">
+                    <div class="col-md-4 col-sm-10 banner-survey-row">
+                        <select name="banner[survey_id]" class="form-control">
                             <option value="0">— 请选择问卷 —</option>
-                            <volist name="exam_list" id="ex">
-                                <option value="{$ex.id}" <if condition="$config.banner.exam_id eq $ex.id">selected</if>>{$ex.id} — {$ex.name}</option>
+                            <volist name="survey_list" id="sv">
+                                <option value="{$sv.id}"
+                                <if condition="($config.banner.survey_id gt 0 and $config.banner.survey_id eq $sv.id) or ($config.banner.survey_id eq 0 and $config.banner.exam_id eq $sv.id)">selected</if>
+                                >{$sv.id} — {$sv.title}</option>
                             </volist>
                         </select>
                     </div>
@@ -71,49 +72,24 @@
                     </div>
                     <div class="col-md-3 col-sm-10 banner-page-row">
                         <input type="text" class="form-control" name="banner[url]" value="{$config.banner.url}"
-                               placeholder="/pages/answer/list?id=1">
+                               placeholder="/pages/health/survey?id=1">
                     </div>
                 </div>
             </div>
         </div>
 
-        <volist name="shortcuts" id="sc" key="sk">
-        <div class="panel panel-default">
-            <div class="panel-heading"><strong>快捷入口 {$sk}</strong></div>
-            <div class="panel-body">
-                <input type="hidden" name="shortcuts[{$sk}][key]" value="{$sc.key}">
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">名称</label>
-                    <div class="col-md-3 col-sm-10">
-                        <input type="text" class="form-control" name="shortcuts[{$sk}][name]" value="{$sc.name}" required>
-                    </div>
-                    <label class="col-sm-1 control-label">描述</label>
-                    <div class="col-md-4 col-sm-10">
-                        <input type="text" class="form-control" name="shortcuts[{$sk}][desc]" value="{$sc.desc}">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label">uView 图标名</label>
-                    <div class="col-md-2 col-sm-10">
-                        <input type="text" class="form-control" name="shortcuts[{$sk}][icon]" value="{$sc.icon}"
-                               placeholder="file-text">
-                    </div>
-                    <label class="col-sm-1 control-label">跳转类型</label>
-                    <div class="col-md-2 col-sm-10">
-                        <select name="shortcuts[{$sk}][route_type]" class="form-control">
-                            <option value="navigateTo" <if condition="$sc.route_type eq 'navigateTo'">selected</if>>navigateTo</option>
-                            <option value="switchTab" <if condition="$sc.route_type eq 'switchTab'">selected</if>>switchTab</option>
-                            <option value="redirectTo" <if condition="$sc.route_type eq 'redirectTo'">selected</if>>redirectTo</option>
-                        </select>
-                    </div>
-                    <label class="col-sm-1 control-label">路径</label>
-                    <div class="col-md-4 col-sm-10">
-                        <input type="text" class="form-control" name="shortcuts[{$sk}][url]" value="{$sc.url}" required>
-                    </div>
-                </div>
-            </div>
-        </div>
-        </volist>
+        <input type="hidden" name="shortcuts[0][key]" value="survey_tool">
+        <input type="hidden" name="shortcuts[0][name]" value="">
+        <input type="hidden" name="shortcuts[0][desc]" value="">
+        <input type="hidden" name="shortcuts[0][icon]" value="file-text">
+        <input type="hidden" name="shortcuts[0][url]" value="">
+        <input type="hidden" name="shortcuts[0][route_type]" value="navigateTo">
+        <input type="hidden" name="shortcuts[1][key]" value="health_quiz">
+        <input type="hidden" name="shortcuts[1][name]" value="">
+        <input type="hidden" name="shortcuts[1][desc]" value="">
+        <input type="hidden" name="shortcuts[1][icon]" value="edit-pen">
+        <input type="hidden" name="shortcuts[1][url]" value="">
+        <input type="hidden" name="shortcuts[1][route_type]" value="navigateTo">
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -126,10 +102,10 @@
 (function () {
     function syncBannerMode() {
         var mode = document.getElementById('banner_link_mode').value;
-        var examRows = document.querySelectorAll('.banner-exam-row');
+        var surveyRows = document.querySelectorAll('.banner-survey-row');
         var pageRows = document.querySelectorAll('.banner-page-row');
-        for (var i = 0; i < examRows.length; i++) {
-            examRows[i].style.display = mode === 'exam' ? '' : 'none';
+        for (var i = 0; i < surveyRows.length; i++) {
+            surveyRows[i].style.display = mode === 'survey' ? '' : 'none';
         }
         for (var j = 0; j < pageRows.length; j++) {
             pageRows[j].style.display = mode === 'page' ? '' : 'none';

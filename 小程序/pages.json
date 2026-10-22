@@ -44,6 +44,13 @@
 				}
 			}
 		}, {
+			"path": "pages/health/survey",
+			"style": {
+				"navigationBarTitleText": "问卷调查",
+				"navigationBarBackgroundColor": "#3974f2",
+				"navigationBarTextStyle": "white"
+			}
+		}, {
 			"path": "pages/health/health",
 			"style": {
 				"navigationBarTitleText": "健康",

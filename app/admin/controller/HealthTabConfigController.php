@@ -16,16 +16,26 @@ class HealthTabConfigController extends AdminBaseController
         if ($this->request->isPost()) {
             $banner = $this->request->param('banner/a', []);
             $shortcuts = $this->request->param('shortcuts/a', []);
-
-            if (count($shortcuts) !== 2) {
-                $this->error('必须配置 2 个快捷入口');
+            $prev = cmf_get_option(self::OPTION_NAME);
+            if (!is_array($prev) || empty($prev['shortcuts'])) {
+                $prev = self::defaultConfig();
+            }
+            if (count($shortcuts) < 2) {
+                $shortcuts = $prev['shortcuts'];
+            } else {
+                foreach (array_values($shortcuts) as $i => $item) {
+                    if (empty(trim((string)($item['name'] ?? '')))) {
+                        $shortcuts[$i] = $prev['shortcuts'][$i] ?? $item;
+                    }
+                }
             }
 
             $cleanBanner = [
                 'title'      => trim((string)($banner['title'] ?? '')),
                 'subtitle'   => trim((string)($banner['subtitle'] ?? '')),
                 'image'      => trim((string)($banner['image'] ?? '')),
-                'link_mode'  => trim((string)($banner['link_mode'] ?? 'exam')),
+                'link_mode'  => trim((string)($banner['link_mode'] ?? 'survey')),
+                'survey_id'  => max(0, (int)($banner['survey_id'] ?? 0)),
                 'exam_id'    => max(0, (int)($banner['exam_id'] ?? 0)),
                 'url'        => trim((string)($banner['url'] ?? '')),
                 'route_type' => trim((string)($banner['route_type'] ?? 'navigateTo')),
@@ -62,7 +72,7 @@ class HealthTabConfigController extends AdminBaseController
 
         $this->assign('config', $config);
         $this->assign('shortcuts', $config['shortcuts']);
-        $this->assign('exam_list', $this->fetchExamOptions());
+        $this->assign('survey_list', $this->fetchSurveyOptions());
 
         return $this->fetch();
     }
@@ -74,7 +84,8 @@ class HealthTabConfigController extends AdminBaseController
                 'title'      => '瓦房店中心医院公共卫生满意度调查',
                 'subtitle'   => '诚邀您参与，助力公共卫生服务提升',
                 'image'      => '',
-                'link_mode'  => 'exam',
+                'link_mode'  => 'survey',
+                'survey_id'  => 0,
                 'exam_id'    => 0,
                 'url'        => '',
                 'route_type' => 'navigateTo',
@@ -103,13 +114,14 @@ class HealthTabConfigController extends AdminBaseController
     /**
      * @return array<int, array{id:int,name:string}>
      */
-    private function fetchExamOptions(): array
+    private function fetchSurveyOptions(): array
     {
-        $rows = \think\facade\Db::name('exam')
+        $rows = \think\facade\Db::name('health_survey')
+            ->where('delete_time', 0)
             ->where('status', 1)
             ->order('list_order asc,id desc')
             ->limit(200)
-            ->field('id,name')
+            ->field('id,title')
             ->select()
             ->toArray();
 

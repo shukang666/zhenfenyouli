@@ -154,8 +154,15 @@ class TabHomeService
         }
         $banner['title'] = (string)($banner['title'] ?? '');
         $banner['subtitle'] = (string)($banner['subtitle'] ?? '');
-        $banner['link_mode'] = (string)($banner['link_mode'] ?? 'exam');
-        $banner['exam_id'] = (int)($banner['exam_id'] ?? 0);
+        $banner['link_mode'] = (string)($banner['link_mode'] ?? 'survey');
+        if ($banner['link_mode'] === 'exam') {
+            $banner['link_mode'] = 'survey';
+        }
+        $banner['survey_id'] = (int)($banner['survey_id'] ?? 0);
+        if ($banner['survey_id'] <= 0) {
+            $banner['survey_id'] = (int)($banner['exam_id'] ?? 0);
+        }
+        unset($banner['exam_id']);
         $banner['url'] = (string)($banner['url'] ?? '');
         $banner['route_type'] = (string)($banner['route_type'] ?? 'navigateTo');
 
