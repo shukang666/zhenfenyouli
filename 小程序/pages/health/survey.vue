@@ -141,7 +141,7 @@
 				this.submitting = true
 				this.$u.api.health_survey_submit({
 					survey_id: this.surveyId,
-					answers: JSON.stringify(this.form)
+					answers: this.form
 				}).then(() => {
 					this.$u.toast('提交成功')
 					setTimeout(() => {

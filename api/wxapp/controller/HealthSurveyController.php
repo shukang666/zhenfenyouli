@@ -90,13 +90,8 @@ class HealthSurveyController extends AuthController
             }
         }
 
-        $answersParam = $this->request->param('answers');
-        if (is_string($answersParam)) {
-            $answers = json_decode($answersParam, true);
-        } else {
-            $answers = is_array($answersParam) ? $answersParam : [];
-        }
-        if (!is_array($answers)) {
+        $answers = $this->parseSubmitAnswers();
+        if ($answers === null) {
             $this->error('答案格式错误');
         }
 
@@ -110,15 +105,15 @@ class HealthSurveyController extends AuthController
         foreach ($fields as $f) {
             $key = $f['field_key'];
             $val = $answers[$key] ?? null;
+            $type = $f['field_type'];
             if ((int)$f['required'] === 1) {
-                if ($val === null || $val === '' || (is_array($val) && count($val) === 0)) {
+                if ($this->isAnswerEmpty($val, $type)) {
                     $this->error('请完成：' . $f['label']);
                 }
             }
-            if ($val === null || $val === '') {
+            if ($this->isAnswerEmpty($val, $type)) {
                 continue;
             }
-            $type = $f['field_type'];
             if ($type === 'checkbox') {
                 if (!is_array($val)) {
                     $val = [$val];
@@ -139,5 +134,85 @@ class HealthSurveyController extends AuthController
         ]);
 
         $this->success('提交成功，感谢您的参与');
+    }
+
+    /**
+     * 解析提交答案（支持 JSON 对象、JSON 字符串、原始 body）
+     *
+     * @return array|null null 表示无法解析
+     */
+    protected function parseSubmitAnswers(): ?array
+    {
+        $fromArray = $this->request->param('answers/a');
+        if (is_array($fromArray) && $fromArray !== []) {
+            return $fromArray;
+        }
+
+        $param = $this->request->param('answers');
+        $parsed = $this->decodeAnswersValue($param);
+        if ($parsed !== null) {
+            return $parsed;
+        }
+
+        $raw = $this->request->getContent();
+        if ($raw !== '') {
+            $body = json_decode($raw, true);
+            if (is_array($body) && array_key_exists('answers', $body)) {
+                $parsed = $this->decodeAnswersValue($body['answers']);
+                if ($parsed !== null) {
+                    return $parsed;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param mixed $value
+     */
+    protected function decodeAnswersValue($value): ?array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+        if (is_object($value)) {
+            $arr = json_decode(json_encode($value), true);
+            return is_array($arr) ? $arr : null;
+        }
+        if (!is_string($value)) {
+            return null;
+        }
+        $str = trim(htmlspecialchars_decode($value, ENT_QUOTES));
+        if ($str === '') {
+            return null;
+        }
+        $candidates = [$str, stripslashes($str), urldecode($str), stripslashes(urldecode($str))];
+        foreach ($candidates as $candidate) {
+            $decoded = json_decode($candidate, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param mixed $val
+     */
+    protected function isAnswerEmpty($val, string $fieldType): bool
+    {
+        if ($val === null || $val === '') {
+            return true;
+        }
+        if (is_array($val) && count($val) === 0) {
+            return true;
+        }
+        if ($fieldType === 'rate' || $fieldType === 'number') {
+            return !is_numeric($val) || (float)$val <= 0;
+        }
+
+        return false;
     }
 }
