@@ -43,11 +43,12 @@ class SecondhandItemController extends AdminBaseController
             ->order('i.id desc')
             ->paginate(15);
 
-        foreach ($list as &$vo) {
-            $imgs = SecondhandService::decodeImages($vo['images']);
-            $vo['cover'] = !empty($imgs[0]) ? cmf_get_asset_url($imgs[0]) : '';
-            $vo['status_name'] = SecondhandService::statusLabel((int)$vo['status']);
-        }
+        $list->each(function ($item) {
+            $imgs = SecondhandService::decodeImages($item['images']);
+            $item['cover'] = !empty($imgs[0]) ? cmf_get_asset_url($imgs[0]) : '';
+            $item['status_name'] = SecondhandService::statusLabel((int)$item['status']);
+            return $item;
+        });
 
         $this->assign('list', $list);
         $list->appends($params);
@@ -124,9 +125,10 @@ class SecondhandItemController extends AdminBaseController
             SecondhandService::INTENT_DONE => '已完成',
             SecondhandService::INTENT_CANCEL => '已取消',
         ];
-        foreach ($list as &$vo) {
-            $vo['status_name'] = $statusMap[(int)$vo['status']] ?? '';
-        }
+        $list->each(function ($item) use ($statusMap) {
+            $item['status_name'] = $statusMap[(int)$item['status']] ?? '';
+            return $item;
+        });
 
         $this->assign('list', $list);
         $list->appends($params);
