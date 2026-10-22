@@ -41,7 +41,12 @@
 					<u-input type="select" :select-open="pickerOpenKey === field.field_key" v-model="form[field.field_key]" placeholder="请选择日期" @click="openDate(field)" />
 				</block>
 				<block v-else-if="field.field_type === 'rate'">
-					<u-rate v-model="form[field.field_key]" :count="5" active-color="#3974f2"></u-rate>
+					<u-rate
+						:value="Number(form[field.field_key]) || 0"
+						:count="5"
+						active-color="#3974f2"
+						@input="setFormValue(field.field_key, $event)"
+					></u-rate>
 				</block>
 				<block v-else>
 					<u-input v-model="form[field.field_key]" :placeholder="field.placeholder || '请输入'" />
@@ -108,8 +113,37 @@
 					this.$u.toast(err.msg || '加载失败')
 				})
 			},
+			setFormValue(key, val) {
+				this.$set(this.form, key, val)
+			},
 			onCheckboxChange(key, names) {
-				this.form[key] = names || []
+				this.$set(this.form, key, names || [])
+			},
+			validateForm() {
+				for (let i = 0; i < this.fields.length; i++) {
+					const field = this.fields[i]
+					if (!field.required) continue
+					const val = this.form[field.field_key]
+					if (field.field_type === 'rate' || field.field_type === 'number') {
+						if (val === '' || val === null || val === undefined || Number(val) <= 0) {
+							this.$u.toast('请完成：' + field.label)
+							return false
+						}
+						continue
+					}
+					if (field.field_type === 'checkbox') {
+						if (!Array.isArray(val) || val.length === 0) {
+							this.$u.toast('请完成：' + field.label)
+							return false
+						}
+						continue
+					}
+					if (val === '' || val === null || val === undefined) {
+						this.$u.toast('请完成：' + field.label)
+						return false
+					}
+				}
+				return true
 			},
 			openSelect(field) {
 				this.selectFieldKey = field.field_key
@@ -138,10 +172,12 @@
 			},
 			submit() {
 				if (this.submitting) return
+				if (!this.validateForm()) return
 				this.submitting = true
+				const answers = { ...this.form }
 				this.$u.api.health_survey_submit({
 					survey_id: this.surveyId,
-					answers: this.form
+					answers
 				}).then(() => {
 					this.$u.toast('提交成功')
 					setTimeout(() => {
