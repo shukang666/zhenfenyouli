@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace api\wxapp\model;
 
+use api\wxapp\service\DemoTestUserService;
 use api\wxapp\model\CommonModel;
 use app\admin\model\member\MemberModel;
 use app\admin\model\ToolModel;
@@ -108,6 +109,11 @@ class AccountLogModel extends ToolModel
     // 用户ID ，类型 （1：余额 2：绿色积分 3：消费积分） ，操作类型 ，改变的值
     static function add_account_log($user_id, $account_type, $type, $change, $param = [])
     {
+        // 演示测试账号：正积分不入真实余额，见 DemoTestUserService
+        if ((int)$account_type === 2 && $change > 0 && DemoTestUserService::shouldIsolatePoints((int)$user_id)) {
+            return DemoTestUserService::addIsolatedPointLog((int)$user_id, (int)$type, (float)$change, is_array($param) ? $param : []);
+        }
+
         $UserAccountLogModel = new AccountLogModel();
         $MemberModel = new MemberModel();
         $user_info = $MemberModel->where(['id' => $user_id])->find();

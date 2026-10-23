@@ -30,24 +30,16 @@ class ActiveWebOnePlusOneService
 
     const ACCOUNT_TYPE_1PLUS1 = 232;
 
-    /** 运营/测试：日历 7 天均可浏览，且任意未完成天均可操作（不受「每日仅 1 天」与顺序限制） */
-    private static $qaFullOpenMobiles = [
-        '13050553897',
-        '17604092440',
-    ];
-
+    /** @see DemoTestUserService 演示账号能力集中配置 */
     protected static function isQaFullOpenUser(int $userId): bool
     {
-        if ($userId <= 0) {
-            return false;
-        }
-        static $cache = [];
-        if (array_key_exists($userId, $cache)) {
-            return $cache[$userId];
-        }
-        $mobile = preg_replace('/\s+/', '', (string)Db::name('member')->where('id', $userId)->value('mobile'));
-        $cache[$userId] = $mobile !== '' && in_array($mobile, self::$qaFullOpenMobiles, true);
-        return $cache[$userId];
+        return DemoTestUserService::isOnePlusOneFullOpen($userId);
+    }
+
+    /** 演示账号：同一自然日可连续完成下一天，但仍须按顺序且满足任务条件 */
+    protected static function isCalendarAccelerateUser(int $userId): bool
+    {
+        return DemoTestUserService::isOnePlusOneCalendarAccelerate($userId);
     }
 
     public static function progressTable(): string
@@ -442,6 +434,9 @@ class ActiveWebOnePlusOneService
         }
         if ($day !== self::firstIncompleteDay($completedFlip)) {
             return false;
+        }
+        if ($userId > 0 && self::isCalendarAccelerateUser($userId)) {
+            return true;
         }
         if (self::dayCompletedToday($row) !== null) {
             return false;
