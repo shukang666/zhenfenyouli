@@ -37,98 +37,27 @@
     <care-pull-hint :visible="!showCareHint"></care-pull-hint>
     <skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
-    <!-- 垃圾真分：Banner + 三场景入口统一外框 -->
-    <view class="fb-zhenfen-hub" id="guide-fb-zhenfen-hub">
-      <view class="fb-zhenfen-hub-head">
-        <view class="fb-zhenfen-hub-brand">
-          <text class="fb-zhenfen-hub-badge">垃圾真分</text>
-          <text class="fb-zhenfen-hub-sub">选场景 · 拍照真分</text>
-        </view>
-        <text class="fb-zhenfen-hub-hint">看海报 · 选场景 · 马上真分</text>
-      </view>
-      <view class="fb-zhenfen-hub-frame">
-        <view class="fb-banner-wrap fb-banner-wrap--inset" v-if="banner_list && banner_list.length">
-          <swiper
-            class="fb-banner-swiper fb-banner-swiper--inset"
-            :indicator-dots="banner_list.length > 1"
-            indicator-color="rgba(255,255,255,0.5)"
-            indicator-active-color="#fff"
-            autoplay
-            circular
-            :interval="4000"
-            @change="onBannerChange"
-          >
-            <swiper-item
-              v-for="(banner, idx) in banner_list"
-              :key="idx"
-              @click="handleBannerTap(banner)"
-            >
-              <view class="fb-banner-item">
-                <u-image
-                  width="100%"
-                  height="100%"
-                  :src="banner.image"
-                  mode="aspectFill"
-                ></u-image>
-              </view>
-            </swiper-item>
-          </swiper>
-        </view>
-        <view class="fb-zhenfen-hub-divider" v-if="banner_list && banner_list.length"></view>
-        <view class="fb-entry-stage fb-entry-stage--inset" id="guide-fb-entry">
-          <view class="fb-entry-kicker fb-entry-kicker--inset">
-            <view class="fb-entry-kicker-dot"></view>
-            <text class="fb-entry-kicker-text">三大场景快捷入口</text>
-          </view>
-          <view class="fb-entry-row fb-entry-row--triple">
-        <view
-          class="fb-entry-card fb-entry-home"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoHomeScene"
-        >
-          <text class="fb-entry-mark">01</text>
-          <view class="fb-entry-main">
-            <text class="fb-entry-emoji">🏠</text>
-            <view class="fb-entry-text">
-              <text class="fb-entry-title">家庭场景</text>
-            </view>
+    <!-- 垃圾分类活动包：点击进入独立子页面（真分Hub + 工作台 + 社区专题） -->
+    <view class="fb-gc-entry" id="fb-gc-entry">
+      <view
+        class="fb-gc-entry-poster"
+        hover-class="fb-gc-entry-press"
+        :hover-stay-time="80"
+        @click="gotoGarbageClassify"
+      >
+        <view class="fb-gc-entry-copy">
+          <text class="fb-gc-entry-badge">垃圾分类</text>
+          <text class="fb-gc-entry-title">主题活动合集</text>
+          <text class="fb-gc-entry-sub">五分类 · 七贤岭 · 真分小课堂</text>
+          <view class="fb-gc-entry-cta">
+            <text>立即进入</text>
+            <u-icon name="arrow-right" size="22" color="#fff"></u-icon>
           </view>
         </view>
-        <view
-          class="fb-entry-card fb-entry-office"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoOfficeBuilding"
-        >
-          <text class="fb-entry-mark">02</text>
-          <view class="fb-entry-main">
-            <text class="fb-entry-emoji">🏢</text>
-            <view class="fb-entry-text">
-              <text class="fb-entry-title">办公场景</text>
-            </view>
-          </view>
-        </view>
-        <view
-          class="fb-entry-card fb-entry-street"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoStreetShop"
-        >
-          <text class="fb-entry-mark">03</text>
-          <view class="fb-entry-main">
-            <text class="fb-entry-emoji">🏪</text>
-            <view class="fb-entry-text">
-              <text class="fb-entry-title">沿街商铺</text>
-            </view>
-          </view>
-        </view>
-          </view>
-        </view>
+        <view class="fb-gc-entry-emoji">♻️</view>
       </view>
     </view>
 
-    <!-- 垃圾分类工作台（运营切图，点击进入 /pages/dtsh/dtsh） -->
     <!-- 轻任务：后台配置的 Web 式活动，作为活动页醒目线上入口 -->
     <view class="fb-task-section" v-if="light_list && light_list.length">
       <view class="fb-task-heading">
@@ -163,43 +92,27 @@
       </view>
     </view>
 
-    <view class="fb-dtsh-spotlight" id="guide-fb-dtsh-hub">
-      <view
-        class="fb-dtsh-spotlight-poster"
-        hover-class="fb-dtsh-spotlight-press"
-        :hover-stay-time="80"
-        @click="gotoFlhd"
-      >
-        <image
-          class="fb-dtsh-spotlight-img"
-          :src="dtshSpotlightPoster"
-          mode="widthFix"
-        />
-      </view>
-    </view>
-
-    <!-- 四大专题：我和七贤岭 + 步行山海净美家园 / 绿色二手集市 / 垃圾真分小课堂 -->
-    <view class="fb-section fb-spot-modules" id="guide-fb-qxl">
+    <!-- 主题活动：5 大分类 -->
+    <view class="fb-section fb-theme-act" id="guide-fb-theme">
       <view class="fb-section-header">
         <view class="fb-hd">
           <view class="fb-entry-kicker-dot"></view>
-          <text class="fb-section-title">社区专题</text>
+          <text class="fb-section-title">主题活动</text>
         </view>
       </view>
-      <view class="fb-spot-grid">
+      <view class="fb-theme-row">
         <view
-          class="fb-spot-card fb-spot-card--poster"
-          v-for="mod in spot_modules"
-          :key="mod.key"
+          class="fb-theme-item"
+          v-for="cate in main_categories"
+          :key="cate.id"
           hover-class="fb-press"
           :hover-stay-time="80"
-          @click="gotoSpotModule(mod)"
+          @click="gotoCateList(cate)"
         >
-          <image
-            class="fb-spot-poster-img"
-            :src="spotModuleCover(mod)"
-            mode="widthFix"
-          />
+          <view class="fb-theme-circle" :style="{ background: cate.bgColor }">
+            <text class="fb-theme-emoji">{{ cate.emoji }}</text>
+          </view>
+          <text class="fb-theme-label">{{ cate.name }}</text>
         </view>
       </view>
     </view>
@@ -269,53 +182,7 @@
       </view>
     </view> -->
 
-    <!-- 主题活动：5 大分类 -->
-    <view class="fb-section fb-theme-act" id="guide-fb-theme">
-      <view class="fb-section-header">
-        <view class="fb-hd">
-          <view class="fb-entry-kicker-dot"></view>
-          <text class="fb-section-title">主题活动</text>
-        </view>
-      </view>
-      <!-- 现行：一行五个圆钮 + 下方文字 -->
-      <view class="fb-theme-row">
-        <view
-          class="fb-theme-item"
-          v-for="cate in main_categories"
-          :key="cate.id"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoCateList(cate)"
-        >
-          <view class="fb-theme-circle" :style="{ background: cate.bgColor }">
-            <text class="fb-theme-emoji">{{ cate.emoji }}</text>
-          </view>
-          <text class="fb-theme-label">{{ cate.name }}</text>
-        </view>
-      </view>
-      <!-- 备用：左大卡 + 右 2×2（已弃用）
-			<view class="fb-cate-wrap">
-				<view class="fb-cate-big" :style="{background: main_categories[0].bgColor}"
-					@click="gotoCateList(main_categories[0])">
-					<text class="fb-cate-big-emoji">{{main_categories[0].emoji}}</text>
-					<text class="fb-cate-big-name">{{main_categories[0].name}}</text>
-					<text class="fb-cate-big-sub">Healthy Life</text>
-				</view>
-				<view class="fb-cate-right">
-					<view class="fb-cate-mini" v-for="(cate, idx) in main_categories.slice(1)" :key="cate.id"
-						:style="{background: cate.bgColor}" @click="gotoCateList(cate)">
-						<text class="fb-cate-mini-emoji">{{cate.emoji}}</text>
-						<view class="fb-cate-mini-text">
-							<text class="fb-cate-mini-name">{{cate.name}}</text>
-							<text class="fb-cate-mini-sub">{{cate.subtitle}}</text>
-						</view>
-					</view>
-				</view>
-			</view>
-			-->
-    </view>
-
-    <!-- 本周推荐：大图海报横滑，和下面两块刻意做成不同版式 -->
+    <!-- 本周推荐：大图海报横滑 -->
     <view class="fb-section fb-weekly-rec" id="guide-fb-weekly" v-if="weekly_display_list.length > 0">
       <view class="fb-section-header">
         <view class="fb-hd">
@@ -673,8 +540,6 @@ export default {
       recent_list: [],
       // 5 大活动分类（硬编码，后台新增不显示）
       // community_cate_id 对应数据库 cmf_active_community_cate.id
-      spot_modules: SPOT_MODULES_DEFAULT.map((m) => ({ ...m })),
-      dtshSpotlightPoster: DTSH_SPOTLIGHT_POSTER,
       main_categories: [
         {
           id: 1,
@@ -743,12 +608,6 @@ export default {
       if (!item) return "";
       return resolveHomeHotThumb(item.thumb) || item.thumb || "";
     },
-    spotModuleCover(mod) {
-      if (!mod) return "";
-      const c = mod.cover || "";
-      if (/^https?:\/\//i.test(c)) return c;
-      return resolveHomeHotThumb(c) || c;
-    },
     onWeeklyCardTap(wIdx) {
       const list = this.weekly_display_list || [];
       const item = list[wIdx];
@@ -814,7 +673,6 @@ export default {
       try {
         await Promise.all([
           this.fetchActivityTabHome({ page: 1 }),
-          this.loadSpotModules(),
         ]);
       } catch (e) {
         console.log("数据加载失败:", e);
@@ -923,108 +781,16 @@ export default {
       this.loadActiveList();
     },
 
-    // Banner 点击处理
-    handleBannerTap(banner) {
-      const url = (banner.url || "").trim();
-      const target = banner.target || "";
-      console.log("[SCF-DEBUG] low_carbon handleBannerTap", {
-        url,
-        target,
-        isLogin: this.isLogin,
-        community_id: this.userInfo && this.userInfo.community_id,
-      });
-      if (!url) return;
-
-      const sceneEntry = parseBannerSceneClockEntry(url);
-      if (sceneEntry && openSceneClockFromBannerEntry(this, sceneEntry)) {
-        return;
-      }
-
-      // 如果是完整页面路径，直接跳转
-      if (url.startsWith("/pages/")) {
-        if (target === "switchTab") {
-          uni.switchTab({ url });
-        } else {
-          uni.navigateTo({ url });
-        }
-        return;
-      }
-
-      // 如果是数字，当作活动 ID
-      if (/^\d+$/.test(url)) {
-        this.$u.route(`/pages/activity/lsxf/details-new?id=${url}`);
-        return;
-      }
-
-      // 如果是 active?id=xxx 格式
-      const match = url.match(/id=(\d+)/);
-      if (match) {
-        this.$u.route(`/pages/activity/lsxf/details-new?id=${match[1]}`);
-        return;
-      }
+    // 进入「垃圾分类活动包」独立子页面
+    gotoGarbageClassify() {
+      this.$u.route("/pages/activity/garbage-classify");
     },
 
     // 点击分类 → 进入分类列表页
     gotoCateList(cate) {
       this.$u.route(
-        `/pages/activity/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name)}`,
+        `/pages/activity/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name)}`
       );
-    },
-
-    // 垃圾分类工作台 → 低碳生活二级页（督导、真分等）
-    gotoFlhd() {
-      this.$u.route("/pages/dtsh/dtsh");
-    },
-
-    // 等同选场景页点「家庭」：与 Banner 总入口同一套 scene-clock-flow
-    gotoHomeScene() {
-      console.log("[SCF-DEBUG] low_carbon gotoHomeScene", {
-        isLogin: this.isLogin,
-        community_id: this.userInfo && this.userInfo.community_id,
-      });
-      openSceneClockHub(this, "home");
-    },
-
-    gotoDtshPage(url) {
-      this.$u.route(url);
-    },
-
-    gotoOfficeBuilding() {
-      console.log("[SCF-DEBUG] low_carbon gotoOfficeBuilding", { isLogin: this.isLogin });
-      openSceneClockHub(this, "office");
-    },
-
-    gotoStreetShop() {
-      console.log("[SCF-DEBUG] low_carbon gotoStreetShop", { isLogin: this.isLogin });
-      openSceneClockHub(this, "street");
-    },
-
-    async loadSpotModules() {
-      try {
-        const res = await this.$u.api.get_activity_spot_modules();
-        const list = res.data || [];
-        if (Array.isArray(list) && list.length >= 4) {
-          this.spot_modules = mergeSpotModulesFromApi(list);
-        }
-      } catch (e) {
-        /* 保留本地默认四项 */
-      }
-    },
-
-    gotoSpotModule(mod) {
-      if (!mod || !mod.key) return;
-      if (mod.entry_type === "qxl_page" || mod.key === "qxl") {
-        this.gotoQxl();
-        return;
-      }
-      this.$u.route(
-        `/pages/activity/activity-spot-hub?spot=${mod.key}&name=${encodeURIComponent(mod.name || "")}`,
-      );
-    },
-
-    // 我和七贤岭入口
-    gotoQxl() {
-      this.$u.route("/pages/activity/love-qixianling");
     },
 
     // 搜索
@@ -1041,9 +807,6 @@ export default {
         this.$mp.page.getTabBar().setSelected(index);
       }
     },
-
-    // Banner 切换（可选埋点）
-    onBannerChange() {},
   },
 
   onReachBottom() {
@@ -1945,6 +1708,74 @@ export default {
 .fb-tab-text {
   font-size: 26rpx;
   color: #636366;
+}
+
+/* ===== 垃圾分类活动包 · 入口卡片 ===== */
+.fb-gc-entry {
+  padding: 16rpx 20rpx 8rpx;
+}
+.fb-gc-entry-poster {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 28rpx 28rpx 28rpx 32rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1b7a4a 0%, #18af38 55%, #43d06a 100%);
+  box-shadow: 0 12rpx 32rpx rgba(24, 175, 56, 0.28),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+}
+.fb-gc-entry-press {
+  opacity: 0.92;
+  transform: scale(0.99);
+}
+.fb-gc-entry-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8rpx;
+}
+.fb-gc-entry-badge {
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #1b7a4a;
+  background: rgba(255, 255, 255, 0.92);
+  letter-spacing: 1rpx;
+}
+.fb-gc-entry-title {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.18);
+}
+.fb-gc-entry-sub {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.88);
+}
+.fb-gc-entry-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  margin-top: 8rpx;
+  padding: 9rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+.fb-gc-entry-emoji {
+  flex-shrink: 0;
+  font-size: 120rpx;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(0 4rpx 14rpx rgba(0, 0, 0, 0.2));
+  margin-left: 12rpx;
 }
 
 /* ===== 通用板块 ===== */

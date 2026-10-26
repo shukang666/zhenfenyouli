@@ -306,6 +306,12 @@
 					}
 				},
 				{
+					"path": "garbage-classify",
+					"style": {
+						"navigationBarTitleText": "垃圾分类活动"
+					}
+				},
+				{
 					"path": "love-qixianling",
 					"style": {
 						"navigationBarTitleText": "我和七贤岭"
