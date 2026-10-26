@@ -19,12 +19,12 @@
 		</u-navbar>
 		<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 
-		<!-- 主推 Banner + 双入口（配置见 PC 后台「健康 Tab 配置」） -->
+		<!-- 健康顾问问卷（参考原型：欢迎 → 服务体验 → 健康关注 → 概要） -->
 		<view class="health-hub u-m-t-20" id="guide-health-hub">
 			<view
-				class="health-hub__banner"
+				class="health-hub__banner health-hub__banner--advisor"
 				hover-class="health-hub__banner--press"
-				@tap.stop="onHealthBannerTap"
+				@tap.stop="openAdvisorSurvey"
 				@touchmove.stop=""
 			>
 				<image
@@ -33,21 +33,45 @@
 					:src="healthHubBannerImage"
 					mode="aspectFill"
 				/>
-				<view v-else class="health-hub__banner-ph">
+				<view v-else class="health-hub__banner-ph health-hub__banner-ph--advisor">
 					<view class="health-hub__banner-ph-orb"></view>
 				</view>
 				<view class="health-hub__banner-mask"></view>
 				<view class="health-hub__banner-copy">
-					<text class="health-hub__banner-tag">满意度调查</text>
-					<text class="health-hub__banner-title">{{ healthHub.banner.title }}</text>
-					<text class="health-hub__banner-sub" v-if="healthHub.banner.subtitle">{{ healthHub.banner.subtitle }}</text>
+					<text class="health-hub__banner-tag">健康顾问</text>
+					<text class="health-hub__banner-title">{{ advisorEntryTitle }}</text>
+					<text class="health-hub__banner-sub">{{ advisorEntrySubtitle }}</text>
 					<view class="health-hub__banner-cta">
-						<text>立即参与</text>
+						<text>开始聊聊</text>
 						<u-icon name="arrow-right" size="24" color="#fff"></u-icon>
 					</view>
 				</view>
 			</view>
+			<view class="health-hub__shortcuts">
+				<view
+					class="health-hub__shortcut glass-card"
+					v-for="(sc, si) in healthHub.shortcuts"
+					:key="sc.key || si"
+					hover-class="health-hub__shortcut--press"
+					@tap="onShortcutTap(sc)"
+				>
+					<view class="health-hub__shortcut-icon" :class="'health-hub__shortcut-icon--' + si">
+						<u-icon :name="sc.icon || 'grid'" size="36" color="#fff"></u-icon>
+					</view>
+					<view class="health-hub__shortcut-text">
+						<text class="health-hub__shortcut-name">{{ sc.name }}</text>
+						<text class="health-hub__shortcut-desc">{{ sc.desc }}</text>
+					</view>
+					<u-icon name="arrow-right" size="22" color="#c5d0c7"></u-icon>
+				</view>
+			</view>
 		</view>
+
+		<!-- 瓦房店中心医院满意度问卷（暂时下线）
+		<view class="health-hub u-m-t-20">
+			<view class="health-hub__banner" @tap.stop="onHealthBannerTap">...</view>
+		</view>
+		-->
 
 		<!-- 为了通过小程序审核，先注释掉下面 -->
 		<!-- <view class="u-radius-10" id="guide-health-diag" style="background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);">
@@ -75,59 +99,9 @@
 				</view>
 			</view>
 		</view> -->
-		<view class="glass-card glass-card--tint-blue health-community u-m-t-30" id="guide-health-life">
-			<view class="health-community__head u-flex u-row-between">
-				<view class="glass-section-head">
-					<view class="glass-section-head__bar" style="background:#3974F2;"></view>
-					<text class="glass-section-head__title">健康生活社区</text>
-				</view>
-				<u-icon name="arrow-right" label="更多" label-size="22" label-color="#636366" color="#636366" label-pos="left" size="22" @click="$u.route('/pages/community/community')"></u-icon>
-			</view>
-			<view class="health-community__body">
-				<view class="glass-card health-forum-item u-m-b-20" v-for="(item,index) in forum_list" :key="index"
-					@click="$u.route('/pages/community/details?id='+item.id+'&index='+index)">
-					<view class="u-flex u-row-between">
-						<view class="u-flex">
-							<u-avatar :src="item.avatar" size="40"></u-avatar>
-							<view class="u-m-l-10 u-font-bold">
-								{{item.nickname}}
-							</view>
-						</view>
-						<view class="u-font-24 u-type-info">
-							{{item.create_time|date('yy年mm月dd日 hh:MM')}}
-						</view>
-					</view>
-					<view class="u-m-t-20 u-font-bold u-font-26">
-						{{item.title}}
-					</view>
-				<view class="u-m-t-20 u-font-bold u-font-26 content-text">
-					{{item.content}}
-				</view>
-					<view class="u-m-t-20">
-						<cl-upload v-model="item.image" :max="item.image?item.image.length:''" :remove="false" :isPreviewImage="false">
-						</cl-upload>
-					</view>
-					<view class="u-m-t-20 u-flex u-row-between">
-						<view class="u-font-24 u-type-info">
-							已有{{item.view_num}}人围观
-						</view>
-						<view class="u-flex">
-							<view class="">
-								<u-icon :name="!item.is_like?'thumb-up':'thumb-up-fill'" size="36" :color="!item.is_like?'#909399':'#3974f2'" :label="item.like_total" label-color="#909399"></u-icon>
-							</view>
-							<view class="u-m-l-20">
-								<u-icon name="chat" :label="item.comment_total" size="38" color="#909399" label-color="#909399"></u-icon>
-							</view>
-							<view class="u-m-l-20">
-								<button class="u-reset-button" open-type="share" @click.stop="share_brn(item)">
-									<u-icon name="zhuanfa" label="分享" size="34" color="#909399" label-color="#909399"></u-icon>
-								</button>
-							</view>
-						</view>
-					</view>
-				</view>
-			</view>
-		</view>
+		<!-- 健康生活社区 / 论坛（暂时不用）
+		<view class="glass-card glass-card--tint-blue health-community u-m-t-30" id="guide-health-life">...</view>
+		-->
 		</view>
 		<!-- tabbar 占位：防止悬浮 tabbar 遮挡底部内容 -->
 		<view style="height: 172rpx; flex-shrink: 0;"></view>
@@ -153,6 +127,16 @@
 			healthHubBannerImage() {
 				const img = this.healthHub && this.healthHub.banner && this.healthHub.banner.image
 				return img ? String(img) : ''
+			},
+			advisorEntryTitle() {
+				const t = this.healthHub && this.healthHub.banner && this.healthHub.banner.title
+				if (t && t.indexOf('瓦房店') < 0) return t
+				return '跟健康顾问轻松聊聊'
+			},
+			advisorEntrySubtitle() {
+				const s = this.healthHub && this.healthHub.banner && this.healthHub.banner.subtitle
+				if (s && s.indexOf('瓦房店') < 0) return s
+				return '服务体验 + 健康关注，约 2 分钟 · 支持大字与语音辅助'
 			}
 		},
 		data() {
@@ -164,10 +148,10 @@
 				health: {},
 				healthHub: {
 					banner: {
-						title: '瓦房店中心医院公共卫生满意度调查',
-						subtitle: '诚邀您参与，助力公共卫生服务提升',
+						title: '跟健康顾问轻松聊聊',
+						subtitle: '服务体验 + 健康关注，约 2 分钟',
 						image: '',
-						link_mode: 'survey',
+						link_mode: 'advisor',
 						survey_id: 0,
 						url: '',
 						route_type: 'navigateTo'
@@ -196,6 +180,21 @@
 				}
 				return id
 			},
+			openAdvisorSurvey() {
+				const surveyId = this.resolveBannerSurveyId()
+				let url = '/pages/health/advisor-survey'
+				if (surveyId > 0) {
+					url += '?id=' + surveyId
+				}
+				this.openHealthRoute(url, 'navigateTo', { needLogin: false })
+			},
+			onShortcutTap(sc) {
+				if (!sc || !sc.url) {
+					return this.$u.toast('功能暂未开放')
+				}
+				this.openHealthRoute(sc.url, sc.route_type || 'navigateTo')
+			},
+			/** 瓦房店等旧版 Banner 跳转（暂时不用，保留备用） */
 			onHealthBannerTap() {
 				const b = this.healthHub.banner || {}
 				const mode = b.link_mode === 'page' ? 'page' : 'survey'
@@ -293,6 +292,7 @@
 						banner: Object.assign({}, this.healthHub.banner, hub.banner || {})
 					})
 				}
+				/* 论坛区暂时下线，不再加载列表
 				const list = d.forum_list || []
 				if (page === 1) {
 					this.forum_list = list
@@ -300,6 +300,7 @@
 					this.forum_list = this.forum_list.concat(list)
 				}
 				this.total = d.forum_total || 0
+				*/
 				this.page = page
 			}).catch(err => {
 				this.$u.toast(err.msg)
@@ -317,9 +318,11 @@
 			},
 		},
 		onReachBottom() {
+			/* 论坛分页暂时关闭
 			if (this.forum_list.length >= this.total) return
 			this.page++
 			this.get_forum_list()
+			*/
 		},
 		onShareAppMessage(res) {
 			return {
@@ -390,6 +393,15 @@
 
 .health-hub__banner-ph {
 	background: linear-gradient(125deg, #1a6bff 0%, #3974f2 45%, #18af38 100%);
+}
+
+.health-hub__banner-ph--advisor,
+.health-hub__banner--advisor {
+	box-shadow: 0 12rpx 40rpx rgba(45, 125, 118, 0.22);
+}
+
+.health-hub__banner-ph--advisor {
+	background: linear-gradient(125deg, #1f6b62 0%, #2d7d76 50%, #3a9a8f 100%);
 }
 
 .health-hub__banner-ph-orb {
