@@ -16,6 +16,32 @@
 			</view>
 		</view>
 
+		<!-- 社区专题：全部 4 项（与 garbage-classify 同款） -->
+		<view class="fb-section fb-spot-modules" v-if="cate_id === 5" id="cate-spot">
+			<view class="fb-section-header">
+				<view class="fb-hd">
+					<view class="fb-entry-kicker-dot"></view>
+					<text class="fb-section-title">社区专题</text>
+				</view>
+			</view>
+			<view class="fb-spot-grid">
+				<view
+					class="fb-spot-card fb-spot-card--poster"
+					v-for="mod in gc_spot_modules"
+					:key="mod.key"
+					hover-class="fb-press"
+					:hover-stay-time="80"
+					@click="gotoSpotModule(mod)"
+				>
+					<image
+						class="fb-spot-poster-img"
+						:src="spotModuleCover(mod)"
+						mode="widthFix"
+					/>
+				</view>
+			</view>
+		</view>
+
 		<!-- 活动列表 -->
 		<view class="fb-act-list">
 			<view class="fb-act-card" v-for="item in active_list" :key="item.id"
@@ -58,6 +84,80 @@
 </template>
 
 <script>
+import settings from "@/common/settings.js";
+
+/** 社区专题：整卡仅一张图（文案/图标都在图里） */
+const SPOT_MODULE_COVER_VER = "2026101415";
+function spotModuleCoverUrl(fileName) {
+	return (
+		settings.staticAssetBase +
+		"spot-modules/" +
+		fileName +
+		"?v=" +
+		SPOT_MODULE_COVER_VER
+	);
+}
+const SPOT_MODULE_COVERS = {
+	qxl: spotModuleCoverUrl("qxl-cover.png"),
+	hiking: spotModuleCoverUrl("hiking-cover.png"),
+	flea_market: spotModuleCoverUrl("flea-market-cover.png"),
+	zhenfen_class: spotModuleCoverUrl("zhenfen-class-cover.png"),
+};
+
+/** 社区专题卡片展示文案 */
+const SPOT_MODULES_DEFAULT = [
+	{
+		key: "qxl",
+		name: "我的七贤岭",
+		subtitle: "认识 · 发现",
+		emoji: "⛰️",
+		cover: SPOT_MODULE_COVERS.qxl,
+		entry_type: "qxl_page",
+	},
+	{
+		key: "hiking",
+		name: "步行山海，净美家园",
+		subtitle: "边走边捡 · 洁净山野",
+		emoji: "🥾",
+		cover: SPOT_MODULE_COVERS.hiking,
+		entry_type: "spot_hub",
+	},
+	{
+		key: "flea_market",
+		name: "七贤岭绿色二手集市",
+		subtitle: "闲置循环 · 绿色生活",
+		emoji: "♻️",
+		cover: SPOT_MODULE_COVERS.flea_market,
+		entry_type: "spot_hub",
+	},
+	{
+		key: "zhenfen_class",
+		name: "垃圾真分小课堂",
+		subtitle: "学分类 · 真投放",
+		emoji: "📗",
+		cover: SPOT_MODULE_COVERS.zhenfen_class,
+		entry_type: "spot_hub",
+	},
+];
+
+function mergeSpotModulesFromApi(fromApi) {
+	if (!Array.isArray(fromApi) || fromApi.length < 4) {
+		return SPOT_MODULES_DEFAULT.map((m) => ({ ...m }));
+	}
+	const remoteByKey = {};
+	fromApi.forEach((item) => {
+		if (item && item.key) remoteByKey[item.key] = item;
+	});
+	return SPOT_MODULES_DEFAULT.map((local) => {
+		const remote = remoteByKey[local.key];
+		if (!remote) return { ...local };
+		return {
+			...local,
+			entry_type: remote.entry_type || local.entry_type,
+		};
+	});
+}
+
 	export default {
 		data() {
 			return {
@@ -67,6 +167,7 @@
 				active_page: 1,
 				active_total: 0,
 				active_loading: false,
+				gc_spot_modules: SPOT_MODULES_DEFAULT.map((m) => ({ ...m })),
 			};
 		},
 		onLoad(options) {
@@ -75,6 +176,9 @@
 			// 动态设置导航栏标题为当前分类名
 			uni.setNavigationBarTitle({ title: this.cate_name })
 			this.loadActiveList()
+			if (this.cate_id === 5) {
+				this.loadSpotModules()
+			}
 		},
 		methods: {
 			loadActiveList() {
@@ -102,6 +206,39 @@
 
 			gotoGarbageClassify() {
 				this.$u.route('/pages/activity/garbage-classify');
+			},
+
+			async loadSpotModules() {
+				try {
+					const res = await this.$u.api.get_activity_spot_modules();
+					const list = res.data || [];
+					if (Array.isArray(list) && list.length >= 4) {
+						this.gc_spot_modules = mergeSpotModulesFromApi(list);
+					}
+				} catch (e) {
+					/* 保留本地默认四项 */
+				}
+			},
+			spotModuleCover(mod) {
+				if (!mod) return "";
+				const c = mod.cover || "";
+				if (/^https?:\/\//i.test(c)) return c;
+				return c;
+			},
+			gotoSpotModule(mod) {
+				if (!mod || !mod.key) return;
+				if (mod.entry_type === "qxl_page" || mod.key === "qxl") {
+					this.gotoQxl();
+					return;
+				}
+				this.$u.route(
+					`/pages/activity/activity-spot-hub?spot=${mod.key}&name=${encodeURIComponent(
+						mod.name || ""
+					)}`
+				);
+			},
+			gotoQxl() {
+				this.$u.route("/pages/activity/love-qixianling");
 			},
 
 			navigateBack() {
@@ -218,6 +355,65 @@
   color: rgba(255, 255, 255, 0.85);
   filter: drop-shadow(0 4rpx 14rpx rgba(0, 0, 0, 0.2));
   margin-left: 12rpx;
+}
+
+.fb-press {
+  opacity: 0.92;
+  transform: scale(0.98);
+}
+
+/* ===== 通用板块标题（社区专题） ===== */
+.fb-section {
+  margin: 28rpx 0 8rpx;
+}
+.fb-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24rpx 18rpx;
+}
+.fb-hd {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.fb-entry-kicker-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #18af38;
+  margin-right: 10rpx;
+  box-shadow: 0 0 0 6rpx rgba(24, 175, 56, 0.18);
+}
+.fb-section-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1c2b1e;
+  margin-right: 8rpx;
+}
+
+/* ===== 社区专题网格（4 项） ===== */
+.fb-spot-modules {
+  padding-top: 8rpx;
+}
+.fb-spot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  padding: 0 16rpx 8rpx;
+}
+.fb-spot-card--poster {
+  border-radius: 20rpx;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 12rpx 30rpx rgba(31, 54, 42, 0.1),
+    0 0 0 1rpx rgba(255, 255, 255, 0.72);
+  background: transparent;
+}
+.fb-spot-poster-img {
+  width: 100%;
+  display: block;
+  border-radius: 20rpx;
 }
 
 /* ===== 活动列表 ===== */
