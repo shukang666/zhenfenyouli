@@ -57,7 +57,7 @@
 					<text class="home-quick-label">积分权益</text>
 				</view>
 				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToSurvey">
-					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/shequshiji.svg" mode="aspectFit"></image>
+					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/2.svg" mode="aspectFit"></image>
 					<text class="home-quick-label">健康调查</text>
 				</view>
 				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToCommunityMarket">
