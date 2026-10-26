@@ -224,9 +224,10 @@
 					if (this.learnContext === 'one_plus_one' && this.onePlusActiveId) {
 						return this.$u.api.one_plus_one_pre_learn_ack({ active_id: this.onePlusActiveId })
 					}
-				}).then(() => {
+				}).then((res) => {
 					if (this.learnContext === 'one_plus_one') {
-						this.$u.toast('学习完成')
+						const point = Number((res && res.data && res.data.point) || 0)
+						this.$u.toast(point > 0 ? ('学习完成，获得 ' + point + ' 积分') : '学习完成')
 						this.finishOnePlusOneLearn()
 						return
 					}

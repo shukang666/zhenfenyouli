@@ -555,6 +555,7 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_progress` (
   `zhenfen_map` text COMMENT 'JSON: day=>forum_id',
   `day_done_at` text COMMENT 'JSON: day=>完成时间戳',
   `share_ack_at` int(10) unsigned NOT NULL DEFAULT 0,
+  `day1_reward_at` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '第1天学习积分发放时间',
   `reward_300_at` int(10) unsigned NOT NULL DEFAULT 0,
   `reward_800_at` int(10) unsigned NOT NULL DEFAULT 0,
   `create_time` int(10) unsigned NOT NULL DEFAULT 0,
@@ -563,6 +564,19 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_progress` (
   UNIQUE KEY `uk_user_active` (`user_id`,`active_id`),
   KEY `idx_active` (`active_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='1+1 Web活动用户进度';
+
+-- 老库补列：第 1 天只有前置学习，完成第 1 天补发与真分打卡同额积分（MySQL 5.7 无 ADD COLUMN IF NOT EXISTS）
+SET @s = (SELECT IF(
+  (SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'cmf_active_web_one_plus_one_progress'
+      AND COLUMN_NAME = 'day1_reward_at') > 0,
+  'SELECT 1',
+  'ALTER TABLE `cmf_active_web_one_plus_one_progress` ADD COLUMN `day1_reward_at` int(10) unsigned NOT NULL DEFAULT 0 COMMENT ''第1天学习积分发放时间'' AFTER `share_ack_at`'
+));
+PREPARE stmt FROM @s;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 CREATE TABLE IF NOT EXISTS `cmf_active_web_one_plus_one_harmful_clock` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,

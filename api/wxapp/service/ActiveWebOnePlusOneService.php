@@ -93,7 +93,7 @@ class ActiveWebOnePlusOneService
         $since = self::dayWindowSincePublic($row, 1, $userId);
         if (self::hasDay1PreLearnInWindow($userId, $activeId, $cycleNo, $since)) {
             $status = self::syncAndBuildStatus($userId, $activeId);
-            return ['already' => 1, 'status' => $status];
+            return ['already' => 1, 'status' => $status, 'point' => self::pickDay1AwardedPoint($status)];
         }
 
         Db::name(self::day1PreLearnTable())->insert([
@@ -105,7 +105,25 @@ class ActiveWebOnePlusOneService
 
         $status = self::syncAndBuildStatus($userId, $activeId);
 
-        return ['already' => 0, 'status' => $status];
+        return ['already' => 0, 'status' => $status, 'point' => self::pickDay1AwardedPoint($status)];
+    }
+
+    /** 本次同步是否刚刚发放了第 1 天学习积分（60 秒内视为本次发放） */
+    protected static function pickDay1AwardedPoint(array $status): int
+    {
+        $at = (int)($status['day1_reward_at'] ?? 0);
+        if ($at <= 0 || time() - $at > 60) {
+            return 0;
+        }
+        return (int)($status['day1_point'] ?? 0);
+    }
+
+    /** 第 1 天学习积分：与每日真分打卡同额 */
+    public static function day1RewardPoint(): int
+    {
+        $cfg = cmf_get_option('set_config');
+        $point = (int)($cfg['carbon'] ?? 0);
+        return $point > 0 ? $point : 0;
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -216,6 +234,7 @@ class ActiveWebOnePlusOneService
                 'zhenfen_map' => '{}',
                 'day_done_at' => '{}',
                 'share_ack_at' => 0,
+                'day1_reward_at' => 0,
                 'reward_300_at' => 0,
                 'reward_800_at' => 0,
                 'create_time' => $now,
@@ -228,6 +247,7 @@ class ActiveWebOnePlusOneService
         $row = self::backfillDayDoneAt($row);
         $row = self::syncZhenfenAssignments($userId, $row);
         $row = self::syncDayCompletions($userId, $activeId, $row);
+        $row = self::maybeGrantDay1Reward($userId, $activeId, $row);
         $row = self::maybeGrantRewards($userId, $activeId, $row);
         $row = self::maybeResetAfterAllDone($userId, $activeId, $row);
         $row = self::findProgress($userId, $activeId) ?: $row;
@@ -588,6 +608,7 @@ class ActiveWebOnePlusOneService
                 'zhenfen_map' => '{}',
                 'day_done_at' => '{}',
                 'share_ack_at' => 0,
+                'day1_reward_at' => 0,
                 'reward_300_at' => 0,
                 'reward_800_at' => 0,
                 'update_time' => $now,
@@ -838,6 +859,41 @@ class ActiveWebOnePlusOneService
         return array_merge($row, $update);
     }
 
+    /**
+     * 第 1 天只有前置学习、没有真分打卡，完成第 1 天后补发与真分打卡同额积分（每轮一次）
+     */
+    protected static function maybeGrantDay1Reward(int $userId, int $activeId, array $row): array
+    {
+        $completed = self::parseCompletedDays((string)($row['completed_days'] ?? ''));
+        if (!in_array(1, $completed, true)) {
+            return $row;
+        }
+        if ((int)($row['day1_reward_at'] ?? 0) > 0) {
+            return $row;
+        }
+        $point = self::day1RewardPoint();
+        if ($point <= 0) {
+            return $row;
+        }
+        $logId = AccountLogModel::add_account_log($userId, 2, self::ACCOUNT_TYPE_1PLUS1, $point, [
+            'active_id' => $activeId,
+            'milestone' => 1,
+            'cycle_no' => (int)($row['cycle_no'] ?? 1),
+            'remark' => '1+1活动第1天学习奖励',
+        ]);
+        if (empty($logId)) {
+            return $row;
+        }
+        $now = time();
+        Db::name(self::progressTable())->where('id', $row['id'])->update([
+            'day1_reward_at' => $now,
+            'update_time' => $now,
+        ]);
+        $row['day1_reward_at'] = $now;
+
+        return $row;
+    }
+
     protected static function maybeGrantRewards(int $userId, int $activeId, array $row): array
     {
         $completed = self::parseCompletedDays((string)($row['completed_days'] ?? ''));
@@ -950,6 +1006,8 @@ class ActiveWebOnePlusOneService
             'deadline_hint' => $deadlineHint,
             'reward_300_granted' => (int)($row['reward_300_at'] ?? 0) > 0 ? 1 : 0,
             'reward_800_granted' => (int)($row['reward_800_at'] ?? 0) > 0 ? 1 : 0,
+            'day1_point' => self::day1RewardPoint(),
+            'day1_reward_at' => (int)($row['day1_reward_at'] ?? 0),
             'rewards' => [
                 'milestone_3' => self::REWARD_AFTER_3,
                 'milestone_7' => self::REWARD_AFTER_7,
@@ -990,7 +1048,7 @@ class ActiveWebOnePlusOneService
         $since = self::dayWindowSincePublic($row, 1, $userId);
         if (self::hasDay1PreLearnInWindow($userId, $activeId, $cycleNo, $since)) {
             $status = self::syncAndBuildStatus($userId, $activeId);
-            return ['already' => 1, 'status' => $status];
+            return ['already' => 1, 'status' => $status, 'point' => self::pickDay1AwardedPoint($status)];
         }
 
         ClockLearnExamService::markCompleted($userId);

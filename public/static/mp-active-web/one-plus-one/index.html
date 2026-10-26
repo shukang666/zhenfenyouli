@@ -1165,7 +1165,9 @@
         $('btn-prelearn-submit').onclick = function () {
           if (!canAct) return;
           $('btn-prelearn-submit').disabled = true;
-          apiPost('/wxapp/active_web_one_plus_one/pre_learn_submit', { active_id: activeId, answers: preLearnPicks }).then(function () {
+          apiPost('/wxapp/active_web_one_plus_one/pre_learn_submit', { active_id: activeId, answers: preLearnPicks }).then(function (data) {
+            var p = Number((data && data.point) || 0);
+            if (p > 0) alert('学习完成，获得 ' + p + ' 积分');
             return refreshAfterMpReturn();
           }).catch(function (e) {
             alert(e.message || e);
