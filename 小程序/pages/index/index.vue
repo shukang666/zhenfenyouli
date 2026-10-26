@@ -46,24 +46,23 @@
 				</view>
 			</view>
 
-			<!-- 问候 + 快捷真分（浅色卡片，入口指向三场景选场景页） -->
+			<!-- 问候 + 快捷入口（浅色卡片） -->
 			<view id="guide-hello" class="home-quick-grid">
-<view class="home-quick-item home-quick-item--sign" hover-class="home-quick-item--on" @click="handleSign">
-					<image v-if="!signStatus.today_signed" class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/qiandao.svg" mode="aspectFit"></image>
-					<view v-else class="home-quick-sign-circle home-quick-sign-circle--done"><u-icon name="checkbox-mark" size="34" color="#fff"></u-icon></view>
-					<text class="home-quick-label">{{ signStatus.today_signed ? '已签到' : '签到' }}</text>
-				</view>
 				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToClock">
 					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/lajifenlei.svg" mode="aspectFit"></image>
-					<text class="home-quick-label">垃圾分类</text>
+					<text class="home-quick-label">源头真分</text>
 				</view>
-				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToQixianling">
+				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToMall">
 					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/renshiqixianling.svg" mode="aspectFit"></image>
-					<text class="home-quick-label">认识七贤岭</text>
+					<text class="home-quick-label">积分权益</text>
+				</view>
+				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToSurvey">
+					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/shequshiji.svg" mode="aspectFit"></image>
+					<text class="home-quick-label">健康调查</text>
 				</view>
 				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToCommunityMarket">
 					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/shequshiji.svg" mode="aspectFit"></image>
-					<text class="home-quick-label">社区市集</text>
+					<text class="home-quick-label">社区闲置</text>
 				</view>
 </view>
 
@@ -287,11 +286,6 @@ export default {
 					{ key: 'mall', name: '积分商城', url: '/pages/mall/mall', type: 'switchTab', svgIcon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/3.svg' },
 					{ key: 'community', name: '社区互动', url: '/pages/sjhd/sjhd', type: 'navigateTo', svgIcon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/4.svg' }
 				],
-				// 签到状态
-				signStatus: {
-					today_signed: false,
-					continue_days: 0,
-				},
 				// 新手引导：登录成功后首页显示，引导用户了解核心功能
 				showGuide: false,
 				guideOnPage: true,
@@ -594,9 +588,6 @@ export default {
 				this.showcaseList = d.showcase_list || []
 				this.homeNotice = (d.home_notice || '').toString()
 				this.mergeHomeEntries(d.home_entries || [])
-				if (d.sign_status) {
-					this.signStatus = d.sign_status
-				}
 				if (d.user_info && Object.keys(d.user_info).length) {
 					this.$u.vuex('userInfo', Object.assign({}, this.userInfo, d.user_info))
 					this.applyIndexUserGrowth(d.user_info)
@@ -803,36 +794,14 @@ export default {
 			goToClock() {
 				 runSceneClockLearnExamGate(this)
 			},
-			goToQixianling() {
-				 navigateHomeHotSpotEntry(this, { key: 'qxl', entry_type: 'qxl_page' })
+			goToMall() {
+				uni.switchTab({ url: '/pages/mall/mall' })
+			},
+			goToSurvey() {
+				this.$u.route('/pages/health/survey')
 			},
 			goToCommunityMarket() {
 				 navigateHomeHotSpotEntry(this, { key: 'flea_market', entry_type: 'spot_hub', name: '七贤岭绿色二手集市' })
-			},
-			// 获取签到状态
-			async getSignStatus() {
-				try {
-					let res = await this.$u.api.getSignStatus()
-					this.signStatus = res.data || { today_signed: false, continue_days: 0 }
-				} catch (e) {
-					// 接口失败不处理
-				}
-			},
-			// 点击签到
-			async handleSign() {
-                if (!this.isLogin) {
-                    this.$u.route('/pages/public/login')
-                    return
-                }
-                if (this.signStatus.today_signed) return
-				try {
-					let res = await this.$u.api.dailySign()
-					this.signStatus.today_signed = true
-					this.signStatus.continue_days = res.data?.continue_days || this.signStatus.continue_days + 1
-					this.$u.toast(`签到成功，获得 ${res.data.point} 积分`)
-				} catch (e) {
-					this.$u.toast(e.msg || '签到失败')
-				}
 			},
 		}
 	}
@@ -937,8 +906,6 @@ export default {
 	.home-quick-grid { position:relative; z-index:1; display:flex; align-items:flex-start; justify-content:space-between; margin:24rpx 32rpx 0; padding:22rpx 12rpx; border-radius:24rpx; @include glass-surface(0.58, 36px); }
 	.home-quick-item { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:4rpx 0; }
 	.home-quick-item--on { transform:scale(0.94); opacity:0.82; }
-	.home-quick-sign-circle { width:88rpx; height:88rpx; display:flex; align-items:center; justify-content:center; border-radius:100%; background:linear-gradient(145deg,#39c75a,#12962e); box-shadow:0 8rpx 20rpx rgba(24,175,56,0.24); }
-	.home-quick-sign-circle--done { background:linear-gradient(145deg,#aebbb1,#87958b); box-shadow:0 8rpx 20rpx rgba(80,100,85,0.16); }
 	.home-quick-img { width:88rpx; height:88rpx; display:block; }
 	.home-quick-label { display:block; margin-top:12rpx; font-size:23rpx; font-weight:600; color:$text; white-space:nowrap; }
 
