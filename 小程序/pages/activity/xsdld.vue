@@ -7,16 +7,18 @@
 			</view>
 		</view>
 
-		<view class="fb-special-entries">
-			<view class="fb-special-entry fb-s-lgfl" hover-class="fb-special-entry--press" :hover-stay-time="80" @click="gotoFlhd">
-				<text class="fb-s-entry-title">垃圾分类</text>
-				<text class="fb-s-entry-sub">学习分类 · 拍照真分</text>
-				<text class="fb-s-entry-arrow">›</text>
-			</view>
-			<view class="fb-special-entry fb-s-qxl" hover-class="fb-special-entry--press" :hover-stay-time="80" @click="gotoQxl">
-				<text class="fb-s-entry-title">我的七贤岭</text>
-				<text class="fb-s-entry-sub">认识 · 发现</text>
-				<text class="fb-s-entry-arrow">›</text>
+		<view class="fb-special-bundle">
+			<view class="fb-special-bundle-inner" hover-class="fb-special-bundle--press" :hover-stay-time="80" @click="gotoGarbageClassify">
+				<view class="fb-special-bundle-copy">
+					<text class="fb-special-bundle-badge">小手拉大手</text>
+					<text class="fb-special-bundle-title">垃圾真分 · 打卡工作台</text>
+					<text class="fb-special-bundle-sub">真分打卡 · 分类学习 · 社区专题</text>
+					<view class="fb-special-bundle-cta">
+						<text>立即进入</text>
+						<text class="fb-special-bundle-arrow">›</text>
+					</view>
+				</view>
+				<view class="fb-special-bundle-emoji">♻️</view>
 			</view>
 		</view>
 
@@ -149,11 +151,8 @@
 			gotoDetail(id) {
 				this.$u.route(`/pages/activity/lsxf/details-new?id=${id}`)
 			},
-			gotoFlhd() {
-				this.$u.route('/pages/activity/scene-clock-pick?mode=theme')
-			},
-			gotoQxl() {
-				this.$u.route('/pages/activity/love-qixianling')
+			gotoGarbageClassify() {
+				this.$u.route('/pages/activity/garbage-classify');
 			},
 		},
 	}
@@ -197,51 +196,72 @@
 	letter-spacing: 2rpx;
 }
 
-.fb-special-entries {
-	display: flex;
-	gap: 16rpx;
-	padding: 16rpx;
-	background: #f0f2f5;
-	position: relative;
-	z-index: 11;
+.fb-special-bundle {
+  padding: 16rpx;
+  background: #f0f2f5;
+  position: relative;
+  z-index: 11;
 }
-.fb-special-entry {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	padding: 28rpx 24rpx;
-	border-radius: 16rpx;
-	position: relative;
+.fb-special-bundle-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 30rpx 30rpx 30rpx 34rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  background: linear-gradient(135deg, #6a4f9e 0%, #8c6ec0 55%, #b594d7 100%);
+  box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.28),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
 }
-.fb-special-entry--press {
-	opacity: 0.88;
+.fb-special-bundle--press { opacity: 0.92; transform: scale(0.99); }
+.fb-special-bundle-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8rpx;
 }
-.fb-s-lgfl {
-	background: linear-gradient(135deg, #4a9bff 0%, #1877f2 100%);
-	color: #fff;
+.fb-special-bundle-badge {
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #5a3d8a;
+  background: rgba(255, 255, 255, 0.92);
+  letter-spacing: 1rpx;
 }
-.fb-s-qxl {
-	background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
-	color: #fff;
+.fb-special-bundle-title {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.18);
 }
-.fb-s-entry-title {
-	font-size: 30rpx;
-	font-weight: 700;
+.fb-special-bundle-sub {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.88);
 }
-.fb-s-entry-sub {
-	font-size: 22rpx;
-	opacity: 0.9;
-	margin-top: 4rpx;
+.fb-special-bundle-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  margin-top: 8rpx;
+  padding: 9rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 700;
 }
-.fb-s-entry-arrow {
-	position: absolute;
-	right: 20rpx;
-	top: 50%;
-	transform: translateY(-50%);
-	font-size: 40rpx;
-	font-weight: 300;
-	opacity: 0.9;
+.fb-special-bundle-arrow { font-size: 28rpx; font-weight: 300; }
+.fb-special-bundle-emoji {
+  flex-shrink: 0;
+  font-size: 120rpx;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(0 4rpx 14rpx rgba(0, 0, 0, 0.2));
+  margin-left: 12rpx;
 }
 
 .xsd-body {

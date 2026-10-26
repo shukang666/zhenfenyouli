@@ -96,27 +96,6 @@
       </view>
     </view>
 
-    <!-- 公益行动 · 垃圾分类活动包（延伸内容卡） -->
-    <view class="fb-gc-entry" id="fb-gc-entry">
-      <view
-        class="fb-gc-entry-poster"
-        hover-class="fb-gc-entry-press"
-        :hover-stay-time="80"
-        @click="gotoGarbageClassify"
-      >
-        <view class="fb-gc-entry-copy">
-          <text class="fb-gc-entry-badge">公益行动</text>
-          <text class="fb-gc-entry-title">垃圾真分 · 打卡工作台</text>
-          <text class="fb-gc-entry-sub">真分打卡 · 分类学习 · 社区专题</text>
-          <view class="fb-gc-entry-cta">
-            <text>立即参与</text>
-            <u-icon name="arrow-right" size="22" color="#fff"></u-icon>
-          </view>
-        </view>
-        <view class="fb-gc-entry-emoji">♻️</view>
-      </view>
-    </view>
-
     <!-- 暂时不需要，注释掉了 -->
     <!-- 分类轻量化入口（与快捷入口同套卡片样式） -->
     <!-- <view class="fb-light-task" id="guide-fb-light-task">
@@ -779,11 +758,6 @@ export default {
       this.active_page = 1;
       this.active_total = 0;
       this.loadActiveList();
-    },
-
-    // 进入「垃圾分类活动包」独立子页面
-    gotoGarbageClassify() {
-      this.$u.route("/pages/activity/garbage-classify");
     },
 
     // 点击分类 → 进入分类列表页
@@ -1711,73 +1685,6 @@ export default {
 }
 
 /* ===== 垃圾分类活动包 · 入口卡片 ===== */
-.fb-gc-entry {
-  padding: 16rpx 20rpx 8rpx;
-}
-.fb-gc-entry-poster {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 28rpx 28rpx 28rpx 32rpx;
-  border-radius: 24rpx;
-  overflow: hidden;
-  background: linear-gradient(135deg, #6a4f9e 0%, #8c6ec0 55%, #b594d7 100%);
-  box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.28),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
-}
-.fb-gc-entry-press {
-  opacity: 0.92;
-  transform: scale(0.99);
-}
-.fb-gc-entry-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8rpx;
-}
-.fb-gc-entry-badge {
-  padding: 4rpx 14rpx;
-  border-radius: 999rpx;
-  font-size: 20rpx;
-  font-weight: 700;
-  color: #5a3d8a;
-  background: rgba(255, 255, 255, 0.92);
-  letter-spacing: 1rpx;
-}
-.fb-gc-entry-title {
-  font-size: 34rpx;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.25;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.18);
-}
-.fb-gc-entry-sub {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.88);
-}
-.fb-gc-entry-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 4rpx;
-  margin-top: 8rpx;
-  padding: 9rpx 18rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-  font-size: 22rpx;
-  font-weight: 700;
-}
-.fb-gc-entry-emoji {
-  flex-shrink: 0;
-  font-size: 120rpx;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.85);
-  filter: drop-shadow(0 4rpx 14rpx rgba(0, 0, 0, 0.2));
-  margin-left: 12rpx;
-}
-
 /* ===== 通用板块 ===== */
 .fb-section {
   margin: 28rpx 0 8rpx;
