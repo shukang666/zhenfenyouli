@@ -37,27 +37,6 @@
     <care-pull-hint :visible="!showCareHint"></care-pull-hint>
     <skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
-    <!-- 垃圾分类活动包：点击进入独立子页面（真分Hub + 工作台 + 社区专题） -->
-    <view class="fb-gc-entry" id="fb-gc-entry">
-      <view
-        class="fb-gc-entry-poster"
-        hover-class="fb-gc-entry-press"
-        :hover-stay-time="80"
-        @click="gotoGarbageClassify"
-      >
-        <view class="fb-gc-entry-copy">
-          <text class="fb-gc-entry-badge">垃圾分类</text>
-          <text class="fb-gc-entry-title">主题活动合集</text>
-          <text class="fb-gc-entry-sub">五分类 · 七贤岭 · 真分小课堂</text>
-          <view class="fb-gc-entry-cta">
-            <text>立即进入</text>
-            <u-icon name="arrow-right" size="22" color="#fff"></u-icon>
-          </view>
-        </view>
-        <view class="fb-gc-entry-emoji">♻️</view>
-      </view>
-    </view>
-
     <!-- 轻任务：后台配置的 Web 式活动，作为活动页醒目线上入口 -->
     <view class="fb-task-section" v-if="light_list && light_list.length">
       <view class="fb-task-heading">
@@ -114,6 +93,27 @@
           </view>
           <text class="fb-theme-label">{{ cate.name }}</text>
         </view>
+      </view>
+    </view>
+
+    <!-- 公益行动 · 垃圾分类活动包（延伸内容卡） -->
+    <view class="fb-gc-entry" id="fb-gc-entry">
+      <view
+        class="fb-gc-entry-poster"
+        hover-class="fb-gc-entry-press"
+        :hover-stay-time="80"
+        @click="gotoGarbageClassify"
+      >
+        <view class="fb-gc-entry-copy">
+          <text class="fb-gc-entry-badge">公益行动</text>
+          <text class="fb-gc-entry-title">垃圾真分 · 打卡工作台</text>
+          <text class="fb-gc-entry-sub">真分打卡 · 分类学习 · 社区专题</text>
+          <view class="fb-gc-entry-cta">
+            <text>立即参与</text>
+            <u-icon name="arrow-right" size="22" color="#fff"></u-icon>
+          </view>
+        </view>
+        <view class="fb-gc-entry-emoji">♻️</view>
       </view>
     </view>
 
@@ -1721,8 +1721,8 @@ export default {
   padding: 28rpx 28rpx 28rpx 32rpx;
   border-radius: 24rpx;
   overflow: hidden;
-  background: linear-gradient(135deg, #1b7a4a 0%, #18af38 55%, #43d06a 100%);
-  box-shadow: 0 12rpx 32rpx rgba(24, 175, 56, 0.28),
+  background: linear-gradient(135deg, #6a4f9e 0%, #8c6ec0 55%, #b594d7 100%);
+  box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.28),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
 }
 .fb-gc-entry-press {
@@ -1742,7 +1742,7 @@ export default {
   border-radius: 999rpx;
   font-size: 20rpx;
   font-weight: 700;
-  color: #1b7a4a;
+  color: #5a3d8a;
   background: rgba(255, 255, 255, 0.92);
   letter-spacing: 1rpx;
 }
