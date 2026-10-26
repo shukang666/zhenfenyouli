@@ -45,8 +45,8 @@
 				</view>
 			</view>
 
-			<!-- 空态 -->
-			<view class="fb-empty" v-if="active_list.length === 0 && !active_loading">
+			<!-- 空态：公益行动(cate_id=5)顶部已有紫卡入口，不再显示"暂无活动" -->
+			<view class="fb-empty" v-if="active_list.length === 0 && !active_loading && cate_id !== 5">
 				<text class="fb-empty-text">暂无活动</text>
 			</view>
 
