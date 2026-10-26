@@ -1,21 +1,5 @@
 <template>
 	<view class="container">
-		<!-- 公益行动特殊入口：垃圾分类活动包（合并原垃圾分类 + 我的七贤岭） -->
-		<view class="fb-special-bundle" v-if="cate_id === 5" @click="gotoGarbageClassify">
-			<view class="fb-special-bundle-inner">
-				<view class="fb-special-bundle-copy">
-					<text class="fb-special-bundle-badge">公益行动</text>
-					<text class="fb-special-bundle-title">垃圾真分 · 打卡工作台</text>
-					<text class="fb-special-bundle-sub">真分打卡 · 分类学习 · 社区专题</text>
-					<view class="fb-special-bundle-cta">
-						<text>立即进入</text>
-						<text class="fb-special-bundle-arrow">›</text>
-					</view>
-				</view>
-				<view class="fb-special-bundle-emoji">♻️</view>
-			</view>
-		</view>
-
 		<!-- 活动列表 -->
 		<view class="fb-act-list">
 			<view class="fb-act-card" v-for="item in active_list" :key="item.id"
@@ -45,8 +29,7 @@
 				</view>
 			</view>
 
-			<!-- 空态：公益行动(cate_id=5)顶部已有紫卡入口，不再显示"暂无活动" -->
-			<view class="fb-empty" v-if="active_list.length === 0 && !active_loading && cate_id !== 5">
+			<view class="fb-empty" v-if="active_list.length === 0 && !active_loading">
 				<text class="fb-empty-text">暂无活动</text>
 			</view>
 
@@ -101,9 +84,6 @@
 				})
 			},
 
-			gotoGarbageClassify() {
-				this.$u.route('/pages/activity/garbage-classify');
-			},
 			navigateBack() {
 				uni.navigateBack()
 			},
@@ -152,72 +132,6 @@
 }
 .fb-nav-placeholder {
 	width: 80rpx;
-}
-
-/* ===== 公益行动特殊入口（垃圾分类活动包） ===== */
-.fb-special-bundle {
-  padding: 16rpx;
-}
-.fb-special-bundle-inner {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 30rpx 30rpx 30rpx 34rpx;
-  border-radius: 20rpx;
-  overflow: hidden;
-  background: linear-gradient(135deg, #6a4f9e 0%, #8c6ec0 55%, #b594d7 100%);
-  box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.28),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
-}
-.fb-special-bundle:active { opacity: 0.92; transform: scale(0.99); }
-.fb-special-bundle-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8rpx;
-}
-.fb-special-bundle-badge {
-  padding: 4rpx 14rpx;
-  border-radius: 999rpx;
-  font-size: 20rpx;
-  font-weight: 700;
-  color: #5a3d8a;
-  background: rgba(255, 255, 255, 0.92);
-  letter-spacing: 1rpx;
-}
-.fb-special-bundle-title {
-  font-size: 34rpx;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.25;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.18);
-}
-.fb-special-bundle-sub {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.88);
-}
-.fb-special-bundle-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 4rpx;
-  margin-top: 8rpx;
-  padding: 9rpx 18rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-  font-size: 22rpx;
-  font-weight: 700;
-}
-.fb-special-bundle-arrow { font-size: 28rpx; font-weight: 300; }
-.fb-special-bundle-emoji {
-  flex-shrink: 0;
-  font-size: 120rpx;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.85);
-  filter: drop-shadow(0 4rpx 14rpx rgba(0, 0, 0, 0.2));
-  margin-left: 12rpx;
 }
 
 /* ===== 活动列表 ===== */
