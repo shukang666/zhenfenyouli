@@ -1023,7 +1023,7 @@ class ForumController extends AuthController
         $pid = $this->request->param('pid');
         $where = [];
         if(!empty($pid)) $where[] = ['pid', '=', $pid];
-        $list = $communityModel->field('id,name')->where($where)->order('list_order asc')->select();
+        $list = $communityModel->field('id,name')->where($where)->order('list_order asc,id asc')->select();
 //        foreach ($list as &$item) {
 //            $item['county_name'] = CommonModel::getAreaName($item['county']);
 //            $item = CommonModel::getOne($item, ['thumb']);
@@ -1064,12 +1064,14 @@ class ForumController extends AuthController
             $nameExpr = "REPLACE({$nameExpr}, '{$symbol}', '')";
         }
         $list = $communityModel->alias('c')
-            ->leftJoin('member_community_parent p', 'p.id = c.pid')
+            ->leftJoin('member_community_parent p', 'p.id = c.pid AND p.delete_time = 0')
             ->field('c.id, c.name, c.pid, p.name as parent_name')
+            ->where('c.delete_time', 0)
             ->when($pureKeyword !== '', function ($query) use ($nameExpr, $pureKeyword) {
                 $query->whereRaw("{$nameExpr} LIKE :keyword", ['keyword' => '%' . $pureKeyword . '%']);
             })
-            ->order('c.list_order asc')
+            // 小区 list_order 大量相同，必须加 id 保证分页顺序稳定，否则翻页会出现重复行
+            ->order(['c.list_order' => 'asc', 'c.id' => 'asc'])
             ->paginate([
                 'page' => $page,
                 'list_rows' => $page_size,

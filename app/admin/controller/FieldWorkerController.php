@@ -394,14 +394,15 @@ class FieldWorkerController extends BaseController
         }
 
         $query = Db::name('member_community')->alias('c')
-            ->leftJoin('member_community_parent p', 'p.id = c.pid')
-            ->field('c.id, c.name, c.pid, p.name as parent_name');
+            ->leftJoin('member_community_parent p', 'p.id = c.pid AND p.delete_time = 0')
+            ->field('c.id, c.name, c.pid, p.name as parent_name')
+            ->where('c.delete_time', 0);
 
         if ($pureKeyword !== '') {
             $query->whereRaw("{$nameExpr} LIKE :keyword", ['keyword' => '%' . $pureKeyword . '%']);
         }
 
-        $query->order('c.list_order asc');
+        $query->order(['c.list_order' => 'asc', 'c.id' => 'asc']);
 
         $total = $query->count();
         $list = $query->limit(($page - 1) * $pageSize, $pageSize)->select();
