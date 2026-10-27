@@ -1,19 +1,39 @@
 <template>
 	<view class="has-page" :class="{ 'has-page--large': largeTextEnabled }">
-		<view class="has-top">
-			<view class="has-top-back" @tap="onTopBack">
-				<u-icon name="arrow-left" size="36" color="#1565D8"></u-icon>
+		<view class="has-scene">
+			<view class="has-scene-bg"></view>
+			<view class="has-top has-top--scene">
+				<view class="has-top-back" @tap="onTopBack">
+					<u-icon name="arrow-left" size="36" color="#fff"></u-icon>
+				</view>
+				<view class="has-top-copy">
+					<text class="has-top-title">健康问答</text>
+					<text class="has-top-sub" v-if="step !== 'done'">{{ qaProgressText }}</text>
+				</view>
+				<view class="has-top-accent"></view>
 			</view>
-			<view class="has-top-copy">
-				<text class="has-top-title">健康问答</text>
-				<text class="has-top-sub" v-if="step !== 'done'">{{ qaProgressText }}</text>
+
+			<health-virtual-persona
+				v-if="step === 'service' || step === 'concerns' || step === 'done'"
+				embedded
+				hide-caption
+				size="lg"
+				dark-caption
+				:speaking="personaSpeaking"
+			/>
+			<view
+				class="has-bubble"
+				v-if="step === 'service' || step === 'concerns' || step === 'done'"
+			>
+				<text>{{ personaCaption }}</text>
 			</view>
-			<view class="has-top-accent"></view>
-		</view>
-		<view class="has-progress" v-if="step === 'service' || step === 'concerns'">
-			<view class="has-progress-fill" :style="{ width: qaProgressPercent + '%' }"></view>
+
+			<view class="has-progress" v-if="step === 'service' || step === 'concerns'">
+				<view class="has-progress-fill" :style="{ width: qaProgressPercent + '%' }"></view>
+			</view>
 		</view>
 
+		<view class="has-sheet">
 		<view class="has-body">
 		<!-- 问答：服务体验 -->
 		<view v-if="step === 'service'" class="has-panel">
@@ -139,10 +159,13 @@
 			<button class="has-btn has-btn--ghost" @tap="openGrassroots">查看基层医疗机构</button>
 		</view>
 		</view>
+		</view>
 	</view>
 </template>
 
 <script>
+import HealthVirtualPersona from '@/components/health-virtual-persona/index.vue'
+
 const SERVICE_QUESTIONS = [
 	{
 		key: 'overall',
@@ -180,9 +203,13 @@ const CONCERN_OPTIONS = [
 ]
 
 export default {
+	components: { HealthVirtualPersona },
 	data() {
 		return {
 			surveyId: 0,
+			personaSpeaking: false,
+			personaCaption: '',
+			personaTimer: null,
 			step: 'service',
 			serviceQuestions: SERVICE_QUESTIONS,
 			serviceIndex: 0,
@@ -250,8 +277,54 @@ export default {
 	},
 	onLoad(option) {
 		this.surveyId = parseInt(option.id, 10) || 0
+		this.$nextTick(() => this.refreshPersonaSpeech(true))
+	},
+	onUnload() {
+		this.stopPersonaSpeak()
+	},
+	watch: {
+		step() {
+			this.$nextTick(() => this.refreshPersonaSpeech(true))
+		},
+		serviceIndex() {
+			if (this.step === 'service') {
+				this.refreshPersonaSpeech(true)
+			}
+		}
 	},
 	methods: {
+		stopPersonaSpeak() {
+			if (this.personaTimer) {
+				clearTimeout(this.personaTimer)
+				this.personaTimer = null
+			}
+			this.personaSpeaking = false
+		},
+		pulsePersonaSpeak(text) {
+			const line = (text || '').trim()
+			if (!line) return
+			this.stopPersonaSpeak()
+			this.personaSpeaking = true
+			const ms = Math.min(9000, Math.max(2400, line.length * 130))
+			this.personaTimer = setTimeout(() => {
+				this.personaSpeaking = false
+				this.personaTimer = null
+			}, ms)
+		},
+		refreshPersonaSpeech(autoPulse) {
+			let line = ''
+			if (this.step === 'service') {
+				line = (this.currentServiceQuestion && this.currentServiceQuestion.text) || ''
+			} else if (this.step === 'concerns') {
+				line = '请选择您当前关注的健康指标，最多选 2 项。'
+			} else if (this.step === 'done') {
+				line = '问答已完成，以下是为您整理的参考摘要。'
+			}
+			this.personaCaption = line
+			if (autoPulse) {
+				this.pulsePersonaSpeak(line)
+			}
+		},
 		onTopBack() {
 			if (this.step === 'done') {
 				return this.goBack()
@@ -298,18 +371,16 @@ export default {
 			this.largeTextEnabled = !!(e.detail && e.detail.value)
 		},
 		readQuestionAloud() {
-			const text = this.currentServiceQuestion.text
-			if (!text) return
-			// #ifdef MP-WEIXIN
-			uni.showToast({ title: '请阅读题目后点选答案', icon: 'none' })
-			// #endif
+			this.refreshPersonaSpeech(true)
 		},
 		onMicStart() {
 			this.recording = true
+			this.personaSpeaking = true
 		},
 		onMicEnd() {
 			this.recording = false
 			this.voiceFallback = true
+			this.stopPersonaSpeak()
 			uni.showToast({
 				title: '请点选下方答案',
 				icon: 'none',
@@ -381,6 +452,7 @@ export default {
 			const done = () => {
 				this.submitting = false
 				this.step = 'done'
+				this.$nextTick(() => this.refreshPersonaSpeech(true))
 				try {
 					uni.setStorageSync('health_advisor_completed_at', Date.now())
 				} catch (e) {}
@@ -405,15 +477,56 @@ export default {
 
 <style lang="scss">
 page {
-	background: #e8f1ff;
+	background: #071a33;
 }
 .has-page {
 	position: relative;
 	min-height: 100vh;
 	padding: 0 0 calc(48rpx + env(safe-area-inset-bottom));
 	box-sizing: border-box;
-	background: linear-gradient(180deg, #e8f1ff 0%, #ffffff 42%, #f7faff 100%);
+	background: #f7faff;
 	overflow: hidden;
+}
+.has-scene {
+	position: relative;
+	padding-bottom: 8rpx;
+	overflow: hidden;
+}
+.has-scene-bg {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(180deg, #020810 0%, #071a33 55%, #1565d8 100%);
+}
+.has-top--scene {
+	position: relative;
+	z-index: 2;
+}
+.has-top--scene .has-top-title {
+	color: #fff;
+}
+.has-top--scene .has-top-sub {
+	color: rgba(255, 255, 255, 0.72);
+}
+.has-bubble {
+	position: relative;
+	z-index: 2;
+	margin: -8rpx 32rpx 12rpx;
+	padding: 16rpx 20rpx;
+	font-size: 24rpx;
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.9);
+	text-align: center;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1rpx solid rgba(255, 255, 255, 0.12);
+	border-radius: 16rpx;
+}
+.has-sheet {
+	position: relative;
+	margin-top: -12rpx;
+	padding-top: 8rpx;
+	border-radius: 28rpx 28rpx 0 0;
+	background: linear-gradient(180deg, #f7faff 0%, #ffffff 32%, #f7faff 100%);
+	box-shadow: 0 -12rpx 40rpx rgba(0, 0, 0, 0.12);
 }
 .has-top {
 	position: relative;
@@ -449,10 +562,12 @@ page {
 	flex-shrink: 0;
 }
 .has-progress {
+	position: relative;
+	z-index: 2;
 	height: 8rpx;
-	margin: 0 28rpx 8rpx;
+	margin: 0 28rpx 16rpx;
 	border-radius: 999rpx;
-	background: #dbeafe;
+	background: rgba(255, 255, 255, 0.2);
 	overflow: hidden;
 }
 .has-progress-fill {

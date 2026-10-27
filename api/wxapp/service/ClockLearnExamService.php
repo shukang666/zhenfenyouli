@@ -2,6 +2,7 @@
 
 namespace api\wxapp\service;
 
+use api\wxapp\model\AnswerLogModel;
 use api\wxapp\model\AnswerModel;
 use app\admin\model\member\MemberModel;
 
@@ -11,6 +12,14 @@ use app\admin\model\member\MemberModel;
 class ClockLearnExamService
 {
     public const EXAM_PID = 1;
+
+    /** 学考一体固定题写入 answer_log 的 q_id（与题库表 id 错开） */
+    private const SYNTHETIC_QID = [
+        'q1' => 900001,
+        'q2' => 900002,
+        'q3' => 900003,
+        'q5' => 900005,
+    ];
 
     /** @return array<int,array<string,mixed>> */
     public static function getBlocksForClient(): array
@@ -60,13 +69,67 @@ class ClockLearnExamService
         ];
     }
 
-    public static function markCompleted(int $userId): void
+    /**
+     * @param array<string,string> $answers 练一练提交答案，如 q1=>B
+     */
+    public static function markCompleted(int $userId, array $answers = []): void
     {
         if ($userId <= 0) {
             return;
         }
         MemberModel::where('id', $userId)->update(['clock_pre_learn' => 1]);
-        self::ensureExamPassRecord($userId);
+        self::ensureExamPassRecord($userId, $answers);
+    }
+
+    public static function isSyntheticLearnQid(int $qid): bool
+    {
+        return in_array($qid, self::SYNTHETIC_QID, true);
+    }
+
+    /** @return array<int,array{qid:int,quiz_key:string,title:string}> */
+    public static function exportQuizColumns(): array
+    {
+        $out = [];
+        foreach (self::blocksWithAnswers() as $b) {
+            if (($b['type'] ?? '') !== 'quiz') {
+                continue;
+            }
+            $key = (string)($b['id'] ?? '');
+            $qid = self::SYNTHETIC_QID[$key] ?? 0;
+            if ($qid <= 0) {
+                continue;
+            }
+            $out[] = [
+                'qid'      => $qid,
+                'quiz_key' => $key,
+                'title'    => (string)($b['question'] ?? $key),
+            ];
+        }
+        return $out;
+    }
+
+    /** @return array<string,mixed>|null */
+    public static function syntheticQuizMeta(int $qid): ?array
+    {
+        if (!self::isSyntheticLearnQid($qid)) {
+            return null;
+        }
+        foreach (self::blocksWithAnswers() as $b) {
+            if (($b['type'] ?? '') !== 'quiz') {
+                continue;
+            }
+            $key = (string)($b['id'] ?? '');
+            if ((self::SYNTHETIC_QID[$key] ?? 0) !== $qid) {
+                continue;
+            }
+            return [
+                'quiz_key'    => $key,
+                'title'       => (string)($b['question'] ?? ''),
+                'true_answer' => strtoupper((string)($b['answer'] ?? '')),
+                'options'     => $b['options'] ?? [],
+            ];
+        }
+        return null;
     }
 
     public static function isCompleted(int $userId): bool
@@ -87,7 +150,10 @@ class ClockLearnExamService
         return $passed > 0;
     }
 
-    private static function ensureExamPassRecord(int $userId): void
+    /**
+     * @param array<string,string> $answers
+     */
+    private static function ensureExamPassRecord(int $userId, array $answers = []): void
     {
         $answerModel = new AnswerModel();
         $exists = $answerModel
@@ -96,10 +162,13 @@ class ClockLearnExamService
             ->where('status', 3)
             ->find();
         if (!empty($exists)) {
+            if (!empty($answers)) {
+                self::persistLearnAnswerLogs((int)$exists['id'], $userId, $answers);
+            }
             return;
         }
         $now = time();
-        $answerModel->insert([
+        $answerId = (int)$answerModel->insertGetId([
             'user_id'     => $userId,
             'exam_id'     => self::EXAM_PID,
             'pid'         => self::EXAM_PID,
@@ -109,6 +178,51 @@ class ClockLearnExamService
             'total_num'   => 4,
             'create_time' => $now,
         ]);
+        if ($answerId > 0 && !empty($answers)) {
+            self::persistLearnAnswerLogs($answerId, $userId, $answers);
+        }
+    }
+
+    /**
+     * @param array<string,string> $answers
+     */
+    private static function persistLearnAnswerLogs(int $answerId, int $userId, array $answers): void
+    {
+        if ($answerId <= 0 || $userId <= 0) {
+            return;
+        }
+        $syntheticIds = array_values(self::SYNTHETIC_QID);
+        $logModel = new AnswerLogModel();
+        $logModel->where('answer_id', $answerId)->whereIn('q_id', $syntheticIds)->delete();
+
+        $listNum = 0;
+        $now = time();
+        foreach (self::blocksWithAnswers() as $b) {
+            if (($b['type'] ?? '') !== 'quiz') {
+                continue;
+            }
+            $key = (string)($b['id'] ?? '');
+            $qid = self::SYNTHETIC_QID[$key] ?? 0;
+            if ($qid <= 0) {
+                continue;
+            }
+            $expect = strtoupper(trim((string)($b['answer'] ?? '')));
+            $got = strtoupper(trim((string)($answers[$key] ?? '')));
+            $ok = ($got !== '' && $got === $expect);
+            $listNum++;
+            $logModel->insert([
+                'answer_id'     => $answerId,
+                'option_id'     => '',
+                'user_answer'   => $got,
+                'answer_status' => $ok ? 1 : 2,
+                'user_id'       => $userId,
+                'exam_id'       => self::EXAM_PID,
+                'q_id'          => $qid,
+                'true_answer'   => $expect,
+                'create_time'   => $now,
+                'list_num'      => $listNum,
+            ]);
+        }
     }
 
     /** @return array<int,array<string,mixed>> */

@@ -140,11 +140,7 @@ class ActiveWebOnePlusOneController extends AuthController
             $this->error('有题目答错了，请修改后再提交', $grade);
         }
         try {
-            $data = ActiveWebOnePlusOneService::submitDay1PreLearnExam(
-                (int)$this->user_id,
-                $activeId,
-                $answers
-            );
+            $data = ActiveWebOnePlusOneService::submitDay1PreLearnExam((int)$this->user_id, $activeId, $answers);
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
         }

@@ -23,6 +23,7 @@ use api\wxapp\model\QuestionModel;
 use cmf\controller\AdminBaseController;
 use api\wxapp\model\CourseModel;
 use api\wxapp\model\CourseChapterModel;
+use api\wxapp\service\ClockLearnExamService;
 use cmf\controller\RestBaseController;
 use think\Model;
 
@@ -335,11 +336,23 @@ class CourseController extends AdminBaseController
         }
 
         $problemName = (string)ProblemModel::where('id', $exam_id)->value('name');
+        $learnQuizzes = [];
+        $learnHead = [];
+        $learnQids = [];
+        if ($exam_id === ClockLearnExamService::EXAM_PID) {
+            $learnQuizzes = ClockLearnExamService::exportQuizColumns();
+            foreach ($learnQuizzes as $lq) {
+                $learnQids[] = (int)$lq['qid'];
+                $learnHead[] = '【学考一体】' . $lq['title'];
+            }
+        }
+
         $answerIds = array_column($list, 'id');
         $logByAnswer = [];
-        if (!empty($answerIds) && !empty($q_ids)) {
+        $allLogQids = array_values(array_unique(array_merge($q_ids, $learnQids)));
+        if (!empty($answerIds) && !empty($allLogQids)) {
             $logs = AnswerLogModel::where('answer_id', 'in', $answerIds)
-                ->where('q_id', 'in', $q_ids)
+                ->where('q_id', 'in', $allLogQids)
                 ->field('answer_id,q_id,answer_status')
                 ->select()
                 ->toArray();
@@ -350,8 +363,9 @@ class CourseController extends AdminBaseController
 
         $answer_status_name = [1 => '正确', 2 => '错误', 3 => '未回答'];
         $head = array_merge(
-            ['ID', '昵称', '姓名', '手机号', '考试名称', '答题数', '得分', '答题时间'],
-            $q_head
+            ['ID', '昵称', '姓名', '手机号', '考试名称', '答题数', '得分', '答题时间', '答题版本'],
+            $q_head,
+            $learnHead
         );
 
         $filename = '答题记录' . ($problemName !== '' ? '_' . $problemName : '') . '_' . date('Y-m-d');
@@ -370,6 +384,25 @@ class CourseController extends AdminBaseController
 
         foreach ($list as $row) {
             $row = CommonModel::changeTrueNameFromNickname($row);
+            $answerId = (int)$row['id'];
+            $totalNum = (int)($row['total_num'] ?? 0);
+            $hasDbLog = false;
+            foreach ($q_ids as $dbQid) {
+                if (isset($logByAnswer[$answerId][$dbQid])) {
+                    $hasDbLog = true;
+                    break;
+                }
+            }
+            $hasLearnLog = false;
+            foreach ($learnQids as $lqid) {
+                if (isset($logByAnswer[$answerId][$lqid])) {
+                    $hasLearnLog = true;
+                    break;
+                }
+            }
+            $isLearnOnly = ($totalNum === 4 || $hasLearnLog) && !$hasDbLog;
+            $versionLabel = $isLearnOnly ? '学考一体(4题)' : ($hasDbLog ? '题库考试' : ($totalNum === 4 ? '学考一体(4题)' : '题库考试'));
+
             $line = [
                 $row['id'],
                 $row['nickname'] ?? '',
@@ -379,11 +412,27 @@ class CourseController extends AdminBaseController
                 $row['total_num'] ?? '',
                 $row['score'] ?? '',
                 !empty($row['create_time']) ? date('Y-m-d H:i:s', (int)$row['create_time']) : '',
+                $versionLabel,
             ];
             foreach ($q_list as $q) {
                 $qid = (int)$q['id'];
-                $status = $logByAnswer[(int)$row['id']][$qid] ?? null;
-                $line[] = $status !== null ? ($answer_status_name[$status] ?? '错误') : '错误';
+                $status = $logByAnswer[$answerId][$qid] ?? null;
+                if ($isLearnOnly) {
+                    $line[] = '—';
+                } else {
+                    $line[] = $status !== null ? ($answer_status_name[$status] ?? '错误') : '错误';
+                }
+            }
+            foreach ($learnQuizzes as $lq) {
+                $qid = (int)$lq['qid'];
+                $status = $logByAnswer[$answerId][$qid] ?? null;
+                if ($status !== null) {
+                    $line[] = $answer_status_name[$status] ?? '错误';
+                } elseif ($isLearnOnly || $totalNum === 4) {
+                    $line[] = '未记录';
+                } else {
+                    $line[] = '—';
+                }
             }
             fputcsv($fp, $line);
         }

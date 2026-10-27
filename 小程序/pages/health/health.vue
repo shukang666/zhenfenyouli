@@ -52,108 +52,71 @@
 
 
 
-			<view class="hp-nav">
-
-				<view class="hp-nav-brand">
-
-					<text class="hp-nav-title">健康服务</text>
-
-					<view class="hp-nav-tag"><text>数字健康</text></view>
-
-				</view>
-
-				<u-image
-
-					width="200"
-
-					height="56"
-
-					:src="healthNavLogo"
-
-					mode="aspectFit"
-
-				></u-image>
-
-			</view>
-
 			<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 
+			<view class="hp-immersive" id="guide-health-hub">
+				<view class="hp-immersive-bg"></view>
+				<view class="hp-immersive-glow hp-immersive-glow--a"></view>
+				<view class="hp-immersive-glow hp-immersive-glow--b"></view>
 
-
-			<view class="hp-hero" id="guide-health-hub">
-
-				<view class="hp-hero-glow"></view>
-
-				<view class="hp-hero-accent"></view>
-
-				<view class="hp-hero-inner">
-
-					<text class="hp-hero-kicker">智能健康指导</text>
-
-					<text class="hp-hero-title">了解身体状况，获取可执行建议</text>
-
-					<text class="hp-hero-desc"
-
-						>通过简短问答梳理您的健康关注点，结合基层医疗服务资源，为您提供清晰、可跟进的指导方向（非诊疗）。</text
-
-					>
-
-					<view
-
-						class="hp-hero-cta"
-
-						hover-class="hp-hero-cta--on"
-
-						@tap="openAdvisorSurvey"
-
-					>
-
-						<text>开始健康问答</text>
-
-						<u-icon name="arrow-right" size="26" color="#fff"></u-icon>
-
+				<view class="hp-nav hp-nav--scene">
+					<view class="hp-nav-brand">
+						<text class="hp-nav-title">健康服务</text>
+						<view class="hp-nav-tag"><text>数字健康</text></view>
 					</view>
-
-					<text class="hp-hero-meta" v-if="lastCompletedHint">{{ lastCompletedHint }}</text>
-
+					<u-image
+						width="200"
+						height="56"
+						:src="healthNavLogo"
+						mode="aspectFit"
+					></u-image>
 				</view>
 
-			</view>
+				<health-virtual-persona
+					embedded
+					hide-caption
+					size="hero"
+					dark-caption
+					:speaking="personaSpeaking"
+				/>
 
+				<view class="hp-assistant-panel">
+					<text class="hp-assistant-bubble">{{ personaCaption }}</text>
 
+					<view class="hp-assistant-actions">
+						<view
+							class="hp-cta"
+							hover-class="hp-cta--on"
+							@tap="openAdvisorSurvey"
+						>
+							<text class="hp-cta-kicker">智能健康指导</text>
+							<text class="hp-cta-title">开始健康问答</text>
+							<text class="hp-cta-desc">梳理关注点，获取可执行参考建议（非诊疗）</text>
+							<view class="hp-cta-row">
+								<text class="hp-cta-go">立即开始</text>
+								<u-icon name="arrow-right" size="24" color="#fff"></u-icon>
+							</view>
+						</view>
 
-			<view
+						<view
+							class="hp-link"
+							hover-class="hp-link--on"
+							@tap="openGrassrootsCare"
+						>
+							<u-icon name="home-fill" size="34" color="#90caf9"></u-icon>
+							<view class="hp-link-copy">
+								<view class="hp-link-title-row">
+									<text class="hp-link-title">基层医疗机构</text>
+									<text class="hp-link-badge">重点</text>
+								</view>
+								<text class="hp-link-desc">社区卫生服务与公共卫生资源</text>
+							</view>
+							<u-icon name="arrow-right" size="24" color="rgba(255,255,255,0.55)"></u-icon>
+						</view>
 
-				class="hp-grass"
-
-				hover-class="hp-grass--on"
-
-				@tap="openGrassrootsCare"
-
-			>
-
-				<view class="hp-grass-icon">
-
-					<u-icon name="home-fill" size="40" color="#fff"></u-icon>
-
-				</view>
-
-				<view class="hp-grass-copy">
-
-					<view class="hp-grass-title-row">
-
-						<text class="hp-grass-title">基层医疗机构</text>
-
-						<view class="hp-grass-badge"><text>重点入口</text></view>
-
+						<text class="hp-assistant-meta" v-if="lastCompletedHint">{{ lastCompletedHint }}</text>
 					</view>
-
-					<text class="hp-grass-desc">社区卫生服务中心、站点信息与可预约公共卫生服务</text>
-
 				</view>
-
-				<u-icon name="arrow-right" size="28" color="#1565D8"></u-icon>
-
 			</view>
 
 		</view>
@@ -173,14 +136,11 @@
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
-
+	import HealthVirtualPersona from '@/components/health-virtual-persona/index.vue'
 	import careGesture from '@/common/care-gesture.mixin.js'
 
-
-
 	export default {
-
-		components: { SkeletonScreen },
+		components: { SkeletonScreen, HealthVirtualPersona },
 
 		mixins: [careGesture],
 
@@ -211,9 +171,10 @@
 			return {
 
 				isLoading: true,
-
 				lastAdvisorCompletedAt: 0,
-
+				personaSpeaking: false,
+				personaCaption: '',
+				personaTimer: null,
 				healthHub: {
 
 					banner: {
@@ -255,11 +216,29 @@
 			if (checkCommunity(this)) return
 
 			this.readAdvisorCompleted()
-
+			this.playHomePersonaIntro()
 		},
-
+		onHide() {
+			this.stopPersonaSpeak()
+		},
 		methods: {
-
+			stopPersonaSpeak() {
+				if (this.personaTimer) {
+					clearTimeout(this.personaTimer)
+					this.personaTimer = null
+				}
+				this.personaSpeaking = false
+			},
+			playHomePersonaIntro() {
+				this.stopPersonaSpeak()
+				this.personaCaption =
+					'您好，我是数字健康助手，可为您提供健康指导与身体状况梳理参考。'
+				this.personaSpeaking = true
+				this.personaTimer = setTimeout(() => {
+					this.personaSpeaking = false
+					this.personaTimer = null
+				}, 4200)
+			},
 			readAdvisorCompleted() {
 
 				try {
@@ -503,6 +482,195 @@
 
 }
 
+.hp-nav--scene {
+	position: relative;
+	z-index: 2;
+	padding-top: calc(env(safe-area-inset-top) + 8rpx);
+}
+
+.hp-nav--scene .hp-nav-title {
+	color: #fff;
+}
+
+.hp-immersive {
+	position: relative;
+	margin: 0 -28rpx;
+	min-height: calc(100vh - 180rpx);
+	padding-bottom: 24rpx;
+	overflow: hidden;
+}
+
+.hp-immersive-bg {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		180deg,
+		#020810 0%,
+		#071a33 38%,
+		#0d47a1 72%,
+		#e8f1ff 100%
+	);
+}
+
+.hp-immersive-glow {
+	position: absolute;
+	border-radius: 50%;
+	pointer-events: none;
+	filter: blur(40rpx);
+}
+
+.hp-immersive-glow--a {
+	width: 520rpx;
+	height: 520rpx;
+	left: -120rpx;
+	top: 120rpx;
+	background: rgba(21, 101, 216, 0.35);
+}
+
+.hp-immersive-glow--b {
+	width: 400rpx;
+	height: 400rpx;
+	right: -80rpx;
+	top: 280rpx;
+	background: rgba(229, 57, 53, 0.18);
+}
+
+.hp-assistant-panel {
+	position: relative;
+	z-index: 2;
+	margin-top: -24rpx;
+	padding: 0 28rpx;
+}
+
+.hp-assistant-bubble {
+	display: block;
+	padding: 20rpx 24rpx;
+	margin: 0 8rpx 20rpx;
+	font-size: 26rpx;
+	line-height: 1.55;
+	color: rgba(255, 255, 255, 0.92);
+	text-align: center;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1rpx solid rgba(255, 255, 255, 0.14);
+	border-radius: 20rpx;
+	backdrop-filter: blur(12rpx);
+}
+
+.hp-assistant-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 16rpx;
+}
+
+.hp-cta {
+	padding: 28rpx 28rpx 24rpx;
+	border-radius: 24rpx;
+	background: rgba(255, 255, 255, 0.14);
+	border: 1rpx solid rgba(255, 255, 255, 0.22);
+	backdrop-filter: blur(16rpx);
+}
+
+.hp-cta--on {
+	opacity: 0.92;
+	transform: scale(0.99);
+}
+
+.hp-cta-kicker {
+	display: inline-block;
+	padding: 4rpx 12rpx;
+	margin-bottom: 12rpx;
+	font-size: 20rpx;
+	font-weight: 700;
+	color: #fff;
+	background: rgba(229, 57, 53, 0.9);
+	border-radius: 6rpx;
+}
+
+.hp-cta-title {
+	display: block;
+	font-size: 34rpx;
+	font-weight: 800;
+	color: #fff;
+}
+
+.hp-cta-desc {
+	display: block;
+	margin-top: 10rpx;
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.78);
+	line-height: 1.45;
+}
+
+.hp-cta-row {
+	display: inline-flex;
+	align-items: center;
+	gap: 8rpx;
+	margin-top: 20rpx;
+	padding: 12rpx 22rpx;
+	border-radius: 999rpx;
+	background: #fff;
+}
+
+.hp-cta-go {
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #1565d8;
+}
+
+.hp-link {
+	display: flex;
+	align-items: center;
+	gap: 16rpx;
+	padding: 22rpx 24rpx;
+	border-radius: 20rpx;
+	background: rgba(0, 0, 0, 0.18);
+	border: 1rpx solid rgba(255, 255, 255, 0.12);
+}
+
+.hp-link--on {
+	opacity: 0.9;
+}
+
+.hp-link-copy {
+	flex: 1;
+	min-width: 0;
+}
+
+.hp-link-title-row {
+	display: flex;
+	align-items: center;
+	gap: 10rpx;
+	margin-bottom: 6rpx;
+}
+
+.hp-link-title {
+	font-size: 28rpx;
+	font-weight: 700;
+	color: #fff;
+}
+
+.hp-link-badge {
+	padding: 2rpx 10rpx;
+	font-size: 18rpx;
+	font-weight: 700;
+	color: #ffcdd2;
+	border: 1rpx solid rgba(229, 57, 53, 0.5);
+	border-radius: 6rpx;
+}
+
+.hp-link-desc {
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.65);
+}
+
+.hp-assistant-meta {
+	display: block;
+	padding: 8rpx 12rpx 0;
+	font-size: 22rpx;
+	color: rgba(13, 71, 161, 0.75);
+	text-align: center;
+}
+
 .hp-nav-tag {
 
 	padding: 4rpx 14rpx;
@@ -522,270 +690,6 @@
 	color: #fff;
 
 	letter-spacing: 2rpx;
-
-}
-
-
-
-.hp-hero {
-
-	position: relative;
-
-	margin-top: 12rpx;
-
-	border-radius: 28rpx;
-
-	overflow: hidden;
-
-	box-shadow: 0 20rpx 48rpx rgba(13, 71, 161, 0.22);
-
-}
-
-.hp-hero-glow {
-
-	position: absolute;
-
-	inset: 0;
-
-	background: linear-gradient(135deg, #1565d8 0%, #0d47a1 58%, #083a8a 100%);
-
-}
-
-.hp-hero-accent {
-
-	position: absolute;
-
-	top: 0;
-
-	right: 0;
-
-	width: 180rpx;
-
-	height: 8rpx;
-
-	background: linear-gradient(90deg, transparent, #ff5252 40%, #e53935 100%);
-
-}
-
-.hp-hero-inner {
-
-	position: relative;
-
-	z-index: 1;
-
-	padding: 36rpx 32rpx 32rpx;
-
-}
-
-.hp-hero-kicker {
-
-	display: inline-block;
-
-	padding: 6rpx 16rpx;
-
-	margin-bottom: 16rpx;
-
-	font-size: 22rpx;
-
-	font-weight: 700;
-
-	color: #fff;
-
-	background: rgba(229, 57, 53, 0.92);
-
-	border-radius: 8rpx;
-
-	letter-spacing: 1rpx;
-
-}
-
-.hp-hero-title {
-
-	display: block;
-
-	font-size: 36rpx;
-
-	font-weight: 800;
-
-	color: #fff;
-
-	line-height: 1.35;
-
-}
-
-.hp-hero-desc {
-
-	display: block;
-
-	margin-top: 16rpx;
-
-	font-size: 24rpx;
-
-	color: rgba(255, 255, 255, 0.88);
-
-	line-height: 1.55;
-
-}
-
-.hp-hero-cta {
-
-	margin-top: 28rpx;
-
-	display: inline-flex;
-
-	align-items: center;
-
-	gap: 10rpx;
-
-	padding: 18rpx 32rpx;
-
-	border-radius: 999rpx;
-
-	background: #fff;
-
-	color: #1565d8;
-
-	font-size: 28rpx;
-
-	font-weight: 700;
-
-	box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.12);
-
-}
-
-.hp-hero-cta--on {
-
-	opacity: 0.9;
-
-	transform: scale(0.98);
-
-}
-
-.hp-hero-meta {
-
-	display: block;
-
-	margin-top: 16rpx;
-
-	font-size: 22rpx;
-
-	color: rgba(255, 255, 255, 0.75);
-
-}
-
-
-
-.hp-grass {
-
-	display: flex;
-
-	align-items: center;
-
-	gap: 20rpx;
-
-	margin-top: 24rpx;
-
-	padding: 28rpx 24rpx;
-
-	border-radius: 24rpx;
-
-	background: #fff;
-
-	border: 2rpx solid rgba(21, 101, 216, 0.18);
-
-	box-shadow: 0 12rpx 32rpx rgba(21, 101, 216, 0.1);
-
-}
-
-.hp-grass--on {
-
-	opacity: 0.92;
-
-}
-
-.hp-grass-icon {
-
-	flex-shrink: 0;
-
-	width: 88rpx;
-
-	height: 88rpx;
-
-	border-radius: 20rpx;
-
-	display: flex;
-
-	align-items: center;
-
-	justify-content: center;
-
-	background: linear-gradient(145deg, #1565d8, #0d47a1);
-
-	box-shadow: inset 0 -4rpx 0 rgba(0, 0, 0, 0.08);
-
-}
-
-.hp-grass-copy {
-
-	flex: 1;
-
-	min-width: 0;
-
-}
-
-.hp-grass-title-row {
-
-	display: flex;
-
-	align-items: center;
-
-	flex-wrap: wrap;
-
-	gap: 10rpx;
-
-	margin-bottom: 8rpx;
-
-}
-
-.hp-grass-title {
-
-	font-size: 30rpx;
-
-	font-weight: 800;
-
-	color: #0d47a1;
-
-}
-
-.hp-grass-badge {
-
-	padding: 2rpx 12rpx;
-
-	border-radius: 6rpx;
-
-	background: #ffebee;
-
-	border: 1rpx solid rgba(229, 57, 53, 0.35);
-
-}
-
-.hp-grass-badge text {
-
-	font-size: 18rpx;
-
-	font-weight: 700;
-
-	color: #e53935;
-
-}
-
-.hp-grass-desc {
-
-	font-size: 22rpx;
-
-	color: #64748b;
-
-	line-height: 1.45;
 
 }
 

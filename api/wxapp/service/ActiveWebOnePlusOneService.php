@@ -1034,7 +1034,7 @@ class ActiveWebOnePlusOneService
      * @param array<string, string> $answers
      * @return array<string, mixed>
      */
-    public static function submitDay1PreLearnExam(int $userId, int $activeId, array $answers): array
+    public static function submitDay1PreLearnExam(int $userId, int $activeId, array $answers = []): array
     {
         self::loadWebActive($activeId);
         self::syncAndBuildStatus($userId, $activeId);
@@ -1051,7 +1051,7 @@ class ActiveWebOnePlusOneService
             return ['already' => 1, 'status' => $status, 'point' => self::pickDay1AwardedPoint($status)];
         }
 
-        ClockLearnExamService::markCompleted($userId);
+        ClockLearnExamService::markCompleted($userId, $answers);
 
         return self::recordDay1PreLearnCompletion($userId, $activeId);
     }

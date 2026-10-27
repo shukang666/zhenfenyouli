@@ -189,7 +189,7 @@ class ForumController extends AuthController
         if (empty($grade['pass'])) {
             $this->error('有题目答错了，请对照上面知识修改后再提交', $grade);
         }
-        ClockLearnExamService::markCompleted((int)$this->user_id);
+        ClockLearnExamService::markCompleted((int)$this->user_id, $answers);
         $this->success('学考完成，可以开始真分打卡了', ['completed' => 1]);
     }
 

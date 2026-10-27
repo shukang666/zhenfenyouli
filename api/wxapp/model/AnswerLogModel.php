@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace api\wxapp\model;
 
+use api\wxapp\service\ClockLearnExamService;
 use think\Model;
 
 class AnswerLogModel extends Model
@@ -48,16 +49,28 @@ class AnswerLogModel extends Model
         $QuestionOptionModel = new QuestionOptionModel();
         $answer_status_name = [1=>'正确',2=>'错误',3=>'未回答'];
         foreach ($list as &$item){
-            $q_info = $QuestionModel->where(['id'=>$item['q_id']])->find();
-            $item['q_title'] = cmf_replace_content_file_url(htmlspecialchars_decode($q_info['title']));
-            $item['desc'] = cmf_replace_content_file_url(htmlspecialchars_decode($q_info['desc']));
-
-            $map = [];
-            $map[] = ['a.q_id','=',$item['q_id']];
-            $item['option_list'] = $QuestionOptionModel->getInfo($map,-1);
-
-//            $item['answer_status_name'] = $answer_status_name[$item['answer_status']];
-
+            $qid = (int)($item['q_id'] ?? 0);
+            $synthetic = ClockLearnExamService::syntheticQuizMeta($qid);
+            if ($synthetic !== null) {
+                $item['q_title'] = '【学考一体】' . ($synthetic['title'] ?? '');
+                $item['desc'] = '';
+                $item['true_answer'] = $synthetic['true_answer'] ?? ($item['true_answer'] ?? '');
+                $optionList = [];
+                foreach ($synthetic['options'] ?? [] as $opt) {
+                    $optionList[] = [
+                        'letter' => $opt['key'] ?? '',
+                        'option' => $opt['text'] ?? '',
+                    ];
+                }
+                $item['option_list'] = $optionList;
+            } else {
+                $q_info = $QuestionModel->where(['id' => $qid])->find();
+                $item['q_title'] = cmf_replace_content_file_url(htmlspecialchars_decode($q_info['title'] ?? ''));
+                $item['desc'] = cmf_replace_content_file_url(htmlspecialchars_decode($q_info['desc'] ?? ''));
+                $map = [];
+                $map[] = ['a.q_id', '=', $qid];
+                $item['option_list'] = $QuestionOptionModel->getInfo($map, -1);
+            }
         }
         return $id ? $list[0] ?? [] : $list;
     }
