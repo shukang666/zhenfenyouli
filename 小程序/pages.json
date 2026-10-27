@@ -54,8 +54,8 @@
 			"path": "pages/health/advisor-survey",
 			"style": {
 				"navigationBarTitleText": "健康顾问",
-				"navigationBarBackgroundColor": "#2d7d76",
-				"navigationBarTextStyle": "white"
+				"navigationBarBackgroundColor": "#f0f9ff",
+				"navigationBarTextStyle": "black"
 			}
 		}, {
 			"path": "pages/health/health",

@@ -1,44 +1,30 @@
 <template>
 	<view class="ham-stage" :class="['ham-stage--' + size, { 'ham-stage--speaking': speaking }]">
 		<view class="ham-scene">
-			<view class="ham-glow"></view>
-			<view class="ham-orbit ham-orbit--a"></view>
-			<view class="ham-orbit ham-orbit--b"></view>
+			<view class="ham-floor-glow"></view>
 
-			<view class="ham-figure-wrap" :class="{ 'ham-figure-wrap--speak': speaking }">
-				<view class="ham-figure">
-					<view class="ham-cap">
-						<view class="ham-cap-cross"></view>
-					</view>
-					<view class="ham-head">
-						<view class="ham-face">
-							<view class="ham-eye ham-eye--l"></view>
-							<view class="ham-eye ham-eye--r"></view>
-							<view class="ham-blush ham-blush--l"></view>
-							<view class="ham-blush ham-blush--r"></view>
-							<view class="ham-mouth" :class="{ 'ham-mouth--open': speaking }"></view>
-						</view>
-					</view>
-					<view class="ham-body">
-						<view class="ham-coat"></view>
-						<view class="ham-arm ham-arm--l"></view>
-						<view class="ham-arm ham-arm--r"></view>
-					</view>
+			<view class="ham-orbit-ring">
+				<view class="ham-orbit-sat"></view>
+			</view>
+
+			<view class="ham-orb-wrap" :class="{ 'ham-orb-wrap--speak': speaking }">
+				<view class="ham-orb-shell">
+					<view class="ham-orb-glass"></view>
+					<view class="ham-orb-swirl ham-orb-swirl--a"></view>
+					<view class="ham-orb-swirl ham-orb-swirl--b"></view>
+					<view class="ham-orb-core"></view>
+					<view class="ham-orb-highlight"></view>
 				</view>
+				<view class="ham-heart-shadow"></view>
 			</view>
 
-			<view class="ham-pedestal">
-				<view class="ham-pedestal-top"></view>
-				<view class="ham-pedestal-side"></view>
-			</view>
-
-			<view class="ham-waves" v-if="speaking">
-				<view class="ham-wave" v-for="i in 5" :key="'w' + i" :style="{ animationDelay: i * 0.08 + 's' }"></view>
+			<view class="ham-speak-rings" v-if="speaking">
+				<view class="ham-speak-ring ham-speak-ring--1"></view>
+				<view class="ham-speak-ring ham-speak-ring--2"></view>
 			</view>
 		</view>
 
-		<view class="ham-bubble" v-if="line">
-			<view class="ham-bubble-tail"></view>
+		<view class="ham-bubble" v-if="line && showBubble">
 			<text class="ham-bubble-text">{{ line }}</text>
 		</view>
 	</view>
@@ -59,6 +45,10 @@ export default {
 		size: {
 			type: String,
 			default: 'lg'
+		},
+		showBubble: {
+			type: Boolean,
+			default: true
 		}
 	}
 }
@@ -75,393 +65,296 @@ export default {
 
 .ham-scene {
 	position: relative;
-	width: 320rpx;
-	height: 300rpx;
-	perspective: 900rpx;
-	transform-style: preserve-3d;
+	width: 340rpx;
+	height: 280rpx;
 }
 
 .ham-stage--sm .ham-scene {
-	width: 220rpx;
-	height: 200rpx;
+	width: 200rpx;
+	height: 168rpx;
 }
 
-.ham-glow {
+.ham-floor-glow {
 	position: absolute;
 	left: 50%;
-	top: 58%;
-	width: 280rpx;
-	height: 120rpx;
-	margin-left: -140rpx;
-	background: radial-gradient(ellipse, rgba(45, 125, 118, 0.35) 0%, transparent 70%);
-	transform: translateZ(-40rpx);
-	filter: blur(8rpx);
+	bottom: 8rpx;
+	width: 220rpx;
+	height: 48rpx;
+	margin-left: -110rpx;
+	background: radial-gradient(ellipse, rgba(56, 189, 248, 0.45) 0%, transparent 72%);
+	filter: blur(6rpx);
 }
 
-.ham-orbit {
+.ham-orbit-ring {
+	position: absolute;
+	left: 50%;
+	top: 46%;
+	width: 260rpx;
+	height: 88rpx;
+	margin-left: -130rpx;
+	border: 2rpx solid rgba(125, 211, 252, 0.55);
+	border-radius: 50%;
+	transform: rotateX(68deg);
+	animation: hamOrbitSpin 12s linear infinite;
+}
+.ham-stage--sm .ham-orbit-ring {
+	width: 160rpx;
+	height: 52rpx;
+	margin-left: -80rpx;
+}
+.ham-orbit-sat {
+	position: absolute;
+	top: -6rpx;
+	left: 18%;
+	width: 14rpx;
+	height: 14rpx;
+	border-radius: 50%;
+	background: radial-gradient(circle at 30% 30%, #fff 0%, #38bdf8 55%, #0284c7 100%);
+	box-shadow: 0 0 16rpx rgba(56, 189, 248, 0.9);
+}
+
+.ham-orb-wrap {
 	position: absolute;
 	left: 50%;
 	top: 42%;
-	border-radius: 50%;
-	border: 2rpx dashed rgba(45, 125, 118, 0.22);
-	transform: translate(-50%, -50%) rotateX(72deg);
+	width: 168rpx;
+	height: 168rpx;
+	margin-left: -84rpx;
+	margin-top: -84rpx;
+	animation: hamOrbFloat 3.6s ease-in-out infinite;
 }
-.ham-orbit--a {
-	width: 260rpx;
-	height: 260rpx;
-	animation: hamOrbitSpin 18s linear infinite;
+.ham-stage--sm .ham-orb-wrap {
+	width: 108rpx;
+	height: 108rpx;
+	margin-left: -54rpx;
+	margin-top: -54rpx;
 }
-.ham-orbit--b {
-	width: 210rpx;
-	height: 210rpx;
-	border-color: rgba(58, 154, 143, 0.18);
-	animation: hamOrbitSpin 24s linear infinite reverse;
-}
-
-.ham-figure-wrap {
-	position: absolute;
-	left: 50%;
-	top: 38%;
-	width: 200rpx;
-	height: 220rpx;
-	margin-left: -100rpx;
-	transform-style: preserve-3d;
-	transform: translateZ(48rpx) rotateX(-6deg);
-	animation: hamIdleFloat 3.2s ease-in-out infinite;
+.ham-orb-wrap--speak {
+	animation: hamOrbSpeak 0.85s ease-in-out infinite;
 }
 
-.ham-figure-wrap--speak {
-	animation: hamSpeakJitter 0.28s ease-in-out infinite;
-}
-
-.ham-figure {
+.ham-orb-shell {
 	position: relative;
 	width: 100%;
 	height: 100%;
-	transform-style: preserve-3d;
+	transform: rotate(-45deg);
 }
 
-.ham-cap {
+/* 玻璃心形：两圆 + 方形 */
+.ham-orb-glass,
+.ham-orb-glass::before,
+.ham-orb-glass::after {
 	position: absolute;
-	top: 0;
-	left: 50%;
-	width: 120rpx;
-	height: 36rpx;
-	margin-left: -60rpx;
-	background: linear-gradient(180deg, #fff 0%, #e8f5f2 100%);
-	border-radius: 18rpx 18rpx 8rpx 8rpx;
-	box-shadow: 0 6rpx 16rpx rgba(30, 80, 72, 0.2);
-	transform: translateZ(20rpx);
-	z-index: 5;
-}
-.ham-cap-cross {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	width: 28rpx;
-	height: 28rpx;
-	margin: -14rpx 0 0 -14rpx;
-}
-.ham-cap-cross::before,
-.ham-cap-cross::after {
-	content: '';
-	position: absolute;
-	background: #e85d7a;
-	border-radius: 4rpx;
-}
-.ham-cap-cross::before {
-	left: 50%;
-	top: 0;
-	width: 8rpx;
-	height: 100%;
-	margin-left: -4rpx;
-}
-.ham-cap-cross::after {
-	left: 0;
-	top: 50%;
-	width: 100%;
-	height: 8rpx;
-	margin-top: -4rpx;
-}
-
-.ham-head {
-	position: absolute;
-	top: 28rpx;
-	left: 50%;
-	width: 132rpx;
-	height: 132rpx;
-	margin-left: -66rpx;
-	border-radius: 50%;
-	background: linear-gradient(145deg, #ffe8d6 0%, #ffd4b8 100%);
+	background: linear-gradient(
+		145deg,
+		rgba(255, 255, 255, 0.75) 0%,
+		rgba(186, 230, 253, 0.45) 35%,
+		rgba(56, 189, 248, 0.35) 70%,
+		rgba(14, 165, 233, 0.25) 100%
+	);
 	box-shadow:
-		inset -8rpx -10rpx 20rpx rgba(200, 120, 80, 0.15),
-		0 16rpx 32rpx rgba(45, 125, 118, 0.25);
-	transform: translateZ(32rpx);
+		inset 0 0 40rpx rgba(255, 255, 255, 0.65),
+		0 16rpx 48rpx rgba(14, 165, 233, 0.28);
+	border: 2rpx solid rgba(255, 255, 255, 0.85);
 }
-
-.ham-face {
-	position: relative;
-	width: 100%;
-	height: 100%;
+.ham-orb-glass {
+	width: 52%;
+	height: 52%;
+	left: 24%;
+	top: 24%;
+	border-radius: 8rpx;
 }
-
-.ham-eye {
-	position: absolute;
-	top: 48rpx;
-	width: 18rpx;
-	height: 22rpx;
-	background: #2a3d38;
+.ham-orb-glass::before,
+.ham-orb-glass::after {
+	content: '';
+	width: 52%;
+	height: 52%;
 	border-radius: 50%;
 }
-.ham-eye--l {
-	left: 36rpx;
+.ham-orb-glass::before {
+	left: -26%;
+	top: -26%;
 }
-.ham-eye--r {
-	right: 36rpx;
+.ham-orb-glass::after {
+	left: 26%;
+	top: -26%;
 }
 
-.ham-blush {
+.ham-orb-swirl {
 	position: absolute;
-	top: 72rpx;
-	width: 24rpx;
-	height: 12rpx;
-	background: rgba(255, 140, 120, 0.35);
 	border-radius: 50%;
 	filter: blur(2rpx);
+	opacity: 0.55;
 }
-.ham-blush--l {
-	left: 24rpx;
+.ham-orb-swirl--a {
+	width: 70%;
+	height: 70%;
+	left: 15%;
+	top: 12%;
+	background: radial-gradient(circle, rgba(224, 242, 254, 0.9) 0%, transparent 68%);
+	animation: hamSwirl 4s ease-in-out infinite;
 }
-.ham-blush--r {
-	right: 24rpx;
+.ham-orb-swirl--b {
+	width: 45%;
+	height: 45%;
+	right: 8%;
+	bottom: 18%;
+	background: radial-gradient(circle, rgba(125, 211, 252, 0.7) 0%, transparent 70%);
+	animation: hamSwirl 5s ease-in-out infinite reverse;
 }
 
-.ham-mouth {
+.ham-orb-core {
 	position: absolute;
 	left: 50%;
-	bottom: 36rpx;
-	width: 28rpx;
-	height: 10rpx;
-	margin-left: -14rpx;
-	border-bottom: 4rpx solid #c9785a;
-	border-radius: 0 0 20rpx 20rpx;
-	transition: height 0.12s ease;
-}
-.ham-mouth--open {
-	height: 22rpx;
-	border: 4rpx solid #c9785a;
-	border-radius: 50%;
-	background: #8b4540;
-	animation: hamMouthPulse 0.22s ease-in-out infinite alternate;
-}
-
-.ham-body {
-	position: absolute;
-	top: 148rpx;
-	left: 50%;
-	width: 116rpx;
-	height: 88rpx;
-	margin-left: -58rpx;
-	transform: translateZ(16rpx);
-}
-
-.ham-coat {
-	width: 100%;
-	height: 100%;
-	border-radius: 36rpx 36rpx 24rpx 24rpx;
-	background: linear-gradient(165deg, #ffffff 0%, #e8f8f4 55%, #c5e8de 100%);
-	box-shadow:
-		inset 0 2rpx 0 rgba(255, 255, 255, 0.9),
-		0 12rpx 24rpx rgba(45, 125, 118, 0.22);
-}
-
-.ham-arm {
-	position: absolute;
-	top: 12rpx;
-	width: 28rpx;
-	height: 64rpx;
-	border-radius: 20rpx;
-	background: linear-gradient(180deg, #ffe8d6, #ffd4b8);
-	box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.08);
-}
-.ham-arm--l {
-	left: -18rpx;
-	transform: rotate(18deg);
-	transform-origin: top center;
-	animation: hamArmL 3.2s ease-in-out infinite;
-}
-.ham-arm--r {
-	right: -18rpx;
-	transform: rotate(-18deg);
-	transform-origin: top center;
-}
-.ham-figure-wrap--speak .ham-arm--r {
-	animation: hamArmWave 0.45s ease-in-out infinite alternate;
-}
-
-.ham-pedestal {
-	position: absolute;
-	left: 50%;
-	bottom: 0;
-	width: 240rpx;
-	height: 56rpx;
-	margin-left: -120rpx;
-	transform-style: preserve-3d;
-	transform: rotateX(58deg) translateZ(-20rpx);
-}
-.ham-pedestal-top {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	border-radius: 50%;
-	background: radial-gradient(ellipse at 30% 30%, #5eb8ad 0%, #2d7d76 45%, #1f5f58 100%);
-	box-shadow: 0 20rpx 40rpx rgba(31, 95, 88, 0.45);
-}
-.ham-pedestal-side {
-	position: absolute;
-	left: 10%;
-	bottom: -18rpx;
-	width: 80%;
-	height: 28rpx;
-	border-radius: 50%;
-	background: rgba(31, 95, 88, 0.55);
-	filter: blur(6rpx);
-	transform: translateZ(-12rpx);
-}
-
-.ham-waves {
-	position: absolute;
-	right: -8rpx;
 	top: 50%;
-	display: flex;
-	align-items: flex-end;
-	gap: 6rpx;
-	height: 48rpx;
-	transform: translateY(-50%) translateZ(60rpx);
+	width: 28%;
+	height: 28%;
+	margin: -14% 0 0 -14%;
+	border-radius: 50%;
+	background: radial-gradient(circle at 35% 35%, #fff 0%, #7dd3fc 45%, #0ea5e9 100%);
+	box-shadow: 0 0 28rpx rgba(56, 189, 248, 0.95);
+	animation: hamCorePulse 2.8s ease-in-out infinite;
 }
-.ham-wave {
-	width: 8rpx;
+.ham-orb-wrap--speak .ham-orb-core {
+	animation: hamCoreSpeak 0.55s ease-in-out infinite;
+}
+
+.ham-orb-highlight {
+	position: absolute;
+	left: 22%;
+	top: 18%;
+	width: 22%;
+	height: 14%;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.75);
+	filter: blur(2rpx);
+	transform: rotate(45deg);
+}
+
+.ham-heart-shadow {
+	position: absolute;
+	left: 50%;
+	bottom: -18rpx;
+	width: 70%;
 	height: 16rpx;
-	border-radius: 8rpx;
-	background: linear-gradient(180deg, #3a9a8f, #2d7d76);
-	animation: hamWaveBar 0.5s ease-in-out infinite alternate;
+	margin-left: -35%;
+	background: rgba(14, 165, 233, 0.2);
+	border-radius: 50%;
+	filter: blur(8rpx);
+}
+
+.ham-speak-rings {
+	position: absolute;
+	left: 50%;
+	top: 42%;
+	width: 200rpx;
+	height: 200rpx;
+	margin: -100rpx 0 0 -100rpx;
+	pointer-events: none;
+}
+.ham-speak-ring {
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	border: 2rpx solid rgba(56, 189, 248, 0.35);
+	animation: hamRingOut 1.6s ease-out infinite;
+}
+.ham-speak-ring--2 {
+	animation-delay: 0.55s;
 }
 
 .ham-bubble {
 	position: relative;
-	margin-top: 8rpx;
-	max-width: 92%;
-	padding: 20rpx 28rpx;
-	background: rgba(255, 255, 255, 0.92);
-	border-radius: 24rpx;
-	box-shadow:
-		0 12rpx 36rpx rgba(45, 125, 118, 0.12),
-		inset 0 1rpx 0 rgba(255, 255, 255, 1);
-	border: 2rpx solid rgba(45, 125, 118, 0.12);
-}
-.ham-bubble-tail {
-	position: absolute;
-	left: 50%;
-	top: -14rpx;
-	width: 24rpx;
-	height: 24rpx;
-	margin-left: -12rpx;
-	background: rgba(255, 255, 255, 0.92);
-	border-left: 2rpx solid rgba(45, 125, 118, 0.12);
-	border-top: 2rpx solid rgba(45, 125, 118, 0.12);
-	transform: rotate(45deg);
+	margin-top: 4rpx;
+	max-width: 94%;
+	padding: 22rpx 32rpx;
+	background: rgba(255, 255, 255, 0.82);
+	border-radius: 20rpx;
+	border: 1rpx solid rgba(186, 230, 253, 0.9);
+	box-shadow: 0 12rpx 40rpx rgba(14, 165, 233, 0.1);
 }
 .ham-bubble-text {
 	display: block;
-	font-size: 26rpx;
+	font-size: 28rpx;
 	line-height: 1.55;
-	color: #1a2e28;
+	color: #334155;
 	text-align: center;
+	font-weight: 500;
 }
 .ham-stage--sm .ham-bubble-text {
 	font-size: 22rpx;
 }
 .ham-stage--speaking .ham-bubble {
-	animation: hamBubblePulse 0.6s ease-in-out infinite alternate;
+	box-shadow: 0 14rpx 44rpx rgba(14, 165, 233, 0.18);
 }
 
 @keyframes hamOrbitSpin {
 	from {
-		transform: translate(-50%, -50%) rotateX(72deg) rotateZ(0deg);
+		transform: rotateX(68deg) rotateZ(0deg);
 	}
 	to {
-		transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg);
+		transform: rotateX(68deg) rotateZ(360deg);
 	}
 }
-@keyframes hamIdleFloat {
+@keyframes hamOrbFloat {
 	0%,
 	100% {
-		transform: translateZ(48rpx) rotateX(-6deg) translateY(0) scale(1);
+		transform: translateY(0) scale(1);
 	}
 	50% {
-		transform: translateZ(52rpx) rotateX(-5deg) translateY(-8rpx) scale(1.02);
+		transform: translateY(-10rpx) scale(1.02);
 	}
 }
-@keyframes hamSpeakJitter {
+@keyframes hamOrbSpeak {
+	0%,
+	100% {
+		transform: translateY(0) scale(1.03);
+	}
+	50% {
+		transform: translateY(-4rpx) scale(1.06);
+	}
+}
+@keyframes hamCorePulse {
+	0%,
+	100% {
+		opacity: 0.92;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.08);
+	}
+}
+@keyframes hamCoreSpeak {
+	0%,
+	100% {
+		transform: scale(1.05);
+		box-shadow: 0 0 28rpx rgba(56, 189, 248, 0.95);
+	}
+	50% {
+		transform: scale(1.18);
+		box-shadow: 0 0 40rpx rgba(56, 189, 248, 1);
+	}
+}
+@keyframes hamSwirl {
+	0%,
+	100% {
+		opacity: 0.45;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.75;
+		transform: scale(1.06);
+	}
+}
+@keyframes hamRingOut {
 	0% {
-		transform: translateZ(52rpx) rotateX(-5deg) translateY(0) rotateZ(0deg) scale(1.02);
-	}
-	25% {
-		transform: translateZ(54rpx) rotateX(-4deg) translateY(-3rpx) rotateZ(-1.2deg) scale(1.03);
-	}
-	50% {
-		transform: translateZ(50rpx) rotateX(-6deg) translateY(2rpx) rotateZ(0.8deg) scale(1.01);
-	}
-	75% {
-		transform: translateZ(53rpx) rotateX(-5deg) translateY(-2rpx) rotateZ(-0.6deg) scale(1.025);
-	}
-	100% {
-		transform: translateZ(51rpx) rotateX(-5deg) translateY(1rpx) rotateZ(0.4deg) scale(1.02);
-	}
-}
-@keyframes hamMouthPulse {
-	from {
-		transform: scaleY(0.85);
-	}
-	to {
-		transform: scaleY(1.15);
-	}
-}
-@keyframes hamArmL {
-	0%,
-	100% {
-		transform: rotate(18deg);
-	}
-	50% {
-		transform: rotate(12deg);
-	}
-}
-@keyframes hamArmWave {
-	from {
-		transform: rotate(-28deg);
-	}
-	to {
-		transform: rotate(-8deg);
-	}
-}
-@keyframes hamWaveBar {
-	from {
-		height: 12rpx;
+		transform: scale(0.75);
 		opacity: 0.55;
 	}
-	to {
-		height: 44rpx;
-		opacity: 1;
-	}
-}
-@keyframes hamBubblePulse {
-	from {
-		box-shadow: 0 12rpx 36rpx rgba(45, 125, 118, 0.12);
-	}
-	to {
-		box-shadow: 0 16rpx 40rpx rgba(45, 125, 118, 0.22);
+	100% {
+		transform: scale(1.15);
+		opacity: 0;
 	}
 }
 </style>

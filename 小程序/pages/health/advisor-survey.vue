@@ -226,7 +226,7 @@ export default {
 		return {
 			surveyId: 0,
 			mascotSpeaking: false,
-			mascotLine: '您好，我是您的健康顾问小慧～',
+			mascotLine: '您好，我想先了解一下您的健康。',
 			speakTimer: null,
 			step: 'welcome',
 			agreed: false,
@@ -336,7 +336,7 @@ export default {
 			let line = ''
 			switch (this.step) {
 				case 'welcome':
-					line = '您好，想跟您轻松聊几分钟～'
+					line = '您好，我想先了解一下您的健康。'
 					break
 				case 'service':
 					line = this.currentServiceQuestion.text
@@ -513,7 +513,7 @@ export default {
 
 <style lang="scss">
 page {
-	background: #eef5f2;
+	background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 45%, #f1f5f9 100%);
 }
 .has-page {
 	min-height: 100vh;
@@ -533,7 +533,7 @@ page {
 	height: 420rpx;
 	margin-left: -260rpx;
 	border-radius: 50%;
-	background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.95) 0%, rgba(232, 248, 244, 0.6) 45%, transparent 72%);
+	background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.95) 0%, rgba(224, 242, 254, 0.65) 45%, transparent 72%);
 	pointer-events: none;
 }
 .has-hub-bg::before {
@@ -628,7 +628,7 @@ page {
 	border: none;
 }
 .has-btn--primary {
-	background: #2d7d76;
+	background: linear-gradient(90deg, #0ea5e9 0%, #14b8a6 100%);
 	color: #fff;
 }
 .has-btn--primary[disabled] {

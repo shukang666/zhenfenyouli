@@ -23,6 +23,7 @@
 		<view class="health-hub u-m-t-20" id="guide-health-hub">
 			<view
 				class="health-hub__banner health-hub__banner--advisor"
+				:class="{ 'health-hub__banner--advisor-light': !healthHubBannerImage }"
 				hover-class="health-hub__banner--press"
 				@tap.stop="openAdvisorSurvey"
 				@touchmove.stop=""
@@ -52,6 +53,7 @@
 							:speaking="hubMascotSpeaking"
 							:line="hubMascotLine"
 							size="sm"
+							:show-bubble="false"
 						/>
 					</view>
 				</view>
@@ -200,7 +202,7 @@
 			},
 			playHubMascotIntro() {
 				this.stopHubMascotSpeak()
-				this.hubMascotLine = '我是小慧，陪您做健康小调研～'
+				this.hubMascotLine = '您好，想先了解一下您的健康'
 				this.hubMascotSpeaking = true
 				this.hubSpeakTimer = setTimeout(() => {
 					this.hubMascotSpeaking = false
@@ -435,7 +437,25 @@
 }
 
 .health-hub__banner-ph--advisor {
-	background: linear-gradient(125deg, #1f6b62 0%, #2d7d76 50%, #3a9a8f 100%);
+	background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 40%, #7dd3fc 100%);
+}
+.health-hub__banner--advisor-light .health-hub__banner-title,
+.health-hub__banner--advisor-light .health-hub__banner-sub {
+	color: #0f172a;
+}
+.health-hub__banner--advisor-light .health-hub__banner-tag {
+	background: rgba(255, 255, 255, 0.55);
+	color: #0369a1;
+}
+.health-hub__banner--advisor-light .health-hub__banner-cta {
+	background: rgba(255, 255, 255, 0.45);
+	color: #0369a1;
+}
+.health-hub__banner--advisor-light .health-hub__banner-mask--advisor {
+	background: linear-gradient(105deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 65%);
+}
+.health-hub__banner-mask--advisor {
+	background: linear-gradient(105deg, rgba(0, 48, 44, 0.55) 0%, rgba(0, 48, 44, 0.12) 55%, transparent 100%);
 }
 
 .health-hub__banner-ph-orb {
@@ -483,9 +503,6 @@
 	width: 240rpx;
 	margin-bottom: -12rpx;
 	pointer-events: none;
-}
-.health-hub__banner-mascot .ham-bubble {
-	display: none;
 }
 
 .health-hub__banner-tag {
