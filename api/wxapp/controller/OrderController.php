@@ -135,8 +135,8 @@ class OrderController extends AuthController
                 if (empty($goods_info)) {
                     $this->error('商品不存在');
                 }
-                if (!GoodsModel::userMetSignRequire((int)$this->user_id, $goods_info)) {
-                    $this->error(GoodsModel::signRequireErrorMessage($goods_info));
+                if (!GoodsModel::userCanRedeemGoods((int)$this->user_id, $goods_info)) {
+                    $this->error(GoodsModel::redeemBlockMessage((int)$this->user_id, $goods_info));
                 }
                 $new_goods_list[$goods_info['user_id']][] = $old_goods_item;
             }

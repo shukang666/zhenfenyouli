@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace app\admin\model\goods;
 
+use api\wxapp\service\GoodsWebUnlockService;
 use api\wxapp\model\CommonModel;
 use api\wxapp\model\OrderCommentModel;
 use app\admin\model\active\ActiveClockModel;
@@ -238,6 +239,25 @@ class GoodsModel extends ToolModel
         return count($days);
     }
 
+    /** 是否可兑换：配置式签到 + Web 活动解锁均满足 */
+    public static function userCanRedeemGoods(int $userId, $goodsInfo): bool
+    {
+        return self::userMetSignRequire($userId, $goodsInfo)
+            && GoodsWebUnlockService::userMetWebUnlock($userId, $goodsInfo);
+    }
+
+    public static function redeemBlockMessage(int $userId, $goodsInfo): string
+    {
+        if (!self::userMetSignRequire($userId, $goodsInfo)) {
+            return self::signRequireErrorMessage($goodsInfo);
+        }
+        if (!GoodsWebUnlockService::userMetWebUnlock($userId, $goodsInfo)) {
+            $row = is_array($goodsInfo) ? $goodsInfo : (array)$goodsInfo;
+            return GoodsWebUnlockService::blockMessage($row);
+        }
+        return '';
+    }
+
     /** 用户是否满足商品绑定的活动前置条件 */
     public static function userMetSignRequire(int $userId, $goodsInfo): bool
     {
@@ -364,6 +384,32 @@ class GoodsModel extends ToolModel
                 $data['require_sign_tip'] = '请先完成活动「' . $name . '」的签到后再兑换';
             }
         }
+
+        $webKey = trim((string)($data['require_web_unlock_key'] ?? ''));
+        $data['require_web_unlock_key'] = $webKey;
+        $data['require_web_unlock_label'] = trim((string)($data['require_web_unlock_label'] ?? ''));
+        $data['require_web_active_id'] = $webKey !== '' ? GoodsWebUnlockService::parseActiveIdFromKey($webKey) : 0;
+        $data['require_web_unlock_met'] = 1;
+        $data['require_web_unlock_tip'] = '';
+        if ($webKey !== '') {
+            $webMet = GoodsWebUnlockService::userMetWebUnlock($userId, $data);
+            $data['require_web_unlock_met'] = $webMet ? 1 : 0;
+            if (!$webMet) {
+                if ($data['require_web_unlock_label'] !== '') {
+                    $data['require_web_unlock_tip'] = $data['require_web_unlock_label'];
+                } else {
+                    $data['require_web_unlock_tip'] = GoodsWebUnlockService::blockMessage($data);
+                }
+            }
+        }
+        if ($webKey !== '' && (int)$data['require_web_unlock_met'] === 0) {
+            $data['require_redeem_met'] = 0;
+        } elseif ($activeId > 0 && (int)$data['require_sign_met'] === 0) {
+            $data['require_redeem_met'] = 0;
+        } else {
+            $data['require_redeem_met'] = 1;
+        }
+
         return $data;
     }
 

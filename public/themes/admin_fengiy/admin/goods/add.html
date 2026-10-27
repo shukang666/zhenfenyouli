@@ -158,6 +158,23 @@
 				</div>
 			</div>
 
+			<div class="form-group">
+				<label class="col-sm-2 control-label">Web 活动解锁:</label>
+				<div class="col-md-6 col-sm-10">
+					<select class="form-control" id="web-unlock-preset" style="max-width:100%;margin-bottom:8px;">
+						<option value="">从预设选择（可选）</option>
+						<foreach name="web_unlock_presets" item="wp">
+							<option value="{$wp.key}" data-label="{$wp.label}">{$wp.label} — {$wp.key}</option>
+						</foreach>
+					</select>
+					<input type="text" class="form-control" name="require_web_unlock_key" id="require_web_unlock_key"
+						value="{$data.require_web_unlock_key|default=''}" placeholder="如 web_active:57:milestone:3，留空表示不要求">
+					<input type="text" class="form-control u-m-t-10" name="require_web_unlock_label"
+						value="{$data.require_web_unlock_label|default=''}" placeholder="未解锁时小程序提示（可空，自动生成）">
+					<p class="help-block">用于 <strong>Web 式活动</strong>：业务在达成条件时写入用户解锁记录后，方可兑换。与「前置签到」可同时配置（须都满足）。预设仅方便填 key，实际发解锁请在 Web 活动服务端调用 <code>GoodsWebUnlockService::grant()</code>。</p>
+				</div>
+			</div>
+
 
 			<!-- 规格类型 -->
 			<div id="fairy-is-attribute"></div>
@@ -274,6 +291,12 @@
 	})
 </script>
 <script type="text/javascript">
+	$('#web-unlock-preset').on('change', function () {
+		var key = $(this).val();
+		if (key) {
+			$('#require_web_unlock_key').val(key);
+		}
+	});
 	var goods_id = "{$goods_id}"
 	// $(function () {
 	// 	//商品详情

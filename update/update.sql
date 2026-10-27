@@ -638,3 +638,31 @@ CREATE TABLE IF NOT EXISTS `cmf_active_web_zhenfen_gift_claim` (
   UNIQUE KEY `uk_user_active` (`user_id`,`active_id`),
   KEY `idx_active` (`active_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='三次真分 Web 活动兑换记录';
+
+-- 商品 Web 活动解锁（配置式 require_active_id 无法覆盖 Web 式活动）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_goods' AND COLUMN_NAME = 'require_web_unlock_key');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_goods` ADD COLUMN `require_web_unlock_key` varchar(64) NOT NULL DEFAULT '''' COMMENT ''Web活动解锁标识，空=不要求'' AFTER `require_active_id`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_goods' AND COLUMN_NAME = 'require_web_unlock_label');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_goods` ADD COLUMN `require_web_unlock_label` varchar(200) NOT NULL DEFAULT '''' COMMENT ''未解锁时小程序提示，可空'' AFTER `require_web_unlock_key`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+CREATE TABLE IF NOT EXISTS `cmf_member_goods_web_unlock` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `unlock_key` varchar(64) NOT NULL DEFAULT '',
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT '便于统计，可从 key 解析',
+  `remark` varchar(255) NOT NULL DEFAULT '',
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_key` (`user_id`,`unlock_key`),
+  KEY `idx_unlock_key` (`unlock_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户 Web 活动商品兑换解锁';
+
+-- 1+1 完成 3 天：垃圾袋 0 积分兑换（goods_id=101，key 与 GoodsWebUnlockService 一致）
+UPDATE `cmf_goods` SET
+  `point` = 0,
+  `require_web_unlock_key` = 'web_active:57:milestone:3',
+  `require_web_unlock_label` = '完成「1+1活动」7日挑战中满3天任务后，可0积分兑换本商品'
+WHERE `id` = 101 AND `delete_time` = 0;

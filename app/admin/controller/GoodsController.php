@@ -13,6 +13,7 @@ namespace app\admin\controller;
 use api\wxapp\model\CategoryModel;
 use app\admin\model\goods\GoodsAttrModel;
 use app\admin\model\goods\GoodsAttrValueModel;
+use api\wxapp\service\GoodsWebUnlockService;
 use app\admin\model\goods\GoodsModel;
 use app\admin\model\goods\GoodsSkuAttrModel;
 use app\admin\model\goods\GoodsSkuModel;
@@ -123,6 +124,14 @@ class GoodsController extends AdminBaseController
             $param['require_active_id'] = GoodsModel::normalizeRequireActiveId($param['require_active_id'] ?? 0);
             if ($param['require_active_id'] > 0 && !GoodsModel::isValidSignRequireActiveId($param['require_active_id'])) {
                 $this->error('前置签到活动无效，请选择已开启签到的活动');
+            }
+            $param['require_web_unlock_key'] = trim((string)($param['require_web_unlock_key'] ?? ''));
+            $param['require_web_unlock_label'] = trim((string)($param['require_web_unlock_label'] ?? ''));
+            if (strlen($param['require_web_unlock_key']) > 64) {
+                $this->error('Web 解锁标识过长（最多 64 字符）');
+            }
+            if (strlen($param['require_web_unlock_label']) > 200) {
+                $this->error('Web 解锁提示文案过长（最多 200 字）');
             }
             Db::startTrans();
 
@@ -269,6 +278,7 @@ class GoodsController extends AdminBaseController
             $this->assign('geo_zone_list', self::getGeoZoneList());
             $requireActiveId = (int)($goods_info['require_active_id'] ?? 0);
             $this->assign('sign_active_list', GoodsModel::getSignActiveListForAdmin($requireActiveId));
+            $this->assign('web_unlock_presets', GoodsWebUnlockService::presetOptionsForAdmin());
             return $this->fetch();
         }
     }

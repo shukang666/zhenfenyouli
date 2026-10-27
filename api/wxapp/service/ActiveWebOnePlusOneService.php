@@ -909,6 +909,9 @@ class ActiveWebOnePlusOneService
             Db::name(self::progressTable())->where('id', $row['id'])->update(['reward_300_at' => $now, 'update_time' => $now]);
             $row['reward_300_at'] = $now;
         }
+        if ($count >= GoodsWebUnlockService::ONE_PLUS_ONE_MILESTONE_DAYS) {
+            GoodsWebUnlockService::syncOnePlusOneMilestone3Unlock($userId, $activeId, $count);
+        }
 
         if ($count >= self::TOTAL_DAYS && (int)($row['reward_800_at'] ?? 0) <= 0) {
             AccountLogModel::add_account_log($userId, 2, self::ACCOUNT_TYPE_1PLUS1, self::REWARD_AFTER_7, [

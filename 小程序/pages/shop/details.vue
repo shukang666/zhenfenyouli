@@ -28,6 +28,16 @@
                         @click="goSignActive">去签到</u-button>
                 </view>
             </view>
+            <view class="web-unlock-bar u-m-t-20" v-if="hasWebUnlockRequire">
+                <view class="u-font-24 web-unlock-text">
+                    <text v-if="webUnlockMet">已解锁：可 0 积分兑换本商品</text>
+                    <text v-else>{{ webUnlockHint }}</text>
+                </view>
+                <view class="u-m-t-15" v-if="!webUnlockMet && webUnlockActiveId">
+                    <u-button type="primary" size="mini" hover-class="none" :customStyle="{background: '#1877F2'}"
+                        @click="goWebUnlockActivity">去参加挑战</u-button>
+                </view>
+            </view>
         </view>
         <view class="u-p-30 u-type-white-bg u-m-t-30 u-flex u-row-between">
             <view class="u-flex">
@@ -144,6 +154,25 @@
                 }
                 return '需先完成「' + this.signRequireActiveName + '」签到后再兑换'
             },
+            hasWebUnlockRequire() {
+                return !!(this.goods && this.goods.require_web_unlock_key)
+            },
+            webUnlockMet() {
+                return Number(this.goods && this.goods.require_web_unlock_met) === 1
+            },
+            webUnlockHint() {
+                const tip = this.goods && this.goods.require_web_unlock_tip
+                if (tip && String(tip).trim()) return String(tip).trim()
+                return '完成指定 Web 活动挑战后，可 0 积分兑换本商品'
+            },
+            webUnlockActiveId() {
+                return Number(this.goods && this.goods.require_web_active_id) || 0
+            },
+            redeemAllowed() {
+                if (this.goods.require_active_id > 0 && !this.signRequireMet) return false
+                if (this.hasWebUnlockRequire && !this.webUnlockMet) return false
+                return true
+            },
         },
         onLoad(option) {
             this.goodsId = option.id
@@ -159,8 +188,12 @@
             //加入购物车/购买(addcart加入购物车 buy立即购买)
             handleBuy(type) {
                 if (!this.isLogin) return this.$u.func.checkLogin();
-                if (this.goods.require_active_id > 0 && !this.signRequireMet) {
-                    this.$u.toast(this.signRequireHint);
+                if (!this.redeemAllowed) {
+                    if (this.goods.require_active_id > 0 && !this.signRequireMet) {
+                        this.$u.toast(this.signRequireHint);
+                    } else {
+                        this.$u.toast(this.webUnlockHint);
+                    }
                     return;
                 }
                 this.$refs.sku.init(type, this.goods);
@@ -170,6 +203,11 @@
                 this.$u.route('/pages/activity/lsxf/details-new', {
                     id: this.goods.require_active_id
                 });
+            },
+            goWebUnlockActivity() {
+                const id = this.webUnlockActiveId
+                if (!id) return
+                this.$u.route('/pages/activity/lsxf/details-new', { id })
             },
             //确定购买
             submitOrder(data) {
@@ -260,6 +298,18 @@
 
     .sign-require-text {
         color: #8B6914;
+        line-height: 1.5;
+    }
+
+    .web-unlock-bar {
+        padding: 20rpx 24rpx;
+        background: #eef4ff;
+        border-radius: 12rpx;
+        border: 1rpx solid #c5d8ff;
+    }
+
+    .web-unlock-text {
+        color: #1a4d8c;
         line-height: 1.5;
     }
 

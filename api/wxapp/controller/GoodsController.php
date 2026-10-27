@@ -419,8 +419,8 @@ class GoodsController extends AuthController
         if (empty($goods_info)) {
             $this->error('商品不存在');
         }
-        if (!GoodsModel::userMetSignRequire((int)$this->user_id, $goods_info)) {
-            $this->error(GoodsModel::signRequireErrorMessage($goods_info));
+        if (!GoodsModel::userCanRedeemGoods((int)$this->user_id, $goods_info)) {
+            $this->error(GoodsModel::redeemBlockMessage((int)$this->user_id, $goods_info));
         }
         $map = [];
         $map['shop_id'] = $goods_info['user_id'];
