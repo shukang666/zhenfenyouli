@@ -1,7 +1,7 @@
 <template>
 	<view class="pg-root">
 		<view
-			v-if="!showGuide"
+			v-if="!showGuide && !cfg.hideMascot"
 			class="pg-mascot"
 			:class="{ 'pg-mascot--drag': dragging }"
 			:style="mascotStyle"

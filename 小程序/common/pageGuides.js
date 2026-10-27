@@ -63,6 +63,7 @@ export const PAGE_GUIDES = {
 		]
 	},
 	health: {
+		hideMascot: true,
 		steps: [
 			{
 				selector: '#guide-health-hub',
