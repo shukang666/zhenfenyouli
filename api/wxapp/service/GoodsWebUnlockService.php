@@ -112,6 +112,26 @@ class GoodsWebUnlockService
         return true;
     }
 
+    /**
+     * 兑换校验前：若尚未解锁，按 1+1 活动进度同步并补发（避免满 3 天后未再进入活动页导致无解锁记录）
+     */
+    public static function syncUnlockFromProgressIfNeeded(int $userId, string $unlockKey): void
+    {
+        $unlockKey = trim($unlockKey);
+        if ($userId <= 0 || $unlockKey === '' || self::hasUnlock($userId, $unlockKey)) {
+            return;
+        }
+        $activeId = self::parseActiveIdFromKey($unlockKey);
+        if ($activeId <= 0) {
+            return;
+        }
+        try {
+            ActiveWebOnePlusOneService::syncAndBuildStatus($userId, $activeId);
+        } catch (\Throwable $e) {
+            // 活动不存在、未部署等：忽略，仍按 unlock 表判断
+        }
+    }
+
     /** @param array<string,mixed>|object $goodsInfo */
     public static function userMetWebUnlock(int $userId, $goodsInfo): bool
     {
@@ -127,6 +147,7 @@ class GoodsWebUnlockService
         if ($userId <= 0) {
             return false;
         }
+        self::syncUnlockFromProgressIfNeeded($userId, $key);
         return self::hasUnlock($userId, $key);
     }
 
