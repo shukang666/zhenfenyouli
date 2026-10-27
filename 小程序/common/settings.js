@@ -13,7 +13,7 @@ module.exports = {
 	prodUrl: 'https://admin.circular-economy.cn/api',
 	// 站点 public 静态资源（Lottie 等，不走 COS）
 	sitePublicUrl: 'https://admin.circular-economy.cn',
-	healthAdvisorLottiePath: '/static/lottie/health-advisor-idle.json',
+	healthAdvisorLottiePath: '/static/lottie/health_agent_idle_v01.json',
 	// 腾讯云 COS 公网根（无尾斜杠）
 	cosPublicBase: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com',
 	// 业务上传图（xcxkf052/...，无 /upload/ 段）

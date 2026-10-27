@@ -6,20 +6,22 @@
 			{
 				'hvp--speaking': speaking,
 				'hvp--dark-caption': darkCaption,
-				'hvp--embedded': embedded
+				'hvp--embedded': embedded,
+				'hvp--lottie-on': lottieReady && !useCssFallback
 			}
 		]"
 	>
 		<view class="hvp-stage">
 			<!-- #ifdef MP-WEIXIN -->
 			<canvas
-				v-if="!useCssFallback"
+				v-show="!useCssFallback"
 				class="hvp-lottie"
+				:class="'hvp-lottie--' + size"
 				type="2d"
 				:id="canvasId"
 			></canvas>
 			<!-- #endif -->
-			<view v-if="showCssHeart" class="hvp-css-fallback">
+			<view v-show="showCssHeart" class="hvp-css-fallback">
 				<view class="hvp-halo hvp-halo--a"></view>
 				<view class="hvp-halo hvp-halo--b"></view>
 				<view class="hvp-motion">
@@ -41,6 +43,8 @@
 
 <script>
 import settings from '@/common/settings.js'
+// 包内备用（线上 JSON 未部署或 download 失败时仍能播 Lottie）
+import bundledLottie from '@/static/lottie/health_agent_idle_v01.json'
 
 // #ifdef MP-WEIXIN
 import lottie from 'lottie-miniprogram'
@@ -75,7 +79,6 @@ export default {
 			type: Boolean,
 			default: false
 		},
-		/** 覆盖默认 Lottie 地址（完整 URL） */
 		lottieUrl: {
 			type: String,
 			default: ''
@@ -86,22 +89,23 @@ export default {
 		return {
 			canvasId: 'hvpLottie' + hvpCanvasSeq,
 			useCssFallback: false,
+			lottieReady: false,
 			lottieAnim: null,
 			lottieInited: false
 		}
 	},
 	computed: {
-		resolvedLottieUrl() {
+		remoteLottieUrl() {
 			if (this.lottieUrl && String(this.lottieUrl).trim()) {
 				return String(this.lottieUrl).trim()
 			}
 			const base = (settings.sitePublicUrl || 'https://admin.circular-economy.cn').replace(/\/$/, '')
-			const path = settings.healthAdvisorLottiePath || '/static/lottie/health-advisor-idle.json'
+			const path = settings.healthAdvisorLottiePath || '/static/lottie/health_agent_idle_v01.json'
 			return base + path
 		},
 		showCssHeart() {
 			// #ifdef MP-WEIXIN
-			return this.useCssFallback
+			return !this.lottieReady || this.useCssFallback
 			// #endif
 			// #ifndef MP-WEIXIN
 			return true
@@ -116,7 +120,7 @@ export default {
 	mounted() {
 		// #ifdef MP-WEIXIN
 		this.$nextTick(() => {
-			setTimeout(() => this.initLottie(), 80)
+			setTimeout(() => this.initLottie(), 120)
 		})
 		// #endif
 	},
@@ -137,6 +141,66 @@ export default {
 				} catch (e) {}
 				this.lottieAnim = null
 			}
+			this.lottieReady = false
+		},
+		fetchLottieJson(url) {
+			return new Promise((resolve, reject) => {
+				uni.request({
+					url,
+					method: 'GET',
+					success: (res) => {
+						if (res.statusCode === 200 && res.data && typeof res.data === 'object') {
+							resolve(res.data)
+							return
+						}
+						reject(new Error('lottie http ' + (res.statusCode || 0)))
+					},
+					fail: (err) => reject(err || new Error('lottie request fail'))
+				})
+			})
+		},
+		async resolveAnimationData() {
+			try {
+				return await this.fetchLottieJson(this.remoteLottieUrl)
+			} catch (e) {
+				console.warn('[health-virtual-persona] remote lottie failed, use bundled', e)
+				return bundledLottie
+			}
+		},
+		startLottieOnCanvas(canvas, box, animationData) {
+			const dpr = uni.getSystemInfoSync().pixelRatio || 2
+			const w = box.width || 320
+			const h = box.height || 320
+			canvas.width = w * dpr
+			canvas.height = h * dpr
+			const ctx = canvas.getContext('2d')
+			ctx.scale(dpr, dpr)
+			lottie.setup(canvas)
+			this.lottieAnim = lottie.loadAnimation({
+				loop: true,
+				autoplay: true,
+				animationData,
+				rendererSettings: {
+					context: ctx,
+					clearCanvas: true
+				}
+			})
+			const onReady = () => {
+				this.lottieReady = true
+				this.applyLottieSpeed(this.speaking)
+			}
+			const onFail = () => {
+				this.destroyLottie()
+				this.useCssFallback = true
+			}
+			this.lottieAnim.addEventListener('DOMLoaded', onReady)
+			this.lottieAnim.addEventListener('data_failed', onFail)
+			this.lottieAnim.addEventListener('error', onFail)
+			setTimeout(() => {
+				if (!this.lottieReady && this.lottieAnim) {
+					onFail()
+				}
+			}, 8000)
 		},
 		initLottie() {
 			// #ifdef MP-WEIXIN
@@ -147,37 +211,25 @@ export default {
 			query
 				.select(selector)
 				.fields({ node: true, size: true })
-				.exec((res) => {
+				.exec(async (res) => {
 					const box = res && res[0]
 					if (!box || !box.node) {
 						this.useCssFallback = true
 						return
 					}
-					const canvas = box.node
-					const dpr = uni.getSystemInfoSync().pixelRatio || 2
-					const w = box.width || 300
-					const h = box.height || 300
-					canvas.width = w * dpr
-					canvas.height = h * dpr
-					const ctx = canvas.getContext('2d')
-					ctx.scale(dpr, dpr)
-					lottie.setup(canvas)
-					this.lottieAnim = lottie.loadAnimation({
-						loop: true,
-						autoplay: true,
-						path: this.resolvedLottieUrl,
-						rendererSettings: {
-							context: ctx,
-							clearCanvas: true
-						}
-					})
-					this.lottieAnim.addEventListener('DOMLoaded', () => {
-						this.applyLottieSpeed(this.speaking)
-					})
-					this.lottieAnim.addEventListener('data_failed', () => {
-						this.destroyLottie()
+					let animationData = bundledLottie
+					try {
+						animationData = await this.resolveAnimationData()
+					} catch (e) {
 						this.useCssFallback = true
-					})
+						return
+					}
+					try {
+						this.startLottieOnCanvas(box.node, box, animationData)
+					} catch (e) {
+						console.warn('[health-virtual-persona] lottie init error', e)
+						this.useCssFallback = true
+					}
 				})
 			// #endif
 		}
@@ -218,18 +270,44 @@ export default {
 }
 
 .hvp-lottie {
-	width: 92%;
-	height: 100%;
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 2;
 	display: block;
+}
+
+.hvp-lottie--hero {
+	width: 560rpx;
+	height: 560rpx;
+	top: 20rpx;
+}
+
+.hvp-lottie--lg {
+	width: 480rpx;
+	height: 480rpx;
+	top: 8rpx;
+}
+
+.hvp-lottie--md {
+	width: 360rpx;
+	height: 360rpx;
+	top: 8rpx;
 }
 
 .hvp-css-fallback {
 	position: relative;
+	z-index: 1;
 	width: 100%;
 	height: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.hvp--lottie-on .hvp-css-fallback {
+	visibility: hidden;
+	pointer-events: none;
 }
 
 .hvp-halo {
