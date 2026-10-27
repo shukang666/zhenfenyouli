@@ -1,10 +1,17 @@
 <template>
 	<view class="has-page" :class="{ 'has-page--large': largeTextEnabled }">
+		<view class="has-hub">
+			<view class="has-hub-bg"></view>
+			<health-advisor-mascot
+				:speaking="mascotSpeaking"
+				:line="mascotLine"
+				size="lg"
+			/>
+		</view>
+
+		<view class="has-body">
 		<!-- 欢迎 -->
 		<view v-if="step === 'welcome'" class="has-panel has-welcome">
-			<view class="has-avatar-wrap">
-				<view class="has-avatar">👩‍⚕️</view>
-			</view>
 			<text class="has-welcome-title">您好，想跟您轻松聊几分钟</text>
 			<text class="has-welcome-desc">问卷分两部分：服务体验与最关心的健康问题。大约 2 分钟，可随时退出。</text>
 			<view class="has-agree" @tap="agreed = !agreed">
@@ -26,10 +33,7 @@
 				<text class="has-step-label">服务体验 {{ serviceIndex + 1 }}/{{ serviceQuestions.length }}</text>
 			</view>
 
-			<view v-if="inputMode === 'voice' && !voiceFallback" class="has-voice-intro">
-				<view class="has-voice-avatar">👩‍⚕️</view>
-				<text class="has-voice-tip">点击下方按钮说话，或直接点选答案</text>
-			</view>
+			<text class="has-voice-tip" v-if="inputMode === 'voice' && !voiceFallback">点击下方按钮说话，或直接点选答案</text>
 
 			<text class="has-question">{{ currentServiceQuestion.text }}</text>
 
@@ -173,10 +177,13 @@
 			<text class="has-done-desc">我们会根据社区情况安排健康科普与活动，请留意小程序通知。</text>
 			<button class="has-btn has-btn--primary" @tap="goBack">返回</button>
 		</view>
+		</view>
 	</view>
 </template>
 
 <script>
+import HealthAdvisorMascot from '@/components/health-advisor-mascot/index.vue'
+
 const SERVICE_QUESTIONS = [
 	{
 		key: 'overall',
@@ -214,9 +221,13 @@ const CONCERN_OPTIONS = [
 ]
 
 export default {
+	components: { HealthAdvisorMascot },
 	data() {
 		return {
 			surveyId: 0,
+			mascotSpeaking: false,
+			mascotLine: '您好，我是您的健康顾问小慧～',
+			speakTimer: null,
 			step: 'welcome',
 			agreed: false,
 			serviceQuestions: SERVICE_QUESTIONS,
@@ -280,8 +291,76 @@ export default {
 	},
 	onLoad(option) {
 		this.surveyId = parseInt(option.id, 10) || 0
+		this.$nextTick(() => {
+			this.speakLine(this.mascotLine, 3200)
+		})
+	},
+	onUnload() {
+		this.stopSpeaking()
+	},
+	watch: {
+		step(val) {
+			this.refreshMascotLine(val === 'service')
+		},
+		serviceIndex() {
+			if (this.step === 'service') {
+				this.refreshMascotLine(true)
+			}
+		}
 	},
 	methods: {
+		stopSpeaking() {
+			if (this.speakTimer) {
+				clearTimeout(this.speakTimer)
+				this.speakTimer = null
+			}
+			this.mascotSpeaking = false
+		},
+		speakDuration(text) {
+			const len = (text || '').length
+			return Math.min(9000, Math.max(2600, len * 180))
+		},
+		speakLine(text, duration) {
+			const line = (text || '').trim()
+			if (!line) return
+			this.stopSpeaking()
+			this.mascotLine = line
+			this.mascotSpeaking = true
+			const ms = duration || this.speakDuration(line)
+			this.speakTimer = setTimeout(() => {
+				this.mascotSpeaking = false
+				this.speakTimer = null
+			}, ms)
+		},
+		refreshMascotLine(autoSpeak) {
+			let line = ''
+			switch (this.step) {
+				case 'welcome':
+					line = '您好，想跟您轻松聊几分钟～'
+					break
+				case 'service':
+					line = this.currentServiceQuestion.text
+					break
+				case 'concerns':
+					line = '请选择您最关心的健康问题，最多选 2 项。'
+					break
+				case 'summary':
+					line = '这是根据您刚才填写整理的概要，请您过目。'
+					break
+				case 'optional':
+					line = '下面有一些可选的社区健康活动，感兴趣可以看看。'
+					break
+				case 'done':
+					line = '感谢您的参与，祝您身体健康！'
+					break
+				default:
+					line = this.mascotLine
+			}
+			this.mascotLine = line
+			if (autoSpeak) {
+				this.speakLine(line)
+			}
+		},
 		startSurvey() {
 			if (!this.agreed) return
 			this.step = 'service'
@@ -317,20 +396,16 @@ export default {
 		},
 		readQuestionAloud() {
 			const text = this.currentServiceQuestion.text
-			uni.showModal({
-				title: '朗读此题',
-				content: text,
-				showCancel: false,
-				confirmText: '知道了',
-				confirmColor: '#2d7d76'
-			})
+			this.speakLine(text)
 		},
 		onMicStart() {
 			this.recording = true
+			this.speakLine('请说出您的答案～', 1500)
 		},
 		onMicEnd() {
 			this.recording = false
 			this.voiceFallback = true
+			this.stopSpeaking()
 			uni.showToast({
 				title: '请点选下方答案',
 				icon: 'none',
@@ -438,12 +513,39 @@ export default {
 
 <style lang="scss">
 page {
-	background: #f4f7f5;
+	background: #eef5f2;
 }
 .has-page {
 	min-height: 100vh;
-	padding: 24rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
+	padding: 0 0 calc(48rpx + env(safe-area-inset-bottom));
 	box-sizing: border-box;
+}
+.has-hub {
+	position: relative;
+	padding: 16rpx 32rpx 8rpx;
+	overflow: hidden;
+}
+.has-hub-bg {
+	position: absolute;
+	left: 50%;
+	top: 20rpx;
+	width: 520rpx;
+	height: 420rpx;
+	margin-left: -260rpx;
+	border-radius: 50%;
+	background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.95) 0%, rgba(232, 248, 244, 0.6) 45%, transparent 72%);
+	pointer-events: none;
+}
+.has-hub-bg::before {
+	content: '';
+	position: absolute;
+	inset: 12%;
+	border-radius: 50%;
+	border: 2rpx solid rgba(45, 125, 118, 0.08);
+	box-shadow: 0 40rpx 80rpx rgba(45, 125, 118, 0.12);
+}
+.has-body {
+	padding: 8rpx 32rpx 0;
 }
 .has-panel {
 	animation: hasFade 0.25s ease;
@@ -459,24 +561,15 @@ page {
 	}
 }
 .has-welcome {
-	padding-top: 40rpx;
+	padding-top: 8rpx;
 	text-align: center;
 }
-.has-avatar-wrap {
-	display: flex;
-	justify-content: center;
-	margin-bottom: 32rpx;
-}
-.has-avatar {
-	width: 160rpx;
-	height: 160rpx;
-	border-radius: 50%;
-	background: linear-gradient(145deg, #e8f5f0, #fff);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 72rpx;
-	box-shadow: 0 12rpx 32rpx rgba(45, 125, 118, 0.15);
+.has-voice-tip {
+	display: block;
+	font-size: 24rpx;
+	color: #8a958c;
+	text-align: center;
+	margin-bottom: 16rpx;
 }
 .has-welcome-title {
 	display: block;
@@ -696,18 +789,6 @@ page {
 .has-mic-btn--active {
 	opacity: 0.88;
 	transform: scale(0.98);
-}
-.has-voice-intro {
-	text-align: center;
-	margin-bottom: 24rpx;
-}
-.has-voice-avatar {
-	font-size: 64rpx;
-	margin-bottom: 12rpx;
-}
-.has-voice-tip {
-	font-size: 24rpx;
-	color: #8a958c;
 }
 .has-voice-confirm {
 	padding: 24rpx;

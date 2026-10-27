@@ -36,14 +36,23 @@
 				<view v-else class="health-hub__banner-ph health-hub__banner-ph--advisor">
 					<view class="health-hub__banner-ph-orb"></view>
 				</view>
-				<view class="health-hub__banner-mask"></view>
-				<view class="health-hub__banner-copy">
-					<text class="health-hub__banner-tag">健康顾问</text>
-					<text class="health-hub__banner-title">{{ advisorEntryTitle }}</text>
-					<text class="health-hub__banner-sub">{{ advisorEntrySubtitle }}</text>
-					<view class="health-hub__banner-cta">
-						<text>开始聊聊</text>
-						<u-icon name="arrow-right" size="24" color="#fff"></u-icon>
+				<view class="health-hub__banner-mask health-hub__banner-mask--advisor"></view>
+				<view class="health-hub__banner-layout">
+					<view class="health-hub__banner-copy">
+						<text class="health-hub__banner-tag">健康顾问</text>
+						<text class="health-hub__banner-title">{{ advisorEntryTitle }}</text>
+						<text class="health-hub__banner-sub">{{ advisorEntrySubtitle }}</text>
+						<view class="health-hub__banner-cta">
+							<text>开始聊聊</text>
+							<u-icon name="arrow-right" size="24" color="#fff"></u-icon>
+						</view>
+					</view>
+					<view class="health-hub__banner-mascot" @tap.stop="">
+						<health-advisor-mascot
+							:speaking="hubMascotSpeaking"
+							:line="hubMascotLine"
+							size="sm"
+						/>
 					</view>
 				</view>
 			</view>
@@ -112,10 +121,12 @@
 <script>
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
+	import HealthAdvisorMascot from '@/components/health-advisor-mascot/index.vue'
 	import careGesture from '@/common/care-gesture.mixin.js'
 	export default {
 		components: {
-			SkeletonScreen
+			SkeletonScreen,
+			HealthAdvisorMascot
 		},
 		mixins: [careGesture],
 		computed: {
@@ -142,6 +153,9 @@
 		data() {
 			return {
 				isLoading: true,
+				hubMascotSpeaking: false,
+				hubMascotLine: '点我，轻松聊聊～',
+				hubSpeakTimer: null,
 				forum_list: [],
 				page: 1,
 				total: 0,
@@ -170,6 +184,10 @@
 			// 更新自定义tabbar选中态
 			this.updateTabBarSelected(2)
 			if (checkCommunity(this)) return
+			this.playHubMascotIntro()
+		},
+		onHide() {
+			this.stopHubMascotSpeak()
 		},
 		methods: {
 			resolveBannerSurveyId() {
@@ -179,6 +197,22 @@
 					id = parseInt(b.exam_id, 10) || 0
 				}
 				return id
+			},
+			playHubMascotIntro() {
+				this.stopHubMascotSpeak()
+				this.hubMascotLine = '我是小慧，陪您做健康小调研～'
+				this.hubMascotSpeaking = true
+				this.hubSpeakTimer = setTimeout(() => {
+					this.hubMascotSpeaking = false
+					this.hubSpeakTimer = null
+				}, 2800)
+			},
+			stopHubMascotSpeak() {
+				if (this.hubSpeakTimer) {
+					clearTimeout(this.hubSpeakTimer)
+					this.hubSpeakTimer = null
+				}
+				this.hubMascotSpeaking = false
 			},
 			openAdvisorSurvey() {
 				const surveyId = this.resolveBannerSurveyId()
@@ -371,7 +405,7 @@
 .health-hub__banner {
 	position: relative;
 	width: 100%;
-	height: 280rpx;
+	min-height: 320rpx;
 	border-radius: $glass-radius-md;
 	overflow: hidden;
 	box-shadow: 0 12rpx 40rpx rgba(57, 116, 242, 0.22);
@@ -423,14 +457,35 @@
 	background: linear-gradient(90deg, rgba(0, 28, 80, 0.55) 0%, rgba(0, 28, 80, 0.08) 70%);
 }
 
-.health-hub__banner-copy {
+.health-hub__banner-mask--advisor {
+	background: linear-gradient(105deg, rgba(0, 48, 44, 0.62) 0%, rgba(0, 48, 44, 0.15) 55%, rgba(0, 48, 44, 0.05) 100%);
+}
+.health-hub__banner-layout {
 	position: relative;
 	z-index: 2;
-	height: 100%;
-	padding: 28rpx 32rpx;
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	min-height: 320rpx;
+	padding: 24rpx 20rpx 20rpx 28rpx;
+	box-sizing: border-box;
+}
+.health-hub__banner-copy {
+	flex: 1;
+	min-width: 0;
+	padding-right: 8rpx;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+}
+.health-hub__banner-mascot {
+	flex-shrink: 0;
+	width: 240rpx;
+	margin-bottom: -12rpx;
+	pointer-events: none;
+}
+.health-hub__banner-mascot .ham-bubble {
+	display: none;
 }
 
 .health-hub__banner-tag {
