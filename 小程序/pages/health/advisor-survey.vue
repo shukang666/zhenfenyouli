@@ -4,7 +4,7 @@
 			<view class="has-scene-bg"></view>
 			<view class="has-top has-top--scene">
 				<view class="has-top-back" @tap="onTopBack">
-					<u-icon name="arrow-left" size="36" color="#fff"></u-icon>
+					<u-icon name="arrow-left" size="36" color="#1565D8"></u-icon>
 				</view>
 				<view class="has-top-copy">
 					<text class="has-top-title">健康问答</text>
@@ -18,7 +18,6 @@
 				embedded
 				hide-caption
 				size="lg"
-				dark-caption
 				:speaking="personaSpeaking"
 			/>
 			<view
@@ -477,7 +476,7 @@ export default {
 
 <style lang="scss">
 page {
-	background: #071a33;
+	background: #f7faff;
 }
 .has-page {
 	position: relative;
@@ -495,30 +494,37 @@ page {
 .has-scene-bg {
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(180deg, #020810 0%, #071a33 55%, #1565d8 100%);
+	background: linear-gradient(
+		180deg,
+		#dceeff 0%,
+		#eef5ff 38%,
+		#ffffff 72%,
+		#f3f8ff 100%
+	);
 }
 .has-top--scene {
 	position: relative;
 	z-index: 2;
 }
 .has-top--scene .has-top-title {
-	color: #fff;
+	color: #0d47a1;
 }
 .has-top--scene .has-top-sub {
-	color: rgba(255, 255, 255, 0.72);
+	color: #64748b;
 }
 .has-bubble {
 	position: relative;
 	z-index: 2;
 	margin: -8rpx 32rpx 12rpx;
-	padding: 16rpx 20rpx;
-	font-size: 24rpx;
-	line-height: 1.5;
-	color: rgba(255, 255, 255, 0.9);
+	padding: 18rpx 24rpx;
+	font-size: 26rpx;
+	line-height: 1.55;
+	color: #1e3a5f;
 	text-align: center;
-	background: rgba(255, 255, 255, 0.08);
-	border: 1rpx solid rgba(255, 255, 255, 0.12);
+	background: #ffffff;
+	border: 1rpx solid #c5dcff;
 	border-radius: 16rpx;
+	box-shadow: 0 8rpx 24rpx rgba(21, 101, 216, 0.08);
 }
 .has-sheet {
 	position: relative;
@@ -567,7 +573,7 @@ page {
 	height: 8rpx;
 	margin: 0 28rpx 16rpx;
 	border-radius: 999rpx;
-	background: rgba(255, 255, 255, 0.2);
+	background: #c5dcff;
 	overflow: hidden;
 }
 .has-progress-fill {
