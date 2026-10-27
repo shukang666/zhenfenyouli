@@ -79,19 +79,24 @@
           <text class="fb-section-title">主题活动</text>
         </view>
       </view>
-      <view class="fb-theme-row">
+      <view class="fb-theme-mosaic">
         <view
-          class="fb-theme-item"
-          v-for="cate in main_categories"
+          class="fb-theme-pane"
+          :class="'fb-theme-pane--' + (idx + 1)"
+          v-for="(cate, idx) in main_categories"
           :key="cate.id"
-          hover-class="fb-press"
+          hover-class="fb-theme-pane--pressed"
           :hover-stay-time="80"
           @click="gotoCateList(cate)"
         >
-          <view class="fb-theme-circle" :style="{ background: cate.bgColor }">
-            <text class="fb-theme-emoji">{{ cate.emoji }}</text>
+          <view
+            class="fb-theme-pane-glow"
+            :style="{ background: cate.bgColor }"
+          ></view>
+          <view class="fb-theme-pane-inner">
+            <text class="fb-theme-pane-emoji">{{ cate.emoji }}</text>
+            <text class="fb-theme-pane-name">{{ cate.name }}</text>
           </view>
-          <text class="fb-theme-label">{{ cate.name }}</text>
         </view>
       </view>
     </view>
@@ -981,48 +986,208 @@ export default {
   height: 100%;
 }
 
-/* ===== 主题活动：一行五个圆钮 ===== */
-.fb-theme-row {
+/* ===== 主题活动：一行五片拼合渐变区 ===== */
+.fb-theme-mosaic {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 4rpx 20rpx 20rpx;
+  align-items: flex-end;
+  margin: 0 16rpx 4rpx;
+  padding: 8rpx 4rpx 12rpx;
+  min-height: 240rpx;
+  overflow: visible;
 }
-.fb-theme-item {
+.fb-theme-pane {
+  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
+  padding: 0 2rpx 18rpx;
+  box-sizing: border-box;
+  overflow: visible;
+  transition: transform 0.18s ease, opacity 0.18s ease;
 }
-.fb-theme-circle {
-  width: 104rpx;
-  height: 104rpx;
-  border-radius: 50%;
+.fb-theme-pane:first-child {
+  border-radius: 22rpx 0 0 22rpx;
+}
+.fb-theme-pane:last-child {
+  border-radius: 0 22rpx 22rpx 0;
+}
+.fb-theme-pane:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 12%;
+  right: 0;
+  bottom: 14%;
+  width: 1rpx;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 35%,
+    rgba(255, 255, 255, 0.55) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 3;
+}
+.fb-theme-pane--pressed {
+  opacity: 0.9;
+  transform: scale(0.97);
+}
+.fb-theme-pane-glow {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  border-radius: 50% 50% 42% 42%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.92;
+  filter: blur(2rpx);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 14%,
+    #000 38%,
+    #000 62%,
+    rgba(0, 0, 0, 0.4) 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 14%,
+    #000 38%,
+    #000 62%,
+    rgba(0, 0, 0, 0.4) 86%,
+    transparent 100%
+  );
+}
+.fb-theme-pane--1 .fb-theme-pane-glow {
+  top: -6%;
+  height: 108%;
+}
+.fb-theme-pane--2 .fb-theme-pane-glow {
+  top: 2%;
+  height: 96%;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.25) 20%,
+    #000 45%,
+    #000 58%,
+    rgba(0, 0, 0, 0.35) 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.25) 20%,
+    #000 45%,
+    #000 58%,
+    rgba(0, 0, 0, 0.35) 88%,
+    transparent 100%
+  );
+}
+.fb-theme-pane--3 .fb-theme-pane-glow {
+  top: -10%;
+  height: 112%;
+}
+.fb-theme-pane--4 .fb-theme-pane-glow {
+  top: 4%;
+  height: 90%;
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 10%,
+    #000 32%,
+    #000 68%,
+    rgba(0, 0, 0, 0.3) 92%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 10%,
+    #000 32%,
+    #000 68%,
+    rgba(0, 0, 0, 0.3) 92%,
+    transparent 100%
+  );
+}
+.fb-theme-pane--5 .fb-theme-pane-glow {
+  top: -4%;
+  height: 102%;
+}
+.fb-theme-pane--1 {
+  padding-bottom: 22rpx;
+}
+.fb-theme-pane--2 {
+  padding-bottom: 14rpx;
+}
+.fb-theme-pane--3 {
+  padding-bottom: 26rpx;
+}
+.fb-theme-pane--4 {
+  padding-bottom: 12rpx;
+}
+.fb-theme-pane--5 {
+  padding-bottom: 20rpx;
+}
+.fb-theme-pane-inner {
+  position: relative;
+  z-index: 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 8rpx 20rpx rgba(16, 48, 24, 0.12);
-  border: 4rpx solid rgba(255, 255, 255, 0.85);
-  box-sizing: border-box;
-}
-.fb-theme-emoji {
-  font-size: 44rpx;
-  line-height: 1;
-}
-.fb-theme-label {
-  margin-top: 14rpx;
+  justify-content: flex-end;
   width: 100%;
-  padding: 0 4rpx;
+  min-height: 200rpx;
+  padding-top: 28rpx;
   box-sizing: border-box;
-  font-size: 22rpx;
-  font-weight: 600;
+}
+.fb-theme-pane--1 .fb-theme-pane-inner {
+  min-height: 212rpx;
+}
+.fb-theme-pane--2 .fb-theme-pane-inner {
+  min-height: 188rpx;
+}
+.fb-theme-pane--3 .fb-theme-pane-inner {
+  min-height: 220rpx;
+}
+.fb-theme-pane--4 .fb-theme-pane-inner {
+  min-height: 180rpx;
+}
+.fb-theme-pane--5 .fb-theme-pane-inner {
+  min-height: 204rpx;
+}
+.fb-theme-pane-emoji {
+  font-size: 40rpx;
+  line-height: 1;
+  margin-bottom: 12rpx;
+  filter: drop-shadow(0 4rpx 10rpx rgba(0, 0, 0, 0.12));
+}
+.fb-theme-pane--3 .fb-theme-pane-emoji {
+  font-size: 44rpx;
+  margin-bottom: 16rpx;
+}
+.fb-theme-pane-name {
+  width: 100%;
+  padding: 0 2rpx;
+  box-sizing: border-box;
+  font-size: 20rpx;
+  font-weight: 700;
   color: #142018;
   text-align: center;
-  white-space: nowrap;
+  line-height: 1.35;
+  letter-spacing: 0.5rpx;
+  text-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.65);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-all;
 }
 
 /* 备用：左大卡 + 右 2×2 样式（已弃用，恢复时取消注释）
