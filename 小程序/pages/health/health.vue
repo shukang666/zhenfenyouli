@@ -76,7 +76,6 @@
 					embedded
 					hide-caption
 					size="hero"
-					dark-caption
 					:speaking="personaSpeaking"
 				/>
 
@@ -93,25 +92,28 @@
 							<text class="hp-cta-title">开始健康问答</text>
 							<text class="hp-cta-desc">梳理关注点，获取可执行参考建议（非诊疗）</text>
 							<view class="hp-cta-row">
-								<text class="hp-cta-go">立即开始</text>
-								<u-icon name="arrow-right" size="24" color="#fff"></u-icon>
+								<text class="hp-cta-go">立即开始健康问答</text>
+								<u-icon name="arrow-right" size="28" color="#fff"></u-icon>
 							</view>
 						</view>
 
 						<view
-							class="hp-link"
+							class="hp-link hp-link--featured"
 							hover-class="hp-link--on"
 							@tap="openGrassrootsCare"
 						>
-							<u-icon name="home-fill" size="34" color="#90caf9"></u-icon>
+							<view class="hp-link-icon-wrap">
+								<u-icon name="home-fill" size="40" color="#fff"></u-icon>
+							</view>
 							<view class="hp-link-copy">
 								<view class="hp-link-title-row">
 									<text class="hp-link-title">基层医疗机构</text>
-									<text class="hp-link-badge">重点</text>
+									<text class="hp-link-badge">便民入口</text>
 								</view>
 								<text class="hp-link-desc">社区卫生服务与公共卫生资源</text>
+								<text class="hp-link-go">点击进入 ›</text>
 							</view>
-							<u-icon name="arrow-right" size="24" color="rgba(255,255,255,0.55)"></u-icon>
+							<u-icon name="arrow-right" size="32" color="#1565d8"></u-icon>
 						</view>
 
 						<text class="hp-assistant-meta" v-if="lastCompletedHint">{{ lastCompletedHint }}</text>
@@ -489,7 +491,7 @@
 }
 
 .hp-nav--scene .hp-nav-title {
-	color: #fff;
+	color: #0d47a1;
 }
 
 .hp-immersive {
@@ -505,10 +507,10 @@
 	inset: 0;
 	background: linear-gradient(
 		180deg,
-		#020810 0%,
-		#071a33 38%,
-		#0d47a1 72%,
-		#e8f1ff 100%
+		#dceeff 0%,
+		#eef5ff 32%,
+		#ffffff 58%,
+		#f3f8ff 100%
 	);
 }
 
@@ -516,23 +518,23 @@
 	position: absolute;
 	border-radius: 50%;
 	pointer-events: none;
-	filter: blur(40rpx);
+	filter: blur(48rpx);
 }
 
 .hp-immersive-glow--a {
 	width: 520rpx;
 	height: 520rpx;
 	left: -120rpx;
-	top: 120rpx;
-	background: rgba(21, 101, 216, 0.35);
+	top: 80rpx;
+	background: rgba(21, 101, 216, 0.16);
 }
 
 .hp-immersive-glow--b {
 	width: 400rpx;
 	height: 400rpx;
 	right: -80rpx;
-	top: 280rpx;
-	background: rgba(229, 57, 53, 0.18);
+	top: 200rpx;
+	background: rgba(229, 57, 53, 0.1);
 }
 
 .hp-assistant-panel {
@@ -544,91 +546,114 @@
 
 .hp-assistant-bubble {
 	display: block;
-	padding: 20rpx 24rpx;
-	margin: 0 8rpx 20rpx;
-	font-size: 26rpx;
+	padding: 22rpx 28rpx;
+	margin: 0 8rpx 24rpx;
+	font-size: 28rpx;
 	line-height: 1.55;
-	color: rgba(255, 255, 255, 0.92);
+	color: #1e3a5f;
 	text-align: center;
-	background: rgba(255, 255, 255, 0.08);
-	border: 1rpx solid rgba(255, 255, 255, 0.14);
+	background: #ffffff;
+	border: 1rpx solid #c5dcff;
 	border-radius: 20rpx;
-	backdrop-filter: blur(12rpx);
+	box-shadow: 0 8rpx 28rpx rgba(21, 101, 216, 0.1);
 }
 
 .hp-assistant-actions {
 	display: flex;
 	flex-direction: column;
-	gap: 16rpx;
+	gap: 24rpx;
 }
 
 .hp-cta {
-	padding: 28rpx 28rpx 24rpx;
-	border-radius: 24rpx;
-	background: rgba(255, 255, 255, 0.14);
-	border: 1rpx solid rgba(255, 255, 255, 0.22);
-	backdrop-filter: blur(16rpx);
+	padding: 32rpx 28rpx 28rpx;
+	border-radius: 28rpx;
+	background: linear-gradient(145deg, #1e88e5 0%, #1565d8 45%, #0d47a1 100%);
+	border: 2rpx solid rgba(255, 255, 255, 0.35);
+	box-shadow: 0 16rpx 40rpx rgba(21, 101, 216, 0.38);
 }
 
 .hp-cta--on {
-	opacity: 0.92;
-	transform: scale(0.99);
+	opacity: 0.94;
+	transform: scale(0.985);
 }
 
 .hp-cta-kicker {
 	display: inline-block;
-	padding: 4rpx 12rpx;
-	margin-bottom: 12rpx;
-	font-size: 20rpx;
+	padding: 6rpx 14rpx;
+	margin-bottom: 14rpx;
+	font-size: 22rpx;
 	font-weight: 700;
-	color: #fff;
-	background: rgba(229, 57, 53, 0.9);
-	border-radius: 6rpx;
+	color: #0d47a1;
+	background: #fff;
+	border-radius: 8rpx;
 }
 
 .hp-cta-title {
 	display: block;
-	font-size: 34rpx;
+	font-size: 40rpx;
 	font-weight: 800;
 	color: #fff;
+	letter-spacing: 1rpx;
 }
 
 .hp-cta-desc {
 	display: block;
-	margin-top: 10rpx;
-	font-size: 22rpx;
-	color: rgba(255, 255, 255, 0.78);
-	line-height: 1.45;
+	margin-top: 12rpx;
+	font-size: 24rpx;
+	color: rgba(255, 255, 255, 0.92);
+	line-height: 1.5;
 }
 
 .hp-cta-row {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
-	gap: 8rpx;
-	margin-top: 20rpx;
-	padding: 12rpx 22rpx;
-	border-radius: 999rpx;
-	background: #fff;
+	justify-content: center;
+	gap: 10rpx;
+	margin-top: 28rpx;
+	padding: 22rpx 28rpx;
+	border-radius: 16rpx;
+	background: #e53935;
+	box-shadow: 0 8rpx 20rpx rgba(229, 57, 53, 0.35);
 }
 
 .hp-cta-go {
-	font-size: 26rpx;
-	font-weight: 700;
-	color: #1565d8;
+	font-size: 30rpx;
+	font-weight: 800;
+	color: #fff;
+	letter-spacing: 1rpx;
 }
 
 .hp-link {
 	display: flex;
 	align-items: center;
-	gap: 16rpx;
-	padding: 22rpx 24rpx;
-	border-radius: 20rpx;
-	background: rgba(0, 0, 0, 0.18);
-	border: 1rpx solid rgba(255, 255, 255, 0.12);
+	gap: 20rpx;
+	padding: 26rpx 28rpx;
+	border-radius: 24rpx;
+	background: #ffffff;
+	border: 2rpx solid #90caf9;
+	box-shadow: 0 12rpx 32rpx rgba(13, 71, 161, 0.12);
+}
+
+.hp-link--featured {
+	border-color: #42a5f5;
+	background: linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%);
 }
 
 .hp-link--on {
-	opacity: 0.9;
+	opacity: 0.92;
+	transform: scale(0.99);
+}
+
+.hp-link-icon-wrap {
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 88rpx;
+	height: 88rpx;
+	border-radius: 20rpx;
+	background: linear-gradient(145deg, #42a5f5, #1565d8);
+	box-shadow: 0 8rpx 16rpx rgba(21, 101, 216, 0.25);
 }
 
 .hp-link-copy {
@@ -639,35 +664,47 @@
 .hp-link-title-row {
 	display: flex;
 	align-items: center;
+	flex-wrap: wrap;
 	gap: 10rpx;
-	margin-bottom: 6rpx;
+	margin-bottom: 8rpx;
 }
 
 .hp-link-title {
-	font-size: 28rpx;
-	font-weight: 700;
-	color: #fff;
+	font-size: 32rpx;
+	font-weight: 800;
+	color: #0d47a1;
 }
 
 .hp-link-badge {
-	padding: 2rpx 10rpx;
-	font-size: 18rpx;
+	padding: 4rpx 12rpx;
+	font-size: 20rpx;
 	font-weight: 700;
-	color: #ffcdd2;
-	border: 1rpx solid rgba(229, 57, 53, 0.5);
-	border-radius: 6rpx;
+	color: #c62828;
+	background: #ffebee;
+	border: 1rpx solid #ef9a9a;
+	border-radius: 8rpx;
 }
 
 .hp-link-desc {
-	font-size: 22rpx;
-	color: rgba(255, 255, 255, 0.65);
+	display: block;
+	font-size: 24rpx;
+	color: #546e7a;
+	line-height: 1.45;
+}
+
+.hp-link-go {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 26rpx;
+	font-weight: 700;
+	color: #1565d8;
 }
 
 .hp-assistant-meta {
 	display: block;
 	padding: 8rpx 12rpx 0;
 	font-size: 22rpx;
-	color: rgba(13, 71, 161, 0.75);
+	color: #5c6bc0;
 	text-align: center;
 }
 
