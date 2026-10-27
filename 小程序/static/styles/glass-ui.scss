@@ -9,7 +9,7 @@ $glass-brand-soft: rgba(24, 175, 56, 0.1);
 $glass-brand-line: rgba(24, 175, 56, 0.35);
 $glass-health: #3974f2;
 $glass-page-bg: #e4e8e5;
-$glass-page-bg-health: #e8ebf2;
+$glass-page-bg-health: #f0f7ff;
 $glass-text: #1d1d1f;
 $glass-text-secondary: #3a3a3c;
 $glass-text-tertiary: #8e8e93;
@@ -147,17 +147,17 @@ $glass-tabbar-space: calc(148rpx + env(safe-area-inset-bottom));
 }
 
 .glass-page--health {
-  background: $glass-page-bg-health;
+  background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 42%, #f5faff 100%);
 
   &::before {
-    background: radial-gradient(circle, rgba(57, 116, 242, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle at 50% 0%, rgba(112, 214, 255, 0.22) 0%, transparent 58%);
   }
 
   .glass-page__ambient {
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.5) 0%,
-      rgba(232, 235, 242, 0) 100%
+      rgba(255, 255, 255, 0.65) 0%,
+      rgba(240, 247, 255, 0) 100%
     );
   }
 }

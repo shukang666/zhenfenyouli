@@ -1,5 +1,6 @@
 <template>
 	<view class="has-page" :class="{ 'has-page--large': largeTextEnabled }">
+		<view class="has-page-waves" aria-hidden="true"></view>
 		<view class="has-hub">
 			<view class="has-hub-bg"></view>
 			<health-advisor-mascot
@@ -28,7 +29,7 @@
 		<view v-else-if="step === 'service'" class="has-panel">
 			<view class="has-topbar">
 				<view class="has-back" @tap="onServiceBack">
-					<u-icon name="arrow-left" size="36" color="#2d7d76"></u-icon>
+					<u-icon name="arrow-left" size="36" color="#4A90E2"></u-icon>
 				</view>
 				<text class="has-step-label">服务体验 {{ serviceIndex + 1 }}/{{ serviceQuestions.length }}</text>
 			</view>
@@ -65,12 +66,12 @@
 
 			<view class="has-toolbar">
 				<view class="has-tool" @tap="readQuestionAloud">
-					<u-icon name="volume-fill" size="32" color="#2d7d76"></u-icon>
+					<u-icon name="volume-fill" size="32" color="#4A90E2"></u-icon>
 					<text>朗读此题</text>
 				</view>
 				<view class="has-tool has-tool--toggle">
 					<text class="has-tool-label">大字</text>
-					<switch :checked="largeTextEnabled" color="#2d7d76" @change="onLargeTextChange" />
+					<switch :checked="largeTextEnabled" color="#4A90E2" @change="onLargeTextChange" />
 				</view>
 			</view>
 
@@ -97,7 +98,7 @@
 		<view v-else-if="step === 'concerns'" class="has-panel">
 			<view class="has-topbar">
 				<view class="has-back" @tap="step = 'service'; serviceIndex = serviceQuestions.length - 1">
-					<u-icon name="arrow-left" size="36" color="#2d7d76"></u-icon>
+					<u-icon name="arrow-left" size="36" color="#4A90E2"></u-icon>
 				</view>
 				<text class="has-step-label">您最关心的健康问题</text>
 			</view>
@@ -179,7 +180,7 @@
 
 		<!-- 完成 -->
 		<view v-else-if="step === 'done'" class="has-panel has-done">
-			<u-icon name="checkmark-circle-fill" size="100" color="#2d7d76"></u-icon>
+			<u-icon name="checkmark-circle-fill" size="100" color="#4A90E2"></u-icon>
 			<text class="has-done-title">感谢您的参与</text>
 			<text class="has-done-desc">我们会根据社区情况安排健康科普与活动，请留意小程序通知。</text>
 			<button class="has-btn has-btn--primary" @tap="goBack">返回</button>
@@ -520,15 +521,31 @@ export default {
 
 <style lang="scss">
 page {
-	background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 45%, #f1f5f9 100%);
+	background: #f0f7ff;
 }
 .has-page {
+	position: relative;
 	min-height: 100vh;
 	padding: 0 0 calc(48rpx + env(safe-area-inset-bottom));
 	box-sizing: border-box;
+	background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 38%, #f5faff 100%);
+	overflow: hidden;
+}
+.has-page-waves {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 280rpx;
+	pointer-events: none;
+	background:
+		radial-gradient(ellipse 120% 80% at 50% 100%, rgba(112, 214, 255, 0.28) 0%, transparent 55%),
+		repeating-radial-gradient(circle at 50% 120%, transparent 0, transparent 28rpx, rgba(74, 144, 226, 0.06) 29rpx, transparent 30rpx);
+	opacity: 0.85;
 }
 .has-hub {
 	position: relative;
+	z-index: 1;
 	padding: 16rpx 32rpx 8rpx;
 	overflow: hidden;
 }
@@ -540,7 +557,7 @@ page {
 	height: 420rpx;
 	margin-left: -260rpx;
 	border-radius: 50%;
-	background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.95) 0%, rgba(224, 242, 254, 0.65) 45%, transparent 72%);
+	background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.98) 0%, rgba(240, 247, 255, 0.75) 45%, transparent 72%);
 	pointer-events: none;
 }
 .has-hub-bg::before {
@@ -548,10 +565,12 @@ page {
 	position: absolute;
 	inset: 12%;
 	border-radius: 50%;
-	border: 2rpx solid rgba(45, 125, 118, 0.08);
-	box-shadow: 0 40rpx 80rpx rgba(45, 125, 118, 0.12);
+	border: 2rpx solid rgba(74, 144, 226, 0.1);
+	box-shadow: 0 40rpx 80rpx rgba(74, 144, 226, 0.12);
 }
 .has-body {
+	position: relative;
+	z-index: 1;
 	padding: 8rpx 32rpx 0;
 }
 .has-panel {
@@ -582,14 +601,14 @@ page {
 	display: block;
 	font-size: 36rpx;
 	font-weight: 700;
-	color: #1a2e28;
+	color: #1e4a7a;
 	line-height: 1.45;
 }
 .has-welcome-desc {
 	display: block;
 	margin-top: 20rpx;
 	font-size: 26rpx;
-	color: #5a6b66;
+	color: #64748b;
 	line-height: 1.6;
 	text-align: left;
 }
@@ -613,8 +632,8 @@ page {
 	flex-shrink: 0;
 }
 .has-agree-box--on {
-	background: #2d7d76;
-	border-color: #2d7d76;
+	background: #4A90E2;
+	border-color: #4A90E2;
 }
 .has-agree-text {
 	font-size: 26rpx;
@@ -635,22 +654,24 @@ page {
 	border: none;
 }
 .has-btn--primary {
-	background: linear-gradient(90deg, #0ea5e9 0%, #14b8a6 100%);
+	background: linear-gradient(90deg, #70d6ff 0%, #4a90e2 100%);
 	color: #fff;
+	box-shadow: 0 12rpx 28rpx rgba(74, 144, 226, 0.35);
 }
 .has-btn--primary[disabled] {
-	background: #a8c4bf;
+	background: #b8d4f0;
+	box-shadow: none;
 	color: rgba(255, 255, 255, 0.9);
 }
 .has-btn--ghost {
-	background: #fff;
-	color: #5a6b66;
-	border: 2rpx solid #dce8e3;
+	background: rgba(255, 255, 255, 0.92);
+	color: #64748b;
+	border: 2rpx solid #d6e8ff;
 }
 .has-btn--outline {
 	background: #fff;
-	color: #2d7d76;
-	border: 2rpx solid #2d7d76;
+	color: #4A90E2;
+	border: 2rpx solid #4A90E2;
 	height: 72rpx;
 	line-height: 72rpx;
 	font-size: 26rpx;
@@ -672,13 +693,13 @@ page {
 .has-step-label {
 	font-size: 28rpx;
 	font-weight: 600;
-	color: #2d7d76;
+	color: #4A90E2;
 }
 .has-step-label--solo {
 	display: block;
 	font-size: 34rpx;
 	font-weight: 700;
-	color: #1a2e28;
+	color: #1e4a7a;
 	margin-bottom: 8rpx;
 }
 .has-subhint {
@@ -692,7 +713,7 @@ page {
 	display: block;
 	font-size: 32rpx;
 	font-weight: 700;
-	color: #1a2e28;
+	color: #1e4a7a;
 	line-height: 1.45;
 	margin-bottom: 28rpx;
 }
@@ -714,34 +735,34 @@ page {
 	font-size: 28rpx;
 	font-weight: 600;
 	text-align: center;
-	background: #eef3f0;
-	color: #3d5245;
+	background: #f0f7ff;
+	color: #334155;
 	border: 2rpx solid transparent;
 }
 .has-opt--light {
-	background: #f0f4f2;
+	background: #f5faff;
 }
 .has-opt--light-mid {
-	background: #e4eee9;
+	background: #e8f2ff;
 }
 .has-opt--mid {
-	background: #d4e8e0;
+	background: #cce5ff;
 }
 .has-opt--good {
-	background: #8fbfb4;
+	background: #7eb8ff;
 	color: #fff;
 }
 .has-opt--best {
-	background: #2d7d76;
+	background: linear-gradient(90deg, #70d6ff 0%, #4a90e2 100%);
 	color: #fff;
 }
 .has-opt--na {
 	background: #fff;
-	border-color: #dce8e3;
+	border-color: #d6e8ff;
 	font-weight: 500;
 }
 .has-opt--active {
-	box-shadow: 0 0 0 4rpx rgba(45, 125, 118, 0.35);
+	box-shadow: 0 0 0 4rpx rgba(74, 144, 226, 0.35);
 }
 .has-opt--press {
 	opacity: 0.9;
@@ -753,14 +774,14 @@ page {
 	justify-content: space-between;
 	margin-top: 36rpx;
 	padding-top: 24rpx;
-	border-top: 1rpx solid #e4ebe7;
+	border-top: 1rpx solid #e3efff;
 }
 .has-tool {
 	display: flex;
 	align-items: center;
 	gap: 8rpx;
 	font-size: 24rpx;
-	color: #2d7d76;
+	color: #4A90E2;
 }
 .has-tool--toggle {
 	color: #5a6b66;
@@ -784,7 +805,7 @@ page {
 	margin-top: 16rpx;
 	height: 160rpx;
 	border-radius: 24rpx;
-	background: linear-gradient(145deg, #35968c, #2d7d76);
+	background: linear-gradient(145deg, #70d6ff, #4a90e2);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -802,7 +823,7 @@ page {
 	background: #fff;
 	border-radius: 20rpx;
 	margin-bottom: 24rpx;
-	box-shadow: 0 8rpx 24rpx rgba(45, 125, 118, 0.1);
+	box-shadow: 0 8rpx 24rpx rgba(74, 144, 226, 0.12);
 }
 .has-voice-confirm-q {
 	display: block;
@@ -821,15 +842,15 @@ page {
 	padding: 28rpx 20rpx;
 	background: #fff;
 	border-radius: 20rpx;
-	border: 2rpx solid #e4ebe7;
+	border: 2rpx solid #e3efff;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	min-height: 160rpx;
 }
 .has-concern--on {
-	border-color: #2d7d76;
-	background: #eef8f5;
+	border-color: #4A90E2;
+	background: #f0f7ff;
 }
 .has-concern-icon-wrap {
 	width: 88rpx;
@@ -855,7 +876,7 @@ page {
 	width: 36rpx;
 	height: 36rpx;
 	border-radius: 50%;
-	background: #2d7d76;
+	background: #4A90E2;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -901,14 +922,14 @@ page {
 	flex: 1;
 }
 .has-summary-v--ok {
-	color: #2d7d76;
+	color: #4A90E2;
 }
 .has-disclaimer {
 	display: flex;
 	align-items: flex-start;
 	gap: 12rpx;
 	padding: 20rpx;
-	background: #eef3f0;
+	background: #f0f7ff;
 	border-radius: 16rpx;
 	font-size: 22rpx;
 	color: #5a6b66;

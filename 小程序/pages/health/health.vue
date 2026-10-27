@@ -410,7 +410,8 @@
 	min-height: 320rpx;
 	border-radius: $glass-radius-md;
 	overflow: hidden;
-	box-shadow: 0 12rpx 40rpx rgba(57, 116, 242, 0.22);
+	box-shadow: 0 16rpx 48rpx rgba(74, 144, 226, 0.18);
+	border: 1rpx solid rgba(255, 255, 255, 0.85);
 }
 
 .health-hub__banner--press {
@@ -431,31 +432,33 @@
 	background: linear-gradient(125deg, #1a6bff 0%, #3974f2 45%, #18af38 100%);
 }
 
-.health-hub__banner-ph--advisor,
 .health-hub__banner--advisor {
-	box-shadow: 0 12rpx 40rpx rgba(45, 125, 118, 0.22);
+	box-shadow: 0 16rpx 48rpx rgba(74, 144, 226, 0.2);
 }
 
 .health-hub__banner-ph--advisor {
-	background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 40%, #7dd3fc 100%);
+	background: linear-gradient(180deg, #f0f7ff 0%, #dcf0ff 48%, #c5e8ff 100%);
 }
-.health-hub__banner--advisor-light .health-hub__banner-title,
+.health-hub__banner--advisor-light .health-hub__banner-title {
+	color: #1e4a7a;
+}
 .health-hub__banner--advisor-light .health-hub__banner-sub {
-	color: #0f172a;
+	color: #64748b;
 }
 .health-hub__banner--advisor-light .health-hub__banner-tag {
-	background: rgba(255, 255, 255, 0.55);
-	color: #0369a1;
+	background: rgba(255, 255, 255, 0.72);
+	color: #4a90e2;
 }
 .health-hub__banner--advisor-light .health-hub__banner-cta {
-	background: rgba(255, 255, 255, 0.45);
-	color: #0369a1;
+	background: linear-gradient(90deg, #70d6ff 0%, #4a90e2 100%);
+	color: #fff;
+	box-shadow: 0 8rpx 20rpx rgba(74, 144, 226, 0.32);
 }
 .health-hub__banner--advisor-light .health-hub__banner-mask--advisor {
-	background: linear-gradient(105deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 65%);
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
 }
 .health-hub__banner-mask--advisor {
-	background: linear-gradient(105deg, rgba(0, 48, 44, 0.55) 0%, rgba(0, 48, 44, 0.12) 55%, transparent 100%);
+	background: linear-gradient(105deg, rgba(30, 74, 122, 0.45) 0%, rgba(74, 144, 226, 0.12) 55%, transparent 100%);
 }
 
 .health-hub__banner-ph-orb {
@@ -477,9 +480,6 @@
 	background: linear-gradient(90deg, rgba(0, 28, 80, 0.55) 0%, rgba(0, 28, 80, 0.08) 70%);
 }
 
-.health-hub__banner-mask--advisor {
-	background: linear-gradient(105deg, rgba(0, 48, 44, 0.62) 0%, rgba(0, 48, 44, 0.15) 55%, rgba(0, 48, 44, 0.05) 100%);
-}
 .health-hub__banner-layout {
 	position: relative;
 	z-index: 2;
@@ -574,11 +574,11 @@
 }
 
 .health-hub__shortcut-icon--0 {
-	background: linear-gradient(145deg, #3974f2, #5b8cff);
+	background: linear-gradient(145deg, #70d6ff, #4a90e2);
 }
 
 .health-hub__shortcut-icon--1 {
-	background: linear-gradient(145deg, #18af38, #3dd068);
+	background: linear-gradient(145deg, #99ffcc, #4a90e2);
 }
 
 .health-hub__shortcut-text {
@@ -591,7 +591,7 @@
 .health-hub__shortcut-name {
 	font-size: 26rpx;
 	font-weight: 600;
-	color: #1d1d1f;
+	color: #1e4a7a;
 }
 
 .health-hub__shortcut-desc {

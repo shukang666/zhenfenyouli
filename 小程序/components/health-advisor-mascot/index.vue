@@ -81,7 +81,7 @@ export default {
 	width: 220rpx;
 	height: 48rpx;
 	margin-left: -110rpx;
-	background: radial-gradient(ellipse, rgba(56, 189, 248, 0.45) 0%, transparent 72%);
+	background: radial-gradient(ellipse, rgba(0, 204, 255, 0.42) 0%, transparent 72%);
 	filter: blur(6rpx);
 }
 
@@ -92,7 +92,7 @@ export default {
 	width: 260rpx;
 	height: 88rpx;
 	margin-left: -130rpx;
-	border: 2rpx solid rgba(125, 211, 252, 0.55);
+	border: 2rpx solid rgba(112, 214, 255, 0.65);
 	border-radius: 50%;
 	transform: rotateX(68deg);
 	animation: hamOrbitSpin 12s linear infinite;
@@ -109,8 +109,8 @@ export default {
 	width: 14rpx;
 	height: 14rpx;
 	border-radius: 50%;
-	background: radial-gradient(circle at 30% 30%, #fff 0%, #38bdf8 55%, #0284c7 100%);
-	box-shadow: 0 0 16rpx rgba(56, 189, 248, 0.9);
+	background: radial-gradient(circle at 30% 30%, #fff 0%, #70d6ff 50%, #4a90e2 100%);
+	box-shadow: 0 0 16rpx rgba(0, 204, 255, 0.85);
 }
 
 .ham-orb-wrap {
@@ -148,13 +148,13 @@ export default {
 	background: linear-gradient(
 		145deg,
 		rgba(255, 255, 255, 0.75) 0%,
-		rgba(186, 230, 253, 0.45) 35%,
-		rgba(56, 189, 248, 0.35) 70%,
-		rgba(14, 165, 233, 0.25) 100%
+		rgba(153, 255, 204, 0.35) 30%,
+		rgba(112, 214, 255, 0.45) 55%,
+		rgba(74, 144, 226, 0.28) 100%
 	);
 	box-shadow:
-		inset 0 0 40rpx rgba(255, 255, 255, 0.65),
-		0 16rpx 48rpx rgba(14, 165, 233, 0.28);
+		inset 0 0 40rpx rgba(255, 255, 255, 0.72),
+		0 16rpx 48rpx rgba(74, 144, 226, 0.28);
 	border: 2rpx solid rgba(255, 255, 255, 0.85);
 }
 .ham-orb-glass {
@@ -211,8 +211,8 @@ export default {
 	height: 28%;
 	margin: -14% 0 0 -14%;
 	border-radius: 50%;
-	background: radial-gradient(circle at 35% 35%, #fff 0%, #7dd3fc 45%, #0ea5e9 100%);
-	box-shadow: 0 0 28rpx rgba(56, 189, 248, 0.95);
+	background: radial-gradient(circle at 35% 35%, #fff 0%, #99ffcc 28%, #70d6ff 55%, #4a90e2 100%);
+	box-shadow: 0 0 32rpx rgba(0, 204, 255, 0.95);
 	animation: hamCorePulse 2.8s ease-in-out infinite;
 }
 .ham-orb-wrap--speak .ham-orb-core {
@@ -238,7 +238,7 @@ export default {
 	width: 70%;
 	height: 16rpx;
 	margin-left: -35%;
-	background: rgba(14, 165, 233, 0.2);
+	background: rgba(74, 144, 226, 0.22);
 	border-radius: 50%;
 	filter: blur(8rpx);
 }
@@ -256,7 +256,7 @@ export default {
 	position: absolute;
 	inset: 0;
 	border-radius: 50%;
-	border: 2rpx solid rgba(56, 189, 248, 0.35);
+	border: 2rpx solid rgba(112, 214, 255, 0.45);
 	animation: hamRingOut 1.6s ease-out infinite;
 }
 .ham-speak-ring--2 {
@@ -270,14 +270,14 @@ export default {
 	padding: 22rpx 32rpx;
 	background: rgba(255, 255, 255, 0.82);
 	border-radius: 20rpx;
-	border: 1rpx solid rgba(186, 230, 253, 0.9);
-	box-shadow: 0 12rpx 40rpx rgba(14, 165, 233, 0.1);
+	border: 1rpx solid rgba(214, 232, 255, 0.95);
+	box-shadow: 0 12rpx 40rpx rgba(74, 144, 226, 0.1);
 }
 .ham-bubble-text {
 	display: block;
 	font-size: 28rpx;
 	line-height: 1.55;
-	color: #334155;
+	color: #1e4a7a;
 	text-align: center;
 	font-weight: 500;
 }
@@ -285,7 +285,7 @@ export default {
 	font-size: 22rpx;
 }
 .ham-stage--speaking .ham-bubble {
-	box-shadow: 0 14rpx 44rpx rgba(14, 165, 233, 0.18);
+	box-shadow: 0 14rpx 44rpx rgba(74, 144, 226, 0.2);
 }
 
 @keyframes hamOrbitSpin {
@@ -329,11 +329,11 @@ export default {
 	0%,
 	100% {
 		transform: scale(1.05);
-		box-shadow: 0 0 28rpx rgba(56, 189, 248, 0.95);
+		box-shadow: 0 0 28rpx rgba(0, 204, 255, 0.95);
 	}
 	50% {
 		transform: scale(1.18);
-		box-shadow: 0 0 40rpx rgba(56, 189, 248, 1);
+		box-shadow: 0 0 44rpx rgba(112, 214, 255, 1);
 	}
 }
 @keyframes hamSwirl {
