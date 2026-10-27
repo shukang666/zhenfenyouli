@@ -540,7 +540,7 @@
 .hp-assistant-panel {
 	position: relative;
 	z-index: 2;
-	margin-top: -24rpx;
+	margin-top: 8rpx;
 	padding: 0 28rpx;
 }
 

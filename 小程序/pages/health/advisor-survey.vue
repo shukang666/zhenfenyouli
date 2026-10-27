@@ -515,7 +515,7 @@ page {
 .has-bubble {
 	position: relative;
 	z-index: 2;
-	margin: -8rpx 32rpx 12rpx;
+	margin: 12rpx 32rpx 12rpx;
 	padding: 18rpx 24rpx;
 	font-size: 26rpx;
 	line-height: 1.55;

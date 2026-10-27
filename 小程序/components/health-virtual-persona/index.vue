@@ -11,24 +11,21 @@
 		]"
 	>
 		<view class="hvp-stage">
-			<view class="hvp-aura"></view>
-			<view class="hvp-aura hvp-aura--b"></view>
+			<view class="hvp-halo hvp-halo--a"></view>
+			<view class="hvp-halo hvp-halo--b"></view>
 
-			<template v-if="speaking">
-				<view class="hvp-wave hvp-wave--1"></view>
-				<view class="hvp-wave hvp-wave--2"></view>
-				<view class="hvp-wave hvp-wave--3"></view>
-				<view class="hvp-wave hvp-wave--4"></view>
-				<view class="hvp-wave hvp-wave--5"></view>
-			</template>
-
-			<view class="hvp-orbit">
-				<view class="hvp-ring hvp-ring--a"></view>
-				<view class="hvp-ring hvp-ring--b"></view>
-				<view class="hvp-ring hvp-ring--c"></view>
+			<view class="hvp-motion">
+				<view class="hvp-heart">
+					<view class="hvp-heart-shell">
+						<view class="hvp-heart-glass"></view>
+						<view class="hvp-heart-glass hvp-heart-glass--inner"></view>
+						<view class="hvp-heart-shine"></view>
+						<view class="hvp-heart-tint"></view>
+					</view>
+				</view>
 			</view>
 
-			<view class="hvp-core"></view>
+			<view class="hvp-speak-ring" v-if="speaking"></view>
 		</view>
 		<text class="hvp-caption" v-if="caption && !hideCaption">{{ caption }}</text>
 	</view>
@@ -87,148 +84,148 @@ export default {
 }
 
 .hvp--hero .hvp-stage {
-	height: 480rpx;
+	height: 620rpx;
 }
 
 .hvp--lg .hvp-stage {
-	height: 360rpx;
+	height: 500rpx;
 }
 
 .hvp--md .hvp-stage {
-	height: 280rpx;
+	height: 380rpx;
 }
 
-.hvp-aura {
+.hvp-halo {
 	position: absolute;
-	width: 76%;
-	height: 76%;
 	border-radius: 50%;
-	background: radial-gradient(
-		circle,
-		rgba(79, 195, 247, 0.4) 0%,
-		rgba(21, 101, 216, 0.14) 48%,
-		transparent 72%
-	);
-	filter: blur(10rpx);
-	animation: hvpAura 4.5s ease-in-out infinite;
+	pointer-events: none;
+	filter: blur(24rpx);
+	animation: hvpHaloDrift 5.5s ease-in-out infinite;
 }
 
-.hvp-aura--b {
-	width: 92%;
-	height: 92%;
-	animation-delay: -2.2s;
-	opacity: 0.75;
+.hvp-halo--a {
+	width: 88%;
+	height: 72%;
+	background: radial-gradient(circle, rgba(144, 202, 249, 0.55) 0%, transparent 70%);
 }
 
-.hvp-orbit {
+.hvp-halo--b {
+	width: 70%;
+	height: 62%;
+	background: radial-gradient(circle, rgba(229, 57, 53, 0.18) 0%, transparent 72%);
+	animation-delay: -2.4s;
+	animation-duration: 6.8s;
+}
+
+.hvp-motion {
 	position: relative;
-	width: 80%;
-	height: 80%;
-	max-width: 560rpx;
-	max-height: 560rpx;
+	z-index: 2;
+	animation: hvpMotionJitter 2.4s ease-in-out infinite;
 }
 
-.hvp-ring {
+.hvp--speaking .hvp-motion {
+	animation-duration: 1.35s;
+}
+
+.hvp-heart {
+	position: relative;
+	width: 360rpx;
+	height: 338rpx;
+	animation: hvpHeartBob 3.6s ease-in-out infinite;
+}
+
+.hvp--hero .hvp-heart {
+	width: 420rpx;
+	height: 394rpx;
+}
+
+.hvp--md .hvp-heart {
+	width: 300rpx;
+	height: 282rpx;
+}
+
+.hvp-heart-shell {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	animation: hvpHeartMorph 4.2s ease-in-out infinite;
+}
+
+.hvp-heart-glass {
 	position: absolute;
 	inset: 0;
-	border: 6rpx solid rgba(129, 212, 250, 0.9);
-	box-shadow:
-		0 0 28rpx rgba(79, 195, 247, 0.6),
-		0 0 72rpx rgba(21, 101, 216, 0.38),
-		inset 0 0 32rpx rgba(144, 202, 249, 0.28);
-	animation: hvpMorph 5.5s ease-in-out infinite;
-}
-
-.hvp-ring--a {
-	border-color: rgba(187, 222, 251, 0.98);
-	animation-duration: 5s;
-}
-
-.hvp-ring--b {
-	inset: 9%;
-	border-width: 4rpx;
-	border-color: rgba(66, 165, 245, 0.8);
-	opacity: 0.88;
-	animation-duration: 6.8s;
-	animation-direction: reverse;
-}
-
-.hvp-ring--c {
-	inset: 18%;
-	border-width: 3rpx;
-	border-color: rgba(229, 57, 53, 0.5);
-	opacity: 0.7;
-	animation-duration: 4.5s;
-}
-
-.hvp--speaking .hvp-ring {
-	animation-name: hvpMorphSpeak;
-}
-
-.hvp--speaking .hvp-ring--a {
-	animation-duration: 1.6s;
-	box-shadow:
-		0 0 40rpx rgba(79, 195, 247, 0.85),
-		0 0 100rpx rgba(21, 101, 216, 0.5),
-		0 0 32rpx rgba(229, 57, 53, 0.35);
-}
-
-.hvp--speaking .hvp-ring--b {
-	animation-duration: 2.1s;
-}
-
-.hvp--speaking .hvp-ring--c {
-	animation-duration: 1.3s;
-}
-
-.hvp-core {
-	position: absolute;
-	width: 40%;
-	height: 40%;
-	border-radius: 50%;
-	background: radial-gradient(
-		circle at 35% 30%,
-		rgba(13, 71, 161, 0.2) 0%,
-		rgba(0, 0, 0, 0.6) 55%,
-		rgba(0, 0, 0, 0.88) 100%
+	clip-path: polygon(
+		50% 93%,
+		10% 52%,
+		16% 30%,
+		32% 18%,
+		50% 34%,
+		68% 17%,
+		84% 29%,
+		90% 51%
 	);
-	box-shadow: inset 0 0 48rpx rgba(79, 195, 247, 0.18);
+	background: linear-gradient(
+		160deg,
+		rgba(255, 255, 255, 0.82) 0%,
+		rgba(179, 229, 252, 0.52) 38%,
+		rgba(66, 165, 245, 0.38) 68%,
+		rgba(21, 101, 216, 0.28) 100%
+	);
+	border: 2rpx solid rgba(255, 255, 255, 0.7);
+	box-shadow:
+		0 20rpx 48rpx rgba(21, 101, 216, 0.22),
+		0 4rpx 16rpx rgba(255, 255, 255, 0.6) inset,
+		0 -8rpx 24rpx rgba(144, 202, 249, 0.35) inset;
+	backdrop-filter: blur(18px);
 }
 
-.hvp-wave {
+.hvp-heart-glass--inner {
+	inset: 14%;
+	clip-path: polygon(
+		50% 88%,
+		22% 54%,
+		28% 36%,
+		50% 46%,
+		72% 35%,
+		78% 53%
+	);
+	opacity: 0.55;
+	border: none;
+	box-shadow: inset 0 0 28rpx rgba(255, 255, 255, 0.65);
+	animation: hvpInnerPulse 2.8s ease-in-out infinite;
+}
+
+.hvp-heart-shine {
 	position: absolute;
-	width: 62%;
-	height: 62%;
-	border: 4rpx solid rgba(144, 202, 249, 0.55);
+	width: 42%;
+	height: 28%;
+	left: 18%;
+	top: 22%;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, transparent 72%);
+	filter: blur(2rpx);
+	animation: hvpShineMove 3.3s ease-in-out infinite;
+}
+
+.hvp-heart-tint {
+	position: absolute;
+	width: 36%;
+	height: 32%;
+	right: 14%;
+	bottom: 26%;
+	border-radius: 45% 55% 60% 40%;
+	background: radial-gradient(circle, rgba(229, 57, 53, 0.22) 0%, transparent 70%);
+	animation: hvpTintMove 4.5s ease-in-out infinite;
+}
+
+.hvp-speak-ring {
+	position: absolute;
+	width: 58%;
+	height: 52%;
+	border: 3rpx solid rgba(144, 202, 249, 0.45);
+	border-radius: 48% 52% 50% 50%;
 	pointer-events: none;
-	animation:
-		hvpWaveBurst 2.4s cubic-bezier(0.22, 0.61, 0.36, 1) infinite,
-		hvpMorphSpeak 1.1s ease-in-out infinite;
-}
-
-.hvp-wave--1 {
-	animation-delay: 0s, 0s;
-}
-
-.hvp-wave--2 {
-	animation-delay: 0.35s, -0.2s;
-	border-color: rgba(100, 181, 246, 0.45);
-}
-
-.hvp-wave--3 {
-	animation-delay: 0.7s, -0.45s;
-	border-width: 3rpx;
-}
-
-.hvp-wave--4 {
-	animation-delay: 1.05s, -0.7s;
-	border-color: rgba(229, 57, 53, 0.35);
-}
-
-.hvp-wave--5 {
-	animation-delay: 1.4s, -0.95s;
-	border-width: 2rpx;
-	opacity: 0.85;
+	animation: hvpSpeakRing 1.8s ease-out infinite;
 }
 
 .hvp-caption {
@@ -246,69 +243,108 @@ export default {
 	font-size: 26rpx;
 }
 
-@keyframes hvpMorph {
+@keyframes hvpMotionJitter {
 	0%,
 	100% {
-		border-radius: 46% 54% 51% 49% / 49% 46% 54% 51%;
-		transform: rotate(0deg) scale(1);
-	}
-	25% {
-		border-radius: 58% 42% 48% 52% / 44% 56% 43% 57%;
-		transform: rotate(2deg) scale(1.02);
-	}
-	50% {
-		border-radius: 43% 57% 55% 45% / 52% 43% 57% 48%;
-		transform: rotate(-2deg) scale(0.98);
-	}
-	75% {
-		border-radius: 52% 48% 42% 58% / 57% 49% 51% 43%;
-		transform: rotate(1deg) scale(1.01);
-	}
-}
-
-@keyframes hvpMorphSpeak {
-	0%,
-	100% {
-		border-radius: 40% 60% 58% 42% / 42% 58% 40% 60%;
-		transform: rotate(-3deg) scale(1.04);
+		transform: translate(0, 0) rotate(0deg);
 	}
 	20% {
-		border-radius: 62% 38% 44% 56% / 48% 52% 60% 40%;
-		transform: rotate(4deg) scale(1.08);
+		transform: translate(3rpx, -4rpx) rotate(0.9deg);
 	}
-	45% {
-		border-radius: 36% 64% 62% 38% / 60% 38% 62% 40%;
-		transform: rotate(-5deg) scale(0.96);
+	40% {
+		transform: translate(-4rpx, 2rpx) rotate(-0.7deg);
 	}
-	70% {
-		border-radius: 55% 45% 38% 62% / 44% 66% 34% 56%;
-		transform: rotate(3deg) scale(1.06);
+	60% {
+		transform: translate(2rpx, 4rpx) rotate(0.5deg);
+	}
+	80% {
+		transform: translate(-3rpx, -2rpx) rotate(-0.4deg);
 	}
 }
 
-@keyframes hvpAura {
+@keyframes hvpHeartBob {
 	0%,
 	100% {
-		opacity: 0.65;
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(-6rpx) scale(1.03);
+	}
+}
+
+@keyframes hvpHeartMorph {
+	0%,
+	100% {
+		transform: scale(1) skew(0deg, 0deg) rotate(0deg);
+		border-radius: 0;
+	}
+	25% {
+		transform: scale(1.04, 0.97) skew(1.2deg, -0.8deg) rotate(1.2deg);
+	}
+	50% {
+		transform: scale(0.97, 1.03) skew(-1deg, 1deg) rotate(-0.8deg);
+	}
+	75% {
+		transform: scale(1.02, 0.98) skew(0.6deg, 0.5deg) rotate(0.6deg);
+	}
+}
+
+@keyframes hvpInnerPulse {
+	0%,
+	100% {
+		opacity: 0.5;
 		transform: scale(1);
 	}
 	50% {
-		opacity: 1;
-		transform: scale(1.08);
+		opacity: 0.72;
+		transform: scale(1.06);
 	}
 }
 
-@keyframes hvpWaveBurst {
-	0% {
-		opacity: 0.75;
-		transform: scale(0.82);
+@keyframes hvpShineMove {
+	0%,
+	100% {
+		transform: translate(0, 0);
+		opacity: 0.85;
 	}
-	70% {
-		opacity: 0.15;
+	50% {
+		transform: translate(8rpx, 6rpx);
+		opacity: 1;
+	}
+}
+
+@keyframes hvpTintMove {
+	0%,
+	100% {
+		transform: translate(0, 0) scale(1);
+		opacity: 0.7;
+	}
+	50% {
+		transform: translate(-6rpx, 4rpx) scale(1.08);
+		opacity: 0.95;
+	}
+}
+
+@keyframes hvpHaloDrift {
+	0%,
+	100% {
+		transform: scale(1) translate(0, 0);
+		opacity: 0.75;
+	}
+	50% {
+		transform: scale(1.1) translate(6rpx, -8rpx);
+		opacity: 1;
+	}
+}
+
+@keyframes hvpSpeakRing {
+	0% {
+		opacity: 0.55;
+		transform: scale(0.92);
 	}
 	100% {
 		opacity: 0;
-		transform: scale(1.55);
+		transform: scale(1.35);
 	}
 }
 </style>
