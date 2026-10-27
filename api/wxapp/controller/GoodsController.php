@@ -283,7 +283,7 @@ class GoodsController extends AuthController
 
         }
 
-        $order .= 'a.list_order,a.id desc';
+        $order .= 'a.list_order asc,a.id desc';
 //        var_dump($order);exit;
         $list = $GoodsModel->getInfo($map, $this->page_size, 0, GoodsModel::getListField(), $order);
 

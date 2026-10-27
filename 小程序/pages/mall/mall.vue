@@ -206,11 +206,13 @@
 						<u-image width="100%" height="320" mode="aspectFill" :src="item.thumb"></u-image>
 						<view class="goods-card__body">
 							<view class="goods-card__zone" v-if="item.second_name">{{ item.second_name }}</view>
+							<view class="goods-card__tag" v-if="item.is_web_activity_goods">活动福利</view>
 							<view class="goods-card__name u-line-2">{{ item.goods_name }}</view>
 							<view class="goods-card__price">
 								<text v-if="Number(item.price)">{{ item.price }}元</text>
 								<text v-if="Number(item.price) && item.point"> + </text>
 								<text v-if="item.point">{{ item.point }}积分</text>
+								<text v-if="!Number(item.price) && !item.point" class="goods-card__price-free">0积分兑换</text>
 							</view>
 							<view class="goods-card__shop u-line-1">{{ item.shop_info.shop_name }}</view>
 						</view>
@@ -1074,6 +1076,16 @@
 		white-space: nowrap;
 	}
 
+	.goods-card__tag {
+		display: inline-block;
+		margin-bottom: 8rpx;
+		padding: 4rpx 12rpx;
+		font-size: 20rpx;
+		color: #1a4d8c;
+		background: #eef4ff;
+		border-radius: 6rpx;
+	}
+
 	.goods-card__name {
 		font-size: 28rpx;
 		font-weight: 600;
@@ -1087,6 +1099,10 @@
 		font-size: 28rpx;
 		font-weight: 700;
 		color: #18AF38;
+	}
+
+	.goods-card__price-free {
+		color: #1877f2;
 	}
 
 	.goods-card__shop {

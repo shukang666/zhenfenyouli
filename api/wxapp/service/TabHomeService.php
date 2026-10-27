@@ -462,6 +462,17 @@ class TabHomeService
         return $out;
     }
 
+    /** @param array<int,array<string,mixed>> $items */
+    protected static function normalizeMallGoodsListItems(array $items): array
+    {
+        foreach ($items as &$item) {
+            $key = trim((string)($item['require_web_unlock_key'] ?? ''));
+            $item['is_web_activity_goods'] = $key !== '' ? 1 : 0;
+        }
+        unset($item);
+        return $items;
+    }
+
     protected function fetchGoodsListPage(int $page, int $pageSize, int $secondCate, int $firstCate, string $keyword): array
     {
         $GoodsModel = new GoodsModel();
@@ -478,7 +489,8 @@ class TabHomeService
         if ($secondCate > 0) {
             $map[] = ['a.second_cate', '=', $secondCate];
         }
-        $order = 'a.list_order,a.id desc';
+        // list_order 升序：数值越小越靠前；同序再按 id 降序
+        $order = 'a.list_order asc,a.id desc';
         Request::withGet(array_merge(Request::get(), ['page' => $page]));
         $list = $GoodsModel->getInfo($map, $pageSize, 0, GoodsModel::getListField(), $order);
         if (is_object($list) && method_exists($list, 'total')) {
@@ -486,9 +498,11 @@ class TabHomeService
             if (is_object($items) && method_exists($items, 'all')) {
                 $items = $items->all();
             }
-            return ['list' => $items ?: [], 'total' => (int)$list->total()];
+            $items = self::normalizeMallGoodsListItems($items ?: []);
+            return ['list' => $items, 'total' => (int)$list->total()];
         }
-        return ['list' => $list ?: [], 'total' => is_countable($list) ? count($list) : 0];
+        $plain = self::normalizeMallGoodsListItems(is_array($list) ? $list : []);
+        return ['list' => $plain, 'total' => count($plain)];
     }
 
     protected function fetchActiveListSlice($query, $limit, $order = 'list_order asc, id desc'): array

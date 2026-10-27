@@ -663,6 +663,7 @@ CREATE TABLE IF NOT EXISTS `cmf_member_goods_web_unlock` (
 -- 1+1 完成 3 天：垃圾袋 0 积分兑换（goods_id=101，key 与 GoodsWebUnlockService 一致）
 UPDATE `cmf_goods` SET
   `point` = 0,
+  `list_order` = 0,
   `require_web_unlock_key` = 'web_active:57:milestone:3',
   `require_web_unlock_label` = '完成「1+1活动」7日挑战中满3天任务后，可0积分兑换本商品'
 WHERE `id` = 101 AND `delete_time` = 0;

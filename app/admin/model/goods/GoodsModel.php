@@ -88,7 +88,7 @@ class GoodsModel extends ToolModel
     public static function getListField(): string
     {
         return 'a.id,a.thumb,a.goods_name,a.price,a.first_cate,a.second_cate,a.sell_count,
-        a.stock,a.is_attribute,original_price,a.desc,a.point';
+        a.stock,a.is_attribute,original_price,a.desc,a.point,a.require_web_unlock_key';
     }
 
     public static function getSku($goods_id, $user_id = 0): array
