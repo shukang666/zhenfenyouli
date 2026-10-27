@@ -111,7 +111,14 @@
 					hover-class="has-concern--press"
 					@tap="toggleConcern(item.key)"
 				>
-					<text class="has-concern-icon">{{ item.icon }}</text>
+					<view
+						class="has-concern-icon-wrap"
+						v-if="item.uIcon"
+						:style="{ background: item.iconBg || '#f1f5f9' }"
+					>
+						<u-icon :name="item.uIcon" :size="44" :color="item.iconColor"></u-icon>
+					</view>
+					<text v-else class="has-concern-icon">{{ item.icon }}</text>
 					<text class="has-concern-name">{{ item.name }}</text>
 					<view v-if="isConcernSelected(item.key)" class="has-concern-check">
 						<u-icon name="checkmark" size="22" color="#fff"></u-icon>
@@ -212,12 +219,12 @@ const SERVICE_QUESTIONS = [
 ]
 
 const CONCERN_OPTIONS = [
-	{ key: 'bp', name: '血压', icon: '🫀' },
-	{ key: 'sugar', name: '血糖', icon: '💧' },
-	{ key: 'sleep', name: '睡眠', icon: '🌙' },
-	{ key: 'sport', name: '体力运动', icon: '🏃' },
-	{ key: 'diet', name: '体重饮食', icon: '🍎' },
-	{ key: 'none', name: '暂无特别关心', icon: '⋯' }
+	{ key: 'bp', name: '血压', uIcon: 'heart-fill', iconColor: '#ef4444', iconBg: '#fee2e2' },
+	{ key: 'sugar', name: '血糖', uIcon: 'tags-fill', iconColor: '#2563eb', iconBg: '#dbeafe' },
+	{ key: 'sleep', name: '睡眠', uIcon: 'star-fill', iconColor: '#ca8a04', iconBg: '#fef9c3' },
+	{ key: 'sport', name: '体力运动', uIcon: 'man-add-fill', iconColor: '#16a34a', iconBg: '#dcfce7' },
+	{ key: 'diet', name: '体重饮食', uIcon: 'apple-fill', iconColor: '#dc2626', iconBg: '#ffe4e6' },
+	{ key: 'none', name: '暂无特别关心', uIcon: 'more-dot-fill', iconColor: '#64748b', iconBg: '#f1f5f9' }
 ]
 
 export default {
@@ -823,6 +830,14 @@ page {
 .has-concern--on {
 	border-color: #2d7d76;
 	background: #eef8f5;
+}
+.has-concern-icon-wrap {
+	width: 88rpx;
+	height: 88rpx;
+	border-radius: 22rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 .has-concern-icon {
 	font-size: 48rpx;
