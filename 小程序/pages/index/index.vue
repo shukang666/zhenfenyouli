@@ -62,7 +62,7 @@
 				</view>
 				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToCommunityMarket">
 					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/shequshiji.svg" mode="aspectFit"></image>
-					<text class="home-quick-label">社区闲置</text>
+					<text class="home-quick-label">二手发布</text>
 				</view>
 </view>
 
