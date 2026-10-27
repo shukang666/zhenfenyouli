@@ -90,11 +90,19 @@ class ActiveOnePlusOneProgressController extends AdminBaseController
 
 
 
+        $selectedActiveName = '';
+        if ($activeId > 0) {
+            $selectedActiveName = (string)Db::name('active')
+                ->where('id', $activeId)
+                ->where('delete_time', 0)
+                ->value('name');
+        }
+
         $paginator = $query->paginate(20);
         $rows = [];
         foreach ($paginator as $vo) {
             $row = is_array($vo) ? $vo : $vo->toArray();
-            $rows[] = $this->enrichProgressRow($row, $cohortMode);
+            $rows[] = $this->enrichProgressRow($row, $cohortMode, $selectedActiveName);
         }
 
         $this->assign('list', $rows);
@@ -247,24 +255,14 @@ class ActiveOnePlusOneProgressController extends AdminBaseController
 
 
 
+        $progressSub = Db::name($this->progressTable())
+            ->where('active_id', $activeId)
+            ->buildSql(true);
+
         $query = Db::name('member')->alias('m')
-
-            ->join(
-
-                $this->progressTable() . ' p',
-
-                'p.user_id = m.id AND p.active_id = ' . max(0, $activeId),
-
-                'LEFT'
-
-            )
-
-            ->join('active a', 'a.id = ' . max(0, $activeId), 'LEFT')
-
+            ->join([$progressSub => 'p'], 'p.user_id = m.id', 'LEFT')
             ->field($this->progressSelectFields(true))
-
             ->where($where)
-
             ->order('m.create_time desc');
 
 
@@ -295,12 +293,8 @@ class ActiveOnePlusOneProgressController extends AdminBaseController
         if ($cohort) {
 
             return 'm.id as user_id,m.nickname,m.mobile,m.true_name,m.create_time as member_create_time,'
-
                 . 'p.id as progress_id,p.active_id,p.cycle_no,p.completed_days,p.day_done_at,p.deadline_at,'
-
-                . 'p.reward_300_at,p.reward_800_at,p.update_time,p.share_ack_at,p.day1_reward_at,'
-
-                . 'a.name as active_name';
+                . 'p.reward_300_at,p.reward_800_at,p.update_time,p.share_ack_at,p.day1_reward_at';
 
         }
 
@@ -314,9 +308,13 @@ class ActiveOnePlusOneProgressController extends AdminBaseController
 
     /** @return array<string, mixed> */
 
-    protected function enrichProgressRow(array $vo, bool $cohortMode): array
-
+    protected function enrichProgressRow(array $vo, bool $cohortMode, string $selectedActiveName = ''): array
     {
+        if ($selectedActiveName !== '') {
+            $vo['active_name'] = $selectedActiveName;
+        } elseif (empty($vo['active_name'])) {
+            $vo['active_name'] = '';
+        }
 
         if ($cohortMode && empty($vo['progress_id'])) {
 
@@ -482,18 +480,11 @@ class ActiveOnePlusOneProgressController extends AdminBaseController
 
         for ($d = 1; $d <= ActiveWebOnePlusOneService::TOTAL_DAYS; $d++) {
 
+            $progressSub = Db::name($this->progressTable())
+                ->where('active_id', $activeId)
+                ->buildSql(true);
             $done = (int)Db::name('member')->alias('m')
-
-                ->join(
-
-                    $this->progressTable() . ' p',
-
-                    'p.user_id = m.id AND p.active_id = ' . $activeId,
-
-                    'INNER'
-
-                )
-
+                ->join([$progressSub => 'p'], 'p.user_id = m.id', 'INNER')
                 ->where('m.create_time', '>=', $registerAfterTs)
 
                 ->whereRaw('FIND_IN_SET(?, REPLACE(p.completed_days, " ", ""))', [$d])
