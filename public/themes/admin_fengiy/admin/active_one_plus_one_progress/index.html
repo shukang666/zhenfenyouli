@@ -1,0 +1,336 @@
+<include file="public@header"/>
+
+<style>
+
+    .oop-day-stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+    .oop-day-stat {
+
+        flex: 1 1 130px;
+
+        min-width: 120px;
+
+        padding: 10px 12px;
+
+        border: 1px solid #e5e5e5;
+
+        border-radius: 6px;
+
+        background: #fafafa;
+
+        text-align: center;
+
+    }
+
+    .oop-day-stat strong { display: block; font-size: 20px; color: #18AF38; }
+
+    .oop-day-stat .oop-miss-num { color: #d9534f; font-size: 16px; }
+
+    .oop-day-stat span { font-size: 12px; color: #666; }
+
+    .oop-day-stat a { color: inherit; text-decoration: none; }
+
+    .oop-day-stat.active { border-color: #337ab7; background: #eef5ff; }
+
+    .oop-day-stat.active-miss { border-color: #d9534f; background: #fff5f5; }
+
+    .oop-cell-done { color: #18AF38; font-weight: bold; }
+
+    .oop-cell-miss { color: #d9534f; font-weight: bold; font-size: 12px; }
+
+    .oop-cell-pending { color: #bbb; }
+
+    .oop-cell-time { display: block; font-size: 11px; color: #888; font-weight: normal; margin-top: 2px; }
+
+    .oop-progress-table th.oop-day-col { min-width: 72px; text-align: center; font-size: 12px; }
+
+    .oop-progress-table td.oop-day-col { text-align: center; vertical-align: middle; }
+
+    .oop-cohort-tip { margin-top: 12px; padding: 10px 14px; background: #fff8e6; border: 1px solid #f0d78c; border-radius: 4px; font-size: 13px; }
+
+    .oop-stat-links { margin-top: 6px; font-size: 11px; }
+
+    .oop-stat-links a { margin: 0 4px; }
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrap js-check-wrap">
+
+    <ul class="nav nav-tabs">
+
+        <li class="active"><a href="{:url('admin/ActiveOnePlusOneProgress/index')}">1+1七日进度</a></li>
+
+        <li><a href="{:url('admin/ActiveOnePlusOneHarmful/index')}">1+1有害垃圾打卡</a></li>
+
+    </ul>
+
+
+
+    <form class="well form-inline margin-top-20" method="get" action="{:url('admin/ActiveOnePlusOneProgress/index')}">
+
+        <div class="form-group">
+
+            <label>活动：</label>
+
+            <select name="active_id" class="form-control" style="width: 220px;">
+
+                <option value="0">请选择</option>
+
+                <foreach name="actives" item="a">
+
+                    <option value="{$a.id}" <if condition="$active_id eq $a.id">selected="selected"</if>>{$a.name}（ID:{$a.id}）</option>
+
+                </foreach>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>注册不早于：</label>
+
+            <input type="date" class="form-control" name="register_after" style="width: 160px;" value="{$register_after}" title="填写后按该日及之后注册的用户统计参与情况">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>第N天已参与：</label>
+
+            <select name="day_filter" class="form-control" style="width: 130px;">
+
+                <option value="0" <if condition="$day_filter eq 0">selected="selected"</if>>不限</option>
+
+                <foreach name="day_numbers" item="di">
+
+                    <option value="{$di}" <if condition="$day_filter eq $di">selected="selected"</if>>第 {$di} 天 ✓</option>
+
+                </foreach>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>第N天未参与：</label>
+
+            <select name="day_miss" class="form-control" style="width: 130px;">
+
+                <option value="0" <if condition="$day_miss eq 0">selected="selected"</if>>不限</option>
+
+                <foreach name="day_numbers" item="dm">
+
+                    <option value="{$dm}" <if condition="$day_miss eq $dm">selected="selected"</if>>第 {$dm} 天 未</option>
+
+                </foreach>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>用户：</label>
+
+            <input type="text" class="form-control" name="keyword" style="width: 140px;" value="{$keyword}" placeholder="昵称/手机/姓名">
+
+        </div>
+
+        <button type="submit" class="btn btn-primary">搜索</button>
+
+        <a class="btn btn-default" href="{:url('admin/ActiveOnePlusOneProgress/index', ['active_id'=>$active_id])}">清空</a>
+
+    </form>
+
+
+
+    <if condition="$cohort_mode eq 1 && $active_id gt 0">
+
+        <div class="oop-cohort-tip">
+
+            <strong>新用户 cohort 模式</strong>：统计注册时间在 <strong>{$register_after}</strong> 及之后的用户（共 <strong>{$day_stats.cohort|default=0}</strong> 人）。
+
+            列表包含<strong>尚未产生 1+1 进度</strong>的用户（七天均视为未参与）。
+
+            「第N天已参与 / 未参与」筛选仅在该模式下对 cohort 生效；「已参与」与「未参与」二选一即可。
+
+        </div>
+
+    </if>
+
+
+
+    <notempty name="active_id">
+
+        <p class="text-muted margin-top-10">
+
+            <if condition="$cohort_mode eq 1">
+
+                注册 cohort 共 <strong>{$day_stats.cohort|default=0}</strong> 人；下表为每日已参与人数 / 未参与人数，点击链接查看对应用户列表。
+
+                <else/>
+
+                当前活动共有 <strong>{$day_stats.users|default=0}</strong> 位用户有进度记录（仅统计已进入活动的用户）。
+
+            </if>
+
+        </p>
+
+        <div class="oop-day-stats">
+            <foreach name="day_stat_cards" item="card">
+                <div class="oop-day-stat <if condition='$card.filter_on'>active</if> <if condition='$card.miss_on'>active-miss</if>">
+                    <strong>{$card.done}</strong>
+                    <if condition="$cohort_mode eq 1">
+                        <span class="oop-miss-num">未 {$card.miss}</span>
+                    </if>
+                    <span>第 {$card.day} 天<br/>{$card.title}</span>
+                    <div class="oop-stat-links">
+                        <a href="{:url('admin/ActiveOnePlusOneProgress/index', ['active_id'=>$active_id,'register_after'=>$register_after,'day_filter'=>$card.day,'day_miss'=>0,'keyword'=>$keyword])}">已参与</a>
+                        <if condition="$cohort_mode eq 1">
+                            | <a href="{:url('admin/ActiveOnePlusOneProgress/index', ['active_id'=>$active_id,'register_after'=>$register_after,'day_filter'=>0,'day_miss'=>$card.day,'keyword'=>$keyword])}">未参与</a>
+                        </if>
+                    </div>
+                </div>
+            </foreach>
+        </div>
+
+    </notempty>
+
+
+
+    <table class="table table-hover table-bordered margin-top-20 oop-progress-table">
+
+        <thead>
+
+        <tr>
+
+            <th>用户ID</th>
+
+            <th>昵称</th>
+
+            <th>手机</th>
+
+            <if condition="$cohort_mode eq 1"><th>注册时间</th></if>
+
+            <th>活动</th>
+
+            <th>轮次</th>
+
+            <th>已完成</th>
+
+            <th>截止</th>
+
+            <th>300分奖</th>
+
+            <th>800分奖</th>
+
+            <foreach name="day_numbers" item="dh">
+
+                <th class="oop-day-col">D{$dh}<br/><small>{$day_titles[$dh]|default=''}</small></th>
+
+            </foreach>
+
+            <th>更新时间</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <foreach name="list" item="vo">
+
+            <tr>
+
+                <td>{$vo.user_id}</td>
+
+                <td>{$vo.nickname|default='-'}</td>
+
+                <td>{$vo.mobile|default='-'}</td>
+
+                <if condition="$cohort_mode eq 1">
+
+                    <td>{$vo.register_text|default='-'}</td>
+
+                </if>
+
+                <td>{$vo.active_name|default='-'}</td>
+
+                <td>
+
+                    <if condition="$vo.cycle_no gt 0">第 {$vo.cycle_no} 轮<else/><span class="text-muted">未进入</span></if>
+
+                </td>
+
+                <td><strong>{$vo.completed_count}</strong> / {$total_days}</td>
+
+                <td>{$vo.deadline_text}</td>
+
+                <td>{$vo.reward_300_text|default='-'}</td>
+
+                <td>{$vo.reward_800_text|default='-'}</td>
+
+                <foreach name="day_numbers" item="dc">
+
+                    <td class="oop-day-col">
+
+                        <if condition="isset($vo['day_cells'][$dc]) && $vo['day_cells'][$dc]['done']">
+
+                            <span class="oop-cell-done">✓</span>
+
+                            <notempty name="vo.day_cells[$dc]['time']">
+
+                                <span class="oop-cell-time">{$vo.day_cells[$dc]['time']}</span>
+
+                            </notempty>
+
+                            <else/>
+
+                            <if condition="$cohort_mode eq 1">
+
+                                <span class="oop-cell-miss">未</span>
+
+                                <else/>
+
+                                <span class="oop-cell-pending">—</span>
+
+                            </if>
+
+                        </if>
+
+                    </td>
+
+                </foreach>
+
+                <td>{$vo.update_text}</td>
+
+            </tr>
+
+        </foreach>
+
+        <empty name="list">
+
+            <tr><td colspan="20" class="text-center text-muted">暂无数据</td></tr>
+
+        </empty>
+
+        </tbody>
+
+    </table>
+
+    <div class="pagination">{$page}</div>
+
+</div>
+
+<script src="__STATIC__/js/admin.js"></script>
+
+</body>
+
+</html>
+

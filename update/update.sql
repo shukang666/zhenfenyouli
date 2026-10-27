@@ -627,6 +627,18 @@ FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveController' AND `action`='index' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveOnePlusOneHarmful' AND `action`='index' LIMIT 1);
 
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveController' AND `action`='index' LIMIT 1),
+    1, 1,
+    IFNULL((SELECT MAX(`list_order`) FROM `cmf_admin_menu` m WHERE m.`parent_id` = (
+        SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveController' AND `action`='index' LIMIT 1
+    )), 0) + 9,
+    'admin','ActiveOnePlusOneProgress','index','','1+1七日进度','','1+1活动用户每日任务完成情况'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveController' AND `action`='index' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='ActiveOnePlusOneProgress' AND `action`='index' LIMIT 1);
+
 CREATE TABLE IF NOT EXISTS `cmf_active_web_zhenfen_gift_claim` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL DEFAULT 0,
