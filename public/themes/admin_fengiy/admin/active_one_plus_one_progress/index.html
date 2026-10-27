@@ -268,7 +268,7 @@
 
                 </td>
 
-                <td><strong>{$vo.completed_count}</strong> / {$total_days}</td>
+                <td><strong>{$vo.completed_count|default=0}</strong> / {$total_days}</td>
 
                 <td>{$vo.deadline_text}</td>
 

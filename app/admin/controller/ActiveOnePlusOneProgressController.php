@@ -90,27 +90,17 @@ class ActiveOnePlusOneProgressController extends AdminBaseController
 
 
 
-        $list = $query->paginate(20);
-
-
-
-        foreach ($list as &$vo) {
-
-            $vo = is_array($vo) ? $vo : $vo->toArray();
-
-            $vo = $this->enrichProgressRow($vo, $cohortMode);
-
+        $paginator = $query->paginate(20);
+        $rows = [];
+        foreach ($paginator as $vo) {
+            $row = is_array($vo) ? $vo : $vo->toArray();
+            $rows[] = $this->enrichProgressRow($row, $cohortMode);
         }
 
-        unset($vo);
+        $this->assign('list', $rows);
+        $paginator->appends($params);
 
-
-
-        $this->assign('list', $list);
-
-        $list->appends($params);
-
-        $this->assign('page', $list->render());
+        $this->assign('page', $paginator->render());
 
         $this->assign('active_id', $activeId);
 
