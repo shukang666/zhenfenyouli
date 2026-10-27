@@ -65,15 +65,10 @@ export const PAGE_GUIDES = {
 	health: {
 		steps: [
 			{
-				selector: '',
-				title: '健康页能做什么',
-				desc: '浏览邻居发的健康帖，可以点赞、评论、分享。点右上角「更多」进完整社区列表。'
-			},
-			{
-				selector: '#guide-health-life',
-				prefer: 'above',
-				title: '健康生活社区',
-				desc: '最新帖子会出现在这里，点一条看详情；列表为空时稍后再来或点「更多」逛逛。'
+				selector: '#guide-health-hub',
+				prefer: 'below',
+				title: '健康服务首页',
+				desc: '点「开始健康问答」进入评估；基层医疗机构入口在下方卡片。'
 			},
 			{
 				selector: '#pg-tabbar',

@@ -147,17 +147,19 @@ $glass-tabbar-space: calc(148rpx + env(safe-area-inset-bottom));
 }
 
 .glass-page--health {
-  background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 42%, #f5faff 100%);
+  background: linear-gradient(180deg, #e8f1ff 0%, #f7faff 38%, #ffffff 100%);
 
   &::before {
-    background: radial-gradient(circle at 50% 0%, rgba(112, 214, 255, 0.22) 0%, transparent 58%);
+    background:
+      radial-gradient(circle at 88% 0%, rgba(229, 57, 53, 0.12) 0%, transparent 42%),
+      radial-gradient(circle at 12% 8%, rgba(21, 101, 216, 0.28) 0%, transparent 52%);
   }
 
   .glass-page__ambient {
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.65) 0%,
-      rgba(240, 247, 255, 0) 100%
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(232, 241, 255, 0) 100%
     );
   }
 }

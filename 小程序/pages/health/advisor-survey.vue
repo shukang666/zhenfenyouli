@@ -1,37 +1,27 @@
 <template>
 	<view class="has-page" :class="{ 'has-page--large': largeTextEnabled }">
-		<view class="has-page-waves" aria-hidden="true"></view>
-		<view class="has-hub">
-			<view class="has-hub-bg"></view>
-			<health-advisor-mascot
-				:speaking="mascotSpeaking"
-				:line="mascotLine"
-				size="lg"
-			/>
+		<view class="has-top">
+			<view class="has-top-back" @tap="onTopBack">
+				<u-icon name="arrow-left" size="36" color="#1565D8"></u-icon>
+			</view>
+			<view class="has-top-copy">
+				<text class="has-top-title">健康问答</text>
+				<text class="has-top-sub" v-if="step !== 'done'">{{ qaProgressText }}</text>
+			</view>
+			<view class="has-top-accent"></view>
+		</view>
+		<view class="has-progress" v-if="step === 'service' || step === 'concerns'">
+			<view class="has-progress-fill" :style="{ width: qaProgressPercent + '%' }"></view>
 		</view>
 
 		<view class="has-body">
-		<!-- 欢迎 -->
-		<view v-if="step === 'welcome'" class="has-panel has-welcome">
-			<text class="has-welcome-title">您好，想跟您轻松聊几分钟</text>
-			<text class="has-welcome-desc">问卷分两部分：服务体验与最关心的健康问题。大约 2 分钟，可随时退出。</text>
-			<view class="has-agree" @tap="agreed = !agreed">
-				<view class="has-agree-box" :class="{ 'has-agree-box--on': agreed }">
-					<u-icon v-if="agreed" name="checkmark" size="24" color="#fff"></u-icon>
-				</view>
-				<text class="has-agree-text">我已了解并自愿参与</text>
-			</view>
-			<button class="has-btn has-btn--primary" :disabled="!agreed" @tap="startSurvey">开始聊聊</button>
-			<button class="has-btn has-btn--ghost" @tap="goBack">暂不参加</button>
-		</view>
-
-		<!-- 服务体验 -->
-		<view v-else-if="step === 'service'" class="has-panel">
+		<!-- 问答：服务体验 -->
+		<view v-if="step === 'service'" class="has-panel">
 			<view class="has-topbar">
 				<view class="has-back" @tap="onServiceBack">
-					<u-icon name="arrow-left" size="36" color="#4A90E2"></u-icon>
+					<u-icon name="arrow-left" size="36" color="#1565D8"></u-icon>
 				</view>
-				<text class="has-step-label">服务体验 {{ serviceIndex + 1 }}/{{ serviceQuestions.length }}</text>
+				<text class="has-step-label">第 {{ serviceIndex + 1 }} 题</text>
 			</view>
 
 			<text class="has-voice-tip" v-if="inputMode === 'voice' && !voiceFallback">点击下方按钮说话，或直接点选答案</text>
@@ -66,12 +56,12 @@
 
 			<view class="has-toolbar">
 				<view class="has-tool" @tap="readQuestionAloud">
-					<u-icon name="volume-fill" size="32" color="#4A90E2"></u-icon>
+					<u-icon name="volume-fill" size="32" color="#1565D8"></u-icon>
 					<text>朗读此题</text>
 				</view>
 				<view class="has-tool has-tool--toggle">
 					<text class="has-tool-label">大字</text>
-					<switch :checked="largeTextEnabled" color="#4A90E2" @change="onLargeTextChange" />
+					<switch :checked="largeTextEnabled" color="#1565D8" @change="onLargeTextChange" />
 				</view>
 			</view>
 
@@ -94,15 +84,10 @@
 			</view>
 		</view>
 
-		<!-- 健康关注 -->
+		<!-- 问答：健康关注 -->
 		<view v-else-if="step === 'concerns'" class="has-panel">
-			<view class="has-topbar">
-				<view class="has-back" @tap="step = 'service'; serviceIndex = serviceQuestions.length - 1">
-					<u-icon name="arrow-left" size="36" color="#4A90E2"></u-icon>
-				</view>
-				<text class="has-step-label">您最关心的健康问题</text>
-			</view>
-			<text class="has-subhint">最多选 2 项，便于我们推荐社区活动与科普</text>
+			<text class="has-step-label has-step-label--solo">您当前关注的健康指标</text>
+			<text class="has-subhint">最多选 2 项，用于生成个性化指导参考（非诊断）</text>
 			<view class="has-concern-grid">
 				<view
 					v-for="item in concernOptions"
@@ -128,70 +113,36 @@
 			</view>
 			<text class="has-note">※ 仅用于了解关注方向，不作医疗诊断</text>
 			<view class="has-footer-actions">
-				<button class="has-btn has-btn--ghost has-btn--half" @tap="skipConcerns">跳过此页</button>
-				<button class="has-btn has-btn--primary has-btn--half" @tap="goSummary">下一步</button>
+				<button class="has-btn has-btn--ghost has-btn--half" @tap="skipConcerns">跳过</button>
+				<button class="has-btn has-btn--primary has-btn--half" :loading="submitting" @tap="finishSurvey(false)">提交并完成</button>
 			</view>
 		</view>
 
-		<!-- 概要 -->
-		<view v-else-if="step === 'summary'" class="has-panel">
-			<text class="has-step-label has-step-label--solo">您的健康概要</text>
-			<text class="has-subhint">根据本次填写整理，供您参考</text>
-			<view class="has-summary-card">
-				<view class="has-summary-row">
-					<text class="has-summary-k">服务满意度</text>
-					<text class="has-summary-v">{{ summaryServiceText }}</text>
-				</view>
-				<view class="has-summary-row">
-					<text class="has-summary-k">当前关注</text>
-					<text class="has-summary-v">{{ summaryConcernText }}</text>
-				</view>
-				<view class="has-summary-row">
-					<text class="has-summary-k">填写状态</text>
-					<text class="has-summary-v has-summary-v--ok">已完成</text>
-				</view>
-			</view>
-			<view class="has-disclaimer">
-				<u-icon name="info-circle" size="28" color="#8a958c"></u-icon>
-				<text>本概要仅供社区健康服务参考，不能替代医生诊断与处方。</text>
-			</view>
-			<button class="has-btn has-btn--primary" :loading="submitting" @tap="goOptional">保存并继续</button>
-		</view>
-
-		<!-- 可选下一步 -->
-		<view v-else-if="step === 'optional'" class="has-panel">
-			<text class="has-step-label has-step-label--solo">下一步（可选）</text>
-			<view class="has-rec-card" v-for="(rec, ri) in recommendCards" :key="ri">
-				<text class="has-rec-title">{{ rec.title }}</text>
-				<text class="has-rec-desc">{{ rec.desc }}</text>
-				<button class="has-btn has-btn--outline" @tap="onRecTap(rec)">了解更多</button>
-			</view>
-			<view class="has-agree has-agree--compact" @tap="answers.contact_ok = !answers.contact_ok">
-				<view class="has-agree-box" :class="{ 'has-agree-box--on': answers.contact_ok }">
-					<u-icon v-if="answers.contact_ok" name="checkmark" size="24" color="#fff"></u-icon>
-				</view>
-				<text class="has-agree-text">愿意接受社区健康活动回访（可选）</text>
-			</view>
-			<view class="has-footer-actions">
-				<button class="has-btn has-btn--ghost has-btn--half" @tap="finishSurvey(false)">以后再说</button>
-				<button class="has-btn has-btn--primary has-btn--half" :loading="submitting" @tap="finishSurvey(true)">完成</button>
-			</view>
-		</view>
-
-		<!-- 完成 -->
+		<!-- 结束页 -->
 		<view v-else-if="step === 'done'" class="has-panel has-done">
-			<u-icon name="checkmark-circle-fill" size="100" color="#4A90E2"></u-icon>
-			<text class="has-done-title">感谢您的参与</text>
-			<text class="has-done-desc">我们会根据社区情况安排健康科普与活动，请留意小程序通知。</text>
-			<button class="has-btn has-btn--primary" @tap="goBack">返回</button>
+			<view class="has-done-badge">
+				<u-icon name="checkmark-circle-fill" size="88" color="#1565D8"></u-icon>
+			</view>
+			<text class="has-done-title">问答已完成</text>
+			<text class="has-done-desc">我们已记录您的服务体验与关注方向，您可在健康首页查看后续服务入口。本结果仅供健康管理参考，不能替代临床诊断。</text>
+			<view class="has-done-summary" v-if="summaryServiceText || summaryConcernText">
+				<view class="has-done-row">
+					<text class="has-done-k">服务体验</text>
+					<text class="has-done-v">{{ summaryServiceText }}</text>
+				</view>
+				<view class="has-done-row">
+					<text class="has-done-k">关注指标</text>
+					<text class="has-done-v">{{ summaryConcernText }}</text>
+				</view>
+			</view>
+			<button class="has-btn has-btn--primary" @tap="goBack">返回健康首页</button>
+			<button class="has-btn has-btn--ghost" @tap="openGrassroots">查看基层医疗机构</button>
 		</view>
 		</view>
 	</view>
 </template>
 
 <script>
-import HealthAdvisorMascot from '@/components/health-advisor-mascot/index.vue'
-
 const SERVICE_QUESTIONS = [
 	{
 		key: 'overall',
@@ -220,24 +171,19 @@ const SERVICE_QUESTIONS = [
 ]
 
 const CONCERN_OPTIONS = [
-	{ key: 'bp', name: '血压', uIcon: 'heart-fill', iconColor: '#ef4444', iconBg: '#fee2e2' },
-	{ key: 'sugar', name: '血糖', uIcon: 'tags-fill', iconColor: '#2563eb', iconBg: '#dbeafe' },
-	{ key: 'sleep', name: '睡眠', uIcon: 'star-fill', iconColor: '#ca8a04', iconBg: '#fef9c3' },
-	{ key: 'sport', name: '体力运动', uIcon: 'man-add-fill', iconColor: '#16a34a', iconBg: '#dcfce7' },
-	{ key: 'diet', name: '体重饮食', uIcon: 'apple-fill', iconColor: '#dc2626', iconBg: '#ffe4e6' },
-	{ key: 'none', name: '暂无特别关心', uIcon: 'more-dot-fill', iconColor: '#64748b', iconBg: '#f1f5f9' }
+	{ key: 'bp', name: '血压', uIcon: 'heart-fill', iconColor: '#e53935', iconBg: '#ffebee' },
+	{ key: 'sugar', name: '血糖', uIcon: 'tags-fill', iconColor: '#1565d8', iconBg: '#e3f2fd' },
+	{ key: 'sleep', name: '睡眠', uIcon: 'star-fill', iconColor: '#3949ab', iconBg: '#e8eaf6' },
+	{ key: 'sport', name: '运动耐力', uIcon: 'man-add-fill', iconColor: '#1565d8', iconBg: '#e3f2fd' },
+	{ key: 'diet', name: '体重饮食', uIcon: 'grid-fill', iconColor: '#c62828', iconBg: '#ffebee' },
+	{ key: 'none', name: '暂无特别关注', uIcon: 'more-dot-fill', iconColor: '#64748b', iconBg: '#f1f5f9' }
 ]
 
 export default {
-	components: { HealthAdvisorMascot },
 	data() {
 		return {
 			surveyId: 0,
-			mascotSpeaking: false,
-			mascotLine: '您好，我想先了解一下您的健康。',
-			speakTimer: null,
-			step: 'welcome',
-			agreed: false,
+			step: 'service',
 			serviceQuestions: SERVICE_QUESTIONS,
 			serviceIndex: 0,
 			concernOptions: CONCERN_OPTIONS,
@@ -253,26 +199,31 @@ export default {
 			voiceConfirmPending: false,
 			pendingLabel: '',
 			pendingValue: '',
-			submitting: false,
-			recommendCards: [
-				{
-					key: 'lecture',
-					title: '社区健康讲座',
-					desc: '血压管理与生活方式小建议，线下/线上均可参与。',
-					url: '/pages/sjhd/list?type=3'
-				},
-				{
-					key: 'community',
-					title: '社区健康服务',
-					desc: '了解本社区可预约的公共卫生与养老资源。',
-					url: '/pages/healthcare/participate?id=6'
-				}
-			]
+			submitting: false
 		}
 	},
 	computed: {
 		currentServiceQuestion() {
 			return this.serviceQuestions[this.serviceIndex] || SERVICE_QUESTIONS[0]
+		},
+		qaProgressText() {
+			if (this.step === 'service') {
+				return `服务体验 · 第 ${this.serviceIndex + 1}/${this.serviceQuestions.length} 题`
+			}
+			if (this.step === 'concerns') {
+				return '关注指标 · 请选择'
+			}
+			return ''
+		},
+		qaProgressPercent() {
+			const total = this.serviceQuestions.length + 1
+			if (this.step === 'service') {
+				return Math.round(((this.serviceIndex + 1) / total) * 100)
+			}
+			if (this.step === 'concerns') {
+				return Math.round((this.serviceQuestions.length / total) * 100) + Math.round(100 / total)
+			}
+			return 0
 		},
 		summaryServiceText() {
 			const parts = []
@@ -299,80 +250,24 @@ export default {
 	},
 	onLoad(option) {
 		this.surveyId = parseInt(option.id, 10) || 0
-		this.$nextTick(() => {
-			this.speakLine(this.mascotLine, 3200)
-		})
-	},
-	onUnload() {
-		this.stopSpeaking()
-	},
-	watch: {
-		step(val) {
-			this.refreshMascotLine(val === 'service')
-		},
-		serviceIndex() {
-			if (this.step === 'service') {
-				this.refreshMascotLine(true)
-			}
-		}
 	},
 	methods: {
-		stopSpeaking() {
-			if (this.speakTimer) {
-				clearTimeout(this.speakTimer)
-				this.speakTimer = null
+		onTopBack() {
+			if (this.step === 'done') {
+				return this.goBack()
 			}
-			this.mascotSpeaking = false
-		},
-		speakDuration(text) {
-			const len = (text || '').length
-			return Math.min(9000, Math.max(2600, len * 180))
-		},
-		speakLine(text, duration) {
-			const line = (text || '').trim()
-			if (!line) return
-			this.stopSpeaking()
-			this.mascotLine = line
-			this.mascotSpeaking = true
-			const ms = duration || this.speakDuration(line)
-			this.speakTimer = setTimeout(() => {
-				this.mascotSpeaking = false
-				this.speakTimer = null
-			}, ms)
-		},
-		refreshMascotLine(autoSpeak) {
-			let line = ''
-			switch (this.step) {
-				case 'welcome':
-					line = '您好，我想先了解一下您的健康。'
-					break
-				case 'service':
-					line = this.currentServiceQuestion.text
-					break
-				case 'concerns':
-					line = '请选择您最关心的健康问题，最多选 2 项。'
-					break
-				case 'summary':
-					line = '这是根据您刚才填写整理的概要，请您过目。'
-					break
-				case 'optional':
-					line = '下面有一些可选的社区健康活动，感兴趣可以看看。'
-					break
-				case 'done':
-					line = '感谢您的参与，祝您身体健康！'
-					break
-				default:
-					line = this.mascotLine
+			if (this.step === 'concerns') {
+				this.step = 'service'
+				this.serviceIndex = this.serviceQuestions.length - 1
+				return
 			}
-			this.mascotLine = line
-			if (autoSpeak) {
-				this.speakLine(line)
+			if (this.step === 'service') {
+				return this.onServiceBack()
 			}
+			this.goBack()
 		},
-		startSurvey() {
-			if (!this.agreed) return
-			this.step = 'service'
-			this.serviceIndex = 0
+		openGrassroots() {
+			this.$u.route('/pages/healthcare/participate?id=6')
 		},
 		pickService(opt) {
 			const key = this.currentServiceQuestion.key
@@ -393,7 +288,7 @@ export default {
 				this.voiceConfirmPending = false
 				return
 			}
-			this.step = 'welcome'
+			this.goBack()
 		},
 		toggleInputMode() {
 			this.inputMode = this.inputMode === 'voice' ? 'text' : 'voice'
@@ -404,16 +299,17 @@ export default {
 		},
 		readQuestionAloud() {
 			const text = this.currentServiceQuestion.text
-			this.speakLine(text)
+			if (!text) return
+			// #ifdef MP-WEIXIN
+			uni.showToast({ title: '请阅读题目后点选答案', icon: 'none' })
+			// #endif
 		},
 		onMicStart() {
 			this.recording = true
-			this.speakLine('请说出您的答案～', 1500)
 		},
 		onMicEnd() {
 			this.recording = false
 			this.voiceFallback = true
-			this.stopSpeaking()
 			uni.showToast({
 				title: '请点选下方答案',
 				icon: 'none',
@@ -449,19 +345,7 @@ export default {
 		},
 		skipConcerns() {
 			this.answers.concerns = []
-			this.goSummary()
-		},
-		goSummary() {
-			this.step = 'summary'
-		},
-		goOptional() {
-			this.submitDraft(false)
-			this.step = 'optional'
-		},
-		onRecTap(rec) {
-			if (rec.url) {
-				this.$u.route(rec.url)
-			}
+			this.finishSurvey(false)
 		},
 		buildSubmitAnswers() {
 			return {
@@ -521,52 +405,61 @@ export default {
 
 <style lang="scss">
 page {
-	background: #f0f7ff;
+	background: #e8f1ff;
 }
 .has-page {
 	position: relative;
 	min-height: 100vh;
 	padding: 0 0 calc(48rpx + env(safe-area-inset-bottom));
 	box-sizing: border-box;
-	background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 38%, #f5faff 100%);
+	background: linear-gradient(180deg, #e8f1ff 0%, #ffffff 42%, #f7faff 100%);
 	overflow: hidden;
 }
-.has-page-waves {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	height: 280rpx;
-	pointer-events: none;
-	background:
-		radial-gradient(ellipse 120% 80% at 50% 100%, rgba(112, 214, 255, 0.28) 0%, transparent 55%),
-		repeating-radial-gradient(circle at 50% 120%, transparent 0, transparent 28rpx, rgba(74, 144, 226, 0.06) 29rpx, transparent 30rpx);
-	opacity: 0.85;
-}
-.has-hub {
+.has-top {
 	position: relative;
-	z-index: 1;
-	padding: 16rpx 32rpx 8rpx;
+	display: flex;
+	align-items: center;
+	padding: calc(env(safe-area-inset-top) + 12rpx) 28rpx 16rpx;
+	gap: 12rpx;
+}
+.has-top-back {
+	padding: 8rpx 8rpx 8rpx 0;
+}
+.has-top-copy {
+	flex: 1;
+	min-width: 0;
+}
+.has-top-title {
+	display: block;
+	font-size: 34rpx;
+	font-weight: 800;
+	color: #0d47a1;
+}
+.has-top-sub {
+	display: block;
+	margin-top: 4rpx;
+	font-size: 22rpx;
+	color: #64748b;
+}
+.has-top-accent {
+	width: 8rpx;
+	height: 48rpx;
+	border-radius: 4rpx;
+	background: linear-gradient(180deg, #e53935, #ff5252);
+	flex-shrink: 0;
+}
+.has-progress {
+	height: 8rpx;
+	margin: 0 28rpx 8rpx;
+	border-radius: 999rpx;
+	background: #dbeafe;
 	overflow: hidden;
 }
-.has-hub-bg {
-	position: absolute;
-	left: 50%;
-	top: 20rpx;
-	width: 520rpx;
-	height: 420rpx;
-	margin-left: -260rpx;
-	border-radius: 50%;
-	background: radial-gradient(ellipse at 50% 40%, rgba(255, 255, 255, 0.98) 0%, rgba(240, 247, 255, 0.75) 45%, transparent 72%);
-	pointer-events: none;
-}
-.has-hub-bg::before {
-	content: '';
-	position: absolute;
-	inset: 12%;
-	border-radius: 50%;
-	border: 2rpx solid rgba(74, 144, 226, 0.1);
-	box-shadow: 0 40rpx 80rpx rgba(74, 144, 226, 0.12);
+.has-progress-fill {
+	height: 100%;
+	border-radius: 999rpx;
+	background: linear-gradient(90deg, #1565d8 0%, #0d47a1 72%, #e53935 100%);
+	transition: width 0.25s ease;
 }
 .has-body {
 	position: relative;
@@ -632,8 +525,8 @@ page {
 	flex-shrink: 0;
 }
 .has-agree-box--on {
-	background: #4A90E2;
-	border-color: #4A90E2;
+	background: #1565d8;
+	border-color: #1565d8;
 }
 .has-agree-text {
 	font-size: 26rpx;
@@ -654,9 +547,10 @@ page {
 	border: none;
 }
 .has-btn--primary {
-	background: linear-gradient(90deg, #70d6ff 0%, #4a90e2 100%);
+	background: linear-gradient(90deg, #1565d8 0%, #0d47a1 100%);
 	color: #fff;
-	box-shadow: 0 12rpx 28rpx rgba(74, 144, 226, 0.35);
+	box-shadow: 0 12rpx 28rpx rgba(21, 101, 216, 0.35);
+	border-top: 4rpx solid rgba(229, 57, 53, 0.85);
 }
 .has-btn--primary[disabled] {
 	background: #b8d4f0;
@@ -693,13 +587,13 @@ page {
 .has-step-label {
 	font-size: 28rpx;
 	font-weight: 600;
-	color: #4A90E2;
+	color: #1565d8;
 }
 .has-step-label--solo {
 	display: block;
 	font-size: 34rpx;
 	font-weight: 700;
-	color: #1e4a7a;
+	color: #0d47a1;
 	margin-bottom: 8rpx;
 }
 .has-subhint {
@@ -713,7 +607,7 @@ page {
 	display: block;
 	font-size: 32rpx;
 	font-weight: 700;
-	color: #1e4a7a;
+	color: #0d47a1;
 	line-height: 1.45;
 	margin-bottom: 28rpx;
 }
@@ -753,7 +647,7 @@ page {
 	color: #fff;
 }
 .has-opt--best {
-	background: linear-gradient(90deg, #70d6ff 0%, #4a90e2 100%);
+	background: linear-gradient(90deg, #1565d8 0%, #0d47a1 100%);
 	color: #fff;
 }
 .has-opt--na {
@@ -762,7 +656,8 @@ page {
 	font-weight: 500;
 }
 .has-opt--active {
-	box-shadow: 0 0 0 4rpx rgba(74, 144, 226, 0.35);
+	box-shadow: 0 0 0 4rpx rgba(21, 101, 216, 0.35);
+	border-color: #e53935;
 }
 .has-opt--press {
 	opacity: 0.9;
@@ -781,7 +676,7 @@ page {
 	align-items: center;
 	gap: 8rpx;
 	font-size: 24rpx;
-	color: #4A90E2;
+	color: #1565d8;
 }
 .has-tool--toggle {
 	color: #5a6b66;
@@ -805,7 +700,7 @@ page {
 	margin-top: 16rpx;
 	height: 160rpx;
 	border-radius: 24rpx;
-	background: linear-gradient(145deg, #70d6ff, #4a90e2);
+	background: linear-gradient(145deg, #1565d8, #0d47a1);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -849,8 +744,8 @@ page {
 	min-height: 160rpx;
 }
 .has-concern--on {
-	border-color: #4A90E2;
-	background: #f0f7ff;
+	border-color: #1565d8;
+	background: #e3f2fd;
 }
 .has-concern-icon-wrap {
 	width: 88rpx;
@@ -876,7 +771,7 @@ page {
 	width: 36rpx;
 	height: 36rpx;
 	border-radius: 50%;
-	background: #4A90E2;
+	background: #e53935;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -922,7 +817,7 @@ page {
 	flex: 1;
 }
 .has-summary-v--ok {
-	color: #4A90E2;
+	color: #1565d8;
 }
 .has-disclaimer {
 	display: flex;
@@ -957,7 +852,42 @@ page {
 }
 .has-done {
 	text-align: center;
-	padding-top: 80rpx;
+	padding-top: 48rpx;
+}
+.has-done-badge {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 8rpx;
+}
+.has-done-summary {
+	margin: 32rpx 0;
+	padding: 24rpx;
+	border-radius: 20rpx;
+	background: #fff;
+	border: 1rpx solid #e3edff;
+	text-align: left;
+}
+.has-done-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 16rpx;
+	padding: 12rpx 0;
+	border-bottom: 1rpx solid #f1f5f9;
+}
+.has-done-row:last-child {
+	border-bottom: none;
+}
+.has-done-k {
+	font-size: 24rpx;
+	color: #64748b;
+	flex-shrink: 0;
+}
+.has-done-v {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #0d47a1;
+	text-align: right;
+	flex: 1;
 }
 .has-done-title {
 	display: block;
