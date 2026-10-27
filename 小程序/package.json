@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "jweixin-module": "^1.6.0",
+    "lottie-miniprogram": "^1.0.12",
     "uview-ui": "^1.8.1"
   }
 }

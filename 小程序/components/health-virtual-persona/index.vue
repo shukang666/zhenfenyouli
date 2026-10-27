@@ -11,27 +11,43 @@
 		]"
 	>
 		<view class="hvp-stage">
-			<view class="hvp-halo hvp-halo--a"></view>
-			<view class="hvp-halo hvp-halo--b"></view>
-
-			<view class="hvp-motion">
-				<view class="hvp-heart">
-					<view class="hvp-heart-shell">
-						<view class="hvp-heart-glass"></view>
-						<view class="hvp-heart-glass hvp-heart-glass--inner"></view>
-						<view class="hvp-heart-shine"></view>
-						<view class="hvp-heart-tint"></view>
+			<!-- #ifdef MP-WEIXIN -->
+			<canvas
+				v-if="!useCssFallback"
+				class="hvp-lottie"
+				type="2d"
+				:id="canvasId"
+			></canvas>
+			<!-- #endif -->
+			<view v-if="showCssHeart" class="hvp-css-fallback">
+				<view class="hvp-halo hvp-halo--a"></view>
+				<view class="hvp-halo hvp-halo--b"></view>
+				<view class="hvp-motion">
+					<view class="hvp-heart">
+						<view class="hvp-heart-shell">
+							<view class="hvp-heart-glass"></view>
+							<view class="hvp-heart-glass hvp-heart-glass--inner"></view>
+							<view class="hvp-heart-shine"></view>
+							<view class="hvp-heart-tint"></view>
+						</view>
 					</view>
 				</view>
+				<view class="hvp-speak-ring" v-if="speaking"></view>
 			</view>
-
-			<view class="hvp-speak-ring" v-if="speaking"></view>
 		</view>
 		<text class="hvp-caption" v-if="caption && !hideCaption">{{ caption }}</text>
 	</view>
 </template>
 
 <script>
+import settings from '@/common/settings.js'
+
+// #ifdef MP-WEIXIN
+import lottie from 'lottie-miniprogram'
+// #endif
+
+let hvpCanvasSeq = 0
+
 export default {
 	name: 'HealthVirtualPersona',
 	props: {
@@ -58,6 +74,112 @@ export default {
 		hideCaption: {
 			type: Boolean,
 			default: false
+		},
+		/** 覆盖默认 Lottie 地址（完整 URL） */
+		lottieUrl: {
+			type: String,
+			default: ''
+		}
+	},
+	data() {
+		hvpCanvasSeq += 1
+		return {
+			canvasId: 'hvpLottie' + hvpCanvasSeq,
+			useCssFallback: false,
+			lottieAnim: null,
+			lottieInited: false
+		}
+	},
+	computed: {
+		resolvedLottieUrl() {
+			if (this.lottieUrl && String(this.lottieUrl).trim()) {
+				return String(this.lottieUrl).trim()
+			}
+			const base = (settings.sitePublicUrl || 'https://admin.circular-economy.cn').replace(/\/$/, '')
+			const path = settings.healthAdvisorLottiePath || '/static/lottie/health-advisor-idle.json'
+			return base + path
+		},
+		showCssHeart() {
+			// #ifdef MP-WEIXIN
+			return this.useCssFallback
+			// #endif
+			// #ifndef MP-WEIXIN
+			return true
+			// #endif
+		}
+	},
+	watch: {
+		speaking(val) {
+			this.applyLottieSpeed(val)
+		}
+	},
+	mounted() {
+		// #ifdef MP-WEIXIN
+		this.$nextTick(() => {
+			setTimeout(() => this.initLottie(), 80)
+		})
+		// #endif
+	},
+	beforeDestroy() {
+		this.destroyLottie()
+	},
+	methods: {
+		applyLottieSpeed(speaking) {
+			if (!this.lottieAnim) return
+			try {
+				this.lottieAnim.setSpeed(speaking ? 1.35 : 1)
+			} catch (e) {}
+		},
+		destroyLottie() {
+			if (this.lottieAnim) {
+				try {
+					this.lottieAnim.destroy()
+				} catch (e) {}
+				this.lottieAnim = null
+			}
+		},
+		initLottie() {
+			// #ifdef MP-WEIXIN
+			if (this.lottieInited || this.useCssFallback) return
+			this.lottieInited = true
+			const selector = '#' + this.canvasId
+			const query = uni.createSelectorQuery().in(this)
+			query
+				.select(selector)
+				.fields({ node: true, size: true })
+				.exec((res) => {
+					const box = res && res[0]
+					if (!box || !box.node) {
+						this.useCssFallback = true
+						return
+					}
+					const canvas = box.node
+					const dpr = uni.getSystemInfoSync().pixelRatio || 2
+					const w = box.width || 300
+					const h = box.height || 300
+					canvas.width = w * dpr
+					canvas.height = h * dpr
+					const ctx = canvas.getContext('2d')
+					ctx.scale(dpr, dpr)
+					lottie.setup(canvas)
+					this.lottieAnim = lottie.loadAnimation({
+						loop: true,
+						autoplay: true,
+						path: this.resolvedLottieUrl,
+						rendererSettings: {
+							context: ctx,
+							clearCanvas: true
+						}
+					})
+					this.lottieAnim.addEventListener('DOMLoaded', () => {
+						this.applyLottieSpeed(this.speaking)
+					})
+					this.lottieAnim.addEventListener('data_failed', () => {
+						this.destroyLottie()
+						this.useCssFallback = true
+					})
+				})
+			// #endif
 		}
 	}
 }
@@ -93,6 +215,21 @@ export default {
 
 .hvp--md .hvp-stage {
 	height: 380rpx;
+}
+
+.hvp-lottie {
+	width: 92%;
+	height: 100%;
+	display: block;
+}
+
+.hvp-css-fallback {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .hvp-halo {
@@ -181,14 +318,7 @@ export default {
 
 .hvp-heart-glass--inner {
 	inset: 14%;
-	clip-path: polygon(
-		50% 88%,
-		22% 54%,
-		28% 36%,
-		50% 46%,
-		72% 35%,
-		78% 53%
-	);
+	clip-path: polygon(50% 88%, 22% 54%, 28% 36%, 50% 46%, 72% 35%, 78% 53%);
 	opacity: 0.55;
 	border: none;
 	box-shadow: inset 0 0 28rpx rgba(255, 255, 255, 0.65);
@@ -276,7 +406,6 @@ export default {
 	0%,
 	100% {
 		transform: scale(1) skew(0deg, 0deg) rotate(0deg);
-		border-radius: 0;
 	}
 	25% {
 		transform: scale(1.04, 0.97) skew(1.2deg, -0.8deg) rotate(1.2deg);

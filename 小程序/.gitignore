@@ -1,3 +1,4 @@
 .hbuilderx
 .git
 /unpackage
+node_modules
