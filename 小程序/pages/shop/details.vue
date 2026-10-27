@@ -161,7 +161,12 @@
                 return !!(this.goods && this.goods.require_web_unlock_key)
             },
             activityUnlockMet() {
-                return Number(this.goods && this.goods.require_web_unlock_met) === 1
+                const g = this.goods
+                if (!g || !g.require_web_unlock_key) return true
+                const met = g.require_web_unlock_met
+                // 旧版详情接口未返回该字段时不在前端拦截（线上 PHP 未同步时会出现），加购/下单仍由后端校验
+                if (met === undefined || met === null || met === '') return true
+                return Number(met) === 1
             },
             activityUnlockName() {
                 const name = this.goods && this.goods.require_web_unlock_active_name
