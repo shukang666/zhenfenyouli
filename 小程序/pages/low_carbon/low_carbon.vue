@@ -79,23 +79,34 @@
           <text class="fb-section-title">主题活动</text>
         </view>
       </view>
-      <view class="fb-theme-mosaic">
+      <view class="fb-theme-board">
         <view
-          class="fb-theme-pane"
-          :class="'fb-theme-pane--' + (idx + 1)"
-          v-for="(cate, idx) in main_categories"
+          class="fb-theme-cell"
+          v-for="cate in main_categories"
           :key="cate.id"
-          hover-class="fb-theme-pane--pressed"
+          hover-class="fb-theme-cell--pressed"
           :hover-stay-time="80"
           @click="gotoCateList(cate)"
         >
           <view
-            class="fb-theme-pane-glow"
+            class="fb-theme-cell-bg"
             :style="{ background: cate.bgColor }"
           ></view>
-          <view class="fb-theme-pane-inner">
-            <text class="fb-theme-pane-emoji">{{ cate.emoji }}</text>
-            <text class="fb-theme-pane-name">{{ cate.name }}</text>
+          <view class="fb-theme-cell-body">
+            <view class="fb-theme-icon">
+              <view
+                class="fb-theme-icon-halo"
+                :style="{ background: cate.iconHalo }"
+              ></view>
+              <view class="fb-theme-icon-disk">
+                <u-icon
+                  :name="cate.icon"
+                  :color="cate.iconColor"
+                  size="52"
+                ></u-icon>
+              </view>
+            </view>
+            <text class="fb-theme-cell-name">{{ cate.name }}</text>
           </view>
         </view>
       </view>
@@ -545,36 +556,46 @@ export default {
           id: 1,
           name: "健康运动",
           subtitle: "Healthy Life",
-          emoji: "🏃",
-          bgColor: "linear-gradient(135deg, #E7F0FE 0%, #1877F2 100%)",
+          icon: "play-circle-fill",
+          iconColor: "#1877F2",
+          iconHalo: "rgba(24, 119, 242, 0.35)",
+          bgColor: "linear-gradient(160deg, #E7F0FE 0%, #1877F2 100%)",
         },
         {
           id: 2,
           name: "学习成长",
           subtitle: "Growing Up",
-          emoji: "🌟",
-          bgColor: "linear-gradient(135deg, #D4FC79 0%, #96E6A1 100%)",
+          icon: "star-fill",
+          iconColor: "#1F9D55",
+          iconHalo: "rgba(31, 157, 85, 0.32)",
+          bgColor: "linear-gradient(160deg, #D4FC79 0%, #3CB878 100%)",
         },
         {
           id: 3,
           name: "兴趣体验",
           subtitle: "Hobby Time",
-          emoji: "🎨",
-          bgColor: "linear-gradient(135deg, #FFD194 0%, #FF9A56 100%)",
+          icon: "grid-fill",
+          iconColor: "#E86A1A",
+          iconHalo: "rgba(232, 106, 26, 0.34)",
+          bgColor: "linear-gradient(160deg, #FFD194 0%, #FF8A3D 100%)",
         },
         {
           id: 4,
           name: "交流互动",
           subtitle: "Neighbors",
-          emoji: "🤝",
-          bgColor: "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)",
+          icon: "chat-fill",
+          iconColor: "#E84D6A",
+          iconHalo: "rgba(232, 77, 106, 0.32)",
+          bgColor: "linear-gradient(160deg, #FF9A9E 0%, #F06B8A 100%)",
         },
         {
           id: 5,
           name: "公益行动",
           subtitle: "Volunteer",
-          emoji: "💚",
-          bgColor: "linear-gradient(135deg, #A18CD1 0%, #D8B4FE 100%)",
+          icon: "gift-fill",
+          iconColor: "#7B4FD6",
+          iconHalo: "rgba(123, 79, 214, 0.34)",
+          bgColor: "linear-gradient(160deg, #D8B4FE 0%, #8B5CF6 100%)",
         },
       ],
     };
@@ -986,203 +1007,96 @@ export default {
   height: 100%;
 }
 
-/* ===== 主题活动：一行五片拼合渐变区 ===== */
-.fb-theme-mosaic {
+/* ===== 主题活动：五色通栏 + 大图标 ===== */
+.fb-theme-board {
   display: flex;
   flex-direction: row;
-  align-items: flex-end;
-  margin: 0 16rpx 4rpx;
-  padding: 8rpx 4rpx 12rpx;
-  min-height: 240rpx;
-  overflow: visible;
+  align-items: stretch;
+  height: 236rpx;
+  margin: 0 24rpx 16rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 12rpx 32rpx rgba(16, 48, 24, 0.1);
 }
-.fb-theme-pane {
+.fb-theme-cell {
   position: relative;
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 2rpx 18rpx;
   box-sizing: border-box;
-  overflow: visible;
-  transition: transform 0.18s ease, opacity 0.18s ease;
 }
-.fb-theme-pane:first-child {
-  border-radius: 22rpx 0 0 22rpx;
-}
-.fb-theme-pane:last-child {
-  border-radius: 0 22rpx 22rpx 0;
-}
-.fb-theme-pane:not(:last-child)::after {
+.fb-theme-cell:not(:last-child)::after {
   content: "";
   position: absolute;
-  top: 12%;
+  top: 16%;
   right: 0;
-  bottom: 14%;
+  bottom: 16%;
   width: 1rpx;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.55) 35%,
-    rgba(255, 255, 255, 0.55) 65%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 3;
-}
-.fb-theme-pane--pressed {
-  opacity: 0.9;
-  transform: scale(0.97);
-}
-.fb-theme-pane-glow {
-  position: absolute;
-  left: -8%;
-  right: -8%;
-  border-radius: 50% 50% 42% 42%;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.92;
-  filter: blur(2rpx);
-  -webkit-mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.35) 14%,
-    #000 38%,
-    #000 62%,
-    rgba(0, 0, 0, 0.4) 86%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.35) 14%,
-    #000 38%,
-    #000 62%,
-    rgba(0, 0, 0, 0.4) 86%,
-    transparent 100%
-  );
-}
-.fb-theme-pane--1 .fb-theme-pane-glow {
-  top: -6%;
-  height: 108%;
-}
-.fb-theme-pane--2 .fb-theme-pane-glow {
-  top: 2%;
-  height: 96%;
-  -webkit-mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 20%,
-    #000 45%,
-    #000 58%,
-    rgba(0, 0, 0, 0.35) 88%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.25) 20%,
-    #000 45%,
-    #000 58%,
-    rgba(0, 0, 0, 0.35) 88%,
-    transparent 100%
-  );
-}
-.fb-theme-pane--3 .fb-theme-pane-glow {
-  top: -10%;
-  height: 112%;
-}
-.fb-theme-pane--4 .fb-theme-pane-glow {
-  top: 4%;
-  height: 90%;
-  -webkit-mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 10%,
-    #000 32%,
-    #000 68%,
-    rgba(0, 0, 0, 0.3) 92%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 10%,
-    #000 32%,
-    #000 68%,
-    rgba(0, 0, 0, 0.3) 92%,
-    transparent 100%
-  );
-}
-.fb-theme-pane--5 .fb-theme-pane-glow {
-  top: -4%;
-  height: 102%;
-}
-.fb-theme-pane--1 {
-  padding-bottom: 22rpx;
-}
-.fb-theme-pane--2 {
-  padding-bottom: 14rpx;
-}
-.fb-theme-pane--3 {
-  padding-bottom: 26rpx;
-}
-.fb-theme-pane--4 {
-  padding-bottom: 12rpx;
-}
-.fb-theme-pane--5 {
-  padding-bottom: 20rpx;
-}
-.fb-theme-pane-inner {
-  position: relative;
+  background: rgba(255, 255, 255, 0.32);
   z-index: 2;
+  pointer-events: none;
+}
+.fb-theme-cell-bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+}
+.fb-theme-cell-body {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   width: 100%;
-  min-height: 200rpx;
-  padding-top: 28rpx;
+  height: 100%;
+  padding: 18rpx 4rpx 16rpx;
   box-sizing: border-box;
 }
-.fb-theme-pane--1 .fb-theme-pane-inner {
-  min-height: 212rpx;
+.fb-theme-cell--pressed {
+  opacity: 0.9;
 }
-.fb-theme-pane--2 .fb-theme-pane-inner {
-  min-height: 188rpx;
+.fb-theme-icon {
+  position: relative;
+  width: 108rpx;
+  height: 108rpx;
+  margin-bottom: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.fb-theme-pane--3 .fb-theme-pane-inner {
-  min-height: 220rpx;
+.fb-theme-icon-halo {
+  position: absolute;
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 50%;
+  opacity: 0.85;
 }
-.fb-theme-pane--4 .fb-theme-pane-inner {
-  min-height: 180rpx;
+.fb-theme-icon-disk {
+  position: relative;
+  z-index: 1;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f7fa 100%);
+  border: 3rpx solid rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 10rpx 24rpx rgba(0, 0, 0, 0.14),
+    inset 0 2rpx 0 rgba(255, 255, 255, 1);
 }
-.fb-theme-pane--5 .fb-theme-pane-inner {
-  min-height: 204rpx;
-}
-.fb-theme-pane-emoji {
-  font-size: 40rpx;
-  line-height: 1;
-  margin-bottom: 12rpx;
-  filter: drop-shadow(0 4rpx 10rpx rgba(0, 0, 0, 0.12));
-}
-.fb-theme-pane--3 .fb-theme-pane-emoji {
-  font-size: 44rpx;
-  margin-bottom: 16rpx;
-}
-.fb-theme-pane-name {
+.fb-theme-cell-name {
   width: 100%;
-  padding: 0 2rpx;
-  box-sizing: border-box;
-  font-size: 20rpx;
+  font-size: 22rpx;
   font-weight: 700;
-  color: #142018;
-  text-align: center;
   line-height: 1.35;
-  letter-spacing: 0.5rpx;
-  text-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.65);
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.22);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
