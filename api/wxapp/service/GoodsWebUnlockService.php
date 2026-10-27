@@ -53,6 +53,28 @@ class GoodsWebUnlockService
         return 0;
     }
 
+    public static function activeNameForKey(string $key): string
+    {
+        $activeId = self::parseActiveIdFromKey($key);
+        if ($activeId <= 0) {
+            return '相关活动';
+        }
+        $name = (string)ActiveModel::where('id', $activeId)->where('delete_time', 0)->value('name');
+        return $name !== '' ? $name : '相关活动';
+    }
+
+    /** 小程序展示用（不含「Web」等技术用语） */
+    public static function defaultUnlockHint(array $goodsInfo): string
+    {
+        $key = (string)($goodsInfo['require_web_unlock_key'] ?? '');
+        $name = self::activeNameForKey($key);
+        if (preg_match('/:milestone:(\d+)$/', $key, $m)) {
+            $days = (int)$m[1];
+            return '完成「' . $name . '」满' . $days . '天挑战后，可0积分兑换本商品';
+        }
+        return '完成「' . $name . '」对应任务后，可兑换本商品';
+    }
+
     public static function hasUnlock(int $userId, string $unlockKey): bool
     {
         $unlockKey = trim($unlockKey);
@@ -111,16 +133,11 @@ class GoodsWebUnlockService
     /** @param array<string,mixed> $goodsInfo */
     public static function blockMessage(array $goodsInfo): string
     {
-        $goodsName = $goodsInfo['goods_name'] ?? '该商品';
         $label = trim((string)($goodsInfo['require_web_unlock_label'] ?? ''));
-        if ($label === '') {
-            $activeId = self::parseActiveIdFromKey((string)($goodsInfo['require_web_unlock_key'] ?? ''));
-            $activeName = $activeId > 0
-                ? ((string)ActiveModel::where('id', $activeId)->value('name') ?: '指定活动')
-                : '指定活动';
-            $label = '完成 Web 活动「' . $activeName . '」对应挑战后';
+        if ($label !== '') {
+            return $label;
         }
-        return $label . '方可兑换（' . $goodsName . '）';
+        return self::defaultUnlockHint($goodsInfo);
     }
 
     /** 1+1：累计完成天数 ≥3 时同步商品解锁（含历史用户补发） */

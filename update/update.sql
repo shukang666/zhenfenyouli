@@ -665,5 +665,5 @@ UPDATE `cmf_goods` SET
   `point` = 0,
   `list_order` = 0,
   `require_web_unlock_key` = 'web_active:57:milestone:3',
-  `require_web_unlock_label` = '完成「1+1活动」7日挑战中满3天任务后，可0积分兑换本商品'
+  `require_web_unlock_label` = '完成「1+1活动」满3天挑战后，可0积分兑换本商品'
 WHERE `id` = 101 AND `delete_time` = 0;

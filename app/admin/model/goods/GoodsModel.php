@@ -389,17 +389,14 @@ class GoodsModel extends ToolModel
         $data['require_web_unlock_key'] = $webKey;
         $data['require_web_unlock_label'] = trim((string)($data['require_web_unlock_label'] ?? ''));
         $data['require_web_active_id'] = $webKey !== '' ? GoodsWebUnlockService::parseActiveIdFromKey($webKey) : 0;
+        $data['require_web_unlock_active_name'] = $webKey !== '' ? GoodsWebUnlockService::activeNameForKey($webKey) : '';
         $data['require_web_unlock_met'] = 1;
         $data['require_web_unlock_tip'] = '';
         if ($webKey !== '') {
             $webMet = GoodsWebUnlockService::userMetWebUnlock($userId, $data);
             $data['require_web_unlock_met'] = $webMet ? 1 : 0;
             if (!$webMet) {
-                if ($data['require_web_unlock_label'] !== '') {
-                    $data['require_web_unlock_tip'] = $data['require_web_unlock_label'];
-                } else {
-                    $data['require_web_unlock_tip'] = GoodsWebUnlockService::blockMessage($data);
-                }
+                $data['require_web_unlock_tip'] = GoodsWebUnlockService::blockMessage($data);
             }
         }
         if ($webKey !== '' && (int)$data['require_web_unlock_met'] === 0) {

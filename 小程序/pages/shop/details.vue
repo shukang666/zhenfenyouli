@@ -1,5 +1,6 @@
 <template>
-    <view>
+    <view class="goods-detail-root">
+    <view class="goods-detail-page">
         <u-swiper :list="goods.photos" height="750" border-radius="0"></u-swiper>
         <view class="u-p-30 u-type-white-bg">
             <view class="u-flex u-row-between">
@@ -7,6 +8,7 @@
                     <text v-if="Number(goods.price)">{{goods.price}}元</text>
                     <text v-if="Number(goods.price) && goods.point"> + </text>
                     <text v-if="goods.point">{{goods.point}}积分</text>
+                    <text v-if="!Number(goods.price) && !goods.point" class="u-type-primary">0积分兑换</text>
                 </view>
                 <view class="u-font-24 u-type-info">
                     {{goods.sell_count}}人兑换
@@ -28,14 +30,14 @@
                         @click="goSignActive">去签到</u-button>
                 </view>
             </view>
-            <view class="web-unlock-bar u-m-t-20" v-if="hasWebUnlockRequire">
-                <view class="u-font-24 web-unlock-text">
-                    <text v-if="webUnlockMet">已解锁：可 0 积分兑换本商品</text>
-                    <text v-else>{{ webUnlockHint }}</text>
+            <view class="activity-unlock-bar u-m-t-20" v-if="hasActivityUnlockRequire">
+                <view class="u-font-24 activity-unlock-text">
+                    <text v-if="activityUnlockMet">已满足「{{ activityUnlockName }}」条件，可0积分兑换</text>
+                    <text v-else>{{ activityUnlockHint }}</text>
                 </view>
-                <view class="u-m-t-15" v-if="!webUnlockMet && webUnlockActiveId">
+                <view class="u-m-t-15" v-if="!activityUnlockMet && activityUnlockActiveId">
                     <u-button type="primary" size="mini" hover-class="none" :customStyle="{background: '#1877F2'}"
-                        @click="goWebUnlockActivity">去参加挑战</u-button>
+                        @click="goActivityUnlock">去参加「{{ activityUnlockName }}」</u-button>
                 </view>
             </view>
         </view>
@@ -82,12 +84,12 @@
                 </view>
             </scroll-view>
         </view>
-        <view class="u-p-30 u-type-white-bg u-m-t-30">
+        <view class="u-p-30 u-type-white-bg u-m-t-30 goods-detail-rich">
             <view class="u-flex u-row-center">
                 <u-image width="447" height="28"
                     src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/xcxkf052/admin/20250521/b5fb7df0b75ce7d4f0f8a7ba800f9d66.png"></u-image>
             </view>
-            <view class="u-m-t-30">
+            <view class="u-m-t-30 goods-detail-parse">
                 <u-parse :html="goods.content"></u-parse>
             </view>
             <view class="">
@@ -95,34 +97,35 @@
                     :key="index"></u-image>
             </view>
         </view>
-        <u-gap height="130"></u-gap>
-        <view class="submit-btn safe-area-inset-bottom">
-            <view class="u-flex u-shrink-no u-m-lr-30">
-                <view class="">
-                    <button class="u-reset-button" open-type="share">
-                        <u-icon name="zhuanfa" size="42" color="#808080" label="转发" label-pos="bottom"
-                            label-size="22"></u-icon>
-                    </button>
-                </view>
-                <view class="u-m-l-30">
-                    <u-icon :name="goods.is_collect ? 'thumb-up-fill' : 'thumb-up'" size="42"
-                        :color="goods.is_collect ? '#18AF38' : '#808080'" label="点赞" label-pos="bottom" label-size="22"
-                        @click="col_goods(goods)"></u-icon>
-                </view>
+        <view class="goods-detail-page__foot"></view>
+    </view>
+    <view class="submit-btn safe-area-inset-bottom goods-detail-submit">
+        <view class="u-flex u-shrink-no u-m-lr-30">
+            <view class="">
+                <button class="u-reset-button" open-type="share">
+                    <u-icon name="zhuanfa" size="42" color="#808080" label="转发" label-pos="bottom"
+                        label-size="22"></u-icon>
+                </button>
             </view>
-            <view class="u-width-100 u-flex u-m-tb-20">
-                <view class="btn-item">
-                    <u-button type="warning" hoverClass="none" :custom-style="{background:'#FF7E15',borderRadius:0}"
-                        @click="handleBuy('cart')">加入购物车</u-button>
-                </view>
-                <view class="btn-item">
-                    <u-button type="error" hoverClass="none" :custom-style="{background:'#18AF38',borderRadius:0}"
-                        @click="handleBuy('buy')">立即购买</u-button>
-                </view>
+            <view class="u-m-l-30">
+                <u-icon :name="goods.is_collect ? 'thumb-up-fill' : 'thumb-up'" size="42"
+                    :color="goods.is_collect ? '#18AF38' : '#808080'" label="点赞" label-pos="bottom" label-size="22"
+                    @click="col_goods(goods)"></u-icon>
             </view>
         </view>
-        <!-- 选择规格 -->
-        <sku-select ref="sku" @change="submitOrder"></sku-select>
+        <view class="u-width-100 u-flex u-m-tb-20">
+            <view class="btn-item">
+                <u-button type="warning" hoverClass="none" :custom-style="{background:'#FF7E15',borderRadius:0}"
+                    @click="handleBuy('cart')">加入购物车</u-button>
+            </view>
+            <view class="btn-item">
+                <u-button type="error" hoverClass="none" :custom-style="{background:'#18AF38',borderRadius:0}"
+                    @click="handleBuy('buy')">立即购买</u-button>
+            </view>
+        </view>
+    </view>
+    <!-- 选择规格 -->
+    <sku-select ref="sku" @change="submitOrder"></sku-select>
     </view>
 </template>
 
@@ -154,23 +157,27 @@
                 }
                 return '需先完成「' + this.signRequireActiveName + '」签到后再兑换'
             },
-            hasWebUnlockRequire() {
+            hasActivityUnlockRequire() {
                 return !!(this.goods && this.goods.require_web_unlock_key)
             },
-            webUnlockMet() {
+            activityUnlockMet() {
                 return Number(this.goods && this.goods.require_web_unlock_met) === 1
             },
-            webUnlockHint() {
+            activityUnlockName() {
+                const name = this.goods && this.goods.require_web_unlock_active_name
+                return name && String(name).trim() ? String(name).trim() : '相关活动'
+            },
+            activityUnlockHint() {
                 const tip = this.goods && this.goods.require_web_unlock_tip
                 if (tip && String(tip).trim()) return String(tip).trim()
-                return '完成指定 Web 活动挑战后，可 0 积分兑换本商品'
+                return '完成「' + this.activityUnlockName + '」对应任务后，可兑换本商品'
             },
-            webUnlockActiveId() {
+            activityUnlockActiveId() {
                 return Number(this.goods && this.goods.require_web_active_id) || 0
             },
             redeemAllowed() {
                 if (this.goods.require_active_id > 0 && !this.signRequireMet) return false
-                if (this.hasWebUnlockRequire && !this.webUnlockMet) return false
+                if (this.hasActivityUnlockRequire && !this.activityUnlockMet) return false
                 return true
             },
         },
@@ -185,14 +192,13 @@
             })
         },
         methods: {
-            //加入购物车/购买(addcart加入购物车 buy立即购买)
             handleBuy(type) {
                 if (!this.isLogin) return this.$u.func.checkLogin();
                 if (!this.redeemAllowed) {
                     if (this.goods.require_active_id > 0 && !this.signRequireMet) {
                         this.$u.toast(this.signRequireHint);
                     } else {
-                        this.$u.toast(this.webUnlockHint);
+                        this.$u.toast(this.activityUnlockHint);
                     }
                     return;
                 }
@@ -204,20 +210,16 @@
                     id: this.goods.require_active_id
                 });
             },
-            goWebUnlockActivity() {
-                const id = this.webUnlockActiveId
+            goActivityUnlock() {
+                const id = this.activityUnlockActiveId
                 if (!id) return
                 this.$u.route('/pages/activity/lsxf/details-new', { id })
             },
-            //确定购买
             submitOrder(data) {
-                console.log(data)
                 if (data.type == 'addcart') {
-                    // 加入购物车
                     this.$u.api.add_cart({
                         goods_id: data.goods_id,
                         count: data.count,
-                        // sku_id: data.sku_name || ''
                     }).then(res => {
                         this.$u.toast(res.msg)
                     }).catch(err => {
@@ -230,7 +232,6 @@
                     })
                 }
             },
-            // 收藏
             col_goods(item) {
                 if (!this.isLogin) return this.$u.route('/pages/public/login')
                 this.$u.api.col_goods({
@@ -249,7 +250,6 @@
                     this.$u.toast(err.msg)
                 })
             },
-            // 详情
             get_goods_detail(id) {
                 this.$u.api.get_goods_detail({
                     id
@@ -289,6 +289,28 @@
 </script>
 
 <style lang="scss">
+    .goods-detail-page {
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    /* 底部固定栏约两行按钮 + 安全区，避免详情被挡 */
+    .goods-detail-page__foot {
+        height: calc(240rpx + constant(safe-area-inset-bottom));
+        height: calc(240rpx + env(safe-area-inset-bottom));
+    }
+
+    .goods-detail-submit {
+        flex-direction: column;
+        padding-bottom: constant(safe-area-inset-bottom);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .goods-detail-parse {
+        overflow: visible;
+        word-break: break-word;
+    }
+
     .sign-require-bar {
         padding: 20rpx 24rpx;
         background: #fff8e6;
@@ -301,14 +323,14 @@
         line-height: 1.5;
     }
 
-    .web-unlock-bar {
+    .activity-unlock-bar {
         padding: 20rpx 24rpx;
         background: #eef4ff;
         border-radius: 12rpx;
         border: 1rpx solid #c5d8ff;
     }
 
-    .web-unlock-text {
+    .activity-unlock-text {
         color: #1a4d8c;
         line-height: 1.5;
     }

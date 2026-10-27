@@ -468,6 +468,7 @@ class TabHomeService
         foreach ($items as &$item) {
             $key = trim((string)($item['require_web_unlock_key'] ?? ''));
             $item['is_web_activity_goods'] = $key !== '' ? 1 : 0;
+            $item['web_unlock_active_name'] = $key !== '' ? GoodsWebUnlockService::activeNameForKey($key) : '';
         }
         unset($item);
         return $items;

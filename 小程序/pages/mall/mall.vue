@@ -206,7 +206,7 @@
 						<u-image width="100%" height="320" mode="aspectFill" :src="item.thumb"></u-image>
 						<view class="goods-card__body">
 							<view class="goods-card__zone" v-if="item.second_name">{{ item.second_name }}</view>
-							<view class="goods-card__tag" v-if="item.is_web_activity_goods">活动福利</view>
+							<view class="goods-card__tag" v-if="item.is_web_activity_goods && item.web_unlock_active_name">{{ item.web_unlock_active_name }}</view>
 							<view class="goods-card__name u-line-2">{{ item.goods_name }}</view>
 							<view class="goods-card__price">
 								<text v-if="Number(item.price)">{{ item.price }}元</text>
