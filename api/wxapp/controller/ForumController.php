@@ -22,6 +22,7 @@ use app\admin\model\forum\ForumMsgLogModel;
 use app\admin\model\forum\ForumMsgUserModel;
 use app\admin\model\member\CommunityCateModel;
 use app\admin\model\member\CommunityModel;
+use api\wxapp\service\CommunitySortHelper;
 use app\admin\model\member\CommunityParentModel;
 use app\admin\model\member\MemberLevelModel;
 use app\admin\model\member\MemberModel;
@@ -1023,7 +1024,9 @@ class ForumController extends AuthController
         $pid = $this->request->param('pid');
         $where = [];
         if(!empty($pid)) $where[] = ['pid', '=', $pid];
-        $list = $communityModel->field('id,name')->where($where)->order('list_order asc,id asc')->select();
+        $list = $communityModel->field('id,name')->where($where)
+            ->orderRaw(CommunitySortHelper::orderRawByNamePinyin('name', 'id'))
+            ->select();
 //        foreach ($list as &$item) {
 //            $item['county_name'] = CommonModel::getAreaName($item['county']);
 //            $item = CommonModel::getOne($item, ['thumb']);
@@ -1070,8 +1073,7 @@ class ForumController extends AuthController
             ->when($pureKeyword !== '', function ($query) use ($nameExpr, $pureKeyword) {
                 $query->whereRaw("{$nameExpr} LIKE :keyword", ['keyword' => '%' . $pureKeyword . '%']);
             })
-            // 小区 list_order 大量相同，必须加 id 保证分页顺序稳定，否则翻页会出现重复行
-            ->order(['c.list_order' => 'asc', 'c.id' => 'asc'])
+            ->orderRaw(CommunitySortHelper::orderRawByNamePinyin())
             ->paginate([
                 'page' => $page,
                 'list_rows' => $page_size,

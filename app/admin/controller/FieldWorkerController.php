@@ -4,6 +4,7 @@
 // +----------------------------------------------------------------------
 namespace app\admin\controller;
 
+use api\wxapp\service\CommunitySortHelper;
 use app\common\SupervisionMonitorPhotos;
 use cmf\controller\BaseController;
 use think\facade\Db;
@@ -402,7 +403,7 @@ class FieldWorkerController extends BaseController
             $query->whereRaw("{$nameExpr} LIKE :keyword", ['keyword' => '%' . $pureKeyword . '%']);
         }
 
-        $query->order(['c.list_order' => 'asc', 'c.id' => 'asc']);
+        $query->orderRaw(CommunitySortHelper::orderRawByNamePinyin());
 
         $total = $query->count();
         $list = $query->limit(($page - 1) * $pageSize, $pageSize)->select();
