@@ -852,6 +852,25 @@ class ForumController extends ToolController
         $this->success('', '', $list);
     }
 
+    /** 代传巡检：按手机号模糊查会员 */
+    public function patrolMemberSearchJson()
+    {
+        $keyword = trim((string)$this->request->param('keyword', ''));
+        $keyword = preg_replace('/\s+/', '', $keyword);
+        if ($keyword === '' || strlen($keyword) < 3) {
+            $this->success('', '', []);
+        }
+        $list = MemberModel::alias('m')
+            ->leftJoin('member_community c', 'c.id = m.community_id AND c.delete_time = 0')
+            ->where('m.status', '>', 0)
+            ->where('m.mobile', 'like', '%' . $keyword . '%')
+            ->field('m.id,m.nickname,m.mobile,m.community_id,c.name as community_name')
+            ->order('m.id desc')
+            ->limit(30)
+            ->select();
+        $this->success('', '', $list);
+    }
+
     public function patrolAddPost()
     {
         $userId = (int)$this->request->param('user_id', 0);
@@ -867,10 +886,10 @@ class ForumController extends ToolController
         $skipLimit = (int)$this->request->param('skip_inspection_limit', 0);
 
         if ($userId <= 0) {
-            $this->error('请填写归属会员 ID');
+            $this->error('请先选择归属会员');
         }
-        if (!MemberModel::where('id', $userId)->where('delete_time', 0)->find()) {
-            $this->error('会员不存在或已删除');
+        if (!MemberModel::where('id', $userId)->where('status', '>', 0)->find()) {
+            $this->error('会员不存在或已禁用');
         }
         if ($communityId <= 0) {
             $this->error('请选择工作小区');

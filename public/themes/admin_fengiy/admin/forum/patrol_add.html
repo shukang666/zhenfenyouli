@@ -1,4 +1,49 @@
 <include file="public@header"/>
+<style>
+    .patrol-member-picker { position: relative; max-width: 520px; }
+    .patrol-member-selected {
+        margin-top: 10px;
+        padding: 10px 12px;
+        background: #f0f9f4;
+        border: 1px solid #b7e4c7;
+        border-radius: 4px;
+        display: none;
+    }
+    .patrol-member-selected.is-show { display: block; }
+    .patrol-member-list {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 100%;
+        z-index: 100;
+        max-height: 280px;
+        overflow-y: auto;
+        margin: 4px 0 0;
+        padding: 0;
+        list-style: none;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.12);
+        display: none;
+    }
+    .patrol-member-list.is-open { display: block; }
+    .patrol-member-list li {
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .patrol-member-list li:last-child { border-bottom: none; }
+    .patrol-member-list li:hover { background: #e8f5e9; }
+    .patrol-member-list .muted { color: #888; font-size: 12px; }
+    .patrol-member-empty {
+        padding: 12px;
+        color: #999;
+        font-size: 13px;
+        display: none;
+    }
+    .patrol-member-empty.is-show { display: block; }
+</style>
 </head>
 <body>
 <div class="wrap js-check-wrap">
@@ -11,8 +56,18 @@
         <div class="form-group">
             <label class="col-sm-2 control-label"><span class="form-required">*</span>归属会员</label>
             <div class="col-md-6 col-sm-10">
-                <input type="number" class="form-control" name="user_id" min="1" placeholder="督导员/运营在小程序侧的会员 ID" required style="max-width:280px;">
-                <p class="help-block">与小程序提交记录归属一致，用于积分与列表展示；可在「会员」或巡检列表「用户」列查看 ID。</p>
+                <input type="hidden" name="user_id" id="js-patrol-user-id" value="" required>
+                <div class="patrol-member-picker">
+                    <input type="text" class="form-control" id="js-patrol-mobile" autocomplete="off"
+                           placeholder="输入手机号，至少 3 位数字" maxlength="20">
+                    <ul class="patrol-member-list" id="js-patrol-member-list"></ul>
+                </div>
+                <p class="patrol-member-empty" id="js-patrol-member-empty">未找到匹配会员，请继续输入或核对手机号</p>
+                <div class="patrol-member-selected" id="js-patrol-member-selected">
+                    已选：<strong id="js-patrol-member-label"></strong>
+                    <a href="javascript:;" class="text-danger" id="js-patrol-member-clear" style="margin-left:12px;">重新选择</a>
+                </div>
+                <p class="help-block">输入手机号后从下方列表点选；记录将记在该会员名下（与小程序提交一致）。</p>
             </div>
         </div>
 
@@ -104,6 +159,83 @@
 <script>
 (function () {
     var pointsUrl = "{:url('patrolPointsJson')}";
+    var memberSearchUrl = "{:url('patrolMemberSearchJson')}";
+    var memberTimer = null;
+    var selectedMember = null;
+
+    function escapeHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+
+    function renderMemberList(list) {
+        var $list = $('#js-patrol-member-list');
+        var $empty = $('#js-patrol-member-empty');
+        if (!list || !list.length) {
+            $list.removeClass('is-open').empty();
+            $empty.addClass('is-show');
+            return;
+        }
+        $empty.removeClass('is-show');
+        var html = '';
+        list.forEach(function (row) {
+            var label = (row.nickname || '未命名') + ' · ' + (row.mobile || '') + ' · ID ' + row.id;
+            if (row.community_name) {
+                label += ' · ' + row.community_name;
+            }
+            html += '<li data-id="' + row.id + '" data-mobile="' + escapeHtml(row.mobile || '') + '" data-community-id="' + (row.community_id || '') + '" data-label="' + escapeHtml(label) + '">' +
+                '<div>' + escapeHtml(row.nickname || '未命名') + ' <span class="muted">' + escapeHtml(row.mobile || '') + '</span></div>' +
+                '<div class="muted">ID ' + row.id + (row.community_name ? ' · ' + escapeHtml(row.community_name) : '') + '</div>' +
+                '</li>';
+        });
+        $list.html(html).addClass('is-open');
+    }
+
+    function searchMembers(keyword) {
+        keyword = (keyword || '').replace(/\s/g, '');
+        if (selectedMember) {
+            return;
+        }
+        if (keyword.length < 3) {
+            $('#js-patrol-member-list').removeClass('is-open').empty();
+            $('#js-patrol-member-empty').removeClass('is-show');
+            return;
+        }
+        $.getJSON(memberSearchUrl, { keyword: keyword }, function (res) {
+            if (res.code === 1) {
+                renderMemberList(res.data || []);
+            } else {
+                renderMemberList([]);
+            }
+        }).fail(function () {
+            renderMemberList([]);
+        });
+    }
+
+    function selectMember(id, label, mobile, communityId) {
+        selectedMember = { id: id, label: label };
+        $('#js-patrol-user-id').val(id);
+        $('#js-patrol-mobile').val(mobile || '').prop('readonly', true);
+        $('#js-patrol-member-list').removeClass('is-open').empty();
+        $('#js-patrol-member-empty').removeClass('is-show');
+        $('#js-patrol-member-label').text(label);
+        $('#js-patrol-member-selected').addClass('is-show');
+        if (communityId) {
+            $('#js-community-id').val(String(communityId));
+            if (window.layui && layui.form) {
+                layui.form.render('select');
+            }
+            loadPoints(communityId);
+        }
+    }
+
+    function clearMember() {
+        selectedMember = null;
+        $('#js-patrol-user-id').val('');
+        $('#js-patrol-mobile').val('').prop('readonly', false).focus();
+        $('#js-patrol-member-selected').removeClass('is-show');
+        $('#js-patrol-member-list').removeClass('is-open').empty();
+        $('#js-patrol-member-empty').removeClass('is-show');
+    }
 
     function loadPoints(communityId) {
         var $cate = $('#js-cate-id');
@@ -138,6 +270,42 @@
     $(function () {
         toggleRectify();
         $('.js-has-rectify').on('change', toggleRectify);
+
+        $('#js-patrol-mobile').on('input', function () {
+            if (memberTimer) clearTimeout(memberTimer);
+            var val = $(this).val();
+            memberTimer = setTimeout(function () {
+                searchMembers(val);
+            }, 280);
+        });
+
+        $('#js-patrol-member-list').on('click', 'li', function () {
+            var $li = $(this);
+            selectMember(
+                $li.attr('data-id'),
+                $li.attr('data-label'),
+                $li.attr('data-mobile'),
+                $li.attr('data-community-id')
+            );
+        });
+
+        $('#js-patrol-member-clear').on('click', function (e) {
+            e.preventDefault();
+            clearMember();
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.patrol-member-picker').length) {
+                $('#js-patrol-member-list').removeClass('is-open');
+            }
+        });
+
+        $('form.js-ajax-form').on('submit', function () {
+            if (!$('#js-patrol-user-id').val()) {
+                alert('请先通过手机号搜索并点选归属会员');
+                return false;
+            }
+        });
 
         $('#js-community-id').on('change', function () {
             loadPoints($(this).val());

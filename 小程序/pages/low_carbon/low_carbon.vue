@@ -2024,11 +2024,7 @@ export default {
   box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.22);
 }
 .fb-special-bundle-poster-wrap--compact .fb-special-bundle-poster-img {
-  /* 等比放大 + 上移，裁掉素材自带的上/左/右（及底部）留白；框高不变 */
-  width: 116%;
-  max-width: none;
-  margin-left: -8%;
-  margin-top: -26rpx;
+  width: 100%;
   border-radius: 0;
   box-shadow: none;
   vertical-align: top;
