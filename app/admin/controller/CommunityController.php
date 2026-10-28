@@ -37,14 +37,8 @@ class CommunityController extends ToolController
         $where = [];
 
 
-        // 遍历参数数组 模糊匹配
-        foreach ($params as $key => $value) {
-            if ($key != 'page') {
-                if (!empty($value)) {
-                    $where[] = [$key, 'like', '%' . trim($value) . '%'];
-                }
-            }
-
+        if (!empty($params['name'])) {
+            $where[] = ['name', 'like', '%' . trim($params['name']) . '%'];
         }
         if(!empty($params['parent_name'])){
             $ids = CommunityParentModel::where('name', 'like', '%' . $params['parent_name'] . '%')->column('id');

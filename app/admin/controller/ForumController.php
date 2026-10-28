@@ -66,9 +66,24 @@ class ForumController extends ToolController
         }
 
         if (!empty($param['community_id'])) {
-            // 与列表展示的 community_name 来源一致：subject_community_id 实际全为 0，
-            // community_name 回退取自 b.community_id，故此处按 b.community_id 筛选
-            $where[] = ['b.community_id', '=', trim($param['community_id'])];
+            $cid = (int)trim($param['community_id']);
+            if ($cid > 0) {
+                // 与列表展示一致：优先 subject_community_id，否则帖子 community_id 或用户绑定小区
+                $where[] = function ($query) use ($cid) {
+                    $query->where(function ($q) use ($cid) {
+                        $q->where('a.subject_community_id', '=', $cid)
+                            ->whereOr(function ($q2) use ($cid) {
+                                $q2->where(function ($q3) {
+                                    $q3->whereNull('a.subject_community_id')
+                                        ->whereOr('a.subject_community_id', '=', 0);
+                                })->where(function ($q4) use ($cid) {
+                                    $q4->where('a.community_id', '=', $cid)
+                                        ->whereOr('b.community_id', '=', $cid);
+                                });
+                            });
+                    });
+                };
+            }
         }
 
 //        $where[] = ['a.type', 'in', [1, 3]];
@@ -112,7 +127,7 @@ class ForumController extends ToolController
             ->alias('a')
             ->join('member b', 'a.user_id=b.id')
             ->leftjoin('forum_cate c', 'a.cate_id=c.id')
-            ->field('a.*,b.nickname,b.mobile user_mobile,b.id uid,b.avatar,c.name cate_name,b.community_id')
+            ->field('a.*,b.nickname,b.mobile user_mobile,b.id uid,b.avatar,c.name cate_name,b.community_id as member_community_id')
             ->where($where)
             ->order('id desc');
         if ($export) {
@@ -130,11 +145,17 @@ class ForumController extends ToolController
                 $item['user_info'] = "被删除";
             }
 
-            //小区名称
-            $item['community_name'] = CommunityModel::where('id', $item['subject_community_id'])->value('name');
-            if (empty($item['community_name'])) {
-                $item['community_name'] = CommunityModel::where('id', $item['community_id'])->value('name');
+            // 小区名称（勿用 b.community_id 覆盖 a.community_id 后再查，见 field 别名）
+            $displayCommunityId = (int)($item['subject_community_id'] ?? 0);
+            if ($displayCommunityId <= 0) {
+                $displayCommunityId = (int)($item['community_id'] ?? 0);
             }
+            if ($displayCommunityId <= 0) {
+                $displayCommunityId = (int)($item['member_community_id'] ?? 0);
+            }
+            $item['community_name'] = $displayCommunityId > 0
+                ? (CommunityModel::where('id', $displayCommunityId)->value('name') ?: '')
+                : '';
 
             if ($item['type'] == 1) {
                 $item['cate_name'] = ForumCateModel::where('id', $item['cate_id'])->value('name');
