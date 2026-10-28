@@ -112,24 +112,18 @@
 </template>
 
 <script>
-import settings from "@/common/settings.js";
+import { DTSH_WORKBENCH_BANNER_URL } from "@/common/activityTabScreenshot.js";
 import {
   openSceneClockHub,
   parseBannerSceneClockEntry,
   openSceneClockFromBannerEntry,
 } from "@/common/sceneClockEntry.js";
 
-const DTSH_SPOTLIGHT_POSTER_VER = "2026101216";
-const DTSH_SPOTLIGHT_POSTER =
-  settings.staticAssetBase +
-  "planning/activity-tab-screenshot.png?v=" +
-  DTSH_SPOTLIGHT_POSTER_VER;
-
 export default {
   data() {
     return {
       banner_list: [],
-      dtshSpotlightPoster: DTSH_SPOTLIGHT_POSTER,
+      dtshSpotlightPoster: DTSH_WORKBENCH_BANNER_URL,
     };
   },
   onLoad() {

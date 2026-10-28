@@ -1,19 +1,17 @@
 <template>
 	<view class="container">
-		<!-- 公益行动特殊入口：垃圾分类活动包（与活动首页同款） -->
-		<view class="fb-special-bundle" v-if="cate_id === 5" @click="gotoGarbageClassify">
-			<view class="fb-special-bundle-inner">
-				<view class="fb-special-bundle-copy">
-					<text class="fb-special-bundle-badge">公益行动</text>
-					<text class="fb-special-bundle-title">垃圾真分 · 打卡工作台</text>
-					<text class="fb-special-bundle-sub">真分打卡 · 分类学习 · 社区专题</text>
-					<view class="fb-special-bundle-cta">
-						<text>立即进入</text>
-						<text class="fb-special-bundle-arrow">›</text>
-					</view>
-				</view>
-				<view class="fb-special-bundle-emoji">♻️</view>
-			</view>
+		<!-- 公益行动：真分入口 COS 整图（与活动 Tab 同款，非底部工作台大图） -->
+		<view
+			class="fb-zhenfen-entry-poster-wrap"
+			v-if="cate_id === 5"
+			@click="gotoGarbageClassify"
+		>
+			<image
+				class="fb-zhenfen-entry-poster-img"
+				:src="zhenfenEntryBanner"
+				mode="widthFix"
+				show-menu-by-longpress="false"
+			/>
 		</view>
 
 		<!-- 社区专题：全部 4 项（与 garbage-classify 同款） -->
@@ -85,6 +83,7 @@
 
 <script>
 import settings from "@/common/settings.js";
+import { ACTIVITY_TAB_ENTRY_BANNER_URL } from "@/common/activityTabScreenshot.js";
 
 /** 社区专题：整卡仅一张图（文案/图标都在图里） */
 const SPOT_MODULE_COVER_VER = "2026101415";
@@ -161,6 +160,7 @@ function mergeSpotModulesFromApi(fromApi) {
 	export default {
 		data() {
 			return {
+				zhenfenEntryBanner: ACTIVITY_TAB_ENTRY_BANNER_URL,
 				cate_id: 0,
 				cate_name: '',
 				active_list: [],
@@ -291,70 +291,15 @@ function mergeSpotModulesFromApi(fromApi) {
 	width: 80rpx;
 }
 
-/* ===== 公益行动特殊入口（垃圾分类活动包） ===== */
-.fb-special-bundle {
+/* ===== 真分入口整图 ===== */
+.fb-zhenfen-entry-poster-wrap {
   padding: 16rpx;
 }
-.fb-special-bundle-inner {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 30rpx 30rpx 30rpx 34rpx;
+.fb-zhenfen-entry-poster-img {
+  width: 100%;
+  display: block;
   border-radius: 20rpx;
-  overflow: hidden;
-  background: linear-gradient(135deg, #6a4f9e 0%, #8c6ec0 55%, #b594d7 100%);
-  box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.28),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
-}
-.fb-special-bundle:active { opacity: 0.92; transform: scale(0.99); }
-.fb-special-bundle-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8rpx;
-}
-.fb-special-bundle-badge {
-  padding: 4rpx 14rpx;
-  border-radius: 999rpx;
-  font-size: 20rpx;
-  font-weight: 700;
-  color: #5a3d8a;
-  background: rgba(255, 255, 255, 0.92);
-  letter-spacing: 1rpx;
-}
-.fb-special-bundle-title {
-  font-size: 34rpx;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.25;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.18);
-}
-.fb-special-bundle-sub {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.88);
-}
-.fb-special-bundle-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 4rpx;
-  margin-top: 8rpx;
-  padding: 9rpx 18rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-  font-size: 22rpx;
-  font-weight: 700;
-}
-.fb-special-bundle-arrow { font-size: 28rpx; font-weight: 300; }
-.fb-special-bundle-emoji {
-  flex-shrink: 0;
-  font-size: 120rpx;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.85);
-  filter: drop-shadow(0 4rpx 14rpx rgba(0, 0, 0, 0.2));
-  margin-left: 12rpx;
+  box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.22);
 }
 
 .fb-press {
