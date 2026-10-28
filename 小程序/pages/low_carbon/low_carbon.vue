@@ -194,12 +194,14 @@
       class="fb-special-bundle-poster-wrap fb-special-bundle-poster-wrap--compact"
       @click="gotoGarbageClassify"
     >
-      <image
-        class="fb-special-bundle-poster-img"
-        :src="activityTabEntryBanner"
-        mode="widthFix"
-        show-menu-by-longpress="false"
-      />
+      <view class="fb-special-bundle-poster-frame">
+        <image
+          class="fb-special-bundle-poster-img"
+          :src="activityTabEntryBanner"
+          mode="widthFix"
+          show-menu-by-longpress="false"
+        />
+      </view>
     </view>
 
     <!-- 暂时不需要，注释掉了 -->
@@ -2000,8 +2002,18 @@ export default {
   padding: 16rpx;
 }
 .fb-special-bundle-poster-wrap--compact {
-  padding: 6rpx 40rpx 20rpx;
-  margin-top: 4rpx;
+  padding: 10rpx 0 8rpx;
+  margin-top: 2rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+.fb-special-bundle-poster-frame {
+  overflow: hidden;
+  width: 100%;
+  height: 180rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 6rpx 20rpx rgba(24, 80, 48, 0.1);
+  background: #f4faf6;
 }
 .fb-special-bundle-poster-img {
   width: 100%;
@@ -2010,8 +2022,10 @@ export default {
   box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.22);
 }
 .fb-special-bundle-poster-wrap--compact .fb-special-bundle-poster-img {
-  border-radius: 22rpx;
-  box-shadow: 0 8rpx 24rpx rgba(24, 80, 48, 0.14);
+  width: 100%;
+  border-radius: 0;
+  box-shadow: none;
+  vertical-align: top;
 }
 
 /* ===== 通用板块 ===== */
