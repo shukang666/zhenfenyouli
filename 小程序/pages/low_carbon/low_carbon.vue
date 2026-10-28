@@ -34,7 +34,19 @@
         </view>
       </view>
     </view>
+
     <care-pull-hint :visible="!showCareHint"></care-pull-hint>
+
+    <!-- 活动 Tab 顶部 Banner（在关怀版拉绳下方，纯展示无点击） -->
+    <view class="fb-activity-top-banner" v-if="activityTabTopBanner">
+      <image
+        class="fb-activity-top-banner-img"
+        :src="activityTabTopBanner"
+        mode="widthFix"
+        show-menu-by-longpress="false"
+      />
+    </view>
+
     <skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
 
     <!-- 轻任务：后台配置的 Web 式活动，作为活动页醒目线上入口 -->
@@ -442,7 +454,10 @@ import {
 } from "@/common/homeHotSpotEntries.js";
 import careGesture from "@/common/care-gesture.mixin.js";
 import SkeletonScreen from "@/components/skeleton-screen/index.vue";
-import { ACTIVITY_TAB_ENTRY_BANNER_URL } from "@/common/activityTabScreenshot.js";
+import {
+  ACTIVITY_TAB_ENTRY_BANNER_URL,
+  ACTIVITY_TAB_TOP_BANNER_URL,
+} from "@/common/activityTabScreenshot.js";
 
 /** 活动 Tab 底部「全部活动」仅预览条数，完整列表见 active-list */
 const ACTIVE_LIST_PREVIEW_SIZE = 2;
@@ -527,6 +542,7 @@ export default {
   mixins: [careGesture],
   data() {
     return {
+      activityTabTopBanner: ACTIVITY_TAB_TOP_BANNER_URL,
       activityTabEntryBanner: ACTIVITY_TAB_ENTRY_BANNER_URL,
       isLoading: true,
       banner_list: [],
@@ -877,6 +893,16 @@ export default {
   margin-left: 12rpx;
   font-size: 26rpx;
   color: #9aa39c;
+}
+
+/* ===== 活动 Tab 顶部 Banner（紧跟 care-pull-hint） ===== */
+.fb-activity-top-banner {
+  padding: 4rpx 24rpx 12rpx;
+}
+.fb-activity-top-banner-img {
+  width: 100%;
+  display: block;
+  border-radius: 20rpx;
 }
 
 /* ===== 垃圾真分：Banner + 场景入口统一外框 ===== */
