@@ -112,20 +112,14 @@
       </view>
     </view>
 
-    <!-- 公益行动特殊入口：垃圾分类活动包 -->
-    <view class="fb-special-bundle" @click="gotoGarbageClassify">
-      <view class="fb-special-bundle-inner">
-        <view class="fb-special-bundle-copy">
-          <text class="fb-special-bundle-badge">公益行动</text>
-          <text class="fb-special-bundle-title">垃圾真分 · 打卡工作台</text>
-          <text class="fb-special-bundle-sub">真分打卡 · 分类学习 · 社区专题</text>
-          <view class="fb-special-bundle-cta">
-            <text>立即进入</text>
-            <text class="fb-special-bundle-arrow">›</text>
-          </view>
-        </view>
-        <view class="fb-special-bundle-emoji">♻️</view>
-      </view>
+    <!-- 公益行动特殊入口（仅活动 Tab，COS 整图） -->
+    <view class="fb-special-bundle-poster-wrap" @click="gotoGarbageClassify">
+      <image
+        class="fb-special-bundle-poster-img"
+        :src="activityTabEntryBanner"
+        mode="widthFix"
+        show-menu-by-longpress="false"
+      />
     </view>
 
     <!-- 暂时不需要，注释掉了 -->
@@ -448,18 +442,13 @@ import {
 } from "@/common/homeHotSpotEntries.js";
 import careGesture from "@/common/care-gesture.mixin.js";
 import SkeletonScreen from "@/components/skeleton-screen/index.vue";
+import { ACTIVITY_TAB_ENTRY_BANNER_URL } from "@/common/activityTabScreenshot.js";
 
 /** 活动 Tab 底部「全部活动」仅预览条数，完整列表见 active-list */
 const ACTIVE_LIST_PREVIEW_SIZE = 2;
 
 /** 换 COS 图后递增，避免小程序/WebView 缓存旧图 */
 const SPOT_MODULE_COVER_VER = "2026101415";
-const DTSH_SPOTLIGHT_POSTER_VER = "2026101216";
-const DTSH_SPOTLIGHT_POSTER =
-  settings.staticAssetBase +
-  "planning/activity-tab-screenshot.png?v=" +
-  DTSH_SPOTLIGHT_POSTER_VER;
-
 function spotModuleCoverUrl(fileName) {
   return (
     settings.staticAssetBase +
@@ -538,6 +527,7 @@ export default {
   mixins: [careGesture],
   data() {
     return {
+      activityTabEntryBanner: ACTIVITY_TAB_ENTRY_BANNER_URL,
       isLoading: true,
       banner_list: [],
       current_tab: 0,
@@ -1783,76 +1773,15 @@ export default {
   color: #636366;
 }
 
-/* ===== 公益行动特殊入口（垃圾分类活动包） ===== */
-.fb-special-bundle {
+/* ===== 活动 Tab：公益行动入口整图 ===== */
+.fb-special-bundle-poster-wrap {
   padding: 16rpx;
 }
-.fb-special-bundle-inner {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 30rpx 30rpx 30rpx 34rpx;
+.fb-special-bundle-poster-img {
+  width: 100%;
+  display: block;
   border-radius: 20rpx;
-  overflow: hidden;
-  background: linear-gradient(135deg, #6a4f9e 0%, #8c6ec0 55%, #b594d7 100%);
-  box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.28),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
-}
-.fb-special-bundle:active {
-  opacity: 0.92;
-  transform: scale(0.99);
-}
-.fb-special-bundle-copy {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8rpx;
-}
-.fb-special-bundle-badge {
-  padding: 4rpx 14rpx;
-  border-radius: 999rpx;
-  font-size: 20rpx;
-  font-weight: 700;
-  color: #5a3d8a;
-  background: rgba(255, 255, 255, 0.92);
-  letter-spacing: 1rpx;
-}
-.fb-special-bundle-title {
-  font-size: 34rpx;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.25;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.18);
-}
-.fb-special-bundle-sub {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.88);
-}
-.fb-special-bundle-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 4rpx;
-  margin-top: 8rpx;
-  padding: 9rpx 18rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
-  font-size: 22rpx;
-  font-weight: 700;
-}
-.fb-special-bundle-arrow {
-  font-size: 28rpx;
-  font-weight: 300;
-}
-.fb-special-bundle-emoji {
-  flex-shrink: 0;
-  font-size: 120rpx;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.85);
-  filter: drop-shadow(0 4rpx 14rpx rgba(0, 0, 0, 0.2));
-  margin-left: 12rpx;
+  box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.22);
 }
 
 /* ===== 通用板块 ===== */
