@@ -83,7 +83,7 @@
       </view>
     </view>
 
-    <!-- 主题活动：5 大分类 -->
+    <!-- 主题活动：左主卡 + 右副卡 + 三小格（参考陪玩页层次） -->
     <view class="fb-section fb-theme-act" id="guide-fb-theme">
       <view class="fb-section-header">
         <view class="fb-hd">
@@ -91,41 +91,109 @@
           <text class="fb-section-title">主题活动</text>
         </view>
       </view>
-      <view class="fb-theme-board">
+      <view class="fb-theme-bento" v-if="themeHeroCate">
         <view
-          class="fb-theme-cell"
-          v-for="cate in main_categories"
-          :key="cate.id"
-          hover-class="fb-theme-cell--pressed"
+          class="fb-theme-hero"
+          hover-class="fb-theme-card--press"
           :hover-stay-time="80"
-          @click="gotoCateList(cate)"
+          @click="gotoCateList(themeHeroCate)"
         >
           <view
-            class="fb-theme-cell-bg"
-            :style="{ background: cate.bgColor }"
+            class="fb-theme-card-bg"
+            :style="{ background: themeHeroCate.surfaceBg }"
           ></view>
-          <view class="fb-theme-cell-body">
-            <view class="fb-theme-icon">
+          <text class="fb-theme-hero-ribbon">精选</text>
+          <view class="fb-theme-hero-copy">
+            <text class="fb-theme-card-title">{{ themeHeroCate.name }}</text>
+            <view
+              class="fb-theme-pill"
+              :style="{
+                background: themeHeroCate.pillBg,
+                color: themeHeroCate.pillColor,
+              }"
+            >
+              <text>{{ themeHeroCate.pillText }}</text>
+            </view>
+          </view>
+          <view class="fb-theme-hero-icon">
+            <view
+              class="fb-theme-icon-disk fb-theme-icon-disk--lg"
+              :style="{ boxShadow: '0 12rpx 28rpx ' + themeHeroCate.iconHalo }"
+            >
+              <u-icon
+                :name="themeHeroCate.icon"
+                :color="themeHeroCate.iconColor"
+                size="64"
+              ></u-icon>
+            </view>
+          </view>
+        </view>
+        <view class="fb-theme-side">
+          <view
+            v-if="themeSideCate"
+            class="fb-theme-side-card"
+            hover-class="fb-theme-card--press"
+            :hover-stay-time="80"
+            @click="gotoCateList(themeSideCate)"
+          >
+            <view
+              class="fb-theme-card-bg"
+              :style="{ background: themeSideCate.surfaceBg }"
+            ></view>
+            <view class="fb-theme-side-copy">
+              <text class="fb-theme-card-title fb-theme-card-title--sm">{{
+                themeSideCate.name
+              }}</text>
               <view
-                class="fb-theme-icon-halo"
-                :style="{ background: cate.iconHalo }"
+                class="fb-theme-pill fb-theme-pill--sm"
+                :style="{
+                  background: themeSideCate.pillBg,
+                  color: themeSideCate.pillColor,
+                }"
+              >
+                <text>{{ themeSideCate.pillText }}</text>
+              </view>
+            </view>
+            <view class="fb-theme-side-icon">
+              <u-icon
+                :name="themeSideCate.icon"
+                :color="themeSideCate.iconColor"
+                size="44"
+              ></u-icon>
+            </view>
+          </view>
+          <view class="fb-theme-mini-row">
+            <view
+              v-for="cate in themeMiniCates"
+              :key="cate.id"
+              class="fb-theme-mini"
+              hover-class="fb-theme-card--press"
+              :hover-stay-time="80"
+              @click="gotoCateList(cate)"
+            >
+              <view
+                class="fb-theme-card-bg"
+                :style="{ background: cate.surfaceBg }"
               ></view>
-              <view class="fb-theme-icon-disk">
+              <view class="fb-theme-mini-icon">
                 <u-icon
                   :name="cate.icon"
                   :color="cate.iconColor"
-                  size="52"
+                  size="34"
                 ></u-icon>
               </view>
+              <text class="fb-theme-mini-name">{{ cate.name }}</text>
             </view>
-            <text class="fb-theme-cell-name">{{ cate.name }}</text>
           </view>
         </view>
       </view>
     </view>
 
     <!-- 公益行动特殊入口（仅活动 Tab，COS 整图） -->
-    <view class="fb-special-bundle-poster-wrap" @click="gotoGarbageClassify">
+    <view
+      class="fb-special-bundle-poster-wrap fb-special-bundle-poster-wrap--compact"
+      @click="gotoGarbageClassify"
+    >
       <image
         class="fb-special-bundle-poster-img"
         :src="activityTabEntryBanner"
@@ -562,46 +630,71 @@ export default {
           id: 1,
           name: "健康运动",
           subtitle: "Healthy Life",
+          pillText: "动出活力",
           icon: "play-circle-fill",
           iconColor: "#1877F2",
           iconHalo: "rgba(24, 119, 242, 0.35)",
           bgColor: "linear-gradient(160deg, #E7F0FE 0%, #1877F2 100%)",
+          surfaceBg:
+            "linear-gradient(145deg, #ffffff 0%, #eef4ff 42%, #c8dcff 100%)",
+          pillBg: "rgba(24, 119, 242, 0.14)",
+          pillColor: "#1565D8",
         },
         {
           id: 2,
           name: "学习成长",
           subtitle: "Growing Up",
+          pillText: "充电提升",
           icon: "star-fill",
           iconColor: "#1F9D55",
           iconHalo: "rgba(31, 157, 85, 0.32)",
           bgColor: "linear-gradient(160deg, #D4FC79 0%, #3CB878 100%)",
+          surfaceBg:
+            "linear-gradient(145deg, #ffffff 0%, #eefbf3 50%, #b8ebd0 100%)",
+          pillBg: "rgba(31, 157, 85, 0.16)",
+          pillColor: "#16884a",
         },
         {
           id: 3,
           name: "兴趣体验",
           subtitle: "Hobby Time",
+          pillText: "好玩体验",
           icon: "grid-fill",
           iconColor: "#E86A1A",
           iconHalo: "rgba(232, 106, 26, 0.34)",
           bgColor: "linear-gradient(160deg, #FFD194 0%, #FF8A3D 100%)",
+          surfaceBg:
+            "linear-gradient(145deg, #fffaf5 0%, #fff0e0 55%, #ffd4b0 100%)",
+          pillBg: "rgba(232, 106, 26, 0.14)",
+          pillColor: "#c45a12",
         },
         {
           id: 4,
           name: "交流互动",
           subtitle: "Neighbors",
+          pillText: "邻里互动",
           icon: "chat-fill",
           iconColor: "#E84D6A",
           iconHalo: "rgba(232, 77, 106, 0.32)",
           bgColor: "linear-gradient(160deg, #FF9A9E 0%, #F06B8A 100%)",
+          surfaceBg:
+            "linear-gradient(145deg, #fff8f9 0%, #ffecef 55%, #ffc8d4 100%)",
+          pillBg: "rgba(232, 77, 106, 0.14)",
+          pillColor: "#c93d58",
         },
         {
           id: 5,
           name: "公益行动",
           subtitle: "Volunteer",
+          pillText: "志愿参与",
           icon: "gift-fill",
           iconColor: "#7B4FD6",
           iconHalo: "rgba(123, 79, 214, 0.34)",
           bgColor: "linear-gradient(160deg, #D8B4FE 0%, #8B5CF6 100%)",
+          surfaceBg:
+            "linear-gradient(145deg, #faf7ff 0%, #f1eaff 55%, #dbc8ff 100%)",
+          pillBg: "rgba(123, 79, 214, 0.14)",
+          pillColor: "#6b3fc4",
         },
       ],
     };
@@ -620,6 +713,15 @@ export default {
       const total = Number(this.active_total) || 0;
       if (total > ACTIVE_LIST_PREVIEW_SIZE) return true;
       return (this.active_list || []).length > ACTIVE_LIST_PREVIEW_SIZE;
+    },
+    themeHeroCate() {
+      return (this.main_categories && this.main_categories[0]) || null;
+    },
+    themeSideCate() {
+      return (this.main_categories && this.main_categories[1]) || null;
+    },
+    themeMiniCates() {
+      return (this.main_categories || []).slice(2, 5);
     },
   },
   onLoad(options) {
@@ -1023,96 +1125,190 @@ export default {
   height: 100%;
 }
 
-/* ===== 主题活动：五色通栏 + 大图标 ===== */
-.fb-theme-board {
+/* ===== 主题活动：左主卡 + 右副卡 + 三小格 ===== */
+.fb-theme-act {
+  margin-bottom: 0;
+}
+.fb-theme-bento {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  height: 236rpx;
-  margin: 0 24rpx 16rpx;
-  border-radius: 24rpx;
-  overflow: hidden;
-  box-shadow: 0 12rpx 32rpx rgba(16, 48, 24, 0.1);
-}
-.fb-theme-cell {
-  position: relative;
-  flex: 1;
-  min-width: 0;
+  gap: 14rpx;
+  min-height: 268rpx;
+  margin: 0 24rpx 10rpx;
   box-sizing: border-box;
 }
-.fb-theme-cell:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 16%;
-  right: 0;
-  bottom: 16%;
-  width: 1rpx;
-  background: rgba(255, 255, 255, 0.32);
-  z-index: 2;
-  pointer-events: none;
-}
-.fb-theme-cell-bg {
+.fb-theme-card-bg {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   z-index: 0;
+  border-radius: inherit;
 }
-.fb-theme-cell-body {
+.fb-theme-card--press {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+.fb-theme-hero,
+.fb-theme-side-card,
+.fb-theme-mini {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22rpx;
+  box-shadow: 0 10rpx 28rpx rgba(22, 48, 36, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.92);
+  box-sizing: border-box;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.fb-theme-hero {
+  flex: 0 0 48%;
+  min-width: 0;
+  padding: 22rpx 20rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.fb-theme-hero-ribbon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  padding: 6rpx 18rpx 6rpx 22rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #18af38 0%, #12962e 100%);
+  border-radius: 0 22rpx 0 18rpx;
+  box-shadow: 0 4rpx 12rpx rgba(24, 175, 56, 0.35);
+}
+.fb-theme-hero-copy {
   position: relative;
   z-index: 1;
+  padding-right: 8rpx;
+}
+.fb-theme-card-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #1a2420;
+  line-height: 1.25;
+  letter-spacing: 0.5rpx;
+}
+.fb-theme-card-title--sm {
+  font-size: 28rpx;
+}
+.fb-theme-pill {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.fb-theme-pill--sm {
+  margin-top: 8rpx;
+  padding: 4rpx 12rpx;
+  font-size: 20rpx;
+}
+.fb-theme-hero-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-top: 8rpx;
+}
+.fb-theme-icon-disk {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2rpx solid rgba(255, 255, 255, 0.98);
+}
+.fb-theme-icon-disk--lg {
+  width: 104rpx;
+  height: 104rpx;
+}
+.fb-theme-side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.fb-theme-side-card {
+  flex: 1.05;
+  min-height: 0;
+  padding: 18rpx 16rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.fb-theme-side-copy {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  padding-right: 8rpx;
+}
+.fb-theme-side-icon {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+.fb-theme-mini-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 10rpx;
+}
+.fb-theme-mini {
+  flex: 1;
+  min-width: 0;
+  padding: 12rpx 6rpx 10rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  padding: 18rpx 4rpx 16rpx;
-  box-sizing: border-box;
 }
-.fb-theme-cell--pressed {
-  opacity: 0.9;
-}
-.fb-theme-icon {
-  position: relative;
-  width: 108rpx;
-  height: 108rpx;
-  margin-bottom: 14rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.fb-theme-icon-halo {
-  position: absolute;
-  width: 108rpx;
-  height: 108rpx;
-  border-radius: 50%;
-  opacity: 0.85;
-}
-.fb-theme-icon-disk {
+.fb-theme-mini-icon {
   position: relative;
   z-index: 1;
-  width: 96rpx;
-  height: 96rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f7fa 100%);
-  border: 3rpx solid rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 10rpx 24rpx rgba(0, 0, 0, 0.14),
-    inset 0 2rpx 0 rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 8rpx;
 }
-.fb-theme-cell-name {
-  width: 100%;
-  font-size: 22rpx;
+.fb-theme-mini-name {
+  position: relative;
+  z-index: 1;
+  font-size: 20rpx;
   font-weight: 700;
-  line-height: 1.35;
+  color: #2a3530;
   text-align: center;
-  color: #fff;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.22);
+  line-height: 1.25;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -1803,11 +1999,19 @@ export default {
 .fb-special-bundle-poster-wrap {
   padding: 16rpx;
 }
+.fb-special-bundle-poster-wrap--compact {
+  padding: 6rpx 40rpx 20rpx;
+  margin-top: 4rpx;
+}
 .fb-special-bundle-poster-img {
   width: 100%;
   display: block;
   border-radius: 20rpx;
   box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.22);
+}
+.fb-special-bundle-poster-wrap--compact .fb-special-bundle-poster-img {
+  border-radius: 22rpx;
+  box-shadow: 0 8rpx 24rpx rgba(24, 80, 48, 0.14);
 }
 
 /* ===== 通用板块 ===== */
