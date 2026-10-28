@@ -70,7 +70,7 @@ class ForumController extends ToolController
         if (!empty($param['community_id'])) {
             $cid = (int)trim($param['community_id']);
             if ($cid > 0) {
-                // 与列表展示一致：优先 subject_community_id，否则帖子 community_id 或用户绑定小区
+                // 与列表展示一致：优先 subject_community_id，否则会员绑定小区（cmf_forum 无 community_id 列）
                 $where[] = function ($query) use ($cid) {
                     $query->where(function ($q) use ($cid) {
                         $q->where('a.subject_community_id', '=', $cid)
@@ -78,10 +78,7 @@ class ForumController extends ToolController
                                 $q2->where(function ($q3) {
                                     $q3->whereNull('a.subject_community_id')
                                         ->whereOr('a.subject_community_id', '=', 0);
-                                })->where(function ($q4) use ($cid) {
-                                    $q4->where('a.community_id', '=', $cid)
-                                        ->whereOr('b.community_id', '=', $cid);
-                                });
+                                })->where('b.community_id', '=', $cid);
                             });
                     });
                 };
@@ -149,9 +146,6 @@ class ForumController extends ToolController
 
             // 小区名称（勿用 b.community_id 覆盖 a.community_id 后再查，见 field 别名）
             $displayCommunityId = (int)($item['subject_community_id'] ?? 0);
-            if ($displayCommunityId <= 0) {
-                $displayCommunityId = (int)($item['community_id'] ?? 0);
-            }
             if ($displayCommunityId <= 0) {
                 $displayCommunityId = (int)($item['member_community_id'] ?? 0);
             }
@@ -949,7 +943,6 @@ class ForumController extends ToolController
             }
         }
 
-        $member = MemberModel::where('id', $userId)->field('id,community_id')->find();
         $point = (int)($cateInfo['inspection_point'] ?? 0);
 
         Db::startTrans();
@@ -958,7 +951,6 @@ class ForumController extends ToolController
                 'type'                  => 3,
                 'user_id'               => $userId,
                 'cate_id'               => $cateId,
-                'community_id'          => (int)($member['community_id'] ?? 0),
                 'subject_community_id'  => $communityId,
                 'content'               => $content,
                 'image_one'             => $imageOne,
