@@ -2014,6 +2014,8 @@ export default {
   border-radius: 20rpx;
   box-shadow: 0 6rpx 20rpx rgba(24, 80, 48, 0.1);
   background: #f4faf6;
+  /* 裁切框内缘，避免素材白边贴边 */
+  transform: translateZ(0);
 }
 .fb-special-bundle-poster-img {
   width: 100%;
@@ -2022,7 +2024,11 @@ export default {
   box-shadow: 0 12rpx 32rpx rgba(106, 79, 158, 0.22);
 }
 .fb-special-bundle-poster-wrap--compact .fb-special-bundle-poster-img {
-  width: 100%;
+  /* 等比放大 + 上移，裁掉素材自带的上/左/右（及底部）留白；框高不变 */
+  width: 116%;
+  max-width: none;
+  margin-left: -8%;
+  margin-top: -26rpx;
   border-radius: 0;
   box-shadow: none;
   vertical-align: top;
