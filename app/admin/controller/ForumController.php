@@ -14,6 +14,8 @@ use app\admin\model\forum\ForumHandleModel;
 use app\admin\model\forum\ForumModel;
 use app\admin\model\member\CommunityCateModel;
 use app\admin\model\member\CommunityModel;
+use app\admin\model\member\MemberLevelModel;
+use app\admin\model\member\MemberModel;
 use think\App;
 use think\db\exception\DbException;
 use think\facade\Db;
@@ -815,6 +817,148 @@ class ForumController extends ToolController
             'page'    => $list->render(),
             'keyword' => $keyword,
         ]);
+    }
+
+    /**
+     * 点位巡检：后台代传（与小程序 dwxj/add type=3 一致）
+     */
+    public function patrolAdd()
+    {
+        $community_list = CommunityModel::where('delete_time', 0)
+            ->field('id,name')
+            ->order('id desc')
+            ->select();
+        $this->assign('community_list', $community_list);
+        $this->assign('photo_fields', [
+            ['key' => 'image_one', 'label' => '点位环境', 'req' => 1],
+            ['key' => 'image_two', 'label' => '分类指引', 'req' => 0],
+            ['key' => 'image_three', 'label' => '桶位情况', 'req' => 0],
+        ]);
+        return $this->fetch('patrol_add');
+    }
+
+    /** 按小区加载巡检点位（member_community_cate.cate_id = 小区 id） */
+    public function patrolPointsJson()
+    {
+        $communityId = (int)$this->request->param('community_id', 0);
+        if ($communityId <= 0) {
+            $this->error('请选择小区');
+        }
+        $list = CommunityCateModel::where('cate_id', $communityId)
+            ->where('delete_time', 0)
+            ->field('id,name,inspection_hour,inspection_point')
+            ->order('id asc')
+            ->select();
+        $this->success('', '', $list);
+    }
+
+    public function patrolAddPost()
+    {
+        $userId = (int)$this->request->param('user_id', 0);
+        $communityId = (int)$this->request->param('community_id', 0);
+        $cateId = (int)$this->request->param('cate_id', 0);
+        $siteHygiene = trim((string)$this->request->param('site_hygiene', 'tidy'));
+        $hasRectify = (int)$this->request->param('has_rectify', 0);
+        $rectifyRemark = trim((string)$this->request->param('rectify_remark', ''));
+        $workContent = trim((string)$this->request->param('content', ''));
+        $imageOne = trim((string)$this->request->param('image_one', ''));
+        $imageTwo = trim((string)$this->request->param('image_two', ''));
+        $imageThree = trim((string)$this->request->param('image_three', ''));
+        $skipLimit = (int)$this->request->param('skip_inspection_limit', 0);
+
+        if ($userId <= 0) {
+            $this->error('请填写归属会员 ID');
+        }
+        if (!MemberModel::where('id', $userId)->where('delete_time', 0)->find()) {
+            $this->error('会员不存在或已删除');
+        }
+        if ($communityId <= 0) {
+            $this->error('请选择工作小区');
+        }
+        if (!CommunityModel::where('id', $communityId)->where('delete_time', 0)->find()) {
+            $this->error('所选小区不存在或已停用');
+        }
+        if ($cateId <= 0) {
+            $this->error('请选择巡检点位');
+        }
+        $cateInfo = CommunityCateModel::where('id', $cateId)->where('delete_time', 0)->find();
+        if (empty($cateInfo) || (int)$cateInfo['cate_id'] !== $communityId) {
+            $this->error('点位与小区不匹配');
+        }
+        if ($imageOne === '') {
+            $this->error('请上传点位环境照片');
+        }
+        if ($workContent === '') {
+            $this->error('请填写工作情况');
+        }
+        if ($hasRectify === 1 && $rectifyRemark === '') {
+            $this->error('请填写整改意见');
+        }
+
+        $hygieneMap = ['tidy' => '整洁', 'average' => '一般', 'poor' => '较差'];
+        $lines = [
+            '现场整洁：' . ($hygieneMap[$siteHygiene] ?? $siteHygiene),
+            '整改意见：' . ($hasRectify === 1 ? '有' : '无'),
+        ];
+        if ($hasRectify === 1 && $rectifyRemark !== '') {
+            $lines[] = '整改说明：' . $rectifyRemark;
+        }
+        $lines[] = '';
+        $lines[] = '工作情况：';
+        $lines[] = $workContent;
+        $lines[] = '';
+        $lines[] = '【后台代传】操作员 ID：' . (int)(session('ADMIN_ID') ?? 0);
+        $content = implode("\n", $lines);
+
+        if ($skipLimit !== 1) {
+            $handleInfo = $this->model->where([
+                ['type', '=', 3],
+                ['user_id', '=', $userId],
+                ['cate_id', '=', $cateId],
+                ['delete_time', '=', 0],
+            ])->order('id desc')->find();
+            $hour = (int)($cateInfo['inspection_hour'] ?? 0);
+            if (!empty($handleInfo) && $hour > 0) {
+                if ($handleInfo['create_time'] > strtotime('-' . $hour . ' hour')) {
+                    $this->error('该会员在此点位尚在巡检间隔内，可勾选「跳过间隔限制」后提交');
+                }
+            }
+        }
+
+        $member = MemberModel::where('id', $userId)->field('id,community_id')->find();
+        $point = (int)($cateInfo['inspection_point'] ?? 0);
+
+        Db::startTrans();
+        try {
+            $save = [
+                'type'                  => 3,
+                'user_id'               => $userId,
+                'cate_id'               => $cateId,
+                'community_id'          => (int)($member['community_id'] ?? 0),
+                'subject_community_id'  => $communityId,
+                'content'               => $content,
+                'image_one'             => $imageOne,
+                'image_two'             => $imageTwo,
+                'image_three'           => $imageThree,
+                'status'                => 1,
+                'create_time'           => time(),
+            ];
+            if ($point > 0) {
+                $save['point'] = $point;
+            }
+            $this->model->save($save);
+            $forumId = (int)$this->model->id;
+            if ($point > 0) {
+                AccountLogModel::add_account_log($userId, 2, 222, $point, ['from_uid' => $forumId]);
+            }
+            MemberLevelModel::isLevel($userId);
+            Db::commit();
+        } catch (\Throwable $e) {
+            Db::rollback();
+            $this->error('提交失败：' . $e->getMessage());
+        }
+
+        $this->success('巡检记录已提交', url('index', ['type' => 3]));
     }
 
     public function index3()

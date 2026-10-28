@@ -35,6 +35,9 @@
 <div class="wrap js-check-wrap">
     <ul class="nav nav-tabs">
         <li class="active"><a href="{:url('index',['type'=>$params.type])}">列表</a></li>
+        <if condition="$params.type==3">
+            <li><a href="{:url('patrolAdd')}">代传巡检</a></li>
+        </if>
         <if condition="$params.type==2">
             <li><a href="{:url('user_clock_scene_point_index')}">用户点位布置</a></li>
             <li><a href="{:url('clock_tutorial_index')}">打卡教程</a></li>
