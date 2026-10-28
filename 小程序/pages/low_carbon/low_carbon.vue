@@ -2002,7 +2002,7 @@ export default {
   padding: 16rpx;
 }
 .fb-special-bundle-poster-wrap--compact {
-  padding: 10rpx 0 8rpx;
+  padding: 10rpx 24rpx 8rpx;
   margin-top: 2rpx;
   width: 100%;
   box-sizing: border-box;
