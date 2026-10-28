@@ -2010,7 +2010,7 @@ export default {
 .fb-special-bundle-poster-frame {
   overflow: hidden;
   width: 100%;
-  height: 180rpx;
+  height: 168rpx;
   border-radius: 20rpx;
   box-shadow: 0 6rpx 20rpx rgba(24, 80, 48, 0.1);
   background: #f4faf6;
