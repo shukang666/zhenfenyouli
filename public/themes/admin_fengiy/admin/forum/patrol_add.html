@@ -162,6 +162,61 @@
     var memberSearchUrl = "{:url('patrolMemberSearchJson')}";
     var memberTimer = null;
     var selectedMember = null;
+    var PATROL_LAST_STORAGE_KEY = 'admin_patrol_add_last';
+
+    function savePatrolLastCache() {
+        var uid = $('#js-patrol-user-id').val();
+        if (!uid) {
+            return;
+        }
+        var payload = {
+            user_id: uid,
+            community_id: $('#js-community-id').val() || '',
+            mobile: $('#js-patrol-mobile').val() || '',
+            label: $('#js-patrol-member-label').text() || ('ID ' + uid),
+        };
+        try {
+            localStorage.setItem(PATROL_LAST_STORAGE_KEY, JSON.stringify(payload));
+        } catch (e) {}
+    }
+
+    function applyPatrolLast(data) {
+        if (!data || !data.user_id) {
+            return;
+        }
+        selectedMember = { id: data.user_id, label: data.label || '' };
+        $('#js-patrol-user-id').val(data.user_id);
+        $('#js-patrol-mobile').val(data.mobile || '').prop('readonly', true);
+        $('#js-patrol-member-list').removeClass('is-open').empty();
+        $('#js-patrol-member-empty').removeClass('is-show');
+        $('#js-patrol-member-label').text(data.label || ('ID ' + data.user_id));
+        $('#js-patrol-member-selected').addClass('is-show');
+        if (data.community_id) {
+            $('#js-community-id').val(String(data.community_id));
+            if (window.layui && layui.form) {
+                layui.form.render('select');
+            }
+            loadPoints(data.community_id);
+        }
+    }
+
+    function restorePatrolLast() {
+        var data = null;
+        try {
+            data = {$patrol_last_json|raw};
+        } catch (e) {
+            data = null;
+        }
+        if (!data || !data.user_id) {
+            try {
+                var raw = localStorage.getItem(PATROL_LAST_STORAGE_KEY);
+                if (raw) {
+                    data = JSON.parse(raw);
+                }
+            } catch (e2) {}
+        }
+        applyPatrolLast(data);
+    }
 
     function escapeHtml(s) {
         return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -305,6 +360,7 @@
                 alert('请先通过手机号搜索并点选归属会员');
                 return false;
             }
+            savePatrolLastCache();
         });
 
         $('#js-community-id').on('change', function () {
@@ -317,7 +373,10 @@
                 form.on('select(patrol-community)', function (data) {
                     loadPoints(data.value);
                 });
+                restorePatrolLast();
             });
+        } else {
+            restorePatrolLast();
         }
     });
 })();

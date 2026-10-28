@@ -834,6 +834,11 @@ class ForumController extends ToolController
             ['key' => 'image_two', 'label' => '分类指引', 'req' => 0],
             ['key' => 'image_three', 'label' => '桶位情况', 'req' => 0],
         ]);
+        $last = session('admin_patrol_add_last');
+        if (!is_array($last)) {
+            $last = [];
+        }
+        $this->assign('patrol_last_json', json_encode($last, JSON_UNESCAPED_UNICODE));
         return $this->fetch('patrol_add');
     }
 
@@ -977,7 +982,17 @@ class ForumController extends ToolController
             $this->error('提交失败：' . $e->getMessage());
         }
 
-        $this->success('巡检记录已提交', url('index', ['type' => 3]));
+        $memberRow = MemberModel::where('id', $userId)->field('nickname,mobile')->find();
+        $nick = $memberRow['nickname'] ?? '未命名';
+        $mobile = $memberRow['mobile'] ?? '';
+        session('admin_patrol_add_last', [
+            'user_id'       => $userId,
+            'community_id'  => $communityId,
+            'mobile'        => $mobile,
+            'label'         => $nick . ' · ' . $mobile . ' · ID ' . $userId,
+        ]);
+
+        $this->success('巡检记录已提交', url('patrolAdd'));
     }
 
     public function index3()
