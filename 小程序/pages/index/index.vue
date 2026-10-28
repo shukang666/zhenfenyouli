@@ -798,7 +798,7 @@ export default {
 				uni.switchTab({ url: '/pages/mall/mall' })
 			},
 			goToSurvey() {
-				this.$u.route('/pages/health/advisor-survey')
+				this.$u.route('/pages/health-form/advisor-survey')
 			},
 			goToCommunityMarket() {
 				 navigateHomeHotSpotEntry(this, { key: 'flea_market', entry_type: 'spot_hub', name: '七贤岭绿色二手集市' })

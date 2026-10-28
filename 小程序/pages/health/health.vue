@@ -277,7 +277,7 @@
 
 				const surveyId = this.resolveBannerSurveyId()
 
-				let url = '/pages/health/advisor-survey'
+				let url = '/pages/health-form/advisor-survey'
 
 				if (surveyId > 0) {
 

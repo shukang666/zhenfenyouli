@@ -44,7 +44,6 @@
 <script>
 import settings from '@/common/settings.js'
 // 包内备用（线上 JSON 未部署或 download 失败时仍能播 Lottie）
-import bundledLottie from '@/static/lottie/health_agent_idle_v01.json'
 
 // #ifdef MP-WEIXIN
 import lottie from 'lottie-miniprogram'
@@ -160,12 +159,7 @@ export default {
 			})
 		},
 		async resolveAnimationData() {
-			try {
-				return await this.fetchLottieJson(this.remoteLottieUrl)
-			} catch (e) {
-				console.warn('[health-virtual-persona] remote lottie failed, use bundled', e)
-				return bundledLottie
-			}
+			return await this.fetchLottieJson(this.remoteLottieUrl)
 		},
 		startLottieOnCanvas(canvas, box, animationData) {
 			const dpr = uni.getSystemInfoSync().pixelRatio || 2
@@ -217,10 +211,11 @@ export default {
 						this.useCssFallback = true
 						return
 					}
-					let animationData = bundledLottie
+					let animationData
 					try {
 						animationData = await this.resolveAnimationData()
 					} catch (e) {
+						console.warn('[health-virtual-persona] remote lottie failed, css fallback', e)
 						this.useCssFallback = true
 						return
 					}

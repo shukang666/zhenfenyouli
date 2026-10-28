@@ -1,4 +1,5 @@
-/** 中国七大地理分区 · Canvas 路径（由 data/gen_mall_china_canvas.php 生成，勿手改） */
+/** 中国七大地理分区 · Canvas 路径（由 data/gen_mall_china_canvas.php 生成，勿手改）
+ *  小程序运行时从 public 拉 JSON，勿在业务代码 import 本文件（减主包）。生成：data/gen_mall_china_json.php */
 export const CHINA_CANVAS_MAP = {
     "bounds": {
         "minLng": 73.6231,

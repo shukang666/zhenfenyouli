@@ -16,7 +16,7 @@
 </template>
 
 <script>
-	import { CHINA_CANVAS_MAP } from '@/common/mallChinaCanvasPaths.js'
+	import settings from '@/common/settings.js'
 	import { MAP_REGIONS } from '@/common/mallGeoMap.js'
 
 	const REGION_ORDER = ['northwest', 'north', 'northeast', 'central', 'east', 'southwest', 'south']
@@ -47,6 +47,8 @@
 				ctx: null,
 				mapReady: false,
 				layout: null,
+				chinaMap: null,
+				mapLoadError: false,
 			}
 		},
 		watch: {
@@ -57,15 +59,44 @@
 			},
 		},
 		mounted() {
-			this.initCanvas()
+			this.ensureMapData().then(() => {
+				if (this.chinaMap) this.initCanvas()
+			})
 		},
 		methods: {
+			ensureMapData() {
+				if (this.chinaMap) return Promise.resolve()
+				if (this._mapLoadPromise) return this._mapLoadPromise
+				const url =
+					settings.sitePublicUrl +
+					settings.mallChinaCanvasMapPath +
+					'?v=20261028'
+				this._mapLoadPromise = new Promise(resolve => {
+					uni.request({
+						url,
+						success: res => {
+							if (res.statusCode === 200 && res.data && res.data.regions) {
+								this.chinaMap = res.data
+							} else {
+								this.mapLoadError = true
+							}
+							resolve()
+						},
+						fail: () => {
+							this.mapLoadError = true
+							resolve()
+						},
+					})
+				})
+				return this._mapLoadPromise
+			},
 			geoAspect() {
-				const b = CHINA_CANVAS_MAP.bounds
+				const b = (this.chinaMap || {}).bounds || { minLng: 73, maxLng: 135, minLat: 3, maxLat: 54 }
 				return (b.maxLng - b.minLng) / (b.maxLat - b.minLat)
 			},
 			computeLayout() {
-				const b = CHINA_CANVAS_MAP.bounds
+				if (!this.chinaMap) return
+				const b = this.chinaMap.bounds
 				const lngSpan = b.maxLng - b.minLng
 				const latSpan = b.maxLat - b.minLat
 				const w = this.canvasW
@@ -158,7 +189,8 @@
 
 				const selected = this.value
 				const hasFocus = selected && selected !== 'all' && selected !== 'creative'
-				const regions = CHINA_CANVAS_MAP.regions
+				if (!this.chinaMap) return
+				const regions = this.chinaMap.regions
 
 				for (let i = 0; i < REGION_ORDER.length; i++) {
 					const key = REGION_ORDER[i]
@@ -176,7 +208,7 @@
 				ctx.setFontSize(10)
 				ctx.setTextAlign('center')
 				ctx.setTextBaseline('middle')
-				const labels = CHINA_CANVAS_MAP.labels || {}
+				const labels = this.chinaMap.labels || {}
 				for (let i = 0; i < REGION_ORDER.length; i++) {
 					const key = REGION_ORDER[i]
 					const pos = labels[key]
@@ -200,7 +232,8 @@
 				return r ? r.name : key
 			},
 			hitRegion(lng, lat) {
-				const regions = CHINA_CANVAS_MAP.regions
+				if (!this.chinaMap) return
+				const regions = this.chinaMap.regions
 				for (let i = REGION_ORDER.length - 1; i >= 0; i--) {
 					const key = REGION_ORDER[i]
 					const rings = regions[key] || []
