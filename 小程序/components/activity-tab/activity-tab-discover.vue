@@ -22,7 +22,7 @@
 			</view>
 		</scroll-view>
 
-		<scroll-view scroll-x class="discover-cates" :show-scrollbar="false">
+		<view class="discover-cates">
 			<view class="discover-cates__inner">
 				<view
 					class="discover-cate"
@@ -36,7 +36,7 @@
 					<text class="discover-cate__name">{{ cate.shortName || cate.name }}</text>
 				</view>
 			</view>
-		</scroll-view>
+		</view>
 
 		<view
 			class="discover-month"
@@ -67,11 +67,12 @@
 			<view class="discover-card" v-for="item in list" :key="item.id" @click="$emit('open', item)">
 				<view class="discover-card__thumb">
 					<u-image
-						v-if="item.thumb"
-						width="100%"
-						height="100%"
-						:src="item.thumb"
+						v-if="item._thumb || item.thumb"
+						width="128rpx"
+						height="128rpx"
+						:src="item._thumb || item.thumb"
 						mode="aspectFill"
+						border-radius="16"
 					></u-image>
 					<text v-else class="discover-card__thumb-ph">🎯</text>
 				</view>
@@ -192,18 +193,20 @@ export default {
 
 .discover-cates {
 	margin-top: 8rpx;
-	white-space: nowrap;
+	padding: 8rpx 24rpx 16rpx;
 }
 .discover-cates__inner {
-	display: inline-flex;
-	padding: 8rpx 24rpx 16rpx;
-	gap: 28rpx;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	justify-content: space-between;
 }
 .discover-cate {
-	display: inline-flex;
+	flex: 1;
+	min-width: 0;
+	display: flex;
 	flex-direction: column;
 	align-items: center;
-	width: 96rpx;
 }
 .discover-cate--on {
 	opacity: 0.85;
@@ -320,6 +323,13 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	position: relative;
+}
+.discover-card__thumb ::v-deep .u-image,
+.discover-card__thumb ::v-deep image {
+	width: 128rpx !important;
+	height: 128rpx !important;
+	display: block;
 }
 .discover-card__thumb-ph {
 	font-size: 48rpx;

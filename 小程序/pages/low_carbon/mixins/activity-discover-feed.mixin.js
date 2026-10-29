@@ -1,6 +1,8 @@
 /**
  * 活动 Tab · 发现页「正在报名」列表（筛选 + 分页）
  */
+import { resolveHomeHotThumb } from "@/common/homeHotSpotEntries.js";
+
 export default {
   data() {
     return {
@@ -136,6 +138,8 @@ export default {
       row._tags = this.buildDiscoverTags(row);
       row._quota_hint = this.buildDiscoverQuotaHint(row);
       row._btn_text = row.web_launch_url ? "了解并申请" : "去报名";
+      const rawThumb = (row.thumb || row.cover || row.image || "").trim();
+      row._thumb = resolveHomeHotThumb(rawThumb) || rawThumb;
       return row;
     },
 
