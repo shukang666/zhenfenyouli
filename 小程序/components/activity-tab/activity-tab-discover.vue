@@ -23,17 +23,27 @@
 		</scroll-view>
 
 		<view class="discover-cates">
-			<view class="discover-cates__inner">
-				<view
-					class="discover-cate"
-					v-for="cate in categories"
-					:key="cate.id"
-					hover-class="discover-cate--on"
-					:hover-stay-time="80"
-					@click="$emit('open-cate', cate)"
-				>
-					<text class="discover-cate__emoji">{{ cate.emoji }}</text>
-					<text class="discover-cate__name">{{ cate.shortName || cate.name }}</text>
+			<view class="discover-cates__panel">
+				<view class="discover-cates__head">
+					<text class="discover-cates__eyebrow">主题活动</text>
+					<view class="discover-cates__head-line"></view>
+				</view>
+				<view class="discover-cates__inner">
+					<view
+						class="discover-cate"
+						v-for="cate in categories"
+						:key="cate.id"
+						hover-class="discover-cate--on"
+						:hover-stay-time="80"
+						@click="$emit('open-cate', cate)"
+					>
+						<view class="discover-cate__tile" :class="'discover-cate__tile--id' + cate.id">
+							<view class="discover-cate__tile-bg" aria-hidden="true"></view>
+							<view class="discover-cate__tile-shine" aria-hidden="true"></view>
+							<text class="discover-cate__emoji">{{ cate.emoji }}</text>
+						</view>
+						<text class="discover-cate__name">{{ cate.shortName || cate.name }}</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -224,14 +234,55 @@ export default {
 }
 
 .discover-cates {
-	margin-top: 8rpx;
-	padding: 8rpx 24rpx 16rpx;
+	margin-top: 4rpx;
+	padding: 0 24rpx 12rpx;
+}
+.discover-cates__panel {
+	position: relative;
+	padding: 20rpx 8rpx 18rpx;
+	border-radius: 26rpx;
+	overflow: hidden;
+	background: linear-gradient(165deg, #ffffff 0%, #f4f9f6 48%, #eef6f1 100%);
+	box-shadow:
+		0 12rpx 36rpx rgba(22, 53, 36, 0.07),
+		inset 0 1rpx 0 rgba(255, 255, 255, 0.95);
+	border: 1rpx solid rgba(24, 175, 56, 0.08);
+}
+.discover-cates__panel::before {
+	content: "";
+	position: absolute;
+	right: -40rpx;
+	top: -50rpx;
+	width: 160rpx;
+	height: 160rpx;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(24, 175, 56, 0.12) 0%, transparent 70%);
+	pointer-events: none;
+}
+.discover-cates__head {
+	display: flex;
+	align-items: center;
+	gap: 12rpx;
+	padding: 0 16rpx 14rpx;
+}
+.discover-cates__eyebrow {
+	font-size: 22rpx;
+	font-weight: 700;
+	color: #18af38;
+	letter-spacing: 0.12em;
+}
+.discover-cates__head-line {
+	flex: 1;
+	height: 2rpx;
+	border-radius: 2rpx;
+	background: linear-gradient(90deg, rgba(24, 175, 56, 0.35), transparent);
 }
 .discover-cates__inner {
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
 	justify-content: space-between;
+	padding: 0 4rpx;
 }
 .discover-cate {
 	flex: 1;
@@ -241,20 +292,67 @@ export default {
 	align-items: center;
 }
 .discover-cate--on {
-	opacity: 0.85;
+	opacity: 0.88;
+	transform: scale(0.96);
+}
+.discover-cate__tile {
+	position: relative;
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 28rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	box-shadow: 0 10rpx 24rpx rgba(22, 53, 36, 0.12);
+}
+.discover-cate__tile-bg {
+	position: absolute;
+	inset: 0;
+}
+.discover-cate__tile-shine {
+	position: absolute;
+	left: 8rpx;
+	top: 8rpx;
+	width: 36rpx;
+	height: 20rpx;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.45);
+	transform: rotate(-24deg);
+	filter: blur(2rpx);
+}
+.discover-cate__tile--id1 .discover-cate__tile-bg {
+	background: linear-gradient(145deg, #e7f0fe 0%, #5a9cf0 55%, #1877f2 100%);
+}
+.discover-cate__tile--id2 .discover-cate__tile-bg {
+	background: linear-gradient(145deg, #eefbf3 0%, #6fd89a 55%, #1f9d55 100%);
+}
+.discover-cate__tile--id3 .discover-cate__tile-bg {
+	background: linear-gradient(145deg, #fff6ec 0%, #ffb066 55%, #e86a1a 100%);
+}
+.discover-cate__tile--id4 .discover-cate__tile-bg {
+	background: linear-gradient(145deg, #fff0f3 0%, #ff8fa8 55%, #e84d6a 100%);
+}
+.discover-cate__tile--id5 .discover-cate__tile-bg {
+	background: linear-gradient(145deg, #f3ecff 0%, #b794f6 55%, #7b4fd6 100%);
 }
 .discover-cate__emoji {
+	position: relative;
+	z-index: 1;
 	font-size: 44rpx;
-	line-height: 1.1;
+	line-height: 1;
+	filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.12));
 }
 .discover-cate__name {
-	margin-top: 8rpx;
-	font-size: 22rpx;
-	font-weight: 600;
+	margin-top: 10rpx;
+	font-size: 20rpx;
+	font-weight: 700;
 	color: #3d4f44;
 	text-align: center;
 	white-space: normal;
 	width: 100%;
+	line-height: 1.3;
+	padding: 0 2rpx;
 }
 
 .discover-month {
