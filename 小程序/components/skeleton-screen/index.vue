@@ -296,7 +296,7 @@ export default {
 	margin: 24rpx 30rpx 0;
 	border-radius: 28rpx;
 }
-.sk-banner--index { height: 340rpx; }
+.sk-banner--index { height: 288rpx; margin: 24rpx 32rpx 0; border-radius: 20rpx; }
 .sk-banner--fb {
 	height: 300rpx;
 	margin: 16rpx 24rpx 0;

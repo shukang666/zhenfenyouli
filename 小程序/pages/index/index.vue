@@ -34,9 +34,12 @@
 				</view>
 			</view>
 
-			<!-- Banner 轮播图 -->
+			<!-- 活动推广 Banner（固定文案 + 跳转） -->
 			<view class="banner-wrap">
-				<u-swiper :list="bannerList" height="320" border-radius="20" @click="adLink" bg-color="rgba(0,0,0,0)"></u-swiper>
+				<home-activity-promo-banner
+					@join="goHomeActivityJoin"
+					@publish="goHomeActivityPublish"
+				></home-activity-promo-banner>
 			</view>
 
 			<!-- 走马灯通知栏（后台 home_notice 配置，留空则不显示） -->
@@ -247,18 +250,18 @@ import {
 	resolveHomeHotThumb,
 } from '@/common/homeHotSpotEntries.js'
 import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
-import { parseActiveDetailIdFromPath } from '@/common/activeOpen.js'
 import { secondhandListUrl } from '@/common/secondhandNav.js'
+import HomeActivityPromoBanner from '@/components/home-activity-promo-banner/index.vue'
 export default {
 	components: {
 		SkeletonScreen,
-		NewUserGuide
+		NewUserGuide,
+		HomeActivityPromoBanner
 	},
 		mixins: [careGesture],
 		data() {
 			return {
 				isLoading: true,
-				bannerList: [],
 				dataList: [],
 				showcaseList: [],
 				homeNotice: '',
@@ -585,7 +588,6 @@ export default {
 			const params = opts.refresh ? { refresh: 1 } : {}
 			const req = this.$u.api.get_index_tab_home(params).then(res => {
 				const d = res.data || {}
-				this.bannerList = d.banner_list || []
 				this.showcaseList = d.showcase_list || []
 				this.homeNotice = (d.home_notice || '').toString()
 				this.mergeHomeEntries(d.home_entries || [])
@@ -661,7 +663,7 @@ export default {
 					this.$u.toast('该功能开发中')
 					return
 				}
-				// 社区活动：跳转活动页（同 banner 跳转逻辑）
+				// 社区活动：跳转活动 Tab
 				if (item.key === 'active' && item.url.indexOf('low_carbon') !== -1) {
 					uni.setStorageSync('jump_monthly_rec', 1)
 					uni.switchTab({ url: item.url.split('?')[0] })
@@ -689,32 +691,14 @@ export default {
 					this.$refs.paging.complete([]);
 				}
 			},
-			// 轮播图点击跳转
-			adLink(e) {
-				let data = this.bannerList[e];
-				if (!data.url) return
-				let url = data.url
-				// 只要是跳转到活动页（low_carbon），就设置标记
-				// switchTab 不支持 query 参数，所以用 storage 传标记
-				if (url.indexOf('low_carbon') !== -1) {
-					let tabUrl = url.split('?')[0]
-					uni.setStorageSync('jump_monthly_rec', 1)
-					uni.switchTab({ url: tabUrl })
-					return
-				}
-				const activeId = parseActiveDetailIdFromPath(url)
-				if (activeId && this.$u.func && typeof this.$u.func.openActiveDetail === 'function') {
-					this.$u.func.openActiveDetail(activeId)
-					return
-				}
-				uni.navigateTo({
-					url: url,
-					fail() {
-						uni.switchTab({
-							url: url
-						})
-					}
-				})
+			// 首页活动 Banner：去活动 Tab（邻里活动列表）
+			goHomeActivityJoin() {
+				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
+			},
+			// 首页活动 Banner：发起居民活动
+			goHomeActivityPublish() {
+				if (!this.$u.func.checkLogin()) return
+				this.$u.route('/pages/activity/member-active-publish')
 			},
 			// 点击搜索框右侧扫码图标：拉起系统扫码，识别活动小程序码/二维码后直达活动详情
 			onScanQrcode() {
@@ -885,10 +869,6 @@ export default {
 		position: relative;
 		z-index: 1;
 		margin: 24rpx 32rpx 0;
-		border-radius: $glass-radius-lg;
-		overflow: hidden;
-		@include glass-surface(0.35, 32px);
-		padding: 8rpx;
 		box-sizing: border-box;
 	}
 
