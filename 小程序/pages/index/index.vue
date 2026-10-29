@@ -10,7 +10,7 @@
 			<u-icon :name="carePullHeight >= 90 ? 'arrow-up' : 'arrow-down'" size="28" color="#18AF38"></u-icon>
 			</view>
 		</view>
-		<z-paging ref='paging' v-model='dataList' @query='queryList' @scroll="onZPagingScroll" :use-page-scroll="true" :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="currentTab === 1" :loading-more-enabled="false" :refresher-enabled="false">
+		<z-paging ref='paging' v-model='dataList' @query='queryList' @scroll="onZPagingScroll" :use-page-scroll="true" :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="false" :loading-more-enabled="false" :refresher-enabled="false">
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
 				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(238,242,239,0)'}" :border-bottom="false">
@@ -72,80 +72,20 @@
 				@open="openOngoingItem"
 			></home-ongoing-section>
 
-<!-- 内容区：活动 / 积分商品 -->
+			<home-weekly-picks
+				id="guide-weekly"
+				:list="weeklyPreviewList"
+				@more="goWeeklyMore"
+				@open="openWeeklyPick"
+			></home-weekly-picks>
+
+			<!-- 原「热门活动 / 积分商品」双 Tab 区块（暂下线，改本周精选）
 			<view class="content-panel">
 			<view id="guide-tabs" class="content-tabs">
-				<view class="tab-list">
-					<view class="tab-item" :class="{'tab-item--active': currentTab === index}" v-for="(item, index) in tabList" :key="index" @click="switchContentTab(index)">
-						<text class="tab-item__text">{{ item.name }}</text>
-					</view>
-				</view>
-				<view class="tab-more" @click="goMore">
-					<text class="tab-more__text">更多</text>
-					<u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
-				</view>
+				...
 			</view>
-
-			<!-- 热门活动：固定五项（垃圾真分 + 社区专题） -->
-			<scroll-view scroll-x class="active-scroll" :show-scrollbar="false" v-if="currentTab === 0">
-				<view class="u-flex">
-					<view class="active-card" v-for="item in home_hot_spot_list" :key="item.key"
-						hover-class="press-scale" :hover-stay-time="80"
-						@click="onHomeHotSpotTap(item)">
-						<view class="active-card-cover" v-if="homeHotThumb(item)">
-							<u-image width="500" height="260" :src="homeHotThumb(item)" :lazy-load="true" mode="aspectFill" border-radius="20rpx 20rpx 0 0"></u-image>
-							<view class="active-card-cover-tag">{{ item.meta }}</view>
-						</view>
-						<view class="active-card-cover active-card-cover--spot" v-else>
-							<text class="active-card-emoji">{{ item.emoji }}</text>
-							<text class="active-card-spot-kicker">{{ item.meta }}</text>
-						</view>
-						<view class="active-card-body">
-							<view class="active-card-title u-line-2">{{ item.name }}</view>
-							<view class="active-card-info">
-								<view class="active-chip">
-									<u-icon name="clock" size="20" color="#18AF38"></u-icon>
-									<text class="active-card-text">{{ item.meta }}</text>
-								</view>
-								<view class="active-chip active-chip--addr">
-									<u-icon name="map" size="20" color="#18AF38"></u-icon>
-									<text class="active-card-text u-line-1">{{ item.hint }}</text>
-								</view>
-							</view>
-							<view class="active-card-foot">
-								<text>{{ item.entry_type === 'scene_clock' ? '去真分' : '进入专题' }}</text>
-								<u-icon name="arrow-right" size="20" color="#18AF38"></u-icon>
-							</view>
-						</view>
-					</view>
-				</view>
-			</scroll-view>
-
-			<!-- 兑换商品列表：两行横向滚动（每列 2 个商品，横向滚动） -->
-			<scroll-view scroll-x class="goods-scroll" :show-scrollbar="false" v-if="currentTab === 1">
-				<view class="goods-cols">
-					<view class="goods-col" v-for="(col, colIndex) in goodsColumns" :key="colIndex">
-						<view class="goods-card" v-for="item in col" :key="item.id" hover-class="press-scale" :hover-stay-time="80" @click="$u.route('/pages/shop/details?id='+item.id)">
-							<u-image width="100%" height="200" :src="item.thumb" :lazy-load="true" border-radius="16rpx 16rpx 0 0"></u-image>
-							<view class="goods-card-body">
-								<view class="goods-card-title">{{item.goods_name}}</view>
-								<view class="goods-card-sold">已兑换{{item.sell_count}}次</view>
-								<view class="goods-card-footer">
-									<view class="goods-card-price">
-										<text class="price-point" v-if="item.point">{{item.point}}积分</text>
-										<text class="price-plus" v-if="Number(item.price) && item.point">+</text>
-										<text class="price-main" v-if="Number(item.price)">{{item.price}}元</text>
-									</view>
-									<view class="goods-card-btn">去兑换</view>
-								</view>
-							</view>
-						</view>
-					</view>
-				</view>
-			</scroll-view>
 			</view>
-
-
+			-->
 
 			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
 			<view class="showcase-section" v-if="showcaseList.length > 0">
@@ -256,12 +196,14 @@ import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
 import { ACTIVITY_PAGE_TAB_PENDING_KEY } from '@/common/activityTabNav.js'
 import HomeActivityPromoBanner from '@/components/home-activity-promo-banner/index.vue'
 import HomeOngoingSection from '@/components/home-ongoing-section/index.vue'
+import HomeWeeklyPicks from '@/components/home-weekly-picks/index.vue'
 export default {
 	components: {
 		SkeletonScreen,
 		NewUserGuide,
 		HomeActivityPromoBanner,
 		HomeOngoingSection,
+		HomeWeeklyPicks,
 	},
 		mixins: [careGesture],
 		data() {
@@ -270,6 +212,7 @@ export default {
 				dataList: [],
 				ongoingList: [],
 				ongoingTotal: 0,
+				weeklyList: [],
 				showcaseList: [],
 				homeNotice: '',
 				// 问候模块数据
@@ -345,10 +288,10 @@ export default {
 						desc: '附近活动、本周活动、发起活动、真分打卡，常用功能一键直达。'
 					},
 					{
-						selector: '#guide-tabs',
+						selector: '#guide-weekly',
 						prefer: 'above',
-						title: '热门活动与积分商品',
-						desc: '「热门活动」固定展示垃圾真分与四个社区专题；「积分商品」用积分兑换好物。'
+						title: '本周精选',
+						desc: '展示两条本周推荐活动；点「更多」到活动页查看更多。'
 					},
 					{
 						selector: '#guide-tabbar',
@@ -362,6 +305,9 @@ export default {
 		computed: {
 			home_hot_spot_list() {
 				return HOME_HOT_SPOT_ENTRIES
+			},
+			weeklyPreviewList() {
+				return (this.weeklyList || []).slice(0, 2)
 			},
 			// 问候文本计算属性
 			greetingText() {
@@ -621,6 +567,7 @@ export default {
 				this.showcaseList = d.showcase_list || []
 				this.homeNotice = (d.home_notice || '').toString()
 				this.mergeHomeEntries(d.home_entries || [])
+				this.weeklyList = d.weekly_list || []
 				if (d.user_info && Object.keys(d.user_info).length) {
 					this.$u.vuex('userInfo', Object.assign({}, this.userInfo, d.user_info))
 					this.applyIndexUserGrowth(d.user_info)
@@ -746,6 +693,20 @@ export default {
 			},
 			openOngoingItem(item) {
 				if (!item || !item.id) return
+				this.$u.route('/pages/activity/lsxf/details-new?id=' + item.id)
+			},
+			goWeeklyMore() {
+				try {
+					uni.setStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY, 'featured')
+				} catch (e) {}
+				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
+			},
+			openWeeklyPick(item) {
+				if (!item || !item.id) return
+				if (item.web_launch_url) {
+					this.$u.route('/pages/activity/web-active-entry?url=' + encodeURIComponent(item.web_launch_url))
+					return
+				}
 				this.$u.route('/pages/activity/lsxf/details-new?id=' + item.id)
 			},
 			// 点击搜索框右侧扫码图标：拉起系统扫码，识别活动小程序码/二维码后直达活动详情

@@ -50,6 +50,7 @@ class TabHomeService
             'showcase_list' => $this->fetchShowcasePreview(6),
             'home_entries' => $this->fetchOptionArray('home_entries'),
             'home_notice' => $this->fetchHomeNoticeText(),
+            'weekly_list' => $this->fetchHomeWeeklyPickList(10),
         ];
         if ($this->userId > 0) {
             $data['sign_status'] = $this->fetchSignStatus();
@@ -545,6 +546,71 @@ class TabHomeService
             'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
             'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
         ];
+    }
+
+    /** 首页「本周精选」：后台标记为本周推荐的活动 */
+    protected function fetchHomeWeeklyPickList(int $limit): array
+    {
+        $weeklyQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
+        $rows = $this->fetchActiveListSlice($weeklyQuery, max(1, $limit));
+        $out = [];
+        foreach ($rows as $i => $row) {
+            $out[] = $this->formatHomeWeeklyPickCard($row, (int)$i);
+        }
+        return $out;
+    }
+
+    /** @param array<string,mixed> $row */
+    protected function formatHomeWeeklyPickCard(array $row, int $index): array
+    {
+        $name = (string)($row['name'] ?? '');
+        $coverTitle = $name;
+        if (function_exists('mb_strlen') && mb_strlen($name, 'UTF-8') > 8) {
+            $coverTitle = mb_substr($name, 0, 8, 'UTF-8');
+        } elseif (strlen($name) > 24) {
+            $coverTitle = substr($name, 0, 24);
+        }
+        $coverSub = trim((string)($row['duration'] ?? ''));
+        if ($coverSub === '') {
+            $coverSub = trim((string)($row['suit_people'] ?? ''));
+        }
+        if ($coverSub === '') {
+            $coverSub = '欢迎参加';
+        }
+        $startTs = (int)($row['offline_sign_start'] ?? 0);
+        if ($startTs <= 0 && !empty($row['date'])) {
+            $startTs = (int)$row['date'];
+        }
+        if ((int)($row['is_date_pending'] ?? 0) === 1) {
+            $timeText = '时间待定';
+        } elseif ($startTs > 0) {
+            $timeText = date('n月j日 H:i', $startTs);
+        } else {
+            $timeText = '时间见详情';
+        }
+        $chips = [];
+        if ((int)($row['point'] ?? 0) === 0 && (int)($row['send_point'] ?? 0) === 0) {
+            $chips[] = ['text' => '免费', 'tone' => 'accent'];
+        }
+        $tagStr = (string)($row['tags'] ?? '');
+        if ($tagStr !== '') {
+            $tags = array_values(array_filter(array_map('trim', explode(',', $tagStr))));
+            foreach (array_slice($tags, 0, 2) as $tag) {
+                if ($tag === MemberActiveService::TAG_MEMBER) {
+                    continue;
+                }
+                $chips[] = ['text' => $tag, 'tone' => 'muted'];
+            }
+        }
+        if (!$chips) {
+            $chips[] = ['text' => '精选推荐', 'tone' => 'muted'];
+        }
+        $row['cover_title'] = $coverTitle;
+        $row['cover_sub'] = $coverSub;
+        $row['time_text'] = $timeText;
+        $row['chip_list'] = $chips;
+        $row['theme'] = ($index % 2 === 0) ? 'cool' : 'warm';
+        return $row;
     }
 
     protected function paginateActiveListForTab($page, $pageSize, $tag = ''): array
