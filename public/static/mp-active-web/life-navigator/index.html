@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>活动详情</title>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+  <script src="../sdk.js?v=2026102918"></script>
+  <script src="./app.js?v=2026102918"></script>
+  <style>
+    :root {
+      --green-deep: #0f4d32;
+      --green: #1a8f5c;
+      --green-soft: #7dcea0;
+      --text: #1a2e22;
+      --muted: #5f7166;
+      --bg: #f3f6f4;
+      --card: #ffffff;
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 100px;
+    }
+    .nav {
+      text-align: center;
+      padding: 14px 16px;
+      font-size: 17px;
+      font-weight: 700;
+      background: var(--bg);
+    }
+    .hero {
+      margin: 0 16px;
+      padding: 24px 20px;
+      border-radius: var(--radius);
+      color: #fff;
+      background: linear-gradient(145deg, #0d5c3a 0%, #1a9d62 55%, #6bc99a 100%);
+      box-shadow: 0 14px 40px rgba(15, 77, 50, .28);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.3);
+      margin-bottom: 12px;
+    }
+    .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.25; margin-bottom: 10px; }
+    .hero p { font-size: 14px; line-height: 1.65; opacity: .95; max-width: 22em; }
+    .hero-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .hero-pill {
+      flex: 1 1 30%;
+      min-width: 90px;
+      font-size: 11px;
+      text-align: center;
+      padding: 10px 6px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      line-height: 1.35;
+    }
+    .shell { padding: 16px; max-width: 520px; margin: 0 auto; }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 28px rgba(22, 53, 36, .06);
+    }
+    .org {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .org-main { display: flex; align-items: center; gap: 10px; }
+    .org-icon {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: linear-gradient(135deg, #e8f8ef, #c8ecd8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .org-name { font-size: 15px; font-weight: 700; }
+    .org-badge {
+      font-size: 11px; color: var(--green);
+      padding: 4px 10px; border-radius: 999px;
+      background: #e8f6ef; font-weight: 600;
+    }
+    .sec-title { font-size: 17px; font-weight: 800; margin-bottom: 14px; }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .mini {
+      border-radius: 14px;
+      padding: 14px 12px;
+      background: #f8fbf9;
+      border: 1px solid #e6efe9;
+    }
+    .mini-num { font-size: 11px; color: var(--green); font-weight: 700; margin-bottom: 6px; }
+    .mini-title { font-size: 14px; font-weight: 700; line-height: 1.35; margin-bottom: 6px; }
+    .mini-sub { font-size: 11px; color: var(--muted); line-height: 1.45; }
+    .benefit-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .benefit {
+      flex: 1;
+      text-align: center;
+      padding: 14px 8px;
+      border-radius: 14px;
+      background: #f8fbf9;
+      border: 1px solid #e6efe9;
+    }
+    .benefit-icon { font-size: 22px; margin-bottom: 6px; }
+    .benefit-title { font-size: 13px; font-weight: 700; }
+    .benefit-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .quote {
+      font-size: 13px;
+      line-height: 1.65;
+      color: #6a5a48;
+      padding: 16px;
+      border-radius: 14px;
+      background: linear-gradient(90deg, #faf6ef, #fff9f2);
+      border: 1px solid #f0e8dc;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f0f2f5;
+      color: var(--muted);
+    }
+    .tag--on { background: #e8f6ef; color: var(--green-deep); font-weight: 600; }
+    .dock {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 -8px 24px rgba(0,0,0,.06);
+      display: flex;
+      gap: 10px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .btn {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .btn-primary { background: var(--green-deep); color: #fff; }
+    .btn-ghost { background: #e8f6ef; color: var(--green-deep); flex: 0 0 42%; }
+    .btn:disabled { opacity: .55; }
+    .toast {
+      position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%);
+      background: rgba(0,0,0,.78); color: #fff; padding: 10px 16px;
+      border-radius: 8px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .toast.show { opacity: 1; }
+    .hidden { display: none !important; }
+    .err { padding: 40px 20px; text-align: center; color: #c0392b; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="nav">活动详情</div>
+  <div id="root" class="hidden">
+    <div class="hero">
+      <span class="hero-tag">公益环保 · 长期招募</span>
+      <h1>绿动生活领航员</h1>
+      <p>从认真垃圾分类开始，让生活更清爽、更有序，把绿色变成日常习惯。</p>
+      <div class="hero-pills">
+        <div class="hero-pill">持续<br>开放</div>
+        <div class="hero-pill">审核<br>加入</div>
+        <div class="hero-pill">月度<br>激励</div>
+      </div>
+    </div>
+    <div class="shell">
+      <div class="card org">
+        <div class="org-main">
+          <div class="org-icon">✓</div>
+          <div>
+            <div class="org-name">甄分友礼运营团队</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">官方长期运营项目</div>
+          </div>
+        </div>
+        <span class="org-badge">已认证</span>
+      </div>
+      <div class="card">
+        <div class="sec-title">我们一起做什么</div>
+        <div class="grid2">
+          <div class="mini"><div class="mini-num">01</div><div class="mini-title">日常真分</div><div class="mini-sub">记录认真分类行为</div></div>
+          <div class="mini"><div class="mini-num">02</div><div class="mini-title">点位巡查</div><div class="mini-sub">关注社区与办公环境</div></div>
+          <div class="mini"><div class="mini-num">03</div><div class="mini-title">反馈改进</div><div class="mini-sub">发现问题并记录</div></div>
+          <div class="mini"><div class="mini-num">04</div><div class="mini-title">绿色行动</div><div class="mini-sub">参与月度主题任务</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sec-title">加入后获得</div>
+        <div class="benefit-row">
+          <div class="benefit"><div class="benefit-icon">⭐</div><div class="benefit-title">积分激励</div><div class="benefit-sub">月度行动奖励</div></div>
+          <div class="benefit"><div class="benefit-icon">📣</div><div class="benefit-title">发布权限</div><div class="benefit-sub">审核开放</div></div>
+          <div class="benefit"><div class="benefit-icon">🎁</div><div class="benefit-title">更多权益</div><div class="benefit-sub">逐步增加</div></div>
+        </div>
+      </div>
+      <div class="card quote">
+        把一件小事做好。分类不是负担，而是对生活的一次温柔整理……
+      </div>
+      <div class="card">
+        <div class="sec-title">适合谁加入</div>
+        <div class="tags">
+          <span class="tag tag--on">认真分类的居民</span>
+          <span class="tag">志愿者</span>
+          <span class="tag">社区工作者</span>
+          <span class="tag">楼长</span>
+          <span class="tag">物业人员</span>
+          <span class="tag">单位职工</span>
+        </div>
+      </div>
+    </div>
+    <div class="dock">
+      <button type="button" class="btn btn-primary" id="btn-main">申请成为领航员</button>
+      <button type="button" class="btn btn-ghost hidden" id="btn-zone">已加入，去行动</button>
+    </div>
+  </div>
+  <div id="err" class="err hidden"></div>
+  <div class="toast" id="toast"></div>
+  <script>
+    (function () {
+      var ctx = null;
+      var activeId = LifeNavigatorApp.activeIdFromQuery();
+      var member = null;
+
+      function setErr(msg) {
+        document.getElementById('err').textContent = msg;
+        document.getElementById('err').classList.remove('hidden');
+      }
+
+      function refreshButtons() {
+        var main = document.getElementById('btn-main');
+        var zone = document.getElementById('btn-zone');
+        if (!member || !member.is_navigator) {
+          main.classList.remove('hidden');
+          zone.classList.add('hidden');
+          if (member && member.audit_status === 0) {
+            main.textContent = '审核中，请耐心等待';
+            main.disabled = true;
+          } else {
+            main.textContent = '申请成为领航员';
+            main.disabled = false;
+          }
+          return;
+        }
+        main.classList.add('hidden');
+        zone.classList.remove('hidden');
+      }
+
+      document.getElementById('btn-main').addEventListener('click', function () {
+        if (!ctx || !activeId) return;
+        var btn = this;
+        btn.disabled = true;
+        LifeNavigatorApp.api(ctx, '/wxapp/active_web_life_navigator/apply', { active_id: activeId })
+          .then(function (data) {
+            member = data;
+            refreshButtons();
+            LifeNavigatorApp.toast(member.is_navigator ? '欢迎加入领航员' : '申请已提交');
+            if (member.is_navigator) {
+              setTimeout(LifeNavigatorApp.goZone, 600);
+            }
+          })
+          .catch(function (e) {
+            LifeNavigatorApp.toast(e.message || '申请失败');
+            btn.disabled = false;
+          });
+      });
+
+      document.getElementById('btn-zone').addEventListener('click', LifeNavigatorApp.goZone);
+
+      ActiveWebSdk.bootstrap().then(function (data) {
+        ctx = data;
+        if (!activeId && data.active && data.active.id) {
+          activeId = String(data.active.id);
+        }
+        if (!activeId) {
+          setErr('缺少活动 ID');
+          return;
+        }
+        return LifeNavigatorApp.api(ctx, '/wxapp/active_web_life_navigator/intro', { active_id: activeId });
+      }).then(function (intro) {
+        if (!intro) return;
+        member = intro.member;
+        document.getElementById('root').classList.remove('hidden');
+        refreshButtons();
+      }).catch(function (e) {
+        setErr(e.message || '加载失败');
+      });
+    })();
+  </script>
+</body>
+</html>

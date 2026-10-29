@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>领航员行动区</title>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+  <script src="../sdk.js?v=2026102918"></script>
+  <script src="./app.js?v=2026102918"></script>
+  <style>
+    :root {
+      --green-deep: #0f4d32;
+      --green: #18af38;
+      --text: #1a2e22;
+      --muted: #8a9690;
+      --bg: #f3f6f4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 32px;
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 16px;
+      font-size: 17px;
+      font-weight: 700;
+      position: relative;
+    }
+    .nav-back {
+      position: absolute;
+      left: 12px;
+      font-size: 14px;
+      color: var(--green);
+      border: none;
+      background: none;
+      padding: 8px;
+    }
+    .hero {
+      margin: 0 16px 16px;
+      padding: 22px 18px;
+      border-radius: 20px;
+      color: #fff;
+      background: linear-gradient(135deg, #0a3d28 0%, #157a4a 100%);
+      box-shadow: 0 12px 32px rgba(10, 61, 40, .25);
+    }
+    .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .hero h2 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .hero-sub { font-size: 12px; opacity: .9; }
+    .hero-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.2);
+      white-space: nowrap;
+    }
+    .hero-slogan { margin-top: 12px; font-size: 13px; opacity: .92; }
+    .progress-label { margin-top: 16px; font-size: 12px; display: flex; justify-content: space-between; }
+    .bar { height: 8px; background: rgba(255,255,255,.25); border-radius: 999px; margin-top: 8px; overflow: hidden; }
+    .bar-fill { height: 100%; width: 0; background: #7dcea0; border-radius: 999px; transition: width .4s; }
+    .shell { padding: 0 16px; max-width: 520px; margin: 0 auto; }
+    .sec-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0 12px;
+    }
+    .sec-title { font-size: 17px; font-weight: 800; }
+    .sec-meta { font-size: 12px; color: var(--green); font-weight: 600; }
+    .grid4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .action {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px 12px;
+      box-shadow: 0 6px 20px rgba(22,53,36,.06);
+      position: relative;
+      border: none;
+      text-align: left;
+      width: 100%;
+    }
+    .action-tag {
+      position: absolute;
+      top: 10px; right: 10px;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f0f2f5;
+      color: var(--muted);
+    }
+    .action-tag.warn { background: #fff3e6; color: #e86b20; }
+    .action-tag.ok { background: #e8f6ef; color: #16864b; }
+    .action-icon { font-size: 26px; margin-bottom: 8px; }
+    .action-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .action-sub { font-size: 11px; color: var(--muted); line-height: 1.4; }
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 20px rgba(22,53,36,.06);
+    }
+    .list-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e8f6ef;
+      color: var(--green-deep);
+      font-weight: 600;
+    }
+    .task {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f2f5;
+    }
+    .task:last-child { border-bottom: none; }
+    .task-check {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid #cfd8d3;
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      color: #fff;
+    }
+    .task-check.on { background: var(--green); border-color: var(--green); }
+    .task-body { flex: 1; min-width: 0; }
+    .task-title { font-size: 14px; font-weight: 700; }
+    .task-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .task-point { font-size: 13px; font-weight: 700; color: #e86b20; white-space: nowrap; }
+    .benefit-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .benefit-icon { font-size: 28px; }
+    .benefit-copy { flex: 1; min-width: 0; }
+    .benefit-title { font-size: 14px; font-weight: 700; }
+    .benefit-sub { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .btn-claim {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--green);
+      color: #fff;
+      white-space: nowrap;
+    }
+    .btn-claim:disabled { background: #cfd8d3; }
+    .btn-invite {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--green);
+      background: none;
+      border: none;
+      padding: 0;
+      text-decoration: underline;
+    }
+    .toast {
+      position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%);
+      background: rgba(0,0,0,.78); color: #fff; padding: 10px 16px;
+      border-radius: 8px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .toast.show { opacity: 1; }
+    .err { padding: 40px 20px; text-align: center; color: #c0392b; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <button type="button" class="nav-back" id="btn-back">返回</button>
+    领航员行动区
+  </div>
+  <div id="err" class="err hidden"></div>
+  <div id="app" class="hidden">
+    <div class="hero">
+      <div class="hero-top">
+        <div>
+          <h2 id="greeting">你好</h2>
+          <div class="hero-sub" id="member-line">绿动生活领航员</div>
+        </div>
+        <span class="hero-badge" id="audit-badge">已认证</span>
+      </div>
+      <div class="hero-slogan">今天也一起，把小事做好</div>
+      <div class="progress-label">
+        <span id="progress-text">本月行动 0/4</span>
+        <span id="progress-pct">进度 0%</span>
+      </div>
+      <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+    </div>
+    <div class="shell">
+      <div class="sec-head">
+        <span class="sec-title">开始行动</span>
+        <span class="sec-meta">本月最高 420 积分</span>
+      </div>
+      <div class="grid4" id="actions"></div>
+      <div class="card">
+        <div class="list-head">
+          <span class="sec-title" id="month-title">行动清单</span>
+          <span class="pill" id="month-pill">进度 0%</span>
+        </div>
+        <div id="tasks"></div>
+      </div>
+      <div class="card benefit-row">
+        <div class="benefit-icon">🎁</div>
+        <div class="benefit-copy">
+          <div class="benefit-title" id="benefit-title">本月领航员保底积分 +70</div>
+          <div class="benefit-sub" id="benefit-sub">完成基础行动后领取</div>
+        </div>
+        <button type="button" class="btn-claim" id="btn-claim">待领取</button>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    (function () {
+      var ctx = null;
+      var activeId = LifeNavigatorApp.activeIdFromQuery();
+      var icons = { zhenfen: '♻️', inspect: '💎', feedback: '⚠️', monthly: '✅' };
+
+      document.getElementById('btn-back').addEventListener('click', function () {
+        var q = window.location.search || '';
+        window.location.href = 'index.html' + q;
+      });
+
+      function renderActions(list) {
+        var box = document.getElementById('actions');
+        box.innerHTML = '';
+        (list || []).forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'action';
+          var tagClass = 'action-tag';
+          if (item.tag_tone === 'warn') tagClass += ' warn';
+          if (item.tag_tone === 'ok') tagClass += ' ok';
+          btn.innerHTML =
+            '<span class="' + tagClass + '">' + (item.tag || '') + '</span>' +
+            '<div class="action-icon">' + (icons[item.key] || '•') + '</div>' +
+            '<div class="action-title">' + item.title + '</div>' +
+            '<div class="action-sub">' + item.sub + '</div>';
+          btn.addEventListener('click', function () {
+            if (!item.mp_path) return;
+            ActiveWebSdk.navigateMp(item.mp_path).catch(function (e) {
+              LifeNavigatorApp.toast(e.message || '请在小程序内打开');
+            });
+          });
+          box.appendChild(btn);
+        });
+      }
+
+      function renderTasks(tasks) {
+        var box = document.getElementById('tasks');
+        box.innerHTML = '';
+        (tasks || []).forEach(function (t) {
+          var row = document.createElement('div');
+          row.className = 'task';
+          row.innerHTML =
+            '<div class="task-check ' + (t.done ? 'on' : '') + '">' + (t.done ? '✓' : '') + '</div>' +
+            '<div class="task-body">' +
+              '<div class="task-title">' + t.title + '</div>' +
+              '<div class="task-meta">' + t.status_text + '</div>' +
+              (t.needs_share_ack && !t.done
+                ? '<button type="button" class="btn-invite" data-invite="1">分享给伙伴后点这里确认</button>'
+                : '') +
+            '</div>' +
+            '<div class="task-point">+' + t.point + '</div>';
+          box.appendChild(row);
+        });
+        box.querySelectorAll('[data-invite]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            LifeNavigatorApp.api(ctx, '/wxapp/active_web_life_navigator/invite_ack', { active_id: activeId })
+              .then(function () { load(); LifeNavigatorApp.toast('已记录邀请'); })
+              .catch(function (e) { LifeNavigatorApp.toast(e.message); });
+          });
+        });
+      }
+
+      function render(data) {
+        document.getElementById('greeting').textContent = data.greeting || '你好';
+        var code = (data.member && data.member.member_code) || '';
+        document.getElementById('member-line').textContent = '绿动生活领航员 · ' + (code || '—');
+        document.getElementById('audit-badge').textContent = (data.member && data.member.audit_label) || '';
+        var m = data.month || {};
+        document.getElementById('progress-text').textContent = '本月行动 ' + (m.completed || 0) + '/' + (m.total || 4);
+        document.getElementById('progress-pct').textContent = '进度 ' + (m.progress_percent || 0) + '%';
+        document.getElementById('bar-fill').style.width = (m.progress_percent || 0) + '%';
+        document.getElementById('month-title').textContent = m.label || '行动清单';
+        document.getElementById('month-pill').textContent = '进度 ' + (m.progress_percent || 0) + '%';
+        renderActions(data.quick_actions);
+        renderTasks(data.tasks);
+        var b = data.benefit || {};
+        document.getElementById('benefit-title').textContent = b.title || '';
+        document.getElementById('benefit-sub').textContent = b.sub || '';
+        var claimBtn = document.getElementById('btn-claim');
+        if (b.claimed) {
+          claimBtn.textContent = '已领取';
+          claimBtn.disabled = true;
+        } else if (b.ready) {
+          claimBtn.textContent = '领取';
+          claimBtn.disabled = false;
+        } else {
+          claimBtn.textContent = '待领取';
+          claimBtn.disabled = true;
+        }
+      }
+
+      function load() {
+        return LifeNavigatorApp.api(ctx, '/wxapp/active_web_life_navigator/zone_status', { active_id: activeId })
+          .then(render);
+      }
+
+      document.getElementById('btn-claim').addEventListener('click', function () {
+        var btn = this;
+        btn.disabled = true;
+        LifeNavigatorApp.api(ctx, '/wxapp/active_web_life_navigator/claim_base', { active_id: activeId })
+          .then(function () {
+            LifeNavigatorApp.toast('积分已发放');
+            return load();
+          })
+          .catch(function (e) {
+            LifeNavigatorApp.toast(e.message);
+            btn.disabled = false;
+          });
+      });
+
+      ActiveWebSdk.bootstrap().then(function (data) {
+        ctx = data;
+        if (!activeId && data.active && data.active.id) activeId = String(data.active.id);
+        if (!activeId) throw new Error('缺少活动 ID');
+        document.getElementById('app').classList.remove('hidden');
+        return load();
+      }).catch(function (e) {
+        document.getElementById('err').textContent = e.message || '加载失败';
+        document.getElementById('err').classList.remove('hidden');
+      });
+    })();
+  </script>
+</body>
+</html>

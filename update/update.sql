@@ -715,3 +715,40 @@ WHERE ma.`app`='admin' AND ma.`controller`='MemberActive' AND ma.`action`='index
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_custom_blocks');
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_custom_blocks` mediumtext COMMENT ''居民发布自定义展示块JSON'' AFTER `publish_reject_reason`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+CREATE TABLE IF NOT EXISTS `cmf_active_web_life_navigator` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `member_code` varchar(16) NOT NULL DEFAULT '',
+  `audit_status` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT '0待审 1通过 2拒绝',
+  `apply_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `audit_time` int(10) unsigned NOT NULL DEFAULT 0,
+  `update_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_active` (`user_id`,`active_id`),
+  KEY `idx_active_audit` (`active_id`,`audit_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='绿动生活领航员成员';
+
+CREATE TABLE IF NOT EXISTS `cmf_active_web_life_navigator_month` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `ym` int(6) unsigned NOT NULL DEFAULT 0 COMMENT 'YYYYMM',
+  `invite_ack` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `update_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_active_ym` (`user_id`,`active_id`,`ym`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='领航员月度辅助状态';
+
+CREATE TABLE IF NOT EXISTS `cmf_active_web_life_navigator_reward_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `active_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `ym` int(6) unsigned NOT NULL DEFAULT 0,
+  `task_key` varchar(32) NOT NULL DEFAULT '',
+  `point` int(10) unsigned NOT NULL DEFAULT 0,
+  `create_time` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_active_ym_task` (`user_id`,`active_id`,`ym`,`task_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='领航员月度积分发放记录';
