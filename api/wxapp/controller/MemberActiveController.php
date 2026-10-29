@@ -68,28 +68,41 @@ class MemberActiveController extends AuthController
         $this->success('发布成功', ['active_id' => $activeId]);
     }
 
-    /** 我发布的活动 */
+    /** 我发布的活动（简版，兼容旧客户端） */
     public function my_list()
     {
         $this->checkUser();
-        $rows = ActiveModel::where('publish_user_id', (int)$this->user_id)
-            ->where('delete_time', 0)
-            ->order('id desc')
-            ->limit(50)
-            ->select();
-        $list = [];
-        foreach ($rows as $row) {
-            $status = (int)$row['publish_audit_status'];
-            $list[] = [
-                'id' => (int)$row['id'],
-                'name' => (string)$row['name'],
-                'thumb' => empty($row['thumb']) ? '' : cmf_get_asset_url($row['thumb']),
-                'audit_status' => $status,
-                'audit_label' => $status === MemberActiveService::AUDIT_PENDING ? '审核中'
-                    : ($status === MemberActiveService::AUDIT_REJECTED ? '未通过' : '展示中'),
-                'time_line' => MemberActiveService::formatTimeLine($row),
-            ];
+        try {
+            $data = MemberActiveService::myPublishDashboard((int)$this->user_id, 'all');
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
         }
-        $this->success('获取成功', ['list' => $list]);
+        $this->success('获取成功', ['list' => $data['list'] ?? []]);
+    }
+
+    /** 发布者维护页：统计 + 分 tab 列表 */
+    public function my_publish()
+    {
+        $this->checkUser();
+        $filter = (string)$this->request->param('filter', 'all');
+        try {
+            $data = MemberActiveService::myPublishDashboard((int)$this->user_id, $filter);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('获取成功', $data);
+    }
+
+    /** 撤回审核中的居民活动 */
+    public function withdraw_publish()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        try {
+            MemberActiveService::withdrawPublish((int)$this->user_id, $activeId);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('已撤回');
     }
 }

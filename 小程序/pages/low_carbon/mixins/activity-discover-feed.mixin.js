@@ -174,10 +174,8 @@ export default {
 
     openDiscoverActive(item) {
       if (!item || !item.id) return;
-      if (item.web_launch_url) {
-        this.$u.route(
-          "/pages/activity/web-active-entry?url=" + encodeURIComponent(item.web_launch_url),
-        );
+      if (this.$u.func && typeof this.$u.func.openActiveDetail === "function") {
+        this.$u.func.openActiveDetail(item);
         return;
       }
       this.$u.route("/pages/activity/lsxf/details-new?id=" + item.id);

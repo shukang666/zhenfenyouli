@@ -3,6 +3,7 @@
 namespace api\wxapp\service;
 
 use app\admin\model\active\ActiveModel;
+use app\admin\model\active\ActiveSIgnModel;
 use think\facade\Db;
 
 /**
@@ -400,5 +401,178 @@ class MemberActiveService
         } catch (\InvalidArgumentException $e) {
             return false;
         }
+    }
+
+    /**
+     * 发布者「我的发布」列表与统计
+     *
+     * @return array{stats:array,tab_counts:array,list:list<array<string,mixed>>}
+     */
+    public static function myPublishDashboard(int $userId, string $filter): array
+    {
+        self::assertPublishSchemaReady();
+        $filter = in_array($filter, ['all', 'auditing', 'enrolling', 'ended'], true) ? $filter : 'all';
+
+        $rows = ActiveModel::where('publish_user_id', $userId)
+            ->where('delete_time', 0)
+            ->order('id desc')
+            ->select()
+            ->toArray();
+
+        $allItems = [];
+        $tabCounts = ['all' => 0, 'auditing' => 0, 'enrolling' => 0, 'ended' => 0];
+        $totalSign = 0;
+
+        foreach ($rows as $row) {
+            $item = self::formatMyPublishItem($row);
+            $allItems[] = $item;
+            $tabCounts['all']++;
+            $tk = (string)($item['tab_key'] ?? '');
+            if (isset($tabCounts[$tk])) {
+                $tabCounts[$tk]++;
+            }
+            $totalSign += (int)($item['sign_count'] ?? 0);
+        }
+
+        $list = $filter === 'all'
+            ? $allItems
+            : array_values(array_filter($allItems, function ($item) use ($filter) {
+                return ($item['tab_key'] ?? '') === $filter;
+            }));
+
+        return [
+            'stats' => [
+                'total_published' => count($allItems),
+                'total_signups' => $totalSign,
+                'rating' => count($allItems) > 0 ? '4.9' : '—',
+            ],
+            'tab_counts' => $tabCounts,
+            'list' => $list,
+        ];
+    }
+
+    /** @param array<string,mixed> $row */
+    protected static function formatMyPublishItem(array $row): array
+    {
+        $id = (int)($row['id'] ?? 0);
+        $audit = (int)($row['publish_audit_status'] ?? 0);
+        $isEnd = ActiveModel::resolveIsEnd($row) === 1;
+        $signCount = ActiveSIgnModel::countParticipants($id);
+
+        $addr = trim((string)($row['place_name'] ?? ''));
+        if ($addr === '') {
+            $addr = trim((string)($row['address'] ?? ''));
+        }
+        $metaLine = self::formatTimeLine($row);
+        if ($addr !== '') {
+            $metaLine .= ' · ' . $addr;
+        }
+
+        $tabKey = 'enrolling';
+        $statusLabel = '报名中';
+        $statusTone = 'ok';
+        $footHint = self::formatEnrollDeadlineHint($row);
+        $progressLine = $signCount > 0 ? ('已报名 ' . $signCount . ' 人') : '';
+        $actions = [
+            ['key' => 'sign_list', 'label' => '报名名单'],
+            ['key' => 'checkin', 'label' => '活动签到'],
+        ];
+
+        if ($audit === self::AUDIT_PENDING) {
+            $tabKey = 'auditing';
+            $statusLabel = '审核中';
+            $statusTone = 'warn';
+            $footHint = '预计24小时内完成审核';
+            $progressLine = '';
+            $actions = [
+                ['key' => 'preview', 'label' => '预览'],
+                ['key' => 'withdraw', 'label' => '撤回'],
+            ];
+        } elseif ($audit === self::AUDIT_REJECTED) {
+            $tabKey = 'all';
+            $statusLabel = '需修改';
+            $statusTone = 'danger';
+            $reason = trim((string)($row['publish_reject_reason'] ?? ''));
+            $footHint = $reason !== '' ? $reason : '请补充说明后重新提交';
+            $progressLine = '';
+            $actions = [
+                ['key' => 'edit', 'label' => '去修改'],
+            ];
+        } elseif ($audit !== self::AUDIT_APPROVED) {
+            $tabKey = 'all';
+            $statusLabel = '草稿';
+            $statusTone = 'muted';
+            $footHint = '完善信息后提交审核';
+            $progressLine = '';
+            $actions = [
+                ['key' => 'edit', 'label' => '继续编辑'],
+            ];
+        } elseif ($isEnd) {
+            $tabKey = 'ended';
+            $statusLabel = '已结束';
+            $statusTone = 'muted';
+            $footHint = '活动已结束，感谢组织';
+            $progressLine = $signCount > 0 ? ('共 ' . $signCount . ' 人参与') : '';
+            $actions = [
+                ['key' => 'preview', 'label' => '查看回顾'],
+            ];
+        }
+
+        return [
+            'id' => $id,
+            'name' => (string)($row['name'] ?? ''),
+            'thumb' => empty($row['thumb']) ? '' : cmf_get_asset_url($row['thumb']),
+            'tab_key' => $tabKey,
+            'status_label' => $statusLabel,
+            'status_tone' => $statusTone,
+            'meta_line' => $metaLine,
+            'foot_hint' => $footHint,
+            'progress_line' => $progressLine,
+            'sign_count' => $signCount,
+            'audit_status' => $audit,
+            'actions' => $actions,
+        ];
+    }
+
+    /** @param array<string,mixed> $row */
+    protected static function formatEnrollDeadlineHint(array $row): string
+    {
+        $start = (int)($row['offline_sign_start'] ?? 0);
+        if ($start > 0) {
+            $dayStart = strtotime(date('Y-m-d 00:00:00', $start));
+            $tomorrowStart = strtotime('tomorrow');
+            if ($dayStart === $tomorrowStart) {
+                return '报名截止：明天' . date('H:i', $start);
+            }
+            return '开始时间：' . date('n月j日 H:i', $start);
+        }
+        $date = (int)($row['date'] ?? 0);
+        if ($date > 0) {
+            return '截止：' . date('Y-m-d H:i', $date);
+        }
+        return '报名时间见详情';
+    }
+
+    /** 撤回审核中的发布（软删除） */
+    public static function withdrawPublish(int $userId, int $activeId): void
+    {
+        self::assertPublishSchemaReady();
+        if ($activeId <= 0) {
+            throw new \InvalidArgumentException('缺少活动 ID');
+        }
+        $row = ActiveModel::where('id', $activeId)
+            ->where('publish_user_id', $userId)
+            ->where('delete_time', 0)
+            ->find();
+        if (empty($row)) {
+            throw new \InvalidArgumentException('活动不存在或无权操作');
+        }
+        if ((int)$row['publish_audit_status'] !== self::AUDIT_PENDING) {
+            throw new \InvalidArgumentException('仅审核中的活动可撤回');
+        }
+        ActiveModel::where('id', $activeId)->update([
+            'delete_time' => time(),
+            'update_time' => time(),
+        ]);
     }
 }

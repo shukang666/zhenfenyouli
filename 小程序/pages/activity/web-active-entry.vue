@@ -12,7 +12,11 @@
 <script>
 import settings from '@/common/settings.js'
 import { buildH5WrapperPath } from '@/common/activeOpen.js'
-import { buildWebActiveEntryPath, savePendingWebActiveEntry } from '@/common/webActiveEntry.js'
+import {
+	buildWebActiveEntryPath,
+	savePendingWebActiveEntry,
+	parseActiveIdFromWebLaunchUrl,
+} from '@/common/webActiveEntry.js'
 
 const DEFAULT_TITLE = '1+1 七日挑战'
 
@@ -29,6 +33,13 @@ export default {
 	},
 	onLoad(options) {
 		this.activeId = String(options.active_id || options.id || '').trim()
+		if (!this.activeId && options.url) {
+			let raw = String(options.url)
+			try {
+				raw = decodeURIComponent(raw)
+			} catch (e) {}
+			this.activeId = parseActiveIdFromWebLaunchUrl(raw) || ''
+		}
 		if (options.title) {
 			try {
 				this.title = decodeURIComponent(options.title)

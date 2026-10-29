@@ -260,6 +260,14 @@
 						iconBg: 'rgba(24, 175, 56, 0.12)',
 					},
 					{
+						key: 'member_publish',
+						name: '我的发布',
+						url: '/pages/activity/member-active-my',
+						icon: 'edit-pen-fill',
+						iconColor: '#18AF38',
+						iconBg: 'rgba(24, 175, 56, 0.12)',
+					},
+					{
 						key: 'badge',
 						name: '我的徽章',
 						url: '/pages/member/badge',
