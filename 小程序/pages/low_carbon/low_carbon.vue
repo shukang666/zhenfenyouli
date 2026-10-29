@@ -23,564 +23,39 @@
         ></u-icon>
       </view>
     </view>
-    <!-- 自定义顶部导航：搜索栏 -->
-    <view class="fb-navbar glass-nav">
-      <view class="fb-navbar-inner">
-        <view class="fb-search-box glass-search" id="guide-fb-search" @click="gotoSearch">
-          <view class="fb-search-ico">
-            <u-icon name="search" size="28" color="#18AF38"></u-icon>
-          </view>
-          <text class="fb-search-ph">搜索活动名称 / 地点</text>
-        </view>
-      </view>
-    </view>
+    <activity-tab-header
+      :value="activityPageTab"
+      @input="switchActivityPageTab"
+      @search="gotoSearch"
+    />
 
     <care-pull-hint :visible="!showCareHint"></care-pull-hint>
 
-    <!-- 活动 Tab 顶部 Banner（在关怀版拉绳下方，纯展示无点击） -->
-    <view class="fb-activity-top-banner" v-if="activityTabTopBanner">
-      <image
-        class="fb-activity-top-banner-img"
-        :src="activityTabTopBanner"
-        mode="widthFix"
-        show-menu-by-longpress="false"
-      />
-    </view>
+    <activity-tab-neighbor-feed
+      v-show="activityPageTab === 'neighbor'"
+      :col-left="member_active_col_left"
+      :col-right="member_active_col_right"
+      :loading="member_active_loading"
+      :has-more="member_active_has_more"
+      :list-length="member_active_list.length"
+      :engagement-count="actEngagementCount"
+      @publish="goPublishMemberActive"
+    />
 
-    <skeleton-screen :show="isLoading" type="low_carbon"></skeleton-screen>
-
-    <!-- 轻任务：后台配置的 Web 式活动，作为活动页醒目线上入口 -->
-    <view class="fb-task-section" v-if="light_list && light_list.length">
-      <view class="fb-task-heading">
-        <view class="fb-task-heading-main">
-          <text class="fb-task-title">轻任务</text>
-          <text class="fb-task-label">线上活动</text>
-        </view>
-        <view class="fb-task-more" @click="goMoreLight">
-          <text>更多任务</text>
-          <u-icon name="arrow-right" size="22" color="#b65b22"></u-icon>
-        </view>
-      </view>
-      <view
-        class="fb-task-card"
-        v-if="light_task_featured"
-        hover-class="fb-task-card--pressed"
-        :hover-stay-time="90"
-        @click="$u.func.openActiveDetail(light_task_featured)"
-      >
-        <view class="fb-task-copy">
-          <text class="fb-task-eyebrow">轻松参与 · 线上完成</text>
-          <text class="fb-task-name u-line-2">{{ light_task_featured.name }}</text>
-          <view class="fb-task-cta">
-            <text>立即参与</text>
-            <u-icon name="arrow-right" size="22" color="#fff"></u-icon>
-          </view>
-        </view>
-        <view class="fb-task-image-wrap" v-if="light_task_featured.thumb">
-          <u-image width="100%" height="100%" :src="light_task_featured.thumb" mode="aspectFill"></u-image>
-        </view>
-        <view class="fb-task-orb"></view>
-      </view>
-    </view>
-
-    <!-- 主题活动：左主卡 + 右副卡 + 三小格（参考陪玩页层次） -->
-    <view class="fb-section fb-theme-act" id="guide-fb-theme">
-      <view class="fb-section-header">
-        <view class="fb-hd">
-          <view class="fb-entry-kicker-dot"></view>
-          <text class="fb-section-title">主题活动</text>
-        </view>
-      </view>
-      <view class="fb-theme-bento" v-if="themeHeroCate">
-        <view
-          class="fb-theme-hero"
-          hover-class="fb-theme-card--press"
-          :hover-stay-time="80"
-          @click="gotoCateList(themeHeroCate)"
-        >
-          <view
-            class="fb-theme-card-bg"
-            :style="{ background: themeHeroCate.surfaceBg }"
-          ></view>
-          <text class="fb-theme-hero-ribbon">精选</text>
-          <view class="fb-theme-hero-copy">
-            <text class="fb-theme-card-title">{{ themeHeroCate.name }}</text>
-            <view
-              class="fb-theme-pill"
-              :style="{
-                background: themeHeroCate.pillBg,
-                color: themeHeroCate.pillColor,
-              }"
-            >
-              <text>{{ themeHeroCate.pillText }}</text>
-            </view>
-          </view>
-          <view class="fb-theme-hero-icon">
-            <view
-              class="fb-theme-icon-disk fb-theme-icon-disk--lg"
-              :style="{ boxShadow: '0 12rpx 28rpx ' + themeHeroCate.iconHalo }"
-            >
-              <u-icon
-                :name="themeHeroCate.icon"
-                :color="themeHeroCate.iconColor"
-                size="64"
-              ></u-icon>
-            </view>
-          </view>
-        </view>
-        <view class="fb-theme-side">
-          <view
-            v-if="themeSideCate"
-            class="fb-theme-side-card"
-            hover-class="fb-theme-card--press"
-            :hover-stay-time="80"
-            @click="gotoCateList(themeSideCate)"
-          >
-            <view
-              class="fb-theme-card-bg"
-              :style="{ background: themeSideCate.surfaceBg }"
-            ></view>
-            <view class="fb-theme-side-copy">
-              <text class="fb-theme-card-title fb-theme-card-title--sm">{{
-                themeSideCate.name
-              }}</text>
-              <view
-                class="fb-theme-pill fb-theme-pill--sm"
-                :style="{
-                  background: themeSideCate.pillBg,
-                  color: themeSideCate.pillColor,
-                }"
-              >
-                <text>{{ themeSideCate.pillText }}</text>
-              </view>
-            </view>
-            <view class="fb-theme-side-icon">
-              <u-icon
-                :name="themeSideCate.icon"
-                :color="themeSideCate.iconColor"
-                size="44"
-              ></u-icon>
-            </view>
-          </view>
-          <view class="fb-theme-mini-row">
-            <view
-              v-for="cate in themeMiniCates"
-              :key="cate.id"
-              class="fb-theme-mini"
-              hover-class="fb-theme-card--press"
-              :hover-stay-time="80"
-              @click="gotoCateList(cate)"
-            >
-              <view
-                class="fb-theme-card-bg"
-                :style="{ background: cate.surfaceBg }"
-              ></view>
-              <view class="fb-theme-mini-icon">
-                <u-icon
-                  :name="cate.icon"
-                  :color="cate.iconColor"
-                  size="34"
-                ></u-icon>
-              </view>
-              <text class="fb-theme-mini-name">{{ cate.name }}</text>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 公益行动特殊入口（仅活动 Tab，COS 整图） -->
-    <view
-      class="fb-special-bundle-poster-wrap fb-special-bundle-poster-wrap--compact"
-      @click="gotoGarbageClassify"
-    >
-      <view class="fb-special-bundle-poster-frame">
-        <image
-          class="fb-special-bundle-poster-img"
-          :src="activityTabEntryBanner"
-          mode="widthFix"
-          show-menu-by-longpress="false"
-        />
-      </view>
-    </view>
-
-    <!-- 暂时不需要，注释掉了 -->
-    <!-- 分类轻量化入口（与快捷入口同套卡片样式） -->
-    <!-- <view class="fb-light-task" id="guide-fb-light-task">
-      <view class="fb-entry-kicker">
-        <view class="fb-entry-kicker-dot"></view>
-        <text class="fb-entry-kicker-text">分类随手学</text>
-      </view>
-      <view class="fb-entry-row fb-entry-row--triple">
-        <view
-          class="fb-entry-card fb-entry-shot"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoDtshPage('/pages/dtsh/report')"
-        >
-          <text class="fb-entry-mark">随手拍</text>
-          <view class="fb-entry-main">
-            <text class="fb-entry-emoji">📷</text>
-            <view class="fb-entry-text">
-              <text class="fb-entry-title">随手发现问题</text>
-              <text class="fb-entry-sub">拍照上报现场</text>
-            </view>
-            <view class="fb-entry-go">
-              <text class="fb-entry-arrow">›</text>
-            </view>
-          </view>
-        </view>
-        <view
-          class="fb-entry-card fb-entry-quiz"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoDtshPage('/pages/dtsh/quiz')"
-        >
-          <text class="fb-entry-mark">小挑战</text>
-          <view class="fb-entry-main">
-            <text class="fb-entry-emoji">✏️</text>
-            <view class="fb-entry-text">
-              <text class="fb-entry-title">分类知识挑战</text>
-              <text class="fb-entry-sub">答题领积分</text>
-            </view>
-            <view class="fb-entry-go">
-              <text class="fb-entry-arrow">›</text>
-            </view>
-          </view>
-        </view>
-        <view
-          class="fb-entry-card fb-entry-know"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="gotoDtshPage('/pages/dtsh/knowledge')"
-        >
-          <text class="fb-entry-mark">学知识</text>
-          <view class="fb-entry-main">
-            <text class="fb-entry-emoji">📚</text>
-            <view class="fb-entry-text">
-              <text class="fb-entry-title">学会分类知识</text>
-              <text class="fb-entry-sub">边看边学分类</text>
-            </view>
-            <view class="fb-entry-go">
-              <text class="fb-entry-arrow">›</text>
-            </view>
-          </view>
-        </view>
-      </view>
-    </view> -->
-
-    <!-- 本周推荐：大图海报横滑（暂时隐藏，恢复时取消注释即可）
-    <view class="fb-section fb-weekly-rec" id="guide-fb-weekly" v-if="weekly_display_list.length > 0">
-      <view class="fb-section-header">
-        <view class="fb-hd">
-          <view class="fb-hd-bar fb-hd-bar--gold"></view>
-          <text class="fb-section-title">本周推荐</text>
-          <view class="fb-hd-chip fb-hd-chip--gold">
-            <text class="fb-hd-chip-text">精选海报</text>
-          </view>
-        </view>
-      </view>
-      <scroll-view scroll-x class="fb-weekly-scroll" :show-scrollbar="false">
-        <view class="fb-weekly-list">
-          <view
-            class="fb-weekly-card"
-            :class="{ 'fb-weekly-card--pin': item.isWeeklyPin }"
-            v-for="(item, wIdx) in weekly_display_list"
-            :key="'weekly-' + wIdx"
-            hover-class="fb-press"
-            :hover-stay-time="80"
-            @tap="onWeeklyCardTap(wIdx)"
-          >
-            <u-image
-              width="520"
-              height="320"
-              :src="weeklyCardCover(item)"
-              mode="aspectFill"
-            ></u-image>
-            <view class="fb-weekly-hatch"></view>
-            <view class="fb-weekly-mask"></view>
-            <view class="fb-weekly-tag">
-              <text class="fb-weekly-tag-text">{{ item.isWeeklyPin ? '垃圾真分' : (item.meta || '社区专题') }}</text>
-            </view>
-            <view class="fb-weekly-badge" v-if="!item.isWeeklyPin && actEngagementCount(item) > 0">
-              <text class="fb-weekly-badge-text"
-                >{{ actEngagementCount(item) }}{{ actEngagementSuffix(item) }}</text
-              >
-            </view>
-            <view class="fb-weekly-foot">
-              <text class="fb-weekly-name u-line-2">{{ item.name }}</text>
-              <text class="fb-weekly-date">{{ weeklyCardDateLine(item) }}</text>
-            </view>
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-    -->
-
-    <!-- 现在就能参加（暂时隐藏，恢复时同步 TabHomeService light_list / goMoreLight）
-    <view class="fb-section fb-light-act" v-if="light_list.length > 0">
-      <view class="fb-section-header">
-        <view class="fb-hd">
-          <view class="fb-live-dot"></view>
-          <text class="fb-section-title">现在就能参加</text>
-        </view>
-        <view class="fb-section-more" @click="goMoreLight">
-          <text class="fb-more-text">更多</text>
-          <u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
-        </view>
-      </view>
-      <view class="fb-light-grid">
-        <view
-          class="fb-light-card"
-          v-for="item in light_list"
-          :key="item.id"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="$u.func.openActiveDetail(item)"
-        >
-          <view class="fb-light-cover">
-            <u-image
-              width="100%"
-              height="100%"
-              :src="
-                item.thumb ||
-                'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/default-avatar.png'
-              "
-              mode="aspectFill"
-            ></u-image>
-            <view class="fb-weekly-hatch fb-weekly-hatch--soft"></view>
-          </view>
-          <view class="fb-light-info">
-            <text class="fb-light-name u-line-2">{{ item.name }}</text>
-          </view>
-          <view class="fb-light-btn">
-            <text class="fb-light-btn-text">立即参与</text>
-          </view>
-        </view>
-      </view>
-    </view>
-    -->
-
-    <!-- 近期活动（暂时隐藏，恢复时同步 TabHomeService recent_list）
-    <view class="fb-section fb-recent-act" v-if="recent_list.length > 0">
-      <view class="fb-section-header">
-        <view class="fb-hd">
-          <view class="fb-hd-bar fb-hd-bar--ink"></view>
-          <text class="fb-section-title">近期活动</text>
-        </view>
-        <view class="fb-section-more" @click="goMoreRecent">
-          <text class="fb-more-text">更多</text>
-          <u-icon name="arrow-right" size="22" color="#18AF38"></u-icon>
-        </view>
-      </view>
-      <view class="fb-recent-list">
-        <view
-          class="fb-recent-card"
-          v-for="item in recent_list"
-          :key="item.id"
-          hover-class="fb-press"
-          :hover-stay-time="80"
-          @click="$u.func.openActiveDetail(item)"
-        >
-          <view class="fb-recent-cal">
-            <text class="fb-recent-cal-d">{{ formatRecentCalDay(item) }}</text>
-            <text class="fb-recent-cal-m">{{
-              formatRecentCalMonth(item)
-            }}</text>
-          </view>
-          <view class="fb-recent-cover">
-            <u-image
-              width="100%"
-              height="100%"
-              :src="item.thumb"
-              mode="aspectFill"
-            ></u-image>
-          </view>
-          <view class="fb-recent-info">
-            <text class="fb-recent-name u-line-2">{{ item.name }}</text>
-            <text class="fb-recent-meta">{{ formatRecentMeta(item) }}</text>
-          </view>
-          <u-icon name="arrow-right" size="24" color="#c5d0c7"></u-icon>
-        </view>
-      </view>
-    </view>
-    -->
-
-    <!-- 标签栏：热门活动 + 动态标签（已隐藏，保留代码备用） -->
-    <view class="fb-tab-bar" v-if="false">
-      <scroll-view
-        scroll-x
-        class="fb-tab-scroll"
-        :show-scrollbar="false"
-        :scroll-into-view="'tab-' + current_tab"
-        scroll-with-animation
-      >
-        <view class="fb-tab-list">
-          <view
-            class="fb-tab-item"
-            :class="{ 'fb-tab-active': current_tab === 0 }"
-            id="tab-0"
-            @click="switchTab(0)"
-          >
-            <text class="fb-tab-text">热门活动</text>
-          </view>
-          <view
-            class="fb-tab-item"
-            :class="{ 'fb-tab-active': current_tab === idx + 1 }"
-            v-for="(tag, idx) in tag_list"
-            :key="tag"
-            :id="'tab-' + (idx + 1)"
-            @click="switchTab(idx + 1)"
-          >
-            <text class="fb-tab-text">{{ tag }}</text>
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-
-    <!-- 全部活动列表（暂时隐藏，恢复时同步 TabHomeService active_list 分页）
-    <view class="fb-act-list">
-      <view class="fb-section-header fb-act-list-hd">
-        <view class="fb-hd">
-          <view class="fb-entry-kicker-dot"></view>
-          <text class="fb-section-title">全部活动</text>
-          <text class="fb-entry-kicker-hint" v-if="active_total > 0">共 {{ active_total }} 场</text>
-        </view>
-      </view>
-      <view
-        class="fb-act-card"
-        v-for="item in active_list_preview"
-        :key="item.id"
-        @click="$u.func.openActiveDetail(item)"
-      >
-        <view class="fb-act-cover">
-          <u-image
-            width="100%"
-            height="100%"
-            :src="item.thumb"
-            mode="aspectFill"
-          ></u-image>
-          <view class="fb-act-badge" v-if="actEngagementCount(item) > 0">
-            <view
-              class="fb-act-avatars"
-              v-if="item.avatar_array && item.avatar_array.length"
-            >
-              <image
-                :src="img"
-                class="fb-act-avatar"
-                mode="aspectFill"
-                v-for="(img, i) in item.avatar_array.slice(0, 3)"
-                :key="i"
-              ></image>
-            </view>
-            <text class="fb-act-badge-text">{{ actEngagementCount(item) }}{{ actEngagementSuffix(item) }}</text>
-          </view>
-        </view>
-        <view class="fb-act-body">
-          <view class="fb-act-title u-line-1">{{ item.name }}</view>
-          <view class="fb-act-meta">
-            <view class="fb-meta-item">
-              <u-icon name="clock" size="22" color="#65676B"></u-icon>
-              <text class="fb-meta-text">{{ formatActiveDate(item) }}</text>
-            </view>
-            <view
-              class="fb-meta-item fb-meta-loc"
-              v-if="item.address && item.address.trim()"
-            >
-              <u-icon name="map" size="22" color="#65676B"></u-icon>
-              <text class="fb-meta-text u-line-1">{{ item.address }}</text>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <view
-        class="fb-act-more-wrap"
-        v-if="showActiveListMore && active_list_preview.length > 0"
-        @click="goMoreAll"
-      >
-        <view class="fb-act-more-btn" hover-class="fb-act-more-btn--on">
-          <text class="fb-act-more-text">查看更多活动</text>
-          <u-icon name="arrow-right" size="24" color="#18AF38"></u-icon>
-        </view>
-      </view>
-    </view>
-    -->
-
-    <!-- 玩转活动：居民自发 · 瀑布流 -->
-    <view class="fb-section fb-member-act" id="guide-fb-member">
-      <view class="fb-section-header">
-        <view class="fb-hd">
-          <view class="fb-hd-bar"></view>
-          <text class="fb-section-title">玩转活动</text>
-          <text class="fb-entry-kicker-hint">邻里自发</text>
-        </view>
-        <view class="fb-member-publish" hover-class="fb-press" @click="goPublishMemberActive">
-          <u-icon name="plus" size="20" color="#fff"></u-icon>
-          <text class="fb-member-publish-text">发布活动</text>
-        </view>
-      </view>
-      <view class="fb-member-empty" v-if="!member_active_loading && member_active_list.length === 0">
-        <text class="fb-member-empty-title">还没有邻里活动</text>
-        <text class="fb-member-empty-sub">发起一场读书、徒步、公益小聚，邻居报名后现场签到即可</text>
-        <view class="fb-member-empty-btn" @click="goPublishMemberActive">我来发布第一场</view>
-      </view>
-      <view class="fb-member-waterfall" v-else>
-        <view class="fb-member-col">
-          <view
-            class="fb-member-card"
-            v-for="item in member_active_col_left"
-            :key="'ma-l-' + item.id"
-            hover-class="fb-press"
-            :hover-stay-time="80"
-            @click="$u.func.openActiveDetail(item)"
-          >
-            <view class="fb-member-cover">
-              <u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
-              <view class="fb-member-tag">{{ item.theme_label || '社区活动' }}</view>
-            </view>
-            <view class="fb-member-body">
-              <text class="fb-member-name u-line-2">{{ item.name }}</text>
-              <text class="fb-member-meta u-line-1">{{ item.time_line }}</text>
-              <view class="fb-member-foot">
-                <text class="fb-member-pub u-line-1">{{ item.publisher_nickname || '邻居' }}</text>
-                <text class="fb-member-count" v-if="actEngagementCount(item) > 0">{{ actEngagementCount(item) }}人参与</text>
-              </view>
-            </view>
-          </view>
-        </view>
-        <view class="fb-member-col">
-          <view
-            class="fb-member-card"
-            v-for="item in member_active_col_right"
-            :key="'ma-r-' + item.id"
-            hover-class="fb-press"
-            :hover-stay-time="80"
-            @click="$u.func.openActiveDetail(item)"
-          >
-            <view class="fb-member-cover fb-member-cover--tall">
-              <u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
-              <view class="fb-member-tag">{{ item.theme_label || '社区活动' }}</view>
-            </view>
-            <view class="fb-member-body">
-              <text class="fb-member-name u-line-2">{{ item.name }}</text>
-              <text class="fb-member-meta u-line-1">{{ item.time_line }}</text>
-              <view class="fb-member-foot">
-                <text class="fb-member-pub u-line-1">{{ item.publisher_nickname || '邻居' }}</text>
-                <text class="fb-member-count" v-if="actEngagementCount(item) > 0">{{ actEngagementCount(item) }}人参与</text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-      <view class="fb-member-load" v-if="member_active_loading">
-        <u-loading mode="circle" color="#18AF38"></u-loading>
-        <text>加载中…</text>
-      </view>
-      <view class="fb-member-load fb-member-load--muted" v-else-if="member_active_list.length > 0 && !member_active_has_more">
-        <text>— 已经到底啦 —</text>
-      </view>
-    </view>
+    <activity-tab-featured-panel
+      v-show="activityPageTab === 'featured'"
+      :top-banner="activityTabTopBanner"
+      :entry-banner="activityTabEntryBanner"
+      :is-loading="isLoading"
+      :light-list="light_list"
+      :light-featured="light_task_featured"
+      :theme-hero="themeHeroCate"
+      :theme-side="themeSideCate"
+      :theme-minis="themeMiniCates"
+      @more-light="goMoreLight"
+      @open-cate="gotoCateList"
+      @garbage-classify="gotoGarbageClassify"
+    />
 
     <page-guide page="low_carbon"></page-guide>
   </view>
@@ -600,7 +75,10 @@ import {
   resolveHomeHotThumb,
 } from "@/common/homeHotSpotEntries.js";
 import careGesture from "@/common/care-gesture.mixin.js";
-import SkeletonScreen from "@/components/skeleton-screen/index.vue";
+import ActivityTabHeader from "@/components/activity-tab/activity-tab-header.vue";
+import ActivityTabNeighborFeed from "@/components/activity-tab/activity-tab-neighbor-feed.vue";
+import ActivityTabFeaturedPanel from "@/components/activity-tab/activity-tab-featured-panel.vue";
+import memberActiveFeedMixin from "@/pages/low_carbon/mixins/member-active-feed.mixin.js";
 import {
   ACTIVITY_TAB_ENTRY_BANNER_URL,
   ACTIVITY_TAB_TOP_BANNER_URL,
@@ -685,12 +163,17 @@ function mergeSpotModulesFromApi(fromApi) {
 }
 
 export default {
-  components: { SkeletonScreen },
-  mixins: [careGesture],
+  components: {
+    ActivityTabHeader,
+    ActivityTabNeighborFeed,
+    ActivityTabFeaturedPanel,
+  },
+  mixins: [careGesture, memberActiveFeedMixin],
   data() {
     return {
       activityTabTopBanner: ACTIVITY_TAB_TOP_BANNER_URL,
       activityTabEntryBanner: ACTIVITY_TAB_ENTRY_BANNER_URL,
+      activityPageTab: "neighbor",
       isLoading: true,
       banner_list: [],
       current_tab: 0,
@@ -702,10 +185,6 @@ export default {
       weekly_list: [],
       light_list: [],
       recent_list: [],
-      member_active_list: [],
-      member_active_page: 1,
-      member_active_has_more: true,
-      member_active_loading: false,
       // 5 大活动分类（硬编码，后台新增不显示）
       // community_cate_id 对应数据库 cmf_active_community_cate.id
       main_categories: [
@@ -806,12 +285,6 @@ export default {
     themeMiniCates() {
       return (this.main_categories || []).slice(2, 5);
     },
-    member_active_col_left() {
-      return (this.member_active_list || []).filter((_, i) => i % 2 === 0);
-    },
-    member_active_col_right() {
-      return (this.member_active_list || []).filter((_, i) => i % 2 === 1);
-    },
   },
   onLoad(options) {
     this.loadAllData();
@@ -820,19 +293,16 @@ export default {
     this.updateTabBarSelected(1);
     if (checkCommunity(this)) return;
     if (!this.isLogin) return;
-    let needRefresh = this._memberActiveNeedRefresh;
-    try {
-      if (uni.getStorageSync('member_active_tab_refresh')) {
-        uni.removeStorageSync('member_active_tab_refresh');
-        needRefresh = true;
-      }
-    } catch (e) {}
-    if (needRefresh) {
-      this._memberActiveNeedRefresh = false;
-      this.fetchMemberActiveList(true);
-    }
+    this.refreshMemberActiveAfterPublish();
   },
   methods: {
+    switchActivityPageTab(tab) {
+      if (this.activityPageTab === tab) return;
+      this.activityPageTab = tab;
+      if (tab === "neighbor" && !this.member_active_list.length && !this.member_active_loading) {
+        this.fetchMemberActiveList(true);
+      }
+    },
     weeklyCardCover(item) {
       if (!item) return "";
       return resolveHomeHotThumb(item.thumb) || item.thumb || "";
@@ -847,13 +317,6 @@ export default {
       }
       if (!item.id) return;
       this.$u.route("/pages/activity/lsxf/details-new?id=" + item.id);
-    },
-    actEngagementCount(item) {
-      if (!item) return 0;
-      if (Number(item.is_date_pending) === 1) {
-        return Number(item.interest_count) || 0;
-      }
-      return Number(item.active_count) || 0;
     },
     actEngagementSuffix(item) {
       return Number(item && item.is_date_pending) === 1 ? "人感兴趣" : "人参与";
@@ -1027,50 +490,6 @@ export default {
       this.$u.route("/pages/activity/active-search");
     },
 
-    goPublishMemberActive() {
-      if (!this.$u.func.checkLogin()) return;
-      this._memberActiveNeedRefresh = true;
-      this.$u.route("/pages/activity/member-active-publish");
-    },
-
-    fetchMemberActiveList(reset = false) {
-      if (reset) {
-        this.member_active_page = 1;
-        this.member_active_has_more = true;
-        if (!this.member_active_list.length) {
-          this.member_active_list = [];
-        }
-      }
-      if (!this.member_active_has_more && !reset) return Promise.resolve();
-      if (this.member_active_loading) return Promise.resolve();
-      this.member_active_loading = true;
-      const page = reset ? 1 : this.member_active_page;
-      return this.$u.api
-        .memberActiveList({ page, page_size: 10 })
-        .then((res) => {
-          const data = res.data || {};
-          const list = data.list || [];
-          if (reset) {
-            this.member_active_list = list;
-          } else {
-            this.member_active_list = (this.member_active_list || []).concat(list);
-          }
-          const lastPage = Number(data.last_page) || 1;
-          const cur = Number(data.page) || page;
-          this.member_active_has_more = cur < lastPage;
-          this.member_active_page = cur + 1;
-        })
-        .catch(() => {})
-        .finally(() => {
-          this.member_active_loading = false;
-        });
-    },
-
-    loadMemberActiveMore() {
-      if (this.member_active_loading || !this.member_active_has_more) return;
-      this.fetchMemberActiveList(false);
-    },
-
     // tabbar
     updateTabBarSelected(index) {
       if (
@@ -1083,7 +502,9 @@ export default {
   },
 
   onReachBottom() {
-    this.loadMemberActiveMore();
+    if (this.activityPageTab === "neighbor") {
+      this.loadMemberActiveMore();
+    }
   },
 };
 </script>
@@ -1140,6 +561,42 @@ export default {
   margin-left: 12rpx;
   font-size: 26rpx;
   color: #9aa39c;
+}
+
+.fb-page-tabs {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 16rpx;
+  padding: 6rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1rpx solid rgba(255, 255, 255, 0.65);
+}
+.fb-page-tab {
+  flex: 1;
+  height: 64rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #5f7166;
+  transition: background 0.2s, color 0.2s;
+}
+.fb-page-tab--on {
+  background: #fff;
+  color: #16864b;
+  box-shadow: 0 4rpx 16rpx rgba(22, 134, 75, 0.12);
+}
+
+.fb-member-feed {
+  padding: 8rpx 24rpx calc(140rpx + env(safe-area-inset-bottom));
+}
+.fb-member-feed-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12rpx;
 }
 
 /* ===== 活动 Tab 顶部 Banner（紧跟 care-pull-hint） ===== */
@@ -2790,6 +2247,9 @@ export default {
 /* ===== 玩转活动 · 居民瀑布流 ===== */
 .fb-member-act {
   padding: 0 24rpx calc(140rpx + env(safe-area-inset-bottom));
+}
+.fb-member-feed .fb-member-waterfall {
+  margin-top: 4rpx;
 }
 .fb-member-publish {
   display: flex;
