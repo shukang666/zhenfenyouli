@@ -17,7 +17,7 @@ class MemberActiveController extends AuthController
             'block_types' => MemberActiveService::blockTypeMeta(),
             'tips' => [
                 'headline' => '发一场小而美的邻里活动',
-                'sub' => '只需填必要信息，报名与现场签到沿用小程序配置式活动流程。',
+                'sub' => '谁参加、做什么，都由你来定！',
             ],
         ]);
     }

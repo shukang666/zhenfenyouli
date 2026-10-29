@@ -27,16 +27,33 @@
 			</view>
 
 			<view class="field">
-				<text class="field-label">封面图 <text class="required">*</text></text>
-				<text class="field-hint">横图效果更好，建议活动现场或主题相关照片</text>
-				<view class="cover-row">
+				<text class="field-label">活动封面</text>
+				<text class="field-hint">没照片也没关系，用活动标题生成文字封面（类似小红书）</text>
+				<view class="cover-mode-tabs">
+					<text class="cover-mode-tab" :class="{ on: coverMode === 'text' }" @tap="setCoverMode('text')">文字封面</text>
+					<text class="cover-mode-tab" :class="{ on: coverMode === 'photo' }" @tap="setCoverMode('photo')">上传照片</text>
+				</view>
+
+				<view v-if="coverMode === 'text'">
+					<view v-if="!String(form.name).trim()" class="cover-name-tip">
+						请先填写上方「活动名称」，系统将自动生成多款封面供选择
+					</view>
+					<member-active-text-cover-picker
+						v-else
+						v-model="textCoverStyleId"
+						:title="form.name"
+						:badge="themeLabel"
+					/>
+				</view>
+
+				<view v-else class="cover-row">
 					<view class="cover-box" v-if="form.coverPreview" @tap="chooseCover">
 						<image :src="form.coverPreview" mode="aspectFill" class="cover-img"></image>
 						<text class="cover-change">更换</text>
 					</view>
 					<view class="cover-add" v-else @tap="chooseCover">
 						<u-icon name="camera" size="44" color="#16864b"></u-icon>
-						<text>添加封面</text>
+						<text>从相册选封面</text>
 					</view>
 				</view>
 			</view>
@@ -90,78 +107,120 @@
 			</view>
 		</view>
 
-		<!-- 详情页预览 -->
-		<view class="preview-section">
-			<view class="preview-head">
-				<text class="preview-title">详情页预览</text>
-				<view class="preview-tabs">
-					<text class="preview-tab" :class="{ on: previewMode === 'mine' }" @tap="previewMode = 'mine'">我的内容</text>
-					<text class="preview-tab" :class="{ on: previewMode === 'example' }" @tap="previewMode = 'example'">样式示例</text>
-				</view>
-			</view>
-			<text class="preview-hint">报名后邻居在活动详情里看到的效果（时间地点等固定信息会自动展示在上方）</text>
-			<member-active-blocks-display
-				:blocks="previewBlocks"
-				:placeholder-text="previewMode === 'example' ? '' : '填写后将显示在这里'"
-			/>
-		</view>
+		<view class="detail-section">
+			<text class="field-label">活动详情</text>
+			<text class="field-hint">报名后在详情页展示；按住右侧 <text class="hint-icon">≡</text> 上下拖动可调整顺序</text>
 
-		<view class="map-card map-card--blocks">
-			<view class="blocks-head">
-				<text class="field-label">自定义展示字段</text>
-				<text class="field-hint">可新增、排序；支持单行、多行、图片集</text>
-			</view>
-			<view class="block-editor" v-for="(block, idx) in customBlocks" :key="block.id">
-				<view class="block-editor-toolbar">
-					<input class="block-label-input" v-model="block.label" placeholder="字段标题，如：温馨提示" maxlength="20" />
-					<view class="block-type-tag">{{ blockTypeName(block.type) }}</view>
-					<text class="block-tool" @tap="moveBlock(idx, -1)" v-if="idx > 0">上移</text>
-					<text class="block-tool" @tap="moveBlock(idx, 1)" v-if="idx < customBlocks.length - 1">下移</text>
-					<text class="block-tool block-tool--danger" @tap="removeBlock(idx)">删除</text>
-				</view>
-				<input
-					v-if="block.type === 'text'"
-					class="input"
-					v-model="block.value"
-					placeholder="单行内容"
-					maxlength="100"
-				/>
-				<textarea
-					v-else-if="block.type === 'textarea'"
-					class="textarea"
-					v-model="block.value"
-					placeholder="多行内容，可换行"
-					maxlength="800"
-				/>
-				<view v-else-if="block.type === 'images'" class="block-images">
-					<view class="photos">
-						<view class="photo" v-for="(src, pi) in block.images" :key="'p-' + pi">
-							<image :src="src" mode="aspectFill" class="photo-image"></image>
-							<view class="photo-delete" @tap="removeBlockImage(idx, pi)">×</view>
+			<view class="block-list">
+				<view
+					class="block-card"
+					v-for="(block, idx) in customBlocks"
+					:key="block.id"
+					:class="{ 'block-card--dragging': dragIndex === idx }"
+				>
+					<view
+						class="block-drag-handle"
+						@touchstart.stop="onBlockDragStart($event, idx)"
+						@touchmove.stop.prevent="onBlockDragMove"
+						@touchend.stop="onBlockDragEnd"
+						@touchcancel.stop="onBlockDragEnd"
+					>
+						<text class="block-drag-icon">≡</text>
+					</view>
+					<view class="block-card-body">
+						<view class="block-card-head">
+							<input
+								class="block-label-input"
+								v-model="block.label"
+								placeholder="小标题，如：活动简介"
+								maxlength="20"
+							/>
+							<text class="block-remove" @tap="removeBlock(idx)">删除</text>
 						</view>
-						<view class="photo photo-add" v-if="blockImageCount(block) < 6" @tap="chooseBlockImages(idx)">
-							<u-icon name="camera" size="36" color="#16864b"></u-icon>
-							<text>添加</text>
+						<text class="block-type-hint">{{ blockTypeName(block.type) }}</text>
+						<input
+							v-if="block.type === 'text'"
+							class="input input--in-card"
+							v-model="block.value"
+							placeholder="写一行即可"
+							maxlength="100"
+						/>
+						<textarea
+							v-else-if="block.type === 'textarea'"
+							class="textarea textarea--in-card"
+							v-model="block.value"
+							placeholder="可多行，支持换行"
+							maxlength="800"
+						/>
+						<view v-else-if="block.type === 'images'" class="block-images">
+							<view class="photos">
+								<view class="photo" v-for="(src, pi) in block.images" :key="'p-' + pi">
+									<image :src="src" mode="aspectFill" class="photo-image"></image>
+									<view class="photo-delete" @tap="removeBlockImage(idx, pi)">×</view>
+								</view>
+								<view class="photo photo-add" v-if="blockImageCount(block) < 6" @tap="chooseBlockImages(idx)">
+									<u-icon name="camera" size="36" color="#16864b"></u-icon>
+									<text>添加</text>
+								</view>
+							</view>
 						</view>
 					</view>
 				</view>
 			</view>
-			<view class="add-block-row">
-				<text class="add-block-label">添加字段：</text>
+		</view>
+
+		<view class="block-add-panel">
+			<text class="block-add-hint">还要加一段内容？点选类型后会出现在上方列表</text>
+			<view class="block-add-actions">
 				<view
-					class="chip chip--add"
+					class="block-add-btn"
 					v-for="t in blockTypes"
 					:key="t.type"
 					@tap="addBlock(t.type)"
-				>{{ t.name }}</view>
+				>
+					<text class="block-add-plus">+</text>
+					<text>{{ t.name }}</text>
+				</view>
 			</view>
 		</view>
 
 		<view class="map-tip">
-			提交后进入审核，通过后在活动页「玩转活动」展示。配置式活动：邻居可报名，现场定位签到；不消耗积分，平台不代收费用。
+			提交后进入审核，通过后在活动页展示。邻居可报名、不消耗积分、平台不代收费用。
 		</view>
 
-		<view class="map-submit" :class="{ disabled: submitting }" @tap="submit">{{ submitting ? '提交中…' : '提交发布' }}</view>
+		<view class="map-bottom-spacer"></view>
+
+		<view class="map-bottom-bar">
+			<view class="map-bottom-btn map-bottom-btn--ghost" @tap="openPreview">预览</view>
+			<view class="map-bottom-btn map-bottom-btn--primary" :class="{ disabled: submitting }" @tap="submit">
+				{{ submitting ? '提交中…' : '提交发布' }}
+			</view>
+		</view>
+
+		<u-popup v-model="previewShow" mode="bottom" border-radius="24" closeable height="72%">
+			<view class="preview-popup">
+				<view class="preview-head">
+					<text class="preview-title">详情页预览</text>
+					<view class="preview-tabs">
+						<text class="preview-tab" :class="{ on: previewMode === 'mine' }" @tap="previewMode = 'mine'">我的内容</text>
+						<text class="preview-tab" :class="{ on: previewMode === 'example' }" @tap="previewMode = 'example'">样式示例</text>
+					</view>
+				</view>
+				<text class="preview-hint">报名后邻居在活动详情里看到的效果（时间地点等固定信息会自动展示在上方）</text>
+				<scroll-view scroll-y class="preview-scroll">
+					<member-active-blocks-display
+						:blocks="previewBlocks"
+						:placeholder-text="previewMode === 'example' ? '' : '填写后将显示在这里'"
+					/>
+				</scroll-view>
+			</view>
+		</u-popup>
+
+		<canvas
+			canvas-id="memberActiveTextCoverCanvas"
+			id="memberActiveTextCoverCanvas"
+			class="cover-export-canvas"
+		/>
 	</view>
 </template>
 
@@ -169,18 +228,19 @@
 import { uploadUrl, headerTokenName, userTokenName } from '@/common/settings.js'
 import { parseUploadAssetResponse } from '@/common/uploadAsset.js'
 import MemberActiveBlocksDisplay from '@/components/member-active-blocks-display/member-active-blocks-display.vue'
+import MemberActiveTextCoverPicker from '@/components/member-active-text-cover-picker/member-active-text-cover-picker.vue'
+import { drawMemberActiveTextCover } from '@/utils/memberActiveTextCoverCanvas.js'
 import {
 	MEMBER_BLOCK_TYPES,
 	createBlock,
 	defaultPublishBlocks,
 	examplePreviewBlocks,
-	moveBlock as moveBlockList,
 	validateBlocks,
 	serializeBlocksForApi,
 } from '@/common/memberActiveBlocks.js'
 
 export default {
-	components: { MemberActiveBlocksDisplay },
+	components: { MemberActiveBlocksDisplay, MemberActiveTextCoverPicker },
 	data() {
 		const today = new Date()
 		const p = (n) => String(n).padStart(2, '0')
@@ -191,6 +251,11 @@ export default {
 			themes: [],
 			dateStart,
 			submitting: false,
+			coverMode: 'text',
+			textCoverStyleId: 'forest',
+			previewShow: false,
+			dragIndex: -1,
+			blockRects: [],
 			coverPath: '',
 			previewMode: 'mine',
 			blockTypes: MEMBER_BLOCK_TYPES,
@@ -227,7 +292,19 @@ export default {
 		const mobile = (this.userInfo && this.userInfo.mobile) || ''
 		if (mobile) this.form.contact = mobile
 	},
+	watch: {
+		textCoverStyleId() {
+			if (this.coverMode === 'text') this.coverPath = ''
+		},
+		'form.name'() {
+			if (this.coverMode === 'text') this.coverPath = ''
+		},
+	},
 	computed: {
+		themeLabel() {
+			const t = (this.themes || []).find((x) => x.id === this.form.theme_id)
+			return (t && t.name) || '邻里活动'
+		},
 		previewBlocks() {
 			if (this.previewMode === 'example') {
 				return this.exampleBlocks
@@ -241,6 +318,17 @@ export default {
 		},
 	},
 	methods: {
+		setCoverMode(mode) {
+			this.coverMode = mode
+			this.coverPath = ''
+			if (mode === 'text') {
+				this.form.coverPreview = ''
+			}
+		},
+		openPreview() {
+			this.previewMode = 'mine'
+			this.previewShow = true
+		},
 		blockTypeName(type) {
 			const t = this.blockTypes.find((x) => x.type === type)
 			return (t && t.name) || type
@@ -251,12 +339,50 @@ export default {
 		},
 		removeBlock(idx) {
 			if (this.customBlocks.length <= 1) {
-				return uni.showToast({ title: '至少保留 1 个展示字段', icon: 'none' })
+				return uni.showToast({ title: '至少保留一段内容', icon: 'none' })
 			}
 			this.customBlocks = this.customBlocks.filter((_, i) => i !== idx)
 		},
-		moveBlock(idx, dir) {
-			this.customBlocks = moveBlockList(this.customBlocks, idx, dir)
+		measureBlockCards(done) {
+			const q = uni.createSelectorQuery().in(this)
+			q.selectAll('.block-card').boundingClientRect((rects) => {
+				this.blockRects = rects || []
+				if (typeof done === 'function') done()
+			}).exec()
+		},
+		onBlockDragStart(e, idx) {
+			this.dragIndex = idx
+			this.measureBlockCards()
+		},
+		onBlockDragMove(e) {
+			if (this.dragIndex < 0) return
+			const y = e.touches[0].clientY
+			const rects = this.blockRects
+			if (!rects || !rects.length) return
+			let target = rects.length - 1
+			for (let i = 0; i < rects.length; i++) {
+				const mid = rects[i].top + rects[i].height / 2
+				if (y < mid) {
+					target = i
+					break
+				}
+			}
+			if (target !== this.dragIndex) {
+				this.reorderBlocks(this.dragIndex, target)
+				this.$nextTick(() => this.measureBlockCards())
+			}
+		},
+		onBlockDragEnd() {
+			this.dragIndex = -1
+			this.blockRects = []
+		},
+		reorderBlocks(from, to) {
+			if (from === to) return
+			const arr = this.customBlocks.slice()
+			const item = arr.splice(from, 1)[0]
+			arr.splice(to, 0, item)
+			this.customBlocks = arr
+			this.dragIndex = to
 		},
 		blockImageCount(block) {
 			return (block.images || []).length + (block.imagePaths || []).length
@@ -328,6 +454,7 @@ export default {
 			})
 		},
 		chooseCover() {
+			this.coverMode = 'photo'
 			uni.chooseImage({
 				count: 1,
 				sizeType: ['compressed'],
@@ -341,6 +468,28 @@ export default {
 				},
 			})
 		},
+		async ensureCoverReady() {
+			if (this.coverMode === 'photo') {
+				if (!this.form.coverPreview) {
+					throw new Error('请上传封面照片，或改用文字封面')
+				}
+				if (!this.coverPath) {
+					this.coverPath = await this.uploadOne(this.form.coverPreview)
+				}
+				return
+			}
+			if (!String(this.form.name).trim()) {
+				throw new Error('请填写活动名称以生成文字封面')
+			}
+			const tempPath = await drawMemberActiveTextCover('memberActiveTextCoverCanvas', {
+				title: this.form.name,
+				styleId: this.textCoverStyleId,
+				badge: this.themeLabel,
+			})
+			this.form.coverPreview = tempPath
+			this.coverPath = await this.uploadOne(tempPath)
+			return
+		},
 		async submit() {
 			if (this.submitting) return
 			if (!String(this.form.name).trim()) {
@@ -349,8 +498,11 @@ export default {
 			if (!this.form.theme_id) {
 				return uni.showToast({ title: '请选择活动类型', icon: 'none' })
 			}
-			if (!this.form.coverPreview) {
-				return uni.showToast({ title: '请添加封面图', icon: 'none' })
+			if (this.coverMode === 'photo' && !this.form.coverPreview) {
+				return uni.showToast({ title: '请上传封面或改用文字封面', icon: 'none' })
+			}
+			if (this.coverMode === 'text' && !String(this.form.name).trim()) {
+				return uni.showToast({ title: '请填写活动名称', icon: 'none' })
 			}
 			if (!this.form.activity_date) {
 				return uni.showToast({ title: '请选择活动日期', icon: 'none' })
@@ -366,11 +518,14 @@ export default {
 				return uni.showToast({ title: blockErr, icon: 'none' })
 			}
 			this.submitting = true
-			uni.showLoading({ title: '上传图片…', mask: true })
 			try {
-				if (!this.coverPath) {
-					this.coverPath = await this.uploadOne(this.form.coverPreview)
+				if (this.coverMode === 'text') {
+					uni.showLoading({ title: '生成封面…', mask: true })
+				} else {
+					uni.showLoading({ title: '上传图片…', mask: true })
 				}
+				await this.ensureCoverReady()
+				uni.showLoading({ title: '上传图片…', mask: true })
 				for (let i = 0; i < this.customBlocks.length; i++) {
 					const block = this.customBlocks[i]
 					if (block.type !== 'images') continue
@@ -430,8 +585,61 @@ export default {
 .map-page {
 	min-height: 100vh;
 	box-sizing: border-box;
-	padding: 20rpx 28rpx calc(40rpx + env(safe-area-inset-bottom));
+	padding: 20rpx 28rpx 0;
+	padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
 	background: linear-gradient(180deg, #eef7f0 0%, #f4f7f5 28%);
+}
+.map-bottom-spacer {
+	height: calc(120rpx + env(safe-area-inset-bottom));
+}
+.map-bottom-bar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	gap: 20rpx;
+	padding: 16rpx 28rpx calc(16rpx + env(safe-area-inset-bottom));
+	background: rgba(255, 255, 255, 0.96);
+	box-shadow: 0 -8rpx 32rpx rgba(22, 53, 36, 0.08);
+	border-top: 1rpx solid rgba(22, 53, 36, 0.06);
+}
+.map-bottom-btn {
+	flex: 1;
+	height: 88rpx;
+	border-radius: 999rpx;
+	text-align: center;
+	line-height: 88rpx;
+	font-size: 30rpx;
+	font-weight: 600;
+}
+.map-bottom-btn--ghost {
+	background: #fff;
+	color: #16864b;
+	border: 2rpx solid #c8e6d0;
+}
+.map-bottom-btn--primary {
+	background: linear-gradient(135deg, #1f9d55, #16864b);
+	color: #fff;
+	box-shadow: 0 8rpx 24rpx rgba(22, 134, 75, 0.25);
+}
+.map-bottom-btn--primary.disabled {
+	opacity: 0.65;
+}
+.preview-popup {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: 28rpx 28rpx 0;
+	box-sizing: border-box;
+}
+.preview-scroll {
+	flex: 1;
+	min-height: 0;
+	margin-top: 8rpx;
+	padding-bottom: 32rpx;
 }
 .map-hero {
 	padding: 16rpx 8rpx 28rpx;
@@ -538,6 +746,39 @@ export default {
 .cover-row {
 	margin-top: 16rpx;
 }
+.cover-mode-tabs {
+	display: flex;
+	gap: 12rpx;
+	margin-top: 16rpx;
+}
+.cover-mode-tab {
+	padding: 12rpx 26rpx;
+	border-radius: 999rpx;
+	font-size: 24rpx;
+	color: #5f7166;
+	background: #f1f4f2;
+}
+.cover-mode-tab.on {
+	background: #e3f3ea;
+	color: #076d3d;
+	font-weight: 600;
+}
+.cover-name-tip {
+	margin-top: 16rpx;
+	padding: 28rpx 24rpx;
+	border-radius: 16rpx;
+	background: #f5f8f6;
+	font-size: 24rpx;
+	color: #8a9a90;
+	line-height: 1.55;
+}
+.cover-export-canvas {
+	position: fixed;
+	left: -2000px;
+	top: 0;
+	width: 750px;
+	height: 1000px;
+}
 .cover-add,
 .cover-box {
 	width: 100%;
@@ -604,28 +845,6 @@ export default {
 	color: #859088;
 	line-height: 1.65;
 }
-.map-submit {
-	height: 96rpx;
-	margin-top: 32rpx;
-	border-radius: 999rpx;
-	background: linear-gradient(135deg, #1f9d55, #16864b);
-	color: #fff;
-	text-align: center;
-	line-height: 96rpx;
-	font-size: 30rpx;
-	font-weight: 600;
-	box-shadow: 0 12rpx 28rpx rgba(22, 134, 75, 0.28);
-}
-.map-submit.disabled {
-	opacity: 0.65;
-}
-.preview-section {
-	margin-top: 24rpx;
-	padding: 24rpx;
-	border-radius: 24rpx;
-	background: #fff;
-	box-shadow: 0 10rpx 36rpx rgba(22, 53, 36, 0.06);
-}
 .preview-head {
 	display: flex;
 	align-items: center;
@@ -661,47 +880,127 @@ export default {
 	color: #8a9a90;
 	line-height: 1.5;
 }
-.map-card--blocks {
+.detail-section {
 	margin-top: 20rpx;
+	padding: 28rpx;
+	border-radius: 24rpx;
+	background: #fff;
+	box-shadow: 0 10rpx 36rpx rgba(22, 53, 36, 0.06);
 }
-.blocks-head {
-	margin-bottom: 8rpx;
+.detail-section .field-label {
+	margin-top: 0;
 }
-.block-editor {
+.hint-icon {
+	font-weight: 700;
+	color: #16864b;
+}
+.block-list {
 	margin-top: 24rpx;
-	padding-top: 20rpx;
-	border-top: 1rpx solid #eef2ef;
-}
-.block-editor-toolbar {
 	display: flex;
-	flex-wrap: wrap;
+	flex-direction: column;
+	gap: 20rpx;
+}
+.block-card {
+	display: flex;
+	align-items: stretch;
+	border-radius: 18rpx;
+	background: #f8faf9;
+	border: 1rpx solid #e8eeea;
+	overflow: hidden;
+}
+.block-card--dragging {
+	opacity: 0.92;
+	box-shadow: 0 12rpx 28rpx rgba(22, 134, 75, 0.18);
+	border-color: #a7dcc0;
+}
+.block-drag-handle {
+	width: 72rpx;
+	flex-shrink: 0;
+	display: flex;
 	align-items: center;
-	gap: 10rpx;
-	margin-bottom: 12rpx;
+	justify-content: center;
+	background: #eef4f0;
+	border-right: 1rpx solid #e0e8e2;
+}
+.block-drag-icon {
+	font-size: 36rpx;
+	font-weight: 700;
+	color: #8aa892;
+	line-height: 1;
+}
+.block-card-body {
+	flex: 1;
+	min-width: 0;
+	padding: 20rpx 20rpx 22rpx 16rpx;
+}
+.block-card-head {
+	display: flex;
+	align-items: center;
+	gap: 12rpx;
 }
 .block-label-input {
 	flex: 1;
-	min-width: 200rpx;
 	height: 72rpx;
 	padding: 0 16rpx;
 	border-radius: 12rpx;
-	background: #f5f8f6;
-	font-size: 26rpx;
+	background: #fff;
+	font-size: 28rpx;
+	font-weight: 600;
+	border: 1rpx solid #e8eeea;
 }
-.block-type-tag {
-	padding: 6rpx 14rpx;
-	border-radius: 8rpx;
-	background: #eef7f0;
+.block-remove {
+	flex-shrink: 0;
+	font-size: 24rpx;
+	color: #c4564a;
+	padding: 8rpx 4rpx;
+}
+.block-type-hint {
+	display: block;
+	margin: 10rpx 4rpx 12rpx;
+	font-size: 22rpx;
+	color: #9aab9f;
+}
+.input--in-card,
+.textarea--in-card {
+	margin-top: 0;
+	background: #fff;
+	border: 1rpx solid #e8eeea;
+}
+.block-add-panel {
+	margin-top: 24rpx;
+	padding: 24rpx 28rpx 28rpx;
+	border-radius: 24rpx;
+	background: linear-gradient(180deg, #e8f5ec 0%, #f0f7f2 100%);
+	border: 2rpx dashed #b8dcc4;
+}
+.block-add-hint {
+	display: block;
+	font-size: 24rpx;
+	color: #4a6b55;
+	line-height: 1.5;
+}
+.block-add-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16rpx;
+	margin-top: 20rpx;
+}
+.block-add-btn {
+	display: flex;
+	align-items: center;
+	gap: 8rpx;
+	padding: 16rpx 24rpx;
+	border-radius: 999rpx;
+	background: #fff;
 	color: #16864b;
-	font-size: 22rpx;
+	font-size: 26rpx;
+	font-weight: 600;
+	box-shadow: 0 4rpx 12rpx rgba(22, 134, 75, 0.1);
 }
-.block-tool {
-	font-size: 22rpx;
-	color: #18af38;
-	padding: 6rpx 8rpx;
-}
-.block-tool--danger {
-	color: #e54d42;
+.block-add-plus {
+	font-size: 32rpx;
+	line-height: 1;
+	font-weight: 400;
 }
 .block-images .photos {
 	display: flex;
@@ -739,23 +1038,5 @@ export default {
 	border: 2rpx dashed #bddbc8;
 	color: #16864b;
 	font-size: 20rpx;
-}
-.add-block-row {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 12rpx;
-	margin-top: 28rpx;
-	padding-top: 20rpx;
-	border-top: 1rpx dashed #dce8de;
-}
-.add-block-label {
-	font-size: 24rpx;
-	color: #5f7166;
-}
-.chip--add {
-	background: #fff;
-	border: 1rpx solid #c8e6d0;
-	color: #16864b;
 }
 </style>
