@@ -4,7 +4,7 @@
  * page key 与 <page-guide page="xxx"> 一致。
  * selector 用页面里的 id（推荐 #guide-xxx），空字符串表示只出说明卡片、不挖洞。
  * type: 'tabbar' 不查 DOM，按自定义胶囊 Tab 的尺寸计算高亮（查固定层会偏）。
- * 吉祥物按屏幕右下角定位（相对窗口，不是页面文档）。拖动距离存 help_mascot_rb，各 Tab 共用。
+ * 小助手入口（右侧吸附胶囊）按 fixed 定位；拖动位置存 help_mascot_rb，各 Tab 共用。
  * prefer: 'above' | 'below' 卡片相对高亮的偏好。
  *
  * 新增页面：1）模板加 id  2）在此加一段 steps  3）页面底部挂 <page-guide page="key" />

@@ -3,45 +3,23 @@
 		<view
 			v-if="!showGuide && !cfg.hideMascot"
 			class="pg-mascot"
-			:class="{ 'pg-mascot--drag': dragging }"
+			:class="{
+				'pg-mascot--drag': dragging,
+				'pg-mascot--left': chipDockLeft,
+				'pg-mascot--snap': snapAnim
+			}"
 			:style="mascotStyle"
 			@touchstart.stop="onPetTouchStart"
 			@touchmove.stop.prevent="onPetTouchMove"
 			@touchend.stop="onPetTouchEnd"
 			@touchcancel.stop="onPetTouchEnd"
 		>
-			<view class="pg-bubble" v-if="showBubble">
-				<text class="pg-bubble-text">遇到困难了吗？可以点我~</text>
-			</view>
-			<view class="pg-pet">
-				<view class="pg-body">
-					<view class="pg-bud"></view>
-					<view class="pg-hand pg-hand-l">
-						<view class="pg-leaf">
-							<view class="pg-leaf-vein"></view>
-						</view>
-						<view class="pg-palm">
-							<view class="pg-finger"></view>
-							<view class="pg-finger pg-finger-2"></view>
-						</view>
-					</view>
-					<view class="pg-hand pg-hand-r">
-						<view class="pg-sprout">
-							<view class="pg-sprout-stem"></view>
-							<view class="pg-sprout-leaf pg-sprout-leaf-l"></view>
-							<view class="pg-sprout-leaf pg-sprout-leaf-r"></view>
-						</view>
-						<view class="pg-palm pg-palm-r">
-							<view class="pg-finger"></view>
-							<view class="pg-finger pg-finger-2"></view>
-						</view>
-					</view>
-					<view class="pg-eye pg-eye-l"></view>
-					<view class="pg-eye pg-eye-r"></view>
-					<view class="pg-blush pg-blush-l"></view>
-					<view class="pg-blush pg-blush-r"></view>
-					<view class="pg-mouth"></view>
+			<view class="pg-chip">
+				<view class="pg-chip-icon">
+					<view class="pg-chip-dot"></view>
+					<view class="pg-chip-dot pg-chip-dot--alt"></view>
 				</view>
+				<text class="pg-chip-text">小助手</text>
 			</view>
 		</view>
 
@@ -92,16 +70,17 @@ export default {
 	},
 	data() {
 		return {
-			showBubble: true,
 			showGuide: false,
 			guideOnPage: true,
 			playingSteps: [],
 			guideTargetRect: null,
 			stepPrefer: '',
+			mascotSide: 'right',
 			mascotRight: 0,
 			mascotBottom: 0,
 			posReady: false,
 			dragging: false,
+			snapAnim: false,
 			_lock: false
 		}
 	},
@@ -109,9 +88,23 @@ export default {
 		cfg() {
 			return getPageGuide(this.page)
 		},
+		chipDockLeft() {
+			if (this.dragging) return this.sideFromRightOffset(this.mascotRight) === 'left'
+			return this.mascotSide === 'left'
+		},
 		mascotStyle() {
-			if (!this.posReady) return 'position:fixed;right:18px;bottom:120px;z-index:10050;pointer-events:auto;'
-			return `position:fixed;right:${this.mascotRight}px;bottom:${this.mascotBottom}px;left:auto;top:auto;z-index:10050;pointer-events:auto;`
+			const z = 'z-index:10050;pointer-events:auto;'
+			if (!this.posReady) {
+				return `position:fixed;right:0;bottom:120px;left:auto;top:auto;${z}`
+			}
+			const b = this.mascotBottom
+			if (this.dragging) {
+				return `position:fixed;right:${this.mascotRight}px;bottom:${b}px;left:auto;top:auto;${z}`
+			}
+			if (this.mascotSide === 'left') {
+				return `position:fixed;left:0;bottom:${b}px;right:auto;top:auto;${z}`
+			}
+			return `position:fixed;right:0;bottom:${b}px;left:auto;top:auto;${z}`
 		},
 		guideWinW() {
 			return uni.getSystemInfoSync().windowWidth
@@ -194,10 +187,8 @@ export default {
 		this.applyMascotPos()
 		this._onMascotMoved = () => this.applyMascotPos()
 		uni.$on('help_mascot_moved', this._onMascotMoved)
-		this.startBubbleLoop()
 	},
 	beforeDestroy() {
-		this.clearBubbleLoop()
 		if (this._scrollTimer) {
 			clearTimeout(this._scrollTimer)
 			this._scrollTimer = null
@@ -220,70 +211,80 @@ export default {
 			}
 		},
 		defaultRB() {
-			const { inset } = this.screenSize()
+			const { inset, h } = this.screenSize()
 			const rpx = uni.getSystemInfoSync().windowWidth / 750
+			const chipH = this.rpxToPx(72)
+			const bMid = h * 0.46 - chipH / 2
 			return {
-				r: 18 * rpx,
-				b: 108 * rpx + 16 * rpx + inset + 12 * rpx
+				r: 0,
+				b: Math.max(108 * rpx + inset + 12 * rpx, bMid)
 			}
 		},
+		chipMetrics() {
+			const chipW = this.rpxToPx(168)
+			const chipH = this.rpxToPx(72)
+			return { chipW, chipH }
+		},
+		maxMascotRight() {
+			const { w } = this.screenSize()
+			const { chipW } = this.chipMetrics()
+			return Math.max(0, w - chipW)
+		},
+		clampBottom(b) {
+			const { h } = this.screenSize()
+			const { chipH } = this.chipMetrics()
+			const maxB = Math.max(4, h - chipH - 4)
+			return Math.max(4, Math.min(b, maxB))
+		},
 		clampRB(r, b) {
-			const { w, h } = this.screenSize()
-			const pet = this.rpxToPx(88)
-			const maxR = Math.max(4, w - pet - 4)
-			const maxB = Math.max(4, h - pet - 4)
+			const maxR = this.maxMascotRight()
 			return {
-				r: Math.max(4, Math.min(r, maxR)),
-				b: Math.max(4, Math.min(b, maxB))
+				r: Math.max(0, Math.min(r, maxR)),
+				b: this.clampBottom(b)
 			}
+		},
+		sideFromRightOffset(r) {
+			const { w } = this.screenSize()
+			const { chipW } = this.chipMetrics()
+			const centerX = w - chipW / 2 - r
+			return centerX < w / 2 ? 'left' : 'right'
+		},
+		rightOffsetForSide(side) {
+			return side === 'left' ? this.maxMascotRight() : 0
 		},
 		applyMascotPos() {
 			const def = this.defaultRB()
-			let r = def.r
+			let side = 'right'
 			let b = def.b
 			try {
 				const p = uni.getStorageSync('help_mascot_rb')
-				if (p && isFinite(Number(p.r)) && isFinite(Number(p.b))) {
-					r = Number(p.r)
+				if (p && (p.side === 'left' || p.side === 'right') && isFinite(Number(p.b))) {
+					side = p.side
 					b = Number(p.b)
+				} else if (p && isFinite(Number(p.r)) && isFinite(Number(p.b))) {
+					b = Number(p.b)
+					side = this.sideFromRightOffset(Number(p.r))
 				}
 			} catch (e) {}
-			const c = this.clampRB(r, b)
-			this.mascotRight = c.r
-			this.mascotBottom = c.b
+			this.mascotSide = side
+			this.mascotBottom = this.clampBottom(b)
+			this.mascotRight = this.rightOffsetForSide(side)
 			this.posReady = true
 		},
 		saveMascotPos() {
 			try {
-				uni.setStorageSync('help_mascot_rb', { r: this.mascotRight, b: this.mascotBottom })
+				uni.setStorageSync('help_mascot_rb', {
+					side: this.mascotSide,
+					b: this.mascotBottom
+				})
 				uni.$emit('help_mascot_moved')
 			} catch (e) {}
 		},
-		clearBubbleLoop() {
-			if (this._bubbleTimer) {
-				clearTimeout(this._bubbleTimer)
-				this._bubbleTimer = null
-			}
-		},
-		startBubbleLoop() {
-			this.clearBubbleLoop()
-			if (this.showGuide) {
-				this.showBubble = false
-				return
-			}
-			this.showBubble = true
-			const waitHide = () => {
-				this._bubbleTimer = setTimeout(() => {
-					if (this.showGuide) return
-					this.showBubble = false
-					this._bubbleTimer = setTimeout(() => {
-						if (this.showGuide) return
-						this.showBubble = true
-						waitHide()
-					}, 5000)
-				}, 3000)
-			}
-			waitHide()
+		snapMascotToEdge() {
+			const side = this.sideFromRightOffset(this.mascotRight)
+			this.mascotSide = side
+			this.mascotBottom = this.clampBottom(this.mascotBottom)
+			this.mascotRight = this.rightOffsetForSide(side)
 		},
 		onPetTouchStart(e) {
 			const t = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0])
@@ -292,8 +293,9 @@ export default {
 			this._moved = false
 			this._sx = t.clientX
 			this._sy = t.clientY
-			this._ox = this.mascotRight
+			this._ox = this.rightOffsetForSide(this.mascotSide)
 			this._oy = this.mascotBottom
+			this.mascotRight = this._ox
 		},
 		onPetTouchMove(e) {
 			if (!this.dragging) return
@@ -314,16 +316,20 @@ export default {
 		},
 		onPetTouchEnd() {
 			if (!this.dragging) return
+			const moved = this._moved
 			this.dragging = false
-			if (this._moved) {
+			if (moved) {
+				this.snapAnim = true
+				this.snapMascotToEdge()
 				this.saveMascotPos()
+				setTimeout(() => {
+					this.snapAnim = false
+				}, 280)
 				return
 			}
 			this.onMascotTap()
 		},
 		onMascotTap() {
-			this.clearBubbleLoop()
-			this.showBubble = false
 			this.startGuide()
 		},
 		startGuide() {
@@ -333,8 +339,6 @@ export default {
 				uni.showToast({ title: '本页暂无教程', icon: 'none' })
 				return
 			}
-			this.clearBubbleLoop()
-			this.showBubble = false
 			this._lock = true
 			this.guideOnPage = true
 			this.playingSteps = steps
@@ -356,7 +360,6 @@ export default {
 				clearTimeout(this._scrollTimer)
 				this._scrollTimer = null
 			}
-			this.startBubbleLoop()
 		},
 		getPageVm() {
 			try {
@@ -506,7 +509,7 @@ export default {
 }
 .pg-mascot {
 	position: fixed;
-	right: 18px;
+	right: 0;
 	bottom: 120px;
 	z-index: 10050;
 	pointer-events: auto;
@@ -514,192 +517,56 @@ export default {
 	flex-direction: column;
 	align-items: flex-end;
 }
-.pg-mascot--drag .pg-pet {
-	animation: none;
+.pg-mascot--left {
+	align-items: flex-start;
 }
-.pg-bubble {
-	max-width: 280rpx;
-	margin: 0 8rpx 10rpx 0;
-	padding: 12rpx 16rpx;
-	background: #fff;
-	border-radius: 16rpx 16rpx 4rpx 16rpx;
-	box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.16);
+.pg-mascot--snap {
+	transition: left 0.26s ease-out, right 0.26s ease-out, bottom 0.26s ease-out;
 }
-.pg-bubble-text {
-	display: block;
-	font-size: 22rpx;
-	color: #1c2b1e;
-	line-height: 1.45;
+.pg-mascot--drag .pg-chip {
+	opacity: 0.88;
 }
-.pg-pet {
-	position: relative;
-	width: 112rpx;
-	height: 112rpx;
+.pg-mascot--left .pg-chip {
+	border-radius: 0 999rpx 999rpx 0;
+	box-shadow: 6rpx 6rpx 24rpx rgba(16, 48, 24, 0.12);
+	border: 1rpx solid rgba(24, 175, 56, 0.14);
+	border-left: none;
+	border-right: 1rpx solid rgba(24, 175, 56, 0.14);
 }
-.pg-body {
-	position: relative;
-	width: 112rpx;
-	height: 112rpx;
-	border-radius: 50%;
-	background: radial-gradient(circle at 42% 32%, #d4f5b8 0%, #8ee06a 38%, #5ec948 72%, #45b838 100%);
-	box-shadow: 0 8rpx 18rpx rgba(46, 125, 50, 0.32);
-	overflow: visible;
+.pg-chip {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 14rpx 22rpx 14rpx 20rpx;
+	background: rgba(255, 255, 255, 0.98);
+	border-radius: 999rpx 0 0 999rpx;
+	box-shadow: -6rpx 6rpx 24rpx rgba(16, 48, 24, 0.12);
+	border: 1rpx solid rgba(24, 175, 56, 0.14);
+	border-right: none;
 }
-.pg-hand {
-	position: absolute;
-	z-index: 4;
+.pg-chip-icon {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin-right: 10rpx;
 }
-.pg-hand-l {
-	left: -12rpx;
-	bottom: 24rpx;
-	width: 50rpx;
-	height: 58rpx;
-}
-.pg-hand-r {
-	right: -10rpx;
-	bottom: 26rpx;
-	width: 42rpx;
-	height: 54rpx;
-}
-.pg-palm {
-	position: absolute;
-	width: 22rpx;
-	height: 22rpx;
-	border-radius: 50%;
-	background: radial-gradient(circle at 38% 32%, #a8e878 0%, #5cb848 55%, #3d9a38 100%);
-	border: 2rpx solid rgba(45, 110, 50, 0.45);
-	box-shadow: 0 2rpx 6rpx rgba(34, 100, 40, 0.25);
-	z-index: 5;
-}
-.pg-hand-l .pg-palm {
-	right: 0;
-	bottom: 8rpx;
-}
-.pg-palm-r {
-	left: 0;
-	bottom: 6rpx;
-}
-.pg-finger {
-	position: absolute;
-	width: 8rpx;
-	height: 8rpx;
-	border-radius: 50%;
-	background: #5cb848;
-	border: 1rpx solid rgba(45, 110, 50, 0.35);
-	top: -2rpx;
-	left: 2rpx;
-}
-.pg-finger-2 {
-	left: auto;
-	right: 0;
-	top: 0;
-}
-.pg-bud {
-	position: absolute;
-	top: 2rpx;
-	right: 22rpx;
-	width: 18rpx;
-	height: 18rpx;
-	border-radius: 50%;
-	background: radial-gradient(circle at 35% 30%, #ffd080 0%, #f5a623 100%);
-	box-shadow: 0 2rpx 4rpx rgba(180, 100, 20, 0.25);
-	z-index: 3;
-}
-.pg-leaf {
-	position: absolute;
-	left: -2rpx;
-	bottom: 10rpx;
-	width: 36rpx;
-	height: 48rpx;
-	border-radius: 0 80% 0 80%;
-	background: linear-gradient(145deg, #8ee06a 0%, #3d9e3a 100%);
-	transform: rotate(-20deg);
-	transform-origin: 85% 88%;
-	box-shadow: 0 2rpx 6rpx rgba(34, 100, 40, 0.15);
-	z-index: 3;
-}
-.pg-leaf-vein {
-	position: absolute;
-	left: 50%;
-	top: 12%;
-	width: 2rpx;
-	height: 72%;
-	margin-left: -1rpx;
-	background: rgba(34, 100, 40, 0.35);
-	border-radius: 2rpx;
-}
-.pg-sprout {
-	position: absolute;
-	right: 2rpx;
-	bottom: 14rpx;
-	width: 28rpx;
-	height: 38rpx;
-	z-index: 3;
-}
-.pg-sprout-stem {
-	position: absolute;
-	left: 10rpx;
-	bottom: 0;
-	width: 4rpx;
-	height: 24rpx;
-	border-radius: 4rpx;
-	background: #3d8f3a;
-	transform: rotate(8deg);
-}
-.pg-sprout-leaf {
-	position: absolute;
-	width: 14rpx;
+.pg-chip-dot {
+	width: 10rpx;
 	height: 10rpx;
-	border-radius: 0 100% 0 100%;
-	background: #6fcf4a;
-}
-.pg-sprout-leaf-l {
-	left: 2rpx;
-	top: 0;
-	transform: rotate(-35deg);
-}
-.pg-sprout-leaf-r {
-	right: 0;
-	top: 2rpx;
-	transform: rotate(25deg);
-	background: #5cb85c;
-}
-.pg-eye {
-	position: absolute;
-	top: 42rpx;
-	width: 12rpx;
-	height: 12rpx;
 	border-radius: 50%;
-	background: #1a1a1a;
-	z-index: 5;
+	background: #18af38;
 }
-.pg-eye-l { left: 30rpx; }
-.pg-eye-r { right: 30rpx; }
-.pg-blush {
-	position: absolute;
-	top: 54rpx;
-	width: 14rpx;
-	height: 9rpx;
-	border-radius: 50%;
-	background: rgba(255, 160, 160, 0.55);
-	z-index: 5;
+.pg-chip-dot--alt {
+	margin-left: 6rpx;
+	background: #3974f2;
+	opacity: 0.9;
 }
-.pg-blush-l { left: 18rpx; }
-.pg-blush-r { right: 18rpx; }
-.pg-mouth {
-	position: absolute;
-	left: 50%;
-	top: 60rpx;
-	width: 18rpx;
-	height: 8rpx;
-	margin-left: -9rpx;
-	border-bottom: 3rpx solid #2d5a2a;
-	border-radius: 0 0 10rpx 10rpx;
-	z-index: 5;
-}
-@keyframes pgBreathe {
-	0%, 100% { transform: scale(1) translateY(0); }
-	50% { transform: scale(1.05) translateY(-5rpx); }
+.pg-chip-text {
+	font-size: 26rpx;
+	font-weight: 600;
+	color: #18af38;
+	letter-spacing: 2rpx;
+	line-height: 1.2;
 }
 .pg-dim-full {
 	position: fixed;
