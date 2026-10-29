@@ -468,6 +468,13 @@
 					}
 				},
 				{
+					"path": "my-ongoing",
+					"style": {
+						"navigationBarTitleText": "我的进行中",
+						"navigationStyle": "custom"
+					}
+				},
+				{
 					"path": "rank",
 					"style": {
 						"navigationBarTitleText": "签到排行榜"

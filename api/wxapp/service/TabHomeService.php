@@ -22,6 +22,7 @@ use app\admin\model\member\MemberModel;
 use app\admin\model\SlideItemModel;
 use api\wxapp\model\CouponModel;
 use api\wxapp\model\UserCouponModel;
+use api\wxapp\service\MemberActiveService;
 use think\facade\Db;
 use think\facade\Request;
 
@@ -53,6 +54,9 @@ class TabHomeService
         if ($this->userId > 0) {
             $data['sign_status'] = $this->fetchSignStatus();
             $data['user_info'] = $this->fetchIndexUserBrief();
+            $ongoing = $this->paginateMyOngoingList(1, 5);
+            $data['ongoing_list'] = $ongoing['list'];
+            $data['ongoing_total'] = $ongoing['total'];
         }
         return $data;
     }
@@ -623,5 +627,193 @@ class TabHomeService
             $launch = ActiveWebContext::appendQueryParam($launch, 'web_ctx', $token);
         }
         $item['web_launch_url'] = $launch;
+    }
+
+    /**
+     * 首页「我的进行中」：已报名 + 我发起且未截止的活动
+     *
+     * @return array{list:array,total:int,page:int,page_size:int,last_page:int}
+     */
+    public function paginateMyOngoingList(int $page, int $pageSize): array
+    {
+        $page = max(1, $page);
+        $pageSize = min(30, max(1, $pageSize));
+        $all = $this->buildMyOngoingRows();
+        $total = count($all);
+        $offset = ($page - 1) * $pageSize;
+        return [
+            'list' => array_slice($all, $offset, $pageSize),
+            'total' => $total,
+            'page' => $page,
+            'page_size' => $pageSize,
+            'last_page' => max(1, (int)ceil($total / max(1, $pageSize))),
+        ];
+    }
+
+    /** @return list<array<string,mixed>> */
+    protected function buildMyOngoingRows(): array
+    {
+        if ($this->userId <= 0) {
+            return [];
+        }
+        $signedIds = ActiveSIgnModel::where('user_id', $this->userId)->column('active_id');
+        $signedMap = array_fill_keys(array_map('intval', $signedIds ?: []), true);
+        $publishedIds = ActiveModel::where('publish_user_id', $this->userId)
+            ->where('delete_time', 0)
+            ->column('id');
+        $idSet = [];
+        foreach (array_merge($signedIds ?: [], $publishedIds ?: []) as $id) {
+            $id = (int)$id;
+            if ($id > 0) {
+                $idSet[$id] = true;
+            }
+        }
+        if (!$idSet) {
+            return [];
+        }
+        $rows = ActiveModel::whereIn('id', array_keys($idSet))
+            ->where('delete_time', 0)
+            ->where('status', 1)
+            ->select();
+        $list = [];
+        foreach ($rows as $item) {
+            if (!$this->isActiveOngoing($item)) {
+                continue;
+            }
+            $aid = (int)$item['id'];
+            $isPublisher = (int)($item['publish_user_id'] ?? 0) === $this->userId;
+            $isSigned = !empty($signedMap[$aid]);
+            if (!$isPublisher && !$isSigned) {
+                continue;
+            }
+            $list[] = $this->formatMyOngoingItem($item, $isSigned, $isPublisher);
+        }
+        usort($list, function ($a, $b) {
+            $sa = (int)($a['sort_ts'] ?? 0);
+            $sb = (int)($b['sort_ts'] ?? 0);
+            if ($sa === $sb) {
+                return (int)$b['id'] - (int)$a['id'];
+            }
+            if ($sa <= 0) {
+                return 1;
+            }
+            if ($sb <= 0) {
+                return -1;
+            }
+            return $sa <=> $sb;
+        });
+        return $list;
+    }
+
+    /** @param array<string,mixed>|object $active */
+    protected function isActiveOngoing($active): bool
+    {
+        $a = is_array($active) ? $active : (array)$active;
+        if (ActiveModel::isDatePending($a)) {
+            return true;
+        }
+        $now = time();
+        $offlineEnd = (int)($a['offline_sign_end'] ?? 0);
+        if ($offlineEnd > 0) {
+            return $now <= $offlineEnd;
+        }
+        return ActiveModel::resolveIsEnd($a) === 0;
+    }
+
+    /** @param array<string,mixed>|object $active */
+    protected function formatMyOngoingItem($active, bool $isSigned, bool $isPublisher): array
+    {
+        $a = is_array($active) ? $active : (array)$active;
+        $aid = (int)$a['id'];
+        $startTs = (int)($a['offline_sign_start'] ?? 0);
+        if ($startTs <= 0 && !empty($a['date'])) {
+            $startTs = (int)$a['date'];
+        }
+        $weekLabels = ['日', '一', '二', '三', '四', '五', '六'];
+        $calDay = '';
+        $calSub = '';
+        if (ActiveModel::isDatePending($a)) {
+            $calDay = '待定';
+            $calSub = '时间未定';
+        } elseif ($startTs > 0) {
+            $calDay = date('j', $startTs);
+            $calSub = '周' . $weekLabels[(int)date('w', $startTs)] . ' ' . date('H:i', $startTs);
+        } else {
+            $calDay = '—';
+            $calSub = '见详情';
+        }
+        $addr = trim((string)($a['address'] ?? ''));
+        if ($addr === '') {
+            $addr = trim((string)($a['area_range'] ?? ''));
+        }
+        return [
+            'id' => $aid,
+            'name' => (string)($a['name'] ?? ''),
+            'thumb' => empty($a['thumb']) ? '' : cmf_get_asset_url($a['thumb']),
+            'address' => $addr,
+            'location_line' => $this->buildOngoingLocationLine($a),
+            'cal_day' => $calDay,
+            'cal_sub' => $calSub,
+            'status_hint' => $this->buildOngoingStatusHint($a, $isSigned, $isPublisher),
+            'role' => $isPublisher ? ($isSigned ? 'both' : 'publish') : 'join',
+            'is_sign' => $isSigned ? 1 : 0,
+            'is_publisher' => $isPublisher ? 1 : 0,
+            'sort_ts' => $startTs > 0 ? $startTs : (ActiveModel::isDatePending($a) ? PHP_INT_MAX : 0),
+            'is_date_pending' => ActiveModel::isDatePending($a) ? 1 : 0,
+        ];
+    }
+
+    /** @param array<string,mixed> $active */
+    protected function buildOngoingLocationLine(array $active): string
+    {
+        $addr = trim((string)($active['address'] ?? ''));
+        if ($addr === '') {
+            $addr = trim((string)($active['area_range'] ?? ''));
+        }
+        if ($addr === '') {
+            return '地点见活动详情';
+        }
+        return $addr;
+    }
+
+    /** @param array<string,mixed> $active */
+    protected function buildOngoingStatusHint(array $active, bool $isSigned, bool $isPublisher): string
+    {
+        if ($isPublisher) {
+            $pubStatus = (int)($active['publish_audit_status'] ?? 0);
+            if ($pubStatus === MemberActiveService::AUDIT_PENDING) {
+                return '我发起的 · 审核中';
+            }
+            if ($pubStatus === MemberActiveService::AUDIT_REJECTED) {
+                return '我发起的 · 未通过审核';
+            }
+            $n = ActiveSIgnModel::countParticipants((int)$active['id']);
+            return '我发起的 · ' . $n . '人参与';
+        }
+        if (!$isSigned) {
+            return '进行中';
+        }
+        if (ActiveModel::isDatePending($active)) {
+            return '已报名 · 时间待定';
+        }
+        if (ActiveModel::isOfflineEvent($active)) {
+            $start = (int)($active['offline_sign_start'] ?? 0);
+            $now = time();
+            $clocked = ActiveClockModel::where([
+                ['active_id', '=', (int)$active['id']],
+                ['user_id', '=', $this->userId],
+            ])->find();
+            if ($clocked) {
+                return '已签到 · 感谢参与';
+            }
+            if ($start > 0 && $now < $start - 1800) {
+                return '已报名 · 活动前30分钟可签到';
+            }
+            if ($start > 0 && $now < $start) {
+                return '已报名 · 即将开始可签到';
+            }
+            return '已报名 · 可进行现场签到';
+        }
+        return '已报名 · 前往活动详情';
     }
 }

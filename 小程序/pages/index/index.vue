@@ -63,6 +63,15 @@
 				</view>
 			</view>
 
+			<home-ongoing-section
+				v-if="isLogin && ongoingList.length"
+				:visible="isLogin && ongoingList.length > 0"
+				:list="ongoingList"
+				:total="ongoingTotal"
+				@more="goOngoingList"
+				@open="openOngoingItem"
+			></home-ongoing-section>
+
 <!-- 内容区：活动 / 积分商品 -->
 			<view class="content-panel">
 			<view id="guide-tabs" class="content-tabs">
@@ -246,17 +255,21 @@ import {
 import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
 import { ACTIVITY_PAGE_TAB_PENDING_KEY } from '@/common/activityTabNav.js'
 import HomeActivityPromoBanner from '@/components/home-activity-promo-banner/index.vue'
+import HomeOngoingSection from '@/components/home-ongoing-section/index.vue'
 export default {
 	components: {
 		SkeletonScreen,
 		NewUserGuide,
-		HomeActivityPromoBanner
+		HomeActivityPromoBanner,
+		HomeOngoingSection,
 	},
 		mixins: [careGesture],
 		data() {
 			return {
 				isLoading: true,
 				dataList: [],
+				ongoingList: [],
+				ongoingTotal: 0,
 				showcaseList: [],
 				homeNotice: '',
 				// 问候模块数据
@@ -612,6 +625,13 @@ export default {
 					this.$u.vuex('userInfo', Object.assign({}, this.userInfo, d.user_info))
 					this.applyIndexUserGrowth(d.user_info)
 				}
+				if (this.isLogin) {
+					this.ongoingList = d.ongoing_list || []
+					this.ongoingTotal = Number(d.ongoing_total) || this.ongoingList.length
+				} else {
+					this.ongoingList = []
+					this.ongoingTotal = 0
+				}
 			}).finally(() => {
 				if (this._indexTabHomeInflight === req) {
 					this._indexTabHomeInflight = null
@@ -719,6 +739,14 @@ export default {
 			goHomeActivityPublish() {
 				if (!this.$u.func.checkLogin()) return
 				this.$u.route('/pages/activity/member-active-publish')
+			},
+			goOngoingList() {
+				if (!this.$u.func.checkLogin()) return
+				this.$u.route('/pages/activity/my-ongoing')
+			},
+			openOngoingItem(item) {
+				if (!item || !item.id) return
+				this.$u.route('/pages/activity/lsxf/details-new?id=' + item.id)
 			},
 			// 点击搜索框右侧扫码图标：拉起系统扫码，识别活动小程序码/二维码后直达活动详情
 			onScanQrcode() {

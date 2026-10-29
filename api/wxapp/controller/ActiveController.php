@@ -534,6 +534,17 @@ class ActiveController extends AuthController
         $this->success('请求成功', $data);
     }
 
+    /** 我的进行中（已报名 + 我发起且未截止） */
+    public function get_my_ongoing_list()
+    {
+        $this->checkUser();
+        $page = max(1, (int)$this->request->param('page', 1));
+        $pageSize = max(1, min(30, (int)$this->request->param('page_size', 10)));
+        $service = new \api\wxapp\service\TabHomeService($this);
+        $data = $service->paginateMyOngoingList($page, $pageSize);
+        $this->success('获取成功', $data);
+    }
+
     /**
      * 活动 Tab 页三块推荐区（本周推荐 / 轻活动 / 近期活动）一次返回，避免重复请求列表接口
      * @deprecated 活动 Tab 请用 get_activity_tab_home

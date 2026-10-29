@@ -167,7 +167,7 @@ class BasicController extends AuthController
     public function get_index_tab_home()
     {
         $uid = (int)$this->user_id;
-        $cacheKey = ['v' => 6];
+        $cacheKey = ['v' => 7];
         $service = new \api\wxapp\service\TabHomeService($this);
         $ttl = $uid > 0 ? \api\wxapp\support\TabHomeCache::TTL_USER : \api\wxapp\support\TabHomeCache::TTL_PUBLIC;
         $data = \api\wxapp\support\TabHomeCache::remember(
