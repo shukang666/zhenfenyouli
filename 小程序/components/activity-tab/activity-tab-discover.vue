@@ -59,35 +59,32 @@
 			<view class="discover-month__aurora discover-month__aurora--a" aria-hidden="true"></view>
 			<view class="discover-month__aurora discover-month__aurora--b" aria-hidden="true"></view>
 			<view class="discover-month__noise" aria-hidden="true"></view>
-			<view class="discover-month__rings" aria-hidden="true">
-				<view class="discover-month__ring discover-month__ring--1"></view>
-				<view class="discover-month__ring discover-month__ring--2"></view>
-				<view class="discover-month__ring discover-month__ring--3"></view>
-			</view>
-			<view class="discover-month__hero" aria-hidden="true">
-				<view class="discover-month__hero-glow"></view>
-				<view class="discover-month__hero-glass">
-					<text class="discover-month__hero-emoji">{{ monthTheme.emoji || "🏃" }}</text>
+			<view class="discover-month__body">
+				<view class="discover-month__copy">
+					<view class="discover-month__badge">
+						<view class="discover-month__badge-dot" aria-hidden="true"></view>
+						<text>{{ monthBadgeText }}</text>
+					</view>
+					<text class="discover-month__title">本月运动健康季</text>
+					<text class="discover-month__sub u-line-1">下班后动一动，让身体和心情都松下来</text>
+					<view class="discover-month__foot">
+						<view class="discover-month__chips">
+							<text class="discover-month__chip">夜跑</text>
+							<text class="discover-month__chip">瑜伽</text>
+							<text class="discover-month__chip">轻运动</text>
+						</view>
+						<view class="discover-month__cta">
+							<text class="discover-month__cta-shine" aria-hidden="true"></text>
+							<text class="discover-month__cta-label">查看专题</text>
+							<u-icon name="arrow-right" size="20" color="#0d4a8f"></u-icon>
+						</view>
+					</view>
 				</view>
-				<view class="discover-month__spark discover-month__spark--1">✦</view>
-				<view class="discover-month__spark discover-month__spark--2">✦</view>
-			</view>
-			<view class="discover-month__copy">
-				<view class="discover-month__badge">
-					<view class="discover-month__badge-dot" aria-hidden="true"></view>
-					<text>{{ monthBadgeText }}</text>
-				</view>
-				<text class="discover-month__title">本月运动健康季</text>
-				<text class="discover-month__sub">下班后动一动，让身体和心情都松下来</text>
-				<view class="discover-month__chips">
-					<text class="discover-month__chip">夜跑</text>
-					<text class="discover-month__chip">瑜伽</text>
-					<text class="discover-month__chip">轻运动</text>
-				</view>
-				<view class="discover-month__cta">
-					<text class="discover-month__cta-shine" aria-hidden="true"></text>
-					<text class="discover-month__cta-label">查看专题</text>
-					<u-icon name="arrow-right" size="22" color="#0d4a8f"></u-icon>
+				<view class="discover-month__hero" aria-hidden="true">
+					<view class="discover-month__hero-glow"></view>
+					<view class="discover-month__hero-glass">
+						<text class="discover-month__hero-emoji">{{ monthTheme.emoji || "🏃" }}</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -357,19 +354,27 @@ export default {
 
 .discover-month {
 	position: relative;
-	margin: 12rpx 24rpx 24rpx;
-	padding: 32rpx 28rpx 28rpx;
-	border-radius: 28rpx;
+	margin: 8rpx 24rpx 20rpx;
+	padding: 22rpx 22rpx 22rpx;
+	border-radius: 24rpx;
 	overflow: hidden;
-	min-height: 268rpx;
 	box-shadow:
-		0 20rpx 48rpx rgba(15, 58, 120, 0.28),
-		0 4rpx 0 rgba(255, 255, 255, 0.12) inset;
+		0 16rpx 40rpx rgba(15, 58, 120, 0.24),
+		0 2rpx 0 rgba(255, 255, 255, 0.12) inset;
 	transform: translateZ(0);
 }
 .discover-month--on {
 	transform: scale(0.985);
 	opacity: 0.96;
+}
+.discover-month__body {
+	position: relative;
+	z-index: 3;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12rpx;
 }
 .discover-month__base {
 	position: absolute;
@@ -405,43 +410,11 @@ export default {
 	background-size: 8rpx 8rpx;
 	pointer-events: none;
 }
-.discover-month__rings {
-	position: absolute;
-	right: -8rpx;
-	top: 50%;
-	width: 240rpx;
-	height: 240rpx;
-	margin-top: -120rpx;
-	pointer-events: none;
-}
-.discover-month__ring {
-	position: absolute;
-	inset: 0;
-	border-radius: 50%;
-	border: 2rpx solid rgba(255, 255, 255, 0.14);
-}
-.discover-month__ring--1 {
-	inset: 0;
-	animation: discover-month-spin 18s linear infinite;
-}
-.discover-month__ring--2 {
-	inset: 24rpx;
-	border-color: rgba(255, 255, 255, 0.1);
-	animation: discover-month-spin 14s linear infinite reverse;
-}
-.discover-month__ring--3 {
-	inset: 48rpx;
-	border-color: rgba(255, 255, 255, 0.08);
-	animation: discover-month-spin 22s linear infinite;
-}
 .discover-month__hero {
-	position: absolute;
-	right: 28rpx;
-	top: 50%;
-	width: 152rpx;
-	height: 152rpx;
-	margin-top: -76rpx;
-	z-index: 2;
+	position: relative;
+	flex-shrink: 0;
+	width: 108rpx;
+	height: 108rpx;
 	pointer-events: none;
 }
 .discover-month__hero-glow {
@@ -466,40 +439,21 @@ export default {
 	backdrop-filter: blur(12px);
 }
 .discover-month__hero-emoji {
-	font-size: 64rpx;
+	font-size: 52rpx;
 	line-height: 1;
-	filter: drop-shadow(0 6rpx 12rpx rgba(0, 30, 70, 0.35));
+	filter: drop-shadow(0 4rpx 10rpx rgba(0, 30, 70, 0.35));
 	animation: discover-month-bob 2.8s ease-in-out infinite;
 }
-.discover-month__spark {
-	position: absolute;
-	font-size: 22rpx;
-	color: rgba(255, 255, 255, 0.85);
-	text-shadow: 0 0 12rpx rgba(255, 255, 255, 0.8);
-}
-.discover-month__spark--1 {
-	top: 4rpx;
-	right: 8rpx;
-	animation: discover-month-twinkle 2.2s ease-in-out infinite;
-}
-.discover-month__spark--2 {
-	bottom: 12rpx;
-	left: 0;
-	font-size: 18rpx;
-	animation: discover-month-twinkle 2.8s ease-in-out 0.6s infinite;
-}
 .discover-month__copy {
-	position: relative;
-	z-index: 3;
-	max-width: 420rpx;
-	padding-right: 120rpx;
+	flex: 1;
+	min-width: 0;
 }
 .discover-month__badge {
 	display: inline-flex;
 	align-items: center;
-	gap: 8rpx;
-	padding: 6rpx 16rpx 6rpx 12rpx;
-	margin-bottom: 14rpx;
+	gap: 6rpx;
+	padding: 4rpx 12rpx 4rpx 10rpx;
+	margin-bottom: 8rpx;
 	border-radius: 999rpx;
 	background: rgba(255, 255, 255, 0.16);
 	border: 1rpx solid rgba(255, 255, 255, 0.28);
@@ -517,46 +471,56 @@ export default {
 }
 .discover-month__title {
 	display: block;
-	font-size: 38rpx;
+	font-size: 32rpx;
 	font-weight: 800;
 	color: #ffffff;
-	line-height: 1.25;
+	line-height: 1.2;
 	text-shadow: 0 4rpx 16rpx rgba(0, 35, 80, 0.35);
 	letter-spacing: 0.02em;
 }
 .discover-month__sub {
 	display: block;
+	margin-top: 6rpx;
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.88);
+	line-height: 1.35;
+}
+.discover-month__foot {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10rpx;
 	margin-top: 12rpx;
-	font-size: 24rpx;
-	color: rgba(255, 255, 255, 0.9);
-	line-height: 1.5;
 }
 .discover-month__chips {
 	display: flex;
-	flex-wrap: wrap;
-	gap: 8rpx;
-	margin-top: 16rpx;
+	flex-wrap: nowrap;
+	gap: 6rpx;
+	flex: 1;
+	min-width: 0;
 }
 .discover-month__chip {
-	padding: 4rpx 14rpx;
-	border-radius: 8rpx;
-	font-size: 20rpx;
+	padding: 2rpx 10rpx;
+	border-radius: 6rpx;
+	font-size: 18rpx;
 	font-weight: 600;
 	color: rgba(255, 255, 255, 0.92);
 	background: rgba(0, 0, 0, 0.12);
 	border: 1rpx solid rgba(255, 255, 255, 0.15);
+	white-space: nowrap;
 }
 .discover-month__cta {
 	position: relative;
+	flex-shrink: 0;
 	display: inline-flex;
 	align-items: center;
-	gap: 8rpx;
-	margin-top: 20rpx;
-	padding: 12rpx 26rpx;
+	gap: 4rpx;
+	padding: 8rpx 18rpx;
 	border-radius: 999rpx;
 	overflow: hidden;
 	background: linear-gradient(180deg, #ffffff 0%, #e8f4ff 100%);
-	box-shadow: 0 8rpx 20rpx rgba(0, 50, 110, 0.22);
+	box-shadow: 0 6rpx 16rpx rgba(0, 50, 110, 0.2);
 }
 .discover-month__cta-shine {
 	position: absolute;
@@ -575,7 +539,7 @@ export default {
 .discover-month__cta-label {
 	position: relative;
 	z-index: 1;
-	font-size: 24rpx;
+	font-size: 22rpx;
 	font-weight: 800;
 	color: #0d4a8f;
 }
@@ -598,14 +562,6 @@ export default {
 		transform: translate(-8%, -6%);
 	}
 }
-@keyframes discover-month-spin {
-	from {
-		transform: rotate(0deg);
-	}
-	to {
-		transform: rotate(360deg);
-	}
-}
 @keyframes discover-month-pulse {
 	0%,
 	100% {
@@ -624,17 +580,6 @@ export default {
 	}
 	50% {
 		transform: translateY(-6rpx);
-	}
-}
-@keyframes discover-month-twinkle {
-	0%,
-	100% {
-		opacity: 0.35;
-		transform: scale(0.85);
-	}
-	50% {
-		opacity: 1;
-		transform: scale(1.1);
 	}
 }
 @keyframes discover-month-shine {
