@@ -282,7 +282,7 @@ export default {
 					{
 						key: 'nearby',
 						label: '附近活动',
-						icon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/1.svg',
+						icon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/renshiqixianling.svg',
 					},
 					{
 						key: 'weekly',
@@ -292,7 +292,7 @@ export default {
 					{
 						key: 'publish',
 						label: '发起活动',
-						icon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/4.svg',
+						icon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/shequshiji.svg',
 					},
 					{
 						key: 'clock',
