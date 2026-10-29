@@ -23,6 +23,7 @@
         ></u-icon>
       </view>
     </view>
+    <care-pull-hint :visible="!showCareHint"></care-pull-hint>
     <activity-tab-discover
       :filter="discover_filter"
       :categories="discover_categories"
@@ -36,8 +37,6 @@
       @open="openDiscoverActive"
       @more-filter="goMoreAllDiscover"
     />
-
-    <care-pull-hint :visible="!showCareHint"></care-pull-hint>
 
     <!-- 原邻里 / 精选双 Tab
     <activity-tab-header ... />
