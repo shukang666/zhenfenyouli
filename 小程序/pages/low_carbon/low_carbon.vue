@@ -23,39 +23,27 @@
         ></u-icon>
       </view>
     </view>
-    <activity-tab-header
-      :value="activityPageTab"
-      @input="switchActivityPageTab"
+    <activity-tab-discover
+      :filter="discover_filter"
+      :categories="discover_categories"
+      :month-theme="discover_month_theme"
+      :list="discover_list"
+      :loading="discover_loading"
+      :has-more="discover_has_more"
       @search="gotoSearch"
+      @filter="switchDiscoverFilter"
+      @open-cate="gotoCateList"
+      @open="openDiscoverActive"
+      @more-filter="goMoreAllDiscover"
     />
 
     <care-pull-hint :visible="!showCareHint"></care-pull-hint>
 
-    <activity-tab-neighbor-feed
-      v-show="activityPageTab === 'neighbor'"
-      :col-left="member_active_col_left"
-      :col-right="member_active_col_right"
-      :loading="member_active_loading"
-      :has-more="member_active_has_more"
-      :list-length="member_active_list.length"
-      :engagement-count="actEngagementCount"
-      @publish="goPublishMemberActive"
-    />
-
-    <activity-tab-featured-panel
-      v-show="activityPageTab === 'featured'"
-      :top-banner="activityTabTopBanner"
-      :entry-banner="activityTabEntryBanner"
-      :is-loading="isLoading"
-      :light-list="light_list"
-      :light-featured="light_task_featured"
-      :theme-hero="themeHeroCate"
-      :theme-side="themeSideCate"
-      :theme-minis="themeMiniCates"
-      @more-light="goMoreLight"
-      @open-cate="gotoCateList"
-      @garbage-classify="gotoGarbageClassify"
-    />
+    <!-- 原邻里 / 精选双 Tab
+    <activity-tab-header ... />
+    <activity-tab-neighbor-feed ... />
+    <activity-tab-featured-panel ... />
+    -->
 
     <page-guide page="low_carbon"></page-guide>
   </view>
@@ -75,11 +63,13 @@ import {
   resolveHomeHotThumb,
 } from "@/common/homeHotSpotEntries.js";
 import careGesture from "@/common/care-gesture.mixin.js";
-import ActivityTabHeader from "@/components/activity-tab/activity-tab-header.vue";
-import ActivityTabNeighborFeed from "@/components/activity-tab/activity-tab-neighbor-feed.vue";
-import ActivityTabFeaturedPanel from "@/components/activity-tab/activity-tab-featured-panel.vue";
+import ActivityTabDiscover from "@/components/activity-tab/activity-tab-discover.vue";
+import activityDiscoverFeedMixin from "@/pages/low_carbon/mixins/activity-discover-feed.mixin.js";
 import memberActiveFeedMixin from "@/pages/low_carbon/mixins/member-active-feed.mixin.js";
-import { ACTIVITY_PAGE_TAB_PENDING_KEY } from "@/common/activityTabNav.js";
+import {
+  ACTIVITY_PAGE_TAB_PENDING_KEY,
+  DISCOVER_FILTER_PENDING_KEY,
+} from "@/common/activityTabNav.js";
 import {
   ACTIVITY_TAB_ENTRY_BANNER_URL,
   ACTIVITY_TAB_TOP_BANNER_URL,
@@ -165,16 +155,14 @@ function mergeSpotModulesFromApi(fromApi) {
 
 export default {
   components: {
-    ActivityTabHeader,
-    ActivityTabNeighborFeed,
-    ActivityTabFeaturedPanel,
+    ActivityTabDiscover,
   },
-  mixins: [careGesture, memberActiveFeedMixin],
+  mixins: [careGesture, activityDiscoverFeedMixin, memberActiveFeedMixin],
   data() {
     return {
       activityTabTopBanner: ACTIVITY_TAB_TOP_BANNER_URL,
       activityTabEntryBanner: ACTIVITY_TAB_ENTRY_BANNER_URL,
-      activityPageTab: "neighbor",
+      discover_filter: "recommend",
       isLoading: true,
       banner_list: [],
       current_tab: 0,
@@ -277,6 +265,30 @@ export default {
       if (total > ACTIVE_LIST_PREVIEW_SIZE) return true;
       return (this.active_list || []).length > ACTIVE_LIST_PREVIEW_SIZE;
     },
+    discover_month_theme() {
+      return (this.main_categories && this.main_categories[0]) || null;
+    },
+    discover_categories() {
+      const emojiMap = {
+        1: "🏃",
+        2: "📚",
+        3: "✨",
+        4: "💬",
+        5: "♻️",
+      };
+      const shortMap = {
+        1: "运动户外",
+        2: "学习成长",
+        3: "兴趣体验",
+        4: "交流互动",
+        5: "公益环保",
+      };
+      return (this.main_categories || []).map((c) => ({
+        ...c,
+        emoji: emojiMap[c.id] || "🎯",
+        shortName: shortMap[c.id] || c.name,
+      }));
+    },
     themeHeroCate() {
       return (this.main_categories && this.main_categories[0]) || null;
     },
@@ -294,22 +306,51 @@ export default {
     this.updateTabBarSelected(1);
     if (checkCommunity(this)) return;
     try {
-      const pending = uni.getStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY);
-      if (pending === "neighbor" || pending === "featured") {
-        uni.removeStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY);
-        this.switchActivityPageTab(pending);
+      let pendingFilter = uni.getStorageSync(DISCOVER_FILTER_PENDING_KEY);
+      if (pendingFilter) {
+        uni.removeStorageSync(DISCOVER_FILTER_PENDING_KEY);
+        if (["recommend", "weekly", "nearby", "enrolling", "free"].includes(pendingFilter)) {
+          this.discover_filter = pendingFilter;
+          this.fetchDiscoverList(true);
+        }
+      } else {
+        const pending = uni.getStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY);
+        if (pending === "featured") {
+          uni.removeStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY);
+          this.discover_filter = "weekly";
+          this.fetchDiscoverList(true);
+        } else if (pending === "neighbor") {
+          uni.removeStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY);
+          this.discover_filter = "nearby";
+          this.fetchDiscoverList(true);
+        }
       }
     } catch (e) {}
     if (!this.isLogin) return;
     this.refreshMemberActiveAfterPublish();
+    if (this._memberActiveNeedRefresh || this.discover_filter === "nearby") {
+      this.fetchDiscoverList(true);
+    }
   },
   methods: {
     switchActivityPageTab(tab) {
-      if (this.activityPageTab === tab) return;
-      this.activityPageTab = tab;
-      if (tab === "neighbor" && !this.member_active_list.length && !this.member_active_loading) {
-        this.fetchMemberActiveList(true);
+      const map = { neighbor: "nearby", featured: "weekly" };
+      const key = map[tab] || tab;
+      if (["recommend", "weekly", "nearby", "enrolling", "free"].includes(key)) {
+        this.switchDiscoverFilter(key);
       }
+    },
+    goMoreAllDiscover() {
+      this.$u.route({
+        url: "/pages/activity/active-list",
+        params: { filter: "all" },
+      });
+    },
+    gotoCateList(cate) {
+      if (!cate || !cate.id) return;
+      this.$u.route(
+        `/pages/activity/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name || "")}`,
+      );
     },
     weeklyCardCover(item) {
       if (!item) return "";
@@ -317,14 +358,14 @@ export default {
     },
     onWeeklyCardTap(wIdx) {
       const list = this.weekly_display_list || [];
-      const item = list[wIdx];
-      if (!item) return;
-      if (item.entry_type) {
-        navigateHomeHotSpotEntry(this, item);
+      const row = list[wIdx];
+      if (!row) return;
+      if (row.entry_type) {
+        navigateHomeHotSpotEntry(this, row);
         return;
       }
-      if (!item.id) return;
-      this.$u.route("/pages/activity/lsxf/details-new?id=" + item.id);
+      if (!row.id) return;
+      this.$u.route("/pages/activity/lsxf/details-new?id=" + row.id);
     },
     actEngagementSuffix(item) {
       return Number(item && item.is_date_pending) === 1 ? "人感兴趣" : "人参与";
@@ -373,7 +414,7 @@ export default {
       try {
         await Promise.all([
           this.fetchActivityTabHome({ page: 1 }),
-          this.fetchMemberActiveList(true),
+          this.fetchDiscoverList(true),
         ]);
       } catch (e) {
         console.log("数据加载失败:", e);
@@ -482,12 +523,7 @@ export default {
       this.loadActiveList();
     },
 
-    // 点击分类 → 进入分类列表页
-    gotoCateList(cate) {
-      this.$u.route(
-        `/pages/activity/cate-list?cate_id=${cate.id}&name=${encodeURIComponent(cate.name)}`
-      );
-    },
+    // 点击分类 → 进入分类列表页（见上方 gotoCateList）
 
     gotoGarbageClassify() {
       this.$u.route("/pages/activity/garbage-classify");
@@ -510,9 +546,7 @@ export default {
   },
 
   onReachBottom() {
-    if (this.activityPageTab === "neighbor") {
-      this.loadMemberActiveMore();
-    }
+    this.loadDiscoverMore();
   },
 };
 </script>

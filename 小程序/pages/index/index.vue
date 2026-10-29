@@ -194,7 +194,7 @@ import {
 	resolveHomeHotThumb,
 } from '@/common/homeHotSpotEntries.js'
 import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
-import { ACTIVITY_PAGE_TAB_PENDING_KEY } from '@/common/activityTabNav.js'
+import { DISCOVER_FILTER_PENDING_KEY } from '@/common/activityTabNav.js'
 import HomeActivityPromoBanner from '@/components/home-activity-promo-banner/index.vue'
 import HomeOngoingSection from '@/components/home-ongoing-section/index.vue'
 import HomeWeeklyPicks from '@/components/home-weekly-picks/index.vue'
@@ -679,7 +679,7 @@ export default {
 			// 首页活动 Banner：去活动 Tab（邻里活动列表）
 			goHomeActivityJoin() {
 				try {
-					uni.setStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY, 'neighbor')
+					uni.setStorageSync(DISCOVER_FILTER_PENDING_KEY, 'nearby')
 				} catch (e) {}
 				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
 			},
@@ -698,7 +698,7 @@ export default {
 			},
 			goWeeklyMore() {
 				try {
-					uni.setStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY, 'featured')
+					uni.setStorageSync(DISCOVER_FILTER_PENDING_KEY, 'weekly')
 				} catch (e) {}
 				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
 			},
@@ -789,7 +789,7 @@ export default {
 				switch (key) {
 					case 'nearby':
 						try {
-							uni.setStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY, 'neighbor')
+							uni.setStorageSync(DISCOVER_FILTER_PENDING_KEY, 'nearby')
 						} catch (e) {}
 						uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
 						break

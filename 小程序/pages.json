@@ -62,7 +62,8 @@
 		}, {
 			"path": "pages/low_carbon/low_carbon",
 			"style": {
-				"navigationBarTitleText": "活动",
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "发现活动",
 				"componentPlaceholder": {
 					"u-icon": "view",
 					"u-image": "view",
