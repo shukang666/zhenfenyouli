@@ -253,7 +253,15 @@ export default {
 				})
 				uni.hideLoading()
 				uni.showToast({ title: '已提交，审核通过后展示', icon: 'success' })
-				setTimeout(() => uni.navigateBack(), 700)
+				try {
+					uni.setStorageSync('member_active_tab_refresh', 1)
+				} catch (e) {}
+				setTimeout(() => {
+					uni.switchTab({
+						url: '/pages/low_carbon/low_carbon',
+						fail: () => uni.navigateBack(),
+					})
+				}, 700)
 			} catch (e) {
 				uni.hideLoading()
 				uni.showToast({ title: (e && (e.message || e.msg)) || '发布失败', icon: 'none' })

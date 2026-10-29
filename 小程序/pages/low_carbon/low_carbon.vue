@@ -820,7 +820,14 @@ export default {
     this.updateTabBarSelected(1);
     if (checkCommunity(this)) return;
     if (!this.isLogin) return;
-    if (this._memberActiveNeedRefresh) {
+    let needRefresh = this._memberActiveNeedRefresh;
+    try {
+      if (uni.getStorageSync('member_active_tab_refresh')) {
+        uni.removeStorageSync('member_active_tab_refresh');
+        needRefresh = true;
+      }
+    } catch (e) {}
+    if (needRefresh) {
       this._memberActiveNeedRefresh = false;
       this.fetchMemberActiveList(true);
     }
