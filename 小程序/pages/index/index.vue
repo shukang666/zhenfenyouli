@@ -87,7 +87,7 @@
 			</view>
 			-->
 
-			<!-- 活动风采：展示社区活动/宣讲现场照片 -->
+			<!-- 活动风采（暂下线）
 			<view class="showcase-section" v-if="showcaseList.length > 0">
 				<view class="section-head">
 					<view class="section-head__main">
@@ -120,10 +120,10 @@
 					</view>
 				</scroll-view>
 			</view>
+			-->
 
-
-			
 			<view class="home-footer">
+				<!-- 品牌介绍「把低碳做成社区日常」（暂下线）
 				<view class="sk-about">
 					<view class="sk-about-mark"></view>
 					<view class="sk-about-body">
@@ -132,6 +132,7 @@
 						<text class="sk-about-desc">分类真分、社区活动、积分兑换，一站式低碳服务。</text>
 					</view>
 				</view>
+				-->
 				<view class="sk-guide-cta" hover-class="sk-guide-cta--on" :hover-stay-time="80" @click="openUsageGuide">
 					<view class="sk-guide-cta-ring"></view>
 					<view class="sk-guide-cta-copy">
