@@ -727,7 +727,7 @@ class TabHomeService
     /** @param array<string,mixed>|object $active */
     protected function isActiveNotEnded($active): bool
     {
-        $a = is_array($active) ? $active : (array)$active;
+        $a = $this->normalizeActiveRowArray($active);
         if (ActiveModel::isDatePending($a)) {
             return true;
         }
@@ -746,7 +746,7 @@ class TabHomeService
      */
     protected function matchesAutoWeeklyRecommendWindow($active, int $weekStart, int $weekEnd, int $todayStart = 0): bool
     {
-        $a = is_array($active) ? $active : (array)$active;
+        $a = $this->normalizeActiveRowArray($active);
         if ($todayStart <= 0) {
             $todayStart = strtotime(date('Y-m-d 00:00:00'));
         }
@@ -774,7 +774,7 @@ class TabHomeService
     /** @param array<string,mixed>|object $active */
     protected function weeklyRecommendSortKey($active): int
     {
-        $a = is_array($active) ? $active : (array)$active;
+        $a = $this->normalizeActiveRowArray($active);
         if (ActiveModel::isDatePending($a)) {
             return PHP_INT_MAX - 1;
         }
@@ -860,10 +860,18 @@ class TabHomeService
         if (is_array($row)) {
             return $row;
         }
-        if (is_object($row) && method_exists($row, 'toArray')) {
-            return $row->toArray();
+        if (is_object($row)) {
+            if (method_exists($row, 'toArray')) {
+                return $row->toArray();
+            }
+            if ($row instanceof \think\Model && method_exists($row, 'getData')) {
+                $data = $row->getData();
+                if (is_array($data) && $data !== []) {
+                    return $data;
+                }
+            }
         }
-        return (array)$row;
+        return is_object($row) ? (array)$row : [];
     }
 
     protected function paginateActiveListForTab($page, $pageSize, $tag = ''): array
@@ -883,6 +891,7 @@ class TabHomeService
 
     protected function applyActiveListItemFields($item)
     {
+        $item = $this->normalizeActiveRowArray($item);
         $item['thumb'] = empty($item['thumb']) ? '' : cmf_get_asset_url($item['thumb']);
         $item['badge_image'] = empty($item['badge_image']) ? '' : cmf_get_asset_url($item['badge_image']);
         $item['content'] = htmlspecialchars_decode($item['content']);
@@ -996,16 +1005,20 @@ class TabHomeService
             ->select();
         $list = [];
         foreach ($rows as $item) {
-            if (!$this->isActiveOngoing($item)) {
+            $a = $this->normalizeActiveRowArray($item);
+            if (!$this->isActiveOngoing($a)) {
                 continue;
             }
-            $aid = (int)$item['id'];
-            $isPublisher = (int)($item['publish_user_id'] ?? 0) === $this->userId;
+            $aid = (int)($a['id'] ?? 0);
+            if ($aid <= 0) {
+                continue;
+            }
+            $isPublisher = (int)($a['publish_user_id'] ?? 0) === $this->userId;
             $isSigned = !empty($signedMap[$aid]);
             if (!$isPublisher && !$isSigned) {
                 continue;
             }
-            $list[] = $this->formatMyOngoingItem($item, $isSigned, $isPublisher);
+            $list[] = $this->formatMyOngoingItem($a, $isSigned, $isPublisher);
         }
         usort($list, function ($a, $b) {
             $sa = (int)($a['sort_ts'] ?? 0);
@@ -1027,7 +1040,7 @@ class TabHomeService
     /** @param array<string,mixed>|object $active */
     protected function isActiveOngoing($active): bool
     {
-        $a = is_array($active) ? $active : (array)$active;
+        $a = $this->normalizeActiveRowArray($active);
         if (ActiveModel::isDatePending($a)) {
             return true;
         }
@@ -1042,8 +1055,8 @@ class TabHomeService
     /** @param array<string,mixed>|object $active */
     protected function formatMyOngoingItem($active, bool $isSigned, bool $isPublisher): array
     {
-        $a = is_array($active) ? $active : (array)$active;
-        $aid = (int)$a['id'];
+        $a = $this->normalizeActiveRowArray($active);
+        $aid = (int)($a['id'] ?? 0);
         $startTs = (int)($a['offline_sign_start'] ?? 0);
         if ($startTs <= 0 && !empty($a['date'])) {
             $startTs = (int)$a['date'];
