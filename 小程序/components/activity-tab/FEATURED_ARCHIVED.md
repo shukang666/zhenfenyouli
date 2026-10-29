@@ -5,6 +5,6 @@
 若需恢复某区块：
 
 1. 从 Git 历史中查看拆分前 `小程序/pages/low_carbon/low_carbon.vue` 的 `v-show="activityPageTab === 'featured'"` 段落；或
-2. 将对应 HTML 加回 `components/activity-tab/activity-tab-featured-panel.vue` 底部，样式仍可在 `pages/low_carbon/low_carbon.vue` 的 legacy SCSS 中查找（`.fb-weekly-*`、`.fb-recent-*` 等）。
+2. 将对应 HTML 加回 `components/activity-tab/activity-tab-featured-panel.vue` 底部；样式见 `pages/low_carbon/styles/activity-tab-legacy.scss`（`.fb-weekly-*`、`.fb-recent-*` 等，按需 `@import` 进 featured-panel）。
 
 当前 **精选专区** 线上仅保留：顶部 Banner、轻任务、主题活动 Bento、公益行动入口整图（视口裁切见 `banner-viewport-crop` skill）。

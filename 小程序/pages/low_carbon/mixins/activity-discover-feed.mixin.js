@@ -2,6 +2,10 @@
  * 活动 Tab · 发现页「正在报名」列表（筛选 + 分页）
  */
 import { resolveHomeHotThumb } from "@/common/homeHotSpotEntries.js";
+import {
+  ACTIVITY_MAIN_CATEGORIES,
+  mapDiscoverCategories,
+} from "@/common/activityMainCategories.js";
 
 export default {
   data() {
@@ -11,7 +15,16 @@ export default {
       discover_page: 1,
       discover_has_more: true,
       discover_loading: false,
+      main_categories: ACTIVITY_MAIN_CATEGORIES.map((c) => ({ ...c })),
     };
+  },
+  computed: {
+    discover_month_theme() {
+      return (this.main_categories && this.main_categories[0]) || null;
+    },
+    discover_categories() {
+      return mapDiscoverCategories(this.main_categories);
+    },
   },
   methods: {
     switchDiscoverFilter(key) {
