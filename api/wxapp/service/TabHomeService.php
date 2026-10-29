@@ -797,9 +797,10 @@ class TabHomeService
         return $out;
     }
 
-    /** @param array<string,mixed> $row */
-    protected function formatHomeWeeklyPickCard(array $row, int $index): array
+    /** @param array<string,mixed>|object $row */
+    protected function formatHomeWeeklyPickCard($row, int $index): array
     {
+        $row = $this->normalizeActiveRowArray($row);
         $name = (string)($row['name'] ?? '');
         $coverTitle = $name;
         if (function_exists('mb_strlen') && mb_strlen($name, 'UTF-8') > 8) {
@@ -851,6 +852,18 @@ class TabHomeService
         $row['chip_list'] = $chips;
         $row['theme'] = ($index % 2 === 0) ? 'cool' : 'warm';
         return $row;
+    }
+
+    /** @param array<string,mixed>|object $row @return array<string,mixed> */
+    protected function normalizeActiveRowArray($row): array
+    {
+        if (is_array($row)) {
+            return $row;
+        }
+        if (is_object($row) && method_exists($row, 'toArray')) {
+            return $row->toArray();
+        }
+        return (array)$row;
     }
 
     protected function paginateActiveListForTab($page, $pageSize, $tag = ''): array
