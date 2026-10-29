@@ -53,7 +53,15 @@ class MemberActiveController extends AuthController
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());
         } catch (\Throwable $e) {
-            $this->error('发布失败，请稍后再试');
+            \think\facade\Log::error('[member_active publish] ' . $e->getMessage());
+            $msg = '发布失败，请稍后再试';
+            $raw = $e->getMessage();
+            if (stripos($raw, 'publish_user_id') !== false || stripos($raw, 'publish_audit') !== false) {
+                $msg = '服务器尚未升级居民活动字段，请执行 update.sql 后重试';
+            } elseif (stripos($raw, 'SQLSTATE') !== false && (bool) config('app.app_debug')) {
+                $msg = $raw;
+            }
+            $this->error($msg);
         }
         $this->success('发布成功', ['active_id' => $activeId]);
     }

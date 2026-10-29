@@ -41,6 +41,9 @@ class MemberActiveService
 
     public static function baseListQuery()
     {
+        if (!self::hasPublishSchema()) {
+            return ActiveModel::whereRaw('1=0');
+        }
         return ActiveModel::where('publish_user_id', '>', 0)
             ->where('publish_audit_status', self::AUDIT_APPROVED)
             ->where('status', 1)
@@ -98,6 +101,8 @@ class MemberActiveService
      */
     public static function publish(int $userId, array $payload): int
     {
+        self::assertPublishSchemaReady();
+
         $name = trim((string)($payload['name'] ?? ''));
         $summary = trim((string)($payload['summary'] ?? ''));
         $thumb = trim((string)($payload['thumb'] ?? ''));
@@ -172,10 +177,20 @@ class MemberActiveService
             'join_type' => 1,
             'display_mode' => ActiveModel::DISPLAY_MODE_CONFIG,
             'event_kind' => ActiveModel::EVENT_KIND_OFFLINE,
+            'cate_id' => 0,
             'name' => $name,
             'thumb' => $thumb,
             'content' => $content,
+            'flow' => '',
+            'gain' => '',
+            'suit_people' => '邻里居民',
+            'duration' => $timeHuman,
+            'day_type' => '',
+            'area_range' => '',
             'address' => $displayAddr,
+            'province' => '',
+            'city' => '',
+            'district' => '',
             'lat' => (string)$lat,
             'lng' => (string)$lng,
             'phone' => $phone,
@@ -183,13 +198,30 @@ class MemberActiveService
             'share_point' => 0,
             'send_point' => 0,
             'community_cate_id' => $themeId,
+            'xsdld_cate_id' => 0,
+            'spot_key' => '',
+            'qxl_hub_slot' => '',
             'date' => strtotime($activityDate . ' 23:59:59'),
             'offline_sign_start' => $startTs,
             'offline_sign_end' => $endTs,
             'offline_sign_password' => '',
             'is_clock' => 0,
+            'is_clock_challenge' => 0,
+            'clock_challenge_days' => 0,
+            'clock_challenge_point' => 0,
+            'clock_start_time' => 0,
+            'clock_end_time' => 0,
+            'sign_day' => 0,
+            'is_badge' => 0,
+            'badge_name' => '',
+            'badge_image' => '',
             'is_date_pending' => 0,
             'is_recurring' => 0,
+            'is_month_recommend' => 0,
+            'web_url' => '',
+            'rules_url' => '',
+            'safety_url' => '',
+            'qr_code' => '',
             'tags' => self::TAG_MEMBER,
             'publish_user_id' => $userId,
             'publish_audit_status' => self::AUDIT_PENDING,
@@ -201,7 +233,33 @@ class MemberActiveService
             'role' => '1',
         ];
 
-        $model = ActiveModel::create($insert);
-        return (int)$model->id;
+        $tableFields = Db::name('active')->getTableFields();
+        $insert = array_intersect_key($insert, array_flip($tableFields));
+        $id = (int) Db::name('active')->strict(false)->insertGetId($insert);
+        if ($id <= 0) {
+            throw new \RuntimeException('活动保存失败');
+        }
+        return $id;
+    }
+
+    /** 线上库未执行 update.sql 时给出可读提示 */
+    public static function assertPublishSchemaReady(): void
+    {
+        $fields = Db::name('active')->getTableFields();
+        foreach (['publish_user_id', 'publish_audit_status'] as $col) {
+            if (!in_array($col, $fields, true)) {
+                throw new \InvalidArgumentException('服务器尚未升级居民活动功能，请联系管理员执行 update.sql 相关脚本');
+            }
+        }
+    }
+
+    public static function hasPublishSchema(): bool
+    {
+        try {
+            self::assertPublishSchemaReady();
+            return true;
+        } catch (\InvalidArgumentException $e) {
+            return false;
+        }
     }
 }
