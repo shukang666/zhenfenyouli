@@ -269,7 +269,7 @@
       </view>
     </view> -->
 
-    <!-- 本周推荐：大图海报横滑 -->
+    <!-- 本周推荐：大图海报横滑（暂时隐藏，恢复时取消注释即可）
     <view class="fb-section fb-weekly-rec" id="guide-fb-weekly" v-if="weekly_display_list.length > 0">
       <view class="fb-section-header">
         <view class="fb-hd">
@@ -315,6 +315,7 @@
         </view>
       </scroll-view>
     </view>
+    -->
 
     <!-- 现在就能参加（暂时隐藏，恢复时同步 TabHomeService light_list / goMoreLight）
     <view class="fb-section fb-light-act" v-if="light_list.length > 0">
