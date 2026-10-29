@@ -45,13 +45,39 @@
 			:hover-stay-time="80"
 			@click="$emit('open-cate', monthTheme)"
 		>
-			<view class="discover-month__bg" aria-hidden="true"></view>
+			<view class="discover-month__base" aria-hidden="true"></view>
+			<view class="discover-month__aurora discover-month__aurora--a" aria-hidden="true"></view>
+			<view class="discover-month__aurora discover-month__aurora--b" aria-hidden="true"></view>
+			<view class="discover-month__noise" aria-hidden="true"></view>
+			<view class="discover-month__rings" aria-hidden="true">
+				<view class="discover-month__ring discover-month__ring--1"></view>
+				<view class="discover-month__ring discover-month__ring--2"></view>
+				<view class="discover-month__ring discover-month__ring--3"></view>
+			</view>
+			<view class="discover-month__hero" aria-hidden="true">
+				<view class="discover-month__hero-glow"></view>
+				<view class="discover-month__hero-glass">
+					<text class="discover-month__hero-emoji">{{ monthTheme.emoji || "🏃" }}</text>
+				</view>
+				<view class="discover-month__spark discover-month__spark--1">✦</view>
+				<view class="discover-month__spark discover-month__spark--2">✦</view>
+			</view>
 			<view class="discover-month__copy">
+				<view class="discover-month__badge">
+					<view class="discover-month__badge-dot" aria-hidden="true"></view>
+					<text>{{ monthBadgeText }}</text>
+				</view>
 				<text class="discover-month__title">本月运动健康季</text>
 				<text class="discover-month__sub">下班后动一动，让身体和心情都松下来</text>
+				<view class="discover-month__chips">
+					<text class="discover-month__chip">夜跑</text>
+					<text class="discover-month__chip">瑜伽</text>
+					<text class="discover-month__chip">轻运动</text>
+				</view>
 				<view class="discover-month__cta">
-					<text>查看专题</text>
-					<u-icon name="arrow-right" size="22" color="#1565D8"></u-icon>
+					<text class="discover-month__cta-shine" aria-hidden="true"></text>
+					<text class="discover-month__cta-label">查看专题</text>
+					<u-icon name="arrow-right" size="22" color="#0d4a8f"></u-icon>
 				</view>
 			</view>
 		</view>
@@ -126,6 +152,12 @@ export default {
 				{ key: "free", label: "免费" },
 			],
 		};
+	},
+	computed: {
+		monthBadgeText() {
+			const m = new Date().getMonth() + 1;
+			return m + "月 · 运动健康专题";
+		},
 	},
 };
 </script>
@@ -227,60 +259,294 @@ export default {
 
 .discover-month {
 	position: relative;
-	margin: 8rpx 24rpx 20rpx;
-	padding: 28rpx 24rpx;
-	border-radius: 24rpx;
+	margin: 12rpx 24rpx 24rpx;
+	padding: 32rpx 28rpx 28rpx;
+	border-radius: 28rpx;
 	overflow: hidden;
-	min-height: 200rpx;
-	box-shadow: 0 12rpx 32rpx rgba(24, 119, 242, 0.22);
+	min-height: 268rpx;
+	box-shadow:
+		0 20rpx 48rpx rgba(15, 58, 120, 0.28),
+		0 4rpx 0 rgba(255, 255, 255, 0.12) inset;
+	transform: translateZ(0);
 }
 .discover-month--on {
-	opacity: 0.94;
+	transform: scale(0.985);
+	opacity: 0.96;
 }
-.discover-month__bg {
+.discover-month__base {
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(135deg, #2f6fd8 0%, #5a9ae8 50%, #9ec9f7 100%);
+	background: linear-gradient(145deg, #0a2f6b 0%, #1a5fbf 38%, #3d8fd9 72%, #7ec8ff 100%);
 }
-.discover-month__bg::after {
-	content: "";
+.discover-month__aurora {
 	position: absolute;
-	right: -20rpx;
-	top: 20rpx;
-	width: 160rpx;
-	height: 160rpx;
+	width: 140%;
+	height: 80%;
 	border-radius: 50%;
-	border: 12rpx solid rgba(255, 255, 255, 0.15);
+	filter: blur(40rpx);
+	opacity: 0.55;
+	pointer-events: none;
+}
+.discover-month__aurora--a {
+	left: -30%;
+	top: -20%;
+	background: radial-gradient(circle, rgba(126, 200, 255, 0.9) 0%, transparent 65%);
+	animation: discover-month-drift-a 8s ease-in-out infinite;
+}
+.discover-month__aurora--b {
+	right: -35%;
+	bottom: -35%;
+	background: radial-gradient(circle, rgba(45, 220, 180, 0.55) 0%, transparent 60%);
+	animation: discover-month-drift-b 10s ease-in-out infinite;
+}
+.discover-month__noise {
+	position: absolute;
+	inset: 0;
+	opacity: 0.07;
+	background-image: radial-gradient(rgba(255, 255, 255, 0.9) 0.6px, transparent 0.6px);
+	background-size: 8rpx 8rpx;
+	pointer-events: none;
+}
+.discover-month__rings {
+	position: absolute;
+	right: -8rpx;
+	top: 50%;
+	width: 240rpx;
+	height: 240rpx;
+	margin-top: -120rpx;
+	pointer-events: none;
+}
+.discover-month__ring {
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	border: 2rpx solid rgba(255, 255, 255, 0.14);
+}
+.discover-month__ring--1 {
+	inset: 0;
+	animation: discover-month-spin 18s linear infinite;
+}
+.discover-month__ring--2 {
+	inset: 24rpx;
+	border-color: rgba(255, 255, 255, 0.1);
+	animation: discover-month-spin 14s linear infinite reverse;
+}
+.discover-month__ring--3 {
+	inset: 48rpx;
+	border-color: rgba(255, 255, 255, 0.08);
+	animation: discover-month-spin 22s linear infinite;
+}
+.discover-month__hero {
+	position: absolute;
+	right: 28rpx;
+	top: 50%;
+	width: 152rpx;
+	height: 152rpx;
+	margin-top: -76rpx;
+	z-index: 2;
+	pointer-events: none;
+}
+.discover-month__hero-glow {
+	position: absolute;
+	inset: -16rpx;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, transparent 70%);
+	animation: discover-month-pulse 3s ease-in-out infinite;
+}
+.discover-month__hero-glass {
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(145deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.08) 100%);
+	border: 2rpx solid rgba(255, 255, 255, 0.35);
+	box-shadow:
+		0 12rpx 32rpx rgba(0, 40, 90, 0.25),
+		inset 0 2rpx 8rpx rgba(255, 255, 255, 0.45);
+	backdrop-filter: blur(12px);
+}
+.discover-month__hero-emoji {
+	font-size: 64rpx;
+	line-height: 1;
+	filter: drop-shadow(0 6rpx 12rpx rgba(0, 30, 70, 0.35));
+	animation: discover-month-bob 2.8s ease-in-out infinite;
+}
+.discover-month__spark {
+	position: absolute;
+	font-size: 22rpx;
+	color: rgba(255, 255, 255, 0.85);
+	text-shadow: 0 0 12rpx rgba(255, 255, 255, 0.8);
+}
+.discover-month__spark--1 {
+	top: 4rpx;
+	right: 8rpx;
+	animation: discover-month-twinkle 2.2s ease-in-out infinite;
+}
+.discover-month__spark--2 {
+	bottom: 12rpx;
+	left: 0;
+	font-size: 18rpx;
+	animation: discover-month-twinkle 2.8s ease-in-out 0.6s infinite;
 }
 .discover-month__copy {
 	position: relative;
-	z-index: 1;
+	z-index: 3;
+	max-width: 420rpx;
+	padding-right: 120rpx;
+}
+.discover-month__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8rpx;
+	padding: 6rpx 16rpx 6rpx 12rpx;
+	margin-bottom: 14rpx;
+	border-radius: 999rpx;
+	background: rgba(255, 255, 255, 0.16);
+	border: 1rpx solid rgba(255, 255, 255, 0.28);
+	font-size: 20rpx;
+	font-weight: 600;
+	color: rgba(255, 255, 255, 0.95);
+	letter-spacing: 0.02em;
+}
+.discover-month__badge-dot {
+	width: 10rpx;
+	height: 10rpx;
+	border-radius: 50%;
+	background: #5dffb8;
+	box-shadow: 0 0 12rpx rgba(93, 255, 184, 0.9);
 }
 .discover-month__title {
 	display: block;
-	font-size: 34rpx;
+	font-size: 38rpx;
 	font-weight: 800;
 	color: #ffffff;
+	line-height: 1.25;
+	text-shadow: 0 4rpx 16rpx rgba(0, 35, 80, 0.35);
+	letter-spacing: 0.02em;
 }
 .discover-month__sub {
 	display: block;
-	margin-top: 10rpx;
+	margin-top: 12rpx;
 	font-size: 24rpx;
+	color: rgba(255, 255, 255, 0.9);
+	line-height: 1.5;
+}
+.discover-month__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8rpx;
+	margin-top: 16rpx;
+}
+.discover-month__chip {
+	padding: 4rpx 14rpx;
+	border-radius: 8rpx;
+	font-size: 20rpx;
+	font-weight: 600;
 	color: rgba(255, 255, 255, 0.92);
-	line-height: 1.45;
-	max-width: 420rpx;
+	background: rgba(0, 0, 0, 0.12);
+	border: 1rpx solid rgba(255, 255, 255, 0.15);
 }
 .discover-month__cta {
+	position: relative;
 	display: inline-flex;
 	align-items: center;
-	gap: 6rpx;
+	gap: 8rpx;
 	margin-top: 20rpx;
-	padding: 10rpx 22rpx;
+	padding: 12rpx 26rpx;
 	border-radius: 999rpx;
-	background: rgba(255, 255, 255, 0.95);
+	overflow: hidden;
+	background: linear-gradient(180deg, #ffffff 0%, #e8f4ff 100%);
+	box-shadow: 0 8rpx 20rpx rgba(0, 50, 110, 0.22);
+}
+.discover-month__cta-shine {
+	position: absolute;
+	top: 0;
+	left: -60%;
+	width: 50%;
+	height: 100%;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(255, 255, 255, 0.65),
+		transparent
+	);
+	animation: discover-month-shine 3.5s ease-in-out infinite;
+}
+.discover-month__cta-label {
+	position: relative;
+	z-index: 1;
 	font-size: 24rpx;
-	font-weight: 700;
-	color: #1565d8;
+	font-weight: 800;
+	color: #0d4a8f;
+}
+
+@keyframes discover-month-drift-a {
+	0%,
+	100% {
+		transform: translate(0, 0) scale(1);
+	}
+	50% {
+		transform: translate(6%, 8%) scale(1.08);
+	}
+}
+@keyframes discover-month-drift-b {
+	0%,
+	100% {
+		transform: translate(0, 0);
+	}
+	50% {
+		transform: translate(-8%, -6%);
+	}
+}
+@keyframes discover-month-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes discover-month-pulse {
+	0%,
+	100% {
+		opacity: 0.6;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.06);
+	}
+}
+@keyframes discover-month-bob {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-6rpx);
+	}
+}
+@keyframes discover-month-twinkle {
+	0%,
+	100% {
+		opacity: 0.35;
+		transform: scale(0.85);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.1);
+	}
+}
+@keyframes discover-month-shine {
+	0% {
+		left: -60%;
+	}
+	45%,
+	100% {
+		left: 120%;
+	}
 }
 
 .discover-section {
