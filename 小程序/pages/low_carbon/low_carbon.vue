@@ -506,6 +506,82 @@
       </view>
     </view>
     -->
+
+    <!-- 玩转活动：居民自发 · 瀑布流 -->
+    <view class="fb-section fb-member-act" id="guide-fb-member">
+      <view class="fb-section-header">
+        <view class="fb-hd">
+          <view class="fb-hd-bar"></view>
+          <text class="fb-section-title">玩转活动</text>
+          <text class="fb-entry-kicker-hint">邻里自发</text>
+        </view>
+        <view class="fb-member-publish" hover-class="fb-press" @click="goPublishMemberActive">
+          <u-icon name="plus" size="20" color="#fff"></u-icon>
+          <text class="fb-member-publish-text">发布活动</text>
+        </view>
+      </view>
+      <view class="fb-member-empty" v-if="!member_active_loading && member_active_list.length === 0">
+        <text class="fb-member-empty-title">还没有邻里活动</text>
+        <text class="fb-member-empty-sub">发起一场读书、徒步、公益小聚，邻居报名后现场签到即可</text>
+        <view class="fb-member-empty-btn" @click="goPublishMemberActive">我来发布第一场</view>
+      </view>
+      <view class="fb-member-waterfall" v-else>
+        <view class="fb-member-col">
+          <view
+            class="fb-member-card"
+            v-for="item in member_active_col_left"
+            :key="'ma-l-' + item.id"
+            hover-class="fb-press"
+            :hover-stay-time="80"
+            @click="$u.func.openActiveDetail(item)"
+          >
+            <view class="fb-member-cover">
+              <u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+              <view class="fb-member-tag">{{ item.theme_label || '社区活动' }}</view>
+            </view>
+            <view class="fb-member-body">
+              <text class="fb-member-name u-line-2">{{ item.name }}</text>
+              <text class="fb-member-meta u-line-1">{{ item.time_line }}</text>
+              <view class="fb-member-foot">
+                <text class="fb-member-pub u-line-1">{{ item.publisher_nickname || '邻居' }}</text>
+                <text class="fb-member-count" v-if="actEngagementCount(item) > 0">{{ actEngagementCount(item) }}人参与</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="fb-member-col">
+          <view
+            class="fb-member-card"
+            v-for="item in member_active_col_right"
+            :key="'ma-r-' + item.id"
+            hover-class="fb-press"
+            :hover-stay-time="80"
+            @click="$u.func.openActiveDetail(item)"
+          >
+            <view class="fb-member-cover fb-member-cover--tall">
+              <u-image width="100%" height="100%" :src="item.thumb" mode="aspectFill"></u-image>
+              <view class="fb-member-tag">{{ item.theme_label || '社区活动' }}</view>
+            </view>
+            <view class="fb-member-body">
+              <text class="fb-member-name u-line-2">{{ item.name }}</text>
+              <text class="fb-member-meta u-line-1">{{ item.time_line }}</text>
+              <view class="fb-member-foot">
+                <text class="fb-member-pub u-line-1">{{ item.publisher_nickname || '邻居' }}</text>
+                <text class="fb-member-count" v-if="actEngagementCount(item) > 0">{{ actEngagementCount(item) }}人参与</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="fb-member-load" v-if="member_active_loading">
+        <u-loading mode="circle" color="#18AF38"></u-loading>
+        <text>加载中…</text>
+      </view>
+      <view class="fb-member-load fb-member-load--muted" v-else-if="member_active_list.length > 0 && !member_active_has_more">
+        <text>— 已经到底啦 —</text>
+      </view>
+    </view>
+
     <page-guide page="low_carbon"></page-guide>
   </view>
 </template>
@@ -626,6 +702,10 @@ export default {
       weekly_list: [],
       light_list: [],
       recent_list: [],
+      member_active_list: [],
+      member_active_page: 1,
+      member_active_has_more: true,
+      member_active_loading: false,
       // 5 大活动分类（硬编码，后台新增不显示）
       // community_cate_id 对应数据库 cmf_active_community_cate.id
       main_categories: [
@@ -726,6 +806,12 @@ export default {
     themeMiniCates() {
       return (this.main_categories || []).slice(2, 5);
     },
+    member_active_col_left() {
+      return (this.member_active_list || []).filter((_, i) => i % 2 === 0);
+    },
+    member_active_col_right() {
+      return (this.member_active_list || []).filter((_, i) => i % 2 === 1);
+    },
   },
   onLoad(options) {
     this.loadAllData();
@@ -734,6 +820,10 @@ export default {
     this.updateTabBarSelected(1);
     if (checkCommunity(this)) return;
     if (!this.isLogin) return;
+    if (this._memberActiveNeedRefresh) {
+      this._memberActiveNeedRefresh = false;
+      this.fetchMemberActiveList(true);
+    }
   },
   methods: {
     weeklyCardCover(item) {
@@ -805,6 +895,7 @@ export default {
       try {
         await Promise.all([
           this.fetchActivityTabHome({ page: 1 }),
+          this.fetchMemberActiveList(true),
         ]);
       } catch (e) {
         console.log("数据加载失败:", e);
@@ -929,6 +1020,50 @@ export default {
       this.$u.route("/pages/activity/active-search");
     },
 
+    goPublishMemberActive() {
+      if (!this.$u.func.checkLogin()) return;
+      this._memberActiveNeedRefresh = true;
+      this.$u.route("/pages/activity/member-active-publish");
+    },
+
+    fetchMemberActiveList(reset = false) {
+      if (reset) {
+        this.member_active_page = 1;
+        this.member_active_has_more = true;
+        if (!this.member_active_list.length) {
+          this.member_active_list = [];
+        }
+      }
+      if (!this.member_active_has_more && !reset) return Promise.resolve();
+      if (this.member_active_loading) return Promise.resolve();
+      this.member_active_loading = true;
+      const page = reset ? 1 : this.member_active_page;
+      return this.$u.api
+        .memberActiveList({ page, page_size: 10 })
+        .then((res) => {
+          const data = res.data || {};
+          const list = data.list || [];
+          if (reset) {
+            this.member_active_list = list;
+          } else {
+            this.member_active_list = (this.member_active_list || []).concat(list);
+          }
+          const lastPage = Number(data.last_page) || 1;
+          const cur = Number(data.page) || page;
+          this.member_active_has_more = cur < lastPage;
+          this.member_active_page = cur + 1;
+        })
+        .catch(() => {})
+        .finally(() => {
+          this.member_active_loading = false;
+        });
+    },
+
+    loadMemberActiveMore() {
+      if (this.member_active_loading || !this.member_active_has_more) return;
+      this.fetchMemberActiveList(false);
+    },
+
     // tabbar
     updateTabBarSelected(index) {
       if (
@@ -941,7 +1076,7 @@ export default {
   },
 
   onReachBottom() {
-    /* 全部活动区仅展示预览，不在 Tab 页触底加载 */
+    this.loadMemberActiveMore();
   },
 };
 </script>
@@ -2643,6 +2778,138 @@ export default {
   padding: 30rpx 0;
   font-size: 24rpx;
   color: #65676b;
+}
+
+/* ===== 玩转活动 · 居民瀑布流 ===== */
+.fb-member-act {
+  padding: 0 24rpx calc(140rpx + env(safe-area-inset-bottom));
+}
+.fb-member-publish {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #1f9d55, #18af38);
+  box-shadow: 0 8rpx 20rpx rgba(24, 175, 56, 0.28);
+}
+.fb-member-publish-text {
+  margin-left: 6rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #fff;
+}
+.fb-member-empty {
+  margin-top: 16rpx;
+  padding: 48rpx 32rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.92);
+  text-align: center;
+  box-shadow: 0 8rpx 28rpx rgba(22, 53, 36, 0.05);
+}
+.fb-member-empty-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1a2e22;
+}
+.fb-member-empty-sub {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #7a8a80;
+  line-height: 1.55;
+}
+.fb-member-empty-btn {
+  display: inline-block;
+  margin-top: 28rpx;
+  padding: 18rpx 40rpx;
+  border-radius: 999rpx;
+  background: #e8f7ec;
+  color: #16864b;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+.fb-member-waterfall {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+.fb-member-col {
+  flex: 1;
+  min-width: 0;
+}
+.fb-member-card {
+  margin-bottom: 16rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10rpx 28rpx rgba(22, 53, 36, 0.07);
+}
+.fb-member-cover {
+  position: relative;
+  width: 100%;
+  height: 220rpx;
+  background: #dce8de;
+}
+.fb-member-cover--tall {
+  height: 280rpx;
+}
+.fb-member-tag {
+  position: absolute;
+  left: 12rpx;
+  top: 12rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 20rpx;
+  color: #16864b;
+  font-weight: 600;
+}
+.fb-member-body {
+  padding: 16rpx 18rpx 18rpx;
+}
+.fb-member-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a2e22;
+  line-height: 1.35;
+}
+.fb-member-meta {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #7a8a80;
+}
+.fb-member-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12rpx;
+  gap: 8rpx;
+}
+.fb-member-pub {
+  font-size: 22rpx;
+  color: #95a59b;
+  flex: 1;
+}
+.fb-member-count {
+  font-size: 22rpx;
+  color: #18af38;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.fb-member-load {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 24rpx 0 8rpx;
+  font-size: 24rpx;
+  color: #65676b;
+}
+.fb-member-load--muted {
+  color: #aab5ad;
 }
 
 </style>

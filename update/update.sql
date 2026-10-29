@@ -679,3 +679,29 @@ UPDATE `cmf_goods` SET
   `require_web_unlock_key` = 'web_active:57:milestone:3',
   `require_web_unlock_label` = '完成「1+1活动」满3天挑战后，可0积分兑换本商品'
 WHERE `id` = 101 AND `delete_time` = 0;
+
+-- 活动 Tab · 居民发布（玩转活动）
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_user_id');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_user_id` int(10) unsigned NOT NULL DEFAULT 0 COMMENT ''居民发布者 member.id，0=后台创建'' AFTER `delete_time`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_audit_status');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_audit_status` tinyint(3) NOT NULL DEFAULT 0 COMMENT ''0非居民 1待审 2已通过 3已拒绝'' AFTER `publish_user_id`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_reject_reason');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_reject_reason` varchar(200) NOT NULL DEFAULT '''' COMMENT ''居民发布审核拒绝原因'' AFTER `publish_audit_status`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND INDEX_NAME = 'idx_publish_feed');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD KEY `idx_publish_feed` (`publish_audit_status`,`publish_user_id`,`status`,`delete_time`)');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
+SELECT
+    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Active' AND `action`='index1' LIMIT 1),
+    1, 1, 15,
+    'admin','MemberActive','index','','居民活动审核','','活动 Tab 居民发布内容审核'
+FROM DUAL
+WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Active' AND `action`='index1' LIMIT 1)
+  AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='MemberActive' AND `action`='index' LIMIT 1);

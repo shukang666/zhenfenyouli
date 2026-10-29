@@ -487,6 +487,12 @@
 					}
 				},
 				{
+					"path": "member-active-publish",
+					"style": {
+						"navigationBarTitleText": "发布邻里活动"
+					}
+				},
+				{
 					"path": "theme-activities",
 					"style": {
 						"navigationBarTitleText": "主题活动",

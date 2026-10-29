@@ -1,0 +1,207 @@
+<?php
+
+namespace api\wxapp\service;
+
+use app\admin\model\active\ActiveModel;
+use think\facade\Db;
+
+/**
+ * 活动 Tab「玩转活动」· 居民自发配置式线下活动
+ */
+class MemberActiveService
+{
+    public const AUDIT_NONE = 0;
+    public const AUDIT_PENDING = 1;
+    public const AUDIT_APPROVED = 2;
+    public const AUDIT_REJECTED = 3;
+
+    public const TAG_MEMBER = '居民活动';
+
+    /** 与活动 Tab 主题活动五分类 id 一致（cmf_active_community_cate） */
+    public static function themeOptions(): array
+    {
+        return [
+            ['id' => 1, 'name' => '健康运动', 'hint' => '徒步、晨练、球类…'],
+            ['id' => 2, 'name' => '学习成长', 'hint' => '读书会、分享会…'],
+            ['id' => 3, 'name' => '兴趣体验', 'hint' => '手工、摄影、体验课…'],
+            ['id' => 4, 'name' => '交流互动', 'hint' => '邻里茶话、座谈…'],
+            ['id' => 5, 'name' => '公益行动', 'hint' => '志愿、环保、互助…'],
+        ];
+    }
+
+    public static function themeLabel(int $id): string
+    {
+        foreach (self::themeOptions() as $row) {
+            if ((int)$row['id'] === $id) {
+                return (string)$row['name'];
+            }
+        }
+        return '社区活动';
+    }
+
+    public static function baseListQuery()
+    {
+        return ActiveModel::where('publish_user_id', '>', 0)
+            ->where('publish_audit_status', self::AUDIT_APPROVED)
+            ->where('status', 1)
+            ->where('delete_time', 0)
+            ->where('join_type', 1);
+    }
+
+    /**
+     * @return array{list:array,total:int,page:int,page_size:int,last_page:int}
+     */
+    public static function paginateForFeed(int $userId, int $page, int $pageSize, TabHomeService $formatter): array
+    {
+        $page = max(1, $page);
+        $pageSize = min(30, max(1, $pageSize));
+        $query = self::baseListQuery();
+        $total = (clone $query)->count();
+        $rows = $query->order('id desc')->page($page, $pageSize)->select();
+        $list = [];
+        foreach ($rows as $item) {
+            $row = $formatter->formatActiveListItemPublic($item);
+            $row['publisher_nickname'] = (string)Db::name('member')->where('id', (int)$item['publish_user_id'])->value('nickname');
+            $row['theme_label'] = self::themeLabel((int)($item['community_cate_id'] ?? 0));
+            $row['time_line'] = self::formatTimeLine($item);
+            $list[] = $row;
+        }
+        $lastPage = $pageSize > 0 ? (int)ceil($total / $pageSize) : 1;
+        return [
+            'list' => $list,
+            'total' => (int)$total,
+            'page' => $page,
+            'page_size' => $pageSize,
+            'last_page' => max(1, $lastPage),
+        ];
+    }
+
+    /** @param array<string,mixed>|object $active */
+    public static function formatTimeLine($active): string
+    {
+        $a = is_array($active) ? $active : (array)$active;
+        $start = (int)($a['offline_sign_start'] ?? 0);
+        $end = (int)($a['offline_sign_end'] ?? 0);
+        if ($start > 0 && $end > 0) {
+            return date('m月d日 H:i', $start) . ' – ' . date('H:i', $end);
+        }
+        if (!empty($a['date'])) {
+            return '截止 ' . date('Y-m-d', (int)$a['date']);
+        }
+        return '时间见详情';
+    }
+
+    /**
+     * 居民发布：生成配置式线下活动（免积分报名 + 现场定位签到）
+     *
+     * @return int active id
+     */
+    public static function publish(int $userId, array $payload): int
+    {
+        $name = trim((string)($payload['name'] ?? ''));
+        $summary = trim((string)($payload['summary'] ?? ''));
+        $thumb = trim((string)($payload['thumb'] ?? ''));
+        $activityDate = trim((string)($payload['activity_date'] ?? ''));
+        $startTime = trim((string)($payload['start_time'] ?? ''));
+        $endTime = trim((string)($payload['end_time'] ?? ''));
+        $address = trim((string)($payload['address'] ?? ''));
+        $placeName = trim((string)($payload['place_name'] ?? ''));
+        $lat = (float)($payload['lat'] ?? 0);
+        $lng = (float)($payload['lng'] ?? 0);
+        $phone = trim((string)($payload['contact'] ?? ''));
+        $themeId = (int)($payload['theme_id'] ?? 0);
+
+        if ($name === '' || mb_strlen($name) > 30) {
+            throw new \InvalidArgumentException('请填写 30 字以内的活动名称');
+        }
+        if ($thumb === '') {
+            throw new \InvalidArgumentException('请上传活动封面');
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $activityDate)) {
+            throw new \InvalidArgumentException('请选择活动日期');
+        }
+        if (!preg_match('/^\d{1,2}:\d{2}$/', $startTime) || !preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+            throw new \InvalidArgumentException('请选择开始与结束时间');
+        }
+        $startTs = strtotime($activityDate . ' ' . $startTime . ':00');
+        $endTs = strtotime($activityDate . ' ' . $endTime . ':00');
+        if (!$startTs || !$endTs || $endTs <= $startTs) {
+            throw new \InvalidArgumentException('结束时间须晚于开始时间');
+        }
+        if ($startTs < strtotime('today')) {
+            throw new \InvalidArgumentException('活动日期不能早于今天');
+        }
+        if ($address === '' || $lat == 0.0 || $lng == 0.0) {
+            throw new \InvalidArgumentException('请在地图上选活动举办地点');
+        }
+        if ($phone === '' || mb_strlen($phone) > 40) {
+            throw new \InvalidArgumentException('请填写有效联系方式');
+        }
+        $validTheme = false;
+        foreach (self::themeOptions() as $t) {
+            if ((int)$t['id'] === $themeId) {
+                $validTheme = true;
+                break;
+            }
+        }
+        if (!$validTheme) {
+            throw new \InvalidArgumentException('请选择活动类型');
+        }
+
+        $displayAddr = $placeName !== '' ? ($placeName . ' · ' . $address) : $address;
+        $timeHuman = date('Y年n月j日', $startTs) . ' ' . $startTime . '–' . $endTime;
+        $contentParts = ['<p>' . htmlspecialchars($timeHuman, ENT_QUOTES, 'UTF-8') . '</p>'];
+        if ($summary !== '') {
+            $contentParts[] = '<p>' . nl2br(htmlspecialchars($summary, ENT_QUOTES, 'UTF-8')) . '</p>';
+        }
+        $contentParts[] = '<p>本活动由居民自发组织，平台提供展示与签到工具，请注意人身与财产安全。</p>';
+        $content = implode('', $contentParts);
+
+        $now = time();
+        $pendingCount = ActiveModel::where('publish_user_id', $userId)
+            ->whereIn('publish_audit_status', [self::AUDIT_PENDING, self::AUDIT_APPROVED])
+            ->where('delete_time', 0)
+            ->count();
+        if ($pendingCount >= 10) {
+            throw new \InvalidArgumentException('您进行中的发布较多，请先下架或等待已有活动结束');
+        }
+
+        $insert = [
+            'type' => 1,
+            'status' => 1,
+            'join_type' => 1,
+            'display_mode' => ActiveModel::DISPLAY_MODE_CONFIG,
+            'event_kind' => ActiveModel::EVENT_KIND_OFFLINE,
+            'name' => $name,
+            'thumb' => $thumb,
+            'content' => $content,
+            'address' => $displayAddr,
+            'lat' => (string)$lat,
+            'lng' => (string)$lng,
+            'phone' => $phone,
+            'point' => 0,
+            'share_point' => 0,
+            'send_point' => 0,
+            'community_cate_id' => $themeId,
+            'date' => strtotime($activityDate . ' 23:59:59'),
+            'offline_sign_start' => $startTs,
+            'offline_sign_end' => $endTs,
+            'offline_sign_password' => '',
+            'is_clock' => 0,
+            'is_date_pending' => 0,
+            'is_recurring' => 0,
+            'tags' => self::TAG_MEMBER,
+            'publish_user_id' => $userId,
+            'publish_audit_status' => self::AUDIT_PENDING,
+            'publish_reject_reason' => '',
+            'create_time' => $now,
+            'update_time' => $now,
+            'delete_time' => 0,
+            'list_order' => 10000,
+            'role' => '1',
+        ];
+
+        $model = ActiveModel::create($insert);
+        return (int)$model->id;
+    }
+}

@@ -598,6 +598,12 @@ class TabHomeService
         return $item;
     }
 
+    /** 供居民活动瀑布流等复用列表字段格式化 */
+    public function formatActiveListItemPublic($item)
+    {
+        return $this->applyActiveListItemFields($item);
+    }
+
     /** 列表项附带 Web 式打开地址（与 ActiveController 详情逻辑一致） */
     protected function attachWebLaunchFields(&$item): void
     {

@@ -1,0 +1,85 @@
+<?php
+
+namespace api\wxapp\controller;
+
+use api\wxapp\service\MemberActiveService;
+use api\wxapp\service\TabHomeService;
+use app\admin\model\active\ActiveModel;
+
+class MemberActiveController extends AuthController
+{
+    /** 发布页元数据 */
+    public function meta()
+    {
+        $this->checkUser();
+        $this->success('获取成功', [
+            'themes' => MemberActiveService::themeOptions(),
+            'tips' => [
+                'headline' => '发一场小而美的邻里活动',
+                'sub' => '只需填必要信息，报名与现场签到沿用小程序配置式活动流程。',
+            ],
+        ]);
+    }
+
+    /** 活动 Tab 瀑布流 */
+    public function list()
+    {
+        $page = max(1, (int)$this->request->param('page', 1));
+        $pageSize = min(30, max(1, (int)$this->request->param('page_size', 10)));
+        $service = new TabHomeService($this);
+        $data = MemberActiveService::paginateForFeed((int)$this->user_id, $page, $pageSize, $service);
+        $this->success('获取成功', $data);
+    }
+
+    /** 居民发布活动 */
+    public function publish()
+    {
+        $this->checkUser();
+        try {
+            $activeId = MemberActiveService::publish((int)$this->user_id, [
+                'name' => $this->request->param('name', ''),
+                'summary' => $this->request->param('summary', ''),
+                'thumb' => $this->request->param('thumb', ''),
+                'activity_date' => $this->request->param('activity_date', ''),
+                'start_time' => $this->request->param('start_time', ''),
+                'end_time' => $this->request->param('end_time', ''),
+                'address' => $this->request->param('address', ''),
+                'place_name' => $this->request->param('place_name', ''),
+                'lat' => $this->request->param('lat', ''),
+                'lng' => $this->request->param('lng', ''),
+                'contact' => $this->request->param('contact', ''),
+                'theme_id' => $this->request->param('theme_id', 0),
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        } catch (\Throwable $e) {
+            $this->error('发布失败，请稍后再试');
+        }
+        $this->success('发布成功', ['active_id' => $activeId]);
+    }
+
+    /** 我发布的活动 */
+    public function my_list()
+    {
+        $this->checkUser();
+        $rows = ActiveModel::where('publish_user_id', (int)$this->user_id)
+            ->where('delete_time', 0)
+            ->order('id desc')
+            ->limit(50)
+            ->select();
+        $list = [];
+        foreach ($rows as $row) {
+            $status = (int)$row['publish_audit_status'];
+            $list[] = [
+                'id' => (int)$row['id'],
+                'name' => (string)$row['name'],
+                'thumb' => empty($row['thumb']) ? '' : cmf_get_asset_url($row['thumb']),
+                'audit_status' => $status,
+                'audit_label' => $status === MemberActiveService::AUDIT_PENDING ? '审核中'
+                    : ($status === MemberActiveService::AUDIT_REJECTED ? '未通过' : '展示中'),
+                'time_line' => MemberActiveService::formatTimeLine($row),
+            ];
+        }
+        $this->success('获取成功', ['list' => $list]);
+    }
+}

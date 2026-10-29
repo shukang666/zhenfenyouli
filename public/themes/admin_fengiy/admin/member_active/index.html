@@ -1,0 +1,68 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="{:url('admin/MemberActive/index')}">居民活动审核</a></li>
+    </ul>
+    <form class="well form-inline margin-top-20" method="get" action="{:url('admin/MemberActive/index')}">
+        <div class="form-group">
+            <label>审核：</label>
+            <select name="status" class="form-control" style="width: 140px;">
+                <option value="">全部</option>
+                <option value="1" <if condition="$status eq '1'">selected="selected"</if>>待审核</option>
+                <option value="2" <if condition="$status eq '2'">selected="selected"</if>>展示中</option>
+                <option value="3" <if condition="$status eq '3'">selected="selected"</if>>已拒绝</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>名称：</label>
+            <input type="text" class="form-control" name="keyword" style="width: 160px;" value="{$keyword}" placeholder="活动名称">
+        </div>
+        <button type="submit" class="btn btn-primary">搜索</button>
+        <a class="btn btn-default" href="{:url('admin/MemberActive/index')}">清空</a>
+    </form>
+    <table class="table table-hover table-bordered margin-top-20">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>封面</th>
+            <th>活动名称</th>
+            <th>发布人</th>
+            <th>手机</th>
+            <th>状态</th>
+            <th>发布时间</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <foreach name="list" item="vo">
+            <tr>
+                <td>{$vo.id}</td>
+                <td>
+                    <notempty name="$vo.thumb_url">
+                        <img src="{$vo.thumb_url}" style="width:56px;height:56px;object-fit:cover;border-radius:4px;">
+                    </notempty>
+                </td>
+                <td style="max-width:200px;word-break:break-all;">{$vo.name}</td>
+                <td>{$vo.nickname}</td>
+                <td>{$vo.mobile}</td>
+                <td>{$vo.audit_name}</td>
+                <td>{:date('Y-m-d H:i', $vo.create_time)}</td>
+                <td>
+                    <if condition="$vo.publish_audit_status != 2">
+                        <a class="btn btn-xs btn-success js-ajax-dialog-btn" data-msg="确认通过并在活动 Tab 展示？" href="{:url('admin/MemberActive/pass', ['id'=>$vo.id])}">通过</a>
+                    </if>
+                    <if condition="$vo.publish_audit_status != 3">
+                        <a class="btn btn-xs btn-danger js-ajax-dialog-btn" data-msg="确认拒绝并下架？" href="{:url('admin/MemberActive/reject', ['id'=>$vo.id])}">拒绝</a>
+                    </if>
+                </td>
+            </tr>
+        </foreach>
+        </tbody>
+    </table>
+    <div class="pagination">{$page}</div>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
