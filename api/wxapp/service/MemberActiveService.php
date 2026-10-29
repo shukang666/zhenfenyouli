@@ -153,14 +153,21 @@ class MemberActiveService
             throw new \InvalidArgumentException('请选择活动类型');
         }
 
+        $customBlocksRaw = $payload['custom_blocks'] ?? '';
+        $customBlocks = self::parseCustomBlocksInput($customBlocksRaw);
+
         $displayAddr = $placeName !== '' ? ($placeName . ' · ' . $address) : $address;
         $timeHuman = date('Y年n月j日', $startTs) . ' ' . $startTime . '–' . $endTime;
         $contentParts = ['<p>' . htmlspecialchars($timeHuman, ENT_QUOTES, 'UTF-8') . '</p>'];
+        foreach ($customBlocks as $block) {
+            $contentParts[] = self::blockToContentHtml($block);
+        }
         if ($summary !== '') {
             $contentParts[] = '<p>' . nl2br(htmlspecialchars($summary, ENT_QUOTES, 'UTF-8')) . '</p>';
         }
         $contentParts[] = '<p>本活动由居民自发组织，平台提供展示与签到工具，请注意人身与财产安全。</p>';
         $content = implode('', $contentParts);
+        $customBlocksJson = $customBlocks ? json_encode($customBlocks, JSON_UNESCAPED_UNICODE) : '';
 
         $now = time();
         $pendingCount = ActiveModel::where('publish_user_id', $userId)
@@ -231,6 +238,7 @@ class MemberActiveService
             'delete_time' => 0,
             'list_order' => 10000,
             'role' => '1',
+            'publish_custom_blocks' => $customBlocksJson,
         ];
 
         $tableFields = Db::name('active')->getTableFields();
@@ -240,6 +248,137 @@ class MemberActiveService
             throw new \RuntimeException('活动保存失败');
         }
         return $id;
+    }
+
+    public static function blockTypeMeta(): array
+    {
+        return [
+            ['type' => 'text', 'name' => '单行文本', 'hint' => '标题 + 一行内容'],
+            ['type' => 'textarea', 'name' => '多行文本', 'hint' => '段落说明、注意事项'],
+            ['type' => 'images', 'name' => '图片集', 'hint' => '最多 6 张，详情页横滑展示'],
+        ];
+    }
+
+    /**
+     * @param mixed $raw JSON 字符串或数组
+     * @return list<array<string,mixed>>
+     */
+    public static function parseCustomBlocksInput($raw): array
+    {
+        if (is_string($raw)) {
+            $raw = trim($raw);
+            if ($raw === '') {
+                return [];
+            }
+            $decoded = json_decode($raw, true);
+            if (!is_array($decoded)) {
+                throw new \InvalidArgumentException('自定义展示字段格式错误');
+            }
+            $raw = $decoded;
+        }
+        if (!is_array($raw)) {
+            return [];
+        }
+        if (count($raw) > 12) {
+            throw new \InvalidArgumentException('最多添加 12 个展示字段');
+        }
+        $out = [];
+        foreach ($raw as $i => $row) {
+            if (!is_array($row)) {
+                throw new \InvalidArgumentException('自定义字段第 ' . ($i + 1) . ' 项无效');
+            }
+            $type = trim((string)($row['type'] ?? ''));
+            $label = trim((string)($row['label'] ?? ''));
+            if (!in_array($type, ['text', 'textarea', 'images'], true)) {
+                throw new \InvalidArgumentException('不支持的展示类型');
+            }
+            if ($label === '' || mb_strlen($label) > 20) {
+                throw new \InvalidArgumentException('请填写第 ' . ($i + 1) . ' 项标题（20 字以内）');
+            }
+            $item = ['type' => $type, 'label' => $label];
+            if ($type === 'images') {
+                $images = $row['images'] ?? [];
+                if (!is_array($images)) {
+                    throw new \InvalidArgumentException('图片集格式错误');
+                }
+                $paths = [];
+                foreach ($images as $p) {
+                    $p = trim((string)$p);
+                    if ($p !== '') {
+                        $paths[] = $p;
+                    }
+                }
+                if (count($paths) > 6) {
+                    throw new \InvalidArgumentException('「' . $label . '」最多 6 张图');
+                }
+                $item['images'] = $paths;
+            } else {
+                $val = trim((string)($row['value'] ?? ''));
+                $max = $type === 'text' ? 100 : 800;
+                if (mb_strlen($val) > $max) {
+                    throw new \InvalidArgumentException('「' . $label . '」内容过长');
+                }
+                $item['value'] = $val;
+            }
+            $out[] = $item;
+        }
+        return $out;
+    }
+
+    /** @param array<string,mixed> $block */
+    protected static function blockToContentHtml(array $block): string
+    {
+        $label = htmlspecialchars((string)$block['label'], ENT_QUOTES, 'UTF-8');
+        if ($block['type'] === 'images') {
+            return '<p><strong>' . $label . '</strong></p>';
+        }
+        $val = nl2br(htmlspecialchars((string)($block['value'] ?? ''), ENT_QUOTES, 'UTF-8'));
+        return '<p><strong>' . $label . '</strong><br/>' . $val . '</p>';
+    }
+
+    /**
+     * @return list<array<string,mixed>>
+     */
+    public static function formatBlocksForApi($stored): array
+    {
+        if ($stored === null || $stored === '') {
+            return [];
+        }
+        if (is_string($stored)) {
+            $arr = json_decode($stored, true);
+            if (!is_array($arr)) {
+                return [];
+            }
+        } elseif (is_array($stored)) {
+            $arr = $stored;
+        } else {
+            return [];
+        }
+        $out = [];
+        foreach ($arr as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $type = (string)($row['type'] ?? '');
+            $item = [
+                'type' => $type,
+                'label' => (string)($row['label'] ?? ''),
+            ];
+            if ($type === 'images') {
+                $urls = [];
+                foreach ($row['images'] ?? [] as $p) {
+                    $p = trim((string)$p);
+                    if ($p !== '') {
+                        $urls[] = cmf_get_asset_url($p);
+                    }
+                }
+                $item['image_urls'] = $urls;
+            } else {
+                $item['value'] = (string)($row['value'] ?? '');
+            }
+            $out[] = $item;
+        }
+        return $out;
     }
 
     /** 线上库未执行 update.sql 时给出可读提示 */

@@ -711,3 +711,7 @@ INNER JOIN `cmf_admin_menu` ref ON ref.`app`='admin' AND ref.`controller`='Activ
 SET ma.`parent_id` = ref.`parent_id`
 WHERE ma.`app`='admin' AND ma.`controller`='MemberActive' AND ma.`action`='index'
   AND ma.`parent_id` = ref.`id`;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_custom_blocks');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_custom_blocks` mediumtext COMMENT ''居民发布自定义展示块JSON'' AFTER `publish_reject_reason`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;

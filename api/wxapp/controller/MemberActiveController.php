@@ -14,6 +14,7 @@ class MemberActiveController extends AuthController
         $this->checkUser();
         $this->success('获取成功', [
             'themes' => MemberActiveService::themeOptions(),
+            'block_types' => MemberActiveService::blockTypeMeta(),
             'tips' => [
                 'headline' => '发一场小而美的邻里活动',
                 'sub' => '只需填必要信息，报名与现场签到沿用小程序配置式活动流程。',
@@ -49,6 +50,7 @@ class MemberActiveController extends AuthController
                 'lng' => $this->request->param('lng', ''),
                 'contact' => $this->request->param('contact', ''),
                 'theme_id' => $this->request->param('theme_id', 0),
+                'custom_blocks' => $this->request->param('custom_blocks', ''),
             ]);
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());

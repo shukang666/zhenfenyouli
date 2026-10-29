@@ -211,7 +211,14 @@
 		</view>
 			
 			<!-- 活动说明 -->
-			<view class="desc-card glass-card">
+			<view class="desc-card glass-card" v-if="memberDetailBlocks.length">
+				<view class="section-header">
+					<view class="section-bar"></view>
+					<text class="section-title">活动详情</text>
+				</view>
+				<member-active-blocks-display :blocks="memberDetailBlocks" placeholder-text="" placeholder-images="" />
+			</view>
+			<view class="desc-card glass-card" v-else-if="info.content">
 				<view class="section-header">
 					<view class="section-bar"></view>
 					<text class="section-title">活动说明</text>
@@ -423,7 +430,9 @@
 		uploadUrl
 	} from '@/common/settings'
 	import { clearPendingAfterLogin } from '@/common/scanSignEntry.js'
+	import MemberActiveBlocksDisplay from '@/components/member-active-blocks-display/member-active-blocks-display.vue'
 	export default {
+		components: { MemberActiveBlocksDisplay },
 		data() {
 			return {
 				detailReady: false,
@@ -599,6 +608,10 @@
 		},
 		isDatePending() {
 			return Number(this.info.is_date_pending) === 1;
+		},
+		memberDetailBlocks() {
+			const raw = (this.info && this.info.publish_custom_blocks) || [];
+			return Array.isArray(raw) ? raw : [];
 		},
 		isRecurringEnded() {
 			return Number(this.info.is_recurring) === 1 && Number(this.info.is_end) === 1;

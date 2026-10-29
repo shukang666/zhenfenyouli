@@ -575,6 +575,8 @@ class ActiveController extends AuthController
         $item['doc_rules_field']  = ActiveModel::parseDocFieldToken((string)($item['rules_url'] ?? ''));
         $item['doc_safety_field'] = ActiveModel::parseDocFieldToken((string)($item['safety_url'] ?? ''));
 
+        $item['publish_custom_blocks'] = \api\wxapp\service\MemberActiveService::formatBlocksForApi($item['publish_custom_blocks'] ?? '');
+
         //是否报名
         $where = [];
         $where[] = ['active_id', '=', $item['id']];
