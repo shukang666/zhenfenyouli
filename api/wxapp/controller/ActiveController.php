@@ -475,10 +475,35 @@ class ActiveController extends AuthController
         $is_put = $this->request->param('is_put');
         $is_month_recommend = $this->request->param('is_month_recommend');
         $tag = $this->request->param('tag');
+        if (!empty($is_month_recommend)) {
+            $page = max(1, (int)$this->request->param('page', 1));
+            $pageSize = max(1, min(50, (int)$page_size));
+            $service = new \api\wxapp\service\TabHomeService($this);
+            $all = $service->getWeeklyRecommendRows(50);
+            if (!empty($keyword)) {
+                $kw = (string)$keyword;
+                $all = array_values(array_filter($all, function ($row) use ($kw) {
+                    $name = (string)($row['name'] ?? '');
+                    $addr = (string)($row['address'] ?? '');
+                    return mb_stripos($name, $kw) !== false || mb_stripos($addr, $kw) !== false;
+                }));
+            }
+            $total = count($all);
+            $offset = ($page - 1) * $pageSize;
+            $data = array_slice($all, $offset, $pageSize);
+            $lastPage = max(1, (int)ceil($total / max(1, $pageSize)));
+            $this->success('请求成功', [
+                'data' => $data,
+                'total' => $total,
+                'per_page' => $pageSize,
+                'current_page' => $page,
+                'last_page' => $lastPage,
+            ]);
+            return;
+        }
         $where = [];
         if(!empty($is_recommendation)) $where[] = ['is_recommendation', '=', 1];
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
-        if(!empty($is_month_recommend)) $where[] = ['is_month_recommend', '=', 1];
         if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
         $query = ActiveModel::miniProgramVisible();
         if (!empty($where)) {
@@ -1417,11 +1442,10 @@ class ActiveController extends AuthController
     private function buildActivityPageSections()
     {
         $lightTag = '轻活动';
-
-        $weeklyQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
         $lightQuery = ActiveModel::miniProgramVisible()->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
+        $service = new \api\wxapp\service\TabHomeService($this);
         return [
-            'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
+            'weekly_list' => $service->getWeeklyRecommendRows(10),
             'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
         ];
     }

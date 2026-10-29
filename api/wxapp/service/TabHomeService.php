@@ -540,19 +540,153 @@ class TabHomeService
     protected function buildActivityPageSections(): array
     {
         $lightTag = '轻活动';
-        $weeklyQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
         $lightQuery = ActiveModel::miniProgramVisible()->whereRaw('FIND_IN_SET(?, tags)', [$lightTag]);
         return [
-            'weekly_list' => $this->fetchActiveListSlice($weeklyQuery, 10),
+            'weekly_list' => $this->getWeeklyRecommendRows(10),
             'light_list' => $this->fetchActiveListSlice($lightQuery, 3),
         ];
     }
 
-    /** 首页「本周精选」：后台标记为本周推荐的活动 */
+    /**
+     * 本周推荐：后台 is_month_recommend 优先，不足时用「本周内且未结束」的活动自动补足
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function getWeeklyRecommendRows(int $limit = 10): array
+    {
+        return $this->resolveWeeklyRecommendRows(max(1, $limit));
+    }
+
+    /** @return list<array<string,mixed>> */
+    protected function resolveWeeklyRecommendRows(int $limit): array
+    {
+        $manualQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
+        $manualRows = $manualQuery->order('list_order asc, id desc')->limit($limit)->select();
+
+        $merged = [];
+        $excludeIds = [];
+        foreach ($manualRows as $item) {
+            $id = (int)$item['id'];
+            if ($id <= 0) {
+                continue;
+            }
+            $excludeIds[] = $id;
+            $row = $this->applyActiveListItemFields($item);
+            $row['recommend_source'] = 'manual';
+            $merged[] = $row;
+        }
+
+        if (count($merged) < $limit) {
+            $need = $limit - count($merged);
+            $autoRows = $this->fetchAutoWeeklyRecommendCandidates($need, $excludeIds);
+            foreach ($autoRows as $item) {
+                $row = $this->applyActiveListItemFields($item);
+                $row['recommend_source'] = 'auto';
+                $merged[] = $row;
+            }
+        }
+
+        return $merged;
+    }
+
+    /** @param list<int> $excludeIds */
+    protected function fetchAutoWeeklyRecommendCandidates(int $need, array $excludeIds): array
+    {
+        if ($need <= 0) {
+            return [];
+        }
+        [$weekStart, $weekEnd] = $this->currentWeekTimestampRange();
+        $query = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 0);
+        if ($excludeIds) {
+            $query->whereNotIn('id', $excludeIds);
+        }
+        $rows = $query->order('list_order asc, id desc')->limit(max($need * 8, 24))->select();
+        $out = [];
+        foreach ($rows as $item) {
+            if (!$this->isActiveNotEnded($item)) {
+                continue;
+            }
+            if (!$this->matchesAutoWeeklyRecommendWindow($item, $weekStart, $weekEnd)) {
+                continue;
+            }
+            $out[] = $item;
+            if (count($out) >= $need) {
+                break;
+            }
+        }
+        usort($out, function ($a, $b) {
+            return $this->weeklyRecommendSortKey($a) <=> $this->weeklyRecommendSortKey($b);
+        });
+        return array_slice($out, 0, $need);
+    }
+
+    /** @return array{0:int,1:int} 本周一 00:00 ~ 周日 23:59:59 */
+    protected function currentWeekTimestampRange(): array
+    {
+        $todayStart = strtotime(date('Y-m-d 00:00:00'));
+        $weekday = (int)date('N');
+        $weekStart = $todayStart - ($weekday - 1) * 86400;
+        $weekEnd = $weekStart + 7 * 86400 - 1;
+        return [$weekStart, $weekEnd];
+    }
+
+    /** @param array<string,mixed>|object $active */
+    protected function isActiveNotEnded($active): bool
+    {
+        $a = is_array($active) ? $active : (array)$active;
+        if (ActiveModel::isDatePending($a)) {
+            return true;
+        }
+        $now = time();
+        $offlineEnd = (int)($a['offline_sign_end'] ?? 0);
+        if ($offlineEnd > 0) {
+            return $now <= $offlineEnd;
+        }
+        return ActiveModel::resolveIsEnd($a) === 0;
+    }
+
+    /**
+     * 自动推荐：活动开始落在本周，或截止日在本周且未过；时间待定视为本周候选
+     *
+     * @param array<string,mixed>|object $active
+     */
+    protected function matchesAutoWeeklyRecommendWindow($active, int $weekStart, int $weekEnd): bool
+    {
+        $a = is_array($active) ? $active : (array)$active;
+        if (ActiveModel::isDatePending($a)) {
+            return true;
+        }
+        $now = time();
+        $startTs = (int)($a['offline_sign_start'] ?? 0);
+        if ($startTs > 0) {
+            return $startTs >= $weekStart && $startTs <= $weekEnd;
+        }
+        $date = (int)($a['date'] ?? 0);
+        if ($date <= 0) {
+            return false;
+        }
+        return $date >= $now && $date <= $weekEnd;
+    }
+
+    /** @param array<string,mixed>|object $active */
+    protected function weeklyRecommendSortKey($active): int
+    {
+        $a = is_array($active) ? $active : (array)$active;
+        if (ActiveModel::isDatePending($a)) {
+            return PHP_INT_MAX - 1;
+        }
+        $startTs = (int)($a['offline_sign_start'] ?? 0);
+        if ($startTs > 0) {
+            return $startTs;
+        }
+        $date = (int)($a['date'] ?? 0);
+        return $date > 0 ? $date : PHP_INT_MAX;
+    }
+
+    /** 首页「本周精选」卡片字段 */
     protected function fetchHomeWeeklyPickList(int $limit): array
     {
-        $weeklyQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
-        $rows = $this->fetchActiveListSlice($weeklyQuery, max(1, $limit));
+        $rows = $this->resolveWeeklyRecommendRows(max(1, $limit));
         $out = [];
         foreach ($rows as $i => $row) {
             $out[] = $this->formatHomeWeeklyPickCard($row, (int)$i);
@@ -604,6 +738,9 @@ class TabHomeService
         }
         if (!$chips) {
             $chips[] = ['text' => '精选推荐', 'tone' => 'muted'];
+        }
+        if (($row['recommend_source'] ?? '') === 'auto' && count($chips) < 3) {
+            $chips[] = ['text' => '本周活动', 'tone' => 'muted'];
         }
         $row['cover_title'] = $coverTitle;
         $row['cover_sub'] = $coverSub;
