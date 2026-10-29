@@ -5,6 +5,9 @@
     <ul class="nav nav-tabs">
         <li class="active"><a href="{:url('index',[['type'=>$params.type]])}">列表</a></li>
         <li><a href="{:url('update',['type'=>$params.type])}">添加</a></li>
+        <if condition="$params.type == 1">
+        <li><a href="{:url('MemberActive/index')}">居民活动审核</a></li>
+        </if>
     </ul>
     <form class="well form-inline margin-top-20" method="get" action="{:url('index',['type'=>$params.type])}">
         关键字：
@@ -35,6 +38,7 @@
                     <th>本周推荐</th>
                     <th>首页展示</th>
                     <th>轻任务</th>
+                    <th>居民审核</th>
                 </if>
                 <th>添加时间</th>
                 <th>小程序码</th>
@@ -56,6 +60,9 @@
                         </if>
                         <if condition="!empty($vo.is_clock_challenge) && $vo.is_clock_challenge == 1">
                             <span class="label label-success" style="margin-left:4px;">{$vo.clock_challenge_days}天兑礼</span>
+                        </if>
+                        <if condition="!empty($vo.is_member_publish)">
+                            <span class="label label-warning" style="margin-left:4px;">居民发布</span>
                         </if>
                     </td>
                     <if condition="$params.type == 1">
@@ -104,6 +111,21 @@
                                 >
                             </div>
                         </td>
+                        <td>
+                            <if condition="empty($vo.is_member_publish)">
+                                <span class="text-muted">—</span>
+                            <else/>
+                                <if condition="$vo.member_audit_name == '待审核'">
+                                    <span class="label label-warning">待审核</span>
+                                <elseif condition="$vo.member_audit_name == '已通过'"/>
+                                    <span class="label label-success">已通过</span>
+                                <elseif condition="$vo.member_audit_name == '已拒绝'"/>
+                                    <span class="label label-default">已拒绝</span>
+                                <else/>
+                                    {$vo.member_audit_name}
+                                </if>
+                            </if>
+                        </td>
                     </if>
                     <td>{$vo.create_time |date="Y-m-d H:i:s"}</td>
                     <td>
@@ -119,6 +141,10 @@
                         <if condition="$params.type == 1">
                         <a class="btn btn-xs btn-info"
                            href="javascript:;" onclick="openClockAction({$vo['id']})">打卡动作</a>
+                        </if>
+                        <if condition="!empty($vo.is_member_publish) && $vo.member_audit_name == '待审核'">
+                        <a class="btn btn-xs btn-success js-ajax-dialog-btn" data-msg="确认通过？通过后展示在活动 Tab「玩转活动」" href="{:url('MemberActive/pass',['id'=>$vo['id']])}">审核通过</a>
+                        <a class="btn btn-xs btn-warning js-ajax-dialog-btn" data-msg="确认拒绝并下架？" href="{:url('MemberActive/reject',['id'=>$vo['id']])}">拒绝</a>
                         </if>
                         <a class="btn btn-xs btn-danger js-ajax-delete"
                            href="{:url('delete',['id'=>$vo['id'],'type'=>$params.type])}">{:lang('DELETE')}</a>

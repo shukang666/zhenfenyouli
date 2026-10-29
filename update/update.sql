@@ -699,9 +699,15 @@ PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
 
 INSERT INTO `cmf_admin_menu` (`parent_id`,`type`,`status`,`list_order`,`app`,`controller`,`action`,`param`,`name`,`icon`,`remark`)
 SELECT
-    (SELECT `id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Active' AND `action`='index1' LIMIT 1),
+    (SELECT `parent_id` FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Active' AND `action`='index1' LIMIT 1),
     1, 1, 15,
     'admin','MemberActive','index','','居民活动审核','','活动 Tab 居民发布内容审核'
 FROM DUAL
 WHERE EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='Active' AND `action`='index1' LIMIT 1)
   AND NOT EXISTS (SELECT 1 FROM `cmf_admin_menu` WHERE `app`='admin' AND `controller`='MemberActive' AND `action`='index' LIMIT 1);
+
+UPDATE `cmf_admin_menu` ma
+INNER JOIN `cmf_admin_menu` ref ON ref.`app`='admin' AND ref.`controller`='Active' AND ref.`action`='index1'
+SET ma.`parent_id` = ref.`parent_id`
+WHERE ma.`app`='admin' AND ma.`controller`='MemberActive' AND ma.`action`='index'
+  AND ma.`parent_id` = ref.`id`;

@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use api\wxapp\model\CommonModel;
+use api\wxapp\service\MemberActiveService;
 use app\admin\model\active\ActiveCateModel;
 use app\admin\model\active\ActiveCommunityCateModel;
 use app\admin\model\active\ActiveClockModel;
@@ -157,6 +158,20 @@ class ActiveController extends ToolController
         $item = $this->setData($item, 2);
         $tags = array_filter(array_map('trim', explode(',', (string)($item['tags'] ?? ''))));
         $item['is_light_task'] = in_array('轻活动', $tags, true) ? 1 : 0;
+        $pubUid = (int)($item['publish_user_id'] ?? 0);
+        $item['is_member_publish'] = $pubUid > 0 ? 1 : 0;
+        $audit = (int)($item['publish_audit_status'] ?? 0);
+        if ($pubUid <= 0) {
+            $item['member_audit_name'] = '';
+        } elseif ($audit === MemberActiveService::AUDIT_PENDING) {
+            $item['member_audit_name'] = '待审核';
+        } elseif ($audit === MemberActiveService::AUDIT_REJECTED) {
+            $item['member_audit_name'] = '已拒绝';
+        } elseif ($audit === MemberActiveService::AUDIT_APPROVED) {
+            $item['member_audit_name'] = '已通过';
+        } else {
+            $item['member_audit_name'] = '—';
+        }
         return $item;
     }
 
