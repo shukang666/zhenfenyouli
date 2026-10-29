@@ -79,6 +79,7 @@ import ActivityTabHeader from "@/components/activity-tab/activity-tab-header.vue
 import ActivityTabNeighborFeed from "@/components/activity-tab/activity-tab-neighbor-feed.vue";
 import ActivityTabFeaturedPanel from "@/components/activity-tab/activity-tab-featured-panel.vue";
 import memberActiveFeedMixin from "@/pages/low_carbon/mixins/member-active-feed.mixin.js";
+import { ACTIVITY_PAGE_TAB_PENDING_KEY } from "@/common/activityTabNav.js";
 import {
   ACTIVITY_TAB_ENTRY_BANNER_URL,
   ACTIVITY_TAB_TOP_BANNER_URL,
@@ -292,6 +293,13 @@ export default {
   onShow() {
     this.updateTabBarSelected(1);
     if (checkCommunity(this)) return;
+    try {
+      const pending = uni.getStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY);
+      if (pending === "neighbor" || pending === "featured") {
+        uni.removeStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY);
+        this.switchActivityPageTab(pending);
+      }
+    } catch (e) {}
     if (!this.isLogin) return;
     this.refreshMemberActiveAfterPublish();
   },

@@ -24,6 +24,7 @@
 							<view class="fb-filter-item" :class="{ 'fb-filter-active': filterType === 'recommend' }" @click="switchFilter('recommend')">推荐</view>
 							<view class="fb-filter-item" :class="{ 'fb-filter-active': filterType === 'light' }" @click="switchFilter('light')">轻活动</view>
 							<view class="fb-filter-item" :class="{ 'fb-filter-active': filterType === 'offline' }" @click="switchFilter('offline')">线下活动</view>
+							<view class="fb-filter-item" :class="{ 'fb-filter-active': filterType === 'weekly' }" @click="switchFilter('weekly')">本周活动</view>
 							<view class="fb-filter-item" v-for="tag in tagOptions" :key="tag" :class="{ 'fb-filter-active': filterType === 'tag' && filterTag === tag }" @click="switchFilter('tag', tag)">{{tag}}</view>
 						</view>
 					</scroll-view>
@@ -86,7 +87,7 @@
 			// 根据入口参数决定初始筛选
 			if (op.filter) {
 				this.showFilter = true
-				if (['recommend', 'light', 'offline'].includes(op.filter)) {
+				if (['recommend', 'light', 'offline', 'weekly'].includes(op.filter)) {
 					this.filterType = op.filter
 				} else if (op.filter.startsWith('tag:')) {
 					this.filterType = 'tag'
@@ -137,6 +138,8 @@
 						params.tag = '轻活动'
 					} else if (this.filterType === 'offline') {
 						params.tag = '线下活动'
+					} else if (this.filterType === 'weekly') {
+						params.is_month_recommend = 1
 					} else if (this.filterType === 'tag' && this.filterTag) {
 						params.tag = this.filterTag
 					}

@@ -49,25 +49,19 @@
 				</view>
 			</view>
 
-			<!-- 问候 + 快捷入口（浅色卡片） -->
+			<!-- 快捷入口（Banner 下方） -->
 			<view id="guide-hello" class="home-quick-grid">
-				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToClock">
-					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/lajifenlei.svg" mode="aspectFit"></image>
-					<text class="home-quick-label">源头真分</text>
+				<view
+					class="home-quick-item"
+					v-for="item in homeQuickEntries"
+					:key="item.key"
+					hover-class="home-quick-item--on"
+					@click="onHomeQuickTap(item.key)"
+				>
+					<image class="home-quick-img" :src="item.icon" mode="aspectFit"></image>
+					<text class="home-quick-label">{{ item.label }}</text>
 				</view>
-				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToMall">
-					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/renshiqixianling.svg" mode="aspectFit"></image>
-					<text class="home-quick-label">积分权益</text>
-				</view>
-				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToSurvey">
-					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/2.svg" mode="aspectFit"></image>
-					<text class="home-quick-label">健康调查</text>
-				</view>
-				<view class="home-quick-item" hover-class="home-quick-item--on" @click="goToCommunityMarket">
-					<image class="home-quick-img" src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/shequshiji.svg" mode="aspectFit"></image>
-					<text class="home-quick-label">二手发布</text>
-				</view>
-</view>
+			</view>
 
 <!-- 内容区：活动 / 积分商品 -->
 			<view class="content-panel">
@@ -250,7 +244,7 @@ import {
 	resolveHomeHotThumb,
 } from '@/common/homeHotSpotEntries.js'
 import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
-import { secondhandListUrl } from '@/common/secondhandNav.js'
+import { ACTIVITY_PAGE_TAB_PENDING_KEY } from '@/common/activityTabNav.js'
 import HomeActivityPromoBanner from '@/components/home-activity-promo-banner/index.vue'
 export default {
 	components: {
@@ -283,7 +277,30 @@ export default {
 					{ name: '热门活动', moreUrl: '/pages/activity/active-list', moreType: 'navigateTo' },
 					{ name: '积分商品', moreUrl: '/pages/mall/mall', moreType: 'switchTab' }
 				],
-				// 首页核心入口：一行四个SVG图标
+				// 首页 Banner 下快捷入口（固定四项，不走 home_entries 配置）
+				homeQuickEntries: [
+					{
+						key: 'nearby',
+						label: '附近活动',
+						icon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/1.svg',
+					},
+					{
+						key: 'weekly',
+						label: '本周活动',
+						icon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/2.svg',
+					},
+					{
+						key: 'publish',
+						label: '发起活动',
+						icon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/4.svg',
+					},
+					{
+						key: 'clock',
+						label: '真分打卡',
+						icon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/lajifenlei.svg',
+					},
+				],
+				// 后台 home_entries 合并用（若其它区块仍引用）
 				entry_list: [
 					{ key: 'active', name: '社区活动', url: '/pages/low_carbon/low_carbon', type: 'switchTab', svgIcon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/1.svg' },
 					{ key: 'health', name: '健康测试', url: '/pages/health/health', type: 'switchTab', svgIcon: 'https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/image/2.svg' },
@@ -311,8 +328,8 @@ export default {
 					{
 						selector: '#guide-hello',
 						prefer: 'below',
-						title: '签到和快捷真分',
-						desc: '登录后这里会显示：先点「签到」，再点「快捷真分」进垃圾分类真分（未显示可跳过本步）。'
+						title: '活动快捷入口',
+						desc: '附近活动、本周活动、发起活动、真分打卡，常用功能一键直达。'
 					},
 					{
 						selector: '#guide-tabs',
@@ -693,6 +710,9 @@ export default {
 			},
 			// 首页活动 Banner：去活动 Tab（邻里活动列表）
 			goHomeActivityJoin() {
+				try {
+					uni.setStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY, 'neighbor')
+				} catch (e) {}
 				uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
 			},
 			// 首页活动 Banner：发起居民活动
@@ -775,18 +795,33 @@ export default {
 					console.log('获取用户信息失败:', e)
 				}
 			},
-			// 快捷真分：学考通过后进三场景选场景页（与 Banner / 热门活动垃圾真分一致）
+			onHomeQuickTap(key) {
+				switch (key) {
+					case 'nearby':
+						try {
+							uni.setStorageSync(ACTIVITY_PAGE_TAB_PENDING_KEY, 'neighbor')
+						} catch (e) {}
+						uni.switchTab({ url: '/pages/low_carbon/low_carbon' })
+						break
+					case 'weekly':
+						this.$u.route({
+							url: '/pages/activity/active-list',
+							params: { filter: 'weekly' },
+						})
+						break
+					case 'publish':
+						this.goHomeActivityPublish()
+						break
+					case 'clock':
+						runSceneClockLearnExamGate(this)
+						break
+					default:
+						break
+				}
+			},
+			// 快捷真分（保留供其它入口复用）
 			goToClock() {
-				 runSceneClockLearnExamGate(this)
-			},
-			goToMall() {
-				uni.switchTab({ url: '/pages/mall/mall' })
-			},
-			goToSurvey() {
-				this.$u.route('/pages/health-form/advisor-survey')
-			},
-			goToCommunityMarket() {
-				this.$u.route(secondhandListUrl())
+				runSceneClockLearnExamGate(this)
 			},
 		}
 	}
