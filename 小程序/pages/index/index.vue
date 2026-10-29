@@ -248,6 +248,7 @@ import {
 } from '@/common/homeHotSpotEntries.js'
 import { runSceneClockLearnExamGate } from '@/common/sceneClockEntry.js'
 import { parseActiveDetailIdFromPath } from '@/common/activeOpen.js'
+import { secondhandListUrl } from '@/common/secondhandNav.js'
 export default {
 	components: {
 		SkeletonScreen,
@@ -801,7 +802,7 @@ export default {
 				this.$u.route('/pages/health-form/advisor-survey')
 			},
 			goToCommunityMarket() {
-				 navigateHomeHotSpotEntry(this, { key: 'flea_market', entry_type: 'spot_hub', name: '七贤岭绿色二手集市' })
+				this.$u.route(secondhandListUrl())
 			},
 		}
 	}
