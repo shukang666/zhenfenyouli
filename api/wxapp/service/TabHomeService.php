@@ -560,7 +560,7 @@ class TabHomeService
     /** @return list<array<string,mixed>> */
     protected function resolveWeeklyRecommendRows(int $limit): array
     {
-        $manualQuery = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 1);
+        $manualQuery = $this->weeklyRecommendBaseQuery()->where('is_month_recommend', '=', 1);
         $manualRows = $manualQuery->order('list_order asc, id desc')->limit($limit)->select();
 
         $merged = [];
@@ -586,7 +586,35 @@ class TabHomeService
             }
         }
 
+        if (count($merged) < $limit) {
+            $need = $limit - count($merged);
+            $moreIds = array_merge($excludeIds, array_map(function ($r) {
+                return (int)($r['id'] ?? 0);
+            }, $merged));
+            $fallback = $this->fetchUpcomingRecommendCandidates($need, $moreIds);
+            foreach ($fallback as $item) {
+                $row = $this->applyActiveListItemFields($item);
+                $row['recommend_source'] = 'auto';
+                $merged[] = $row;
+            }
+        }
+
         return $merged;
+    }
+
+    /** 小程序列表可见 + 居民活动需审核通过 */
+    protected function weeklyRecommendBaseQuery()
+    {
+        $query = ActiveModel::miniProgramVisible();
+        if (MemberActiveService::hasPublishSchema()) {
+            $query->where(function ($q) {
+                $q->where('publish_user_id', '=', 0)->whereOr(function ($q2) {
+                    $q2->where('publish_user_id', '>', 0)
+                        ->where('publish_audit_status', '=', MemberActiveService::AUDIT_APPROVED);
+                });
+            });
+        }
+        return $query;
     }
 
     /** @param list<int> $excludeIds */
@@ -596,17 +624,19 @@ class TabHomeService
             return [];
         }
         [$weekStart, $weekEnd] = $this->currentWeekTimestampRange();
-        $query = ActiveModel::miniProgramVisible()->where('is_month_recommend', '=', 0);
+        $todayStart = strtotime(date('Y-m-d 00:00:00'));
+        $query = $this->weeklyRecommendBaseQuery()->where('is_month_recommend', '=', 0);
         if ($excludeIds) {
             $query->whereNotIn('id', $excludeIds);
         }
-        $rows = $query->order('list_order asc, id desc')->limit(max($need * 8, 24))->select();
+        $this->applyAutoWeeklyRecommendSqlScope($query, $weekStart, $weekEnd, $todayStart);
+        $rows = $query->order('offline_sign_start asc, list_order asc, id desc')->limit(max(50, $need * 5))->select();
         $out = [];
         foreach ($rows as $item) {
             if (!$this->isActiveNotEnded($item)) {
                 continue;
             }
-            if (!$this->matchesAutoWeeklyRecommendWindow($item, $weekStart, $weekEnd)) {
+            if (!$this->matchesAutoWeeklyRecommendWindow($item, $weekStart, $weekEnd, $todayStart)) {
                 continue;
             }
             $out[] = $item;
@@ -618,6 +648,70 @@ class TabHomeService
             return $this->weeklyRecommendSortKey($a) <=> $this->weeklyRecommendSortKey($b);
         });
         return array_slice($out, 0, $need);
+    }
+
+    /**
+     * 自动池仍不足时：取未结束、即将开始的活动（按开始时间升序）
+     *
+     * @param list<int> $excludeIds
+     */
+    protected function fetchUpcomingRecommendCandidates(int $need, array $excludeIds): array
+    {
+        if ($need <= 0) {
+            return [];
+        }
+        $todayStart = strtotime(date('Y-m-d 00:00:00'));
+        $horizon = $todayStart + 30 * 86400;
+        $query = $this->weeklyRecommendBaseQuery()->where('is_month_recommend', '=', 0);
+        if ($excludeIds) {
+            $query->whereNotIn('id', $excludeIds);
+        }
+        $query->where(function ($q) use ($todayStart, $horizon) {
+            $q->where('is_date_pending', '=', 1)->whereOr(function ($q2) use ($todayStart, $horizon) {
+                $q2->where('offline_sign_start', '>=', $todayStart)
+                    ->where('offline_sign_start', '<=', $horizon);
+            })->whereOr(function ($q3) use ($todayStart, $horizon) {
+                $q3->where('offline_sign_start', '=', 0)
+                    ->where('date', '>=', $todayStart)
+                    ->where('date', '<=', $horizon);
+            });
+        });
+        $rows = $query->order('offline_sign_start asc, date asc, id desc')->limit(max(30, $need * 5))->select();
+        $out = [];
+        foreach ($rows as $item) {
+            if (!$this->isActiveNotEnded($item)) {
+                continue;
+            }
+            $out[] = $item;
+            if (count($out) >= $need) {
+                break;
+            }
+        }
+        return $out;
+    }
+
+    protected function applyAutoWeeklyRecommendSqlScope($query, int $weekStart, int $weekEnd, int $todayStart): void
+    {
+        $query->where(function ($q) use ($weekStart, $weekEnd, $todayStart) {
+            $q->where('is_date_pending', '=', 1)
+                ->whereOr(function ($q2) use ($weekStart, $weekEnd) {
+                    $q2->where('offline_sign_start', '>', 0)
+                        ->where('offline_sign_start', '<=', $weekEnd)
+                        ->where('offline_sign_start', '>=', $weekStart);
+                })
+                ->whereOr(function ($q3) use ($weekStart, $weekEnd) {
+                    $q3->where('offline_sign_start', '>', 0)
+                        ->where('offline_sign_start', '<', $weekStart)
+                        ->where('offline_sign_end', '>=', $weekStart)
+                        ->where('offline_sign_end', '<=', $weekEnd + 7 * 86400);
+                })
+                ->whereOr(function ($q4) use ($weekEnd, $todayStart) {
+                    $q4->where('offline_sign_start', '=', 0)
+                        ->where('date', '>', 0)
+                        ->where('date', '>=', $todayStart)
+                        ->where('date', '<=', $weekEnd);
+                });
+        });
     }
 
     /** @return array{0:int,1:int} 本周一 00:00 ~ 周日 23:59:59 */
@@ -650,22 +744,31 @@ class TabHomeService
      *
      * @param array<string,mixed>|object $active
      */
-    protected function matchesAutoWeeklyRecommendWindow($active, int $weekStart, int $weekEnd): bool
+    protected function matchesAutoWeeklyRecommendWindow($active, int $weekStart, int $weekEnd, int $todayStart = 0): bool
     {
         $a = is_array($active) ? $active : (array)$active;
+        if ($todayStart <= 0) {
+            $todayStart = strtotime(date('Y-m-d 00:00:00'));
+        }
         if (ActiveModel::isDatePending($a)) {
             return true;
         }
-        $now = time();
         $startTs = (int)($a['offline_sign_start'] ?? 0);
+        $endTs = (int)($a['offline_sign_end'] ?? 0);
         if ($startTs > 0) {
-            return $startTs >= $weekStart && $startTs <= $weekEnd;
+            if ($startTs >= $weekStart && $startTs <= $weekEnd) {
+                return true;
+            }
+            if ($startTs < $weekStart && $endTs >= $weekStart) {
+                return true;
+            }
+            return false;
         }
         $date = (int)($a['date'] ?? 0);
         if ($date <= 0) {
             return false;
         }
-        return $date >= $now && $date <= $weekEnd;
+        return $date >= $todayStart && $date <= $weekEnd;
     }
 
     /** @param array<string,mixed>|object $active */
