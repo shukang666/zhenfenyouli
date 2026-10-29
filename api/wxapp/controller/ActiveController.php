@@ -506,6 +506,7 @@ class ActiveController extends AuthController
         if(!empty($is_put)) $where[] = ['is_put', '=', 1];
         if(!empty($keyword)) $where[] = ['name|address', 'like', '%' . $keyword . '%'];
         $query = ActiveModel::miniProgramVisible();
+        $query = $this->applyResidentPublishVisibleScope($query);
         if (!empty($where)) {
             $query = $query->where($where);
         }
@@ -524,10 +525,24 @@ class ActiveController extends AuthController
             $query = $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
         }
         $controller = $this;
-        $list = $query->order('list_order asc, id desc')->paginate($page_size)->each(function ($item) use ($controller) {
+        $list = $query->order('create_time desc, id desc')->paginate($page_size)->each(function ($item) use ($controller) {
             return $controller->applyActiveListItemFields($item);
         });
         $this->success('请求成功', $list);
+    }
+
+    /** 列表可见：平台活动 + 已审核通过的居民发布 */
+    protected function applyResidentPublishVisibleScope($query)
+    {
+        if (!\api\wxapp\service\MemberActiveService::hasPublishSchema()) {
+            return $query;
+        }
+        return $query->where(function ($q) {
+            $q->where('publish_user_id', '=', 0)->whereOr(function ($q2) {
+                $q2->where('publish_user_id', '>', 0)
+                    ->where('publish_audit_status', '=', \api\wxapp\service\MemberActiveService::AUDIT_APPROVED);
+            });
+        });
     }
 
     /**
@@ -1454,11 +1469,12 @@ class ActiveController extends AuthController
     private function paginateActiveListForTab($page, $pageSize, $tag = '')
     {
         $query = ActiveModel::miniProgramVisible();
+        $query = $this->applyResidentPublishVisibleScope($query);
         if ($tag !== '') {
             $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
         }
         $total = (clone $query)->count();
-        $rows = $query->order('list_order asc, id desc')->page($page, $pageSize)->select();
+        $rows = $query->order('create_time desc, id desc')->page($page, $pageSize)->select();
         $list = [];
         foreach ($rows as $item) {
             $list[] = $this->applyActiveListItemFields($item);

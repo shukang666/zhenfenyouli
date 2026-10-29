@@ -877,11 +877,19 @@ class TabHomeService
     protected function paginateActiveListForTab($page, $pageSize, $tag = ''): array
     {
         $query = ActiveModel::miniProgramVisible();
+        if (MemberActiveService::hasPublishSchema()) {
+            $query->where(function ($q) {
+                $q->where('publish_user_id', '=', 0)->whereOr(function ($q2) {
+                    $q2->where('publish_user_id', '>', 0)
+                        ->where('publish_audit_status', '=', MemberActiveService::AUDIT_APPROVED);
+                });
+            });
+        }
         if ($tag !== '') {
             $query->whereRaw('FIND_IN_SET(?, tags)', [$tag]);
         }
         $total = (clone $query)->count();
-        $rows = $query->order('list_order asc, id desc')->page($page, $pageSize)->select();
+        $rows = $query->order('create_time desc, id desc')->page($page, $pageSize)->select();
         $list = [];
         foreach ($rows as $item) {
             $list[] = $this->applyActiveListItemFields($item);
