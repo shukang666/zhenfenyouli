@@ -38,6 +38,18 @@ class MemberActiveService
         return $ok;
     }
 
+    /** @param array<string,mixed>|object $row */
+    public static function rowToArray($row): array
+    {
+        if (is_array($row)) {
+            return $row;
+        }
+        if (is_object($row) && method_exists($row, 'toArray')) {
+            return $row->toArray();
+        }
+        return (array)$row;
+    }
+
     public static function defaultProxyNoticeText(): string
     {
         return self::DEFAULT_PROXY_NOTICE;
@@ -46,7 +58,7 @@ class MemberActiveService
     /** @param array<string,mixed>|object $row */
     public static function resolveProxyNotice($row): string
     {
-        $a = is_array($row) ? $row : (array)$row;
+        $a = self::rowToArray($row);
         if ((int)($a['publish_user_id'] ?? 0) <= 0) {
             return '';
         }
@@ -57,7 +69,7 @@ class MemberActiveService
     /** @param array<string,mixed>|object $row */
     public static function isPublishAllowSignup($row): bool
     {
-        $a = is_array($row) ? $row : (array)$row;
+        $a = self::rowToArray($row);
         if ((int)($a['publish_user_id'] ?? 0) <= 0) {
             return true;
         }
@@ -70,7 +82,7 @@ class MemberActiveService
     /** @param array<string,mixed>|object $row */
     public static function isPublishRequireCheckin($row): bool
     {
-        $a = is_array($row) ? $row : (array)$row;
+        $a = self::rowToArray($row);
         if ((int)($a['publish_user_id'] ?? 0) <= 0) {
             return true;
         }
@@ -83,7 +95,8 @@ class MemberActiveService
     /** @param array<string,mixed>|object $item ThinkPHP 模型或数组 */
     public static function attachPublishPresentationFields(&$item): void
     {
-        $pid = (int)($item['publish_user_id'] ?? 0);
+        $a = self::rowToArray($item);
+        $pid = (int)($a['publish_user_id'] ?? 0);
         $item['is_member_publish'] = $pid > 0 ? 1 : 0;
         $item['publish_allow_signup'] = self::isPublishAllowSignup($item) ? 1 : 0;
         $item['publish_require_checkin'] = self::isPublishRequireCheckin($item) ? 1 : 0;
@@ -155,7 +168,7 @@ class MemberActiveService
     /** @param array<string,mixed>|object $active */
     public static function formatTimeLine($active): string
     {
-        $a = is_array($active) ? $active : (array)$active;
+        $a = self::rowToArray($active);
         $start = (int)($a['offline_sign_start'] ?? 0);
         $end = (int)($a['offline_sign_end'] ?? 0);
         if ($start > 0 && $end > 0) {
@@ -238,13 +251,11 @@ class MemberActiveService
         if ($summary !== '') {
             $contentParts[] = '<p>' . nl2br(htmlspecialchars($summary, ENT_QUOTES, 'UTF-8')) . '</p>';
         }
-        $noticeHtml = htmlspecialchars(self::DEFAULT_PROXY_NOTICE, ENT_QUOTES, 'UTF-8');
-        $contentParts[] = '<p><strong>温馨提示：</strong>' . $noticeHtml . '</p>';
         $content = implode('', $contentParts);
         $customBlocksJson = $customBlocks ? json_encode($customBlocks, JSON_UNESCAPED_UNICODE) : '';
 
-        $allowSignup = 1;
-        $requireCheckin = 1;
+        $allowSignup = 0;
+        $requireCheckin = 0;
         if (self::hasParticipationSchema()) {
             $allowSignup = !empty($payload['allow_signup']) ? 1 : 0;
             $requireCheckin = !empty($payload['require_checkin']) ? 1 : 0;

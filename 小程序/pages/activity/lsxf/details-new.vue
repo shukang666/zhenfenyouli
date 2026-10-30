@@ -62,7 +62,7 @@
 			</view>
 			<view
 				class="member-proxy-notice glass-card"
-				v-if="Number(info.is_member_publish) === 1 && info.publish_proxy_notice"
+				v-if="isMemberPublishActivity && info.publish_proxy_notice"
 			>
 				<text class="member-proxy-notice__tag">代理发布</text>
 				<text class="member-proxy-notice__text">{{ info.publish_proxy_notice }}</text>
@@ -297,7 +297,7 @@
 				</view>
 			</view>
 			<!-- 居民发布且未开放线上报名（非线下活动路径） -->
-			<view class="action-area" v-else-if="Number(info.is_member_publish) === 1 && !memberPublishAllowSignup && !isOfflineEvent">
+			<view class="action-area" v-else-if="isMemberPublishActivity && !memberPublishAllowSignup && !isOfflineEvent">
 				<view class="bar-native-btn bar-native-btn--full is-disabled">
 					{{ info.is_end == 1 ? '活动已结束' : '暂未开放线上报名' }}
 				</view>
@@ -521,12 +521,15 @@
 		isOfflineEvent() {
 			return Number(this.info.event_kind) === 2;
 		},
+		isMemberPublishActivity() {
+			return Number(this.info.is_member_publish) === 1 || Number(this.info.publish_user_id) > 0;
+		},
 		memberPublishAllowSignup() {
-			if (Number(this.info.is_member_publish) !== 1) return true;
+			if (!this.isMemberPublishActivity) return true;
 			return Number(this.info.publish_allow_signup) === 1;
 		},
 		memberPublishRequireCheckin() {
-			if (Number(this.info.is_member_publish) !== 1) return true;
+			if (!this.isMemberPublishActivity) return true;
 			return Number(this.info.publish_require_checkin) === 1;
 		},
 		// 打卡/签到按钮文本（扫码参加活动显示"立即签到"）
@@ -742,10 +745,16 @@
 			},
 			tapOfflineSignUp() {
 				if (this.info.is_end == 1) return;
+				if (!this.memberPublishAllowSignup) {
+					return uni.showToast({ title: '本活动暂未开放线上报名', icon: 'none' });
+				}
 				this.handleSign();
 			},
 			tapActiveSignUp() {
 				if (this.info.is_end == 1) return;
+				if (!this.memberPublishAllowSignup) {
+					return uni.showToast({ title: '本活动暂未开放线上报名', icon: 'none' });
+				}
 				this.handleSign();
 			},
 			tapClockBar() {

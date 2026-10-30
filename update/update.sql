@@ -734,6 +734,8 @@ SET `publish_allow_signup` = 0,
     `publish_require_checkin` = 0
 WHERE `publish_user_id` > 0 AND `delete_time` = 0;
 
+-- 若存量居民活动仍可报名，可单独再执行上一段 UPDATE（安全可重复执行）
+
 CREATE TABLE IF NOT EXISTS `cmf_active_web_life_navigator` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL DEFAULT 0,

@@ -86,11 +86,11 @@
 					</picker>
 				</view>
 			</view>
-			<text class="field-hint field-hint--block" v-if="participationSchema && form.allow_signup && form.require_checkin">
+			<text class="field-hint field-hint--block" v-if="form.allow_signup && form.require_checkin">
 				开放报名且需签到时，活动时段内支持现场定位签到（500 米内）
 			</text>
 
-			<view class="participation-card" v-if="participationSchema">
+			<view class="participation-card">
 				<text class="field-label">参与方式</text>
 				<text class="field-hint">可按活动实际情况选择；不开放报名时邻居仅可浏览详情并自行联系您</text>
 				<view class="switch-row">
@@ -116,12 +116,6 @@
 						@change="onRequireCheckinChange"
 					/>
 				</view>
-			</view>
-
-			<view class="proxy-notice-preview" v-if="defaultProxyNotice">
-				<text class="proxy-notice-preview__tag">展示说明</text>
-				<text class="proxy-notice-preview__text">{{ defaultProxyNotice }}</text>
-				<text class="proxy-notice-preview__hint">审核通过后将显示在活动详情页，告知邻居本活动为代理发布</text>
 			</view>
 
 			<view class="field">
@@ -283,10 +277,8 @@ export default {
 		const dateStart = `${today.getFullYear()}-${p(today.getMonth() + 1)}-${p(today.getDate())}`
 		return {
 			headline: '发一场邻里小活动',
-			subline: '只填必要信息，其余交给小程序报名与签到',
+			subline: '填写活动信息；是否开放报名与签到可在下方配置',
 			themes: [],
-			participationSchema: false,
-			defaultProxyNotice: '',
 			dateStart,
 			submitting: false,
 			coverMode: 'text',
@@ -311,8 +303,8 @@ export default {
 				lng: '',
 				contact: '',
 				coverPreview: '',
-				allow_signup: true,
-				require_checkin: true,
+				allow_signup: false,
+				require_checkin: false,
 			},
 		}
 	},
@@ -321,8 +313,6 @@ export default {
 		this.$u.api.memberActiveMeta().then((res) => {
 			const data = res.data || {}
 			this.themes = data.themes || []
-			this.participationSchema = Number(data.participation_schema) === 1
-			this.defaultProxyNotice = data.default_proxy_notice || ''
 			if (data.tips) {
 				this.headline = data.tips.headline || this.headline
 				this.subline = data.tips.sub || this.subline
@@ -608,8 +598,8 @@ export default {
 					contact: this.form.contact,
 					theme_id: this.form.theme_id,
 					custom_blocks: JSON.stringify(payloadBlocks),
-					allow_signup: this.participationSchema && this.form.allow_signup ? 1 : 0,
-					require_checkin: this.participationSchema && this.form.allow_signup && this.form.require_checkin ? 1 : 0,
+					allow_signup: this.form.allow_signup ? 1 : 0,
+					require_checkin: this.form.allow_signup && this.form.require_checkin ? 1 : 0,
 				})
 				uni.hideLoading()
 				uni.showToast({ title: '已提交，审核通过后展示', icon: 'success' })
@@ -930,36 +920,6 @@ export default {
 	margin-top: 6rpx;
 	font-size: 22rpx;
 	color: #8a9a90;
-	line-height: 1.45;
-}
-.proxy-notice-preview {
-	margin-top: 28rpx;
-	padding: 22rpx 20rpx;
-	border-radius: 16rpx;
-	background: #faf8f3;
-	border: 1rpx solid rgba(180, 150, 80, 0.15);
-}
-.proxy-notice-preview__tag {
-	display: inline-block;
-	padding: 4rpx 12rpx;
-	border-radius: 8rpx;
-	font-size: 22rpx;
-	font-weight: 600;
-	color: #8a6d2e;
-	background: rgba(180, 150, 80, 0.12);
-}
-.proxy-notice-preview__text {
-	display: block;
-	margin-top: 14rpx;
-	font-size: 24rpx;
-	color: #5f7166;
-	line-height: 1.6;
-}
-.proxy-notice-preview__hint {
-	display: block;
-	margin-top: 12rpx;
-	font-size: 22rpx;
-	color: #9aab9f;
 	line-height: 1.45;
 }
 .map-tip {
