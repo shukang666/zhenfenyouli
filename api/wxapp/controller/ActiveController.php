@@ -103,39 +103,66 @@ class ActiveController extends AuthController
         $type = $this->request->param('type');
         $cate_id = $this->request->param('cate_id');
         $id = $this->request->param('id');
-        $is_my = $this->request->param('is_my', 0);
+        $is_my = (int)$this->request->param('is_my', 0);
         $is_put = $this->request->param('is_put', 0);
         if ($id) {
             $item = $activeModel->where('id', $id)->find();
             $item = CommonModel::getOne($item, ['thumb'], [], ['content']);
             $this->success('请求成功', $item);
         }
-        $where = [];
-        $where[] = ['type', '<>', 1];
-        if ($type) $where[] = ['type', '=', $type];
-        if ($cate_id) $where[] = ['cate_id', '=', $cate_id];
-        if ($is_put) $where[] = ['is_put', '=', 1];
+
         if ($is_my) {
-            $active_ids = $activeUserModel
-                ->where('type', 1)  ->where('user_id', $this->user_id)
-                ->column('active_id');
-//            var_dump($active_ids);exit;
-            $where[] = ['id', 'in', $active_ids];
+            $this->checkUser();
+            $signedIds = ActiveSIgnModel::where('user_id', $this->user_id)->column('active_id');
+            $publishedIds = ActiveModel::where('publish_user_id', $this->user_id)
+                ->where('delete_time', 0)
+                ->column('id');
+            $idSet = [];
+            foreach (array_merge($signedIds ?: [], $publishedIds ?: []) as $aid) {
+                $aid = (int)$aid;
+                if ($aid > 0) {
+                    $idSet[$aid] = true;
+                }
+            }
+            if (!$idSet) {
+                $this->success('请求成功', $activeModel->where('id', 0)->paginate($this->page_size));
+                return;
+            }
+            $query = ActiveModel::whereIn('id', array_keys($idSet))
+                ->where('delete_time', 0)
+                ->where('status', 1);
         } else {
-            // 浏览型列表不展示扫码参加(join_type=2)的活动；我参加的活动(is_my)仍正常展示
-            $where[] = ['join_type', '=', 1];
+            $query = ActiveModel::miniProgramVisible();
+            $query = $this->applyResidentPublishVisibleScope($query);
+            if ($is_put) {
+                $query->where('is_put', 1);
+            }
+            if ($cate_id) {
+                $query->where(function ($q) use ($cate_id) {
+                    $q->where('community_cate_id', '=', $cate_id)
+                        ->whereOr('cate_id', '=', $cate_id);
+                });
+            }
+            // 历史参数 type=2/3 仍可按旧类型筛；type=1 为当前小程序活动，勿再用 type<>1 排除
+            if ($type && (int)$type !== 1) {
+                $query->where('type', '=', (int)$type);
+            }
         }
 
-        $list = $activeModel->where($where)
-            ->order('id desc')
+        $list = $query->order('id desc')
             ->hidden(['content'])
             ->paginate($this->page_size);
         foreach ($list as &$item) {
-            $item = CommonModel::getOne($item, ['thumb']);
-            $item['people_num'] = $activeModel->where('id', $item['id'])->count();
-            $item['date'] = date('Y-m-d', ($item['date']));
+            $item = $this->applyActiveListItemFields($item);
+            $rawDate = $item['date'] ?? 0;
+            if (is_string($rawDate) && strpos($rawDate, '-') !== false) {
+                $rawDate = strtotime($rawDate);
+            }
+            $item['date'] = ($rawDate && (int)$rawDate > 0)
+                ? date('Y-m-d', (int)$rawDate)
+                : (ActiveModel::isDatePending($item) ? '时间待定' : '');
         }
-        $list = CommonModel::getMany($list, ['thumb']);
+        unset($item);
         $this->success('请求成功', $list);
     }
 
