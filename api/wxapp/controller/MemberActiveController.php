@@ -19,6 +19,8 @@ class MemberActiveController extends AuthController
                 'headline' => '发一场小而美的邻里活动',
                 'sub' => '谁参加、做什么，都由你来定！',
             ],
+            'default_proxy_notice' => MemberActiveService::defaultProxyNoticeText(),
+            'participation_schema' => MemberActiveService::hasParticipationSchema() ? 1 : 0,
         ]);
     }
 
@@ -51,6 +53,8 @@ class MemberActiveController extends AuthController
                 'contact' => $this->request->param('contact', ''),
                 'theme_id' => $this->request->param('theme_id', 0),
                 'custom_blocks' => $this->request->param('custom_blocks', ''),
+                'allow_signup' => $this->request->param('allow_signup', 1),
+                'require_checkin' => $this->request->param('require_checkin', 1),
             ]);
         } catch (\InvalidArgumentException $e) {
             $this->error($e->getMessage());

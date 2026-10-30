@@ -1,0 +1,58 @@
+<include file="public@header"/>
+</head>
+<body>
+<div class="wrap js-check-wrap">
+    <ul class="nav nav-tabs">
+        <li><a href="{:url('admin/MemberActive/index')}">居民活动审核</a></li>
+        <li class="active"><a href="javascript:;">参与设置 · {$row.name}</a></li>
+    </ul>
+    <form class="form-horizontal margin-top-20" method="post" action="{:url('admin/MemberActive/editPost')}">
+        <input type="hidden" name="id" value="{$row.id}">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">活动</label>
+            <div class="col-sm-8">
+                <p class="form-control-static">#{$row.id} {$row.name}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">开放报名</label>
+            <div class="col-sm-8">
+                <label class="radio-inline">
+                    <input type="radio" name="allow_signup" value="1" <if condition="$row.publish_allow_signup eq 1">checked</if>> 是
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="allow_signup" value="0" <if condition="$row.publish_allow_signup neq 1">checked</if>> 否
+                </label>
+                <p class="help-block">关闭后详情页不展示「我要报名」，仅作信息展示。</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">现场签到</label>
+            <div class="col-sm-8">
+                <label class="radio-inline">
+                    <input type="radio" name="require_checkin" value="1" <if condition="$row.publish_require_checkin eq 1">checked</if>> 需要
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="require_checkin" value="0" <if condition="$row.publish_require_checkin neq 1">checked</if>> 不需要
+                </label>
+                <p class="help-block">仅在「开放报名」为是时生效；报名成功后是否需 GPS 现场签到。</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">代理展示说明</label>
+            <div class="col-sm-8">
+                <textarea class="form-control" name="publish_proxy_notice" rows="6" placeholder="留空则使用系统默认文案">{$row.publish_proxy_notice}</textarea>
+                <p class="help-block">向用户说明：本活动为邻友代理发布，非平台官方活动，场地/支持需联系发布者或主办方。默认：{$default_proxy_notice}</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-8">
+                <button type="submit" class="btn btn-primary">保存</button>
+                <a class="btn btn-default" href="{:url('admin/MemberActive/index')}">返回</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

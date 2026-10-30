@@ -78,4 +78,36 @@ class MemberActiveController extends AdminBaseController
         ]);
         $this->success('已拒绝并下架');
     }
+
+    public function edit()
+    {
+        $id = (int)$this->request->param('id');
+        $row = ActiveModel::where('id', $id)->where('publish_user_id', '>', 0)->find();
+        if (empty($row)) {
+            $this->error('记录不存在');
+        }
+        $row = $row->toArray();
+        $row['thumb_url'] = empty($row['thumb']) ? '' : cmf_get_asset_url($row['thumb']);
+        if (!MemberActiveService::hasParticipationSchema()) {
+            $this->error('请先执行 update.sql 中的居民发布报名/签到字段脚本');
+        }
+        $this->assign('row', $row);
+        $this->assign('default_proxy_notice', MemberActiveService::defaultProxyNoticeText());
+        return $this->fetch();
+    }
+
+    public function editPost()
+    {
+        $id = (int)$this->request->param('id');
+        try {
+            MemberActiveService::updatePublishSettings($id, [
+                'allow_signup' => $this->request->param('allow_signup', 0),
+                'require_checkin' => $this->request->param('require_checkin', 0),
+                'publish_proxy_notice' => $this->request->param('publish_proxy_notice', ''),
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('保存成功', url('admin/MemberActive/index'));
+    }
 }

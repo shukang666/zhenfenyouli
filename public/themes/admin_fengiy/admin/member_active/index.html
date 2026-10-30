@@ -50,6 +50,7 @@
                 <td>{$vo.audit_name}</td>
                 <td>{:date('Y-m-d H:i', $vo.create_time)}</td>
                 <td>
+                    <a class="btn btn-xs btn-primary" href="{:url('admin/MemberActive/edit', ['id'=>$vo.id])}">参与设置</a>
                     <if condition="$vo.publish_audit_status != 2">
                         <a class="btn btn-xs btn-success js-ajax-dialog-btn" data-msg="确认通过并在活动 Tab 展示？" href="{:url('admin/MemberActive/pass', ['id'=>$vo.id])}">通过</a>
                     </if>

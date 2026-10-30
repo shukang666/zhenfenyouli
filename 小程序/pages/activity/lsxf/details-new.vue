@@ -60,6 +60,13 @@
 					<text class="status-hint__arrow">›</text>
 				</view>
 			</view>
+			<view
+				class="member-proxy-notice glass-card"
+				v-if="Number(info.is_member_publish) === 1 && info.publish_proxy_notice"
+			>
+				<text class="member-proxy-notice__tag">代理发布</text>
+				<text class="member-proxy-notice__text">{{ info.publish_proxy_notice }}</text>
+			</view>
 			<!-- 活动时间地点卡片 -->
 			<view class="info-card glass-card">
 				<view class="info-item">
@@ -259,7 +266,12 @@
 				</view>
 			</view>
 			<!-- 线下活动：报名 + 限时定位签到 -->
-			<view class="action-area" v-else-if="isOfflineEvent">
+			<view class="action-area" v-else-if="isOfflineEvent && !memberPublishAllowSignup">
+				<view class="bar-native-btn bar-native-btn--full is-disabled">
+					{{ info.is_end == 1 ? '活动已结束' : '暂未开放线上报名' }}
+				</view>
+			</view>
+			<view class="action-area" v-else-if="isOfflineEvent && memberPublishAllowSignup">
 				<view
 					v-if="info.is_sign == 0"
 					class="bar-native-btn bar-native-btn--primary"
@@ -267,6 +279,9 @@
 					@click="tapOfflineSignUp"
 				>
 					{{ info.is_end == 1 ? '活动已结束' : '我要报名' }}
+				</view>
+				<view v-else-if="!memberPublishRequireCheckin" class="bar-native-btn bar-native-btn--done">
+					已报名 ✓
 				</view>
 				<view v-else-if="info.is_sign_clock == 1" class="bar-native-btn bar-native-btn--done">
 					已签到 ✓
@@ -279,6 +294,12 @@
 				</view>
 				<view v-else class="bar-native-btn bar-native-btn--primary" @click="openOfflineSignPopup">
 					签到
+				</view>
+			</view>
+			<!-- 居民发布且未开放线上报名（非线下活动路径） -->
+			<view class="action-area" v-else-if="Number(info.is_member_publish) === 1 && !memberPublishAllowSignup && !isOfflineEvent">
+				<view class="bar-native-btn bar-native-btn--full is-disabled">
+					{{ info.is_end == 1 ? '活动已结束' : '暂未开放线上报名' }}
 				</view>
 			</view>
 			<!-- 非打卡活动：报名按钮（扫码参加活动统一叫"签到"） -->
@@ -499,6 +520,14 @@
 		},
 		isOfflineEvent() {
 			return Number(this.info.event_kind) === 2;
+		},
+		memberPublishAllowSignup() {
+			if (Number(this.info.is_member_publish) !== 1) return true;
+			return Number(this.info.publish_allow_signup) === 1;
+		},
+		memberPublishRequireCheckin() {
+			if (Number(this.info.is_member_publish) !== 1) return true;
+			return Number(this.info.publish_require_checkin) === 1;
 		},
 		// 打卡/签到按钮文本（扫码参加活动显示"立即签到"）
 		clockBtnText() {
@@ -1312,6 +1341,31 @@
 
 		&--showcase:active {
 			opacity: 0.92;
+		}
+	}
+
+	.member-proxy-notice {
+		padding: 22rpx 24rpx;
+		margin-bottom: 16rpx;
+		background: #faf8f3;
+		border: 1rpx solid rgba(180, 150, 80, 0.18);
+
+		&__tag {
+			display: inline-block;
+			padding: 4rpx 14rpx;
+			margin-bottom: 12rpx;
+			border-radius: 8rpx;
+			font-size: 22rpx;
+			font-weight: 600;
+			color: #8a6d2e;
+			background: rgba(180, 150, 80, 0.12);
+		}
+
+		&__text {
+			display: block;
+			font-size: 24rpx;
+			color: $text-muted;
+			line-height: 1.6;
 		}
 	}
 

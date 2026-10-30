@@ -23,6 +23,7 @@ use app\admin\model\active\ActiveClockActionFormModel;
 use app\admin\model\active\ActiveClockActionUserModel;
 use app\admin\model\active\ActiveClockPushUserModel;
 use api\wxapp\service\ActivitySpotService;
+use api\wxapp\service\MemberActiveService;
 use app\admin\model\forum\ForumCommentModel;
 use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\goods\GoodsModel;
@@ -627,6 +628,7 @@ class ActiveController extends AuthController
         $item['doc_safety_field'] = ActiveModel::parseDocFieldToken((string)($item['safety_url'] ?? ''));
 
         $item['publish_custom_blocks'] = \api\wxapp\service\MemberActiveService::formatBlocksForApi($item['publish_custom_blocks'] ?? '');
+        MemberActiveService::attachPublishPresentationFields($item);
 
         //是否报名
         $where = [];
@@ -759,6 +761,9 @@ class ActiveController extends AuthController
         $active_info = ActiveModel::where('id', $active_id)->find();
         if (empty($active_info) || !ActiveModel::isOfflineEvent($active_info)) {
             $this->error('活动不存在或不是线下活动');
+        }
+        if ((int)($active_info['publish_user_id'] ?? 0) > 0 && !MemberActiveService::isPublishRequireCheckin($active_info)) {
+            $this->error('本活动未开启现场签到');
         }
         if (ActiveModel::isDatePending($active_info)) {
             $this->error('活动时间待定，确定时间后再签到');
@@ -900,6 +905,9 @@ class ActiveController extends AuthController
         $active_id = $this->request->param('active_id');
         $item = ActiveModel::where('id',$active_id)->find();
         if(empty($item)) $this->error('活动不存在');
+        if ((int)($item['publish_user_id'] ?? 0) > 0 && !MemberActiveService::isPublishAllowSignup($item)) {
+            $this->error('本活动暂未开放线上报名，请联系活动发布者');
+        }
         if (ActiveModel::isDatePending($item)) {
             $this->error('活动时间待定，请先点击「感兴趣」，确定时间后再报名参与');
         }

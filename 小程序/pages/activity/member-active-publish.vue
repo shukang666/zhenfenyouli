@@ -86,7 +86,43 @@
 					</picker>
 				</view>
 			</view>
-			<text class="field-hint field-hint--block">该时段内支持现场定位签到（500 米内）</text>
+			<text class="field-hint field-hint--block" v-if="participationSchema && form.allow_signup && form.require_checkin">
+				开放报名且需签到时，活动时段内支持现场定位签到（500 米内）
+			</text>
+
+			<view class="participation-card" v-if="participationSchema">
+				<text class="field-label">参与方式</text>
+				<text class="field-hint">可按活动实际情况选择；不开放报名时邻居仅可浏览详情并自行联系您</text>
+				<view class="switch-row">
+					<view class="switch-row__text">
+						<text class="switch-row__title">开放线上报名</text>
+						<text class="switch-row__desc">邻居可在小程序内报名，您可在「我的发布」查看名单</text>
+					</view>
+					<switch
+						:checked="form.allow_signup"
+						color="#16864b"
+						@change="onAllowSignupChange"
+					/>
+				</view>
+				<view class="switch-row" :class="{ 'switch-row--muted': !form.allow_signup }">
+					<view class="switch-row__text">
+						<text class="switch-row__title">报名后需现场签到</text>
+						<text class="switch-row__desc">关闭则报名成功即可，无需定位签到</text>
+					</view>
+					<switch
+						:checked="form.require_checkin"
+						color="#16864b"
+						:disabled="!form.allow_signup"
+						@change="onRequireCheckinChange"
+					/>
+				</view>
+			</view>
+
+			<view class="proxy-notice-preview" v-if="defaultProxyNotice">
+				<text class="proxy-notice-preview__tag">展示说明</text>
+				<text class="proxy-notice-preview__text">{{ defaultProxyNotice }}</text>
+				<text class="proxy-notice-preview__hint">审核通过后将显示在活动详情页，告知邻居本活动为代理发布</text>
+			</view>
 
 			<view class="field">
 				<text class="field-label">活动地点 <text class="required">*</text></text>
@@ -185,7 +221,7 @@
 		</view>
 
 		<view class="map-tip">
-			提交后进入审核，通过后在活动页展示。邻居可报名、不消耗积分、平台不代收费用。
+			提交后进入审核，通过后在活动页展示。不消耗积分、平台不代收费用；是否开放报名由上方开关决定。
 		</view>
 
 		<view class="map-bottom-spacer"></view>
@@ -249,6 +285,8 @@ export default {
 			headline: '发一场邻里小活动',
 			subline: '只填必要信息，其余交给小程序报名与签到',
 			themes: [],
+			participationSchema: false,
+			defaultProxyNotice: '',
 			dateStart,
 			submitting: false,
 			coverMode: 'text',
@@ -273,6 +311,8 @@ export default {
 				lng: '',
 				contact: '',
 				coverPreview: '',
+				allow_signup: true,
+				require_checkin: true,
 			},
 		}
 	},
@@ -281,6 +321,8 @@ export default {
 		this.$u.api.memberActiveMeta().then((res) => {
 			const data = res.data || {}
 			this.themes = data.themes || []
+			this.participationSchema = Number(data.participation_schema) === 1
+			this.defaultProxyNotice = data.default_proxy_notice || ''
 			if (data.tips) {
 				this.headline = data.tips.headline || this.headline
 				this.subline = data.tips.sub || this.subline
@@ -443,6 +485,14 @@ export default {
 		onEndChange(e) {
 			this.form.end_time = e.detail.value
 		},
+		onAllowSignupChange(e) {
+			const on = !!(e.detail && e.detail.value)
+			this.form.allow_signup = on
+			if (!on) this.form.require_checkin = false
+		},
+		onRequireCheckinChange(e) {
+			this.form.require_checkin = !!(e.detail && e.detail.value)
+		},
 		chooseLocation() {
 			uni.chooseLocation({
 				success: (res) => {
@@ -558,6 +608,8 @@ export default {
 					contact: this.form.contact,
 					theme_id: this.form.theme_id,
 					custom_blocks: JSON.stringify(payloadBlocks),
+					allow_signup: this.participationSchema && this.form.allow_signup ? 1 : 0,
+					require_checkin: this.participationSchema && this.form.allow_signup && this.form.require_checkin ? 1 : 0,
 				})
 				uni.hideLoading()
 				uni.showToast({ title: '已提交，审核通过后展示', icon: 'success' })
@@ -838,6 +890,77 @@ export default {
 	margin-top: 8rpx;
 	font-size: 24rpx;
 	color: #7a8a80;
+}
+.participation-card {
+	margin-top: 32rpx;
+	padding: 24rpx 22rpx;
+	border-radius: 18rpx;
+	background: #f8faf9;
+	border: 1rpx solid #e8eeea;
+}
+.switch-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20rpx;
+	margin-top: 24rpx;
+	padding-top: 24rpx;
+	border-top: 1rpx solid #e8eeea;
+}
+.switch-row:first-of-type {
+	margin-top: 20rpx;
+	padding-top: 0;
+	border-top: none;
+}
+.switch-row--muted {
+	opacity: 0.55;
+}
+.switch-row__text {
+	flex: 1;
+	min-width: 0;
+}
+.switch-row__title {
+	display: block;
+	font-size: 28rpx;
+	font-weight: 600;
+	color: #26372d;
+}
+.switch-row__desc {
+	display: block;
+	margin-top: 6rpx;
+	font-size: 22rpx;
+	color: #8a9a90;
+	line-height: 1.45;
+}
+.proxy-notice-preview {
+	margin-top: 28rpx;
+	padding: 22rpx 20rpx;
+	border-radius: 16rpx;
+	background: #faf8f3;
+	border: 1rpx solid rgba(180, 150, 80, 0.15);
+}
+.proxy-notice-preview__tag {
+	display: inline-block;
+	padding: 4rpx 12rpx;
+	border-radius: 8rpx;
+	font-size: 22rpx;
+	font-weight: 600;
+	color: #8a6d2e;
+	background: rgba(180, 150, 80, 0.12);
+}
+.proxy-notice-preview__text {
+	display: block;
+	margin-top: 14rpx;
+	font-size: 24rpx;
+	color: #5f7166;
+	line-height: 1.6;
+}
+.proxy-notice-preview__hint {
+	display: block;
+	margin-top: 12rpx;
+	font-size: 22rpx;
+	color: #9aab9f;
+	line-height: 1.45;
 }
 .map-tip {
 	margin: 24rpx 8rpx 0;

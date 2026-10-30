@@ -19,6 +19,77 @@ class MemberActiveService
 
     public const TAG_MEMBER = '居民活动';
 
+    /** 居民发布详情页默认代理说明（可被单条 publish_proxy_notice 覆盖） */
+    public const DEFAULT_PROXY_NOTICE = '本活动由邻友代理发布展示，并非平台官方举办活动。平台不提供活动场地、物料与现场支持，也不承担活动组织与安全保障责任。如需了解详情或参与安排，请自行联系活动发布者/主办方。';
+
+    public static function hasParticipationSchema(): bool
+    {
+        static $ok = null;
+        if ($ok !== null) {
+            return $ok;
+        }
+        try {
+            $fields = Db::name('active')->getTableFields();
+            $ok = in_array('publish_allow_signup', $fields, true)
+                && in_array('publish_require_checkin', $fields, true);
+        } catch (\Throwable $e) {
+            $ok = false;
+        }
+        return $ok;
+    }
+
+    public static function defaultProxyNoticeText(): string
+    {
+        return self::DEFAULT_PROXY_NOTICE;
+    }
+
+    /** @param array<string,mixed>|object $row */
+    public static function resolveProxyNotice($row): string
+    {
+        $a = is_array($row) ? $row : (array)$row;
+        if ((int)($a['publish_user_id'] ?? 0) <= 0) {
+            return '';
+        }
+        $custom = trim((string)($a['publish_proxy_notice'] ?? ''));
+        return $custom !== '' ? $custom : self::DEFAULT_PROXY_NOTICE;
+    }
+
+    /** @param array<string,mixed>|object $row */
+    public static function isPublishAllowSignup($row): bool
+    {
+        $a = is_array($row) ? $row : (array)$row;
+        if ((int)($a['publish_user_id'] ?? 0) <= 0) {
+            return true;
+        }
+        if (!self::hasParticipationSchema()) {
+            return false;
+        }
+        return (int)($a['publish_allow_signup'] ?? 0) === 1;
+    }
+
+    /** @param array<string,mixed>|object $row */
+    public static function isPublishRequireCheckin($row): bool
+    {
+        $a = is_array($row) ? $row : (array)$row;
+        if ((int)($a['publish_user_id'] ?? 0) <= 0) {
+            return true;
+        }
+        if (!self::hasParticipationSchema() || !self::isPublishAllowSignup($a)) {
+            return false;
+        }
+        return (int)($a['publish_require_checkin'] ?? 0) === 1;
+    }
+
+    /** @param array<string,mixed> $item */
+    public static function attachPublishPresentationFields(array &$item): void
+    {
+        $pid = (int)($item['publish_user_id'] ?? 0);
+        $item['is_member_publish'] = $pid > 0 ? 1 : 0;
+        $item['publish_allow_signup'] = self::isPublishAllowSignup($item) ? 1 : 0;
+        $item['publish_require_checkin'] = self::isPublishRequireCheckin($item) ? 1 : 0;
+        $item['publish_proxy_notice'] = self::resolveProxyNotice($item);
+    }
+
     /** 与活动 Tab 主题活动五分类 id 一致（cmf_active_community_cate） */
     public static function themeOptions(): array
     {
@@ -167,9 +238,20 @@ class MemberActiveService
         if ($summary !== '') {
             $contentParts[] = '<p>' . nl2br(htmlspecialchars($summary, ENT_QUOTES, 'UTF-8')) . '</p>';
         }
-        $contentParts[] = '<p>本活动由居民自发组织，平台提供展示与签到工具，请注意人身与财产安全。</p>';
+        $noticeHtml = htmlspecialchars(self::DEFAULT_PROXY_NOTICE, ENT_QUOTES, 'UTF-8');
+        $contentParts[] = '<p><strong>温馨提示：</strong>' . $noticeHtml . '</p>';
         $content = implode('', $contentParts);
         $customBlocksJson = $customBlocks ? json_encode($customBlocks, JSON_UNESCAPED_UNICODE) : '';
+
+        $allowSignup = 1;
+        $requireCheckin = 1;
+        if (self::hasParticipationSchema()) {
+            $allowSignup = !empty($payload['allow_signup']) ? 1 : 0;
+            $requireCheckin = !empty($payload['require_checkin']) ? 1 : 0;
+            if (!$allowSignup) {
+                $requireCheckin = 0;
+            }
+        }
 
         $now = time();
         $pendingCount = ActiveModel::where('publish_user_id', $userId)
@@ -241,6 +323,9 @@ class MemberActiveService
             'list_order' => 10000,
             'role' => '1',
             'publish_custom_blocks' => $customBlocksJson,
+            'publish_allow_signup' => $allowSignup,
+            'publish_require_checkin' => $requireCheckin,
+            'publish_proxy_notice' => '',
         ];
 
         $tableFields = Db::name('active')->getTableFields();
@@ -383,6 +468,32 @@ class MemberActiveService
         return $out;
     }
 
+    public static function updatePublishSettings(int $activeId, array $data): void
+    {
+        $row = ActiveModel::where('id', $activeId)->where('publish_user_id', '>', 0)->find();
+        if (empty($row)) {
+            throw new \InvalidArgumentException('记录不存在');
+        }
+        if (!self::hasParticipationSchema()) {
+            throw new \InvalidArgumentException('请先执行 update.sql 升级居民发布字段');
+        }
+        $allowSignup = !empty($data['allow_signup']) ? 1 : 0;
+        $requireCheckin = !empty($data['require_checkin']) ? 1 : 0;
+        if (!$allowSignup) {
+            $requireCheckin = 0;
+        }
+        $notice = trim((string)($data['publish_proxy_notice'] ?? ''));
+        if (mb_strlen($notice) > 2000) {
+            throw new \InvalidArgumentException('代理说明不超过 2000 字');
+        }
+        ActiveModel::where('id', $activeId)->update([
+            'publish_allow_signup' => $allowSignup,
+            'publish_require_checkin' => $requireCheckin,
+            'publish_proxy_notice' => $notice,
+            'update_time' => time(),
+        ]);
+    }
+
     /** 线上库未执行 update.sql 时给出可读提示 */
     public static function assertPublishSchemaReady(): void
     {
@@ -459,6 +570,8 @@ class MemberActiveService
         $audit = (int)($row['publish_audit_status'] ?? 0);
         $isEnd = ActiveModel::resolveIsEnd($row) === 1;
         $signCount = ActiveSIgnModel::countParticipants($id);
+        $allowSignup = self::isPublishAllowSignup($row);
+        $requireCheckin = self::isPublishRequireCheckin($row);
 
         $addr = trim((string)($row['place_name'] ?? ''));
         if ($addr === '') {
@@ -470,14 +583,19 @@ class MemberActiveService
         }
 
         $tabKey = 'enrolling';
-        $statusLabel = '报名中';
+        $statusLabel = $allowSignup ? '报名中' : '展示中';
         $statusTone = 'ok';
-        $footHint = self::formatEnrollDeadlineHint($row);
-        $progressLine = $signCount > 0 ? ('已报名 ' . $signCount . ' 人') : '';
-        $actions = [
-            ['key' => 'sign_list', 'label' => '报名名单'],
-            ['key' => 'checkin_list', 'label' => '签到名单'],
-        ];
+        $footHint = $allowSignup ? self::formatEnrollDeadlineHint($row) : '未开放线上报名，请通过联系方式沟通';
+        $progressLine = ($allowSignup && $signCount > 0) ? ('已报名 ' . $signCount . ' 人') : '';
+        $actions = [];
+        if ($allowSignup) {
+            $actions[] = ['key' => 'sign_list', 'label' => '报名名单'];
+            if ($requireCheckin) {
+                $actions[] = ['key' => 'checkin_list', 'label' => '签到名单'];
+            }
+        } else {
+            $actions[] = ['key' => 'preview', 'label' => '预览'];
+        }
 
         if ($audit === self::AUDIT_PENDING) {
             $tabKey = 'auditing';
@@ -531,6 +649,8 @@ class MemberActiveService
             'progress_line' => $progressLine,
             'sign_count' => $signCount,
             'audit_status' => $audit,
+            'allow_signup' => $allowSignup ? 1 : 0,
+            'require_checkin' => $requireCheckin ? 1 : 0,
             'actions' => $actions,
         ];
     }

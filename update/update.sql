@@ -716,6 +716,24 @@ SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEM
 SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_custom_blocks` mediumtext COMMENT ''居民发布自定义展示块JSON'' AFTER `publish_reject_reason`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
 
+-- 居民发布：报名/签到开关 + 代理展示说明
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_allow_signup');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_allow_signup` tinyint(3) unsigned NOT NULL DEFAULT 1 COMMENT ''居民发布-是否开放线上报名 0否1是'' AFTER `publish_custom_blocks`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_require_checkin');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_require_checkin` tinyint(3) unsigned NOT NULL DEFAULT 1 COMMENT ''居民发布-报名后是否需现场签到 0否1是'' AFTER `publish_allow_signup`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_proxy_notice');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_proxy_notice` text COMMENT ''居民发布-代理展示说明(空则用系统默认)'' AFTER `publish_require_checkin`');
+PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
+
+UPDATE `cmf_active`
+SET `publish_allow_signup` = 0,
+    `publish_require_checkin` = 0
+WHERE `publish_user_id` > 0 AND `delete_time` = 0;
+
 CREATE TABLE IF NOT EXISTS `cmf_active_web_life_navigator` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL DEFAULT 0,
