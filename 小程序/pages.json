@@ -5,7 +5,12 @@
 			"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue",
 			"^care-pull-hint$": "@/components/care-pull-hint/care-pull-hint.vue",
 			"^page-guide$": "@/components/page-guide/index.vue",
-			"^skeleton-screen$": "@/components/skeleton-screen/index.vue"
+			"^skeleton-screen$": "@/components/skeleton-screen/index.vue",
+			"^home-prd-header$": "@/components/home-prd-header/index.vue",
+			"^home-prd-home$": "@/components/home-prd-home/index.vue",
+			"^home-activity-promo-banner$": "@/components/home-activity-promo-banner/index.vue",
+			"^home-ongoing-section$": "@/components/home-ongoing-section/index.vue",
+			"^home-weekly-picks$": "@/components/home-weekly-picks/index.vue"
 		}
 	},
 	"pages": [{
@@ -13,6 +18,9 @@
 			"style": {
 				"navigationBarTitleText": "首页",
 				"navigationStyle": "custom",
+				"navigationBarBackgroundColor": "#F7F8F3",
+				"backgroundColor": "#F7F8F3",
+				"backgroundColorTop": "#F7F8F3",
 				"componentPlaceholder": {
 					"u-navbar": "view",
 					"u-swiper": "view",
@@ -22,7 +30,12 @@
 					"z-paging": "view",
 					"care-pull-hint": "view",
 					"new-user-guide": "view",
-					"skeleton-screen": "view"
+					"skeleton-screen": "view",
+					"home-prd-header": "view",
+					"home-prd-home": "view",
+					"home-activity-promo-banner": "view",
+					"home-ongoing-section": "view",
+					"home-weekly-picks": "view"
 				}
 			}
 		}, {

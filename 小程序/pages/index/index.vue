@@ -13,13 +13,12 @@
 		<z-paging ref='paging' v-model='dataList' @query='queryList' @scroll="onZPagingScroll" :use-page-scroll="true" :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="false" :loading-more-enabled="false" :refresher-enabled="false">
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
-				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(238,242,239,0)'}" :border-bottom="false">
-					<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/logo.png" class="home-logo" mode="aspectFill"></image>
-					<view v-if="!showLegacyHome" slot="right" class="home-location-readonly">
-						<u-icon name="map" size="28" color="#738264"></u-icon>
-						<text class="home-location-text">{{ homeLocationLabel }}</text>
-					</view>
-				</u-navbar>
+				<block v-if="showLegacyHome">
+					<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(238,242,239,0)'}" :border-bottom="false">
+						<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/logo.png" class="home-logo" mode="aspectFill"></image>
+					</u-navbar>
+				</block>
+				<home-prd-header v-else :location-label="homeLocationLabel" />
 				<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			</template>
 
@@ -227,6 +226,7 @@ import HomeActivityPromoBanner from '@/components/home-activity-promo-banner/ind
 import HomeOngoingSection from '@/components/home-ongoing-section/index.vue'
 import HomeWeeklyPicks from '@/components/home-weekly-picks/index.vue'
 import HomePrdHome from '@/components/home-prd-home/index.vue'
+import HomePrdHeader from '@/components/home-prd-header/index.vue'
 import { buildWebActiveEntryPath } from '@/common/webActiveEntry.js'
 /** 绿动生活领航员 Web 活动（见 install_life_navigator_active.php） */
 const LIFE_NAVIGATOR_ACTIVE_ID = 69
@@ -238,6 +238,7 @@ export default {
 		HomeOngoingSection,
 		HomeWeeklyPicks,
 		HomePrdHome,
+		HomePrdHeader,
 	},
 		mixins: [careGesture],
 		data() {
@@ -932,25 +933,6 @@ export default {
 		width: 320rpx;
 		height: 88rpx;
 		margin-left: 30rpx;
-	}
-
-	.home-location-readonly {
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		gap: 10rpx;
-		max-width: 340rpx;
-		padding-right: 12rpx;
-		pointer-events: none;
-	}
-	.home-location-text {
-		font-size: 22rpx;
-		line-height: 1.3;
-		color: #738264;
-		letter-spacing: 1rpx;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 
 	.press-scale {

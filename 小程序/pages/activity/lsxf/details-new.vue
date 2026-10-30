@@ -444,7 +444,7 @@
 		uploadUrl
 	} from '@/common/settings'
 	import { clearPendingAfterLogin } from '@/common/scanSignEntry.js'
-	import MemberActiveBlocksDisplay from '@/components/member-active-blocks-display/member-active-blocks-display.vue'
+	import MemberActiveBlocksDisplay from '@/pages/activity/components/member-active-blocks-display/member-active-blocks-display.vue'
 	export default {
 		components: { MemberActiveBlocksDisplay },
 		data() {

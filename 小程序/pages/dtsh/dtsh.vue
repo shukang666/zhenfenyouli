@@ -97,7 +97,7 @@
 </template>
 
 <script>
-	import PageGuide from '@/components/page-guide/index.vue'
+	import PageGuide from './components/page-guide/index.vue'
 
 	export default {
 		components: {

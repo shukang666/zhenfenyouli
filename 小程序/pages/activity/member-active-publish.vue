@@ -257,8 +257,8 @@
 <script>
 import { uploadUrl, headerTokenName, userTokenName } from '@/common/settings.js'
 import { parseUploadAssetResponse } from '@/common/uploadAsset.js'
-import MemberActiveBlocksDisplay from '@/components/member-active-blocks-display/member-active-blocks-display.vue'
-import MemberActiveTextCoverPicker from '@/components/member-active-text-cover-picker/member-active-text-cover-picker.vue'
+import MemberActiveBlocksDisplay from '@/pages/activity/components/member-active-blocks-display/member-active-blocks-display.vue'
+import MemberActiveTextCoverPicker from '@/pages/activity/components/member-active-text-cover-picker/member-active-text-cover-picker.vue'
 import { drawMemberActiveTextCover } from '@/utils/memberActiveTextCoverCanvas.js'
 import {
 	MEMBER_BLOCK_TYPES,

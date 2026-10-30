@@ -5,7 +5,7 @@
 </template>
 
 <script>
-	import fSignatureVue from '@/components/f-signature/f-signature.vue';
+	import fSignatureVue from '@/pages/zzhd/components/f-signature/f-signature.vue';
 	import {
 		uploadUrl
 	} from '@/common/settings';

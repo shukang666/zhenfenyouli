@@ -15,7 +15,7 @@
 </template>
 
 <script>
-	import zoomParse from '@/components/zoom-parse/zoom-parse.vue';
+	import zoomParse from '@/pages/zzhd/components/zoom-parse/zoom-parse.vue';
 
 	export default {
 		components: {
