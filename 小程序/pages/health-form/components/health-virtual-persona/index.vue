@@ -27,45 +27,26 @@
 					<view class="hvp-mascot">
 						<view class="hvp-mascot__shadow"></view>
 						<view class="hvp-mascot__figure">
-							<view class="hvp-mascot__leg hvp-mascot__leg--l"></view>
-							<view class="hvp-mascot__leg hvp-mascot__leg--r"></view>
-							<view class="hvp-mascot__shoe hvp-mascot__shoe--l"></view>
-							<view class="hvp-mascot__shoe hvp-mascot__shoe--r"></view>
 							<view class="hvp-mascot__arm hvp-mascot__arm--l">
-								<view class="hvp-mascot__cuff"></view>
-								<view class="hvp-mascot__hand hvp-mascot__hand--welcome">
-									<view class="hvp-mascot__palm"></view>
-									<view class="hvp-mascot__finger hvp-mascot__finger--1"></view>
-									<view class="hvp-mascot__finger hvp-mascot__finger--2"></view>
-									<view class="hvp-mascot__finger hvp-mascot__finger--3"></view>
-								</view>
+								<view class="hvp-mascot__sleeve"></view>
+								<view class="hvp-mascot__glove"></view>
 							</view>
 							<view class="hvp-mascot__arm hvp-mascot__arm--r">
-								<view class="hvp-mascot__cuff"></view>
-								<view class="hvp-mascot__hand"></view>
+								<view class="hvp-mascot__sleeve"></view>
+								<view class="hvp-mascot__glove"></view>
 							</view>
 							<view class="hvp-mascot__torso">
+								<view class="hvp-mascot__neck-bridge"></view>
+								<view class="hvp-mascot__scrub-neck"></view>
 								<view class="hvp-mascot__coat-shine"></view>
-								<view class="hvp-mascot__collar">
-									<view class="hvp-mascot__collar-l"></view>
-									<view class="hvp-mascot__collar-r"></view>
-								</view>
 								<view class="hvp-mascot__stetho">
 									<view class="hvp-mascot__stetho-yoke"></view>
 									<view class="hvp-mascot__stetho-tube hvp-mascot__stetho-tube--a"></view>
-									<view class="hvp-mascot__stetho-tube hvp-mascot__stetho-tube--b"></view>
 									<view class="hvp-mascot__stetho-disk"></view>
 								</view>
-								<view class="hvp-mascot__pocket"></view>
 								<view class="hvp-mascot__badge">
 									<view class="hvp-mascot__badge-v"></view>
 									<view class="hvp-mascot__badge-h"></view>
-								</view>
-								<view class="hvp-mascot__care-pin">
-									<view class="hvp-mascot__care-pin-heart">
-										<view class="hvp-mascot__care-pin-lobe hvp-mascot__care-pin-lobe--a"></view>
-										<view class="hvp-mascot__care-pin-lobe hvp-mascot__care-pin-lobe--b"></view>
-									</view>
 								</view>
 							</view>
 							<view class="hvp-mascot__head">
@@ -76,30 +57,21 @@
 										<view class="hvp-mascot__cap-cross-h"></view>
 									</view>
 								</view>
-								<view class="hvp-mascot__hair hvp-mascot__hair--l"></view>
-								<view class="hvp-mascot__hair hvp-mascot__hair--r"></view>
-								<view class="hvp-mascot__hair-bang"></view>
 								<view class="hvp-mascot__face">
 									<view class="hvp-mascot__face-glow"></view>
 									<view class="hvp-mascot__brow hvp-mascot__brow--l"></view>
 									<view class="hvp-mascot__brow hvp-mascot__brow--r"></view>
 									<view class="hvp-mascot__eye hvp-mascot__eye--l">
-										<view class="hvp-mascot__eye-lid hvp-mascot__eye-lid--top"></view>
-										<view class="hvp-mascot__eye-soft">
-											<view class="hvp-mascot__pupil"></view>
-											<view class="hvp-mascot__eye-spark"></view>
-											<view class="hvp-mascot__eye-spark hvp-mascot__eye-spark--sm"></view>
+										<view class="hvp-mascot__eye-ball">
+											<view class="hvp-mascot__eye-pupil"></view>
+											<view class="hvp-mascot__eye-shine"></view>
 										</view>
-										<view class="hvp-mascot__eye-lid hvp-mascot__eye-lid--bottom"></view>
 									</view>
 									<view class="hvp-mascot__eye hvp-mascot__eye--r">
-										<view class="hvp-mascot__eye-lid hvp-mascot__eye-lid--top"></view>
-										<view class="hvp-mascot__eye-soft">
-											<view class="hvp-mascot__pupil"></view>
-											<view class="hvp-mascot__eye-spark"></view>
-											<view class="hvp-mascot__eye-spark hvp-mascot__eye-spark--sm"></view>
+										<view class="hvp-mascot__eye-ball">
+											<view class="hvp-mascot__eye-pupil"></view>
+											<view class="hvp-mascot__eye-shine"></view>
 										</view>
-										<view class="hvp-mascot__eye-lid hvp-mascot__eye-lid--bottom"></view>
 									</view>
 									<view class="hvp-mascot__cheek hvp-mascot__cheek--l"></view>
 									<view class="hvp-mascot__cheek hvp-mascot__cheek--r"></view>
@@ -289,27 +261,27 @@ export default {
 .hvp-mascot {
 	position: relative;
 	width: 320rpx;
-	height: 448rpx;
+	height: 380rpx;
 }
 
 .hvp--hero .hvp-mascot {
 	width: 380rpx;
-	height: 528rpx;
+	height: 440rpx;
 }
 
 .hvp--md .hvp-mascot {
 	width: 260rpx;
-	height: 364rpx;
+	height: 310rpx;
 }
 
 .hvp-mascot__shadow {
 	position: absolute;
 	left: 50%;
-	bottom: 4rpx;
-	width: 58%;
-	height: 20rpx;
-	margin-left: -29%;
-	background: radial-gradient(ellipse, rgba(21, 101, 216, 0.22) 0%, transparent 72%);
+	bottom: 8%;
+	width: 62%;
+	height: 22rpx;
+	margin-left: -31%;
+	background: radial-gradient(ellipse, rgba(21, 101, 216, 0.2) 0%, transparent 72%);
 	border-radius: 50%;
 	animation: hvpShadowPulse 3.2s ease-in-out infinite;
 }
@@ -323,11 +295,11 @@ export default {
 .hvp-mascot__torso {
 	position: absolute;
 	left: 50%;
-	top: 44%;
-	width: 54%;
-	height: 36%;
-	margin-left: -27%;
-	border-radius: 42% 42% 38% 38% / 36% 36% 48% 48%;
+	top: 50%;
+	width: 58%;
+	height: 44%;
+	margin-left: -29%;
+	border-radius: 38% 38% 46% 46% / 32% 32% 52% 52%;
 	background: linear-gradient(
 		165deg,
 		#ffffff 0%,
@@ -343,90 +315,31 @@ export default {
 	overflow: visible;
 }
 
-.hvp-mascot__collar {
+.hvp-mascot__neck-bridge {
 	position: absolute;
 	left: 50%;
-	top: -4rpx;
-	width: 72%;
-	height: 28%;
-	margin-left: -36%;
-	z-index: 2;
-}
-
-.hvp-mascot__collar-l,
-.hvp-mascot__collar-r {
-	position: absolute;
-	top: 0;
-	width: 52%;
-	height: 100%;
-	background: linear-gradient(180deg, #ffffff, #e8f4fc);
-	border: 2rpx solid rgba(255, 255, 255, 0.9);
-	box-shadow: 0 4rpx 10rpx rgba(21, 101, 216, 0.08);
-}
-
-.hvp-mascot__collar-l {
-	left: 0;
-	border-radius: 8rpx 0 40rpx 8rpx;
-	transform: skewY(-6deg) rotate(-4deg);
-}
-
-.hvp-mascot__collar-r {
-	right: 0;
-	border-radius: 0 8rpx 8rpx 40rpx;
-	transform: skewY(6deg) rotate(4deg);
-}
-
-.hvp-mascot__pocket {
-	position: absolute;
-	left: 14%;
-	bottom: 16%;
+	top: -14rpx;
 	width: 28%;
-	height: 22%;
-	border-radius: 0 0 12rpx 12rpx;
-	border: 2rpx solid rgba(144, 202, 249, 0.55);
-	border-top: 4rpx solid rgba(144, 202, 249, 0.65);
-	background: rgba(255, 255, 255, 0.35);
-}
-
-.hvp-mascot__care-pin {
-	position: absolute;
-	right: 16%;
-	top: 22%;
-	width: 28rpx;
 	height: 28rpx;
+	margin-left: -14%;
 	border-radius: 50%;
-	background: linear-gradient(145deg, #ffab91, #ff8a65);
-	box-shadow: 0 4rpx 8rpx rgba(255, 138, 101, 0.35);
+	background: linear-gradient(180deg, #ffece3, #ffdfd0);
+	border: 2rpx solid rgba(255, 255, 255, 0.65);
+	z-index: 1;
 }
 
-.hvp-mascot__care-pin-heart {
+.hvp-mascot__scrub-neck {
 	position: absolute;
 	left: 50%;
-	top: 50%;
-	width: 16rpx;
-	height: 14rpx;
-	margin-left: -8rpx;
-	margin-top: -9rpx;
-}
-
-.hvp-mascot__care-pin-lobe {
-	position: absolute;
+	top: 6rpx;
 	width: 50%;
-	height: 100%;
-	background: #fff;
-	border-radius: 3rpx 3rpx 0 3rpx;
-}
-
-.hvp-mascot__care-pin-lobe--a {
-	left: 0;
-	transform: rotate(45deg);
-	transform-origin: 100% 100%;
-}
-
-.hvp-mascot__care-pin-lobe--b {
-	right: 0;
-	transform: rotate(-45deg);
-	transform-origin: 0 100%;
+	height: 22rpx;
+	margin-left: -25%;
+	border-radius: 0 0 18rpx 18rpx;
+	border: 2rpx solid rgba(144, 202, 249, 0.45);
+	border-top: none;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(227, 242, 253, 0.5));
+	z-index: 2;
 }
 
 .hvp-mascot__coat-shine {
@@ -470,15 +383,6 @@ export default {
 	width: 58%;
 	height: 48%;
 	transform: rotate(-14deg);
-}
-
-.hvp-mascot__stetho-tube--b {
-	right: 28%;
-	top: 18%;
-	width: 42%;
-	height: 42%;
-	transform: rotate(-32deg);
-	opacity: 0.85;
 }
 
 .hvp-mascot__stetho-disk {
@@ -527,36 +431,46 @@ export default {
 
 .hvp-mascot__arm {
 	position: absolute;
-	top: 46%;
-	width: 18%;
-	height: 30%;
-	border-radius: 40rpx;
-	background: linear-gradient(160deg, #ffffff, #e3f2fd);
-	border: 2rpx solid rgba(255, 255, 255, 0.9);
-	box-shadow: 0 6rpx 14rpx rgba(21, 101, 216, 0.12);
-	transform-origin: 50% 12%;
+	top: 52%;
+	width: 14%;
+	height: 26%;
+	transform-origin: 50% 8%;
+	z-index: 2;
 }
 
-.hvp-mascot__cuff {
+.hvp-mascot__sleeve {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 72%;
+	border-radius: 999rpx;
+	background: linear-gradient(165deg, #ffffff 0%, #e8f4fc 100%);
+	border: 2rpx solid rgba(255, 255, 255, 0.95);
+	box-shadow: 0 8rpx 16rpx rgba(21, 101, 216, 0.1);
+}
+
+.hvp-mascot__glove {
 	position: absolute;
 	left: 50%;
-	bottom: 18%;
-	width: 108%;
-	height: 22%;
-	margin-left: -54%;
-	border-radius: 8rpx;
-	background: linear-gradient(90deg, #1565c0, #42a5f5, #1565c0);
-	opacity: 0.92;
+	bottom: 0;
+	width: 130%;
+	height: 38%;
+	margin-left: -65%;
+	border-radius: 999rpx;
+	background: linear-gradient(180deg, #ffffff, #f5fafd);
+	border: 2rpx solid rgba(144, 202, 249, 0.35);
+	box-shadow: 0 6rpx 12rpx rgba(21, 101, 216, 0.08);
 }
 
 .hvp-mascot__arm--l {
-	left: 4%;
+	left: 10%;
 	animation: hvpArmWelcome 4.5s ease-in-out infinite;
 	animation-delay: -0.8s;
 }
 
 .hvp-mascot__arm--r {
-	right: 6%;
+	right: 10%;
 	animation: hvpArmSwayR 4s ease-in-out infinite;
 	animation-delay: -2.2s;
 }
@@ -565,117 +479,15 @@ export default {
 	animation: hvpArmWave 1.2s ease-in-out infinite;
 }
 
-.hvp-mascot__hand {
-	position: absolute;
-	left: 50%;
-	bottom: -6rpx;
-	width: 36rpx;
-	height: 36rpx;
-	margin-left: -18rpx;
-	border-radius: 50%;
-	background: linear-gradient(160deg, #ffe8dc 0%, #ffd5c8 100%);
-	border: 2rpx solid rgba(255, 255, 255, 0.65);
-}
-
-.hvp-mascot__hand--welcome {
-	width: 44rpx;
-	height: 40rpx;
-	margin-left: -22rpx;
-	border-radius: 46% 46% 42% 42%;
-	background: linear-gradient(165deg, #ffe8dc, #ffcbb8);
-}
-
-.hvp-mascot__palm {
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	border-radius: inherit;
-}
-
-.hvp-mascot__finger {
-	position: absolute;
-	top: -6rpx;
-	width: 8rpx;
-	height: 14rpx;
-	border-radius: 6rpx;
-	background: #ffd5c8;
-}
-
-.hvp-mascot__finger--1 {
-	left: 8rpx;
-	transform: rotate(-8deg);
-}
-
-.hvp-mascot__finger--2 {
-	left: 50%;
-	margin-left: -4rpx;
-}
-
-.hvp-mascot__finger--3 {
-	right: 8rpx;
-	transform: rotate(8deg);
-}
-
-.hvp-mascot__leg {
-	position: absolute;
-	top: 76%;
-	width: 16%;
-	height: 14%;
-	border-radius: 0 0 12rpx 12rpx;
-	background: linear-gradient(180deg, #546e7a, #455a64);
-}
-
-.hvp-mascot__leg--l {
-	left: 34%;
-}
-
-.hvp-mascot__leg--r {
-	right: 34%;
-}
-
-.hvp-mascot__shoe {
-	position: absolute;
-	top: 88%;
-	width: 22%;
-	height: 8%;
-	border-radius: 50% 50% 12rpx 12rpx;
-	background: linear-gradient(180deg, #ffffff, #eceff1);
-	border: 2rpx solid rgba(144, 202, 249, 0.45);
-	box-shadow: 0 6rpx 12rpx rgba(21, 101, 216, 0.12);
-}
-
-.hvp-mascot__shoe--l {
-	left: 30%;
-}
-
-.hvp-mascot__shoe--r {
-	right: 30%;
-}
-
 .hvp-mascot__head {
 	position: absolute;
 	left: 50%;
-	top: 0;
-	width: 64%;
-	height: 46%;
-	margin-left: -32%;
-	z-index: 3;
+	top: 2%;
+	width: 66%;
+	height: 52%;
+	margin-left: -33%;
+	z-index: 4;
 	animation: hvpHeadTilt 5s ease-in-out infinite;
-}
-
-.hvp-mascot__hair-bang {
-	position: absolute;
-	left: 50%;
-	bottom: 32%;
-	width: 36%;
-	height: 18%;
-	margin-left: -18%;
-	background: #6d4c41;
-	border-radius: 50% 50% 40% 40%;
-	z-index: 1;
-	opacity: 0.85;
 }
 
 .hvp-mascot__cap {
@@ -731,46 +543,25 @@ export default {
 	height: 5rpx;
 }
 
-.hvp-mascot__hair {
-	position: absolute;
-	bottom: 18%;
-	width: 24%;
-	height: 34%;
-	background: linear-gradient(180deg, #6d4c41, #5d4037);
-	border-radius: 50% 50% 40% 40%;
-	z-index: 0;
-}
-
-.hvp-mascot__hair--l {
-	left: 8%;
-	transform: rotate(-8deg);
-}
-
-.hvp-mascot__hair--r {
-	right: 8%;
-	transform: rotate(8deg);
-}
-
 .hvp-mascot__face {
 	position: absolute;
 	left: 50%;
-	top: 20%;
-	width: 88%;
-	height: 76%;
-	margin-left: -44%;
-	border-radius: 50% 50% 46% 46% / 54% 54% 44% 44%;
+	top: 22%;
+	width: 84%;
+	height: 72%;
+	margin-left: -42%;
+	border-radius: 50%;
 	background: linear-gradient(
 		168deg,
 		#fff8f3 0%,
-		#ffece3 42%,
-		#ffdfd0 78%,
-		#ffd0bc 100%
+		#ffece3 45%,
+		#ffdfd0 100%
 	);
-	border: 2rpx solid rgba(255, 255, 255, 0.72);
+	border: 2rpx solid rgba(255, 255, 255, 0.75);
 	box-shadow:
-		0 12rpx 28rpx rgba(255, 171, 145, 0.18),
-		inset 0 8rpx 20rpx rgba(255, 255, 255, 0.55),
-		inset 0 -8rpx 18rpx rgba(255, 183, 160, 0.15);
+		0 10rpx 24rpx rgba(255, 171, 145, 0.16),
+		inset 0 6rpx 16rpx rgba(255, 255, 255, 0.5);
+	z-index: 1;
 }
 
 .hvp-mascot__face-glow {
@@ -786,130 +577,98 @@ export default {
 
 .hvp-mascot__brow {
 	position: absolute;
-	top: 26%;
-	width: 20%;
-	height: 10rpx;
+	top: 30%;
+	width: 18%;
+	height: 8rpx;
 	border: none;
-	border-top: 4rpx solid #a1887f;
+	border-top: 3rpx solid #bcaaa4;
 	border-radius: 50% 50% 0 0 / 100% 100% 0 0;
 	background: transparent;
-	opacity: 0.9;
+	opacity: 0.85;
 }
 
 .hvp-mascot__brow--l {
-	left: 20%;
-	transform: rotate(-6deg);
+	left: 22%;
+	transform: rotate(-4deg);
 }
 
 .hvp-mascot__brow--r {
-	right: 20%;
-	transform: rotate(6deg) scaleX(-1);
+	right: 22%;
+	transform: rotate(4deg) scaleX(-1);
 }
 
 .hvp-mascot__eye {
 	position: absolute;
-	top: 32%;
-	width: 24%;
-	height: 28%;
+	top: 38%;
+	width: 16%;
+	height: 16%;
 }
 
 .hvp-mascot__eye--l {
-	left: 18%;
+	left: 26%;
 }
 
 .hvp-mascot__eye--r {
-	right: 18%;
+	right: 26%;
 }
 
-.hvp-mascot__eye-lid {
-	position: absolute;
-	left: 0;
-	width: 100%;
-	z-index: 2;
-	pointer-events: none;
-}
-
-.hvp-mascot__eye-lid--top {
-	top: -4%;
-	height: 42%;
-	border-radius: 50% 50% 40% 40%;
-	background: linear-gradient(180deg, rgba(255, 223, 208, 0.95), transparent);
-}
-
-.hvp-mascot__eye-lid--bottom {
-	bottom: 8%;
-	height: 28%;
-	border-radius: 0 0 50% 50%;
-	border-bottom: 3rpx solid rgba(161, 136, 127, 0.35);
-}
-
-.hvp-mascot__eye-soft {
+.hvp-mascot__eye-ball {
 	position: relative;
 	width: 100%;
-	height: 88%;
-	margin-top: 6%;
-	border-radius: 48% 48% 44% 44%;
-	background: radial-gradient(circle at 50% 40%, #ffffff 0%, #fff5f5 100%);
-	border: 2rpx solid rgba(161, 136, 127, 0.12);
-	box-shadow: inset 0 -6rpx 10rpx rgba(255, 183, 178, 0.2);
+	height: 100%;
+	border-radius: 50%;
+	background: radial-gradient(circle at 38% 32%, #ffffff 0%, #fff5f5 55%, #f8bbd0 100%);
+	border: 2rpx solid rgba(188, 170, 164, 0.25);
+	box-shadow: inset 0 -4rpx 6rpx rgba(244, 143, 177, 0.15);
 	animation: hvpBlinkSoft 6s ease-in-out infinite;
 }
 
-.hvp-mascot__pupil {
+.hvp-mascot__eye-pupil {
 	position: absolute;
 	left: 50%;
-	top: 56%;
-	width: 46%;
-	height: 46%;
-	margin-left: -23%;
-	margin-top: -23%;
+	top: 54%;
+	width: 42%;
+	height: 42%;
+	margin-left: -21%;
+	margin-top: -21%;
 	border-radius: 50%;
-	background: radial-gradient(circle at 38% 32%, #8d6e63, #5d4037 72%, #4e342e);
+	background: radial-gradient(circle at 35% 30%, #8d6e63, #5d4037);
 }
 
-.hvp-mascot__eye-spark {
+.hvp-mascot__eye-shine {
 	position: absolute;
-	right: 24%;
-	top: 24%;
-	width: 20%;
-	height: 20%;
+	right: 22%;
+	top: 20%;
+	width: 22%;
+	height: 22%;
 	border-radius: 50%;
 	background: #fff;
 }
 
-.hvp-mascot__eye-spark--sm {
-	right: auto;
-	left: 28%;
-	top: 38%;
-	width: 10%;
-	height: 10%;
-	opacity: 0.85;
-}
-
 .hvp-mascot__cheek {
 	position: absolute;
-	top: 54%;
-	width: 20%;
-	height: 14%;
+	top: 48%;
+	width: 18%;
+	height: 12%;
 	border-radius: 50%;
-	background: radial-gradient(circle, rgba(255, 138, 128, 0.55) 0%, rgba(255, 138, 128, 0) 72%);
+	background: radial-gradient(circle, rgba(255, 138, 128, 0.4) 0%, transparent 72%);
 }
 
 .hvp-mascot__cheek--l {
-	left: 10%;
+	left: 12%;
 }
 
 .hvp-mascot__cheek--r {
-	right: 10%;
+	right: 12%;
 }
 
 .hvp-mascot__smile {
 	position: absolute;
 	left: 50%;
-	bottom: 16%;
-	width: 34%;
-	height: 18%;
-	margin-left: -17%;
+	bottom: 22%;
+	width: 30%;
+	height: 12%;
+	margin-left: -15%;
 }
 
 .hvp-mascot__smile-arc {
@@ -918,7 +677,7 @@ export default {
 	bottom: 0;
 	width: 100%;
 	height: 100%;
-	border: 4rpx solid #bcaaa4;
+	border: 3rpx solid #bcaaa4;
 	border-top: none;
 	border-radius: 0 0 50% 50% / 0 0 100% 100%;
 	box-sizing: border-box;
@@ -949,7 +708,7 @@ export default {
 	animation: hvpMouthTalk 0.5s ease-in-out infinite alternate;
 }
 
-.hvp--speaking .hvp-mascot__eye-soft {
+.hvp--speaking .hvp-mascot__eye-ball {
 	animation: hvpBlinkSoft 6s ease-in-out infinite, hvpEyeBright 2s ease-in-out infinite;
 }
 
@@ -1024,10 +783,10 @@ export default {
 @keyframes hvpArmWelcome {
 	0%,
 	100% {
-		transform: rotate(28deg);
+		transform: rotate(18deg);
 	}
 	50% {
-		transform: rotate(34deg);
+		transform: rotate(24deg);
 	}
 }
 
