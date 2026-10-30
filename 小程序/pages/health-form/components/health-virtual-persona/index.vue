@@ -11,81 +11,83 @@
 		]"
 	>
 		<view class="hvp-stage">
-			<view class="hvp-halo"></view>
-			<view class="hvp-halo hvp-halo--small"></view>
+			<view class="hvp-halo hvp-halo--tech"></view>
+			<view class="hvp-halo hvp-halo--warm"></view>
 
 			<view v-if="speaking" class="hvp-speak-ring hvp-speak-ring--outer"></view>
 			<view v-if="speaking" class="hvp-speak-ring hvp-speak-ring--inner"></view>
 
 			<view class="hvp-motion">
-				<view class="hvp-mascot">
-					<view class="hvp-mascot__head-wrap">
-						<view class="hvp-mascot__hat">
-							<view class="hvp-mascot__hat-top"></view>
-							<view class="hvp-mascot__hat-front">
-								<view class="hvp-mascot__hat-cross">
-									<view class="hvp-mascot__cross-v"></view>
-									<view class="hvp-mascot__cross-h"></view>
-								</view>
-							</view>
-							<view class="hvp-mascot__hat-shadow"></view>
-						</view>
-
-						<view class="hvp-mascot__face">
-							<view class="hvp-mascot__face-light"></view>
-							<view class="hvp-mascot__eyes">
-								<view class="hvp-mascot__eye">
-									<view class="hvp-mascot__eye-curve"></view>
-								</view>
-								<view class="hvp-mascot__eye">
-									<view class="hvp-mascot__eye-curve"></view>
-								</view>
-							</view>
-							<view class="hvp-mascot__blush hvp-mascot__blush--left"></view>
-							<view class="hvp-mascot__blush hvp-mascot__blush--right"></view>
-							<view class="hvp-mascot__mouth">
-								<view class="hvp-mascot__mouth-smile"></view>
-							</view>
-						</view>
-
-						<view class="hvp-mascot__ear hvp-mascot__ear--left"></view>
-						<view class="hvp-mascot__ear hvp-mascot__ear--right"></view>
+				<view class="hvp-figure">
+					<view class="hvp-orbit">
+						<view class="hvp-orbit-arc hvp-orbit-arc--a"></view>
+						<view class="hvp-orbit-arc hvp-orbit-arc--b"></view>
+						<view class="hvp-orbit-dot hvp-orbit-dot--1"></view>
+						<view class="hvp-orbit-dot hvp-orbit-dot--2"></view>
 					</view>
 
-					<view class="hvp-mascot__body">
-						<view class="hvp-mascot__shoulder hvp-mascot__shoulder--left"></view>
-						<view class="hvp-mascot__shoulder hvp-mascot__shoulder--right"></view>
-
-						<view class="hvp-mascot__uniform">
-							<view class="hvp-mascot__uniform-light"></view>
-							<view class="hvp-mascot__collar">
-								<view class="hvp-mascot__collar-inner"></view>
+					<view class="hvp-head">
+						<view class="hvp-visor">
+							<view class="hvp-visor-glass"></view>
+							<view class="hvp-visor-line hvp-visor-line--l"></view>
+							<view class="hvp-visor-line hvp-visor-line--r"></view>
+							<view class="hvp-visor-badge">
+								<view class="hvp-visor-cross-v"></view>
+								<view class="hvp-visor-cross-h"></view>
 							</view>
-							<view class="hvp-mascot__badge">
-								<view class="hvp-mascot__badge-heart">
-									<view class="hvp-mascot__heart-left"></view>
-									<view class="hvp-mascot__heart-right"></view>
-									<view class="hvp-mascot__heart-bottom"></view>
-								</view>
-							</view>
-							<view class="hvp-mascot__uniform-line"></view>
 						</view>
 
-						<view class="hvp-mascot__arm hvp-mascot__arm--left">
-							<view class="hvp-mascot__hand"></view>
-						</view>
-						<view class="hvp-mascot__arm hvp-mascot__arm--right">
-							<view class="hvp-mascot__hand"></view>
+						<view class="hvp-face">
+							<view class="hvp-face-warm"></view>
+							<view class="hvp-brow hvp-brow--l"></view>
+							<view class="hvp-brow hvp-brow--r"></view>
+							<view class="hvp-eye hvp-eye--l">
+								<view class="hvp-eye-arc"></view>
+							</view>
+							<view class="hvp-eye hvp-eye--r">
+								<view class="hvp-eye-arc"></view>
+							</view>
+							<view class="hvp-blush hvp-blush--l"></view>
+							<view class="hvp-blush hvp-blush--r"></view>
+							<view class="hvp-smile">
+								<view class="hvp-smile-line"></view>
+							</view>
 						</view>
 					</view>
 
-					<view class="hvp-mascot__base-light"></view>
+					<view class="hvp-neck"></view>
+
+					<view class="hvp-torso">
+						<view class="hvp-torso-glass"></view>
+						<view class="hvp-torso-shine"></view>
+						<view class="hvp-collar-notch"></view>
+						<view class="hvp-med-chip">
+							<text class="hvp-med-chip-text">AI+</text>
+						</view>
+						<view class="hvp-stetho">
+							<view class="hvp-stetho-cord"></view>
+							<view class="hvp-stetho-head"></view>
+						</view>
+						<view class="hvp-cross-badge">
+							<view class="hvp-cross-badge-v"></view>
+							<view class="hvp-cross-badge-h"></view>
+						</view>
+					</view>
+
+					<view class="hvp-arm hvp-arm--l">
+						<view class="hvp-arm-cap"></view>
+					</view>
+					<view class="hvp-arm hvp-arm--r">
+						<view class="hvp-arm-cap"></view>
+					</view>
+
+					<view class="hvp-pedestal"></view>
 				</view>
 			</view>
 
-			<view class="hvp-decoration hvp-decoration--one"></view>
-			<view class="hvp-decoration hvp-decoration--two"></view>
-			<view class="hvp-decoration hvp-decoration--three"></view>
+			<view class="hvp-particle hvp-particle--1"></view>
+			<view class="hvp-particle hvp-particle--2"></view>
+			<view class="hvp-particle hvp-particle--3"></view>
 		</view>
 		<text class="hvp-caption" v-if="caption && !hideCaption">{{ caption }}</text>
 	</view>
@@ -134,7 +136,6 @@ export default {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: center;
 	box-sizing: border-box;
 }
 
@@ -146,56 +147,52 @@ export default {
 	pointer-events: none;
 }
 
-.hvp--hero {
-	.hvp-stage {
-		height: 620rpx;
-	}
-
-	.hvp-mascot {
-		transform: scale(1);
-	}
+.hvp--hero .hvp-stage {
+	height: 580rpx;
 }
 
-.hvp--lg {
-	.hvp-stage {
-		height: 500rpx;
-	}
-
-	.hvp-mascot {
-		transform: scale(0.82);
-	}
+.hvp--hero .hvp-figure {
+	transform: scale(1);
 }
 
-.hvp--md {
-	.hvp-stage {
-		height: 380rpx;
-	}
-
-	.hvp-mascot {
-		transform: scale(0.64);
-	}
+.hvp--lg .hvp-stage {
+	height: 480rpx;
 }
 
-.hvp--speaking {
-	.hvp-motion {
-		animation: hvp-float-speaking 3s ease-in-out infinite;
-	}
+.hvp--lg .hvp-figure {
+	transform: scale(0.86);
+}
 
-	.hvp-mascot__mouth-smile {
-		height: 17rpx;
-		border-radius: 0 0 30rpx 30rpx;
-		border-bottom-width: 6rpx;
-	}
+.hvp--md .hvp-stage {
+	height: 360rpx;
+}
 
-	.hvp-mascot__eyes {
-		animation: hvp-eye-talk 2.8s ease-in-out infinite;
-	}
+.hvp--md .hvp-figure {
+	transform: scale(0.68);
+}
+
+.hvp--speaking .hvp-motion {
+	animation: hvp-float-speak 2.8s ease-in-out infinite;
+}
+
+.hvp--speaking .hvp-smile-line {
+	border-bottom-width: 6rpx;
+	height: 14rpx;
+}
+
+.hvp--speaking .hvp-eye-arc {
+	border-top-color: #1565d8;
+	animation: hvp-eye-glow 2s ease-in-out infinite;
+}
+
+.hvp--speaking .hvp-orbit {
+	animation: hvp-orbit-spin 8s linear infinite;
 }
 
 .hvp-stage {
 	position: relative;
 	width: 100%;
-	height: 620rpx;
+	height: 580rpx;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -206,494 +203,531 @@ export default {
 .hvp-motion {
 	position: relative;
 	z-index: 3;
-	animation: hvp-float 4s ease-in-out infinite;
+	animation: hvp-float 4.2s ease-in-out infinite;
 }
 
 .hvp-halo {
 	position: absolute;
-	width: 520rpx;
-	height: 520rpx;
-	border-radius: 50%;
-	background: radial-gradient(
-		circle,
-		rgba(255, 255, 255, 0.48) 0%,
-		rgba(187, 222, 251, 0.22) 42%,
-		rgba(66, 165, 245, 0.02) 72%,
-		rgba(66, 165, 245, 0) 100%
-	);
 	left: 50%;
-	top: 50%;
+	top: 46%;
 	transform: translate(-50%, -50%);
-	z-index: 0;
+	border-radius: 50%;
 	pointer-events: none;
 }
 
-.hvp-halo--small {
-	width: 340rpx;
-	height: 340rpx;
-	background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 72%);
+.hvp-halo--tech {
+	width: 480rpx;
+	height: 480rpx;
+	background: radial-gradient(
+		circle,
+		rgba(0, 229, 255, 0.12) 0%,
+		rgba(66, 165, 245, 0.2) 38%,
+		rgba(21, 101, 216, 0) 72%
+	);
+}
+
+.hvp-halo--warm {
+	width: 320rpx;
+	height: 320rpx;
+	background: radial-gradient(circle, rgba(255, 204, 188, 0.22) 0%, transparent 68%);
+	animation: hvp-warm-pulse 5s ease-in-out infinite;
 }
 
 .hvp-speak-ring {
 	position: absolute;
 	left: 50%;
-	top: 50%;
-	border: 2rpx solid rgba(255, 255, 255, 0.6);
+	top: 46%;
+	border: 2rpx solid rgba(0, 229, 255, 0.45);
 	border-radius: 50%;
 	transform: translate(-50%, -50%);
+	pointer-events: none;
+	z-index: 1;
+}
+
+.hvp-speak-ring--outer {
+	width: 420rpx;
+	height: 420rpx;
+	animation: hvp-ring-pulse 2.8s ease-out infinite;
+}
+
+.hvp-speak-ring--inner {
+	width: 360rpx;
+	height: 360rpx;
+	border-color: rgba(255, 255, 255, 0.35);
+	animation: hvp-ring-pulse 2.8s ease-out 0.7s infinite;
+}
+
+.hvp-figure {
+	position: relative;
+	width: 360rpx;
+	height: 460rpx;
+	transform-origin: center center;
+}
+
+.hvp-orbit {
+	position: absolute;
+	left: 50%;
+	top: 88rpx;
+	width: 300rpx;
+	height: 300rpx;
+	margin-left: -150rpx;
 	z-index: 1;
 	pointer-events: none;
 }
 
-.hvp-speak-ring--outer {
-	width: 460rpx;
-	height: 460rpx;
-	animation: hvp-ring-pulse 3s ease-out infinite;
-}
-
-.hvp-speak-ring--inner {
-	width: 390rpx;
-	height: 390rpx;
-	border-color: rgba(255, 255, 255, 0.38);
-	animation: hvp-ring-pulse 3s ease-out 1s infinite;
-}
-
-.hvp-mascot {
-	position: relative;
-	z-index: 3;
-	width: 440rpx;
-	height: 550rpx;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	transform-origin: center center;
-}
-
-.hvp-mascot__head-wrap {
-	position: relative;
-	z-index: 5;
-	width: 310rpx;
-	height: 300rpx;
-	margin-top: 12rpx;
-	display: flex;
-	justify-content: center;
-	align-items: flex-end;
-}
-
-.hvp-mascot__hat {
+.hvp-orbit-arc {
 	position: absolute;
-	width: 188rpx;
-	height: 94rpx;
-	top: 0;
-	left: 50%;
-	transform: translateX(-50%);
-	z-index: 8;
-}
-
-.hvp-mascot__hat-top {
-	position: absolute;
-	width: 176rpx;
-	height: 76rpx;
-	left: 6rpx;
-	top: 0;
-	border-radius: 88rpx 88rpx 20rpx 20rpx;
-	background: linear-gradient(145deg, #ffffff 0%, #f5fbff 55%, #dceeff 100%);
-	box-shadow:
-		0 8rpx 18rpx rgba(21, 101, 216, 0.12),
-		inset 0 5rpx 8rpx rgba(255, 255, 255, 0.95);
-}
-
-.hvp-mascot__hat-front {
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	width: 188rpx;
-	height: 32rpx;
+	border: 3rpx solid transparent;
 	border-radius: 50%;
-	background: linear-gradient(180deg, #ffffff 0%, #e7f4ff 100%);
-	box-shadow:
-		0 5rpx 10rpx rgba(21, 101, 216, 0.12),
-		inset 0 2rpx 5rpx rgba(255, 255, 255, 0.9);
-	z-index: 2;
 }
 
-.hvp-mascot__hat-cross {
-	position: absolute;
-	left: 50%;
-	top: -30rpx;
-	width: 36rpx;
-	height: 36rpx;
-	transform: translateX(-50%);
-	z-index: 3;
+.hvp-orbit-arc--a {
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	border-top-color: rgba(0, 229, 255, 0.55);
+	border-right-color: rgba(66, 165, 245, 0.2);
+	transform: rotate(-24deg);
 }
 
-.hvp-mascot__cross-v {
+.hvp-orbit-arc--b {
+	left: 18rpx;
+	top: 18rpx;
+	right: 18rpx;
+	bottom: 18rpx;
+	border-bottom-color: rgba(21, 101, 216, 0.35);
+	border-left-color: rgba(255, 255, 255, 0.15);
+	transform: rotate(18deg);
+}
+
+.hvp-orbit-dot {
 	position: absolute;
 	width: 10rpx;
-	height: 34rpx;
-	border-radius: 5rpx;
-	background: linear-gradient(180deg, #64b5f6, #1976d2);
-	left: 13rpx;
-	top: 1rpx;
-}
-
-.hvp-mascot__cross-h {
-	position: absolute;
-	width: 34rpx;
 	height: 10rpx;
-	border-radius: 5rpx;
-	background: linear-gradient(90deg, #64b5f6, #1976d2);
-	left: 1rpx;
-	top: 13rpx;
-}
-
-.hvp-mascot__hat-shadow {
-	position: absolute;
-	width: 150rpx;
-	height: 12rpx;
-	left: 19rpx;
-	bottom: -5rpx;
 	border-radius: 50%;
-	background: rgba(21, 101, 216, 0.1);
-	filter: blur(5rpx);
+	background: #00e5ff;
+	box-shadow: 0 0 12rpx rgba(0, 229, 255, 0.8);
 }
 
-.hvp-mascot__face {
-	position: absolute;
-	width: 276rpx;
-	height: 252rpx;
-	left: 50%;
-	bottom: 0;
-	transform: translateX(-50%);
-	border-radius: 46% 46% 48% 48%;
-	background: linear-gradient(145deg, #fffdfb 0%, #ffefea 45%, #f8dcd6 100%);
-	box-shadow:
-		0 14rpx 30rpx rgba(21, 101, 216, 0.1),
-		inset 0 8rpx 16rpx rgba(255, 255, 255, 0.85),
-		inset 0 -8rpx 15rpx rgba(232, 176, 164, 0.12);
-	overflow: hidden;
+.hvp-orbit-dot--1 {
+	right: 28rpx;
+	top: 42rpx;
+}
+
+.hvp-orbit-dot--2 {
+	left: 36rpx;
+	bottom: 48rpx;
+	opacity: 0.75;
+}
+
+.hvp-head {
+	position: relative;
 	z-index: 4;
+	width: 240rpx;
+	height: 240rpx;
+	margin: 0 auto;
 }
 
-.hvp-mascot__face-light {
+.hvp-visor {
 	position: absolute;
-	width: 160rpx;
-	height: 90rpx;
-	left: 40rpx;
-	top: 10rpx;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.48);
-	filter: blur(18rpx);
-}
-
-.hvp-mascot__eyes {
-	position: absolute;
-	width: 164rpx;
 	left: 50%;
-	top: 104rpx;
-	transform: translateX(-50%);
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	z-index: 3;
+	top: 0;
+	width: 228rpx;
+	height: 72rpx;
+	margin-left: -114rpx;
+	z-index: 6;
 }
 
-.hvp-mascot__eye {
+.hvp-visor-glass {
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	border-radius: 36rpx 36rpx 8rpx 8rpx;
+	background: linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.95) 0%,
+		rgba(187, 222, 251, 0.75) 100%
+	);
+	border: 2rpx solid rgba(255, 255, 255, 0.9);
+	box-shadow:
+		0 8rpx 24rpx rgba(21, 101, 216, 0.15),
+		inset 0 2rpx 8rpx rgba(255, 255, 255, 0.9);
+}
+
+.hvp-visor-line {
+	position: absolute;
+	top: 22rpx;
 	width: 48rpx;
-	height: 24rpx;
+	height: 4rpx;
+	border-radius: 4rpx;
+	background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.7), transparent);
+}
+
+.hvp-visor-line--l {
+	left: 16rpx;
+}
+
+.hvp-visor-line--r {
+	right: 16rpx;
+}
+
+.hvp-visor-badge {
+	position: absolute;
+	left: 50%;
+	top: 14rpx;
+	width: 28rpx;
+	height: 28rpx;
+	margin-left: -14rpx;
+}
+
+.hvp-visor-cross-v,
+.hvp-visor-cross-h {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	background: linear-gradient(180deg, #42a5f5, #1565d8);
+	border-radius: 3rpx;
+	transform: translate(-50%, -50%);
+}
+
+.hvp-visor-cross-v {
+	width: 6rpx;
+	height: 20rpx;
+}
+
+.hvp-visor-cross-h {
+	width: 20rpx;
+	height: 6rpx;
+}
+
+.hvp-face {
+	position: absolute;
+	left: 50%;
+	top: 36rpx;
+	width: 220rpx;
+	height: 200rpx;
+	margin-left: -110rpx;
+	border-radius: 50%;
+	background: linear-gradient(165deg, #fffaf7 0%, #ffe8dc 48%, #ffd4c4 100%);
+	border: 2rpx solid rgba(255, 255, 255, 0.85);
+	box-shadow:
+		0 16rpx 36rpx rgba(21, 101, 216, 0.12),
+		inset 0 8rpx 20rpx rgba(255, 255, 255, 0.65);
+	overflow: hidden;
+}
+
+.hvp-face-warm {
+	position: absolute;
+	left: 10%;
+	top: 12%;
+	right: 10%;
+	bottom: 20%;
+	border-radius: 50%;
+	background: radial-gradient(circle at 50% 40%, rgba(255, 171, 145, 0.28) 0%, transparent 70%);
+}
+
+.hvp-brow {
+	position: absolute;
+	top: 72rpx;
+	width: 36rpx;
+	height: 8rpx;
+	border-top: 3rpx solid #b0a090;
+	border-radius: 50% 50% 0 0;
+	opacity: 0.85;
+}
+
+.hvp-brow--l {
+	left: 52rpx;
+	transform: rotate(-6deg);
+}
+
+.hvp-brow--r {
+	right: 52rpx;
+	transform: rotate(6deg) scaleX(-1);
+}
+
+.hvp-eye {
+	position: absolute;
+	top: 88rpx;
+	width: 44rpx;
+	height: 28rpx;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	overflow: hidden;
 }
 
-.hvp-mascot__eye-curve {
-	width: 38rpx;
-	height: 19rpx;
-	border-top: 6rpx solid #526b82;
-	border-radius: 50% 50% 0 0;
-	transform: translateY(7rpx);
+.hvp-eye--l {
+	left: 48rpx;
 }
 
-.hvp-mascot__blush {
-	position: absolute;
+.hvp-eye--r {
+	right: 48rpx;
+}
+
+.hvp-eye-arc {
 	width: 36rpx;
-	height: 19rpx;
-	border-radius: 50%;
-	background: rgba(255, 171, 145, 0.4);
-	filter: blur(4rpx);
-	top: 145rpx;
-	z-index: 2;
+	height: 18rpx;
+	border-top: 5rpx solid #4a6572;
+	border-radius: 50% 50% 0 0;
+	transform: translateY(6rpx);
 }
 
-.hvp-mascot__blush--left {
-	left: 32rpx;
-}
-
-.hvp-mascot__blush--right {
-	right: 32rpx;
-}
-
-.hvp-mascot__mouth {
+.hvp-blush {
 	position: absolute;
-	width: 48rpx;
-	height: 26rpx;
-	left: 50%;
-	top: 168rpx;
-	transform: translateX(-50%);
-	display: flex;
-	justify-content: center;
-	overflow: hidden;
-	z-index: 4;
-}
-
-.hvp-mascot__mouth-smile {
-	width: 34rpx;
-	height: 17rpx;
-	border-bottom: 5rpx solid #c77976;
-	border-radius: 0 0 50% 50%;
-	transition: all 0.3s ease;
-}
-
-.hvp-mascot__ear {
-	position: absolute;
-	width: 35rpx;
-	height: 52rpx;
-	bottom: 85rpx;
+	top: 118rpx;
+	width: 40rpx;
+	height: 22rpx;
 	border-radius: 50%;
-	background: linear-gradient(145deg, #fff4ef, #f2d4cd);
-	box-shadow: inset 0 4rpx 8rpx rgba(255, 255, 255, 0.7);
-	z-index: 2;
+	background: rgba(255, 138, 128, 0.35);
+	filter: blur(3rpx);
 }
 
-.hvp-mascot__ear--left {
-	left: 4rpx;
+.hvp-blush--l {
+	left: 28rpx;
 }
 
-.hvp-mascot__ear--right {
-	right: 4rpx;
+.hvp-blush--r {
+	right: 28rpx;
 }
 
-.hvp-mascot__body {
-	position: relative;
-	width: 390rpx;
-	height: 260rpx;
-	margin-top: -12rpx;
-	z-index: 2;
-}
-
-.hvp-mascot__shoulder {
-	position: absolute;
-	width: 170rpx;
-	height: 170rpx;
-	top: 18rpx;
-	border-radius: 50%;
-	background: linear-gradient(145deg, #ffffff 0%, #e8f5ff 65%, #d1e8fb 100%);
-	box-shadow: 0 10rpx 22rpx rgba(21, 101, 216, 0.1);
-}
-
-.hvp-mascot__shoulder--left {
-	left: 4rpx;
-}
-
-.hvp-mascot__shoulder--right {
-	right: 4rpx;
-}
-
-.hvp-mascot__uniform {
+.hvp-smile {
 	position: absolute;
 	left: 50%;
-	top: 32rpx;
-	transform: translateX(-50%);
-	width: 278rpx;
-	height: 250rpx;
-	border-radius: 110rpx 110rpx 30rpx 30rpx;
-	overflow: hidden;
-	background: linear-gradient(135deg, #ffffff 0%, #f2f9ff 45%, #d8edff 100%);
-	box-shadow:
-		0 16rpx 28rpx rgba(21, 101, 216, 0.14),
-		inset 0 6rpx 12rpx rgba(255, 255, 255, 0.95);
-	z-index: 3;
-}
-
-.hvp-mascot__uniform-light {
-	position: absolute;
-	width: 130rpx;
-	height: 200rpx;
-	left: 22rpx;
-	top: -20rpx;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.55);
-	filter: blur(20rpx);
-}
-
-.hvp-mascot__collar {
-	position: absolute;
-	width: 80rpx;
-	height: 45rpx;
-	left: 50%;
-	top: -10rpx;
-	transform: translateX(-50%);
-	border-radius: 0 0 40rpx 40rpx;
-	background: #b9e0fb;
-	z-index: 4;
-}
-
-.hvp-mascot__collar-inner {
-	position: absolute;
+	bottom: 48rpx;
 	width: 56rpx;
 	height: 28rpx;
-	left: 12rpx;
-	top: -2rpx;
-	border-radius: 0 0 28rpx 28rpx;
-	background: #eaf6ff;
+	margin-left: -28rpx;
+	display: flex;
+	justify-content: center;
 }
 
-.hvp-mascot__badge {
+.hvp-smile-line {
+	width: 40rpx;
+	height: 12rpx;
+	border-bottom: 4rpx solid #c97b7b;
+	border-radius: 0 0 50% 50%;
+	transition: all 0.25s ease;
+}
+
+.hvp-neck {
+	position: relative;
+	z-index: 3;
+	width: 56rpx;
+	height: 28rpx;
+	margin: -8rpx auto 0;
+	border-radius: 0 0 20rpx 20rpx;
+	background: linear-gradient(180deg, #ffd4c4, #ffe8dc);
+}
+
+.hvp-torso {
+	position: relative;
+	z-index: 2;
+	width: 280rpx;
+	height: 200rpx;
+	margin: -4rpx auto 0;
+	border-radius: 48% 48% 36% 36% / 42% 42% 58% 58%;
+	overflow: hidden;
+	background: linear-gradient(155deg, #ffffff 0%, #e8f4fc 45%, #bbdefb 100%);
+	border: 2rpx solid rgba(255, 255, 255, 0.92);
+	box-shadow:
+		0 20rpx 40rpx rgba(21, 101, 216, 0.16),
+		inset 0 6rpx 16rpx rgba(255, 255, 255, 0.9);
+}
+
+.hvp-torso-glass {
 	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	height: 55%;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent);
+}
+
+.hvp-torso-shine {
+	position: absolute;
+	left: 24rpx;
+	top: 20rpx;
+	width: 80rpx;
+	height: 140rpx;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.45);
+	filter: blur(16rpx);
+}
+
+.hvp-collar-notch {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	width: 72rpx;
+	height: 36rpx;
+	margin-left: -36rpx;
+	border-radius: 0 0 36rpx 36rpx;
+	background: #e3f2fd;
+	border: 2rpx solid rgba(144, 202, 249, 0.5);
+	border-top: none;
+}
+
+.hvp-med-chip {
+	position: absolute;
+	left: 28rpx;
+	top: 52rpx;
+	padding: 6rpx 14rpx;
+	border-radius: 999rpx;
+	background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(21, 101, 216, 0.08));
+	border: 1rpx solid rgba(0, 229, 255, 0.35);
+}
+
+.hvp-med-chip-text {
+	font-size: 20rpx;
+	font-weight: 700;
+	color: #1565d8;
+	letter-spacing: 1rpx;
+}
+
+.hvp-stetho {
+	position: absolute;
+	right: 32rpx;
+	top: 48rpx;
+	width: 64rpx;
+	height: 72rpx;
+}
+
+.hvp-stetho-cord {
+	position: absolute;
+	right: 0;
+	top: 0;
 	width: 48rpx;
 	height: 48rpx;
-	right: 46rpx;
-	top: 100rpx;
-	border-radius: 50%;
-	background: linear-gradient(145deg, #ffffff, #e5f3ff);
-	box-shadow:
-		0 5rpx 12rpx rgba(21, 101, 216, 0.12),
-		inset 0 2rpx 5rpx rgba(255, 255, 255, 0.95);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 5;
+	border: 3rpx solid #90a4ae;
+	border-bottom: none;
+	border-left: none;
+	border-radius: 0 100% 0 0;
 }
 
-.hvp-mascot__badge-heart {
-	position: relative;
-	width: 24rpx;
+.hvp-stetho-head {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 26rpx;
+	height: 26rpx;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #eceff1, #90a4ae);
+	border: 2rpx solid #fff;
+}
+
+.hvp-cross-badge {
+	position: absolute;
+	left: 50%;
+	top: 88rpx;
+	width: 52rpx;
+	height: 52rpx;
+	margin-left: -26rpx;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #42a5f5, #1565d8);
+	box-shadow: 0 6rpx 16rpx rgba(21, 101, 216, 0.35);
+}
+
+.hvp-cross-badge-v,
+.hvp-cross-badge-h {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	background: #fff;
+	border-radius: 2rpx;
+	transform: translate(-50%, -50%);
+}
+
+.hvp-cross-badge-v {
+	width: 6rpx;
 	height: 24rpx;
 }
 
-.hvp-mascot__heart-left,
-.hvp-mascot__heart-right {
+.hvp-cross-badge-h {
+	width: 24rpx;
+	height: 6rpx;
+}
+
+.hvp-arm {
 	position: absolute;
-	width: 13rpx;
-	height: 17rpx;
-	top: 1rpx;
-	background: #f5a99d;
-	border-radius: 12rpx 12rpx 0 0;
-}
-
-.hvp-mascot__heart-left {
-	left: 1rpx;
-	transform: rotate(-45deg);
-	transform-origin: 100% 100%;
-}
-
-.hvp-mascot__heart-right {
-	right: 1rpx;
-	transform: rotate(45deg);
-	transform-origin: 0 100%;
-}
-
-.hvp-mascot__heart-bottom {
-	position: absolute;
-	width: 16rpx;
-	height: 16rpx;
-	left: 4rpx;
-	top: 8rpx;
-	transform: rotate(45deg);
-	background: #f5a99d;
-	border-radius: 0 0 4rpx 0;
-}
-
-.hvp-mascot__uniform-line {
-	position: absolute;
-	width: 2rpx;
-	height: 90rpx;
-	left: 50%;
-	top: 80rpx;
-	transform: translateX(-50%);
-	background: rgba(66, 165, 245, 0.12);
-}
-
-.hvp-mascot__arm {
-	position: absolute;
-	width: 84rpx;
-	height: 126rpx;
-	top: 80rpx;
-	border-radius: 45rpx;
-	background: linear-gradient(145deg, #ffffff 0%, #e7f4ff 100%);
+	top: 248rpx;
+	width: 72rpx;
+	height: 100rpx;
+	border-radius: 40rpx;
+	background: linear-gradient(165deg, #ffffff, #e3f2fd);
+	border: 2rpx solid rgba(255, 255, 255, 0.9);
 	box-shadow: 0 8rpx 18rpx rgba(21, 101, 216, 0.1);
-	z-index: 2;
+	z-index: 1;
 }
 
-.hvp-mascot__arm--left {
-	left: 0;
-	transform: rotate(8deg);
+.hvp-arm--l {
+	left: 8rpx;
+	transform: rotate(14deg);
 }
 
-.hvp-mascot__arm--right {
-	right: 0;
-	transform: rotate(-8deg);
+.hvp-arm--r {
+	right: 8rpx;
+	transform: rotate(-10deg);
 }
 
-.hvp-mascot__hand {
+.hvp-arm-cap {
 	position: absolute;
-	width: 74rpx;
-	height: 72rpx;
 	left: 50%;
-	bottom: -5rpx;
-	transform: translateX(-50%);
+	bottom: -4rpx;
+	width: 64rpx;
+	height: 64rpx;
+	margin-left: -32rpx;
 	border-radius: 50%;
-	background: linear-gradient(145deg, #ffffff 0%, #e3f2fd 100%);
-	box-shadow:
-		inset 0 4rpx 8rpx rgba(255, 255, 255, 0.9),
-		0 4rpx 10rpx rgba(21, 101, 216, 0.08);
+	background: linear-gradient(180deg, #ffffff, #e1f0fa);
+	border: 2rpx solid rgba(144, 202, 249, 0.4);
 }
 
-.hvp-mascot__base-light {
+.hvp-pedestal {
 	position: absolute;
-	width: 300rpx;
-	height: 34rpx;
 	left: 50%;
-	bottom: 0;
-	transform: translateX(-50%);
+	bottom: 8rpx;
+	width: 240rpx;
+	height: 28rpx;
+	margin-left: -120rpx;
 	border-radius: 50%;
-	background: rgba(21, 101, 216, 0.12);
-	filter: blur(16rpx);
-	z-index: -1;
+	background: radial-gradient(ellipse, rgba(21, 101, 216, 0.2) 0%, transparent 72%);
 }
 
-.hvp-decoration {
+.hvp-particle {
 	position: absolute;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.82);
-	box-shadow: 0 0 16rpx rgba(255, 255, 255, 0.7);
-	z-index: 2;
+	border-radius: 4rpx;
+	background: rgba(0, 229, 255, 0.65);
+	box-shadow: 0 0 10rpx rgba(0, 229, 255, 0.5);
 	pointer-events: none;
+	z-index: 2;
 }
 
-.hvp-decoration--one {
-	width: 12rpx;
-	height: 12rpx;
-	left: 18%;
-	top: 30%;
-	animation: hvp-glow 3s ease-in-out infinite;
+.hvp-particle--1 {
+	width: 8rpx;
+	height: 8rpx;
+	left: 14%;
+	top: 32%;
+	animation: hvp-particle 3.2s ease-in-out infinite;
 }
 
-.hvp-decoration--two {
-	width: 9rpx;
-	height: 9rpx;
-	right: 18%;
-	top: 38%;
-	animation: hvp-glow 4s ease-in-out 1s infinite;
+.hvp-particle--2 {
+	width: 6rpx;
+	height: 6rpx;
+	right: 16%;
+	top: 40%;
+	animation: hvp-particle 4s ease-in-out 0.8s infinite;
 }
 
-.hvp-decoration--three {
-	width: 7rpx;
-	height: 7rpx;
-	right: 24%;
-	bottom: 22%;
-	animation: hvp-glow 3.5s ease-in-out 0.5s infinite;
+.hvp-particle--3 {
+	width: 5rpx;
+	height: 5rpx;
+	right: 22%;
+	bottom: 28%;
+	background: rgba(255, 171, 145, 0.8);
+	box-shadow: 0 0 8rpx rgba(255, 171, 145, 0.5);
+	animation: hvp-particle 3.6s ease-in-out 1.4s infinite;
 }
 
 .hvp-caption {
@@ -716,60 +750,72 @@ export default {
 	100% {
 		transform: translateY(0);
 	}
-
 	50% {
-		transform: translateY(-10rpx);
+		transform: translateY(-12rpx);
 	}
 }
 
-@keyframes hvp-float-speaking {
+@keyframes hvp-float-speak {
 	0%,
 	100% {
 		transform: translateY(0);
 	}
-
 	50% {
-		transform: translateY(-7rpx);
+		transform: translateY(-8rpx);
 	}
 }
 
 @keyframes hvp-ring-pulse {
 	0% {
-		opacity: 0.15;
-		transform: translate(-50%, -50%) scale(0.92);
+		opacity: 0.2;
+		transform: translate(-50%, -50%) scale(0.94);
 	}
-
-	50% {
-		opacity: 0.55;
-	}
-
 	100% {
 		opacity: 0;
-		transform: translate(-50%, -50%) scale(1.12);
+		transform: translate(-50%, -50%) scale(1.1);
 	}
 }
 
-@keyframes hvp-glow {
+@keyframes hvp-warm-pulse {
+	0%,
+	100% {
+		opacity: 0.75;
+		transform: translate(-50%, -50%) scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1.05);
+	}
+}
+
+@keyframes hvp-orbit-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes hvp-eye-glow {
+	0%,
+	100% {
+		border-top-color: #4a6572;
+	}
+	50% {
+		border-top-color: #1565d8;
+	}
+}
+
+@keyframes hvp-particle {
 	0%,
 	100% {
 		opacity: 0.35;
-		transform: scale(0.8);
+		transform: translateY(0);
 	}
-
 	50% {
 		opacity: 1;
-		transform: scale(1.2);
-	}
-}
-
-@keyframes hvp-eye-talk {
-	0%,
-	100% {
-		opacity: 1;
-	}
-
-	50% {
-		opacity: 0.7;
+		transform: translateY(-8rpx);
 	}
 }
 </style>
