@@ -144,48 +144,40 @@
 
 			<view class="flat-section flat-card">
 				<text class="flat-section__title">更多</text>
-				<view
-					class="flat-row"
-					v-for="item in moreMenus"
-					:key="item.key"
-					@click="onMoreTap(item)"
-				>
-					<view class="flat-row__icon" :style="{ background: item.iconBg }">
-						<image v-if="meAssets.more[item.key]" :src="meAssets.more[item.key]" mode="aspectFit" class="flat-row__img"></image>
-						<u-icon v-else :name="item.icon" :size="38" :color="item.iconColor"></u-icon>
+				<template v-for="item in moreMenus">
+					<button
+						v-if="item.action === 'kf'"
+						:key="item.key"
+						class="flat-row flat-row--contact"
+						open-type="contact"
+						hover-class="flat-row--contact-hover"
+					>
+						<view class="flat-row__icon" :style="{ background: item.iconBg }">
+							<image v-if="meAssets.more[item.key]" :src="meAssets.more[item.key]" mode="aspectFit" class="flat-row__img"></image>
+							<u-icon v-else :name="item.icon" :size="38" :color="item.iconColor"></u-icon>
+						</view>
+						<text class="flat-row__label">{{ item.name }}</text>
+						<text v-if="item.desc" class="flat-row__desc">{{ item.desc }}</text>
+						<u-icon name="arrow-right" size="24" color="#C7C7CC"></u-icon>
+					</button>
+					<view
+						v-else
+						:key="item.key"
+						class="flat-row"
+						@click="onMoreTap(item)"
+					>
+						<view class="flat-row__icon" :style="{ background: item.iconBg }">
+							<image v-if="meAssets.more[item.key]" :src="meAssets.more[item.key]" mode="aspectFit" class="flat-row__img"></image>
+							<u-icon v-else :name="item.icon" :size="38" :color="item.iconColor"></u-icon>
+						</view>
+						<text class="flat-row__label">{{ item.name }}</text>
+						<text v-if="item.desc" class="flat-row__desc">{{ item.desc }}</text>
+						<u-icon name="arrow-right" size="24" color="#C7C7CC"></u-icon>
 					</view>
-					<text class="flat-row__label">{{ item.name }}</text>
-					<text v-if="item.desc" class="flat-row__desc">{{ item.desc }}</text>
-					<u-icon name="arrow-right" size="24" color="#C7C7CC"></u-icon>
-				</view>
+				</template>
 			</view>
 		</view>
 
-		<u-mask :show="mask_show">
-			<view class="warp">
-				<view>
-					<view class="kf-box">
-						<view class="kf-title">联系客服</view>
-						<view class="kf-code">
-							<u-image width="420" height="420" :src="setting.wx_code"></u-image>
-						</view>
-						<view class="kf-tip">扫码添加客服微信</view>
-						<view class="kf-btn">
-							<u-button
-								type="success"
-								shape="circle"
-								:customStyle="{ background: 'linear-gradient(141deg, #A4DB88 0%, #18AF38 100%)' }"
-								hover-class="none"
-								open-type="contact"
-							>在线客服</u-button>
-						</view>
-					</view>
-					<view class="kf-close" @click="closeKf">
-						<u-icon name="close-circle" color="#fff" size="60"></u-icon>
-					</view>
-				</view>
-			</view>
-		</u-mask>
 		<u-mask :show="descShow">
 			<view class="desc-box">
 				<view class="desc-title">等级说明</view>
@@ -218,7 +210,6 @@
 		data() {
 			return {
 				isLoading: true,
-				mask_show: false,
 				descShow: false,
 				badge_list: [],
 				envGrowBadgeUrl: ENV_GROW_BADGE_URL,
@@ -383,10 +374,6 @@
 				this.$u.route('/pages/member/info')
 			},
 			onMoreTap(item) {
-				if (item.action === 'kf') {
-					this.openKf()
-					return
-				}
 				if (item.action === 'about') {
 					this.goShukangAbout()
 					return
@@ -396,12 +383,6 @@
 					return
 				}
 				if (item.url) this.$u.route(item.url)
-			},
-			openKf() {
-				this.mask_show = true
-			},
-			closeKf() {
-				this.mask_show = false
 			},
 			openDesc() {
 				this.descShow = true
@@ -688,6 +669,22 @@
 	.flat-row:first-of-type {
 		border-top: none;
 	}
+	.flat-row--contact {
+		margin: 0;
+		width: 100%;
+		box-sizing: border-box;
+		border-radius: 0;
+		background: #fff;
+		line-height: normal;
+		font-size: inherit;
+		text-align: left;
+	}
+	.flat-row--contact::after {
+		border: none;
+	}
+	.flat-row--contact-hover {
+		background: #f7f7f7;
+	}
 	.flat-row__icon {
 		width: 72rpx;
 		height: 72rpx;
@@ -716,43 +713,6 @@
 		font-size: 24rpx;
 		color: $flat-sub;
 		text-align: right;
-	}
-
-	.warp {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
-	}
-	.kf-box {
-		width: 560rpx;
-		border-radius: 24rpx;
-		background: #fff;
-		padding: 36rpx 30rpx;
-		text-align: center;
-	}
-	.kf-title {
-		font-size: 32rpx;
-		font-weight: 700;
-		color: $flat-text;
-	}
-	.kf-code {
-		margin-top: 20rpx;
-		display: flex;
-		justify-content: center;
-	}
-	.kf-tip {
-		margin-top: 10rpx;
-		font-size: 24rpx;
-		color: $flat-sub;
-	}
-	.kf-btn {
-		margin-top: 30rpx;
-		padding: 0 30rpx;
-	}
-	.kf-close {
-		margin-top: 30rpx;
-		text-align: center;
 	}
 
 	.desc-box {
