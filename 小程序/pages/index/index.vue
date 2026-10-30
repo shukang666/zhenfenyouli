@@ -19,6 +19,24 @@
 				<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			</template>
 
+			<home-prd-home
+				v-if="!showLegacyHome"
+				:is-login="isLogin"
+				:points="prdHomePoints"
+				:joined-count="prdHomeJoinedCount"
+				:following-count="prdFollowingCount"
+				@activities="goHomeActivityJoin"
+				@create="goHomeActivityPublish"
+				@health="goPrdHomeHealth"
+				@benefits="goPrdHomeBenefits"
+				@my-activities="goPrdHomeMyActivities"
+				@points="goPrdHomePoints"
+				@following="goPrdHomeFollowing"
+				@featured="goPrdFeaturedCampaign"
+			></home-prd-home>
+
+			<!-- 原首页内容（PRD 新首页上线后暂隐藏，保留便于回滚） -->
+			<block v-if="showLegacyHome">
 			<view class="glass-page__ambient"></view>
 
 			<!-- 活动搜索 + 扫码入口（点击进活动搜索页，右侧扫码直达活动详情） -->
@@ -149,6 +167,7 @@
 					</button>
 				</view>
 			</view>
+			</block>
 		</z-paging>
 
 		<!-- 蒙层只用 view：cover-view 是原生层，离开首页后仍会盖住扫码签到页，导致教程关不掉、也点不了签到 -->
@@ -203,6 +222,10 @@ import { DISCOVER_FILTER_PENDING_KEY } from '@/common/activityTabNav.js'
 import HomeActivityPromoBanner from '@/components/home-activity-promo-banner/index.vue'
 import HomeOngoingSection from '@/components/home-ongoing-section/index.vue'
 import HomeWeeklyPicks from '@/components/home-weekly-picks/index.vue'
+import HomePrdHome from '@/components/home-prd-home/index.vue'
+import { buildWebActiveEntryPath } from '@/common/webActiveEntry.js'
+/** 绿动生活领航员 Web 活动（见 install_life_navigator_active.php） */
+const LIFE_NAVIGATOR_ACTIVE_ID = 69
 export default {
 	components: {
 		SkeletonScreen,
@@ -210,10 +233,12 @@ export default {
 		HomeActivityPromoBanner,
 		HomeOngoingSection,
 		HomeWeeklyPicks,
+		HomePrdHome,
 	},
 		mixins: [careGesture],
 		data() {
 			return {
+				showLegacyHome: false,
 				isLoading: true,
 				dataList: [],
 				ongoingList: [],
@@ -314,6 +339,23 @@ export default {
 			},
 			weeklyPreviewList() {
 				return (this.weeklyList || []).slice(0, 2)
+			},
+			prdHomePoints() {
+				const u = this.userInfo || {}
+				const n = u.point != null ? u.point : u.points
+				return Number(n) || 0
+			},
+			prdHomeJoinedCount() {
+				const u = this.userInfo || {}
+				if (u.active_count != null) return Number(u.active_count) || 0
+				if (u.join_count != null) return Number(u.join_count) || 0
+				return Number(this.ongoingTotal) || 0
+			},
+			prdFollowingCount() {
+				const u = this.userInfo || {}
+				if (u.follow_count != null) return Number(u.follow_count) || 0
+				if (u.following_count != null) return Number(u.following_count) || 0
+				return 0
 			},
 			// 问候文本计算属性
 			greetingText() {
@@ -692,6 +734,33 @@ export default {
 			goHomeActivityPublish() {
 				if (!this.$u.func.checkLogin()) return
 				this.$u.route('/pages/activity/member-active-publish')
+			},
+			goPrdHomeHealth() {
+				uni.switchTab({ url: '/pages/health/health' })
+			},
+			goPrdHomeBenefits() {
+				uni.switchTab({ url: '/pages/mall/mall' })
+			},
+			goPrdHomePoints() {
+				if (!this.$u.func.checkLogin()) return
+				this.$u.route('/pages/points/points')
+			},
+			goPrdHomeMyActivities() {
+				if (!this.$u.func.checkLogin()) return
+				this.$u.route('/pages/activity/my_activity')
+			},
+			goPrdHomeFollowing() {
+				this.$u.toast('关注功能即将上线')
+			},
+			goPrdFeaturedCampaign() {
+				const path = buildWebActiveEntryPath(LIFE_NAVIGATOR_ACTIVE_ID, {
+					title: '绿动生活领航员',
+				})
+				if (this.$u.func && typeof this.$u.func.openActiveDetail === 'function') {
+					this.$u.func.openActiveDetail({ id: LIFE_NAVIGATOR_ACTIVE_ID, title: '绿动生活领航员' })
+					return
+				}
+				this.$u.route(path)
 			},
 			goOngoingList() {
 				if (!this.$u.func.checkLogin()) return
