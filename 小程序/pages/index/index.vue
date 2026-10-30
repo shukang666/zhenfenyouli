@@ -15,6 +15,10 @@
 			<template slot="top">
 				<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(238,242,239,0)'}" :border-bottom="false">
 					<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/logo.png" class="home-logo" mode="aspectFill"></image>
+					<view v-if="!showLegacyHome" slot="right" class="home-location-readonly">
+						<u-icon name="map" size="28" color="#738264"></u-icon>
+						<text class="home-location-text">{{ homeLocationLabel }}</text>
+					</view>
 				</u-navbar>
 				<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			</template>
@@ -357,6 +361,19 @@ export default {
 				const u = this.userInfo || {}
 				if (u.follow_count != null) return Number(u.follow_count) || 0
 				return 0
+			},
+			homeLocationLabel() {
+				const u = this.userInfo || {}
+				const parent = String(u.community_parent || '').trim()
+				const community = String(u.community || '').trim()
+				const shortParent = parent.replace(/街道$/u, '').replace(/办事处$/u, '')
+				if (shortParent && community) {
+					return `${shortParent} · ${community}`
+				}
+				if (shortParent) return shortParent
+				if (community) return community
+				if (!this.isLogin) return '登录后显示区域'
+				return '未设置社区'
 			},
 			// 问候文本计算属性
 			greetingText() {
@@ -915,6 +932,25 @@ export default {
 		width: 320rpx;
 		height: 88rpx;
 		margin-left: 30rpx;
+	}
+
+	.home-location-readonly {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 10rpx;
+		max-width: 340rpx;
+		padding-right: 12rpx;
+		pointer-events: none;
+	}
+	.home-location-text {
+		font-size: 22rpx;
+		line-height: 1.3;
+		color: #738264;
+		letter-spacing: 1rpx;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.press-scale {

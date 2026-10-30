@@ -16,6 +16,7 @@ use app\admin\model\forum\ForumLikeModel;
 use app\admin\model\forum\ForumModel;
 use app\admin\model\forum\ForumCateModel;
 use app\admin\model\member\CommunityModel;
+use app\admin\model\member\CommunityParentModel;
 use app\admin\model\goods\GoodsCategoryModel;
 use app\admin\model\goods\GoodsModel;
 use app\admin\model\member\MemberModel;
@@ -357,7 +358,7 @@ class TabHomeService
     protected function fetchIndexUserBrief(): array
     {
         $member = MemberModel::where('id', $this->userId)
-            ->field('id,nickname,avatar,point,is_environmental,clock_pre_learn')
+            ->field('id,nickname,avatar,point,is_environmental,clock_pre_learn,community_id,community_parent_id')
             ->find();
         if (empty($member)) {
             return [];
@@ -378,6 +379,14 @@ class TabHomeService
         $row['clock_days'] = $row['clock_count'];
         $row['my_activity_count'] = $this->countUserMyActivities();
         $row['follow_count'] = ActiveInterestModel::countByUser($this->userId);
+        $row['community'] = '';
+        $row['community_parent'] = '';
+        if (!empty($row['community_id'])) {
+            $row['community'] = (string) CommunityModel::where('id', (int) $row['community_id'])->value('name');
+        }
+        if (!empty($row['community_parent_id'])) {
+            $row['community_parent'] = (string) CommunityParentModel::where('id', (int) $row['community_parent_id'])->value('name');
+        }
         return $row;
     }
 
