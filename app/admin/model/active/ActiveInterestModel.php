@@ -14,6 +14,14 @@ class ActiveInterestModel extends \think\Model
         return (int) self::where('active_id', $activeId)->count();
     }
 
+    public static function countByUser(int $userId): int
+    {
+        if ($userId <= 0) {
+            return 0;
+        }
+        return (int) self::where('user_id', $userId)->count();
+    }
+
     public static function isInterested(int $activeId, int $userId): bool
     {
         if ($activeId <= 0 || $userId <= 0) {

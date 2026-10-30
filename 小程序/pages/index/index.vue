@@ -341,20 +341,21 @@ export default {
 				return (this.weeklyList || []).slice(0, 2)
 			},
 			prdHomePoints() {
+				if (!this.isLogin) return 0
 				const u = this.userInfo || {}
 				const n = u.point != null ? u.point : u.points
 				return Number(n) || 0
 			},
 			prdHomeJoinedCount() {
+				if (!this.isLogin) return 0
 				const u = this.userInfo || {}
-				if (u.active_count != null) return Number(u.active_count) || 0
-				if (u.join_count != null) return Number(u.join_count) || 0
-				return Number(this.ongoingTotal) || 0
+				if (u.my_activity_count != null) return Number(u.my_activity_count) || 0
+				return 0
 			},
 			prdFollowingCount() {
+				if (!this.isLogin) return 0
 				const u = this.userInfo || {}
 				if (u.follow_count != null) return Number(u.follow_count) || 0
-				if (u.following_count != null) return Number(u.following_count) || 0
 				return 0
 			},
 			// 问候文本计算属性

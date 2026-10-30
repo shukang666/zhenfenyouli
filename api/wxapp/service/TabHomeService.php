@@ -376,7 +376,35 @@ class TabHomeService
         $forumTimes = ForumModel::where(['type' => 2, 'user_id' => $this->userId])->column('create_time');
         $row['clock_count'] = $this->calcNowContinueSignDays($forumTimes);
         $row['clock_days'] = $row['clock_count'];
+        $row['my_activity_count'] = $this->countUserMyActivities();
+        $row['follow_count'] = ActiveInterestModel::countByUser($this->userId);
         return $row;
+    }
+
+    /** 已报名 + 我发起的活动数（去重，仅统计未删除且上架） */
+    protected function countUserMyActivities(): int
+    {
+        if ($this->userId <= 0) {
+            return 0;
+        }
+        $signedIds = ActiveSIgnModel::where('user_id', $this->userId)->column('active_id');
+        $publishedIds = ActiveModel::where('publish_user_id', $this->userId)
+            ->where('delete_time', 0)
+            ->column('id');
+        $idSet = [];
+        foreach (array_merge($signedIds ?: [], $publishedIds ?: []) as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                $idSet[$id] = true;
+            }
+        }
+        if (!$idSet) {
+            return 0;
+        }
+        return (int) ActiveModel::whereIn('id', array_keys($idSet))
+            ->where('delete_time', 0)
+            ->where('status', 1)
+            ->count();
     }
 
     protected function fetchFullUserInfo(): array
