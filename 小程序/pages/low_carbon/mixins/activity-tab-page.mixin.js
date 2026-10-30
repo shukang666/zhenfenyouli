@@ -25,9 +25,6 @@ export default {
     this.applyDiscoverPendingFromStorage();
     if (!this.isLogin) return;
     this.refreshMemberActiveAfterPublish();
-    if (this._memberActiveNeedRefresh || this.discover_filter === "nearby") {
-      this.fetchDiscoverList(true);
-    }
     this.$nextTick(() => this.syncCareGestureScrollTop());
   },
   onPageScroll(e) {

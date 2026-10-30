@@ -76,6 +76,9 @@ export default {
       if (needRefresh) {
         this._memberActiveNeedRefresh = false;
         this.fetchMemberActiveList(true);
+        if (this.discover_filter === "nearby") {
+          this.fetchDiscoverList(true);
+        }
       }
     },
 

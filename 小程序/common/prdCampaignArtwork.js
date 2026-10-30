@@ -2,7 +2,7 @@
  * PRD campaignArtwork()：SVG viewBox + 2048×1152 图源，与 首页预览.html / 页面源码/app.js 一致。
  */
 import prdNavigatorCampaignImage from '@/common/home-prd-navigator-campaign-image.js'
-import { resolveMpImageDataUri } from '@/common/resolveMpImageDataUri.js'
+import { resolveMpImageSource } from '@/common/resolveMpImageDataUri.js'
 import settings from '@/common/settings.js'
 
 const IMG_BASE = settings.staticAssetBase + 'planning/'
@@ -28,7 +28,7 @@ export function renderCampaignArtworkForMp(vm, canvasSelector, containerSelector
 	return new Promise(async (resolve, reject) => {
 		let localWebp
 		try {
-			localWebp = await resolveMpImageDataUri(prdNavigatorCampaignImage)
+			localWebp = await resolveMpImageSource(prdNavigatorCampaignImage)
 		} catch (e) {
 			reject(e)
 			return
