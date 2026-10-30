@@ -60,12 +60,12 @@
 					<text class="status-hint__arrow">›</text>
 				</view>
 			</view>
-			<view
-				class="member-proxy-notice glass-card"
-				v-if="isMemberPublishActivity && info.publish_proxy_notice"
-			>
-				<text class="member-proxy-notice__tag">代理发布</text>
-				<text class="member-proxy-notice__text">{{ info.publish_proxy_notice }}</text>
+			<view class="desc-card glass-card" v-if="publishNoticeText">
+				<view class="section-header">
+					<view class="section-bar"></view>
+					<text class="section-title">温馨提示</text>
+				</view>
+				<text class="notice-multiline">{{ publishNoticeText }}</text>
 			</view>
 			<!-- 活动时间地点卡片 -->
 			<view class="info-card glass-card">
@@ -523,6 +523,9 @@
 		},
 		isMemberPublishActivity() {
 			return Number(this.info.is_member_publish) === 1 || Number(this.info.publish_user_id) > 0;
+		},
+		publishNoticeText() {
+			return String(this.info.publish_proxy_notice || '').trim();
 		},
 		memberPublishAllowSignup() {
 			if (!this.isMemberPublishActivity) return true;
@@ -1353,29 +1356,12 @@
 		}
 	}
 
-	.member-proxy-notice {
-		padding: 22rpx 24rpx;
-		margin-bottom: 16rpx;
-		background: #faf8f3;
-		border: 1rpx solid rgba(180, 150, 80, 0.18);
-
-		&__tag {
-			display: inline-block;
-			padding: 4rpx 14rpx;
-			margin-bottom: 12rpx;
-			border-radius: 8rpx;
-			font-size: 22rpx;
-			font-weight: 600;
-			color: #8a6d2e;
-			background: rgba(180, 150, 80, 0.12);
-		}
-
-		&__text {
-			display: block;
-			font-size: 24rpx;
-			color: $text-muted;
-			line-height: 1.6;
-		}
+	.notice-multiline {
+		display: block;
+		font-size: 26rpx;
+		color: $text-body;
+		line-height: 1.65;
+		white-space: pre-wrap;
 	}
 
 	.section-header {

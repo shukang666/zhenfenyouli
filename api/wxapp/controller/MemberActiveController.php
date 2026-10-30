@@ -19,8 +19,6 @@ class MemberActiveController extends AuthController
                 'headline' => '发一场小而美的邻里活动',
                 'sub' => '谁参加、做什么，都由你来定！',
             ],
-            'default_proxy_notice' => MemberActiveService::defaultProxyNoticeText(),
-            'participation_schema' => MemberActiveService::hasParticipationSchema() ? 1 : 0,
         ]);
     }
 

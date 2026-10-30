@@ -92,7 +92,6 @@ class MemberActiveController extends AdminBaseController
             $this->error('请先执行 update.sql 中的居民发布报名/签到字段脚本');
         }
         $this->assign('row', $row);
-        $this->assign('default_proxy_notice', MemberActiveService::defaultProxyNoticeText());
         return $this->fetch();
     }
 

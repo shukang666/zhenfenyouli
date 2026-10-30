@@ -19,9 +19,6 @@ class MemberActiveService
 
     public const TAG_MEMBER = '居民活动';
 
-    /** 居民发布详情页默认代理说明（可被单条 publish_proxy_notice 覆盖） */
-    public const DEFAULT_PROXY_NOTICE = '本活动由邻友代理发布展示，并非平台官方举办活动。平台不提供活动场地、物料与现场支持，也不承担活动组织与安全保障责任。如需了解详情或参与安排，请自行联系活动发布者/主办方。';
-
     public static function hasParticipationSchema(): bool
     {
         static $ok = null;
@@ -48,22 +45,6 @@ class MemberActiveService
             return $row->toArray();
         }
         return (array)$row;
-    }
-
-    public static function defaultProxyNoticeText(): string
-    {
-        return self::DEFAULT_PROXY_NOTICE;
-    }
-
-    /** @param array<string,mixed>|object $row */
-    public static function resolveProxyNotice($row): string
-    {
-        $a = self::rowToArray($row);
-        if ((int)($a['publish_user_id'] ?? 0) <= 0) {
-            return '';
-        }
-        $custom = trim((string)($a['publish_proxy_notice'] ?? ''));
-        return $custom !== '' ? $custom : self::DEFAULT_PROXY_NOTICE;
     }
 
     /** @param array<string,mixed>|object $row */
@@ -100,7 +81,7 @@ class MemberActiveService
         $item['is_member_publish'] = $pid > 0 ? 1 : 0;
         $item['publish_allow_signup'] = self::isPublishAllowSignup($item) ? 1 : 0;
         $item['publish_require_checkin'] = self::isPublishRequireCheckin($item) ? 1 : 0;
-        $item['publish_proxy_notice'] = self::resolveProxyNotice($item);
+        $item['publish_proxy_notice'] = trim((string)($a['publish_proxy_notice'] ?? ''));
     }
 
     /** 与活动 Tab 主题活动五分类 id 一致（cmf_active_community_cate） */
@@ -495,7 +476,7 @@ class MemberActiveService
         }
         $notice = trim((string)($data['publish_proxy_notice'] ?? ''));
         if (mb_strlen($notice) > 2000) {
-            throw new \InvalidArgumentException('代理说明不超过 2000 字');
+            throw new \InvalidArgumentException('用户须知不超过 2000 字');
         }
         ActiveModel::where('id', $activeId)->update([
             'publish_allow_signup' => $allowSignup,

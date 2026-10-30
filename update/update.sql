@@ -726,13 +726,15 @@ SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `p
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
 
 SET @__col := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cmf_active' AND COLUMN_NAME = 'publish_proxy_notice');
-SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_proxy_notice` text COMMENT ''居民发布-代理展示说明(空则用系统默认)'' AFTER `publish_require_checkin`');
+SET @__sql := IF(@__col > 0, 'SELECT 1', 'ALTER TABLE `cmf_active` ADD COLUMN `publish_proxy_notice` text COMMENT ''活动详情页用户须知(多行,空则不展示)'' AFTER `publish_require_checkin`');
 PREPARE __s FROM @__sql; EXECUTE __s; DEALLOCATE PREPARE __s;
 
 UPDATE `cmf_active`
 SET `publish_allow_signup` = 0,
-    `publish_require_checkin` = 0
-WHERE `publish_user_id` > 0 AND `delete_time` = 0;
+    `publish_require_checkin` = 0,
+    `publish_proxy_notice` = '本活动由邻友代理发布展示，并非平台官方举办活动。平台不提供活动场地、物料与现场支持，也不承担活动组织与安全保障责任。如需了解详情或参与安排，请自行联系活动发布者/主办方。'
+WHERE `publish_user_id` > 0 AND `delete_time` = 0
+  AND (`publish_proxy_notice` IS NULL OR TRIM(`publish_proxy_notice`) = '');
 
 -- 若存量居民活动仍可报名，可单独再执行上一段 UPDATE（安全可重复执行）
 

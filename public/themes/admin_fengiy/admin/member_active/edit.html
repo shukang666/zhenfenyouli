@@ -39,10 +39,10 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-2 control-label">代理展示说明</label>
+            <label class="col-sm-2 control-label">详情页用户须知</label>
             <div class="col-sm-8">
-                <textarea class="form-control" name="publish_proxy_notice" rows="6" placeholder="留空则使用系统默认文案">{$row.publish_proxy_notice}</textarea>
-                <p class="help-block">向用户说明：本活动为邻友代理发布，非平台官方活动，场地/支持需联系发布者或主办方。默认：{$default_proxy_notice}</p>
+                <textarea class="form-control" name="publish_proxy_notice" rows="6" placeholder="多行文本，有内容时在小程序活动详情页展示；留空则不展示">{$row.publish_proxy_notice}</textarea>
+                <p class="help-block">与报名/签到无关，仅作详情页补充说明，可按活动单独维护，无需改代码。</p>
             </div>
         </div>
         <div class="form-group">
