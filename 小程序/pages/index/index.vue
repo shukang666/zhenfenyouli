@@ -143,6 +143,11 @@
 						<text class="sk-guide-cta-arrow">›</text>
 					</view>
 				</view>
+				<view class="home-contact-link-wrap">
+					<button class="home-contact-link" open-type="contact" hover-class="home-contact-link--hover">
+						联系客服
+					</button>
+				</view>
 			</view>
 		</z-paging>
 
@@ -1451,6 +1456,29 @@ export default {
 		color: #fff;
 		font-weight: 300;
 		margin-top: -4rpx;
+	}
+
+	.home-contact-link-wrap {
+		margin-top: 28rpx;
+		text-align: center;
+	}
+	.home-contact-link {
+		display: inline-block;
+		margin: 0;
+		padding: 8rpx 12rpx;
+		background: transparent;
+		border: none;
+		line-height: 1.4;
+		font-size: 24rpx;
+		font-weight: 400;
+		color: #3974f2;
+		text-decoration: underline;
+	}
+	.home-contact-link::after {
+		border: none;
+	}
+	.home-contact-link--hover {
+		opacity: 0.75;
 	}
 
 	/* 新手引导加载期间透明遮罩：屏蔽所有点击与切页 */
