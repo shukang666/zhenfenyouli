@@ -513,6 +513,17 @@
 					}
 				},
 				{
+					"path": "member-active-roster",
+					"style": {
+						"navigationStyle": "custom",
+						"navigationBarTitleText": "活动名单",
+						"componentPlaceholder": {
+							"u-icon": "view",
+							"u-image": "view"
+						}
+					}
+				},
+				{
 					"path": "theme-activities",
 					"style": {
 						"navigationBarTitleText": "主题活动",

@@ -172,8 +172,28 @@ export default {
 				this.goPublish()
 				return
 			}
-			if (key === 'preview' || key === 'sign_list' || key === 'checkin') {
+			if (key === 'preview') {
 				this.onPreview(item)
+				return
+			}
+			if (key === 'sign_list') {
+				const title = encodeURIComponent(item.name || '')
+				this.$u.route(
+					'/pages/activity/member-active-roster?active_id=' +
+						item.id +
+						'&tab=sign&title=' +
+						title
+				)
+				return
+			}
+			if (key === 'checkin_list' || key === 'checkin') {
+				const title = encodeURIComponent(item.name || '')
+				this.$u.route(
+					'/pages/activity/member-active-roster?active_id=' +
+						item.id +
+						'&tab=checkin&title=' +
+						title
+				)
 				return
 			}
 		},

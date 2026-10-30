@@ -4,6 +4,7 @@ namespace api\wxapp\service;
 
 use app\admin\model\active\ActiveModel;
 use app\admin\model\active\ActiveSIgnModel;
+use app\admin\model\active\ActiveClockModel;
 use think\facade\Db;
 
 /**
@@ -475,7 +476,7 @@ class MemberActiveService
         $progressLine = $signCount > 0 ? ('已报名 ' . $signCount . ' 人') : '';
         $actions = [
             ['key' => 'sign_list', 'label' => '报名名单'],
-            ['key' => 'checkin', 'label' => '活动签到'],
+            ['key' => 'checkin_list', 'label' => '签到名单'],
         ];
 
         if ($audit === self::AUDIT_PENDING) {
@@ -574,5 +575,131 @@ class MemberActiveService
             'delete_time' => time(),
             'update_time' => time(),
         ]);
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    protected static function loadPublisherActive(int $userId, int $activeId): array
+    {
+        self::assertPublishSchemaReady();
+        if ($activeId <= 0) {
+            throw new \InvalidArgumentException('缺少活动 ID');
+        }
+        $row = ActiveModel::where('id', $activeId)
+            ->where('publish_user_id', $userId)
+            ->where('delete_time', 0)
+            ->find();
+        if (empty($row)) {
+            throw new \InvalidArgumentException('活动不存在或无权查看');
+        }
+        return is_array($row) ? $row : $row->toArray();
+    }
+
+    protected static function maskMobile(string $mobile): string
+    {
+        $mobile = trim($mobile);
+        if (strlen($mobile) < 7) {
+            return $mobile !== '' ? $mobile : '—';
+        }
+        return substr($mobile, 0, 3) . '****' . substr($mobile, -4);
+    }
+
+    /**
+     * 发布者查看报名名单
+     *
+     * @return array{list:array,total:int,page:int,page_size:int,last_page:int,active:array}
+     */
+    public static function publishSignList(int $userId, int $activeId, int $page, int $pageSize): array
+    {
+        $active = self::loadPublisherActive($userId, $activeId);
+        $page = max(1, $page);
+        $pageSize = min(50, max(1, $pageSize));
+
+        $query = ActiveSIgnModel::alias('s')
+            ->join('member m', 's.user_id = m.id', 'left')
+            ->where('s.active_id', $activeId)
+            ->field('s.id,s.user_id,s.create_time,m.nickname,m.avatar,m.mobile')
+            ->order('s.id desc');
+
+        $paginator = $query->paginate([
+            'list_rows' => $pageSize,
+            'page' => $page,
+        ]);
+
+        $list = [];
+        foreach ($paginator->items() as $item) {
+            $row = is_array($item) ? $item : $item->toArray();
+            $ts = (int)($row['create_time'] ?? 0);
+            $list[] = [
+                'id' => (int)($row['id'] ?? 0),
+                'user_id' => (int)($row['user_id'] ?? 0),
+                'nickname' => (string)($row['nickname'] ?? '居民'),
+                'avatar' => empty($row['avatar']) ? '' : cmf_get_asset_url($row['avatar']),
+                'mobile_mask' => self::maskMobile((string)($row['mobile'] ?? '')),
+                'time_text' => $ts > 0 ? date('Y-m-d H:i', $ts) : '—',
+            ];
+        }
+
+        return [
+            'active' => [
+                'id' => $activeId,
+                'name' => (string)($active['name'] ?? ''),
+            ],
+            'list' => $list,
+            'total' => (int)$paginator->total(),
+            'page' => (int)$paginator->currentPage(),
+            'page_size' => $pageSize,
+            'last_page' => max(1, (int)$paginator->lastPage()),
+        ];
+    }
+
+    /**
+     * 发布者查看现场签到名单（active_clock）
+     *
+     * @return array{list:array,total:int,page:int,page_size:int,last_page:int,active:array}
+     */
+    public static function publishCheckinList(int $userId, int $activeId, int $page, int $pageSize): array
+    {
+        $active = self::loadPublisherActive($userId, $activeId);
+        $page = max(1, $page);
+        $pageSize = min(50, max(1, $pageSize));
+
+        $query = ActiveClockModel::alias('c')
+            ->join('member m', 'c.user_id = m.id', 'left')
+            ->where('c.active_id', $activeId)
+            ->field('c.id,c.user_id,c.create_time,m.nickname,m.avatar,m.mobile')
+            ->order('c.id desc');
+
+        $paginator = $query->paginate([
+            'list_rows' => $pageSize,
+            'page' => $page,
+        ]);
+
+        $list = [];
+        foreach ($paginator->items() as $item) {
+            $row = is_array($item) ? $item : $item->toArray();
+            $ts = (int)($row['create_time'] ?? 0);
+            $list[] = [
+                'id' => (int)($row['id'] ?? 0),
+                'user_id' => (int)($row['user_id'] ?? 0),
+                'nickname' => (string)($row['nickname'] ?? '居民'),
+                'avatar' => empty($row['avatar']) ? '' : cmf_get_asset_url($row['avatar']),
+                'mobile_mask' => self::maskMobile((string)($row['mobile'] ?? '')),
+                'time_text' => $ts > 0 ? date('Y-m-d H:i', $ts) : '—',
+            ];
+        }
+
+        return [
+            'active' => [
+                'id' => $activeId,
+                'name' => (string)($active['name'] ?? ''),
+            ],
+            'list' => $list,
+            'total' => (int)$paginator->total(),
+            'page' => (int)$paginator->currentPage(),
+            'page_size' => $pageSize,
+            'last_page' => max(1, (int)$paginator->lastPage()),
+        ];
     }
 }

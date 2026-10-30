@@ -105,4 +105,34 @@ class MemberActiveController extends AuthController
         }
         $this->success('已撤回');
     }
+
+    /** 发布者：报名名单 */
+    public function publish_sign_list()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        $page = max(1, (int)$this->request->param('page', 1));
+        $pageSize = min(50, max(1, (int)$this->request->param('page_size', 20)));
+        try {
+            $data = MemberActiveService::publishSignList((int)$this->user_id, $activeId, $page, $pageSize);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('获取成功', $data);
+    }
+
+    /** 发布者：签到名单 */
+    public function publish_checkin_list()
+    {
+        $this->checkUser();
+        $activeId = (int)$this->request->param('active_id');
+        $page = max(1, (int)$this->request->param('page', 1));
+        $pageSize = min(50, max(1, (int)$this->request->param('page_size', 20)));
+        try {
+            $data = MemberActiveService::publishCheckinList((int)$this->user_id, $activeId, $page, $pageSize);
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
+        }
+        $this->success('获取成功', $data);
+    }
 }
