@@ -60,13 +60,6 @@
 					<text class="status-hint__arrow">›</text>
 				</view>
 			</view>
-			<view class="desc-card glass-card" v-if="publishNoticeText">
-				<view class="section-header">
-					<view class="section-bar"></view>
-					<text class="section-title">温馨提示</text>
-				</view>
-				<text class="notice-multiline">{{ publishNoticeText }}</text>
-			</view>
 			<!-- 活动时间地点卡片 -->
 			<view class="info-card glass-card">
 				<view class="info-item">
@@ -217,6 +210,13 @@
 			</view>
 		</view>
 			
+			<view class="desc-card glass-card" v-if="publishNoticeText">
+				<view class="section-header">
+					<view class="section-bar"></view>
+					<text class="section-title">温馨提示</text>
+				</view>
+				<text class="notice-multiline">{{ publishNoticeText }}</text>
+			</view>
 			<!-- 活动说明 -->
 			<view class="desc-card glass-card" v-if="memberDetailBlocks.length">
 				<view class="section-header">

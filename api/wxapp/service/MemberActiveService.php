@@ -73,15 +73,62 @@ class MemberActiveService
         return (int)($a['publish_require_checkin'] ?? 0) === 1;
     }
 
+    /** 存量 SQL 回填文案（与 update.sql 一致；写入 publish_proxy_notice 后请在后台按活动改） */
+    private const STOCK_MEMBER_NOTICE_BACKFILL = '本活动由邻友代理发布展示，并非平台官方举办活动。平台不提供活动场地、物料与现场支持，也不承担活动组织与安全保障责任。如需了解详情或参与安排，请自行联系活动发布者/主办方。';
+
+    /** 从旧版 content HTML 中提取「温馨提示」段落（曾写入 content 但详情只展示 blocks） */
+    public static function extractNoticeFromContentHtml(string $content): string
+    {
+        $content = html_entity_decode($content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($content === '') {
+            return '';
+        }
+        if (preg_match('/<strong>\s*温馨提示\s*[：:]\s*<\/strong>\s*(.*?)<\/p>/isu', $content, $m)) {
+            $text = trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            return $text !== '' ? $text : '';
+        }
+        return '';
+    }
+
+    /**
+     * 保证 publish_proxy_notice 有库内值：优先已有字段，其次从 content 迁移，最后存量回填（写库，非接口兜底文案）
+     *
+     * @param array<string,mixed>|object $item
+     */
+    public static function syncPublishNoticeField(int $activeId, &$item): string
+    {
+        $a = self::rowToArray($item);
+        $notice = trim((string)($a['publish_proxy_notice'] ?? ''));
+        $pid = (int)($a['publish_user_id'] ?? 0);
+        if ($activeId <= 0 || $pid <= 0 || !self::hasParticipationSchema()) {
+            return $notice;
+        }
+        if ($notice !== '') {
+            return $notice;
+        }
+        $fromContent = self::extractNoticeFromContentHtml((string)($a['content'] ?? ''));
+        if ($fromContent !== '') {
+            $notice = $fromContent;
+        } else {
+            $notice = self::STOCK_MEMBER_NOTICE_BACKFILL;
+        }
+        Db::name('active')->where('id', $activeId)->where('publish_user_id', '>', 0)->update([
+            'publish_proxy_notice' => $notice,
+            'update_time' => time(),
+        ]);
+        return $notice;
+    }
+
     /** @param array<string,mixed>|object $item ThinkPHP 模型或数组 */
     public static function attachPublishPresentationFields(&$item): void
     {
         $a = self::rowToArray($item);
         $pid = (int)($a['publish_user_id'] ?? 0);
+        $activeId = (int)($a['id'] ?? 0);
         $item['is_member_publish'] = $pid > 0 ? 1 : 0;
         $item['publish_allow_signup'] = self::isPublishAllowSignup($item) ? 1 : 0;
         $item['publish_require_checkin'] = self::isPublishRequireCheckin($item) ? 1 : 0;
-        $item['publish_proxy_notice'] = trim((string)($a['publish_proxy_notice'] ?? ''));
+        $item['publish_proxy_notice'] = self::syncPublishNoticeField($activeId, $item);
     }
 
     /** 与活动 Tab 主题活动五分类 id 一致（cmf_active_community_cate） */

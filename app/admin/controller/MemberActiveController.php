@@ -59,6 +59,7 @@ class MemberActiveController extends AdminBaseController
             'status' => 1,
             'update_time' => time(),
         ]);
+        MemberActiveService::syncPublishNoticeField($id, $row);
         $this->success('已通过');
     }
 
