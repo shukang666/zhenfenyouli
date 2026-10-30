@@ -515,7 +515,6 @@
 				{
 					"path": "member-active-roster",
 					"style": {
-						"navigationStyle": "custom",
 						"navigationBarTitleText": "活动名单",
 						"componentPlaceholder": {
 							"u-icon": "view",
