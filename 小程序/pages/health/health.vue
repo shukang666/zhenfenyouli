@@ -138,7 +138,7 @@
 	import { checkCommunity } from '@/common/communityCheck.mixin.js'
 
 	import SkeletonScreen from '@/components/skeleton-screen/index.vue'
-	import HealthVirtualPersona from '@/components/health-virtual-persona/index.vue'
+	import HealthVirtualPersona from '@/pages/health-form/components/health-virtual-persona/index.vue'
 	import careGesture from '@/common/care-gesture.mixin.js'
 
 	export default {

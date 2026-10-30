@@ -163,7 +163,7 @@
 </template>
 
 <script>
-import HealthVirtualPersona from '@/components/health-virtual-persona/index.vue'
+import HealthVirtualPersona from './components/health-virtual-persona/index.vue'
 
 const SERVICE_QUESTIONS = [
 	{

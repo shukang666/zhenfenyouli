@@ -56,7 +56,8 @@
 					"cl-upload": "view",
 					"care-pull-hint": "view",
 					"new-user-guide": "view",
-					"skeleton-screen": "view"
+					"skeleton-screen": "view",
+					"health-virtual-persona": "view"
 				}
 			}
 		}, {
@@ -1226,7 +1227,7 @@
 		},
 		"pages/health/health": {
 			"network": "wifi",
-			"packages": ["pages/answer"]
+			"packages": ["pages/answer", "pages/health-form"]
 		},
 		"pages/mall/mall": {
 			"network": "wifi",
