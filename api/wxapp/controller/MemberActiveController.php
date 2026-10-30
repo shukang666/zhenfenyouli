@@ -22,7 +22,7 @@ class MemberActiveController extends AuthController
         ]);
     }
 
-    /** 活动 Tab 瀑布流 */
+    /** 活动 Tab 瀑布流（「附近」chip：按七贤岭基准点距离排序） */
     public function list()
     {
         $page = max(1, (int)$this->request->param('page', 1));

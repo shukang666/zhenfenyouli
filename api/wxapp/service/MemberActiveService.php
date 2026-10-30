@@ -19,6 +19,14 @@ class MemberActiveService
 
     public const TAG_MEMBER = '居民活动';
 
+    /**
+     * 活动 Tab「附近」chip：列表按与基准点的距离升序（非用户 GPS）
+     * 基准：七贤岭地铁站（GCJ-02，与小程序地图一致）
+     */
+    public const NEARBY_BASE_LAT = 38.856539;
+    public const NEARBY_BASE_LNG = 121.522681;
+    public const NEARBY_BASE_LABEL = '七贤岭地铁站';
+
     public static function hasParticipationSchema(): bool
     {
         static $ok = null;
@@ -195,6 +203,21 @@ class MemberActiveService
     }
 
     /**
+     * 「附近」居民活动 feed：距 NEARBY_BASE_* 越近越靠前；无有效坐标排最后
+     *
+     * @param \think\db\Query|\think\Model $query
+     */
+    public static function applyFeedNearbyDistanceOrder($query): void
+    {
+        $lat = self::NEARBY_BASE_LAT;
+        $lng = self::NEARBY_BASE_LNG;
+        $invalid = '(lat IS NULL OR lng IS NULL OR lat = \'\' OR lng = \'\' '
+            . 'OR (CAST(lat AS DECIMAL(10,6)) = 0 AND CAST(lng AS DECIMAL(10,6)) = 0))';
+        $distSq = '(POW(CAST(lat AS DECIMAL(10,6)) - ' . $lat . ', 2) + POW(CAST(lng AS DECIMAL(10,6)) - ' . $lng . ', 2))';
+        $query->orderRaw('CASE WHEN ' . $invalid . ' THEN 1 ELSE 0 END ASC, ' . $distSq . ' ASC, id DESC');
+    }
+
+    /**
      * @return array{list:array,total:int,page:int,page_size:int,last_page:int}
      */
     public static function paginateForFeed(int $userId, int $page, int $pageSize, TabHomeService $formatter): array
@@ -203,7 +226,8 @@ class MemberActiveService
         $pageSize = min(30, max(1, $pageSize));
         $query = self::baseListQuery();
         $total = (clone $query)->count();
-        $rows = $query->order('id desc')->page($page, $pageSize)->select();
+        self::applyFeedNearbyDistanceOrder($query);
+        $rows = $query->page($page, $pageSize)->select();
         $list = [];
         foreach ($rows as $item) {
             $row = $formatter->formatActiveListItemPublic($item);
