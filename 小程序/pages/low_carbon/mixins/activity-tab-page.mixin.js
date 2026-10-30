@@ -28,11 +28,35 @@ export default {
     if (this._memberActiveNeedRefresh || this.discover_filter === "nearby") {
       this.fetchDiscoverList(true);
     }
+    this.$nextTick(() => this.syncCareGestureScrollTop());
+  },
+  onPageScroll(e) {
+    this.forwardCarePageScroll(e);
   },
   onReachBottom() {
     this.loadDiscoverMore();
   },
   methods: {
+    /** 关怀版手势在 shell 组件内，页面级 onPageScroll 须转发 scrollTop */
+    forwardCarePageScroll(e) {
+      const shell = this.$refs.careShell;
+      if (shell && typeof shell._updateScrollTop === "function") {
+        shell._updateScrollTop(e);
+      }
+    },
+    syncCareGestureScrollTop() {
+      const shell = this.$refs.careShell;
+      if (!shell || typeof shell._updateScrollTop !== "function") return;
+      uni.createSelectorQuery()
+        .in(this)
+        .selectViewport()
+        .scrollOffset((res) => {
+          if (res) {
+            shell._updateScrollTop({ scrollTop: res.scrollTop || 0 });
+          }
+        })
+        .exec();
+    },
     applyDiscoverPendingFromStorage() {
       try {
         const pendingFilter = uni.getStorageSync(DISCOVER_FILTER_PENDING_KEY);

@@ -46,17 +46,21 @@ export default {
 			}
 		},
 
-		// 触摸开始
+		// 触摸开始（仅页面顶部才记录，避免列表中部下滑误触关怀版）
 		onCareTouchStart(e) {
 			if (!this.careGesture.isInTop) return
 			this.careGesture.startY = e.touches[0].clientY
 			this.careGesture.startX = e.touches[0].clientX
 			this.careGesture.startTime = Date.now()
+			this.careGesture.pullDistance = 0
 		},
 
 		// 触摸移动（节流 setData，避免滚动时每一帧都触发渲染导致卡顿）
 		onCareTouchMove(e) {
-			if (!this.careGesture.isInTop) return
+			if (!this.careGesture.isInTop) {
+				if (this.showCareHint) this.resetCarePull()
+				return
+			}
 
 			const currentY = e.touches[0].clientY
 			const currentX = e.touches[0].clientX

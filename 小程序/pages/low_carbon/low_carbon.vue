@@ -1,5 +1,5 @@
 <template>
-  <activity-tab-page-shell>
+  <activity-tab-page-shell ref="careShell">
     <skeleton-screen
       :show="discover_loading && !discover_list.length"
       type="low_carbon"
