@@ -210,20 +210,13 @@
 			</view>
 		</view>
 			
-			<view class="desc-card glass-card" v-if="publishNoticeText">
-				<view class="section-header">
-					<view class="section-bar"></view>
-					<text class="section-title">温馨提示</text>
-				</view>
-				<text class="notice-multiline">{{ publishNoticeText }}</text>
-			</view>
 			<!-- 活动说明 -->
-			<view class="desc-card glass-card" v-if="memberDetailBlocks.length">
+			<view class="desc-card glass-card" v-if="memberDetailBlocksForView.length">
 				<view class="section-header">
 					<view class="section-bar"></view>
 					<text class="section-title">活动详情</text>
 				</view>
-				<member-active-blocks-display :blocks="memberDetailBlocks" placeholder-text="" placeholder-images="" />
+				<member-active-blocks-display :blocks="memberDetailBlocksForView" placeholder-text="" placeholder-images="" />
 			</view>
 			<view class="desc-card glass-card" v-else-if="info.content">
 				<view class="section-header">
@@ -647,6 +640,17 @@
 		memberDetailBlocks() {
 			const raw = (this.info && this.info.publish_custom_blocks) || [];
 			return Array.isArray(raw) ? raw : [];
+		},
+		memberDetailBlocksForView() {
+			const blocks = this.memberDetailBlocks.slice();
+			const notice = this.publishNoticeText;
+			if (!notice) {
+				return blocks;
+			}
+			if (blocks.some((b) => String((b && b.label) || '').indexOf('温馨提示') >= 0)) {
+				return blocks;
+			}
+			return [{ type: 'textarea', label: '温馨提示', value: notice }].concat(blocks);
 		},
 		isRecurringEnded() {
 			return Number(this.info.is_recurring) === 1 && Number(this.info.is_end) === 1;

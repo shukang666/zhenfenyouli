@@ -131,6 +131,35 @@ class MemberActiveService
         $item['publish_proxy_notice'] = self::syncPublishNoticeField($activeId, $item);
     }
 
+    /**
+     * 详情页用户须知写入 blocks 首段（线上旧版小程序只渲染 publish_custom_blocks）
+     *
+     * @param array<string,mixed>|object $item
+     */
+    public static function injectPublishNoticeIntoDetailBlocks(&$item): void
+    {
+        $notice = trim((string)($item['publish_proxy_notice'] ?? ''));
+        if ($notice === '') {
+            return;
+        }
+        $blocks = $item['publish_custom_blocks'] ?? [];
+        if (!is_array($blocks)) {
+            $blocks = [];
+        }
+        foreach ($blocks as $b) {
+            $label = (string)($b['label'] ?? '');
+            if ($label === '温馨提示' || mb_strpos($label, '温馨提示') !== false) {
+                return;
+            }
+        }
+        array_unshift($blocks, [
+            'type' => 'textarea',
+            'label' => '温馨提示',
+            'value' => $notice,
+        ]);
+        $item['publish_custom_blocks'] = $blocks;
+    }
+
     /** 与活动 Tab 主题活动五分类 id 一致（cmf_active_community_cate） */
     public static function themeOptions(): array
     {

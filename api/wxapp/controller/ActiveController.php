@@ -629,6 +629,7 @@ class ActiveController extends AuthController
 
         $item['publish_custom_blocks'] = \api\wxapp\service\MemberActiveService::formatBlocksForApi($item['publish_custom_blocks'] ?? '');
         MemberActiveService::attachPublishPresentationFields($item);
+        MemberActiveService::injectPublishNoticeIntoDetailBlocks($item);
 
         //是否报名
         $where = [];
