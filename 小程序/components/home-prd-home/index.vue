@@ -1,5 +1,6 @@
 <template>
 	<view class="prd-home">
+		<home-prd-header embedded :location-label="locationLabel" />
 		<!-- PRD view-home：hero + below-hero（摘自 甄分友礼-首页设计/页面源码/index.html） -->
 		<view class="prd-hero">
 			<view class="prd-hero-copy">
@@ -167,16 +168,19 @@ import {
 	renderCampaignArtworkForMp,
 	getCampaignArtworkFallbackSrc,
 } from '@/common/prdCampaignArtwork.js'
+import HomePrdHeader from '@/components/home-prd-header/index.vue'
 
 const IMG_BASE = settings.staticAssetBase + 'planning/'
 
 export default {
 	name: 'HomePrdHome',
+	components: { HomePrdHeader },
 	props: {
 		isLogin: { type: Boolean, default: false },
 		points: { type: [Number, String], default: 0 },
 		joinedCount: { type: Number, default: 0 },
 		followingCount: { type: Number, default: 0 },
+		locationLabel: { type: String, default: '' },
 	},
 	data() {
 		return {
@@ -279,7 +283,7 @@ $bg: #f7f8f3;
 	display: flex;
 	flex-direction: column;
 	gap: 52rpx;
-	padding-top: 40rpx;
+	padding-top: 24rpx;
 	padding-bottom: 72rpx;
 }
 .prd-h1-line {

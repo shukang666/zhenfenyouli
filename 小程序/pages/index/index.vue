@@ -13,12 +13,6 @@
 		<z-paging ref='paging' v-model='dataList' @query='queryList' @scroll="onZPagingScroll" :use-page-scroll="true" :fixed='true' :safe-area-inset-bottom="true" :auto="false" :empty-view-enabled="false" :loading-more-enabled="false" :refresher-enabled="false">
 			<!-- 顶部导航栏：仅展示 logo，无返回按钮 -->
 			<template slot="top">
-				<block v-if="showLegacyHome">
-					<u-navbar :is-back="false" title="" title-color="rgba(0,0,0,0)" :background="{background:'rgba(238,242,239,0)'}" :border-bottom="false">
-						<image src="https://shukang-budget-1319203539.cos.ap-shanghai.myqcloud.com/static/images/logo.png" class="home-logo" mode="aspectFill"></image>
-					</u-navbar>
-				</block>
-				<home-prd-header v-else :location-label="homeLocationLabel" />
 				<care-pull-hint :visible="!showCareHint"></care-pull-hint>
 			</template>
 
@@ -28,6 +22,7 @@
 				:points="prdHomePoints"
 				:joined-count="prdHomeJoinedCount"
 				:following-count="prdFollowingCount"
+				:location-label="homeLocationLabel"
 				@activities="goHomeActivityJoin"
 				@create="goHomeActivityPublish"
 				@health="goPrdHomeHealth"
@@ -226,7 +221,6 @@ import HomeActivityPromoBanner from '@/components/home-activity-promo-banner/ind
 import HomeOngoingSection from '@/components/home-ongoing-section/index.vue'
 import HomeWeeklyPicks from '@/components/home-weekly-picks/index.vue'
 import HomePrdHome from '@/components/home-prd-home/index.vue'
-import HomePrdHeader from '@/components/home-prd-header/index.vue'
 import { buildWebActiveEntryPath } from '@/common/webActiveEntry.js'
 /** 绿动生活领航员 Web 活动（见 install_life_navigator_active.php） */
 const LIFE_NAVIGATOR_ACTIVE_ID = 69
@@ -238,7 +232,6 @@ export default {
 		HomeOngoingSection,
 		HomeWeeklyPicks,
 		HomePrdHome,
-		HomePrdHeader,
 	},
 		mixins: [careGesture],
 		data() {

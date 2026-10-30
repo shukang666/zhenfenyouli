@@ -1,5 +1,5 @@
 <template>
-	<view class="prd-header" :style="headerWrapStyle">
+	<view class="prd-header" :class="{ 'prd-header--embedded': embedded }" :style="headerWrapStyle">
 		<view class="prd-header__inner">
 			<view class="prd-brand">
 				<view class="prd-brand-mark" aria-hidden="true">
@@ -32,6 +32,11 @@ export default {
 			type: String,
 			default: '',
 		},
+		/** 系统默认导航栏下内嵌，不占状态栏 */
+		embedded: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	data() {
 		return {
@@ -53,11 +58,15 @@ export default {
 	},
 	computed: {
 		headerWrapStyle() {
+			if (this.embedded) return {}
 			return {
 				paddingTop: this.statusBarHeight + 'px',
 			}
 		},
 		locStyle() {
+			if (this.embedded) {
+				return { paddingRight: '24rpx' }
+			}
 			return {
 				paddingRight: this.locRightPad + 'px',
 			}
@@ -74,6 +83,13 @@ $bg: #f7f8f3;
 
 .prd-header {
 	background: rgba(247, 248, 243, 0.96);
+}
+.prd-header--embedded {
+	background: transparent;
+}
+.prd-header--embedded .prd-header__inner {
+	padding-left: 0;
+	padding-right: 0;
 }
 .prd-header__inner {
 	display: flex;
