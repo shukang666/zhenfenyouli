@@ -1,5 +1,9 @@
 <template>
   <activity-tab-page-shell>
+    <skeleton-screen
+      :show="discover_loading && !discover_list.length"
+      type="low_carbon"
+    ></skeleton-screen>
     <activity-tab-discover
       :filter="discover_filter"
       :categories="discover_categories"
@@ -21,6 +25,7 @@
 </template>
 
 <script>
+import SkeletonScreen from "@/components/skeleton-screen/index.vue";
 import ActivityTabPageShell from "@/components/activity-tab/activity-tab-page-shell.vue";
 import ActivityTabDiscover from "@/components/activity-tab/activity-tab-discover.vue";
 import activityDiscoverFeedMixin from "@/pages/low_carbon/mixins/activity-discover-feed.mixin.js";
@@ -29,6 +34,7 @@ import activityTabPageMixin from "@/pages/low_carbon/mixins/activity-tab-page.mi
 
 export default {
   components: {
+    SkeletonScreen,
     ActivityTabPageShell,
     ActivityTabDiscover,
   },

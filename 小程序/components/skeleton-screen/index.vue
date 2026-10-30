@@ -1,152 +1,194 @@
 <template>
 	<view class="skeleton-screen" :class="'skeleton-bg--' + type" v-show="show">
-		<!-- 首页：搜索 + banner + 问候打卡卡 + tab + 横向活动卡 -->
+		<!-- 首页：搜索 + 推广 Banner + 通知 + 四快捷 + 本周精选 -->
 		<view v-if="type === 'index'" class="skeleton-index">
-			<view class="sk-nav"></view>
+			<view class="sk-nav sk-nav--glass"></view>
 			<view class="sk-search">
 				<view class="sk-search-ico"></view>
 				<view class="sk-search-line"></view>
 				<view class="sk-search-scan"></view>
 			</view>
-			<view class="sk-banner sk-banner--index"></view>
-			<view class="sk-notice"></view>
-			<view class="sk-hello">
-				<view class="sk-hello-avatar"></view>
-				<view class="sk-hello-text">
-					<view class="sk-hello-row">
-						<view class="sk-line sk-line--w220"></view>
-						<view class="sk-hello-sign"></view>
+			<view class="sk-promo">
+				<view class="sk-promo__copy">
+					<view class="sk-line sk-line--w240"></view>
+					<view class="sk-line sk-line--w220"></view>
+					<view class="sk-line sk-line--w300 sk-line--sm"></view>
+					<view class="sk-promo__btns">
+						<view class="sk-promo__btn"></view>
+						<view class="sk-promo__btn sk-promo__btn--ghost"></view>
 					</view>
-					<view class="sk-line sk-line--w280 sk-line--sm"></view>
 				</view>
-				<view class="sk-hello-btn"></view>
+				<view class="sk-promo__art"></view>
 			</view>
-			<view class="sk-tabs">
-				<view class="sk-tab sk-tab--on"></view>
-				<view class="sk-tab"></view>
-				<view class="sk-tab-more"></view>
+			<view class="sk-notice"></view>
+			<view class="sk-quick-grid">
+				<view class="sk-quick-item" v-for="i in 4" :key="'q' + i">
+					<view class="sk-quick-ico"></view>
+					<view class="sk-line sk-line--w70 sk-line--sm"></view>
+				</view>
 			</view>
-			<view class="sk-h-scroll">
-				<view class="sk-active-card" v-for="i in 2" :key="i">
-					<view class="sk-active-cover"></view>
-					<view class="sk-active-body">
-						<view class="sk-line sk-line--w80"></view>
+			<view class="sk-sec-head-row">
+				<view class="sk-line sk-line--w160 sk-line--title"></view>
+				<view class="sk-line sk-line--w80 sk-line--sm"></view>
+			</view>
+			<view class="sk-weekly-pair">
+				<view class="sk-weekly-card" v-for="i in 2" :key="'w' + i">
+					<view class="sk-weekly-card__hero"></view>
+					<view class="sk-weekly-card__body">
+						<view class="sk-line sk-line--w90"></view>
 						<view class="sk-line sk-line--w60 sk-line--sm"></view>
 					</view>
 				</view>
 			</view>
+			<view class="sk-guide-cta"></view>
 		</view>
 
-		<!-- 活动 Tab：搜索 + banner + 快捷 2×2 + 分类随手学 3 卡 + 主题五圆钮 + 海报横滑 -->
+		<!-- 活动 Tab · 发现页：标题搜索 + 筛选 chip + 主题分类 + 本月专题 + 活动列表 -->
 		<view v-else-if="type === 'low_carbon'" class="skeleton-low-carbon">
-			<view class="sk-fb-nav">
-				<view class="sk-search sk-search--fb">
+			<view class="sk-discover-nav">
+				<view class="sk-line sk-line--w180 sk-line--title"></view>
+				<view class="sk-search sk-search--discover">
 					<view class="sk-search-ico"></view>
 					<view class="sk-search-line"></view>
 				</view>
 			</view>
-			<view class="sk-banner sk-banner--fb"></view>
-			<view class="sk-entry-kicker"></view>
-			<view class="sk-entry-grid">
-				<view class="sk-entry-card" v-for="i in 4" :key="'e' + i"></view>
+			<view class="sk-chip-row">
+				<view class="sk-chip sk-chip--on"></view>
+				<view class="sk-chip" v-for="i in 4" :key="'c' + i"></view>
 			</view>
-			<view class="sk-entry-kicker sk-entry-kicker--alt"></view>
-			<view class="sk-entry-grid sk-entry-grid--triple">
-				<view class="sk-entry-card sk-entry-card--sm" v-for="i in 3" :key="'t' + i"></view>
-			</view>
-			<view class="sk-sec-title"></view>
-			<view class="sk-theme-row">
-				<view class="sk-theme-item" v-for="i in 5" :key="i">
-					<view class="sk-theme-circle"></view>
-					<view class="sk-theme-label"></view>
+			<view class="sk-cates-panel">
+				<view class="sk-line sk-line--w120 sk-line--sm"></view>
+				<view class="sk-cates-row">
+					<view class="sk-cate-item" v-for="i in 5" :key="'ca' + i">
+						<view class="sk-cate-tile"></view>
+						<view class="sk-line sk-line--w60 sk-line--xs"></view>
+					</view>
 				</view>
 			</view>
-			<view class="sk-sec-title sk-sec-title--wide"></view>
-			<view class="sk-h-scroll">
-				<view class="sk-weekly" v-for="i in 2" :key="'w' + i"></view>
+			<view class="sk-month-banner"></view>
+			<view class="sk-sec-head-row sk-sec-head-row--pad">
+				<view class="sk-line sk-line--w160 sk-line--title"></view>
+				<view class="sk-line sk-line--w60 sk-line--sm"></view>
 			</view>
-			<view class="sk-light-grid">
-				<view class="sk-light-card" v-for="i in 2" :key="'l' + i"></view>
+			<view class="sk-discover-card" v-for="i in 3" :key="'d' + i">
+				<view class="sk-discover-thumb"></view>
+				<view class="sk-discover-body">
+					<view class="sk-line sk-line--w90"></view>
+					<view class="sk-line sk-line--w70 sk-line--sm"></view>
+					<view class="sk-discover-foot">
+						<view class="sk-line sk-line--w40 sk-line--xs"></view>
+						<view class="sk-discover-btn"></view>
+					</view>
+				</view>
 			</view>
 		</view>
 
-		<!-- 健康页：蓝顶 + 健康生活社区帖列表 -->
+		<!-- 健康 Tab：沉浸式顶区 + 数字人 + 问答 CTA -->
 		<view v-else-if="type === 'health'" class="skeleton-health">
-			<view class="sk-nav sk-nav--trans"></view>
-			<view class="sk-health-block">
-				<view class="sk-health-hd sk-health-hd--row">
-					<view class="sk-line sk-line--w200 sk-line--light-h"></view>
-					<view class="sk-health-more"></view>
+			<view class="sk-hp-scene">
+				<view class="sk-hp-nav">
+					<view class="sk-hp-nav__copy">
+						<view class="sk-line sk-line--w160 sk-line--title"></view>
+						<view class="sk-hp-nav__tag"></view>
+					</view>
+					<view class="sk-hp-nav__logo"></view>
 				</view>
-				<view class="sk-health-body">
-					<view class="sk-forum" v-for="i in 3" :key="i">
-						<view class="sk-forum-top">
-							<view class="sk-forum-av"></view>
+				<view class="sk-hp-persona">
+					<view class="sk-hp-persona__ring"></view>
+					<view class="sk-hp-persona__fig"></view>
+				</view>
+				<view class="sk-hp-panel">
+					<view class="sk-hp-bubble"></view>
+					<view class="sk-hp-cta">
+						<view class="sk-line sk-line--w120 sk-line--sm"></view>
+						<view class="sk-line sk-line--w200 sk-line--title"></view>
+						<view class="sk-line sk-line--w280 sk-line--sm"></view>
+						<view class="sk-hp-cta__go"></view>
+					</view>
+					<view class="sk-hp-link">
+						<view class="sk-hp-link__ico"></view>
+						<view class="sk-hp-link__copy">
 							<view class="sk-line sk-line--w180"></view>
+							<view class="sk-line sk-line--w240 sk-line--sm"></view>
 						</view>
-						<view class="sk-line sk-line--w90"></view>
-						<view class="sk-line sk-line--w70 sk-line--sm"></view>
-						<view class="sk-forum-img"></view>
 					</view>
 				</view>
 			</view>
 		</view>
 
-		<!-- 积分权益：绿顶 + 搜索 + 券 + 产区网格 + 两列商品 -->
+		<!-- 积分权益：积分卡片 + 闲置入口 + 搜索 + 分类 + 商品 -->
 		<view v-else-if="type === 'mall'" class="skeleton-mall">
-			<view class="sk-nav sk-nav--trans"></view>
-			<view class="sk-search sk-search--mall">
-				<view class="sk-search-line"></view>
-			</view>
-			<view class="sk-coupon"></view>
-			<view class="sk-zone-panel">
-				<view class="sk-line sk-line--w40"></view>
-				<view class="sk-china-map"></view>
-				<view class="sk-zone-strip">
-					<view class="sk-zone-chip" v-for="i in 4" :key="'zc' + i"></view>
+			<view class="sk-mall-top">
+				<view class="sk-nav sk-nav--mall"></view>
+				<view class="sk-points-hub">
+					<view class="sk-line sk-line--w200 sk-line--sm"></view>
+					<view class="sk-points-hub__val"></view>
+					<view class="sk-points-hub__actions">
+						<view class="sk-points-hub__btn"></view>
+						<view class="sk-points-hub__btn"></view>
+					</view>
 				</view>
 			</view>
-			<view class="sk-goods-grid">
-				<view class="sk-goods-card" v-for="i in 4" :key="i">
-					<view class="sk-goods-img"></view>
-					<view class="sk-goods-info">
-						<view class="sk-line sk-line--w80"></view>
-						<view class="sk-line sk-line--w50 sk-line--sm"></view>
+			<view class="sk-mall-body">
+				<view class="sk-secondhand"></view>
+				<view class="sk-search sk-search--mall">
+					<view class="sk-search-line"></view>
+				</view>
+				<view class="sk-mall-cate">
+					<view class="sk-mall-pill" v-for="i in 4" :key="'p' + i"></view>
+				</view>
+				<view class="sk-goods-grid">
+					<view class="sk-goods-card" v-for="i in 4" :key="i">
+						<view class="sk-goods-img"></view>
+						<view class="sk-goods-info">
+							<view class="sk-line sk-line--w80"></view>
+							<view class="sk-line sk-line--w50 sk-line--sm"></view>
+						</view>
 					</view>
 				</view>
 			</view>
 		</view>
 
-		<!-- 我的：绿头像区 + 积分条 + 功能宫格 -->
+		<!-- 我的：扁平顶栏 + 常用 + 服务/更多列表 -->
 		<view v-else-if="type === 'user'" class="skeleton-user">
-			<view class="sk-me-hero">
-				<view class="sk-me-user">
+			<view class="sk-me-head">
+				<view class="sk-me-profile">
 					<view class="sk-me-avatar"></view>
 					<view class="sk-me-info">
-						<view class="sk-line sk-line--light sk-line--w200"></view>
-						<view class="sk-line sk-line--light sk-line--w160 sk-line--sm"></view>
+						<view class="sk-line sk-line--w200 sk-line--title"></view>
+						<view class="sk-line sk-line--w260 sk-line--sm"></view>
+					</view>
+					<view class="sk-me-arrow"></view>
+				</view>
+				<view class="sk-me-metrics">
+					<view class="sk-me-metric" v-for="i in 3" :key="'m' + i">
+						<view class="sk-line sk-line--w80 sk-line--title"></view>
+						<view class="sk-line sk-line--w60 sk-line--xs"></view>
 					</view>
 				</view>
-				<view class="sk-me-stat"></view>
 			</view>
-			<view class="sk-me-sheet">
-				<view class="sk-me-grow"></view>
+			<view class="sk-me-body">
 				<view class="sk-me-card">
-					<view class="sk-line sk-line--w140"></view>
-					<view class="sk-me-grid">
-						<view class="sk-me-item" v-for="i in 4" :key="'a'+i">
+					<view class="sk-line sk-line--w80 sk-line--title"></view>
+					<view class="sk-me-quick">
+						<view class="sk-me-quick-item" v-for="i in 4" :key="'q' + i">
 							<view class="sk-me-ico"></view>
-							<view class="sk-line sk-line--w70 sk-line--sm"></view>
+							<view class="sk-line sk-line--w70 sk-line--xs"></view>
 						</view>
 					</view>
 				</view>
 				<view class="sk-me-card">
-					<view class="sk-line sk-line--w140"></view>
-					<view class="sk-me-grid">
-						<view class="sk-me-item" v-for="i in 8" :key="'b'+i">
-							<view class="sk-me-ico"></view>
-							<view class="sk-line sk-line--w70 sk-line--sm"></view>
-						</view>
+					<view class="sk-line sk-line--w80 sk-line--title"></view>
+					<view class="sk-me-row" v-for="i in 3" :key="'s' + i">
+						<view class="sk-me-row-ico"></view>
+						<view class="sk-line sk-line--w180"></view>
+					</view>
+				</view>
+				<view class="sk-me-card">
+					<view class="sk-line sk-line--w80 sk-line--title"></view>
+					<view class="sk-me-row" v-for="i in 3" :key="'o' + i">
+						<view class="sk-me-row-ico"></view>
+						<view class="sk-line sk-line--w160"></view>
 					</view>
 				</view>
 			</view>
@@ -181,15 +223,17 @@ export default {
 	overflow: hidden;
 }
 .skeleton-bg--index,
-.skeleton-bg--low_carbon,
-.skeleton-bg--user {
+.skeleton-bg--low_carbon {
 	background: #eef4f0;
 }
+.skeleton-bg--user {
+	background: #f2f3f5;
+}
 .skeleton-bg--health {
-	background: #eff4ff;
+	background: linear-gradient(180deg, #e8f0ff 0%, #eff4ff 42%, #f5f8fc 100%);
 }
 .skeleton-bg--mall {
-	background: #eff9f1;
+	background: #e4e8e5;
 }
 
 @keyframes skeleton-loading {
@@ -203,11 +247,16 @@ export default {
 	animation: skeleton-loading 1.5s ease-in-out infinite;
 }
 .skeleton-bg--health .sk-base,
-.skeleton-health .sk-health-tile,
-.skeleton-health .sk-forum,
-.skeleton-health .sk-health-hd,
-.skeleton-health .sk-forum-av,
-.skeleton-health .sk-line {
+.skeleton-health .sk-line,
+.skeleton-health .sk-hp-nav__tag,
+.skeleton-health .sk-hp-nav__logo,
+.skeleton-health .sk-hp-persona__ring,
+.skeleton-health .sk-hp-persona__fig,
+.skeleton-health .sk-hp-bubble,
+.skeleton-health .sk-hp-cta,
+.skeleton-health .sk-hp-cta__go,
+.skeleton-health .sk-hp-link,
+.skeleton-health .sk-hp-link__ico {
 	background: linear-gradient(90deg, #d5e2f6 25%, #eaf1fb 50%, #d5e2f6 75%);
 	background-size: 400rpx 100%;
 	animation: skeleton-loading 1.5s ease-in-out infinite;
@@ -219,21 +268,24 @@ export default {
 	border-radius: 8rpx;
 }
 .sk-line--sm { height: 22rpx; margin-top: 16rpx; }
+.sk-line--xs { height: 18rpx; margin-top: 10rpx; }
+.sk-line--title { height: 32rpx; border-radius: 10rpx; }
+.sk-line--w40 { width: 40%; }
 .sk-line--w50 { width: 50%; }
 .sk-line--w60 { width: 60%; }
 .sk-line--w70 { width: 70%; }
 .sk-line--w80 { width: 80%; }
 .sk-line--w90 { width: 90%; }
+.sk-line--w120 { width: 120rpx; }
 .sk-line--w140 { width: 140rpx; height: 32rpx; }
 .sk-line--w160 { width: 160rpx; }
 .sk-line--w180 { width: 180rpx; }
 .sk-line--w200 { width: 200rpx; }
 .sk-line--w220 { width: 220rpx; }
+.sk-line--w240 { width: 240rpx; }
+.sk-line--w260 { width: 260rpx; }
 .sk-line--w280 { width: 280rpx; }
-.sk-line--light {
-	background: linear-gradient(90deg, rgba(255,255,255,0.28) 25%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.28) 75%);
-	background-size: 400rpx 100%;
-}
+.sk-line--w300 { width: 300rpx; }
 
 .sk-nav {
 	@extend .sk-base;
@@ -241,6 +293,17 @@ export default {
 	border-radius: 0;
 	background: #fff;
 	animation: none;
+}
+.sk-nav--glass {
+	height: 168rpx;
+	background: transparent;
+}
+.sk-nav--mall {
+	height: 88rpx;
+	margin: 0 30rpx;
+	border-radius: 16rpx;
+	background: rgba(255, 255, 255, 0.35);
+	animation: skeleton-loading 1.5s ease-in-out infinite;
 }
 .sk-nav--trans {
 	height: 176rpx;
@@ -258,16 +321,18 @@ export default {
 	border-radius: 40rpx;
 	box-sizing: border-box;
 }
-.sk-search--fb {
-	margin: 0;
+.sk-search--discover {
+	margin: 16rpx 0 0;
 	height: 76rpx;
-	background: #f3f8f4;
+	background: rgba(255, 255, 255, 0.72);
 	border-radius: 38rpx;
 }
 .sk-search--mall {
-	height: 70rpx;
+	height: 68rpx;
 	margin: 0 0 24rpx;
-	border: 2rpx solid #cdeece;
+	padding: 0 20rpx;
+	background: #f5f7f6;
+	border-radius: 34rpx;
 }
 .sk-search-ico {
 	@extend .sk-base;
@@ -291,309 +356,326 @@ export default {
 	flex-shrink: 0;
 }
 
-.sk-banner {
-	@extend .sk-base;
-	margin: 24rpx 30rpx 0;
+.sk-promo {
+	display: flex;
+	align-items: stretch;
+	margin: 24rpx 32rpx 0;
+	padding: 28rpx 24rpx;
+	min-height: 280rpx;
 	border-radius: 28rpx;
+	background: rgba(255, 255, 255, 0.55);
+	box-sizing: border-box;
 }
-.sk-banner--index { height: 288rpx; margin: 24rpx 32rpx 0; border-radius: 20rpx; }
-.sk-banner--fb {
-	height: 300rpx;
-	margin: 16rpx 24rpx 0;
-	border-radius: 24rpx;
+.sk-promo__copy {
+	flex: 1;
+	min-width: 0;
+	padding-right: 12rpx;
 }
-.sk-banner--mall {
-	height: 350rpx;
-	margin: 0 0 24rpx;
-	border-radius: 20rpx;
+.sk-promo__btns {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12rpx;
+	margin-top: 24rpx;
+}
+.sk-promo__btn {
+	@extend .sk-base;
+	width: 168rpx;
+	height: 56rpx;
+	border-radius: 999rpx;
+}
+.sk-promo__btn--ghost {
+	width: 148rpx;
+	opacity: 0.75;
+}
+.sk-promo__art {
+	@extend .sk-base;
+	width: 188rpx;
+	height: 188rpx;
+	border-radius: 50%;
+	flex-shrink: 0;
+	align-self: center;
 }
 
 .sk-notice {
 	@extend .sk-base;
 	height: 64rpx;
-	margin: 20rpx 30rpx 0;
+	margin: 20rpx 32rpx 0;
 	border-radius: 20rpx;
 }
 
-.sk-hello {
-	display: flex;
-	align-items: center;
-	margin: 24rpx 30rpx 0;
-	padding: 24rpx 20rpx 24rpx 24rpx;
-	background: linear-gradient(135deg, #2bc24e 0%, #12962e 100%);
-	border-radius: 28rpx;
-	box-sizing: border-box;
-}
-.sk-hello-avatar {
-	width: 80rpx;
-	height: 80rpx;
-	border-radius: 50%;
-	background: rgba(255,255,255,0.35);
-	flex-shrink: 0;
-	margin-right: 18rpx;
-}
-.sk-hello-text { flex: 1; min-width: 0; }
-.sk-hello-row {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-}
-.sk-hello-sign {
-	width: 110rpx;
-	height: 48rpx;
-	border-radius: 32rpx;
-	background: rgba(255,255,255,0.22);
-	flex-shrink: 0;
-	margin-left: 12rpx;
-}
-.sk-hello-btn {
-	width: 140rpx;
-	height: 88rpx;
-	margin-left: 16rpx;
-	background: #fff;
-	border-radius: 20rpx;
-	flex-shrink: 0;
-}
-
-.sk-tabs {
-	display: flex;
-	align-items: center;
-	margin: 28rpx 30rpx 8rpx;
-	padding: 8rpx 12rpx 8rpx 8rpx;
-	background: #fff;
-	border-radius: 20rpx;
-}
-.sk-tab {
-	@extend .sk-base;
-	width: 140rpx;
-	height: 56rpx;
-	border-radius: 14rpx;
-	margin-right: 8rpx;
-}
-.sk-tab--on { width: 160rpx; }
-.sk-tab-more {
-	@extend .sk-base;
-	width: 80rpx;
-	height: 28rpx;
-	margin-left: auto;
-}
-
-.sk-h-scroll {
-	display: flex;
-	padding: 16rpx 0 0 30rpx;
-	overflow: hidden;
-}
-.sk-active-card {
-	width: 540rpx;
-	margin-right: 24rpx;
-	background: #fff;
-	border-radius: 28rpx;
-	overflow: hidden;
-	flex-shrink: 0;
-}
-.sk-active-cover {
-	@extend .sk-base;
-	width: 540rpx;
-	height: 270rpx;
-	border-radius: 0;
-}
-.sk-active-body { padding: 24rpx; }
-
-.sk-fb-nav {
-	background: #fff;
-	padding: 16rpx 24rpx;
-	padding-top: calc(env(safe-area-inset-top) + 16rpx);
-}
-
-.sk-sec-title {
-	@extend .sk-base;
-	width: 160rpx;
-	height: 36rpx;
-	margin: 28rpx 24rpx 16rpx;
-}
-
-.sk-theme-row {
+.sk-quick-grid {
 	display: flex;
 	justify-content: space-between;
-	padding: 8rpx 20rpx 24rpx;
+	margin: 24rpx 32rpx 0;
+	padding: 22rpx 12rpx;
+	border-radius: 24rpx;
+	background: rgba(255, 255, 255, 0.58);
 }
-.sk-theme-item {
+.sk-quick-item {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
-.sk-theme-circle {
+.sk-quick-ico {
 	@extend .sk-base;
-	width: 104rpx;
-	height: 104rpx;
-	border-radius: 50%;
-}
-.sk-theme-label {
-	@extend .sk-base;
-	width: 72rpx;
-	height: 22rpx;
-	margin-top: 14rpx;
-	border-radius: 8rpx;
+	width: 88rpx;
+	height: 88rpx;
+	border-radius: 22rpx;
 }
 
-/* 备用：旧版主题分类骨架 sk-cate-* 已弃用 */
-
-.sk-entry-kicker {
-	@extend .sk-base;
-	width: 120rpx;
-	height: 28rpx;
-	margin: 20rpx 24rpx 12rpx;
-	border-radius: 8rpx;
-}
-.sk-entry-kicker--alt {
-	width: 140rpx;
-	margin-top: 8rpx;
-}
-.sk-entry-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 12rpx;
-	padding: 0 24rpx 12rpx;
-}
-.sk-entry-grid--triple {
-	grid-template-columns: repeat(3, 1fr);
-	padding-bottom: 20rpx;
-}
-.sk-entry-card {
-	@extend .sk-base;
-	height: 148rpx;
-	border-radius: 20rpx;
-}
-.sk-entry-card--sm {
-	height: 120rpx;
-	border-radius: 16rpx;
-}
-.sk-sec-title--wide {
-	width: 200rpx;
-}
-.sk-light-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 16rpx;
-	padding: 8rpx 24rpx 24rpx;
-}
-.sk-light-card {
-	@extend .sk-base;
-	height: 280rpx;
-	border-radius: 20rpx;
-}
-
-.sk-weekly {
-	@extend .sk-base;
-	width: 520rpx;
-	height: 320rpx;
-	border-radius: 24rpx;
-	margin-right: 20rpx;
-	flex-shrink: 0;
-}
-
-.skeleton-health { padding: 0 30rpx 30rpx; }
-.sk-health-block {
-	border-radius: 20rpx;
-	overflow: hidden;
-	margin-bottom: 30rpx;
-	background: linear-gradient(90deg, #3974F2 0%, rgba(57,116,242,0.5) 100%);
-}
-.sk-health-hd {
-	width: 180rpx;
-	height: 36rpx;
-	margin: 20rpx;
-	border-radius: 8rpx;
-	background: rgba(255,255,255,0.35);
-	animation: none;
-}
-.sk-health-hd--row {
-	width: auto;
+.sk-sec-head-row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	margin: 28rpx 32rpx 16rpx;
 }
-.sk-line--light-h {
-	background: linear-gradient(90deg, rgba(255,255,255,0.35) 25%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0.35) 75%);
-	background-size: 400rpx 100%;
-	animation: skeleton-loading 1.5s ease-in-out infinite;
+.sk-sec-head-row--pad {
+	margin-left: 24rpx;
+	margin-right: 24rpx;
 }
-.sk-health-more {
-	width: 80rpx;
-	height: 28rpx;
-	border-radius: 8rpx;
-	background: rgba(255,255,255,0.28);
+
+.sk-weekly-pair {
+	display: flex;
+	gap: 16rpx;
+	padding: 0 32rpx;
 }
-.sk-forum-img {
+.sk-weekly-card {
+	flex: 1;
+	min-width: 0;
+	background: #fff;
+	border-radius: 24rpx;
+	overflow: hidden;
+}
+.sk-weekly-card__hero {
 	@extend .sk-base;
 	height: 160rpx;
-	margin-top: 16rpx;
-	border-radius: 12rpx;
+	border-radius: 0;
 }
-.sk-health-body {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 20rpx;
-}
-.sk-health-row {
-	display: flex;
-	justify-content: space-between;
-	margin-bottom: 20rpx;
-	&:last-child { margin-bottom: 0; }
-}
-.sk-health-tile {
-	width: 314rpx;
-	height: 123rpx;
-	border-radius: 10rpx;
-}
-.sk-forum {
-	padding: 20rpx;
-	border-radius: 20rpx;
-	margin-bottom: 20rpx;
-	background: #f4f8ff;
-	animation: none;
-	&:last-child { margin-bottom: 0; }
-}
-.sk-forum-top {
-	display: flex;
-	align-items: center;
-	margin-bottom: 20rpx;
-}
-.sk-forum-av {
-	width: 40rpx;
-	height: 40rpx;
-	border-radius: 50%;
-	margin-right: 10rpx;
-	flex-shrink: 0;
+.sk-weekly-card__body {
+	padding: 16rpx 14rpx 20rpx;
 }
 
-.skeleton-mall { padding: 0 30rpx 30rpx; }
-.sk-coupon {
+.sk-guide-cta {
 	@extend .sk-base;
-	height: 210rpx;
-	border-radius: 20rpx;
-	margin-bottom: 30rpx;
-}
-.sk-zone-panel {
-	@extend .sk-base;
-	padding: 28rpx 24rpx;
+	height: 120rpx;
+	margin: 32rpx 32rpx 40rpx;
 	border-radius: 24rpx;
-	margin-bottom: 30rpx;
 }
-.sk-china-map {
-	@extend .sk-base;
-	height: 520rpx;
-	margin-top: 20rpx;
-	border-radius: 20rpx;
+
+/* —— 活动 Tab · 发现 —— */
+.skeleton-low-carbon {
+	padding-bottom: 40rpx;
 }
-.sk-zone-strip {
+.sk-discover-nav {
+	padding: calc(env(safe-area-inset-top) + 24rpx) 24rpx 0;
+}
+.sk-chip-row {
 	display: flex;
-	gap: 16rpx;
-	margin-top: 20rpx;
+	padding: 20rpx 24rpx 8rpx;
 	overflow: hidden;
 }
-.sk-zone-chip {
+.sk-chip {
+	@extend .sk-base;
+	width: 120rpx;
+	height: 56rpx;
+	border-radius: 999rpx;
+	margin-right: 12rpx;
+	flex-shrink: 0;
+}
+.sk-chip--on {
+	width: 136rpx;
+}
+.sk-cates-panel {
+	margin: 16rpx 24rpx 0;
+	padding: 24rpx 20rpx;
+	border-radius: 24rpx;
+	background: rgba(255, 255, 255, 0.72);
+}
+.sk-cates-row {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 20rpx;
+}
+.sk-cate-item {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.sk-cate-tile {
+	@extend .sk-base;
+	width: 96rpx;
+	height: 96rpx;
+	border-radius: 22rpx;
+}
+.sk-month-banner {
+	@extend .sk-base;
+	height: 240rpx;
+	margin: 20rpx 24rpx 0;
+	border-radius: 28rpx;
+}
+.sk-discover-card {
+	display: flex;
+	margin: 16rpx 24rpx 0;
+	padding: 20rpx;
+	border-radius: 24rpx;
+	background: rgba(255, 255, 255, 0.85);
+}
+.sk-discover-thumb {
+	@extend .sk-base;
+	width: 128rpx;
+	height: 128rpx;
+	border-radius: 16rpx;
+	flex-shrink: 0;
+}
+.sk-discover-body {
+	flex: 1;
+	min-width: 0;
+	margin-left: 20rpx;
+}
+.sk-discover-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: 20rpx;
+}
+.sk-discover-btn {
+	@extend .sk-base;
+	width: 120rpx;
+	height: 52rpx;
+	border-radius: 999rpx;
+}
+
+/* —— 健康 Tab —— */
+.skeleton-health {
+	padding: 0 0 40rpx;
+}
+.sk-hp-scene {
+	padding: calc(env(safe-area-inset-top) + 12rpx) 24rpx 0;
+}
+.sk-hp-nav {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8rpx;
+}
+.sk-hp-nav__copy {
+	display: flex;
+	align-items: center;
+}
+.sk-hp-nav__tag {
+	width: 120rpx;
+	height: 36rpx;
+	margin-left: 12rpx;
+	border-radius: 999rpx;
+}
+.sk-hp-nav__logo {
+	width: 200rpx;
+	height: 56rpx;
+	border-radius: 12rpx;
+}
+.sk-hp-persona {
+	position: relative;
+	height: 420rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 8rpx 0 0;
+}
+.sk-hp-persona__ring {
+	position: absolute;
+	width: 360rpx;
+	height: 360rpx;
+	border-radius: 50%;
+	opacity: 0.55;
+}
+.sk-hp-persona__fig {
+	width: 280rpx;
+	height: 320rpx;
+	border-radius: 140rpx 140rpx 100rpx 100rpx;
+}
+.sk-hp-panel {
+	margin-top: 8rpx;
+}
+.sk-hp-bubble {
+	height: 72rpx;
+	border-radius: 20rpx;
+	margin-bottom: 20rpx;
+}
+.sk-hp-cta {
+	padding: 28rpx 24rpx;
+	border-radius: 28rpx;
+	margin-bottom: 16rpx;
+}
+.sk-hp-cta__go {
+	@extend .sk-base;
+	height: 64rpx;
+	margin-top: 24rpx;
+	border-radius: 16rpx;
+}
+.sk-hp-link {
+	display: flex;
+	align-items: center;
+	padding: 24rpx 20rpx;
+	border-radius: 24rpx;
+}
+.sk-hp-link__ico {
+	width: 72rpx;
+	height: 72rpx;
+	border-radius: 20rpx;
+	flex-shrink: 0;
+}
+.sk-hp-link__copy {
+	flex: 1;
+	margin-left: 16rpx;
+}
+
+/* —— 积分权益 —— */
+.sk-mall-top {
+	padding-top: calc(env(safe-area-inset-top) + 8rpx);
+}
+.sk-points-hub {
+	@extend .sk-base;
+	margin: 16rpx 24rpx 0;
+	padding: 28rpx 24rpx;
+	border-radius: 28rpx;
+	animation: none;
+	background: rgba(255, 255, 255, 0.72);
+}
+.sk-points-hub__val {
+	@extend .sk-base;
+	height: 72rpx;
+	margin-top: 20rpx;
+	border-radius: 16rpx;
+}
+.sk-points-hub__actions {
+	display: flex;
+	gap: 16rpx;
+	margin-top: 24rpx;
+}
+.sk-points-hub__btn {
+	@extend .sk-base;
+	flex: 1;
+	height: 96rpx;
+	border-radius: 20rpx;
+}
+.sk-mall-body {
+	padding: 24rpx 30rpx 40rpx;
+}
+.sk-secondhand {
+	@extend .sk-base;
+	height: 120rpx;
+	border-radius: 20rpx;
+	margin-bottom: 24rpx;
+}
+.sk-mall-cate {
+	display: flex;
+	gap: 12rpx;
+	margin-bottom: 28rpx;
+	overflow: hidden;
+}
+.sk-mall-pill {
 	@extend .sk-base;
 	width: 140rpx;
 	height: 56rpx;
@@ -620,38 +702,47 @@ export default {
 }
 .sk-goods-info { padding: 16rpx; }
 
-.sk-me-hero {
-	background: linear-gradient(165deg, #18af38 0%, #12962e 58%, #0e7f26 100%);
-	padding: 120rpx 32rpx 88rpx;
+/* —— 我的 —— */
+.sk-me-head {
+	background: #fff;
+	padding: calc(env(safe-area-inset-top) + 88rpx) 32rpx 0;
+	border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
 }
-.sk-me-user { display: flex; align-items: center; }
+.sk-me-profile {
+	display: flex;
+	align-items: center;
+	padding-bottom: 28rpx;
+}
 .sk-me-avatar {
-	width: 130rpx;
-	height: 130rpx;
+	width: 120rpx;
+	height: 120rpx;
 	border-radius: 50%;
-	background: rgba(255,255,255,0.35);
+	background: #e8e8ed;
 	flex-shrink: 0;
 }
-.sk-me-info { margin-left: 24rpx; flex: 1; }
-.sk-me-stat {
-	height: 120rpx;
-	margin-top: 32rpx;
-	border-radius: 24rpx;
-	background: rgba(255,255,255,0.22);
+.sk-me-info {
+	flex: 1;
+	margin: 0 20rpx;
 }
-.sk-me-sheet {
-	margin-top: -40rpx;
-	padding: 0 24rpx 40rpx;
-	position: relative;
-}
-.sk-me-grow {
+.sk-me-arrow {
 	@extend .sk-base;
-	height: 160rpx;
-	border-radius: 24rpx;
-	margin-bottom: 24rpx;
-	background: #fff;
-	animation: none;
-	box-shadow: 0 8rpx 24rpx rgba(16, 48, 24, 0.06);
+	width: 28rpx;
+	height: 28rpx;
+	border-radius: 50%;
+}
+.sk-me-metrics {
+	display: flex;
+	padding: 28rpx 0 32rpx;
+	border-top: 1rpx solid rgba(0, 0, 0, 0.06);
+}
+.sk-me-metric {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.sk-me-body {
+	padding: 24rpx;
 }
 .sk-me-card {
 	background: #fff;
@@ -659,17 +750,17 @@ export default {
 	padding: 28rpx 20rpx;
 	margin-bottom: 24rpx;
 }
-.sk-me-grid {
+.sk-me-quick {
 	display: flex;
 	flex-wrap: wrap;
 	margin-top: 24rpx;
 }
-.sk-me-item {
+.sk-me-quick-item {
 	width: 25%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	margin-bottom: 28rpx;
+	margin-bottom: 8rpx;
 }
 .sk-me-ico {
 	@extend .sk-base;
@@ -677,5 +768,23 @@ export default {
 	height: 72rpx;
 	border-radius: 20rpx;
 	margin-bottom: 12rpx;
+}
+.sk-me-row {
+	display: flex;
+	align-items: center;
+	padding: 22rpx 0;
+	border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
+	&:last-child {
+		border-bottom: none;
+		padding-bottom: 0;
+	}
+}
+.sk-me-row-ico {
+	@extend .sk-base;
+	width: 64rpx;
+	height: 64rpx;
+	border-radius: 16rpx;
+	margin-right: 20rpx;
+	flex-shrink: 0;
 }
 </style>

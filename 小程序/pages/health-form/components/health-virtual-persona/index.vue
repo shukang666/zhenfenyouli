@@ -14,52 +14,44 @@
 			<view class="hvp-css-mascot">
 				<view class="hvp-halo hvp-halo--a"></view>
 				<view class="hvp-halo hvp-halo--b"></view>
-				<view class="hvp-tech-orbit">
-					<view class="hvp-tech-orbit__spin">
-						<view class="hvp-light-pillar hvp-light-pillar--1"></view>
-						<view class="hvp-light-pillar hvp-light-pillar--2"></view>
-						<view class="hvp-light-pillar hvp-light-pillar--3"></view>
-						<view class="hvp-light-pillar hvp-light-pillar--4"></view>
-						<view class="hvp-light-pillar hvp-light-pillar--5"></view>
-						<view class="hvp-light-pillar hvp-light-pillar--6"></view>
-					</view>
-					<view class="hvp-tech-orbit__spin hvp-tech-orbit__spin--reverse">
-						<view class="hvp-light-pillar hvp-light-pillar--thin hvp-light-pillar--7"></view>
-						<view class="hvp-light-pillar hvp-light-pillar--thin hvp-light-pillar--8"></view>
-						<view class="hvp-light-pillar hvp-light-pillar--thin hvp-light-pillar--9"></view>
-					</view>
-				</view>
 				<view class="hvp-motion">
 					<view class="hvp-mascot">
-						<view class="hvp-mascot__shadow"></view>
 						<view class="hvp-mascot__figure">
+							<view class="hvp-mascot__float-ring">
+								<view class="hvp-mascot__float-ring-glow"></view>
+							</view>
+
 							<view class="hvp-mascot__arm hvp-mascot__arm--l">
-								<view class="hvp-mascot__hand"></view>
+								<view class="hvp-mascot__arm-oval"></view>
 							</view>
 							<view class="hvp-mascot__arm hvp-mascot__arm--r">
-								<view class="hvp-mascot__hand"></view>
+								<view class="hvp-mascot__arm-oval"></view>
 							</view>
-							<view class="hvp-mascot__torso">
-								<view class="hvp-mascot__coat-shine"></view>
-								<view class="hvp-mascot__stetho">
-									<view class="hvp-mascot__stetho-tube"></view>
-									<view class="hvp-mascot__stetho-disk"></view>
-								</view>
-								<view class="hvp-mascot__badge">
-									<view class="hvp-mascot__badge-v"></view>
-									<view class="hvp-mascot__badge-h"></view>
-								</view>
-							</view>
-							<view class="hvp-mascot__head">
-								<view class="hvp-mascot__cap">
-									<view class="hvp-mascot__cap-band"></view>
-									<view class="hvp-mascot__cap-cross">
-										<view class="hvp-mascot__cap-cross-v"></view>
-										<view class="hvp-mascot__cap-cross-h"></view>
+
+							<view class="hvp-mascot__body">
+								<view class="hvp-mascot__body-shine"></view>
+								<view class="hvp-mascot__panel hvp-mascot__panel--v"></view>
+								<view class="hvp-mascot__panel hvp-mascot__panel--h"></view>
+								<view class="hvp-mascot__circuit hvp-mascot__circuit--a"></view>
+								<view class="hvp-mascot__circuit hvp-mascot__circuit--b"></view>
+								<view class="hvp-mascot__chest">
+									<view class="hvp-mascot__chest-glow"></view>
+									<view class="hvp-mascot__chest-ring"></view>
+									<view class="hvp-mascot__heart">
+										<view class="hvp-mascot__heart-lobe hvp-mascot__heart-lobe--l"></view>
+										<view class="hvp-mascot__heart-lobe hvp-mascot__heart-lobe--r"></view>
+										<view class="hvp-mascot__heart-tip"></view>
 									</view>
 								</view>
-								<view class="hvp-mascot__hair hvp-mascot__hair--l"></view>
-								<view class="hvp-mascot__hair hvp-mascot__hair--r"></view>
+							</view>
+
+							<view class="hvp-mascot__head-block">
+								<view class="hvp-mascot__helmet">
+									<view class="hvp-mascot__helmet-dome"></view>
+									<view class="hvp-mascot__helmet-band">
+										<view class="hvp-mascot__helmet-light"></view>
+									</view>
+								</view>
 								<view class="hvp-mascot__face">
 									<view class="hvp-mascot__face-glow"></view>
 									<view class="hvp-mascot__brow hvp-mascot__brow--l">
@@ -89,7 +81,6 @@
 										<view class="hvp-mascot__mouth-talk" v-if="speaking"></view>
 									</view>
 								</view>
-								<view class="hvp-mascot__head-shine"></view>
 							</view>
 						</view>
 					</view>
@@ -195,109 +186,15 @@ export default {
 .hvp-halo--a {
 	width: 88%;
 	height: 72%;
-	background: radial-gradient(circle, rgba(144, 202, 249, 0.5) 0%, transparent 70%);
+	background: radial-gradient(circle, rgba(144, 202, 249, 0.45) 0%, transparent 70%);
 }
 
 .hvp-halo--b {
 	width: 70%;
 	height: 62%;
-	background: radial-gradient(circle, rgba(76, 175, 80, 0.14) 0%, transparent 72%);
+	background: radial-gradient(circle, rgba(0, 188, 212, 0.12) 0%, transparent 72%);
 	animation-delay: -2.8s;
 	animation-duration: 7.2s;
-}
-
-.hvp-tech-orbit {
-	position: absolute;
-	left: 50%;
-	top: 48%;
-	width: 520rpx;
-	height: 520rpx;
-	margin-left: -260rpx;
-	margin-top: -260rpx;
-	z-index: 1;
-	pointer-events: none;
-}
-
-.hvp-tech-orbit__spin {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	animation: hvpOrbitSpin 14s linear infinite;
-}
-
-.hvp-tech-orbit__spin--reverse {
-	animation: hvpOrbitSpinRev 20s linear infinite;
-	opacity: 0.65;
-}
-
-.hvp-light-pillar {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	width: 10rpx;
-	height: 140rpx;
-	margin-left: -5rpx;
-	margin-top: -228rpx;
-	border-radius: 6rpx;
-	background: linear-gradient(
-		180deg,
-		rgba(255, 255, 255, 0.95) 0%,
-		rgba(144, 202, 249, 0.75) 35%,
-		rgba(66, 165, 245, 0.35) 65%,
-		rgba(66, 165, 245, 0) 100%
-	);
-	box-shadow: 0 0 20rpx rgba(144, 202, 249, 0.45);
-	transform-origin: 50% 228rpx;
-	opacity: 0.85;
-}
-
-.hvp-light-pillar--thin {
-	width: 6rpx;
-	height: 100rpx;
-	margin-top: -210rpx;
-	transform-origin: 50% 210rpx;
-	opacity: 0.55;
-	background: linear-gradient(
-		180deg,
-		rgba(255, 255, 255, 0.7) 0%,
-		rgba(129, 212, 250, 0.5) 50%,
-		rgba(66, 165, 245, 0) 100%
-	);
-}
-
-.hvp-light-pillar--1 {
-	transform: rotate(0deg);
-}
-.hvp-light-pillar--2 {
-	transform: rotate(60deg);
-}
-.hvp-light-pillar--3 {
-	transform: rotate(120deg);
-}
-.hvp-light-pillar--4 {
-	transform: rotate(180deg);
-}
-.hvp-light-pillar--5 {
-	transform: rotate(240deg);
-}
-.hvp-light-pillar--6 {
-	transform: rotate(300deg);
-}
-.hvp-light-pillar--7 {
-	transform: rotate(30deg);
-}
-.hvp-light-pillar--8 {
-	transform: rotate(150deg);
-}
-.hvp-light-pillar--9 {
-	transform: rotate(270deg);
-}
-
-.hvp--speaking .hvp-light-pillar {
-	opacity: 1;
-	box-shadow: 0 0 28rpx rgba(144, 202, 249, 0.65);
 }
 
 .hvp-motion {
@@ -310,33 +207,21 @@ export default {
 	animation-duration: 2s;
 }
 
-/* —— 拟人吉祥物「小健」：护士帽 + 听诊器 + 白大褂 —— */
+/* —— 3D 数字健康助手「小健」—— */
 .hvp-mascot {
 	position: relative;
-	width: 320rpx;
-	height: 420rpx;
+	width: 340rpx;
+	height: 460rpx;
 }
 
 .hvp--hero .hvp-mascot {
-	width: 380rpx;
-	height: 500rpx;
+	width: 400rpx;
+	height: 540rpx;
 }
 
 .hvp--md .hvp-mascot {
-	width: 260rpx;
-	height: 340rpx;
-}
-
-.hvp-mascot__shadow {
-	position: absolute;
-	left: 50%;
-	bottom: 4rpx;
-	width: 58%;
-	height: 20rpx;
-	margin-left: -29%;
-	background: radial-gradient(ellipse, rgba(21, 101, 216, 0.22) 0%, transparent 72%);
-	border-radius: 50%;
-	animation: hvpShadowPulse 3.2s ease-in-out infinite;
+	width: 280rpx;
+	height: 380rpx;
 }
 
 .hvp-mascot__figure {
@@ -345,125 +230,209 @@ export default {
 	height: 100%;
 }
 
-.hvp-mascot__torso {
+.hvp-mascot__float-ring {
 	position: absolute;
 	left: 50%;
-	top: 46%;
-	width: 52%;
-	height: 38%;
-	margin-left: -26%;
-	border-radius: 42% 42% 38% 38% / 36% 36% 48% 48%;
-	background: linear-gradient(
-		165deg,
-		#ffffff 0%,
-		#f0f7ff 35%,
-		#dceeff 70%,
-		#c5e1fb 100%
-	);
-	border: 2rpx solid rgba(255, 255, 255, 0.95);
-	box-shadow:
-		0 16rpx 36rpx rgba(21, 101, 216, 0.18),
-		inset 0 6rpx 16rpx rgba(255, 255, 255, 0.9),
-		inset 0 -8rpx 20rpx rgba(144, 202, 249, 0.35);
-	overflow: hidden;
-}
-
-.hvp-mascot__coat-shine {
-	position: absolute;
-	left: 12%;
-	top: 8%;
-	width: 28%;
-	height: 55%;
-	border-radius: 50%;
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), transparent);
-}
-
-.hvp-mascot__stetho {
-	position: absolute;
-	right: 8%;
-	top: 18%;
-	width: 36%;
-	height: 50%;
-}
-
-.hvp-mascot__stetho-tube {
-	position: absolute;
-	right: 0;
-	top: 0;
-	width: 70%;
-	height: 55%;
-	border: 3rpx solid transparent;
-	border-top-color: #78909c;
-	border-right-color: #78909c;
-	border-radius: 0 80% 0 0;
-	transform: rotate(-12deg);
-}
-
-.hvp-mascot__stetho-disk {
-	position: absolute;
-	right: 52%;
 	bottom: 0;
-	width: 28rpx;
+	width: 72%;
 	height: 28rpx;
+	margin-left: -36%;
 	border-radius: 50%;
-	background: linear-gradient(145deg, #cfd8dc, #90a4ae);
-	border: 2rpx solid #eceff1;
-	box-shadow: inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
+	background: radial-gradient(
+		ellipse,
+		rgba(79, 195, 247, 0.55) 0%,
+		rgba(33, 150, 243, 0.35) 45%,
+		rgba(33, 150, 243, 0) 72%
+	);
+	box-shadow:
+		0 0 20rpx rgba(79, 195, 247, 0.65),
+		0 0 48rpx rgba(41, 182, 246, 0.35);
+	animation: hvpRingPulse 2.8s ease-in-out infinite;
 }
 
-.hvp-mascot__badge {
+.hvp-mascot__float-ring-glow {
+	position: absolute;
+	left: 10%;
+	top: -6rpx;
+	width: 80%;
+	height: 12rpx;
+	border-radius: 50%;
+	border: 3rpx solid rgba(129, 212, 250, 0.85);
+	box-shadow: 0 0 16rpx rgba(129, 212, 250, 0.9);
+}
+
+.hvp-mascot__body {
 	position: absolute;
 	left: 50%;
-	top: 28%;
-	width: 44rpx;
-	height: 44rpx;
-	margin-left: -22rpx;
+	top: 38%;
+	width: 58%;
+	height: 46%;
+	margin-left: -29%;
 	border-radius: 50%;
-	background: linear-gradient(145deg, #42a5f5, #1565c0);
-	box-shadow: 0 4rpx 10rpx rgba(21, 101, 192, 0.35);
+	background: radial-gradient(
+		circle at 32% 28%,
+		#ffffff 0%,
+		#f4f9ff 28%,
+		#dceefb 62%,
+		#b8d4f0 100%
+	);
+	box-shadow:
+		0 22rpx 40rpx rgba(21, 101, 216, 0.22),
+		0 8rpx 16rpx rgba(255, 255, 255, 0.9) inset,
+		0 -14rpx 28rpx rgba(144, 202, 249, 0.35) inset,
+		-6rpx -6rpx 12rpx rgba(255, 255, 255, 0.6) inset;
+	z-index: 2;
 }
 
-.hvp-mascot__badge-v,
-.hvp-mascot__badge-h {
+.hvp-mascot__body-shine {
+	position: absolute;
+	left: 14%;
+	top: 10%;
+	width: 38%;
+	height: 32%;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.92) 0%, transparent 70%);
+	filter: blur(2rpx);
+}
+
+.hvp-mascot__panel {
+	position: absolute;
+	background: rgba(144, 202, 249, 0.22);
+	border-radius: 2rpx;
+}
+
+.hvp-mascot__panel--v {
+	left: 50%;
+	top: 18%;
+	width: 2rpx;
+	height: 52%;
+	margin-left: -1rpx;
+}
+
+.hvp-mascot__panel--h {
+	left: 22%;
+	top: 42%;
+	width: 56%;
+	height: 2rpx;
+}
+
+.hvp-mascot__circuit {
+	position: absolute;
+	width: 24rpx;
+	height: 2rpx;
+	background: rgba(0, 188, 212, 0.45);
+	box-shadow: 0 0 8rpx rgba(0, 188, 212, 0.5);
+}
+
+.hvp-mascot__circuit--a {
+	left: 18%;
+	top: 28%;
+	transform: rotate(-24deg);
+}
+
+.hvp-mascot__circuit--b {
+	right: 16%;
+	top: 52%;
+	transform: rotate(18deg);
+}
+
+.hvp-mascot__chest {
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	background: #fff;
-	border-radius: 2rpx;
-	transform: translate(-50%, -50%);
+	width: 38%;
+	height: 38%;
+	margin-left: -19%;
+	margin-top: -19%;
 }
 
-.hvp-mascot__badge-v {
-	width: 6rpx;
-	height: 22rpx;
+.hvp-mascot__chest-glow {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(79, 195, 247, 0.55) 0%, rgba(33, 150, 243, 0) 72%);
+	animation: hvpChestGlow 2.4s ease-in-out infinite;
 }
 
-.hvp-mascot__badge-h {
-	width: 22rpx;
-	height: 6rpx;
+.hvp-mascot__chest-ring {
+	position: absolute;
+	left: 8%;
+	top: 8%;
+	width: 84%;
+	height: 84%;
+	border-radius: 50%;
+	border: 4rpx solid rgba(100, 181, 246, 0.85);
+	box-shadow:
+		0 0 20rpx rgba(79, 195, 247, 0.7),
+		inset 0 0 16rpx rgba(255, 255, 255, 0.35);
+	background: radial-gradient(circle at 50% 40%, rgba(227, 242, 253, 0.95) 0%, rgba(144, 202, 249, 0.45) 100%);
+}
+
+.hvp-mascot__heart {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 28rpx;
+	height: 26rpx;
+	margin-left: -14rpx;
+	margin-top: -13rpx;
+}
+
+.hvp-mascot__heart-lobe {
+	position: absolute;
+	width: 14rpx;
+	height: 18rpx;
+	top: 0;
+	background: linear-gradient(145deg, #ff8a80, #e53935);
+	border-radius: 14rpx 14rpx 0 0;
+	box-shadow: 0 2rpx 6rpx rgba(229, 57, 53, 0.35);
+}
+
+.hvp-mascot__heart-lobe--l {
+	left: 0;
+	transform: rotate(-45deg);
+	transform-origin: 100% 100%;
+}
+
+.hvp-mascot__heart-lobe--r {
+	right: 0;
+	transform: rotate(45deg);
+	transform-origin: 0 100%;
+}
+
+.hvp-mascot__heart-tip {
+	position: absolute;
+	width: 16rpx;
+	height: 16rpx;
+	left: 6rpx;
+	top: 9rpx;
+	transform: rotate(45deg);
+	background: #e53935;
+	border-radius: 0 0 4rpx 0;
 }
 
 .hvp-mascot__arm {
 	position: absolute;
-	top: 48%;
-	width: 18%;
-	height: 28%;
-	border-radius: 40rpx;
-	background: linear-gradient(160deg, #ffffff, #e3f2fd);
-	border: 2rpx solid rgba(255, 255, 255, 0.9);
-	box-shadow: 0 6rpx 14rpx rgba(21, 101, 216, 0.12);
-	transform-origin: 50% 12%;
+	top: 51%;
+	width: 48rpx;
+	z-index: 3;
+	transform-origin: 50% 0;
 }
 
 .hvp-mascot__arm--l {
-	left: 6%;
-	animation: hvpArmSwayL 4s ease-in-out infinite;
+	left: 7%;
+	transform: rotate(13deg);
+	animation: hvpArmSwayL 4.2s ease-in-out infinite;
 	animation-delay: -1s;
 }
 
 .hvp-mascot__arm--r {
-	right: 6%;
-	animation: hvpArmSwayR 4s ease-in-out infinite;
+	right: 7%;
+	transform: rotate(-13deg);
+	animation: hvpArmSwayR 4.2s ease-in-out infinite;
 	animation-delay: -2.2s;
 }
 
@@ -471,162 +440,144 @@ export default {
 	animation: hvpArmWave 1.2s ease-in-out infinite;
 }
 
-.hvp-mascot__hand {
-	position: absolute;
-	left: 50%;
-	bottom: -6rpx;
-	width: 36rpx;
-	height: 36rpx;
-	margin-left: -18rpx;
+/* 单段长椭圆臂：上白下略收，末端肉色掌 */
+.hvp-mascot__arm-oval {
+	width: 44rpx;
+	height: 152rpx;
 	border-radius: 50%;
-	background: linear-gradient(160deg, #fff5ef 0%, #ffe8dc 100%);
-	border: 2rpx solid rgba(255, 255, 255, 0.6);
+	background: linear-gradient(
+		175deg,
+		#ffffff 0%,
+		#f4f9ff 22%,
+		#e3f2fd 55%,
+		#cfe6f9 78%,
+		#fde2d2 92%,
+		#f5c4b8 100%
+	);
+	box-shadow:
+		0 10rpx 22rpx rgba(21, 101, 216, 0.14),
+		inset 0 8rpx 16rpx rgba(255, 255, 255, 0.92),
+		inset 0 -10rpx 18rpx rgba(100, 181, 246, 0.22);
 }
 
-.hvp-mascot__head {
+.hvp-mascot__head-block {
 	position: absolute;
 	left: 50%;
 	top: 0;
-	width: 62%;
-	height: 48%;
-	margin-left: -31%;
+	width: 68%;
+	height: 52%;
+	margin-left: -34%;
+	z-index: 4;
+}
+
+.hvp-mascot__helmet {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 52%;
 	z-index: 3;
 }
 
-.hvp-mascot__cap {
+.hvp-mascot__helmet-dome {
 	position: absolute;
-	left: 50%;
-	top: -6%;
+	left: 6%;
+	top: 0;
 	width: 88%;
-	height: 38%;
-	margin-left: -44%;
-	border-radius: 50% 50% 12% 12% / 60% 60% 20% 20%;
-	background: linear-gradient(180deg, #ffffff 0%, #e8f4fc 100%);
-	border: 2rpx solid rgba(255, 255, 255, 0.95);
-	box-shadow: 0 8rpx 20rpx rgba(21, 101, 216, 0.12);
-	z-index: 2;
+	height: 88%;
+	border-radius: 50% 50% 42% 42%;
+	background: radial-gradient(circle at 35% 25%, #ffffff 0%, #eef6ff 40%, #d4e8fa 100%);
+	box-shadow:
+		0 14rpx 28rpx rgba(21, 101, 216, 0.18),
+		inset 0 8rpx 14rpx rgba(255, 255, 255, 0.95),
+		inset 0 -10rpx 18rpx rgba(144, 202, 249, 0.25);
 }
 
-.hvp-mascot__cap-band {
+.hvp-mascot__helmet-band {
 	position: absolute;
 	left: 0;
 	bottom: 0;
 	width: 100%;
-	height: 28%;
-	background: linear-gradient(90deg, #1565c0, #42a5f5, #1565c0);
-	border-radius: 0 0 8rpx 8rpx;
+	height: 34%;
+	border-radius: 0 0 40rpx 40rpx;
+	background: linear-gradient(180deg, #42a5f5 0%, #1565c0 55%, #0d47a1 100%);
+	box-shadow:
+		0 6rpx 14rpx rgba(13, 71, 161, 0.35),
+		inset 0 2rpx 6rpx rgba(255, 255, 255, 0.35);
 }
 
-.hvp-mascot__cap-cross {
+.hvp-mascot__helmet-light {
 	position: absolute;
-	left: 50%;
-	top: 22%;
-	width: 28rpx;
-	height: 28rpx;
-	margin-left: -14rpx;
-}
-
-.hvp-mascot__cap-cross-v,
-.hvp-mascot__cap-cross-h {
-	position: absolute;
-	left: 50%;
+	right: 14%;
 	top: 50%;
-	background: #fff;
-	border-radius: 2rpx;
-	transform: translate(-50%, -50%);
-}
-
-.hvp-mascot__cap-cross-v {
-	width: 5rpx;
+	width: 10rpx;
 	height: 18rpx;
-}
-
-.hvp-mascot__cap-cross-h {
-	width: 18rpx;
-	height: 5rpx;
-}
-
-.hvp-mascot__hair {
-	position: absolute;
-	bottom: 18%;
-	width: 22%;
-	height: 32%;
-	background: #5d4037;
-	border-radius: 50% 50% 40% 40%;
-	z-index: 0;
-}
-
-.hvp-mascot__hair--l {
-	left: 8%;
-	transform: rotate(-8deg);
-}
-
-.hvp-mascot__hair--r {
-	right: 8%;
-	transform: rotate(8deg);
+	margin-top: -9rpx;
+	border-radius: 4rpx;
+	background: linear-gradient(180deg, #ff8a65, #e64a19);
+	box-shadow: 0 0 10rpx rgba(255, 138, 101, 0.85);
 }
 
 .hvp-mascot__face {
 	position: absolute;
 	left: 50%;
-	top: 18%;
-	width: 86%;
+	bottom: 0;
+	width: 92%;
 	height: 78%;
-	margin-left: -43%;
-	border-radius: 48% 48% 44% 44% / 52% 52% 46% 46%;
-	background: linear-gradient(165deg, #fffdfb 0%, #fff0e8 42%, #ffe4d9 100%);
-	border: 2rpx solid rgba(255, 255, 255, 0.72);
+	margin-left: -46%;
+	border-radius: 50%;
+	background: radial-gradient(circle at 38% 32%, #fffdfb 0%, #fff0e8 38%, #fde2d2 72%, #f5c4b8 100%);
 	box-shadow:
-		0 12rpx 28rpx rgba(144, 202, 249, 0.1),
-		inset 0 8rpx 18rpx rgba(255, 255, 255, 0.85),
-		inset 0 -4rpx 12rpx rgba(255, 200, 180, 0.08);
+		0 16rpx 32rpx rgba(21, 101, 216, 0.12),
+		inset 0 10rpx 20rpx rgba(255, 255, 255, 0.85),
+		inset 0 -8rpx 16rpx rgba(244, 143, 177, 0.12);
 	overflow: hidden;
+	z-index: 2;
 }
 
 .hvp-mascot__face-glow {
 	position: absolute;
-	left: 18%;
-	top: 12%;
-	width: 52%;
-	height: 38%;
+	left: 20%;
+	top: 14%;
+	width: 48%;
+	height: 36%;
 	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.45);
-	filter: blur(14rpx);
-	z-index: 0;
+	background: rgba(255, 255, 255, 0.5);
+	filter: blur(12rpx);
 }
 
 .hvp-mascot__brow {
 	position: absolute;
-	top: 26%;
-	width: 20%;
-	height: 14rpx;
+	top: 24%;
+	width: 16%;
+	height: 12rpx;
 	overflow: hidden;
 	z-index: 2;
 }
 
 .hvp-mascot__brow--l {
-	left: 20%;
-	transform: rotate(-6deg);
+	left: 22%;
+	transform: rotate(-5deg);
 }
 
 .hvp-mascot__brow--r {
-	right: 20%;
-	transform: rotate(6deg) scaleX(-1);
+	right: 22%;
+	transform: rotate(5deg) scaleX(-1);
 }
 
 .hvp-mascot__brow-arc {
 	width: 100%;
 	height: 200%;
-	border-top: 4rpx solid #bcaaa4;
+	border-top: 3rpx solid rgba(188, 170, 164, 0.55);
 	border-radius: 50% 50% 0 0;
 	box-sizing: border-box;
 }
 
 .hvp-mascot__eye {
 	position: absolute;
-	top: 36%;
-	width: 21%;
-	height: 24%;
+	top: 38%;
+	width: 22%;
+	height: 26%;
 	z-index: 2;
 }
 
@@ -642,80 +593,78 @@ export default {
 	position: relative;
 	width: 100%;
 	height: 100%;
-	border-radius: 46% 46% 44% 44% / 48% 48% 42% 42%;
+	border-radius: 50%;
 	background: #fff;
-	border: 2rpx solid rgba(188, 170, 164, 0.2);
-	box-shadow: inset 0 -3rpx 6rpx rgba(0, 0, 0, 0.03);
+	border: 2rpx solid rgba(188, 170, 164, 0.15);
+	box-shadow: inset 0 -4rpx 8rpx rgba(0, 0, 0, 0.04);
 	animation: hvpBlink 6.5s ease-in-out infinite;
 }
 
 .hvp-mascot__pupil {
 	position: absolute;
 	left: 50%;
-	top: 54%;
-	width: 46%;
-	height: 46%;
-	margin-left: -23%;
-	margin-top: -23%;
+	top: 52%;
+	width: 50%;
+	height: 50%;
+	margin-left: -25%;
+	margin-top: -25%;
 	border-radius: 50%;
-	background: radial-gradient(circle at 38% 32%, #8d6e63, #6d4c41);
+	background: radial-gradient(circle at 38% 30%, #8d6e63, #5d4037);
 }
 
 .hvp-mascot__eye-spark {
 	position: absolute;
-	right: 24%;
-	top: 24%;
-	width: 20%;
-	height: 20%;
+	right: 22%;
+	top: 22%;
+	width: 22%;
+	height: 22%;
 	border-radius: 50%;
 	background: #fff;
 }
 
 .hvp-mascot__eye-spark--sm {
 	right: auto;
-	left: 28%;
-	top: 38%;
+	left: 26%;
+	top: 36%;
 	width: 10%;
 	height: 10%;
-	opacity: 0.85;
 }
 
 .hvp-mascot__cheek {
 	position: absolute;
-	top: 54%;
-	width: 18%;
-	height: 13%;
+	top: 56%;
+	width: 20%;
+	height: 14%;
 	border-radius: 50%;
-	background: radial-gradient(circle, rgba(255, 171, 145, 0.42) 0%, transparent 72%);
-	z-index: 1;
+	background: radial-gradient(circle, rgba(255, 171, 145, 0.45) 0%, transparent 72%);
 }
 
 .hvp-mascot__cheek--l {
-	left: 14%;
+	left: 12%;
 }
 
 .hvp-mascot__cheek--r {
-	right: 14%;
+	right: 12%;
 }
 
 .hvp-mascot__mouth {
 	position: absolute;
 	left: 50%;
-	bottom: 20%;
-	width: 30%;
-	height: 16%;
-	margin-left: -15%;
+	bottom: 17%;
+	width: 26%;
+	height: 22rpx;
+	margin-left: -13%;
 	z-index: 2;
+	overflow: visible;
 }
 
 .hvp-mascot__mouth-smile {
 	position: absolute;
-	left: 50%;
+	left: 0;
 	bottom: 0;
-	width: 72%;
-	height: 50%;
-	margin-left: -36%;
-	border-bottom: 4rpx solid #c9a89a;
+	width: 100%;
+	height: 22rpx;
+	border-bottom: 3rpx solid rgba(230, 180, 168, 0.82);
 	border-radius: 0 0 50% 50% / 0 0 100% 100%;
 	box-sizing: border-box;
 }
@@ -723,45 +672,33 @@ export default {
 .hvp-mascot__mouth-talk {
 	position: absolute;
 	left: 50%;
-	bottom: 18%;
-	width: 22%;
-	height: 14%;
-	margin-left: -11%;
+	bottom: -10rpx;
+	width: 18rpx;
+	height: 12rpx;
+	margin-left: -9rpx;
 	border-radius: 50%;
-	background: #a1887f;
-	border: 2rpx solid #bcaaa4;
+	background: rgba(248, 180, 168, 0.75);
+	border: none;
 	animation: hvpMouthTalk 0.5s ease-in-out infinite alternate;
-}
-
-.hvp-mascot__head-shine {
-	position: absolute;
-	left: 22%;
-	top: 28%;
-	width: 22%;
-	height: 14%;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.55);
-	filter: blur(2rpx);
-	pointer-events: none;
 }
 
 .hvp-speak-ring {
 	position: absolute;
 	left: 50%;
-	top: 50%;
-	width: 52%;
-	height: 48%;
-	margin-left: -26%;
-	margin-top: -24%;
-	border: 3rpx solid rgba(144, 202, 249, 0.5);
-	border-radius: 48% 52% 50% 50%;
+	top: 48%;
+	width: 54%;
+	height: 50%;
+	margin-left: -27%;
+	margin-top: -25%;
+	border: 3rpx solid rgba(129, 212, 250, 0.55);
+	border-radius: 50%;
 	pointer-events: none;
 	animation: hvpSpeakRing 2s ease-out infinite;
 }
 
 .hvp-speak-ring--delay {
 	animation-delay: 0.65s;
-	border-color: rgba(129, 199, 132, 0.35);
+	border-color: rgba(100, 181, 246, 0.35);
 }
 
 .hvp-caption {
@@ -785,49 +722,61 @@ export default {
 		transform: translateY(0);
 	}
 	50% {
-		transform: translateY(-10rpx);
+		transform: translateY(-12rpx);
 	}
 }
 
-@keyframes hvpShadowPulse {
+@keyframes hvpRingPulse {
 	0%,
 	100% {
 		transform: scaleX(1);
-		opacity: 0.85;
+		opacity: 0.9;
 	}
 	50% {
-		transform: scaleX(0.92);
-		opacity: 0.65;
+		transform: scaleX(1.06);
+		opacity: 1;
+	}
+}
+
+@keyframes hvpChestGlow {
+	0%,
+	100% {
+		opacity: 0.75;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.06);
 	}
 }
 
 @keyframes hvpArmSwayL {
 	0%,
 	100% {
-		transform: rotate(16deg);
+		transform: rotate(11deg);
 	}
 	50% {
-		transform: rotate(22deg);
+		transform: rotate(15deg);
 	}
 }
 
 @keyframes hvpArmSwayR {
 	0%,
 	100% {
-		transform: rotate(-12deg);
+		transform: rotate(-11deg);
 	}
 	50% {
-		transform: rotate(-18deg);
+		transform: rotate(-15deg);
 	}
 }
 
 @keyframes hvpArmWave {
 	0%,
 	100% {
-		transform: rotate(-14deg);
+		transform: rotate(-11deg);
 	}
 	50% {
-		transform: rotate(-34deg);
+		transform: rotate(-24deg);
 	}
 }
 
@@ -838,7 +787,7 @@ export default {
 		transform: scaleY(1);
 	}
 	94% {
-		transform: scaleY(0.12);
+		transform: scaleY(0.1);
 	}
 	96% {
 		transform: scaleY(1);
@@ -848,29 +797,9 @@ export default {
 @keyframes hvpMouthTalk {
 	0% {
 		transform: scaleY(0.65);
-		opacity: 0.85;
 	}
 	100% {
-		transform: scaleY(1.05);
-		opacity: 1;
-	}
-}
-
-@keyframes hvpOrbitSpin {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
-	}
-}
-
-@keyframes hvpOrbitSpinRev {
-	0% {
-		transform: rotate(360deg);
-	}
-	100% {
-		transform: rotate(0deg);
+		transform: scaleY(1.08);
 	}
 }
 
@@ -889,11 +818,11 @@ export default {
 @keyframes hvpSpeakRing {
 	0% {
 		opacity: 0.5;
-		transform: scale(0.94);
+		transform: scale(0.92);
 	}
 	100% {
 		opacity: 0;
-		transform: scale(1.28);
+		transform: scale(1.22);
 	}
 }
 </style>
