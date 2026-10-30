@@ -6,35 +6,74 @@
 			{
 				'hvp--speaking': speaking,
 				'hvp--dark-caption': darkCaption,
-				'hvp--embedded': embedded,
-				'hvp--lottie-on': lottieReady && !useCssFallback
+				'hvp--embedded': embedded
 			}
 		]"
 	>
 		<view class="hvp-stage">
-			<!-- #ifdef MP-WEIXIN -->
-			<canvas
-				v-show="!useCssFallback"
-				class="hvp-lottie"
-				:class="'hvp-lottie--' + size"
-				type="2d"
-				:id="canvasId"
-			></canvas>
-			<!-- #endif -->
-			<view v-show="showCssHeart" class="hvp-css-fallback">
+			<view class="hvp-css-mascot">
 				<view class="hvp-halo hvp-halo--a"></view>
 				<view class="hvp-halo hvp-halo--b"></view>
 				<view class="hvp-motion">
-					<view class="hvp-heart">
-						<view class="hvp-heart-shell">
-							<view class="hvp-heart-glass"></view>
-							<view class="hvp-heart-glass hvp-heart-glass--inner"></view>
-							<view class="hvp-heart-shine"></view>
-							<view class="hvp-heart-tint"></view>
+					<view class="hvp-mascot">
+						<view class="hvp-mascot__shadow"></view>
+						<view class="hvp-mascot__figure">
+							<view class="hvp-mascot__arm hvp-mascot__arm--l">
+								<view class="hvp-mascot__hand"></view>
+							</view>
+							<view class="hvp-mascot__arm hvp-mascot__arm--r">
+								<view class="hvp-mascot__hand"></view>
+							</view>
+							<view class="hvp-mascot__torso">
+								<view class="hvp-mascot__coat-shine"></view>
+								<view class="hvp-mascot__stetho">
+									<view class="hvp-mascot__stetho-tube"></view>
+									<view class="hvp-mascot__stetho-disk"></view>
+								</view>
+								<view class="hvp-mascot__badge">
+									<view class="hvp-mascot__badge-v"></view>
+									<view class="hvp-mascot__badge-h"></view>
+								</view>
+							</view>
+							<view class="hvp-mascot__head">
+								<view class="hvp-mascot__cap">
+									<view class="hvp-mascot__cap-band"></view>
+									<view class="hvp-mascot__cap-cross">
+										<view class="hvp-mascot__cap-cross-v"></view>
+										<view class="hvp-mascot__cap-cross-h"></view>
+									</view>
+								</view>
+								<view class="hvp-mascot__hair hvp-mascot__hair--l"></view>
+								<view class="hvp-mascot__hair hvp-mascot__hair--r"></view>
+								<view class="hvp-mascot__face">
+									<view class="hvp-mascot__brow hvp-mascot__brow--l"></view>
+									<view class="hvp-mascot__brow hvp-mascot__brow--r"></view>
+									<view class="hvp-mascot__eye hvp-mascot__eye--l">
+										<view class="hvp-mascot__eye-white">
+											<view class="hvp-mascot__pupil"></view>
+											<view class="hvp-mascot__eye-spark"></view>
+										</view>
+									</view>
+									<view class="hvp-mascot__eye hvp-mascot__eye--r">
+										<view class="hvp-mascot__eye-white">
+											<view class="hvp-mascot__pupil"></view>
+											<view class="hvp-mascot__eye-spark"></view>
+										</view>
+									</view>
+									<view class="hvp-mascot__cheek hvp-mascot__cheek--l"></view>
+									<view class="hvp-mascot__cheek hvp-mascot__cheek--r"></view>
+									<view class="hvp-mascot__nose"></view>
+									<view class="hvp-mascot__mouth">
+										<view class="hvp-mascot__mouth-inner"></view>
+									</view>
+								</view>
+								<view class="hvp-mascot__head-shine"></view>
+							</view>
 						</view>
 					</view>
 				</view>
 				<view class="hvp-speak-ring" v-if="speaking"></view>
+				<view class="hvp-speak-ring hvp-speak-ring--delay" v-if="speaking"></view>
 			</view>
 		</view>
 		<text class="hvp-caption" v-if="caption && !hideCaption">{{ caption }}</text>
@@ -42,15 +81,6 @@
 </template>
 
 <script>
-import settings from '@/common/settings.js'
-// 包内备用（线上 JSON 未部署或 download 失败时仍能播 Lottie）
-
-// #ifdef MP-WEIXIN
-import lottie from 'lottie-miniprogram'
-// #endif
-
-let hvpCanvasSeq = 0
-
 export default {
 	name: 'HealthVirtualPersona',
 	props: {
@@ -81,152 +111,6 @@ export default {
 		lottieUrl: {
 			type: String,
 			default: ''
-		}
-	},
-	data() {
-		hvpCanvasSeq += 1
-		return {
-			canvasId: 'hvpLottie' + hvpCanvasSeq,
-			useCssFallback: false,
-			lottieReady: false,
-			lottieAnim: null,
-			lottieInited: false
-		}
-	},
-	computed: {
-		remoteLottieUrl() {
-			if (this.lottieUrl && String(this.lottieUrl).trim()) {
-				return String(this.lottieUrl).trim()
-			}
-			const base = (settings.sitePublicUrl || 'https://admin.circular-economy.cn').replace(/\/$/, '')
-			const path = settings.healthAdvisorLottiePath || '/static/lottie/health_agent_idle_v01.json'
-			return base + path
-		},
-		showCssHeart() {
-			// #ifdef MP-WEIXIN
-			return !this.lottieReady || this.useCssFallback
-			// #endif
-			// #ifndef MP-WEIXIN
-			return true
-			// #endif
-		}
-	},
-	watch: {
-		speaking(val) {
-			this.applyLottieSpeed(val)
-		}
-	},
-	mounted() {
-		// #ifdef MP-WEIXIN
-		this.$nextTick(() => {
-			setTimeout(() => this.initLottie(), 120)
-		})
-		// #endif
-	},
-	beforeDestroy() {
-		this.destroyLottie()
-	},
-	methods: {
-		applyLottieSpeed(speaking) {
-			if (!this.lottieAnim) return
-			try {
-				this.lottieAnim.setSpeed(speaking ? 1.35 : 1)
-			} catch (e) {}
-		},
-		destroyLottie() {
-			if (this.lottieAnim) {
-				try {
-					this.lottieAnim.destroy()
-				} catch (e) {}
-				this.lottieAnim = null
-			}
-			this.lottieReady = false
-		},
-		fetchLottieJson(url) {
-			return new Promise((resolve, reject) => {
-				uni.request({
-					url,
-					method: 'GET',
-					success: (res) => {
-						if (res.statusCode === 200 && res.data && typeof res.data === 'object') {
-							resolve(res.data)
-							return
-						}
-						reject(new Error('lottie http ' + (res.statusCode || 0)))
-					},
-					fail: (err) => reject(err || new Error('lottie request fail'))
-				})
-			})
-		},
-		async resolveAnimationData() {
-			return await this.fetchLottieJson(this.remoteLottieUrl)
-		},
-		startLottieOnCanvas(canvas, box, animationData) {
-			const dpr = uni.getSystemInfoSync().pixelRatio || 2
-			const w = box.width || 320
-			const h = box.height || 320
-			canvas.width = w * dpr
-			canvas.height = h * dpr
-			const ctx = canvas.getContext('2d')
-			ctx.scale(dpr, dpr)
-			lottie.setup(canvas)
-			this.lottieAnim = lottie.loadAnimation({
-				loop: true,
-				autoplay: true,
-				animationData,
-				rendererSettings: {
-					context: ctx,
-					clearCanvas: true
-				}
-			})
-			const onReady = () => {
-				this.lottieReady = true
-				this.applyLottieSpeed(this.speaking)
-			}
-			const onFail = () => {
-				this.destroyLottie()
-				this.useCssFallback = true
-			}
-			this.lottieAnim.addEventListener('DOMLoaded', onReady)
-			this.lottieAnim.addEventListener('data_failed', onFail)
-			this.lottieAnim.addEventListener('error', onFail)
-			setTimeout(() => {
-				if (!this.lottieReady && this.lottieAnim) {
-					onFail()
-				}
-			}, 8000)
-		},
-		initLottie() {
-			// #ifdef MP-WEIXIN
-			if (this.lottieInited || this.useCssFallback) return
-			this.lottieInited = true
-			const selector = '#' + this.canvasId
-			const query = uni.createSelectorQuery().in(this)
-			query
-				.select(selector)
-				.fields({ node: true, size: true })
-				.exec(async (res) => {
-					const box = res && res[0]
-					if (!box || !box.node) {
-						this.useCssFallback = true
-						return
-					}
-					let animationData
-					try {
-						animationData = await this.resolveAnimationData()
-					} catch (e) {
-						console.warn('[health-virtual-persona] remote lottie failed, css fallback', e)
-						this.useCssFallback = true
-						return
-					}
-					try {
-						this.startLottieOnCanvas(box.node, box, animationData)
-					} catch (e) {
-						console.warn('[health-virtual-persona] lottie init error', e)
-						this.useCssFallback = true
-					}
-				})
-			// #endif
 		}
 	}
 }
@@ -264,33 +148,7 @@ export default {
 	height: 380rpx;
 }
 
-.hvp-lottie {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	z-index: 2;
-	display: block;
-}
-
-.hvp-lottie--hero {
-	width: 560rpx;
-	height: 560rpx;
-	top: 20rpx;
-}
-
-.hvp-lottie--lg {
-	width: 480rpx;
-	height: 480rpx;
-	top: 8rpx;
-}
-
-.hvp-lottie--md {
-	width: 360rpx;
-	height: 360rpx;
-	top: 8rpx;
-}
-
-.hvp-css-fallback {
+.hvp-css-mascot {
 	position: relative;
 	z-index: 1;
 	width: 100%;
@@ -300,135 +158,461 @@ export default {
 	justify-content: center;
 }
 
-.hvp--lottie-on .hvp-css-fallback {
-	visibility: hidden;
-	pointer-events: none;
-}
-
 .hvp-halo {
 	position: absolute;
 	border-radius: 50%;
 	pointer-events: none;
 	filter: blur(24rpx);
-	animation: hvpHaloDrift 5.5s ease-in-out infinite;
+	animation: hvpHaloDrift 6s ease-in-out infinite;
 }
 
 .hvp-halo--a {
 	width: 88%;
 	height: 72%;
-	background: radial-gradient(circle, rgba(144, 202, 249, 0.55) 0%, transparent 70%);
+	background: radial-gradient(circle, rgba(144, 202, 249, 0.5) 0%, transparent 70%);
 }
 
 .hvp-halo--b {
 	width: 70%;
 	height: 62%;
-	background: radial-gradient(circle, rgba(229, 57, 53, 0.18) 0%, transparent 72%);
-	animation-delay: -2.4s;
-	animation-duration: 6.8s;
+	background: radial-gradient(circle, rgba(76, 175, 80, 0.14) 0%, transparent 72%);
+	animation-delay: -2.8s;
+	animation-duration: 7.2s;
 }
 
 .hvp-motion {
 	position: relative;
 	z-index: 2;
-	animation: hvpMotionJitter 2.4s ease-in-out infinite;
+	animation: hvpIdleBob 3.2s ease-in-out infinite;
 }
 
 .hvp--speaking .hvp-motion {
-	animation-duration: 1.35s;
+	animation-duration: 2s;
 }
 
-.hvp-heart {
+/* —— 拟人吉祥物「小健」：护士帽 + 听诊器 + 白大褂 —— */
+.hvp-mascot {
 	position: relative;
-	width: 360rpx;
-	height: 338rpx;
-	animation: hvpHeartBob 3.6s ease-in-out infinite;
+	width: 320rpx;
+	height: 420rpx;
 }
 
-.hvp--hero .hvp-heart {
-	width: 420rpx;
-	height: 394rpx;
+.hvp--hero .hvp-mascot {
+	width: 380rpx;
+	height: 500rpx;
 }
 
-.hvp--md .hvp-heart {
-	width: 300rpx;
-	height: 282rpx;
+.hvp--md .hvp-mascot {
+	width: 260rpx;
+	height: 340rpx;
 }
 
-.hvp-heart-shell {
+.hvp-mascot__shadow {
+	position: absolute;
+	left: 50%;
+	bottom: 4rpx;
+	width: 58%;
+	height: 20rpx;
+	margin-left: -29%;
+	background: radial-gradient(ellipse, rgba(21, 101, 216, 0.22) 0%, transparent 72%);
+	border-radius: 50%;
+	animation: hvpShadowPulse 3.2s ease-in-out infinite;
+}
+
+.hvp-mascot__figure {
 	position: relative;
 	width: 100%;
 	height: 100%;
-	animation: hvpHeartMorph 4.2s ease-in-out infinite;
 }
 
-.hvp-heart-glass {
+.hvp-mascot__torso {
 	position: absolute;
-	inset: 0;
-	clip-path: polygon(
-		50% 93%,
-		10% 52%,
-		16% 30%,
-		32% 18%,
-		50% 34%,
-		68% 17%,
-		84% 29%,
-		90% 51%
-	);
+	left: 50%;
+	top: 46%;
+	width: 52%;
+	height: 38%;
+	margin-left: -26%;
+	border-radius: 42% 42% 38% 38% / 36% 36% 48% 48%;
 	background: linear-gradient(
-		160deg,
-		rgba(255, 255, 255, 0.82) 0%,
-		rgba(179, 229, 252, 0.52) 38%,
-		rgba(66, 165, 245, 0.38) 68%,
-		rgba(21, 101, 216, 0.28) 100%
+		165deg,
+		#ffffff 0%,
+		#f0f7ff 35%,
+		#dceeff 70%,
+		#c5e1fb 100%
 	);
-	border: 2rpx solid rgba(255, 255, 255, 0.7);
+	border: 2rpx solid rgba(255, 255, 255, 0.95);
 	box-shadow:
-		0 20rpx 48rpx rgba(21, 101, 216, 0.22),
-		0 4rpx 16rpx rgba(255, 255, 255, 0.6) inset,
-		0 -8rpx 24rpx rgba(144, 202, 249, 0.35) inset;
-	backdrop-filter: blur(18px);
+		0 16rpx 36rpx rgba(21, 101, 216, 0.18),
+		inset 0 6rpx 16rpx rgba(255, 255, 255, 0.9),
+		inset 0 -8rpx 20rpx rgba(144, 202, 249, 0.35);
+	overflow: hidden;
 }
 
-.hvp-heart-glass--inner {
-	inset: 14%;
-	clip-path: polygon(50% 88%, 22% 54%, 28% 36%, 50% 46%, 72% 35%, 78% 53%);
-	opacity: 0.55;
-	border: none;
-	box-shadow: inset 0 0 28rpx rgba(255, 255, 255, 0.65);
-	animation: hvpInnerPulse 2.8s ease-in-out infinite;
-}
-
-.hvp-heart-shine {
+.hvp-mascot__coat-shine {
 	position: absolute;
-	width: 42%;
-	height: 28%;
-	left: 18%;
-	top: 22%;
+	left: 12%;
+	top: 8%;
+	width: 28%;
+	height: 55%;
 	border-radius: 50%;
-	background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, transparent 72%);
-	filter: blur(2rpx);
-	animation: hvpShineMove 3.3s ease-in-out infinite;
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), transparent);
 }
 
-.hvp-heart-tint {
+.hvp-mascot__stetho {
 	position: absolute;
+	right: 8%;
+	top: 18%;
 	width: 36%;
+	height: 50%;
+}
+
+.hvp-mascot__stetho-tube {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 70%;
+	height: 55%;
+	border: 3rpx solid transparent;
+	border-top-color: #78909c;
+	border-right-color: #78909c;
+	border-radius: 0 80% 0 0;
+	transform: rotate(-12deg);
+}
+
+.hvp-mascot__stetho-disk {
+	position: absolute;
+	right: 52%;
+	bottom: 0;
+	width: 28rpx;
+	height: 28rpx;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #cfd8dc, #90a4ae);
+	border: 2rpx solid #eceff1;
+	box-shadow: inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
+}
+
+.hvp-mascot__badge {
+	position: absolute;
+	left: 50%;
+	top: 28%;
+	width: 44rpx;
+	height: 44rpx;
+	margin-left: -22rpx;
+	border-radius: 50%;
+	background: linear-gradient(145deg, #42a5f5, #1565c0);
+	box-shadow: 0 4rpx 10rpx rgba(21, 101, 192, 0.35);
+}
+
+.hvp-mascot__badge-v,
+.hvp-mascot__badge-h {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	background: #fff;
+	border-radius: 2rpx;
+	transform: translate(-50%, -50%);
+}
+
+.hvp-mascot__badge-v {
+	width: 6rpx;
+	height: 22rpx;
+}
+
+.hvp-mascot__badge-h {
+	width: 22rpx;
+	height: 6rpx;
+}
+
+.hvp-mascot__arm {
+	position: absolute;
+	top: 48%;
+	width: 18%;
+	height: 28%;
+	border-radius: 40rpx;
+	background: linear-gradient(160deg, #ffffff, #e3f2fd);
+	border: 2rpx solid rgba(255, 255, 255, 0.9);
+	box-shadow: 0 6rpx 14rpx rgba(21, 101, 216, 0.12);
+	transform-origin: 50% 12%;
+}
+
+.hvp-mascot__arm--l {
+	left: 6%;
+	animation: hvpArmSwayL 4s ease-in-out infinite;
+	animation-delay: -1s;
+}
+
+.hvp-mascot__arm--r {
+	right: 6%;
+	animation: hvpArmSwayR 4s ease-in-out infinite;
+	animation-delay: -2.2s;
+}
+
+.hvp--speaking .hvp-mascot__arm--r {
+	animation: hvpArmWave 1.2s ease-in-out infinite;
+}
+
+.hvp-mascot__hand {
+	position: absolute;
+	left: 50%;
+	bottom: -6rpx;
+	width: 36rpx;
+	height: 36rpx;
+	margin-left: -18rpx;
+	border-radius: 50%;
+	background: linear-gradient(160deg, #ffe0bd 0%, #ffccbc 100%);
+	border: 2rpx solid rgba(255, 255, 255, 0.6);
+}
+
+.hvp-mascot__head {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	width: 62%;
+	height: 48%;
+	margin-left: -31%;
+	z-index: 3;
+}
+
+.hvp-mascot__cap {
+	position: absolute;
+	left: 50%;
+	top: -6%;
+	width: 88%;
+	height: 38%;
+	margin-left: -44%;
+	border-radius: 50% 50% 12% 12% / 60% 60% 20% 20%;
+	background: linear-gradient(180deg, #ffffff 0%, #e8f4fc 100%);
+	border: 2rpx solid rgba(255, 255, 255, 0.95);
+	box-shadow: 0 8rpx 20rpx rgba(21, 101, 216, 0.12);
+	z-index: 2;
+}
+
+.hvp-mascot__cap-band {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 28%;
+	background: linear-gradient(90deg, #1565c0, #42a5f5, #1565c0);
+	border-radius: 0 0 8rpx 8rpx;
+}
+
+.hvp-mascot__cap-cross {
+	position: absolute;
+	left: 50%;
+	top: 22%;
+	width: 28rpx;
+	height: 28rpx;
+	margin-left: -14rpx;
+}
+
+.hvp-mascot__cap-cross-v,
+.hvp-mascot__cap-cross-h {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	background: #fff;
+	border-radius: 2rpx;
+	transform: translate(-50%, -50%);
+}
+
+.hvp-mascot__cap-cross-v {
+	width: 5rpx;
+	height: 18rpx;
+}
+
+.hvp-mascot__cap-cross-h {
+	width: 18rpx;
+	height: 5rpx;
+}
+
+.hvp-mascot__hair {
+	position: absolute;
+	bottom: 18%;
+	width: 22%;
 	height: 32%;
+	background: #5d4037;
+	border-radius: 50% 50% 40% 40%;
+	z-index: 0;
+}
+
+.hvp-mascot__hair--l {
+	left: 8%;
+	transform: rotate(-8deg);
+}
+
+.hvp-mascot__hair--r {
+	right: 8%;
+	transform: rotate(8deg);
+}
+
+.hvp-mascot__face {
+	position: absolute;
+	left: 50%;
+	top: 18%;
+	width: 86%;
+	height: 78%;
+	margin-left: -43%;
+	border-radius: 48% 48% 44% 44% / 52% 52% 46% 46%;
+	background: linear-gradient(165deg, #ffe8d6 0%, #ffccbc 55%, #ffab91 100%);
+	border: 2rpx solid rgba(255, 255, 255, 0.55);
+	box-shadow:
+		0 12rpx 28rpx rgba(244, 143, 177, 0.15),
+		inset 0 -6rpx 16rpx rgba(255, 138, 101, 0.12);
+}
+
+.hvp-mascot__brow {
+	position: absolute;
+	top: 28%;
+	width: 18%;
+	height: 6rpx;
+	border-radius: 6rpx;
+	background: #6d4c41;
+}
+
+.hvp-mascot__brow--l {
+	left: 22%;
+	transform: rotate(-8deg);
+}
+
+.hvp-mascot__brow--r {
+	right: 22%;
+	transform: rotate(8deg);
+}
+
+.hvp-mascot__eye {
+	position: absolute;
+	top: 34%;
+	width: 22%;
+	height: 26%;
+}
+
+.hvp-mascot__eye--l {
+	left: 20%;
+}
+
+.hvp-mascot__eye--r {
+	right: 20%;
+}
+
+.hvp-mascot__eye-white {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background: #fff;
+	border: 2rpx solid rgba(93, 64, 55, 0.15);
+	box-shadow: inset 0 -4rpx 8rpx rgba(0, 0, 0, 0.04);
+	animation: hvpBlink 5.5s ease-in-out infinite;
+}
+
+.hvp-mascot__pupil {
+	position: absolute;
+	left: 50%;
+	top: 52%;
+	width: 52%;
+	height: 52%;
+	margin-left: -26%;
+	margin-top: -26%;
+	border-radius: 50%;
+	background: radial-gradient(circle at 35% 30%, #5d4037, #3e2723);
+}
+
+.hvp-mascot__eye-spark {
+	position: absolute;
+	right: 22%;
+	top: 22%;
+	width: 18%;
+	height: 18%;
+	border-radius: 50%;
+	background: #fff;
+}
+
+.hvp-mascot__cheek {
+	position: absolute;
+	top: 52%;
+	width: 16%;
+	height: 12%;
+	border-radius: 50%;
+	background: rgba(244, 143, 177, 0.45);
+}
+
+.hvp-mascot__cheek--l {
+	left: 14%;
+}
+
+.hvp-mascot__cheek--r {
 	right: 14%;
-	bottom: 26%;
-	border-radius: 45% 55% 60% 40%;
-	background: radial-gradient(circle, rgba(229, 57, 53, 0.22) 0%, transparent 70%);
-	animation: hvpTintMove 4.5s ease-in-out infinite;
+}
+
+.hvp-mascot__nose {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 10rpx;
+	height: 8rpx;
+	margin-left: -5rpx;
+	border-radius: 50%;
+	background: rgba(255, 138, 101, 0.55);
+}
+
+.hvp-mascot__mouth {
+	position: absolute;
+	left: 50%;
+	bottom: 18%;
+	width: 28%;
+	height: 14%;
+	margin-left: -14%;
+	overflow: hidden;
+}
+
+.hvp-mascot__mouth-inner {
+	width: 100%;
+	height: 200%;
+	border: 3rpx solid #8d6e63;
+	border-top: none;
+	border-radius: 0 0 50% 50% / 0 0 100% 100%;
+	background: transparent;
+	transition: transform 0.2s ease;
+}
+
+.hvp--speaking .hvp-mascot__mouth-inner {
+	border-radius: 50%;
+	background: #5d4037;
+	height: 70%;
+	border: 3rpx solid #6d4c41;
+	animation: hvpMouthTalk 0.45s ease-in-out infinite alternate;
+}
+
+.hvp-mascot__head-shine {
+	position: absolute;
+	left: 22%;
+	top: 28%;
+	width: 22%;
+	height: 14%;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.55);
+	filter: blur(2rpx);
+	pointer-events: none;
 }
 
 .hvp-speak-ring {
 	position: absolute;
-	width: 58%;
-	height: 52%;
-	border: 3rpx solid rgba(144, 202, 249, 0.45);
+	left: 50%;
+	top: 50%;
+	width: 52%;
+	height: 48%;
+	margin-left: -26%;
+	margin-top: -24%;
+	border: 3rpx solid rgba(144, 202, 249, 0.5);
 	border-radius: 48% 52% 50% 50%;
 	pointer-events: none;
-	animation: hvpSpeakRing 1.8s ease-out infinite;
+	animation: hvpSpeakRing 2s ease-out infinite;
+}
+
+.hvp-speak-ring--delay {
+	animation-delay: 0.65s;
+	border-color: rgba(129, 199, 132, 0.35);
 }
 
 .hvp-caption {
@@ -446,84 +630,78 @@ export default {
 	font-size: 26rpx;
 }
 
-@keyframes hvpMotionJitter {
+@keyframes hvpIdleBob {
 	0%,
 	100% {
-		transform: translate(0, 0) rotate(0deg);
-	}
-	20% {
-		transform: translate(3rpx, -4rpx) rotate(0.9deg);
-	}
-	40% {
-		transform: translate(-4rpx, 2rpx) rotate(-0.7deg);
-	}
-	60% {
-		transform: translate(2rpx, 4rpx) rotate(0.5deg);
-	}
-	80% {
-		transform: translate(-3rpx, -2rpx) rotate(-0.4deg);
-	}
-}
-
-@keyframes hvpHeartBob {
-	0%,
-	100% {
-		transform: translateY(0) scale(1);
+		transform: translateY(0);
 	}
 	50% {
-		transform: translateY(-6rpx) scale(1.03);
+		transform: translateY(-10rpx);
 	}
 }
 
-@keyframes hvpHeartMorph {
+@keyframes hvpShadowPulse {
 	0%,
 	100% {
-		transform: scale(1) skew(0deg, 0deg) rotate(0deg);
-	}
-	25% {
-		transform: scale(1.04, 0.97) skew(1.2deg, -0.8deg) rotate(1.2deg);
-	}
-	50% {
-		transform: scale(0.97, 1.03) skew(-1deg, 1deg) rotate(-0.8deg);
-	}
-	75% {
-		transform: scale(1.02, 0.98) skew(0.6deg, 0.5deg) rotate(0.6deg);
-	}
-}
-
-@keyframes hvpInnerPulse {
-	0%,
-	100% {
-		opacity: 0.5;
-		transform: scale(1);
-	}
-	50% {
-		opacity: 0.72;
-		transform: scale(1.06);
-	}
-}
-
-@keyframes hvpShineMove {
-	0%,
-	100% {
-		transform: translate(0, 0);
+		transform: scaleX(1);
 		opacity: 0.85;
 	}
 	50% {
-		transform: translate(8rpx, 6rpx);
-		opacity: 1;
+		transform: scaleX(0.92);
+		opacity: 0.65;
 	}
 }
 
-@keyframes hvpTintMove {
+@keyframes hvpArmSwayL {
 	0%,
 	100% {
-		transform: translate(0, 0) scale(1);
-		opacity: 0.7;
+		transform: rotate(16deg);
 	}
 	50% {
-		transform: translate(-6rpx, 4rpx) scale(1.08);
-		opacity: 0.95;
+		transform: rotate(22deg);
+	}
+}
+
+@keyframes hvpArmSwayR {
+	0%,
+	100% {
+		transform: rotate(-12deg);
+	}
+	50% {
+		transform: rotate(-18deg);
+	}
+}
+
+@keyframes hvpArmWave {
+	0%,
+	100% {
+		transform: rotate(-14deg);
+	}
+	50% {
+		transform: rotate(-34deg);
+	}
+}
+
+@keyframes hvpBlink {
+	0%,
+	92%,
+	100% {
+		transform: scaleY(1);
+	}
+	94% {
+		transform: scaleY(0.12);
+	}
+	96% {
+		transform: scaleY(1);
+	}
+}
+
+@keyframes hvpMouthTalk {
+	0% {
+		transform: scaleY(0.75);
+	}
+	100% {
+		transform: scaleY(1.15);
 	}
 }
 
@@ -531,22 +709,22 @@ export default {
 	0%,
 	100% {
 		transform: scale(1) translate(0, 0);
-		opacity: 0.75;
+		opacity: 0.7;
 	}
 	50% {
-		transform: scale(1.1) translate(6rpx, -8rpx);
-		opacity: 1;
+		transform: scale(1.06) translate(4rpx, -6rpx);
+		opacity: 0.95;
 	}
 }
 
 @keyframes hvpSpeakRing {
 	0% {
-		opacity: 0.55;
-		transform: scale(0.92);
+		opacity: 0.5;
+		transform: scale(0.94);
 	}
 	100% {
 		opacity: 0;
-		transform: scale(1.35);
+		transform: scale(1.28);
 	}
 }
 </style>
