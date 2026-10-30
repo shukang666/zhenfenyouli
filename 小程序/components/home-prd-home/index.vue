@@ -6,9 +6,11 @@
 				<view class="prd-eyebrow"><text class="prd-eyebrow-dot"></text> 生活的可能，就在附近</view>
 				<view class="prd-h1">
 					<text class="prd-h1-line">在身边，</text>
-					<text class="prd-h1-line">遇见更多</text>
-					<text class="prd-h1-possible">可能</text>
-					<text class="prd-h1-line">。</text>
+					<view class="prd-h1-line">
+						<text class="prd-h1-phrase">遇见更多</text>
+						<text class="prd-h1-possible">可能</text>
+						<text class="prd-h1-phrase">。</text>
+					</view>
 				</view>
 				<view class="prd-desc">一场活动，一次相遇。</view>
 				<view class="prd-desc">有些美好，正在日常附近发生。</view>
@@ -282,6 +284,13 @@ $bg: #f7f8f3;
 }
 .prd-h1-line {
 	display: block;
+	font-size: 86rpx;
+	line-height: 1.34;
+	font-weight: 600;
+	letter-spacing: -2.8rpx;
+	color: $ink;
+}
+.prd-h1-phrase {
 	font-size: 86rpx;
 	line-height: 1.34;
 	font-weight: 600;
