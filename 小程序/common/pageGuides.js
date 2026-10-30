@@ -66,7 +66,7 @@ export const PAGE_GUIDES = {
 		hideMascot: true,
 		steps: [
 			{
-				selector: '#guide-health-hub',
+				selector: '#guide-health-cta',
 				prefer: 'below',
 				title: '健康服务首页',
 				desc: '点「开始健康问答」进入评估；基层医疗机构入口在下方卡片。'

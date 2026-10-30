@@ -132,7 +132,7 @@ export default {
 		guideSpotCss() {
 			const h = this.guideHole
 			if (!h) return ''
-			return `position:fixed;left:${h.left}px;top:${h.top}px;width:${h.width}px;height:${h.height}px;border:3px solid #18AF38;border-radius:12px;box-sizing:border-box;background:transparent;z-index:999998;`
+			return `position:fixed;left:${h.left}px;top:${h.top}px;width:${h.width}px;height:${h.height}px;border:3px solid #18AF38;border-radius:12px;box-sizing:border-box;background:transparent;z-index:999998;pointer-events:none;`
 		},
 		guideSafeTop() {
 			const sys = uni.getSystemInfoSync()
@@ -589,7 +589,7 @@ export default {
 	width: 100%;
 	height: 100%;
 	z-index: 999999;
-	pointer-events: auto;
+	pointer-events: none;
 }
 .pg-tabbar-area {
 	position: fixed;

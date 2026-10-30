@@ -1,5 +1,5 @@
 <template>
-	<view class="guide-overlay" :style="overlayStyle" @touchmove.stop.prevent="noop" @tap="onOverlayTap">
+	<view class="guide-overlay" :style="overlayStyle" @touchmove.stop.prevent="noop">
 		<view class="guide-card-wrap" :class="placeBelow ? 'guide-card-wrap--below' : 'guide-card-wrap--above'" :style="cardWrapCss || cardWrapStyle">
 			<view class="guide-card" @tap.stop="noop">
 				<view class="guide-card__head">
@@ -197,6 +197,7 @@ export default {
 	height: 100%;
 	z-index: 100053;
 	background-color: transparent;
+	pointer-events: none;
 }
 
 .guide-mask {

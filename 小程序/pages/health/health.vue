@@ -84,6 +84,7 @@
 
 					<view class="hp-assistant-actions">
 						<view
+							id="guide-health-cta"
 							class="hp-cta"
 							hover-class="hp-cta--on"
 							@tap="openAdvisorSurvey"
@@ -539,7 +540,7 @@
 
 .hp-assistant-panel {
 	position: relative;
-	z-index: 2;
+	z-index: 5;
 	margin-top: 8rpx;
 	padding: 0 28rpx;
 }

@@ -142,6 +142,10 @@ export default {
 	margin: 0;
 }
 
+.hvp--embedded .hvp-stage {
+	pointer-events: none;
+}
+
 .hvp--hero {
 	.hvp-stage {
 		height: 620rpx;
