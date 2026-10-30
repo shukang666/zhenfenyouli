@@ -80,8 +80,8 @@ class MemberActiveService
         return (int)($a['publish_require_checkin'] ?? 0) === 1;
     }
 
-    /** @param array<string,mixed> $item */
-    public static function attachPublishPresentationFields(array &$item): void
+    /** @param array<string,mixed>|object $item ThinkPHP 模型或数组 */
+    public static function attachPublishPresentationFields(&$item): void
     {
         $pid = (int)($item['publish_user_id'] ?? 0);
         $item['is_member_publish'] = $pid > 0 ? 1 : 0;
